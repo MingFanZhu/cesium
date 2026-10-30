@@ -30,31 +30,29 @@ function copyDimensions(value) {
 }
 
 /**
- * Loads WMTS imagery using KVP or REST resource templates in a planar world.
- * The selected matrix set must match the world's single-root, north-origin quadtree.
- * Matrix labels map canonical levels to service identifiers; no CRS conversion is performed.
+ * 在平面世界中通过 KVP 或 REST 资源模板加载 WMTS 影像。所选矩阵集须匹配世界的单根、北侧原点四叉树。矩阵标签将标准层级映射到服务标识，不进行 CRS 转换。
  *
  * @alias SceneGISPlanarWebMapTileServiceImageryProvider
  * @extends SceneGISPlanarUrlTemplateImageryProvider
  *
- * @param {object} options Initialization options.
- * @param {string|Resource} options.url The WMTS endpoint or REST template.
- * @param {SceneGISPlanarTilingScheme} options.tilingScheme The world's canonical tiling scheme.
- * @param {string} options.layer The WMTS layer identifier.
- * @param {string} options.style The WMTS style identifier.
- * @param {string} options.tileMatrixSetID The tile matrix set identifier.
- * @param {string[]} [options.tileMatrixLabels] Matrix identifiers indexed by canonical level.
- * @param {string} [options.format="image/jpeg"] The image MIME type.
- * @param {object} [options.dimensions] Static dimension names and values. Assign a new object to reload tiles.
- * @param {SceneGISPlanarExtent} [options.coverageExtent] Coverage in world meter coordinates; does not change tile addresses.
- * @param {number} [options.minimumLevel=0] The minimum available canonical level.
- * @param {number} [options.maximumLevel] The highest level, defaulting to the last label or maximumSafeLevel.
- * @param {number} [options.tileWidth=256] The image width in pixels.
- * @param {number} [options.tileHeight=options.tileWidth] The image height in pixels.
- * @param {string|string[]} [options.subdomains="abc"] URL subdomains.
- * @param {boolean} [options.hasAlphaChannel=true] Whether imagery has alpha.
- * @param {Credit|string} [options.credit] Attribution.
- * @exception {DeveloperError} Required options are missing or the level mapping is invalid.
+ * @param {object} options 初始化选项。
+ * @param {string|Resource} options.url WMTS 端点或 REST 模板。
+ * @param {SceneGISPlanarTilingScheme} options.tilingScheme 世界的标准切片方案。
+ * @param {string} options.layer WMTS 图层标识。
+ * @param {string} options.style WMTS 样式标识。
+ * @param {string} options.tileMatrixSetID 瓦片矩阵集标识。
+ * @param {string[]} [options.tileMatrixLabels] 按标准层级索引的矩阵标识。
+ * @param {string} [options.format="image/jpeg"] 图像 MIME 类型。
+ * @param {object} [options.dimensions] 静态维度名称和值；赋予新对象可重新加载瓦片。
+ * @param {SceneGISPlanarExtent} [options.coverageExtent] 世界米制覆盖范围，不改变瓦片地址。
+ * @param {number} [options.minimumLevel=0] 可用最低标准层级。
+ * @param {number} [options.maximumLevel] 最高层级，默认最后一个标签或 maximumSafeLevel。
+ * @param {number} [options.tileWidth=256] 图像宽度，单位为像素。
+ * @param {number} [options.tileHeight=options.tileWidth] 图像高度，单位为像素。
+ * @param {string|string[]} [options.subdomains="abc"] URL 子域。
+ * @param {boolean} [options.hasAlphaChannel=true] 影像是否具有 alpha。
+ * @param {Credit|string} [options.credit] 署名。
+ * @exception {DeveloperError} 缺少必需选项或层级映射无效。
  *
  * @example
  * const provider = new SceneGISPlanarWebMapTileServiceImageryProvider({
@@ -130,7 +128,7 @@ class SceneGISPlanarWebMapTileServiceImageryProvider extends SceneGISPlanarUrlTe
   }
 
   /**
-   * Gets the layer identifier.
+   * 获取图层标识。
    * @type {string}
    * @readonly
    */
@@ -138,7 +136,7 @@ class SceneGISPlanarWebMapTileServiceImageryProvider extends SceneGISPlanarUrlTe
     return this._layer;
   }
   /**
-   * Gets the style identifier.
+   * 获取样式标识。
    * @type {string}
    * @readonly
    */
@@ -146,7 +144,7 @@ class SceneGISPlanarWebMapTileServiceImageryProvider extends SceneGISPlanarUrlTe
     return this._style;
   }
   /**
-   * Gets the image MIME type.
+   * 获取图像 MIME 类型。
    * @type {string}
    * @readonly
    */
@@ -154,7 +152,7 @@ class SceneGISPlanarWebMapTileServiceImageryProvider extends SceneGISPlanarUrlTe
     return this._format;
   }
   /**
-   * Gets the matrix set identifier.
+   * 获取矩阵集标识。
    * @type {string}
    * @readonly
    */
@@ -162,7 +160,7 @@ class SceneGISPlanarWebMapTileServiceImageryProvider extends SceneGISPlanarUrlTe
     return this._tileMatrixSetID;
   }
   /**
-   * Gets the immutable level labels.
+   * 获取不可变层级标签。
    * @type {ReadonlyArray<string>|undefined}
    * @readonly
    */
@@ -170,8 +168,7 @@ class SceneGISPlanarWebMapTileServiceImageryProvider extends SceneGISPlanarUrlTe
     return this._tileMatrixLabels;
   }
   /**
-   * Gets or replaces the immutable dimensions. Replacement reloads all attached layers
-   * on their next normal frame. Editing a returned object is not supported.
+   * 获取或替换不可变维度。替换使全部已挂载图层在下一正常帧重新加载，不支持修改返回对象。
    * @type {object}
    */
   get dimensions() {

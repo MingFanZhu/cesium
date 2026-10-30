@@ -3,30 +3,28 @@ import Resource from "../../Core/Resource.js";
 import SceneGISPlanarUrlTemplateImageryProvider from "./SceneGISPlanarUrlTemplateImageryProvider.js";
 
 /**
- * Loads WMS GetMap images for planar tile extents. Coordinates are sent in meters
- * in the configured CRS, without projection or reprojection. WMS 1.3.0 axis order
- * is explicit because arbitrary CRS identifiers do not imply an axis definition.
+ * 按平面瓦片范围加载 WMS GetMap 图像。坐标以米为单位，按配置的 CRS 发送，不执行投影或重投影。任意 CRS 标识不隐含坐标轴定义，因此 WMS 1.3.0 轴顺序须显式配置。
  *
  * @alias SceneGISPlanarWebMapServiceImageryProvider
  * @extends SceneGISPlanarUrlTemplateImageryProvider
  *
- * @param {object} options Initialization options.
- * @param {string|Resource} options.url The WMS endpoint.
- * @param {string} options.layers Comma-separated layer names.
- * @param {SceneGISPlanarTilingScheme} options.tilingScheme The world's canonical tiling scheme.
- * @param {object} [options.parameters] WMS parameters, including version, styles, format, transparent, and time.
- * @param {string} [options.crs] The WMS 1.3.0 CRS, defaulting to coordinateSystem.crs.
- * @param {string} [options.srs] The WMS 1.1.1 SRS, defaulting to coordinateSystem.crs.
- * @param {"xy"|"yx"} [options.axisOrder="xy"] WMS 1.3.0 BBOX axis order. WMS 1.1.1 always uses XY.
- * @param {SceneGISPlanarExtent} [options.coverageExtent] Coverage in world meter coordinates; does not change tile addresses.
- * @param {number} [options.minimumLevel=0] The minimum available canonical level.
- * @param {number} [options.maximumLevel] The maximum available level.
- * @param {number} [options.tileWidth=256] The image width in pixels.
- * @param {number} [options.tileHeight=options.tileWidth] The image height in pixels.
- * @param {string|string[]} [options.subdomains="abc"] URL subdomains.
- * @param {boolean} [options.hasAlphaChannel=true] Whether imagery has alpha.
- * @param {Credit|string} [options.credit] Attribution.
- * @exception {DeveloperError} The layers, CRS, version, or axis order is invalid.
+ * @param {object} options 初始化选项。
+ * @param {string|Resource} options.url WMS 服务端点。
+ * @param {string} options.layers 以逗号分隔的图层名。
+ * @param {SceneGISPlanarTilingScheme} options.tilingScheme 世界的标准切片方案。
+ * @param {object} [options.parameters] WMS 参数，包含 version、styles、format、transparent 和 time。
+ * @param {string} [options.crs] WMS 1.3.0 CRS，默认 coordinateSystem.crs。
+ * @param {string} [options.srs] WMS 1.1.1 SRS，默认 coordinateSystem.crs。
+ * @param {"xy"|"yx"} [options.axisOrder="xy"] WMS 1.3.0 BBOX 轴顺序，WMS 1.1.1 始终使用 XY。
+ * @param {SceneGISPlanarExtent} [options.coverageExtent] 世界米制覆盖范围，不改变瓦片地址。
+ * @param {number} [options.minimumLevel=0] 可用最低标准层级。
+ * @param {number} [options.maximumLevel] 可用最高层级。
+ * @param {number} [options.tileWidth=256] 图像宽度，单位为像素。
+ * @param {number} [options.tileHeight=options.tileWidth] 图像高度，单位为像素。
+ * @param {string|string[]} [options.subdomains="abc"] URL 子域。
+ * @param {boolean} [options.hasAlphaChannel=true] 影像是否具有 alpha。
+ * @param {Credit|string} [options.credit] 署名。
+ * @exception {DeveloperError} 图层、CRS、版本或轴顺序无效。
  *
  * @example
  * world.imageryLayers.addImageryProvider(new SceneGISPlanarWebMapServiceImageryProvider({
@@ -107,7 +105,7 @@ class SceneGISPlanarWebMapServiceImageryProvider extends SceneGISPlanarUrlTempla
   }
 
   /**
-   * Gets the requested layer names.
+   * 获取请求的图层名。
    * @type {string}
    * @readonly
    */

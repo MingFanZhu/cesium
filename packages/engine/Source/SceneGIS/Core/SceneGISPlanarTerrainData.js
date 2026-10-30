@@ -16,13 +16,10 @@ function throwPropertyInstantiationError() {
 }
 
 /**
- * Defines read-only CPU terrain data for one planar tile. Concrete data must
- * interpolate on the same surface triangles used by its future mesh consumer.
- * This interface owns no GPU, request, worker, or destroyable resources and is
- * not intended to be instantiated directly.
+ * 定义单个平面瓦片的只读 CPU 地形数据。具体数据须在未来网格消费者使用的相同表面三角形上插值。此接口不拥有 GPU、请求、Worker 或可销毁资源，不应直接实例化。
  *
  * @interface
- * @exception {DeveloperError} This interface must not be instantiated directly.
+ * @exception {DeveloperError} 此接口不能直接实例化。
  */
 class SceneGISPlanarTerrainData {
   constructor() {
@@ -30,7 +27,7 @@ class SceneGISPlanarTerrainData {
   }
 
   /**
-   * Gets the minimum decoded height in meters.
+   * 获取最小解码高度，单位为米。
    * @type {number}
    * @constant
    */
@@ -39,7 +36,7 @@ class SceneGISPlanarTerrainData {
   }
 
   /**
-   * Gets the maximum decoded height in meters.
+   * 获取最大解码高度，单位为米。
    * @type {number}
    * @constant
    */
@@ -48,7 +45,7 @@ class SceneGISPlanarTerrainData {
   }
 
   /**
-   * Gets the credits associated with this tile.
+   * 获取与此瓦片关联的署名。
    * @type {Credit[]|undefined}
    * @constant
    */
@@ -57,7 +54,7 @@ class SceneGISPlanarTerrainData {
   }
 
   /**
-   * Gets the water mask owned by this tile.
+   * 获取此瓦片所有的水面掩码。
    * @type {Uint8Array|undefined}
    * @constant
    */
@@ -66,7 +63,7 @@ class SceneGISPlanarTerrainData {
   }
 
   /**
-   * Gets whether this data was created by upsampling.
+   * 获取数据是否由上采样创建。
    * @type {boolean}
    * @constant
    */
@@ -75,25 +72,25 @@ class SceneGISPlanarTerrainData {
   }
 
   /**
-   * Interpolates the terrain height at a planar position.
+   * 插值平面位置的地形高度。
    *
-   * @param {SceneGISPlanarExtent} extent The tile extent represented by this data.
-   * @param {number} x The X coordinate in meters.
-   * @param {number} y The Y coordinate in meters.
-   * @returns {number|undefined} The interpolated height in meters, or undefined when the finite position is outside the extent.
+   * @param {SceneGISPlanarExtent} extent 此数据表示的瓦片范围。
+   * @param {number} x X 坐标，单位为米。
+   * @param {number} y Y 坐标，单位为米。
+   * @returns {number|undefined} 插值高度，单位为米；有限位置在范围外时返回 undefined。
    */
   interpolateHeight(extent, x, y) {
     DeveloperError.throwInstantiationError();
   }
 
   /**
-   * Determines whether a direct child tile is available.
+   * 判断直接子瓦片是否可用。
    *
-   * @param {number} thisX The parent tile X coordinate.
-   * @param {number} thisY The parent tile Y coordinate.
-   * @param {number} childX The direct child tile X coordinate.
-   * @param {number} childY The direct child tile Y coordinate.
-   * @returns {boolean} True if the child is available; otherwise, false.
+   * @param {number} thisX 父瓦片的 X 坐标。
+   * @param {number} thisY 父瓦片的 Y 坐标。
+   * @param {number} childX 直接子瓦片的 X 坐标。
+   * @param {number} childY 直接子瓦片的 Y 坐标。
+   * @returns {boolean} 子瓦片可用时为 true，否则为 false。
    */
   isChildAvailable(thisX, thisY, childX, childY) {
     DeveloperError.throwInstantiationError();

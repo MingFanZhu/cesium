@@ -193,42 +193,34 @@ function create(v, context, field) {
 }
 
 /**
- * GPU wind volume, horizontal tracer slice and instantaneous streamlines. Add to Scene.primitives
- * after the simulation. It owns display commands, particle state/history and one post-process
- * stage, never the simulation. Marker/ribbon dimensions and opacity are live display controls.
- * Trails sample actual RK2 positions at uniform completed-time intervals, using the final
- * velocity snapshot of each render batch. Rebirths break trajectories. Hidden periods discard
- * history without catch-up; reset/rewind clears it. Pause retains unchanged positions/history.
- * Volume/slice alpha derives only from computed dimensionless tracer. Color may show speed or tracer.
- * Opaque buildings/terrain terminate volume rays; transparent surfaces do not occlude this post stage.
- * Streamlines follow the current field with midpoint integration at half-cell arclength, terminating
- * at solids/domain limits. They are not particle trajectories or extra turbulence.
- * No wall-clock animation or field stepping occurs here. Destroy this consumer before the producer.
+ * GPU 风场体渲染、水平示踪切片和瞬时流线显示。在模拟之后加入 Scene.primitives。它拥有绘制命令、粒子状态/历史及一个后处理阶段，不拥有模拟。标记/线带尺寸与不透明度可实时调整。
+ * 拖尾按已完成模拟时间的等间隔采样真实 RK2 位置，使用每个渲染批次最终速度快照；粒子重生断尾。隐藏期间丢弃历史且不补算，重置/回退清空历史，暂停保留位置和历史。体渲染/切片 alpha 仅来自计算得到的无量纲示踪量，颜色可表示风速或示踪量。不透明建筑和地形截断体积射线，透明表面不遮挡此后处理阶段。
+ * 流线在当前场中以半格弧长进行中点积分，在固体或域边界终止；流线不是粒子历史轨迹，也不是额外湍流。此组件不按墙钟时间动画，不推进风场。应先于生产者销毁此消费者。
  * @alias SceneGISWindVisualization
  * @constructor
- * @param {object} options Configuration.
- * @param {Scene} options.scene Scene owning the post-process collection.
- * @param {SceneGISWindSimulation} options.simulation Ready or pending field producer.
- * @param {boolean} [options.show=true] Display enabled.
- * @param {string} [options.mode="volume"] "volume", "slice" or "none".
- * @param {boolean} [options.showStreamlines=false] Show instantaneous streamlines.
- * @param {boolean} [options.showParticles=true] Show GPU flow markers, clocked by completed simulation time. They sample the latest completed field during each render batch; they are not conservative concentration transport.
- * @param {number} [options.particleCount=4096] Immutable particle capacity, integer 1..65536.
- * @param {number} [options.particleWidth=1.4] Independent marker/ribbon width, (0,64], in particleWidthUnits.
- * @param {string} [options.particleWidthUnits="pixels"] Drawing-buffer "pixels" or "meters". Pixel widths stay thin at close range.
- * @param {number} [options.particleLength=2.5] Independent marker length in meters, (0,256].
- * @param {number} [options.particleOpacity=0.75] Marker opacity in [0,1], independent of tracer concentration.
- * @param {boolean} [options.showTrails=false] Draw sampled three-dimensional particle trajectories, not screen persistence.
- * @param {number} [options.trailDuration=4] Retained completed simulation seconds, (0,120]. Changing it restarts history only.
- * @param {number} [options.trailSegments=32] Immutable history capacity, integer 1..128. Padded particle/history textures together must not exceed 64 MiB.
- * @param {number} [options.trailFade=1] Tail opacity exponent in [0,8]; zero disables age fading. particleOpacity scales both markers and ribbons.
- * @param {string} [options.colorBy="speed"] "speed" or "concentration".
- * @param {number} [options.colorMaximum=10] Color scale maximum, m/s or tracer units.
- * @param {number} [options.extinction=0.15] Visual opacity coefficient per meter per tracer unit.
- * @param {number} [options.sliceHeight=4] Simulation-local horizontal slice Z in meters.
- * @param {Cartesian3[]} [options.streamlineSeeds] 1..256 local-meter seeds, copied; default 32 on the minimum-X side.
- * @param {number} [options.streamlineSegments=64] 1..64 half-cell segments, construction snapshot.
- * @experimental This API is subject to change during urban-flow qualification.
+ * @param {object} options 配置。
+ * @param {Scene} options.scene 拥有后处理集合的 Scene。
+ * @param {SceneGISWindSimulation} options.simulation 已就绪或等待就绪的场生产者。
+ * @param {boolean} [options.show=true] 是否启用显示。
+ * @param {string} [options.mode="volume"] 显示模式："volume" 体渲染、"slice" 切片或 "none"。
+ * @param {boolean} [options.showStreamlines=false] 显示瞬时流线。
+ * @param {boolean} [options.showParticles=true] 显示按已完成模拟时间驱动的 GPU 流动标记。每个渲染批次采样最新已完成速度场，不是守恒浓度输运。
+ * @param {number} [options.particleCount=4096] 不可变粒子容量，整数 1..65536。
+ * @param {number} [options.particleWidth=1.4] 独立标记/线带宽度，范围 (0,64]，单位由 particleWidthUnits 决定。
+ * @param {string} [options.particleWidthUnits="pixels"] 宽度单位为绘制缓冲区 "pixels" 或 "meters"。像素宽度在近距离仍保持细窄。
+ * @param {number} [options.particleLength=2.5] 独立标记长度，单位为米，范围 (0,256]。
+ * @param {number} [options.particleOpacity=0.75] 标记不透明度，范围 [0,1]，独立于示踪浓度。
+ * @param {boolean} [options.showTrails=false] 绘制采样的三维粒子轨迹，不使用屏幕残影。
+ * @param {number} [options.trailDuration=4] 保留已完成模拟历史的秒数，范围 (0,120]；修改仅重启历史。
+ * @param {number} [options.trailSegments=32] 不可变历史容量，整数 1..128。包含填充后的粒子和历史纹理合计不得超过 64 MiB。
+ * @param {number} [options.trailFade=1] 尾部不透明度指数，范围 [0,8]；零关闭按年龄淡出。particleOpacity 同时缩放标记与线带。
+ * @param {string} [options.colorBy="speed"] 颜色依据："speed" 风速或 "concentration" 示踪浓度。
+ * @param {number} [options.colorMaximum=10] 色标上限，单位为 m/s 或示踪量。
+ * @param {number} [options.extinction=0.15] 每米、每单位示踪量对应的可视化不透明度系数。
+ * @param {number} [options.sliceHeight=4] 模拟局部水平切片的 Z 高度，单位为米。
+ * @param {Cartesian3[]} [options.streamlineSeeds] 1..256 个局部米制种子，会复制；默认在最小 X 侧设置 32 个。
+ * @param {number} [options.streamlineSegments=64] 1..64 个半格段，在构造时快照保存。
+ * @experimental 城市流动验证期间此 API 可能发生变化。
  */
 function SceneGISWindVisualization(options) {
   if (!options?.scene || !options.simulation) {
@@ -310,7 +302,7 @@ function SceneGISWindVisualization(options) {
 }
 Object.defineProperties(SceneGISWindVisualization.prototype, {
   /**
-   * Immutable GPU marker capacity.
+   * 不可变 GPU 标记容量。
    * @memberof SceneGISWindVisualization.prototype
    * @type {number}
    * @readonly
@@ -321,7 +313,7 @@ Object.defineProperties(SceneGISWindVisualization.prototype, {
     },
   },
   /**
-   * Allocated particle and history texture bytes; excludes borrowed wind fields and scene targets.
+   * 已分配粒子和历史纹理字节数，不含借用风场与场景目标。
    * @memberof SceneGISWindVisualization.prototype
    * @type {number}
    * @readonly
@@ -332,7 +324,7 @@ Object.defineProperties(SceneGISWindVisualization.prototype, {
     },
   },
   /**
-   * Immutable history segment capacity. One additional sampled position is retained.
+   * 不可变历史段容量，额外保留一个采样位置。
    * @memberof SceneGISWindVisualization.prototype
    * @type {number}
    * @readonly
@@ -343,7 +335,7 @@ Object.defineProperties(SceneGISWindVisualization.prototype, {
     },
   },
   /**
-   * Allocated history texture bytes, a subset of particleTextureByteLength. Zero before first enable.
+   * 已分配历史纹理字节数，是 particleTextureByteLength 的子集，首次启用前为零。
    * @memberof SceneGISWindVisualization.prototype
    * @type {number}
    * @readonly
@@ -406,11 +398,15 @@ SceneGISWindVisualization.prototype.update = function (frameState) {
     frameState.commandList.push(this._command);
   }
 };
-/** @returns {boolean} Whether destroyed. */
+/**
+ *  @returns {boolean} 是否已销毁。
+ */
 SceneGISWindVisualization.prototype.isDestroyed = function () {
   return false;
 };
-/** @returns {undefined} Releases only owned display resources. */
+/**
+ *  @returns {undefined} 仅释放自有显示资源。
+ */
 SceneGISWindVisualization.prototype.destroy = function () {
   release(this);
   return destroyObject(this);

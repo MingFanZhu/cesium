@@ -147,10 +147,8 @@ function readCatalog(directory, locale) {
   return { schemaVersion: 1, locale, entries };
 }
 
-/** Apply exact source-bound prose translations in place before any brand mapping/rendering. */
-function localizeDoclets(doclets, catalog) {
-  const { locale } = catalog;
-  validateCatalog(catalog, locale);
+/** Isolate mutable JSDoc records before language annotations or text replacement. */
+function isolateProse(doclets) {
   // JSDoc enum properties can alias another doclet. Isolate mutable prose records first.
   for (const doclet of doclets) {
     for (const field of [
@@ -170,6 +168,31 @@ function localizeDoclets(doclets, catalog) {
       }
     }
   }
+}
+
+/** Mark prose maintained directly in the requested source language. */
+function markSourceDoclets(doclets, locale) {
+  isolateProse(doclets);
+  for (const doclet of doclets) {
+    doclet.sourceLocale = locale;
+    doclet.i18n = {
+      locale,
+      sourceLocale: locale,
+      sourceFields: [],
+      translatedFields: [],
+      fallbackFields: [],
+    };
+  }
+  for (const doclet of doclets) {
+    doclet.i18n.sourceFields = collectUnits([doclet]).map((unit) => unit.field);
+  }
+}
+
+/** Apply exact source-bound prose translations in place before any brand mapping/rendering. */
+function localizeDoclets(doclets, catalog) {
+  const { locale } = catalog;
+  validateCatalog(catalog, locale);
+  isolateProse(doclets);
   const translations = new Map();
   const fields = new Set(catalog.entries.map(fieldIdentity));
   for (const entry of catalog.entries) {
@@ -256,6 +279,7 @@ function pendingEntries(inventory, catalog) {
 module.exports = {
   collectUnits,
   localizeDoclets,
+  markSourceDoclets,
   mapProse,
   pendingEntries,
   readCatalog,

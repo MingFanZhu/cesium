@@ -197,17 +197,15 @@ function findSouthOwnedTile(positionY, extent, count) {
 }
 
 /**
- * A single-root quadtree tiling scheme for a SceneGIS planar coordinate system. Level zero
- * contains one tile. Tile X increases eastward and tile Y increases southward from a northwest
- * origin. The scheme does not wrap.
+ * 平面坐标系的单根四叉树切片方案。零级仅有一个瓦片，瓦片 X 向东递增，瓦片 Y 从西北原点向南递增，不进行环绕。
  *
  * @alias SceneGISPlanarTilingScheme
  * @constructor
  *
- * @param {object} options Object with the following properties:
- * @param {SceneGISPlanarCoordinateSystem} options.coordinateSystem The planar coordinate system to tile.
+ * @param {object} options 包含以下属性的对象：
+ * @param {SceneGISPlanarCoordinateSystem} options.coordinateSystem 要切片的平面坐标系。
  *
- * @exception {DeveloperError} <code>options.coordinateSystem</code> is not a SceneGISPlanarCoordinateSystem.
+ * @exception {DeveloperError} <code>options.coordinateSystem</code> 不是 SceneGISPlanarCoordinateSystem。
  */
 function SceneGISPlanarTilingScheme(options) {
   options = options ?? Frozen.EMPTY_OBJECT;
@@ -226,7 +224,7 @@ function SceneGISPlanarTilingScheme(options) {
 
 Object.defineProperties(SceneGISPlanarTilingScheme.prototype, {
   /**
-   * Gets the coordinate system tiled by this scheme.
+   * 获取此方案切片的坐标系。
    *
    * @memberof SceneGISPlanarTilingScheme.prototype
    * @type {SceneGISPlanarCoordinateSystem}
@@ -239,9 +237,7 @@ Object.defineProperties(SceneGISPlanarTilingScheme.prototype, {
   },
 
   /**
-   * Gets the highest level at which every tile boundary is guaranteed to remain numerically
-   * distinguishable and all tile indices are safe integers. This is a mathematical addressing
-   * limit, not a data source availability limit.
+   * 获取保证每条瓦片边界在数值上仍可区分、且全部索引为安全整数的最高层级。这是数学寻址限制，不是数据源可用性限制。
    *
    * @memberof SceneGISPlanarTilingScheme.prototype
    * @type {number}
@@ -255,11 +251,11 @@ Object.defineProperties(SceneGISPlanarTilingScheme.prototype, {
 });
 
 /**
- * Gets the number of tiles in the X direction at a level.
+ * 获取某层 X 方向的瓦片数。
  *
- * @param {number} level The level of detail.
- * @returns {number} The number of tiles in the X direction.
- * @exception {DeveloperError} <code>level</code> is not a valid level for this tiling scheme.
+ * @param {number} level 细节层级。
+ * @returns {number} X 方向瓦片数。
+ * @exception {DeveloperError} <code>level</code> 不是此切片方案的有效层级。
  */
 SceneGISPlanarTilingScheme.prototype.getNumberOfXTilesAtLevel = function (
   level,
@@ -269,11 +265,11 @@ SceneGISPlanarTilingScheme.prototype.getNumberOfXTilesAtLevel = function (
 };
 
 /**
- * Gets the number of tiles in the Y direction at a level.
+ * 获取某层 Y 方向的瓦片数。
  *
- * @param {number} level The level of detail.
- * @returns {number} The number of tiles in the Y direction.
- * @exception {DeveloperError} <code>level</code> is not a valid level for this tiling scheme.
+ * @param {number} level 细节层级。
+ * @returns {number} Y 方向瓦片数。
+ * @exception {DeveloperError} <code>level</code> 不是此切片方案的有效层级。
  */
 SceneGISPlanarTilingScheme.prototype.getNumberOfYTilesAtLevel = function (
   level,
@@ -283,11 +279,11 @@ SceneGISPlanarTilingScheme.prototype.getNumberOfYTilesAtLevel = function (
 };
 
 /**
- * Gets the ideal square tile edge length in meters at a level.
+ * 获取某层理想正方形瓦片的边长，单位为米。
  *
- * @param {number} level The level of detail.
- * @returns {number} The ideal tile edge length in meters.
- * @exception {DeveloperError} <code>level</code> is not a valid level for this tiling scheme.
+ * @param {number} level 细节层级。
+ * @returns {number} 理想瓦片边长，单位为米。
+ * @exception {DeveloperError} <code>level</code> 不是此切片方案的有效层级。
  */
 SceneGISPlanarTilingScheme.prototype.getTileSizeAtLevel = function (level) {
   validateLevel(this, level);
@@ -295,15 +291,15 @@ SceneGISPlanarTilingScheme.prototype.getTileSizeAtLevel = function (level) {
 };
 
 /**
- * Converts tile coordinates to their planar extent.
+ * 将瓦片坐标转换为平面范围。
  *
- * @param {number} x The integer tile X coordinate.
- * @param {number} y The integer tile Y coordinate.
- * @param {number} level The level of detail.
- * @returns {SceneGISPlanarExtent} A new extent for the tile.
- * @exception {DeveloperError} <code>level</code> is not a valid level for this tiling scheme.
- * @exception {DeveloperError} <code>x</code> or <code>y</code> is not a valid tile index.
- * @exception {DeveloperError} The requested tile boundaries are not numerically distinguishable.
+ * @param {number} x 整数瓦片 X 坐标。
+ * @param {number} y 整数瓦片 Y 坐标。
+ * @param {number} level 细节层级。
+ * @returns {SceneGISPlanarExtent} 此瓦片的新范围。
+ * @exception {DeveloperError} <code>level</code> 不是此切片方案的有效层级。
+ * @exception {DeveloperError} <code>x</code> 或 <code>y</code> 不是有效瓦片索引。
+ * @exception {DeveloperError} 请求的瓦片边界在数值上不可区分。
  */
 SceneGISPlanarTilingScheme.prototype.tileXYToExtent = function (x, y, level) {
   validateLevel(this, level);
@@ -357,15 +353,14 @@ SceneGISPlanarTilingScheme.prototype.tileXYToExtent = function (x, y, level) {
 };
 
 /**
- * Finds the tile containing a planar world position. Outer boundaries are inclusive. An internal
- * X boundary belongs to the eastern tile, and an internal Y boundary belongs to the southern tile.
+ * 查找包含平面世界位置的瓦片。外边界包含；内部 X 边界归东侧瓦片，内部 Y 边界归南侧瓦片。
  *
- * @param {Cartesian3} position The planar world position. Z is validated but does not affect addressing.
- * @param {number} level The level of detail.
- * @param {Cartesian2} [result] The object in which to store the tile coordinates.
- * @returns {Cartesian2|undefined} The tile coordinates, or <code>undefined</code> when the position is outside the world extent.
- * @exception {DeveloperError} <code>position</code> is not a Cartesian3 with finite components.
- * @exception {DeveloperError} <code>level</code> is not a valid level for this tiling scheme.
+ * @param {Cartesian3} position 平面世界位置。验证 Z，但 Z 不参与寻址。
+ * @param {number} level 细节层级。
+ * @param {Cartesian2} [result] 存储瓦片坐标的对象。
+ * @returns {Cartesian2|undefined} 瓦片坐标；位置在世界范围外时为 <code>undefined</code>。
+ * @exception {DeveloperError} <code>position</code> 不是各分量有限的 Cartesian3。
+ * @exception {DeveloperError} <code>level</code> 不是此切片方案的有效层级。
  */
 SceneGISPlanarTilingScheme.prototype.positionToTileXY = function (
   position,

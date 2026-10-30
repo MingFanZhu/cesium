@@ -103,56 +103,51 @@ function validate(primitive) {
 }
 
 /**
- * Native local GPU fluid with PBF density constraints and a reconstructed liquid surface.
- * Add to Scene.primitives. Requires WebGL2 floating MRT, HDR and SCENE3D. The camera must
- * remain outside the liquid. Scene opaque depth controls visibility, not physical collisions.
- * A closed local axis-aligned box provides collisions. No runtime CPU particle readback.
+ * 原生局部 GPU 流体图元，使用 PBF 密度约束并重建液面。加入 Scene.primitives。要求 WebGL2 浮点 MRT、HDR 和 SCENE3D，相机必须位于液体之外。场景不透明深度仅控制可见性，不作为物理碰撞；碰撞由封闭的局部轴对齐盒提供。运行时不进行 CPU 粒子回读。
  *
- * All distances are local meters. Use an ENU modelMatrix on Globe or a rigid meter transform
- * on PlanarWorld. Changing modelMatrix moves existing particles and the container together.
- * Layout options are immutable; mutable controls are documented as instance properties.
+ * 全部距离为局部米制单位。球面使用 ENU modelMatrix，平面使用米制刚体变换。修改 modelMatrix 会同时移动已有粒子和容器。布局选项不可变，可修改控制项在实例属性中说明。
  *
  * @alias SceneGISFluidPrimitive
  * @constructor
- * @param {object} [options] Initial configuration.
- * @param {Matrix4} [options.modelMatrix=Matrix4.IDENTITY] Rigid local-to-world transform.
- * @param {number} [options.maximumParticles=4096] Power-of-two capacity from 16 to 16384.
- * @param {Cartesian3} [options.minimum] Container minimum, default (-1,-1,0).
- * @param {Cartesian3} [options.maximum] Container maximum, default (1,1,3).
- * @param {number} [options.particleSpacing=0.065] Rest spacing; determines rest particle volume.
- * @param {number} [options.smoothingRadius] Neighbor kernel radius, default 2.5 times spacing.
- * @param {number} [options.particleRadius] Collision radius, default 0.4 times spacing.
- * @param {number} [options.renderRadius] Mutable reconstruction radius in meters, default 0.8 times spacing.
- * @param {number} [options.surfaceAnisotropy=1] Neighborhood-shaped reconstruction, from 0 (spheres) to 1 (ellipsoids).
- * @param {number} [options.sprayIntensity=0] Passive GPU spray generation strength, 0 to 4. Zero hides spray and stops new spray births.
- * @param {number} [options.sprayParticleRadius] Spray radius in meters, default 0.12 times spacing; range 0.04 to 0.25 times spacing.
- * @param {number} [options.solverIterations=2] Immutable density iterations, integer 1 to 8.
- * @param {number} [options.timeStep=0.016666666666666666] Fixed simulated seconds per step, from 1/240 to 1/30.
- * @param {number} [options.maximumSubSteps=2] Maximum catch-up steps per frame, integer 1 to 4; excess elapsed time is discarded.
- * @param {number} [options.resolutionScale=0.75] Screen-space reconstruction scale, 0.25 to 1.
- * @param {number} [options.initialParticles=0] Initial/reset lattice count, at most capacity.
- * @param {Cartesian3} [options.initialMinimum] Lattice origin, default container minimum plus collision radius.
- * @param {Cartesian3} [options.initialDimensions] Positive integer lattice dimensions, default (1,1,1).
- * @param {Cartesian3} [options.gravity] Local acceleration, default (0,0,-9.81).
- * @param {Cartesian3} [options.emitterPosition] Disk center in simulation coordinates, default (0,0,0.15).
- * @param {Quaternion} [options.emitterOrientation=Quaternion.IDENTITY] Unit rotation from emitter to simulation coordinates.
- * @param {Cartesian3} [options.emitterVelocity] Birth velocity in emitter coordinates, default (0,0,4).
- * @param {number} [options.emitterRadius=0.05] Disk radius in emitter XY.
- * @param {number} [options.emissionRate=120] Births per simulated second.
- * @param {number} [options.particleLifetime=8] Lifetime in simulated seconds; expired slots are inactive.
- * @param {number} [options.restitution=0.05] Box collision restitution, 0 to 1.
- * @param {number} [options.damping=0.1] Velocity damping per second, 0 to 100.
- * @param {Cartesian3} [options.waterColor] Linear RGB scattering color, default (0.025,0.22,0.3).
- * @param {Cartesian3} [options.absorption] RGB absorption per meter, default (3,0.8,0.4).
- * @param {Cartesian3} [options.reflectionColor] Linear RGB when no sky probe, default (0.25,0.4,0.55).
- * @param {number} [options.roughness=0.14] Dielectric roughness, 0.02 to 1.
- * @param {number} [options.refractionStrength=0.15] Bounded screen-space refraction scale, 0 to 1.
- * @param {boolean} [options.reflections=true] Trace opaque screen-space reflections; sky reflection remains active.
- * @param {boolean} [options.show=true] Display and simulate this primitive.
- * @param {boolean} [options.paused=false] Freeze simulation while keeping the liquid visible.
- * @param {boolean} [options.emitting=true] Enable births; existing fluid keeps simulating when false.
- * @exception {DeveloperError} Invalid layout, controls, non-rigid transform or cross-context use.
- * @exception {RuntimeError} Rendering requires HDR, SCENE3D and supported WebGL2 floating targets.
+ * @param {object} [options] 初始配置。
+ * @param {Matrix4} [options.modelMatrix=Matrix4.IDENTITY] 局部到世界的刚体变换。
+ * @param {number} [options.maximumParticles=4096] 为 2 的幂的容量，范围 16 到 16384。
+ * @param {Cartesian3} [options.minimum] 容器最小点，默认 (-1,-1,0)。
+ * @param {Cartesian3} [options.maximum] 容器最大点，默认 (1,1,3)。
+ * @param {number} [options.particleSpacing=0.065] 静止间距，决定静止粒子体积。
+ * @param {number} [options.smoothingRadius] 邻域核半径，默认 spacing 的 2.5 倍。
+ * @param {number} [options.particleRadius] 碰撞半径，默认 spacing 的 0.4 倍。
+ * @param {number} [options.renderRadius] 可变重建半径，单位为米，默认 spacing 的 0.8 倍。
+ * @param {number} [options.surfaceAnisotropy=1] 按邻域形状重建，范围从 0 球体到 1 椭球体。
+ * @param {number} [options.sprayIntensity=0] 被动 GPU 飞沫生成强度，范围 0 到 4；0 隐藏飞沫并停止新飞沫出生。
+ * @param {number} [options.sprayParticleRadius] 飞沫半径，单位为米，默认 spacing 的 0.12 倍，范围为 spacing 的 0.04 到 0.25 倍。
+ * @param {number} [options.solverIterations=2] 不可变密度迭代次数，整数 1 到 8。
+ * @param {number} [options.timeStep=0.016666666666666666] 每步固定模拟秒数，范围 1/240 到 1/30。
+ * @param {number} [options.maximumSubSteps=2] 每帧最多追赶步数，整数 1 到 4；超出的实际时间被丢弃。
+ * @param {number} [options.resolutionScale=0.75] 屏幕空间重建倍率，范围 0.25 到 1。
+ * @param {number} [options.initialParticles=0] 初始和重置时的格点数，不超过 capacity。
+ * @param {Cartesian3} [options.initialMinimum] 格点阵原点，默认容器最小点加碰撞半径。
+ * @param {Cartesian3} [options.initialDimensions] 格点阵的正整数维度，默认 (1,1,1)。
+ * @param {Cartesian3} [options.gravity] 局部加速度，默认 (0,0,-9.81)。
+ * @param {Cartesian3} [options.emitterPosition] 模拟坐标中的圆盘中心，默认 (0,0,0.15)。
+ * @param {Quaternion} [options.emitterOrientation=Quaternion.IDENTITY] 从发射器到模拟坐标的单位旋转。
+ * @param {Cartesian3} [options.emitterVelocity] 发射器坐标中的出生速度，默认 (0,0,4)。
+ * @param {number} [options.emitterRadius=0.05] 发射器 XY 平面中的圆盘半径。
+ * @param {number} [options.emissionRate=120] 每模拟秒出生的粒子数。
+ * @param {number} [options.particleLifetime=8] 寿命，单位为模拟秒；过期槽位不活动。
+ * @param {number} [options.restitution=0.05] 盒碰撞恢复系数，范围 0 到 1。
+ * @param {number} [options.damping=0.1] 每秒速度阻尼，范围 0 到 100。
+ * @param {Cartesian3} [options.waterColor] 线性 RGB 散射颜色，默认 (0.025,0.22,0.3)。
+ * @param {Cartesian3} [options.absorption] 每米 RGB 吸收，默认 (3,0.8,0.4)。
+ * @param {Cartesian3} [options.reflectionColor] 没有天空探针时的线性 RGB，默认 (0.25,0.4,0.55)。
+ * @param {number} [options.roughness=0.14] 介电粗糙度，范围 0.02 到 1。
+ * @param {number} [options.refractionStrength=0.15] 有界屏幕空间折射倍率，范围 0 到 1。
+ * @param {boolean} [options.reflections=true] 追踪不透明屏幕空间反射，天空反射仍启用。
+ * @param {boolean} [options.show=true] 显示并模拟此图元。
+ * @param {boolean} [options.paused=false] 冻结模拟但保持液体可见。
+ * @param {boolean} [options.emitting=true] 是否启用出生；为 false 时已有流体继续模拟。
+ * @exception {DeveloperError} 布局、控制项或刚体变换无效，或跨 Context 使用。
+ * @exception {RuntimeError} 渲染要求 HDR、SCENE3D 和支持的 WebGL2 浮点目标。
  * @example
  * scene.highDynamicRange = true;
  * const fluid = scene.primitives.add(new Cesium.SceneGISFluidPrimitive({
@@ -265,141 +260,126 @@ function SceneGISFluidPrimitive(options = {}) {
     throw new DeveloperError("maximumSubSteps must be an integer.");
   }
   /**
-   * Rigid placement; moves all existing fluid.
+   * 刚体放置变换，同时移动全部已有流体。
    * @type {Matrix4}
    */
   this.modelMatrix = Matrix4.clone(options.modelMatrix ?? Matrix4.IDENTITY);
   /**
-   * Hide and freeze; hidden elapsed time is discarded.
+   * 隐藏并冻结，隐藏期间经过的时间被丢弃。
    * @type {boolean}
    */
   this.show = options.show ?? true;
   /**
-   * Freeze simulation; paused elapsed time is discarded.
+   * 冻结模拟，暂停期间经过的时间被丢弃。
    * @type {boolean}
    */
   this.paused = options.paused ?? false;
   /**
-   * Control births independently of existing fluid.
+   * 独立于已有流体控制粒子出生。
    * @type {boolean}
    */
   this.emitting = options.emitting ?? true;
   /**
-   * Births per simulated second; saturation replaces oldest circular slots.
+   * 每模拟秒出生数；容量满时替换最旧的循环槽位。
    * @type {number}
    */
   this.emissionRate = options.emissionRate ?? 120;
   /**
-   * Emitter disk center in simulation coordinates.
+   * 模拟坐标中的发射圆盘中心。
    * @type {Cartesian3}
    */
   this.emitterPosition = Cartesian3.clone(
     options.emitterPosition ?? new Cartesian3(0, 0, 0.15),
   );
   /**
-   * Unit rotation from emitter coordinates to simulation coordinates. Rotates the
-   * emission disk and birth velocity only. Changes affect new particles on the next
-   * simulation step; existing particles, gravity and the container are unchanged.
-   * Defaults to Quaternion.IDENTITY. Zero and non-unit quaternions are invalid.
+   * 从发射器坐标到模拟坐标的单位旋转，仅旋转发射圆盘和出生速度。修改在下一模拟步影响新粒子，已有粒子、重力和容器不变。默认 Quaternion.IDENTITY，拒绝零四元数或非单位四元数。
    * @type {Quaternion}
    */
   this.emitterOrientation = Quaternion.clone(
     options.emitterOrientation ?? Quaternion.IDENTITY,
   );
   /**
-   * Birth velocity in emitter coordinates, rotated by emitterOrientation.
+   * 发射器坐标中的出生速度，由 emitterOrientation 旋转。
    * @type {Cartesian3}
    */
   this.emitterVelocity = Cartesian3.clone(
     options.emitterVelocity ?? new Cartesian3(0, 0, 4),
   );
   /**
-   * Disk radius in emitter XY before applying emitterOrientation.
+   * 应用 emitterOrientation 之前，发射器 XY 平面中的圆盘半径。
    * @type {number}
    */
   this.emitterRadius = options.emitterRadius ?? 0.05;
   /**
-   * Lifetime of new particles in simulated seconds.
+   * 新粒子寿命，单位为模拟秒。
    * @type {number}
    */
   this.particleLifetime = options.particleLifetime ?? 8;
   /**
-   * Local acceleration in meters per second squared.
+   * 局部加速度，单位为米/秒平方。
    * @type {Cartesian3}
    */
   this.gravity = Cartesian3.clone(
     options.gravity ?? new Cartesian3(0, 0, -9.81),
   );
   /**
-   * Collision restitution, 0 to 1.
+   * 碰撞恢复系数，范围 0 到 1。
    * @type {number}
    */
   this.restitution = options.restitution ?? 0.05;
   /**
-   * Exponential velocity damping per simulated second.
+   * 每模拟秒的指数速度阻尼。
    * @type {number}
    */
   this.damping = options.damping ?? 0.1;
   /**
-   * Linear RGB scattering color.
+   * 线性 RGB 散射颜色。
    * @type {Cartesian3}
    */
   this.waterColor = Cartesian3.clone(
     options.waterColor ?? new Cartesian3(0.025, 0.22, 0.3),
   );
   /**
-   * RGB absorption per meter.
+   * 每米 RGB 吸收。
    * @type {Cartesian3}
    */
   this.absorption = Cartesian3.clone(
     options.absorption ?? new Cartesian3(3, 0.8, 0.4),
   );
   /**
-   * Linear RGB reflection when no sky probe exists.
+   * 没有天空探针时使用的线性 RGB 反射色。
    * @type {Cartesian3}
    */
   this.reflectionColor = Cartesian3.clone(
     options.reflectionColor ?? new Cartesian3(0.25, 0.4, 0.55),
   );
   /**
-   * Dielectric roughness, 0.02 to 1.
+   * 介电粗糙度，范围 0.02 到 1。
    * @type {number}
    */
   this.roughness = options.roughness ?? 0.14;
   /**
-   * Screen-space refraction scale, 0 to 1.
+   * 屏幕空间折射倍率，范围 0 到 1。
    * @type {number}
    */
   this.refractionStrength = options.refractionStrength ?? 0.15;
   /**
-   * Enable opaque screen-space reflection rays.
+   * 启用不透明屏幕空间反射射线。
    * @type {boolean}
    */
   this.reflections = options.reflections ?? true;
   /**
-   * Volume-preserving neighborhood shape strength, from 0 (spheres) to 1.
-   * Only changes rendering, including while paused. Maximum semi-axis is less
-   * than 1.6 times renderRadius. Shape resources are created lazily when nonzero,
-   * retained until destruction, and recomputed only after simulation or reset.
+   * 保持体积的邻域形状强度，范围从 0 球体到 1。仅影响绘制，暂停时也有效，最大半轴小于 renderRadius 的 1.6 倍。非零时延迟创建形状资源，保留至销毁，仅在模拟或重置后重新计算。
    * @type {number}
    */
   this.surfaceAnisotropy = options.surfaceAnisotropy ?? 1;
   /**
-   * Passive spray strength, from 0 to 4. Default 0. Fast surface flow and box
-   * impacts generate secondary droplets, without changing the main fluid mass.
-   * Zero hides spray and stops its births; allocated droplets keep aging on
-   * simulation steps. Pausing or hiding freezes both pools. Reset clears spray.
-   * The pool has maximumParticles slots, allocated on the first enabled step,
-   * with 64 bytes per slot retained until destruction. No CPU particle readback.
+   * 被动飞沫强度，范围 0 到 4，默认 0。快速表面流动和盒碰撞生成次级液滴，不改变主流体质量。0 隐藏飞沫并停止出生，已分配液滴仍随模拟步老化。暂停或隐藏冻结两个池，重置清除飞沫。飞沫池有 maximumParticles 个槽位，首次启用步分配，每槽 64 字节并保留至销毁。不进行 CPU 粒子回读。
    * @type {number}
    */
   this.sprayIntensity = options.sprayIntensity ?? 0;
   /**
-   * Visual spray radius in meters, from 0.04 to 0.25 times particleSpacing.
-   * Default 0.12 times spacing. Takes effect while paused without reallocation.
-   * Droplets have size variation and bounded motion streaks. Spray is transparent
-   * visual detail, with gravity, drag, finite lifetime and box/liquid reabsorption;
-   * it does not contribute to fluid thickness, picking depth or density constraints.
+   * 可视化飞沫半径，单位为米，范围为 particleSpacing 的 0.04 到 0.25 倍，默认 0.12 倍。暂停时也生效，不重新分配。液滴有尺寸变化及有界运动拖迹。飞沫是透明显示细节，受重力、阻力、有限寿命与盒体/液体再吸收控制，不参与液体厚度、拾取深度或密度约束。
    * @type {number}
    */
   this.sprayParticleRadius = options.sprayParticleRadius ?? spacing * 0.12;
@@ -422,14 +402,11 @@ function SceneGISFluidPrimitive(options = {}) {
 
 Object.defineProperties(SceneGISFluidPrimitive.prototype, {
   /**
-   * Volume-equivalent reconstruction radius in meters, from 0.5 to 1.5 times the immutable
-   * particleSpacing. Takes effect on the next render, including while paused.
-   * Changes visible size and smoothing without resetting particles or allocating
-   * GPU resources. Rest volume, neighbor spacing and collision radius are unchanged.
+   * 等体积重建半径，单位为米，范围为不可变 particleSpacing 的 0.5 到 1.5 倍。下一渲染帧生效，暂停时也有效。改变可见尺寸和平滑程度，不重置粒子或分配 GPU 资源；静止体积、邻域间距和碰撞半径不变。
    *
    * @memberof SceneGISFluidPrimitive.prototype
    * @type {number}
-   * @exception {DeveloperError} The radius is non-finite or outside the supported range.
+   * @exception {DeveloperError} 半径非有限值或超出支持范围。
    */
   renderRadius: {
     get() {
@@ -453,7 +430,7 @@ Object.defineProperties(SceneGISFluidPrimitive.prototype, {
     },
   },
   /**
-   * Immutable particle slot capacity.
+   * 不可变粒子槽位容量。
    * @memberof SceneGISFluidPrimitive.prototype
    * @type {number}
    * @readonly
@@ -464,7 +441,7 @@ Object.defineProperties(SceneGISFluidPrimitive.prototype, {
     },
   },
   /**
-   * Fixed seconds per simulation step.
+   * 每模拟步的固定秒数。
    * @memberof SceneGISFluidPrimitive.prototype
    * @type {number}
    * @readonly
@@ -475,7 +452,7 @@ Object.defineProperties(SceneGISFluidPrimitive.prototype, {
     },
   },
   /**
-   * Whether owned GPU resources exist.
+   * 自有 GPU 资源是否已存在。
    * @memberof SceneGISFluidPrimitive.prototype
    * @type {boolean}
    * @readonly
@@ -486,7 +463,7 @@ Object.defineProperties(SceneGISFluidPrimitive.prototype, {
     },
   },
   /**
-   * Owned texture and depth-buffer bytes, excluding shared scene captures.
+   * 自有纹理与深度缓冲的字节数，不含共享场景捕获。
    * @memberof SceneGISFluidPrimitive.prototype
    * @type {number}
    * @readonly
@@ -499,7 +476,7 @@ Object.defineProperties(SceneGISFluidPrimitive.prototype, {
 });
 
 /**
- * Reset the initial lattice and emission sequence on the next visible render, even when paused.
+ * 在下一次可见渲染中重置初始格点与发射序列，暂停时也执行。
  */
 SceneGISFluidPrimitive.prototype.reset = function () {
   this._reset = true;
@@ -607,13 +584,13 @@ SceneGISFluidPrimitive.prototype._prepareWaterSurface = function (scene) {
   this._surface.prepare(scene);
 };
 /**
- * @returns {boolean} Whether this primitive has been destroyed.
+ * @returns {boolean} 此图元是否已销毁。
  */
 SceneGISFluidPrimitive.prototype.isDestroyed = function () {
   return false;
 };
 /**
- * Release all owned GPU state and screen targets. Scene capture textures remain Scene-owned.
+ * 释放全部自有 GPU 状态和屏幕目标。场景捕获纹理仍归 Scene 所有。
  * @returns {undefined}
  */
 SceneGISFluidPrimitive.prototype.destroy = function () {

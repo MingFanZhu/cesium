@@ -88,35 +88,30 @@ function validatePolygon(polygon) {
 }
 
 /**
- * Deterministic, explicit preprocessing of static obstacles for a local wind grid.
- * Does not read scene objects, terrain, screen depth or private model geometry.
+ * 为局部风场格网确定性、显式预处理静态障碍。不读取场景对象、地形、屏幕深度或模型私有几何。
  * @namespace SceneGISWindObstacleMask
  */
 const SceneGISWindObstacleMask = {};
 
 /**
- * A closed prism defined in its own local meters. Ring may be concave, clockwise or counterclockwise.
+ * 以自身局部米制定义的闭合棱柱，环可为凹形、顺时针或逆时针。
  * @typedef {object} SceneGISWindObstacleMask.ExtrudedPolygon
- * @property {Cartesian2[]} positions Simple XY outer ring without repeated closing vertex or holes.
- * @property {number} minimumHeight Bottom local Z in meters.
- * @property {number} maximumHeight Top local Z in meters.
- * @property {Matrix4} [modelMatrix=Matrix4.IDENTITY] Rigid geometry-local to simulation-local transform.
+ * @property {Cartesian2[]} positions 简单 XY 外环，不含重复闭合顶点或孔洞。
+ * @property {number} minimumHeight 底部局部 Z，单位为米。
+ * @property {number} maximumHeight 顶部局部 Z，单位为米。
+ * @property {Matrix4} [modelMatrix=Matrix4.IDENTITY] 几何局部到模拟局部的刚体变换。
  */
 
 /**
- * Fill cells whose centers lie inside any transformed prism (union). Centers on the closed
- * boundary count as solid. This is center sampling, not conservative triangle coverage; features
- * thinner than a cell can be missed. Use finer grids or supply an explicitly voxelized mask.
- * Preprocessing is synchronous, limited to each prism's transformed bounding box. Geometry is
- * read only during this call. The returned array is caller-owned; simulation copies its input.
- * @param {object} options Grid and explicit geometry.
- * @param {Cartesian3} options.dimensions Integer cell counts >=4; product <=2097152.
- * @param {number} options.cellSize Cubic width in meters.
- * @param {Cartesian3} [options.minimum=Cartesian3.ZERO] Simulation-local minimum in meters.
- * @param {SceneGISWindObstacleMask.ExtrudedPolygon[]} options.polygons Static closed prisms.
- * @param {number} [options.groundHeight] Optional horizontal solid half-space below this simulation-local Z.
- * @returns {Uint8Array} 0 fluid / 1 solid, x-fastest index x+nx*(y+ny*z).
- * @throws {DeveloperError} Invalid grid, simple polygon or rigid transform.
+ * 填充格心位于任一已变换棱柱内部的单元，取并集。格心位于闭合边界也视为固体。这是格心采样，不是保守三角形覆盖；小于格宽的特征可能遗漏，应使用更细格网或显式体素掩码。预处理同步执行，限制在各棱柱变换后的包围盒内。几何仅在此调用期间读取。返回数组归调用方所有，模拟会复制输入。
+ * @param {object} options 格网与显式几何。
+ * @param {Cartesian3} options.dimensions 整数单元数须 >=4，总乘积 <=2097152。
+ * @param {number} options.cellSize 立方格宽，单位为米。
+ * @param {Cartesian3} [options.minimum=Cartesian3.ZERO] 模拟局部最小点，单位为米。
+ * @param {SceneGISWindObstacleMask.ExtrudedPolygon[]} options.polygons 静态闭合棱柱。
+ * @param {number} [options.groundHeight] 可选的水平固体半空间，位于此模拟局部 Z 以下。
+ * @returns {Uint8Array} 0 为流体，1 为固体；X 最快，索引为 x+nx*(y+ny*z)。
+ * @throws {DeveloperError} 格网、简单多边形或刚体变换无效。
  */
 SceneGISWindObstacleMask.fromExtrudedPolygons = function (options) {
   const n = options.dimensions;

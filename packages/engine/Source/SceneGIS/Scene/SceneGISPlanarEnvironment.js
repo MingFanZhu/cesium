@@ -410,49 +410,43 @@ function releaseAuthority(environment) {
 }
 
 /**
- * Controls manual or project-origin astronomical celestial directions and
- * planar scene lighting for one caller-owned {@link SceneGISPlanarWorld}.
- * An explicit scene.light DirectionalLight takes precedence over the automatic
- * light. Installing a SunLight restores automatic lighting. Celestial directions
- * remain available to the sky and advanced environment while a custom light is active.
- * Register the instance with a CesiumWidget or Viewer controller host and
- * remove it before destroying the widget. The world does not own this
- * instance or its stable light.
+ * 为调用方所有的单个 {@link SceneGISPlanarWorld} 控制手动或基于项目原点星历的天体方向，以及平面场景光照。显式 scene.light DirectionalLight 优先于自动光源，安装 SunLight 可恢复自动光照。自定义光源生效时，天空及高级环境仍可使用天体方向。
+ * 将实例注册到 CesiumWidget 或 Viewer 控制器宿主，并在销毁 Widget 前移除。World 不拥有此实例或其稳定光源对象。
  *
  * @alias SceneGISPlanarEnvironment
  * @constructor
  * @implements Controller
  *
- * @param {object} options Object with the following properties:
- * @param {SceneGISPlanarWorld} options.world The live planar world controlled by this environment.
- * @param {Cartesian3} options.sunDirection The finite non-zero observer-to-sun direction in +X east, +Y north, +Z up world axes.
- * @param {Cartesian3} options.moonDirection The finite non-zero observer-to-moon direction used by the lightweight Moon and advanced Moonlight.
- * @param {Color} [options.sunColor=Color.WHITE] The finite directional-light color.
- * @param {number} [options.sunIntensity=2.0] The finite non-negative directional-light intensity.
- * @param {"manual"|"astronomical"} [options.directionMode="manual"] The source of effective celestial directions.
- * @param {number} [options.originLongitude] The project-origin WGS84 longitude in radians, required in astronomical mode.
- * @param {number} [options.originLatitude] The project-origin WGS84 geodetic latitude in radians, required in astronomical mode.
- * @param {boolean} [options.showSun=false] Whether the procedural planar Sun is visible.
- * @param {boolean} [options.showMoon=false] Whether the procedural planar Moon is visible.
- * @param {number} [options.sunPixelSize=48.0] The Sun disc diameter in CSS pixels.
- * @param {number} [options.moonPixelSize=36.0] The Moon disc diameter in CSS pixels.
- * @param {Color} [options.moonColor=Color.LIGHTGRAY] The finite procedural Moon color.
- * @param {boolean} [options.showAtmosphere=false] Whether the planar atmosphere is visible.
- * @param {Color} [options.atmosphereZenithColor=(0.12, 0.32, 0.72, 0.72)] The finite zenith color and maximum alpha.
- * @param {Color} [options.atmosphereHorizonColor=(0.92, 0.56, 0.28, 0.58)] The finite horizon color and maximum alpha.
- * @param {number} [options.atmosphereIntensity=1.0] The finite non-negative visual atmosphere strength.
- * @param {number} [options.atmosphereFadeHeight=1000000.0] The finite positive height-fade scale in meters.
- * @param {SceneGISPlanarSkyBox} [options.skyBox] The live caller-owned fixed-axis planar sky box.
+ * @param {object} options 包含以下属性的对象：
+ * @param {SceneGISPlanarWorld} options.world 由此环境控制的存活平面世界。
+ * @param {Cartesian3} options.sunDirection 世界轴 +X 向东、+Y 向北、+Z 向上时，从观察者指向太阳的有限非零方向。
+ * @param {Cartesian3} options.moonDirection 供轻量月亮与高级月光使用、从观察者指向月亮的有限非零方向。
+ * @param {Color} [options.sunColor=Color.WHITE] 有限的方向光颜色。
+ * @param {number} [options.sunIntensity=2.0] 有限非负的方向光强度。
+ * @param {"manual"|"astronomical"} [options.directionMode="manual"] 有效天体方向的来源。
+ * @param {number} [options.originLongitude] 项目原点的 WGS84 经度，单位为弧度，星历模式必需。
+ * @param {number} [options.originLatitude] 项目原点的 WGS84 大地纬度，单位为弧度，星历模式必需。
+ * @param {boolean} [options.showSun=false] 是否显示程序平面太阳。
+ * @param {boolean} [options.showMoon=false] 是否显示程序平面月亮。
+ * @param {number} [options.sunPixelSize=48.0] 太阳圆盘直径，单位为 CSS 像素。
+ * @param {number} [options.moonPixelSize=36.0] 月盘直径，单位为 CSS 像素。
+ * @param {Color} [options.moonColor=Color.LIGHTGRAY] 有限的程序月面颜色。
+ * @param {boolean} [options.showAtmosphere=false] 是否显示平面大气。
+ * @param {Color} [options.atmosphereZenithColor=(0.12, 0.32, 0.72, 0.72)] 有限的天顶颜色与最大 alpha。
+ * @param {Color} [options.atmosphereHorizonColor=(0.92, 0.56, 0.28, 0.58)] 有限的地平线颜色与最大 alpha。
+ * @param {number} [options.atmosphereIntensity=1.0] 有限非负的大气显示强度。
+ * @param {number} [options.atmosphereFadeHeight=1000000.0] 以米计的有限正高度衰减尺度。
+ * @param {SceneGISPlanarSkyBox} [options.skyBox] 调用方所有、存活的固定轴平面天空盒。
  *
- * @exception {DeveloperError} The world is not a live SceneGISPlanarWorld.
- * @exception {DeveloperError} A direction is not a finite non-zero Cartesian3.
- * @exception {DeveloperError} The sun color is not finite.
- * @exception {DeveloperError} The sun intensity is not finite and non-negative.
- * @exception {DeveloperError} The direction mode is not <code>"manual"</code> or <code>"astronomical"</code>.
- * @exception {DeveloperError} An origin is not undefined or a finite value in its inclusive longitude or latitude range.
- * @exception {DeveloperError} Astronomical mode does not define both origin longitude and origin latitude.
- * @exception {DeveloperError} A visible-body option is not a boolean, a finite positive CSS-pixel size, or a finite Color.
- * @exception {DeveloperError} An atmosphere option is not a valid boolean, finite Color, non-negative intensity, positive fade height, or live planar SkyBox.
+ * @exception {DeveloperError} world 不是存活的 SceneGISPlanarWorld。
+ * @exception {DeveloperError} 方向不是有限非零 Cartesian3。
+ * @exception {DeveloperError} 太阳颜色不是有限值。
+ * @exception {DeveloperError} 太阳强度非有限值或非负条件不满足。
+ * @exception {DeveloperError} 方向模式不是 <code>"manual"</code> 或 <code>"astronomical"</code>。
+ * @exception {DeveloperError} 原点不是 undefined，或不是位于闭区间经纬度范围内的有限值。
+ * @exception {DeveloperError} 星历模式未同时定义原点经度和纬度。
+ * @exception {DeveloperError} 可见天体选项不是布尔值、有限正 CSS 像素尺寸或有限 Color。
+ * @exception {DeveloperError} 大气选项不是有效布尔值、有限 Color、非负强度、正衰减高度或存活平面 SkyBox。
  */
 function SceneGISPlanarEnvironment(options) {
   options = options ?? Frozen.EMPTY_OBJECT;
@@ -590,7 +584,7 @@ SceneGISPlanarEnvironment.prototype._clearAdvancedLight = function (owner) {
 
 Object.defineProperties(SceneGISPlanarEnvironment.prototype, {
   /**
-   * Gets the caller-owned planar world associated with this environment.
+   * 获取与此环境关联、调用方所有的平面世界。
    *
    * @memberof SceneGISPlanarEnvironment.prototype
    * @type {SceneGISPlanarWorld}
@@ -603,8 +597,7 @@ Object.defineProperties(SceneGISPlanarEnvironment.prototype, {
   },
 
   /**
-   * Gets the stable Cesium directional light controlled by this environment.
-   * Its direction is the normalized negative of {@link SceneGISPlanarEnvironment#effectiveSunDirection}.
+   * 获取此环境控制的稳定 Cesium 方向光，其方向为 {@link SceneGISPlanarEnvironment#effectiveSunDirection} 取负后归一化。
    *
    * @memberof SceneGISPlanarEnvironment.prototype
    * @type {DirectionalLight}
@@ -617,13 +610,12 @@ Object.defineProperties(SceneGISPlanarEnvironment.prototype, {
   },
 
   /**
-   * Gets or sets whether effective celestial directions use manual fallback
-   * state or the project-origin astronomical calculation.
+   * 获取或设置有效天体方向采用手动后备状态还是基于项目原点的星历计算。
    *
    * @memberof SceneGISPlanarEnvironment.prototype
    * @type {"manual"|"astronomical"}
-   * @exception {DeveloperError} The assigned value is not <code>"manual"</code> or <code>"astronomical"</code>.
-   * @exception {DeveloperError} Astronomical mode is selected without both origin longitude and origin latitude.
+   * @exception {DeveloperError} 赋值不是 <code>"manual"</code> 或 <code>"astronomical"</code>。
+   * @exception {DeveloperError} 已选择星历模式，但缺少原点经度或纬度。
    */
   directionMode: {
     get: function () {
@@ -656,12 +648,12 @@ Object.defineProperties(SceneGISPlanarEnvironment.prototype, {
   },
 
   /**
-   * Gets or sets the project-origin WGS84 longitude in radians.
+   * 获取或设置项目原点的 WGS84 经度，单位为弧度。
    *
    * @memberof SceneGISPlanarEnvironment.prototype
    * @type {number|undefined}
-   * @exception {DeveloperError} The assigned value is neither undefined nor a finite number in <code>[-PI, PI]</code>.
-   * @exception {DeveloperError} The value is undefined while astronomical mode is active.
+   * @exception {DeveloperError} 赋值既不是 undefined，也不是 <code>[-PI, PI]</code> 内的有限数。
+   * @exception {DeveloperError} 星历模式启用时此值为 undefined。
    */
   originLongitude: {
     get: function () {
@@ -684,12 +676,12 @@ Object.defineProperties(SceneGISPlanarEnvironment.prototype, {
   },
 
   /**
-   * Gets or sets the project-origin WGS84 geodetic latitude in radians.
+   * 获取或设置项目原点的 WGS84 大地纬度，单位为弧度。
    *
    * @memberof SceneGISPlanarEnvironment.prototype
    * @type {number|undefined}
-   * @exception {DeveloperError} The assigned value is neither undefined nor a finite number in <code>[-PI/2, PI/2]</code>.
-   * @exception {DeveloperError} The value is undefined while astronomical mode is active.
+   * @exception {DeveloperError} 赋值既不是 undefined，也不是 <code>[-PI/2, PI/2]</code> 内的有限数。
+   * @exception {DeveloperError} 星历模式启用时此值为 undefined。
    */
   originLatitude: {
     get: function () {
@@ -712,7 +704,7 @@ Object.defineProperties(SceneGISPlanarEnvironment.prototype, {
   },
 
   /**
-   * Gets the effective observer-to-sun planar direction.
+   * 获取平面中从观察者指向太阳的有效方向。
    *
    * @memberof SceneGISPlanarEnvironment.prototype
    * @type {Cartesian3}
@@ -725,7 +717,7 @@ Object.defineProperties(SceneGISPlanarEnvironment.prototype, {
   },
 
   /**
-   * Gets the effective observer-to-moon planar direction.
+   * 获取平面中从观察者指向月亮的有效方向。
    *
    * @memberof SceneGISPlanarEnvironment.prototype
    * @type {Cartesian3}
@@ -738,7 +730,7 @@ Object.defineProperties(SceneGISPlanarEnvironment.prototype, {
   },
 
   /**
-   * Gets or sets the finite non-zero observer-to-sun world direction.
+   * 获取或设置从观察者指向太阳的有限非零世界方向。
    *
    * @memberof SceneGISPlanarEnvironment.prototype
    * @type {Cartesian3}
@@ -769,8 +761,7 @@ Object.defineProperties(SceneGISPlanarEnvironment.prototype, {
   },
 
   /**
-   * Gets or sets the finite non-zero observer-to-moon world direction.
-   * Advanced environment effects use its effective direction for Moonlight.
+   * 获取或设置从观察者指向月亮的有限非零世界方向，高级环境效果使用其有效方向生成月光。
    *
    * @memberof SceneGISPlanarEnvironment.prototype
    * @type {Cartesian3}
@@ -800,8 +791,7 @@ Object.defineProperties(SceneGISPlanarEnvironment.prototype, {
   },
 
   /**
-   * Gets or sets the finite directional-light color. The value is cloned on
-   * both assignment and access.
+   * 获取或设置有限的方向光颜色，赋值和读取时均复制。
    *
    * @memberof SceneGISPlanarEnvironment.prototype
    * @type {Color}
@@ -824,7 +814,7 @@ Object.defineProperties(SceneGISPlanarEnvironment.prototype, {
   },
 
   /**
-   * Gets or sets the finite non-negative directional-light intensity.
+   * 获取或设置有限非负方向光强度。
    *
    * @memberof SceneGISPlanarEnvironment.prototype
    * @type {number}
@@ -847,11 +837,11 @@ Object.defineProperties(SceneGISPlanarEnvironment.prototype, {
   },
 
   /**
-   * Gets or sets whether the procedural planar Sun is visible.
+   * 获取或设置是否显示程序平面太阳。
    * @memberof SceneGISPlanarEnvironment.prototype
    * @type {boolean}
    * @default false
-   * @exception {DeveloperError} The assigned value is not a boolean or conflicts with a visible native Sun.
+   * @exception {DeveloperError} 赋值不是布尔值，或与可见的原生 Sun 冲突。
    */
   showSun: {
     get: function () {
@@ -876,11 +866,12 @@ Object.defineProperties(SceneGISPlanarEnvironment.prototype, {
     },
   },
 
-  /** Gets or sets whether the procedural planar Moon is visible.
+  /**
+   *  获取或设置是否显示程序平面月亮。
    * @memberof SceneGISPlanarEnvironment.prototype
    * @type {boolean}
    * @default false
-   * @exception {DeveloperError} The assigned value is not a boolean or conflicts with a visible native Moon.
+   * @exception {DeveloperError} 赋值不是布尔值，或与可见的原生 Moon 冲突。
    */
   showMoon: {
     get: function () {
@@ -905,10 +896,11 @@ Object.defineProperties(SceneGISPlanarEnvironment.prototype, {
     },
   },
 
-  /** Gets or sets the procedural Sun disc diameter in CSS pixels.
+  /**
+   *  获取或设置程序太阳圆盘直径，单位为 CSS 像素。
    * @memberof SceneGISPlanarEnvironment.prototype
    * @type {number}
-   * @exception {DeveloperError} The assigned value is not finite and positive.
+   * @exception {DeveloperError} 赋值不是有限正值。
    */
   sunPixelSize: {
     get: function () {
@@ -924,10 +916,11 @@ Object.defineProperties(SceneGISPlanarEnvironment.prototype, {
     },
   },
 
-  /** Gets or sets the procedural Moon disc diameter in CSS pixels.
+  /**
+   *  获取或设置程序月盘直径，单位为 CSS 像素。
    * @memberof SceneGISPlanarEnvironment.prototype
    * @type {number}
-   * @exception {DeveloperError} The assigned value is not finite and positive.
+   * @exception {DeveloperError} 赋值不是有限正值。
    */
   moonPixelSize: {
     get: function () {
@@ -943,10 +936,11 @@ Object.defineProperties(SceneGISPlanarEnvironment.prototype, {
     },
   },
 
-  /** Gets or sets the finite procedural Moon color, cloned on access.
+  /**
+   *  获取或设置有限的程序月面颜色，读取时复制。
    * @memberof SceneGISPlanarEnvironment.prototype
    * @type {Color}
-   * @exception {DeveloperError} The assigned value is not a finite Color.
+   * @exception {DeveloperError} 赋值不是有限 Color。
    */
   moonColor: {
     get: function () {
@@ -962,11 +956,12 @@ Object.defineProperties(SceneGISPlanarEnvironment.prototype, {
     },
   },
 
-  /** Gets or sets whether the planar atmosphere is visible.
+  /**
+   *  获取或设置是否显示平面大气。
    * @memberof SceneGISPlanarEnvironment.prototype
    * @type {boolean}
    * @default false
-   * @exception {DeveloperError} The value is not boolean or conflicts with a visible native environment primitive.
+   * @exception {DeveloperError} 数值不是布尔值，或与可见的原生环境图元冲突。
    */
   showAtmosphere: {
     get: function () {
@@ -993,10 +988,11 @@ Object.defineProperties(SceneGISPlanarEnvironment.prototype, {
     },
   },
 
-  /** Gets or sets the finite planar atmosphere zenith color, cloned on access.
+  /**
+   *  获取或设置有限的平面大气天顶颜色，读取时复制。
    * @memberof SceneGISPlanarEnvironment.prototype
    * @type {Color}
-   * @exception {DeveloperError} The assigned value is not a finite Color.
+   * @exception {DeveloperError} 赋值不是有限 Color。
    */
   atmosphereZenithColor: {
     get: function () {
@@ -1014,10 +1010,11 @@ Object.defineProperties(SceneGISPlanarEnvironment.prototype, {
     },
   },
 
-  /** Gets or sets the finite planar atmosphere horizon color, cloned on access.
+  /**
+   *  获取或设置有限的平面大气地平线颜色，读取时复制。
    * @memberof SceneGISPlanarEnvironment.prototype
    * @type {Color}
-   * @exception {DeveloperError} The assigned value is not a finite Color.
+   * @exception {DeveloperError} 赋值不是有限 Color。
    */
   atmosphereHorizonColor: {
     get: function () {
@@ -1035,11 +1032,12 @@ Object.defineProperties(SceneGISPlanarEnvironment.prototype, {
     },
   },
 
-  /** Gets or sets the finite non-negative atmosphere strength.
+  /**
+   *  获取或设置有限非负的大气强度。
    * @memberof SceneGISPlanarEnvironment.prototype
    * @type {number}
    * @default 1.0
-   * @exception {DeveloperError} The assigned value is not finite and non-negative.
+   * @exception {DeveloperError} 赋值不是有限非负值。
    */
   atmosphereIntensity: {
     get: function () {
@@ -1057,11 +1055,12 @@ Object.defineProperties(SceneGISPlanarEnvironment.prototype, {
     },
   },
 
-  /** Gets or sets the finite positive atmosphere height-fade scale in meters.
+  /**
+   *  获取或设置有限正大气高度衰减尺度，单位为米。
    * @memberof SceneGISPlanarEnvironment.prototype
    * @type {number}
    * @default 1000000.0
-   * @exception {DeveloperError} The assigned value is not finite and positive.
+   * @exception {DeveloperError} 赋值不是有限正值。
    */
   atmosphereFadeHeight: {
     get: function () {
@@ -1079,10 +1078,11 @@ Object.defineProperties(SceneGISPlanarEnvironment.prototype, {
     },
   },
 
-  /** Gets or sets the live caller-owned fixed-axis planar sky box.
+  /**
+   *  获取或设置调用方所有、存活的固定轴平面天空盒。
    * @memberof SceneGISPlanarEnvironment.prototype
    * @type {SceneGISPlanarSkyBox|undefined}
-   * @exception {DeveloperError} The assigned value is not an undestroyed SceneGISPlanarSkyBox or conflicts with a visible native environment primitive.
+   * @exception {DeveloperError} 赋值不是未销毁的 SceneGISPlanarSkyBox，或与可见原生环境图元冲突。
    */
   skyBox: {
     get: function () {
@@ -1110,7 +1110,7 @@ Object.defineProperties(SceneGISPlanarEnvironment.prototype, {
   },
 
   /**
-   * Gets or sets whether this controller owns planar scene-light authority.
+   * 获取或设置此控制器是否拥有平面场景光源控制权。
    *
    * @memberof SceneGISPlanarEnvironment.prototype
    * @type {boolean}
@@ -1152,11 +1152,10 @@ Object.defineProperties(SceneGISPlanarEnvironment.prototype, {
 });
 
 /**
- * Records a controller-host connection and reserves this instance's world.
- * This callback does not change the Scene light.
+ * 记录控制器宿主连接并预留此实例的 World，此回调不修改 Scene 光源。
  *
- * @param {HTMLElement} element The element containing the Scene.
- * @exception {DeveloperError} The connection or world registry is invalid.
+ * @param {HTMLElement} element 包含 Scene 的元素。
+ * @exception {DeveloperError} 连接或世界注册状态无效。
  */
 SceneGISPlanarEnvironment.prototype.connectedCallback = function (element) {
   validateLiveWorld(this._world);
@@ -1180,10 +1179,10 @@ SceneGISPlanarEnvironment.prototype.connectedCallback = function (element) {
 };
 
 /**
- * Releases light authority and the world registry for this host connection.
+ * 释放此宿主连接的光源控制权与世界注册。
  *
- * @param {HTMLElement} element The element containing the Scene.
- * @exception {DeveloperError} The element does not match the connection.
+ * @param {HTMLElement} element 包含 Scene 的元素。
+ * @exception {DeveloperError} 元素与连接不匹配。
  */
 SceneGISPlanarEnvironment.prototype.disconnectedCallback = function (element) {
   if (!defined(this._element) || element !== this._element) {
@@ -1207,11 +1206,11 @@ SceneGISPlanarEnvironment.prototype.disconnectedCallback = function (element) {
 };
 
 /**
- * Validates the host Scene and acquires scene-wide directional-light authority.
+ * 验证宿主 Scene 并取得场景级方向光控制权。
  *
- * @param {Scene} scene The host Scene.
- * @param {JulianDate} time The current simulation time.
- * @exception {DeveloperError} The connection, registry, world, Scene, or mode is invalid.
+ * @param {Scene} scene 宿主 Scene。
+ * @param {JulianDate} time 当前模拟时间。
+ * @exception {DeveloperError} 连接、注册状态、World、Scene 或模式无效。
  */
 SceneGISPlanarEnvironment.prototype.firstUpdate = function (scene, time) {
   if (!defined(this._element)) {
@@ -1242,11 +1241,11 @@ SceneGISPlanarEnvironment.prototype.firstUpdate = function (scene, time) {
 };
 
 /**
- * Updates the automatic light while preserving an explicit caller light.
+ * 更新自动光源，同时保留调用方显式光源。
  *
- * @param {Scene} scene The host Scene.
- * @param {JulianDate} time The current simulation time.
- * @exception {DeveloperError} The connection, registry, world, Scene, or mode is invalid.
+ * @param {Scene} scene 宿主 Scene。
+ * @param {JulianDate} time 当前模拟时间。
+ * @exception {DeveloperError} 连接、注册状态、World、Scene 或模式无效。
  */
 SceneGISPlanarEnvironment.prototype.update = function (scene, time) {
   if (!defined(this._element) || !defined(this._scene)) {

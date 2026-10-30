@@ -46,7 +46,9 @@ Source/SceneGIS/
 
 ## JSDoc 与错误处理
 
-- 公共 API 必须按 Cesium 现有风格提供完整英文 JSDoc，包括参数、返回值、异常、生命周期和必要示例。
+- SceneGIS 自有公共 API 必须按 Cesium 现有标签风格提供完整中文 JSDoc，
+  包括参数、返回值、异常、生命周期和必要示例；类型、标识符与示例代码保留英文。
+  原生 Cesium 注释保持英文。
 - 不暴露尚未稳定的实现细节。实验 API 必须明确标记并记录兼容性预期。
 - 使用 Cesium 现有的 `Check`、`DeveloperError`、`RuntimeError`、`defined` 等约定，不引入平行的错误体系。
 - 热路径避免无依据的逐帧分配、隐式状态和全局注册；必要开销必须有测量依据。

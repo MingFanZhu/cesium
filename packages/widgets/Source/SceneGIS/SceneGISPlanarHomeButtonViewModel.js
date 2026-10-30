@@ -7,18 +7,16 @@ import createCommand from "../createCommand.js";
 import knockout from "../ThirdParty/knockout.js";
 
 /**
- * The view model for {@link SceneGISPlanarHomeButton}.
+ * {@link SceneGISPlanarHomeButton} 的视图模型。
  *
  * @alias SceneGISPlanarHomeButtonViewModel
  * @constructor
  *
- * @param {Scene} scene The planar scene to control.
- * @param {SceneGISPlanarCameraController} planarCameraController The controller
- *        that owns planar navigation for the scene.
+ * @param {Scene} scene 要控制的平面场景。
+ * @param {SceneGISPlanarCameraController} planarCameraController 管理场景平面导航的控制器。
  *
- * @exception {DeveloperError} <code>scene</code> is required.
- * @exception {DeveloperError} <code>planarCameraController</code> must be a live
- *            {@link SceneGISPlanarCameraController} for <code>scene.world</code>.
+ * @exception {DeveloperError} 必须提供 <code>scene</code>。
+ * @exception {DeveloperError} <code>planarCameraController</code> 必须是与 <code>scene.world</code> 对应的存活 {@link SceneGISPlanarCameraController}。
  */
 function SceneGISPlanarHomeButtonViewModel(scene, planarCameraController) {
   //>>includeStart('debug', pragmas.debug);
@@ -45,7 +43,7 @@ function SceneGISPlanarHomeButtonViewModel(scene, planarCameraController) {
   });
 
   /**
-   * Gets or sets the tooltip. This property is observable.
+   * 获取或设置工具提示，此属性可观测。
    *
    * @type {string}
    */
@@ -56,7 +54,7 @@ function SceneGISPlanarHomeButtonViewModel(scene, planarCameraController) {
 
 Object.defineProperties(SceneGISPlanarHomeButtonViewModel.prototype, {
   /**
-   * Gets the planar scene to control.
+   * 获取要控制的平面场景。
    *
    * @memberof SceneGISPlanarHomeButtonViewModel.prototype
    * @type {Scene}
@@ -69,7 +67,7 @@ Object.defineProperties(SceneGISPlanarHomeButtonViewModel.prototype, {
   },
 
   /**
-   * Gets the planar camera controller.
+   * 获取平面相机控制器。
    *
    * @memberof SceneGISPlanarHomeButtonViewModel.prototype
    * @type {SceneGISPlanarCameraController}
@@ -82,7 +80,7 @@ Object.defineProperties(SceneGISPlanarHomeButtonViewModel.prototype, {
   },
 
   /**
-   * Gets the command that immediately restores the planar home view.
+   * 获取立即恢复平面初始视图的命令。
    *
    * @memberof SceneGISPlanarHomeButtonViewModel.prototype
    * @type {Command}

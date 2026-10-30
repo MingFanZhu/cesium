@@ -1619,6 +1619,11 @@ underwaterBoundaryByteLength 报告实际分配。预算不足报错，不简化
 
 ## 独立文档本地化
 
+当前语言与交付策略以 [ADR-0207](Decisions/ADR-0207-chinese-source-api-documentation.md) 为准：
+SceneGIS 自有公共 JSDoc 直接维护中文，原生 Cesium 注释保持英文。SceneGIS 发行仅交付中文
+页面树与元数据；原生英文说明通过独立词条层翻译，自有中文不再进入翻译词条与待译报告。
+运行时实现、原生构建入口、类型和符号标识保持不变。
+
 [ADR-0206](Decisions/ADR-0206-documentation-localization.md) 批准两个自有目录：
 `Documentation/i18n/**` 保存语言词条、术语和文档 UI 文案，`scripts/docs-i18n/**`
 保存通用 JSDoc 翻译合并、原文提取及测试工具。它们不属于引擎源码、workspace、

@@ -459,22 +459,20 @@ function normalizeUndergroundTangent(controller, scene) {
 }
 
 /**
- * A deterministic mouse camera controller for a {@link SceneGISPlanarWorld}.
- * The caller must disable the legacy controller before registering this
- * controller and must remove this controller before destroying its widget.
+ * 用于 {@link SceneGISPlanarWorld} 的确定性鼠标相机控制器。调用方在注册前必须禁用旧控制器，并在销毁 Widget 前移除此控制器。
  *
  * @alias SceneGISPlanarCameraController
  * @constructor
  * @implements Controller
  *
- * @param {object} options Object with the following properties:
- * @param {SceneGISPlanarWorld} options.world The live planar world to navigate.
- * @param {"surface"|"underground"} [options.navigationMode="surface"] The side-aware navigation profile.
- * @param {number} [options.minimumTerrainClearance=1.0] The minimum vertical distance, in meters, maintained above resident terrain in surface mode.
+ * @param {object} options 包含以下属性的对象：
+ * @param {SceneGISPlanarWorld} options.world 要导航的存活平面世界。
+ * @param {"surface"|"underground"} [options.navigationMode="surface"] 感知地表侧别的导航模式。
+ * @param {number} [options.minimumTerrainClearance=1.0] 地表模式下保持在驻留地形上方的最小竖直距离，单位为米。
  *
- * @exception {DeveloperError} <code>options.world</code> is missing, has the wrong type, or has been destroyed.
- * @exception {DeveloperError} <code>options.navigationMode</code> is not <code>"surface"</code> or <code>"underground"</code>.
- * @exception {DeveloperError} <code>options.minimumTerrainClearance</code> is not finite or is not greater than zero.
+ * @exception {DeveloperError} 缺少 <code>options.world</code>，或其类型错误或已销毁。
+ * @exception {DeveloperError} <code>options.navigationMode</code> 不是 <code>"surface"</code> 或 <code>"underground"</code>。
+ * @exception {DeveloperError} <code>options.minimumTerrainClearance</code> 非有限值或不大于零。
  *
  * @example
  * widget.scene.screenSpaceCameraController.enableInputs = false;
@@ -560,7 +558,7 @@ function SceneGISPlanarCameraController(options) {
 
 Object.defineProperties(SceneGISPlanarCameraController.prototype, {
   /**
-   * Gets the planar world navigated by this controller.
+   * 获取此控制器导航的平面世界。
    *
    * @memberof SceneGISPlanarCameraController.prototype
    * @type {SceneGISPlanarWorld}
@@ -572,12 +570,12 @@ Object.defineProperties(SceneGISPlanarCameraController.prototype, {
     },
   },
   /**
-   * Gets or sets the side-aware navigation profile.
+   * 获取或设置感知地表侧别的导航模式。
    *
    * @memberof SceneGISPlanarCameraController.prototype
    * @type {"surface"|"underground"}
    * @default "surface"
-   * @exception {DeveloperError} The assigned value is not <code>"surface"</code> or <code>"underground"</code>.
+   * @exception {DeveloperError} 赋值不是 <code>"surface"</code> 或 <code>"underground"</code>。
    */
   navigationMode: {
     get: function () {
@@ -593,13 +591,12 @@ Object.defineProperties(SceneGISPlanarCameraController.prototype, {
     },
   },
   /**
-   * Gets or sets the minimum vertical distance maintained above resident terrain in surface mode.
-   * Assigning this property does not move the Camera; the new value is applied on the next controller update.
+   * 获取或设置地表模式下与驻留地形保持的最小竖直距离。赋值不立即移动 Camera，新值在下一控制器更新时应用。
    *
    * @memberof SceneGISPlanarCameraController.prototype
    * @type {number}
    * @default 1.0
-   * @exception {DeveloperError} The assigned value is not finite or is not greater than zero.
+   * @exception {DeveloperError} 赋值非有限值或不大于零。
    */
   minimumTerrainClearance: {
     get: function () {
@@ -614,11 +611,11 @@ Object.defineProperties(SceneGISPlanarCameraController.prototype, {
     },
   },
   /**
-   * Gets or sets whether the controller is enabled.
+   * 获取或设置是否启用控制器。
    *
    * @memberof SceneGISPlanarCameraController.prototype
    * @type {boolean}
-   * @exception {DeveloperError} The assigned value is not a boolean.
+   * @exception {DeveloperError} 赋值不是布尔值。
    */
   enabled: {
     get: function () {
@@ -634,11 +631,11 @@ Object.defineProperties(SceneGISPlanarCameraController.prototype, {
     },
   },
   /**
-   * Gets or sets whether left-drag panning is enabled.
+   * 获取或设置是否启用左键拖动平移。
    *
    * @memberof SceneGISPlanarCameraController.prototype
    * @type {boolean}
-   * @exception {DeveloperError} The assigned value is not a boolean.
+   * @exception {DeveloperError} 赋值不是布尔值。
    */
   enablePan: {
     get: function () {
@@ -655,11 +652,11 @@ Object.defineProperties(SceneGISPlanarCameraController.prototype, {
     },
   },
   /**
-   * Gets or sets whether middle-drag rotation is enabled.
+   * 获取或设置是否启用中键拖动旋转。
    *
    * @memberof SceneGISPlanarCameraController.prototype
    * @type {boolean}
-   * @exception {DeveloperError} The assigned value is not a boolean.
+   * @exception {DeveloperError} 赋值不是布尔值。
    */
   enableRotate: {
     get: function () {
@@ -676,11 +673,11 @@ Object.defineProperties(SceneGISPlanarCameraController.prototype, {
     },
   },
   /**
-   * Gets or sets whether wheel zoom is enabled.
+   * 获取或设置是否启用滚轮缩放。
    *
    * @memberof SceneGISPlanarCameraController.prototype
    * @type {boolean}
-   * @exception {DeveloperError} The assigned value is not a boolean.
+   * @exception {DeveloperError} 赋值不是布尔值。
    */
   enableZoom: {
     get: function () {
@@ -696,12 +693,12 @@ Object.defineProperties(SceneGISPlanarCameraController.prototype, {
     },
   },
   /**
-   * Gets or sets the multiplicative padding used by {@link SceneGISPlanarCameraController#viewHome}.
+   * 获取或设置 {@link SceneGISPlanarCameraController#viewHome} 使用的乘法边距。
    *
    * @memberof SceneGISPlanarCameraController.prototype
    * @type {number}
    * @default 1.05
-   * @exception {DeveloperError} The assigned value is not finite or is less than 1.0.
+   * @exception {DeveloperError} 赋值非有限值或小于 1.0。
    */
   homePadding: {
     get: function () {
@@ -717,12 +714,12 @@ Object.defineProperties(SceneGISPlanarCameraController.prototype, {
     },
   },
   /**
-   * Gets or sets the rotation inertia coefficient. Zero disables inertia.
+   * 获取或设置旋转惯性系数，0 禁用惯性。
    *
    * @memberof SceneGISPlanarCameraController.prototype
    * @type {number}
    * @default 0.9
-   * @exception {DeveloperError} The assigned value is not finite or is outside [0.0, 1.0).
+   * @exception {DeveloperError} 赋值非有限值或不在 [0.0,1.0) 内。
    */
   inertiaSpin: {
     get: function () {
@@ -737,12 +734,12 @@ Object.defineProperties(SceneGISPlanarCameraController.prototype, {
     },
   },
   /**
-   * Gets or sets the pan inertia coefficient. Zero disables inertia.
+   * 获取或设置平移惯性系数，0 禁用惯性。
    *
    * @memberof SceneGISPlanarCameraController.prototype
    * @type {number}
    * @default 0.9
-   * @exception {DeveloperError} The assigned value is not finite or is outside [0.0, 1.0).
+   * @exception {DeveloperError} 赋值非有限值或不在 [0.0,1.0) 内。
    */
   inertiaTranslate: {
     get: function () {
@@ -757,12 +754,12 @@ Object.defineProperties(SceneGISPlanarCameraController.prototype, {
     },
   },
   /**
-   * Gets or sets the wheel zoom inertia coefficient. Zero disables inertia.
+   * 获取或设置滚轮缩放惯性系数，0 禁用惯性。
    *
    * @memberof SceneGISPlanarCameraController.prototype
    * @type {number}
    * @default 0.8
-   * @exception {DeveloperError} The assigned value is not finite or is outside [0.0, 1.0).
+   * @exception {DeveloperError} 赋值非有限值或不在 [0.0,1.0) 内。
    */
   inertiaZoom: {
     get: function () {
@@ -879,10 +876,10 @@ SceneGISPlanarCameraController.prototype._validateScene = function (scene) {
 };
 
 /**
- * Connects this controller to the element used for mouse input.
+ * 将控制器连接到鼠标输入元素。
  *
- * @param {HTMLElement} element The element containing the Scene.
- * @exception {DeveloperError} <code>element</code> is missing or this instance is already connected.
+ * @param {HTMLElement} element 包含 Scene 的元素。
+ * @exception {DeveloperError} 缺少 <code>element</code>，或此实例已连接。
  */
 SceneGISPlanarCameraController.prototype.connectedCallback = function (
   element,
@@ -904,9 +901,9 @@ SceneGISPlanarCameraController.prototype.connectedCallback = function (
 };
 
 /**
- * Disconnects this controller and destroys its input aggregator.
+ * 断开控制器并销毁输入聚合器。
  *
- * @param {HTMLElement} element The element containing the Scene.
+ * @param {HTMLElement} element 包含 Scene 的元素。
  */
 SceneGISPlanarCameraController.prototype.disconnectedCallback = function (
   element,
@@ -1005,11 +1002,11 @@ SceneGISPlanarCameraController.prototype._syncRig = function (
 };
 
 /**
- * Validates the registered Scene and synchronizes the initial planar rig.
+ * 验证已注册 Scene，并同步初始平面相机架。
  *
- * @param {Scene} scene The host Scene.
- * @param {JulianDate} time The current simulation time.
- * @exception {DeveloperError} The controller is disconnected, the Scene/world/mode/frustum is invalid, or legacy input is enabled.
+ * @param {Scene} scene 宿主 Scene。
+ * @param {JulianDate} time 当前模拟时间。
+ * @exception {DeveloperError} 控制器未连接、Scene/World/模式/视锥无效，或旧输入控制器仍启用。
  */
 SceneGISPlanarCameraController.prototype.firstUpdate = function (scene, time) {
   if (!defined(this._aggregator)) {
@@ -1335,12 +1332,11 @@ SceneGISPlanarCameraController.prototype._zoom = function (
 };
 
 /**
- * Applies one deterministic frame in which middle-drag takes priority over
- * left-drag and wheel input is processed last.
+ * 执行一个确定性帧，中键拖动优先于左键，滚轮输入最后处理。
  *
- * @param {Scene} scene The host Scene.
- * @param {JulianDate} time The current simulation time.
- * @exception {DeveloperError} The controller is disconnected, the Scene/world/mode/frustum is invalid, or legacy input is enabled.
+ * @param {Scene} scene 宿主 Scene。
+ * @param {JulianDate} time 当前模拟时间。
+ * @exception {DeveloperError} 控制器未连接、Scene/World/模式/视锥无效，或旧输入控制器仍启用。
  */
 SceneGISPlanarCameraController.prototype.update = function (scene, time) {
   if (
@@ -1553,11 +1549,11 @@ SceneGISPlanarCameraController._getRegisteredForScene = function (scene) {
 };
 
 /**
- * Sets an immediate north-up, nadir view that contains the padded world extent.
+ * 立即设置北向朝上、垂直俯视的初始视图，包含加边距后的世界范围。
  *
- * @param {Scene} scene The live SCENE3D scene whose primary world is this controller's world.
- * @exception {DeveloperError} The scene, world, legacy input state, camera pose, or frustum is invalid.
- * @exception {DeveloperError} The existing near/far range cannot contain the fitted home view.
+ * @param {Scene} scene 存活的 SCENE3D Scene，其主世界须为此控制器的世界。
+ * @exception {DeveloperError} Scene、World、旧输入状态、相机姿态或视锥无效。
+ * @exception {DeveloperError} 已有 near/far 范围无法容纳拟合后的初始视图。
  */
 SceneGISPlanarCameraController.prototype.viewHome = function (scene) {
   this._validateScene(scene);

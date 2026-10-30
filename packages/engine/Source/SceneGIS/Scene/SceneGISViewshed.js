@@ -6,42 +6,32 @@ import observerShader from "../../Shaders/SceneGIS/Viewshed/SceneGISObserverVisi
 import fragmentShader from "../../Shaders/SceneGIS/Viewshed/SceneGISViewshed.js";
 
 /**
- * Directed, depth-map viewshed bound to one Scene and World. Add it to that
- * Scene's postProcessStages; the collection then owns its destruction.
- * Position, direction and up use the World's native coordinates (ECEF for a
- * Globe, Cartesian metres for a planar World), without implicit projection.
+ * 绑定单个 Scene 与 World、基于方向深度图的通视分析。加入对应 Scene 的 postProcessStages 后由集合负责销毁。position、direction 和 up 使用 World 原生坐标：Globe 为 ECEF，平面为米制笛卡尔坐标，不隐式投影。
  *
- * Opaque and alpha-masked explicit sources and optional World terrain occlude.
- * Terrain skirts, annotations, classification and transparent media do not.
- * Tile selection uses the observer view, sharing loaded geometry with the Scene.
- * Pending or failed coverage leaves the display unchanged. analysisReady refers
- * to observer coverage; inherited ready only describes post-process resources.
- * Resolution and source LOD bound accuracy; this is not an exact geometry query.
- * Camera-scaled models (minimumPixelSize), frozen tile traversal and stereo
- * rendering are not supported. This initial analysis API is experimental.
+ * 不透明和 alpha 掩码的显式源，以及可选 World 地形可遮挡；地形裙边、注记、分类与透明介质不遮挡。瓦片选择使用观察者视图，与 Scene 共享已加载几何。覆盖等待或失败时保持原画面。analysisReady 表示观察者覆盖，继承的 ready 仅表示后处理资源。精度受分辨率和源 LOD 限制，不是精确几何查询。不支持随相机缩放的模型（minimumPixelSize）、冻结瓦片遍历或立体渲染。此首版分析 API 为实验性。
  *
  * @alias SceneGISViewshed
  * @extends PostProcessStage
- * @param {object} options Configuration.
- * @param {Scene} options.scene The live SCENE3D Scene.
- * @param {Globe|SceneGISWorld} options.world The exact World attached to scene.
- * @param {Cartesian3} options.position Observer position in World metres.
- * @param {Cartesian3} options.direction Observer forward direction.
- * @param {Cartesian3} options.up Observer up direction, not parallel to direction.
- * @param {number} [options.distance=1000] Maximum radial distance in metres.
- * @param {number} [options.near=0.5] Near clipping distance in metres.
- * @param {number} [options.horizontalAngle=Math.PI/2] Horizontal angle in radians, between 0 and PI.
- * @param {number} [options.verticalAngle=Math.PI/3] Vertical angle in radians, between 0 and PI.
- * @param {number} [options.resolution=1024] Square observer depth-map size.
- * @param {Array<Model|Cesium3DTileset|SceneGISS3MLayer|Primitive|SceneGISPlanarPrimitive>} [options.sources=[]] Explicit occluders in scene.primitives, borrowed.
- * @param {boolean} [options.terrain=true] Include the bound World's surface.
- * @param {number} [options.depthBias=0.1] Observer depth comparison tolerance in metres.
- * @param {Color} [options.visibleColor=Color.GREEN] Visible overlay color and opacity.
- * @param {Color} [options.hiddenColor=Color.RED] Occluded overlay color and opacity.
- * @param {boolean} [options.enabled=true] Whether to select, capture and display.
- * @param {boolean} [options.showFrustum=false] Show the observer range outline independently of enabled.
- * @param {string} [options.name] Unique native post-process stage name.
- * @exception {DeveloperError} Invalid geometry, unsupported source or Scene / World mismatch.
+ * @param {object} options 配置。
+ * @param {Scene} options.scene 存活的 SCENE3D Scene。
+ * @param {Globe|SceneGISWorld} options.world 挂载到 scene 的精确 World。
+ * @param {Cartesian3} options.position 观察者位置，单位为 World 米。
+ * @param {Cartesian3} options.direction 观察者前向方向。
+ * @param {Cartesian3} options.up 观察者向上方向，不得与 direction 平行。
+ * @param {number} [options.distance=1000] 最大径向距离，单位为米。
+ * @param {number} [options.near=0.5] 近裁剪距离，单位为米。
+ * @param {number} [options.horizontalAngle=Math.PI/2] 水平角，单位为弧度，介于 0 和 PI 之间。
+ * @param {number} [options.verticalAngle=Math.PI/3] 竖直角，单位为弧度，介于 0 和 PI 之间。
+ * @param {number} [options.resolution=1024] 正方形观察者深度图尺寸。
+ * @param {Array<Model|Cesium3DTileset|SceneGISS3MLayer|Primitive|SceneGISPlanarPrimitive>} [options.sources=[]] 借用 scene.primitives 中的显式遮挡物。
+ * @param {boolean} [options.terrain=true] 包含绑定 World 的表面。
+ * @param {number} [options.depthBias=0.1] 观察者深度比较容差，单位为米。
+ * @param {Color} [options.visibleColor=Color.GREEN] 可见覆盖色与不透明度。
+ * @param {Color} [options.hiddenColor=Color.RED] 被遮挡覆盖色与不透明度。
+ * @param {boolean} [options.enabled=true] 是否选择、捕获并显示。
+ * @param {boolean} [options.showFrustum=false] 独立于 enabled 显示观察者范围轮廓。
+ * @param {string} [options.name] 唯一的原生后处理阶段名称。
+ * @exception {DeveloperError} 几何无效、源不支持或 Scene/World 不匹配。
  * @example
  * const analysis = scene.postProcessStages.add(new Cesium.SceneGISViewshed({
  *   scene, world: scene.world, position, direction, up,
@@ -74,7 +64,8 @@ class SceneGISViewshed extends PostProcessStage {
     (state.scene._sceneGISObservers ??= new Set()).add(this);
   }
 
-  /** Exact Scene owning this analysis.
+  /**
+   *  拥有此分析的精确 Scene。
    * @type {Scene}
    * @readonly
    */
@@ -82,7 +73,8 @@ class SceneGISViewshed extends PostProcessStage {
     return this._observer.scene;
   }
 
-  /** Exact World bound at construction.
+  /**
+   *  构造时绑定的精确 World。
    * @type {Globe|SceneGISWorld}
    * @readonly
    */
@@ -91,10 +83,7 @@ class SceneGISViewshed extends PostProcessStage {
   }
 
   /**
-   * Shows a yellow outline of the angular, near-plane and radial range boundaries.
-   * Independent of enabled and coverage readiness. The outline is depth-tested,
-   * does not write depth, cast shadows, occlude analysis or participate in picking.
-   * Hidden geometry is retained for reuse and released when this stage is destroyed.
+   * 显示角度、近平面及径向范围边界的黄色轮廓，独立于 enabled 和覆盖就绪状态。轮廓进行深度测试，不写深度、不投影、不遮挡分析、不参与拾取。隐藏时保留几何复用，阶段销毁时释放。
    * @type {boolean}
    * @default false
    */
@@ -110,7 +99,8 @@ class SceneGISViewshed extends PostProcessStage {
     this._observer.scene.requestRender();
   }
 
-  /** Whether the current observer depth has complete selected source coverage.
+  /**
+   *  当前观察者深度是否包含完整选中源覆盖。
    * @type {boolean}
    * @readonly
    */
@@ -118,7 +108,8 @@ class SceneGISViewshed extends PostProcessStage {
     return this.enabled && this._observer.analysisReady;
   }
 
-  /** One of loading, ready, disabled or error.
+  /**
+   *  状态为 loading、ready、disabled 或 error。
    * @type {string}
    * @readonly
    */
@@ -126,7 +117,8 @@ class SceneGISViewshed extends PostProcessStage {
     return this.enabled ? this._observer.status : "disabled";
   }
 
-  /** Most recent coverage or capture failure; undefined after a successful capture.
+  /**
+   *  最近覆盖或捕获失败，成功捕获后为 undefined。
    * @type {Error|undefined}
    * @readonly
    */
@@ -134,7 +126,8 @@ class SceneGISViewshed extends PostProcessStage {
     return this._observer.error;
   }
 
-  /** Raised with a coverage or capture error. Invalid bindings still throw.
+  /**
+   *  覆盖或捕获错误时触发，无效绑定仍抛异常。
    * @type {Event}
    * @readonly
    */
@@ -142,7 +135,8 @@ class SceneGISViewshed extends PostProcessStage {
     return this._observer.errorEvent;
   }
 
-  /** Snapshot of the most recent capture draw calls and CPU submission time.
+  /**
+   *  最近捕获绘制调用与 CPU 提交时间的快照。
    * @type {object}
    * @readonly
    */
@@ -151,16 +145,15 @@ class SceneGISViewshed extends PostProcessStage {
   }
 
   /**
-   * Atomically changes the observer. Omitted scalar values retain their value.
-   * A new pose requires position, direction and up together.
-   * @param {object} options Observer configuration.
-   * @param {Cartesian3} options.position World position.
-   * @param {Cartesian3} options.direction Forward direction.
-   * @param {Cartesian3} options.up Up direction.
-   * @param {number} [options.distance] Maximum radial distance in metres.
-   * @param {number} [options.near] Near clipping distance in metres.
-   * @param {number} [options.horizontalAngle] Horizontal angle in radians.
-   * @param {number} [options.verticalAngle] Vertical angle in radians.
+   * 原子修改观察者，省略的标量保留原值；新姿态须同时提供 position、direction、up。
+   * @param {object} options 观察者配置。
+   * @param {Cartesian3} options.position 世界位置。
+   * @param {Cartesian3} options.direction 前向方向。
+   * @param {Cartesian3} options.up 向上方向。
+   * @param {number} [options.distance] 最大径向距离，单位为米。
+   * @param {number} [options.near] 近裁剪距离，单位为米。
+   * @param {number} [options.horizontalAngle] 水平角，单位为弧度。
+   * @param {number} [options.verticalAngle] 竖直角，单位为弧度。
    */
   setView(options) {
     Observer.setView(this._observer, options);
@@ -177,7 +170,8 @@ class SceneGISViewshed extends PostProcessStage {
     super.update(context, useLogDepth);
   }
 
-  /** Releases analysis targets and unregisters this observer. Sources are borrowed.
+  /**
+   *  释放分析目标并注销观察者，源仅借用。
    * @returns {undefined}
    */
   destroy() {

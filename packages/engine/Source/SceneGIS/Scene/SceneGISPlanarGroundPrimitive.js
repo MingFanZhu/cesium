@@ -452,28 +452,21 @@ function preserveCurrentAttributes(primitive) {
 }
 
 /**
- * Renders planar polylines or non-extruded polygons clamped to the current planar surface.
- * A static batch shares one native Primitive and its vertex buffers. Lines use one command per
- * vertex array with fragment clipping against surface depth. Areas with disjoint XY extents share
- * a stencil/color pair, including for picking. Overlapping areas retain input order; compatible
- * opaque color ranges can also coalesce within the stencil counter capacity.
- * Material batches share one Fabric material and merge only spatially compatible ranges.
- * Area picking tests footprints, including zero-alpha pixels; area Fabric must use alpha
- * instead of discard for stencil cleanup. Line picking follows material alpha/discard coverage.
- * Line Fabric uses cumulative XY st.s and pixel-width st.t; native Arrow and Dash are supported.
+ * 绘制贴合当前平面地表的折线或非挤出多边形。静态批次共享一个原生 Primitive 及其顶点缓冲。线每个顶点数组使用一条命令，并根据地表深度裁剪片元；XY 范围不相交的面共用一对模板/颜色命令，拾取也如此。重叠面保留输入顺序；在模板计数容量内，兼容的不透明颜色范围也可合并。
+ * 材质批次共享一个 Fabric 材质，仅合并空间兼容范围。面拾取按足迹判断，包括 alpha 为零的像素；面 Fabric 须用 alpha 而非 discard，以便清理模板。线拾取遵循材质的 alpha/discard 覆盖。线 Fabric 的 st.s 为累计 XY 距离，st.t 为像素宽度坐标，支持原生 Arrow 和 Dash。
  *
  * @alias SceneGISPlanarGroundPrimitive
  * @constructor
- * @param {object} options Object with the following properties:
- * @param {SceneGISPlanarWorld} options.world The live caller-owned planar world.
- * @param {SceneGISPlanarPolylineGeometry|SceneGISPlanarPolygonGeometry} [options.geometry] The source footprint, required unless geometryInstances is supplied. Source Z values are ignored.
- * @param {SceneGISPlanarGroundPrimitive.GeometryInstanceOptions[]} [options.geometryInstances] A non-empty static batch of only polylines or only polygons. Mutually exclusive with geometry, id, and attributes. Topology changes require a new batch.
- * @param {PolylineMaterialAppearance|PolylineColorAppearance|PerInstanceColorAppearance|MaterialAppearance} options.appearance The compatible caller-owned appearance. Area Fabric uses depth-reconstructed XY coordinates, rotated by geometry.stRotation; caller owns the material. Custom outer shaders are not used.
- * @param {*} [options.id] The required non-null identifier for a single geometry.
- * @param {Object.<string, SceneGISPlanarPrimitive.InstanceAttribute>} [options.attributes] Instance attributes.
- * @param {boolean} [options.show=true] Whether the primitive is shown.
- * @param {boolean} [options.allowPicking=true] Whether picking resources are created.
- * @exception {DeveloperError} The world, geometry, appearance, id, attributes, or boolean options are invalid.
+ * @param {object} options 包含以下属性的对象：
+ * @param {SceneGISPlanarWorld} options.world 调用方所有、存活的平面世界。
+ * @param {SceneGISPlanarPolylineGeometry|SceneGISPlanarPolygonGeometry} [options.geometry] 源足迹；未提供 geometryInstances 时必需。忽略源 Z 值。
+ * @param {SceneGISPlanarGroundPrimitive.GeometryInstanceOptions[]} [options.geometryInstances] 仅包含折线或仅包含多边形的非空静态批次，与 geometry、id、attributes 互斥；拓扑变化须创建新批次。
+ * @param {PolylineMaterialAppearance|PolylineColorAppearance|PerInstanceColorAppearance|MaterialAppearance} options.appearance 调用方所有的兼容外观。面 Fabric 使用深度重建的 XY 坐标，并按 geometry.stRotation 旋转；材质归调用方所有。不使用自定义外层着色器。
+ * @param {*} [options.id] 单几何必需的非空标识。
+ * @param {Object.<string, SceneGISPlanarPrimitive.InstanceAttribute>} [options.attributes] 实例属性。
+ * @param {boolean} [options.show=true] 是否显示图元。
+ * @param {boolean} [options.allowPicking=true] 是否创建拾取资源。
+ * @exception {DeveloperError} World、几何、外观、id、属性或布尔选项无效。
  */
 function SceneGISPlanarGroundPrimitive(options) {
   options = options ?? {};
@@ -507,12 +500,12 @@ function SceneGISPlanarGroundPrimitive(options) {
 }
 
 /**
- * A static ground footprint instance. Inputs are copied; geometry and id remain caller-owned.
+ * 静态贴地足迹实例。输入会复制，geometry 和 id 仍归调用方所有。
  *
  * @typedef {object} SceneGISPlanarGroundPrimitive.GeometryInstanceOptions
- * @property {SceneGISPlanarPolylineGeometry|SceneGISPlanarPolygonGeometry} geometry The source footprint. Only non-extruded polygons are accepted. Source Z is ignored.
- * @property {*} id A unique, non-null business identifier within the batch.
- * @property {Object.<string, SceneGISPlanarPrimitive.InstanceAttribute>} [attributes] Native per-instance attributes with an identical schema across the batch.
+ * @property {SceneGISPlanarPolylineGeometry|SceneGISPlanarPolygonGeometry} geometry 源足迹，仅接受非挤出多边形，忽略源 Z。
+ * @property {*} id 批次内唯一且非空的业务标识。
+ * @property {Object.<string, SceneGISPlanarPrimitive.InstanceAttribute>} [attributes] 原生逐实例属性，批次内须具有相同结构。
  */
 
 Object.defineProperties(SceneGISPlanarGroundPrimitive.prototype, {
@@ -604,11 +597,10 @@ Object.defineProperties(SceneGISPlanarGroundPrimitive.prototype, {
 });
 
 /**
- * Returns whether the scene provides the stencil buffer and depth textures required
- * to support both planar ground polygons and polylines.
+ * 检查场景是否提供同时支持平面贴地多边形和折线所需的模板缓冲与深度纹理。
  *
- * @param {Scene} scene The scene to test.
- * @returns {boolean} Whether planar ground rendering is supported.
+ * @param {Scene} scene 要测试的场景。
+ * @returns {boolean} 是否支持平面贴地渲染。
  */
 SceneGISPlanarGroundPrimitive.isSupported = function (scene) {
   return (
@@ -719,11 +711,11 @@ SceneGISPlanarGroundPrimitive.prototype.update = function (frameState) {
 };
 
 /**
- * Gets mutable native instance attributes. Assign a property such as color or show to update the batch.
+ * 获取可修改的原生实例属性。为 color、show 等属性赋值可更新批次。
  *
- * @param {*} [id] Required for a batch; defaults to this.id for a single geometry.
- * @returns {object|undefined} The attributes, or undefined when the id is not found.
- * @exception {DeveloperError} The primitive is destroyed, not ready, or a batch id is missing.
+ * @param {*} [id] 批次必需；单几何默认使用 this.id。
+ * @returns {object|undefined} 实例属性；未找到 id 时返回 undefined。
+ * @exception {DeveloperError} 图元已销毁、未就绪，或缺少批次 id。
  */
 SceneGISPlanarGroundPrimitive.prototype.getGeometryInstanceAttributes =
   function (id) {
@@ -738,15 +730,12 @@ SceneGISPlanarGroundPrimitive.prototype.getGeometryInstanceAttributes =
   };
 
 /**
- * Gets the presentation bounding sphere for selection and UI placement. Its
- * center uses the last successful footprint and the resident terrain height,
- * or zero when no resident height is available. Command culling continues to
- * use the private shadow-volume bounds.
+ * 获取用于选择和 UI 放置的显示包围球。中心使用最近成功足迹及驻留地形高度；无驻留高度时为零。命令剔除仍使用私有阴影体包围体。
  *
- * @param {BoundingSphere} result The object onto which to store the result.
- * @param {*} [id] An optional batch instance id. Omit to bound the entire primitive.
- * @returns {BoundingSphere} The modified result parameter.
- * @exception {DeveloperError} The result is missing, the id is unknown, or the primitive is destroyed.
+ * @param {BoundingSphere} result 用于存储结果的对象。
+ * @param {*} [id] 可选批次实例 id，省略时获取整个图元的包围体。
+ * @returns {BoundingSphere} 已写入结果的 result 参数。
+ * @exception {DeveloperError} 缺少 result、id 未知或图元已销毁。
  */
 SceneGISPlanarGroundPrimitive.prototype.getBoundingSphere = function (
   result,

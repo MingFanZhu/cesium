@@ -104,21 +104,18 @@ function checkAddress(name, value) {
 }
 
 /**
- * Terrain data for one planar tile represented by a rectangular heightmap.
- * Samples are stored row-major from north to south and west to east, including
- * all tile edges. The constructor takes ownership of the input buffer and
- * water mask; callers must not mutate them after successful construction.
+ * 以矩形高度图表示的单个平面地形瓦片数据。样本按从北到南、从西到东的行主序存储，包含全部瓦片边界。构造函数接管输入缓冲和水面掩码，成功构造后调用方不得修改它们。
  *
  * @alias SceneGISPlanarHeightmapTerrainData
  * @constructor
  *
- * @param {SceneGISPlanarHeightmapTerrainData.ConstructorOptions} options The construction options.
+ * @param {SceneGISPlanarHeightmapTerrainData.ConstructorOptions} options 构造选项。
  *
- * @exception {DeveloperError} The buffer is not a non-BigInt numeric TypedArray.
- * @exception {DeveloperError} Width or height is not a safe integer of at least two.
- * @exception {DeveloperError} The structure is invalid or does not fit the buffer.
- * @exception {DeveloperError} A decoded height is not finite.
- * @exception {DeveloperError} The child tile mask or metadata is invalid.
+ * @exception {DeveloperError} buffer 不是非 BigInt 的数值 TypedArray。
+ * @exception {DeveloperError} 宽或高不是至少为 2 的安全整数。
+ * @exception {DeveloperError} 编码结构无效或不适合缓冲区。
+ * @exception {DeveloperError} 解码高度非有限值。
+ * @exception {DeveloperError} 子瓦片掩码或元数据无效。
  */
 function SceneGISPlanarHeightmapTerrainData(options) {
   options = options ?? Frozen.EMPTY_OBJECT;
@@ -202,7 +199,7 @@ function SceneGISPlanarHeightmapTerrainData(options) {
 
 Object.defineProperties(SceneGISPlanarHeightmapTerrainData.prototype, {
   /**
-   * Gets the sample width.
+   * 获取采样宽度。
    * @memberof SceneGISPlanarHeightmapTerrainData.prototype
    * @type {number}
    * @readonly
@@ -214,7 +211,7 @@ Object.defineProperties(SceneGISPlanarHeightmapTerrainData.prototype, {
   },
 
   /**
-   * Gets the sample height.
+   * 获取采样高度。
    * @memberof SceneGISPlanarHeightmapTerrainData.prototype
    * @type {number}
    * @readonly
@@ -226,7 +223,7 @@ Object.defineProperties(SceneGISPlanarHeightmapTerrainData.prototype, {
   },
 
   /**
-   * Gets the minimum decoded height in meters.
+   * 获取最小解码高度，单位为米。
    * @memberof SceneGISPlanarHeightmapTerrainData.prototype
    * @type {number}
    * @readonly
@@ -238,7 +235,7 @@ Object.defineProperties(SceneGISPlanarHeightmapTerrainData.prototype, {
   },
 
   /**
-   * Gets the maximum decoded height in meters.
+   * 获取最大解码高度，单位为米。
    * @memberof SceneGISPlanarHeightmapTerrainData.prototype
    * @type {number}
    * @readonly
@@ -250,7 +247,7 @@ Object.defineProperties(SceneGISPlanarHeightmapTerrainData.prototype, {
   },
 
   /**
-   * Gets the credits associated with this tile.
+   * 获取与此瓦片关联的署名。
    * @memberof SceneGISPlanarHeightmapTerrainData.prototype
    * @type {Credit[]|undefined}
    * @readonly
@@ -262,7 +259,7 @@ Object.defineProperties(SceneGISPlanarHeightmapTerrainData.prototype, {
   },
 
   /**
-   * Gets the water mask owned by this tile.
+   * 获取此瓦片所有的水面掩码。
    * @memberof SceneGISPlanarHeightmapTerrainData.prototype
    * @type {Uint8Array|undefined}
    * @readonly
@@ -274,7 +271,7 @@ Object.defineProperties(SceneGISPlanarHeightmapTerrainData.prototype, {
   },
 
   /**
-   * Gets whether this data was created by upsampling.
+   * 获取数据是否由上采样创建。
    * @memberof SceneGISPlanarHeightmapTerrainData.prototype
    * @type {boolean}
    * @readonly
@@ -371,15 +368,14 @@ SceneGISPlanarHeightmapTerrainData.prototype._createMeshTaskPayload = function (
 };
 
 /**
- * Interpolates height on the heightmap's fixed southwest-to-northeast
- * triangle split.
+ * 按高度图固定的西南到东北三角形对角线拆分进行高度插值。
  *
- * @param {SceneGISPlanarExtent} extent The tile extent represented by this data.
- * @param {number} x The X coordinate in meters.
- * @param {number} y The Y coordinate in meters.
- * @returns {number|undefined} The interpolated height in meters, or undefined when the finite position is outside the extent.
+ * @param {SceneGISPlanarExtent} extent 此数据表示的瓦片范围。
+ * @param {number} x X 坐标，单位为米。
+ * @param {number} y Y 坐标，单位为米。
+ * @returns {number|undefined} 插值高度，单位为米；有限位置在范围外时返回 undefined。
  *
- * @exception {DeveloperError} The extent is invalid or X/Y is not finite.
+ * @exception {DeveloperError} 范围无效，或 X/Y 非有限值。
  */
 SceneGISPlanarHeightmapTerrainData.prototype.interpolateHeight = function (
   extent,
@@ -444,16 +440,15 @@ SceneGISPlanarHeightmapTerrainData.prototype.interpolateHeight = function (
 };
 
 /**
- * Determines whether a direct child tile is available. Child mask bits are
- * southwest 1, southeast 2, northwest 4, and northeast 8.
+ * 判断直接子瓦片是否可用。子掩码位为西南 1、东南 2、西北 4、东北 8。
  *
- * @param {number} thisX The parent tile X coordinate.
- * @param {number} thisY The parent tile Y coordinate.
- * @param {number} childX The direct child tile X coordinate.
- * @param {number} childY The direct child tile Y coordinate.
- * @returns {boolean} True if the child is available; otherwise, false.
+ * @param {number} thisX 父瓦片的 X 坐标。
+ * @param {number} thisY 父瓦片的 Y 坐标。
+ * @param {number} childX 直接子瓦片的 X 坐标。
+ * @param {number} childY 直接子瓦片的 Y 坐标。
+ * @returns {boolean} 子瓦片可用时为 true，否则为 false。
  *
- * @exception {DeveloperError} Any address is invalid or is not a direct child.
+ * @exception {DeveloperError} 任一地址无效或不是直接子瓦片。
  */
 SceneGISPlanarHeightmapTerrainData.prototype.isChildAvailable = function (
   thisX,
@@ -486,29 +481,29 @@ SceneGISPlanarHeightmapTerrainData.prototype.isChildAvailable = function (
 };
 
 /**
- * Initialization options for SceneGISPlanarHeightmapTerrainData.
+ * SceneGISPlanarHeightmapTerrainData 的初始化选项。
  *
  * @typedef {object} SceneGISPlanarHeightmapTerrainData.ConstructorOptions
- * @property {Int8Array|Uint8Array|Uint8ClampedArray|Int16Array|Uint16Array|Int32Array|Uint32Array|Float32Array|Float64Array} buffer The owned numeric height elements.
- * @property {number} width The sample width, at least two.
- * @property {number} height The sample height, at least two.
- * @property {number} [childTileMask=15] Direct child availability bits: southwest 1, southeast 2, northwest 4, northeast 8.
- * @property {Uint8Array} [waterMask] The owned water mask.
- * @property {SceneGISPlanarHeightmapTerrainData.Structure} [structure] The encoded height structure.
- * @property {boolean} [createdByUpsampling=false] Whether the data was created by upsampling.
- * @property {Credit[]} [credits] Credits associated with the tile.
+ * @property {Int8Array|Uint8Array|Uint8ClampedArray|Int16Array|Uint16Array|Int32Array|Uint32Array|Float32Array|Float64Array} buffer 自有数值高度元素。
+ * @property {number} width 采样宽度，至少为 2。
+ * @property {number} height 采样高度，至少为 2。
+ * @property {number} [childTileMask=15] 直接子瓦片可用位：西南 1、东南 2、西北 4、东北 8。
+ * @property {Uint8Array} [waterMask] 自有水面掩码。
+ * @property {SceneGISPlanarHeightmapTerrainData.Structure} [structure] 高度编码结构。
+ * @property {boolean} [createdByUpsampling=false] 数据是否由上采样创建。
+ * @property {Credit[]} [credits] 与瓦片关联的署名。
  */
 
 /**
- * Cesium-compatible encoded height structure.
+ * 与 Cesium 兼容的高度编码结构。
  *
  * @typedef {object} SceneGISPlanarHeightmapTerrainData.Structure
- * @property {number} [heightScale=1.0] Scale applied after decoding.
- * @property {number} [heightOffset=0.0] Offset in meters applied after scaling.
- * @property {number} [elementsPerHeight=1] Number of raw elements per encoded height.
- * @property {number} [stride=1] Number of raw elements between height samples.
- * @property {number} [elementMultiplier=256.0] Positional multiplier for multi-element heights.
- * @property {boolean} [isBigEndian=false] Whether the first raw element is most significant.
+ * @property {number} [heightScale=1.0] 解码后应用的倍率。
+ * @property {number} [heightOffset=0.0] 缩放后应用的偏移，单位为米。
+ * @property {number} [elementsPerHeight=1] 每个编码高度包含的原始元素数。
+ * @property {number} [stride=1] 相邻高度样本之间的原始元素步长。
+ * @property {number} [elementMultiplier=256.0] 多元素高度编码的位权倍率。
+ * @property {boolean} [isBigEndian=false] 首个原始元素是否为最高有效位。
  */
 
 export default SceneGISPlanarHeightmapTerrainData;

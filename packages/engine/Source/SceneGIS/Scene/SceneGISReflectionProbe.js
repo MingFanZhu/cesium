@@ -4,18 +4,15 @@ import Matrix3 from "../../Core/Matrix3.js";
 import Matrix4 from "../../Core/Matrix4.js";
 
 /**
- * An immutable local box for specular radiance and directional environment visibility.
- * Add it to a {@link SceneGISReflectionProbeCollection} and explicitly capture loaded models.
- * The center is both the capture position and the box origin. Keep it in empty space.
- * Visibility is a coarse directional approximation at that position, not per-point GI.
+ * 用于镜面辐亮度与方向性环境可见度的不可变局部盒探针。加入 {@link SceneGISReflectionProbeCollection}，显式捕获已加载模型。中心同时为捕获位置和盒原点，应置于空旷位置。可见度仅是在该位置的粗略方向近似，不是逐点 GI。
  *
  * @alias SceneGISReflectionProbe
  * @constructor
- * @param {object} options Probe placement.
- * @param {Matrix4} options.modelMatrix Rigid local-to-world transform: Cartesian in Planar, ECEF in Globe.
- * @param {Cartesian3} options.halfSize Positive box half extents in meters.
- * @param {number} [options.blendDistance] Boundary fade distance, default ten percent of the smallest half extent.
- * @param {number} [options.maximumDistance=200.0] Capture distance in meters, larger than the box radius.
+ * @param {object} options 探针放置配置。
+ * @param {Matrix4} options.modelMatrix 局部到世界的刚体变换；平面为笛卡尔坐标，Globe 为 ECEF。
+ * @param {Cartesian3} options.halfSize 正盒体半长，单位为米。
+ * @param {number} [options.blendDistance] 边界淡出距离，默认最小半长的百分之十。
+ * @param {number} [options.maximumDistance=200.0] 捕获距离，单位为米，须大于盒体半径。
  */
 function SceneGISReflectionProbe(options = {}) {
   const matrix = options.modelMatrix;
@@ -119,7 +116,7 @@ Object.defineProperties(SceneGISReflectionProbe.prototype, {
     },
   },
   /**
-   * Whether a complete capture is available.
+   * 是否有完整捕获结果。
    * @memberof SceneGISReflectionProbe.prototype
    * @type {boolean}
    * @readonly
@@ -130,7 +127,7 @@ Object.defineProperties(SceneGISReflectionProbe.prototype, {
     },
   },
   /**
-   * Number of successful captures.
+   * 成功捕获次数。
    * @memberof SceneGISReflectionProbe.prototype
    * @type {number}
    * @readonly

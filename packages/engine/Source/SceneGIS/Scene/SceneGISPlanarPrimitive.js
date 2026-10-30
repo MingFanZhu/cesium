@@ -406,28 +406,22 @@ function createInternal(wrapper, attributes) {
 }
 
 /**
- * Renders a planar geometry or a static batch through Cesium's synchronous standard Primitive path.
- * Batch topology and instance transforms are construction snapshots; create a new primitive to change them.
- * Group instances spatially and by compatible appearance to bound synchronous construction and culling costs.
- * Lines support PolylineMaterialAppearance with native Fabric (including Arrow/Dash).
- * Non-line geometry supports MaterialAppearance and caller-owned Fabric materials. A batch shares
- * one material; instance color attributes are only consumed by the color appearances.
- * Native solids use native UVs; polygon, wall, and swept surfaces use normalized dominant-axis
- * face projection, with seams where the dominant axis changes. Material and appearance remain caller-owned.
+ * 通过 Cesium 同步标准 Primitive 路径绘制平面几何或静态批次。批次拓扑与实例变换在构造时快照保存，修改须创建新图元。按空间及兼容外观分组，以限制同步构建和剔除成本。
+ * 线支持 PolylineMaterialAppearance 与原生 Fabric（包括 Arrow/Dash）。非线几何支持 MaterialAppearance 和调用方所有的 Fabric 材质。每批共享一个材质，实例颜色属性仅由颜色外观读取。原生实体使用原生 UV；多边形、墙和扫掠表面使用归一化主轴面投影，主轴变化处存在接缝。材质和外观始终归调用方所有。
  *
  * @alias SceneGISPlanarPrimitive
  * @constructor
- * @param {object} options Object with the following properties:
- * @param {SceneGISPlanarPolylineGeometry|SceneGISPlanarPolygonGeometry|SceneGISPlanarBoxGeometry|SceneGISPlanarCylinderGeometry|SceneGISPlanarEllipsoidGeometry|SceneGISPlanarWallGeometry|SceneGISPlanarPolylineVolumeGeometry} [options.geometry] The planar geometry snapshot. Required unless geometryInstances is supplied.
- * @param {SceneGISPlanarPrimitive.GeometryInstanceOptions[]} [options.geometryInstances] A non-empty static batch. Mutually exclusive with geometry, id, and attributes. Instances must share a compatible appearance and identical attribute schemas.
- * @param {PolylineMaterialAppearance|PolylineColorAppearance|PerInstanceColorAppearance|MaterialAppearance} options.appearance The compatible caller-owned appearance.
- * @param {*} [options.id] The required non-null pick identifier for the single-geometry form.
- * @param {Object.<string, SceneGISPlanarPrimitive.InstanceAttribute>} [options.attributes] Geometry instance attributes with valid component datatype, one to four components, boolean normalization, and one complete finite value.
- * @param {Matrix4} [options.modelMatrix=Matrix4.IDENTITY] A finite affine transform. Applied around the geometry origin for a single geometry, or to world coordinates for a batch.
- * @param {boolean} [options.show=true] Whether the primitive is shown.
- * @param {ShadowMode} [options.shadows=ShadowMode.DISABLED] Whether the primitive casts or receives geometry shadows.
- * @param {boolean} [options.allowPicking=true] Whether picking resources are created.
- * @exception {DeveloperError} The id is missing or the geometry, appearance, attributes, matrix, or boolean options are invalid.
+ * @param {object} options 包含以下属性的对象：
+ * @param {SceneGISPlanarPolylineGeometry|SceneGISPlanarPolygonGeometry|SceneGISPlanarBoxGeometry|SceneGISPlanarCylinderGeometry|SceneGISPlanarEllipsoidGeometry|SceneGISPlanarWallGeometry|SceneGISPlanarPolylineVolumeGeometry} [options.geometry] 平面几何快照；未提供 geometryInstances 时必需。
+ * @param {SceneGISPlanarPrimitive.GeometryInstanceOptions[]} [options.geometryInstances] 非空静态批次，与 geometry、id、attributes 互斥。实例须共享兼容外观与相同属性结构。
+ * @param {PolylineMaterialAppearance|PolylineColorAppearance|PerInstanceColorAppearance|MaterialAppearance} options.appearance 调用方所有的兼容外观。
+ * @param {*} [options.id] 单几何形式必需的非空拾取标识。
+ * @param {Object.<string, SceneGISPlanarPrimitive.InstanceAttribute>} [options.attributes] 几何实例属性，须有有效分量类型、一到四个分量、布尔归一化标志及一个完整有限值。
+ * @param {Matrix4} [options.modelMatrix=Matrix4.IDENTITY] 有限仿射变换；单几何围绕几何原点应用，批次则应用于世界坐标。
+ * @param {boolean} [options.show=true] 是否显示图元。
+ * @param {ShadowMode} [options.shadows=ShadowMode.DISABLED] 图元是否投射或接收几何阴影。
+ * @param {boolean} [options.allowPicking=true] 是否创建拾取资源。
+ * @exception {DeveloperError} 缺少 id，或几何、外观、属性、矩阵、布尔选项无效。
  */
 function SceneGISPlanarPrimitive(options) {
   options = options ?? {};
@@ -472,29 +466,28 @@ function SceneGISPlanarPrimitive(options) {
 }
 
 /**
- * A construction-time planar geometry instance, using the native GeometryInstance option shape.
- * The geometry and id remain caller-owned; attributes and modelMatrix are copied.
+ * 构造时的平面几何实例，使用原生 GeometryInstance 选项结构。geometry 与 id 归调用方所有，attributes 和 modelMatrix 会复制。
  *
  * @typedef {object} SceneGISPlanarPrimitive.GeometryInstanceOptions
- * @property {SceneGISPlanarPolylineGeometry|SceneGISPlanarPolygonGeometry|SceneGISPlanarBoxGeometry|SceneGISPlanarCylinderGeometry|SceneGISPlanarEllipsoidGeometry|SceneGISPlanarWallGeometry|SceneGISPlanarPolylineVolumeGeometry} geometry The immutable planar geometry.
- * @property {*} id A unique, non-null pick identifier within this batch.
- * @property {Object.<string, SceneGISPlanarPrimitive.InstanceAttribute>} [attributes] Native per-instance attributes, such as color and show. Every instance must use the same schema.
- * @property {Matrix4} [modelMatrix=Matrix4.IDENTITY] A finite affine transform around this geometry's origin. The world transform is batch.modelMatrix * translation(geometry.origin) * instance.modelMatrix.
+ * @property {SceneGISPlanarPolylineGeometry|SceneGISPlanarPolygonGeometry|SceneGISPlanarBoxGeometry|SceneGISPlanarCylinderGeometry|SceneGISPlanarEllipsoidGeometry|SceneGISPlanarWallGeometry|SceneGISPlanarPolylineVolumeGeometry} geometry 不可变平面几何。
+ * @property {*} id 批次内唯一且非空的拾取标识。
+ * @property {Object.<string, SceneGISPlanarPrimitive.InstanceAttribute>} [attributes] 原生逐实例属性，如 color 和 show；各实例必须使用相同结构。
+ * @property {Matrix4} [modelMatrix=Matrix4.IDENTITY] 围绕此几何原点的有限仿射变换，世界变换为 batch.modelMatrix * translation(geometry.origin) * instance.modelMatrix。
  */
 
 /**
- * The structural attribute contract, including native color, show, distance, and custom attributes.
+ * 属性结构契约，包含原生颜色、显隐、距离及自定义属性。
  *
  * @typedef {object} SceneGISPlanarPrimitive.InstanceAttribute
- * @property {ComponentDatatype} componentDatatype The component datatype.
- * @property {number} componentsPerAttribute The number of components, from one to four.
- * @property {boolean} [normalize=false] Whether integer components are normalized.
- * @property {number[]|Int8Array|Uint8Array|Uint8ClampedArray|Int16Array|Uint16Array|Int32Array|Uint32Array|Float32Array|Float64Array} value One complete instance value.
+ * @property {ComponentDatatype} componentDatatype 分量数据类型。
+ * @property {number} componentsPerAttribute 分量数量，范围一到四。
+ * @property {boolean} [normalize=false] 整数分量是否归一化。
+ * @property {number[]|Int8Array|Uint8Array|Uint8ClampedArray|Int16Array|Uint16Array|Int32Array|Uint32Array|Float32Array|Float64Array} value 一个完整的实例值。
  */
 
 Object.defineProperties(SceneGISPlanarPrimitive.prototype, {
   /**
-   * Gets or sets the native geometry shadow mode without rebuilding geometry.
+   * 获取或设置原生几何阴影模式，不重建几何。
    * @memberof SceneGISPlanarPrimitive.prototype
    * @type {ShadowMode}
    * @default ShadowMode.DISABLED
@@ -512,12 +505,11 @@ Object.defineProperties(SceneGISPlanarPrimitive.prototype, {
     },
   },
   /**
-   * Gets or sets a planar geometry of the kind fixed at construction. Replacement is promoted on a normal render pass.
-   * Undefined for a batch; batch topology cannot be changed through this property.
+   * 获取或设置构造时固定种类的平面几何，替换在正常渲染通道中发布。批次返回 undefined，不能通过此属性改变批次拓扑。
    *
    * @memberof SceneGISPlanarPrimitive.prototype
    * @type {SceneGISPlanarPolylineGeometry|SceneGISPlanarPolygonGeometry|SceneGISPlanarBoxGeometry|SceneGISPlanarCylinderGeometry|SceneGISPlanarEllipsoidGeometry|SceneGISPlanarWallGeometry|SceneGISPlanarPolylineVolumeGeometry|undefined}
-   * @exception {DeveloperError} The value is not the construction-time geometry kind.
+   * @exception {DeveloperError} 数值不是构造时的几何种类。
    */
   geometry: {
     get: function () {
@@ -549,11 +541,11 @@ Object.defineProperties(SceneGISPlanarPrimitive.prototype, {
     },
   },
   /**
-   * Gets or sets a caller-owned appearance compatible with the construction-time geometry kind.
+   * 获取或设置调用方所有、与构造时几何种类兼容的外观。
    *
    * @memberof SceneGISPlanarPrimitive.prototype
    * @type {PolylineMaterialAppearance|PolylineColorAppearance|PerInstanceColorAppearance|MaterialAppearance}
-   * @exception {DeveloperError} The value is incompatible with the construction-time geometry kind or attributes.
+   * @exception {DeveloperError} 数值与构造时几何种类或属性不兼容。
    */
   appearance: {
     get: function () {
@@ -580,8 +572,7 @@ Object.defineProperties(SceneGISPlanarPrimitive.prototype, {
     },
   },
   /**
-   * Gets or sets a finite affine transform applied around the single geometry origin,
-   * or to the world coordinates of a batch. Does not rebuild geometry.
+   * 获取或设置有限仿射变换，作用于单几何原点周围或批次世界坐标，不重建几何。
    *
    * @memberof SceneGISPlanarPrimitive.prototype
    * @type {Matrix4}
@@ -609,7 +600,7 @@ Object.defineProperties(SceneGISPlanarPrimitive.prototype, {
     },
   },
   /**
-   * Gets or sets whether this primitive is shown.
+   * 获取或设置是否显示此图元。
    *
    * @memberof SceneGISPlanarPrimitive.prototype
    * @type {boolean}
@@ -631,7 +622,7 @@ Object.defineProperties(SceneGISPlanarPrimitive.prototype, {
     },
   },
   /**
-   * Gets the caller-owned pick identifier for a single geometry. Undefined for a batch.
+   * 获取单几何的调用方所有拾取标识，批次返回 undefined。
    *
    * @memberof SceneGISPlanarPrimitive.prototype
    * @type {*}
@@ -643,7 +634,7 @@ Object.defineProperties(SceneGISPlanarPrimitive.prototype, {
     },
   },
   /**
-   * Gets whether picking resources are enabled.
+   * 获取是否启用拾取资源。
    *
    * @memberof SceneGISPlanarPrimitive.prototype
    * @type {boolean}
@@ -655,7 +646,7 @@ Object.defineProperties(SceneGISPlanarPrimitive.prototype, {
     },
   },
   /**
-   * Gets whether the current standard Primitive is ready.
+   * 获取当前标准 Primitive 是否就绪。
    *
    * @memberof SceneGISPlanarPrimitive.prototype
    * @type {boolean}
@@ -736,12 +727,11 @@ SceneGISPlanarPrimitive.prototype.update = function (frameState) {
 };
 
 /**
- * Gets native mutable attributes for an instance. Assign values to the returned attribute properties
- * to update the GPU without rebuilding geometry. Values survive compatible appearance replacement.
+ * 获取实例可修改的原生属性。给返回对象的属性赋值即可更新 GPU，无需重建几何；兼容外观替换后属性值保留。
  *
- * @param {*} [id] The instance identifier. Required for a batch; defaults to this.id for a single geometry.
- * @returns {object|undefined} The current geometry instance attributes, or undefined when the id is not found.
- * @exception {DeveloperError} The primitive is destroyed or is not ready.
+ * @param {*} [id] 实例标识；批次必需，单几何默认 this.id。
+ * @returns {object|undefined} 当前几何实例属性；未找到 id 时返回 undefined。
+ * @exception {DeveloperError} 图元已销毁或尚未就绪。
  */
 SceneGISPlanarPrimitive.prototype.getGeometryInstanceAttributes = function (
   id,
@@ -757,12 +747,12 @@ SceneGISPlanarPrimitive.prototype.getGeometryInstanceAttributes = function (
 };
 
 /**
- * Computes the current world-space bounding sphere.
+ * 计算当前世界空间包围球。
  *
- * @param {BoundingSphere} result The object onto which to store the result.
- * @param {*} [id] An optional batch instance identifier. Omit to get the entire primitive's sphere.
- * @returns {BoundingSphere} The modified result.
- * @exception {DeveloperError} The primitive is destroyed, result is invalid, or the id is not found.
+ * @param {BoundingSphere} result 用于存储结果的对象。
+ * @param {*} [id] 可选批次实例标识，省略则获取整个图元的包围球。
+ * @returns {BoundingSphere} 已写入的结果。
+ * @exception {DeveloperError} 图元已销毁、result 无效或未找到 id。
  */
 SceneGISPlanarPrimitive.prototype.getBoundingSphere = function (result, id) {
   ensureAlive(this);
@@ -791,15 +781,15 @@ SceneGISPlanarPrimitive.prototype.getBoundingSphere = function (result, id) {
 };
 
 /**
- * Returns whether this primitive was destroyed.
+ * 返回此图元是否已销毁。
  *
- * @returns {boolean} True if destroyed; otherwise, false.
+ * @returns {boolean} 已销毁时为 True，否则为 false。
  */
 SceneGISPlanarPrimitive.prototype.isDestroyed = function () {
   return false;
 };
 /**
- * Destroys the owned standard Primitive and GPU resources.
+ * 销毁自有标准 Primitive 与 GPU 资源。
  *
  * @returns {undefined}
  */

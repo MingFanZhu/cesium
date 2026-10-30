@@ -91,81 +91,75 @@ function target(context, size, datatype) {
 }
 
 /**
- * Reusable three-band FFT wind waves for SceneGISWaterSurface. Uses a seeded JONSWAP/TMA
- * spectrum, finite-depth dispersion and local XY meters. This is visual wave synthesis,
- * not a hydraulic solver or a prediction of measured weather/bathymetry. Spectra repeat
- * over patchLength, four times patchLength and patchLength / 8; wavelengths outside the represented bands
- * are omitted. Wind and fetch describe a steady wind sea, without island diffraction.
- * Attach through WaterSurface's windWaves option. One object may be shared by surfaces
- * using aligned local coordinates in the same Scene context. The caller owns this object:
- * remove its surfaces before destroy(). Allocation is lazy and simulation follows Scene time.
+ * 供 SceneGISWaterSurface 复用的三频带 FFT 风浪。使用带种子的 JONSWAP/TMA 频谱、有限水深色散和局部 XY 米制坐标。这是可视化波浪合成，不是水动力求解器，也不预测实测天气或水深。频谱分别以 patchLength、其四倍及其八分之一为周期，表示频带之外的波长被省略。风与吹程描述稳态风海，不包含岛屿绕射。
+ * 通过 WaterSurface 的 windWaves 选项挂载。在同一 Scene Context 中，局部坐标对齐的多个水面可共享同一对象。对象归调用方所有，destroy() 前须移除借用水面。资源延迟分配，模拟遵循 Scene 时间。
  * @alias SceneGISWindWaves
  * @constructor
- * @param {object} [options] Wave configuration.
- * @param {number} [options.windSpeed=6] Wind speed at 10 m above water, in m/s, in [0, 40].
- * @param {Cartesian2} [options.windDirection=Cartesian2.UNIT_X] Wave travel direction in local XY, not wind-from bearing.
- * @param {number} [options.fetchLength=1500] Effective wind fetch in meters, in [10, 1000000].
- * @param {number} [options.waterDepth=3] Uniform mean depth for dispersion/TMA, in meters, in [0.1, 10000].
- * @param {number} [options.amplitudeScale=1] Artistic displacement multiplier in [0, 4].
- * @param {number} [options.choppiness=0.7] Horizontal crest displacement strength in [0, 1].
- * @param {number} [options.whitecapIntensity=0.3] Compression-based crest foam strength in [0, 1].
- * @param {number} [options.foamHalfLife=2] Whitecap half-life in simulation seconds, in [0, 30]. Zero disables history. Rewind or wave configuration changes reset history.
- * @param {number} [options.directionalSpread=0.7] Angular spreading in [0, 1], increasingly broad above the spectral peak. Zero retains narrow wind-aligned waves.
- * @param {number} [options.rippleIntensity=1] Fine-band amplitude multiplier in [0, 4].
- * @param {number} [options.resolution=128] Immutable FFT size: 32, 64, 128 or 256.
- * @param {number} [options.patchLength=64] Immutable base-band period in meters, in [16, 1024].
- * @param {number} [options.seed=12345] Immutable unsigned 32-bit random seed.
+ * @param {object} [options] 波浪配置。
+ * @param {number} [options.windSpeed=6] 水面上方 10 米处风速，单位为 m/s，范围 [0,40]。
+ * @param {Cartesian2} [options.windDirection=Cartesian2.UNIT_X] 局部 XY 波浪传播方向，不是风的来源方位。
+ * @param {number} [options.fetchLength=1500] 有效风吹程，单位为米，范围 [10,1000000]。
+ * @param {number} [options.waterDepth=3] 用于色散和 TMA 的均匀平均水深，单位为米，范围 [0.1,10000]。
+ * @param {number} [options.amplitudeScale=1] 艺术化位移倍率，范围 [0,4]。
+ * @param {number} [options.choppiness=0.7] 水平波峰位移强度，范围 [0,1]。
+ * @param {number} [options.whitecapIntensity=0.3] 基于压缩程度的波峰白沫强度，范围 [0,1]。
+ * @param {number} [options.foamHalfLife=2] 风浪白沫半衰期，单位为模拟秒，范围 [0,30]。0 禁用历史，时间回退或波浪配置变化会重置历史。
+ * @param {number} [options.directionalSpread=0.7] 角度扩散，范围 [0,1]，频谱峰值以上越来越宽。0 保留沿风向的窄波。
+ * @param {number} [options.rippleIntensity=1] 细频带振幅倍率，范围 [0,4]。
+ * @param {number} [options.resolution=128] 不可变 FFT 尺寸，可取 32、64、128 或 256。
+ * @param {number} [options.patchLength=64] 不可变基础频带周期，单位为米，范围 [16,1024]。
+ * @param {number} [options.seed=12345] 不可变无符号 32 位随机种子。
  */
 function SceneGISWindWaves(options = {}) {
   /**
-   *  Wind speed in m/s.
+   *  风速，单位为 m/s。
    * @type {number}
    */
   this.windSpeed = options.windSpeed ?? 6;
   /**
-   *  Local XY wave travel direction.
+   *  局部 XY 波浪传播方向。
    * @type {Cartesian2}
    */
   this.windDirection = Cartesian2.clone(
     options.windDirection ?? Cartesian2.UNIT_X,
   );
   /**
-   *  Effective fetch in meters.
+   *  有效吹程，单位为米。
    * @type {number}
    */
   this.fetchLength = options.fetchLength ?? 1500;
   /**
-   *  Mean depth in meters.
+   *  平均水深，单位为米。
    * @type {number}
    */
   this.waterDepth = options.waterDepth ?? 3;
   /**
-   *  Artistic amplitude multiplier.
+   *  艺术化振幅倍率。
    * @type {number}
    */
   this.amplitudeScale = options.amplitudeScale ?? 1;
   /**
-   *  Horizontal displacement strength.
+   *  水平位移强度。
    * @type {number}
    */
   this.choppiness = options.choppiness ?? 0.7;
   /**
-   *  Crest foam strength.
+   *  波峰白沫强度。
    * @type {number}
    */
   this.whitecapIntensity = options.whitecapIntensity ?? 0.3;
   /**
-   * Whitecap coverage half-life in simulation seconds, in [0, 30]. Zero uses instantaneous foam.
+   * 风浪白沫覆盖半衰期，单位为模拟秒，范围 [0,30]；0 使用瞬时白沫。
    * @type {number}
    */
   this.foamHalfLife = options.foamHalfLife ?? 2;
   /**
-   * Angular spread in [0, 1]; short waves spread more than long waves.
+   * 角度扩散，范围 [0,1]，短波比长波更分散。
    * @type {number}
    */
   this.directionalSpread = options.directionalSpread ?? 0.7;
   /**
-   * Fine-band amplitude multiplier in [0, 4].
+   * 细频带振幅倍率，范围 [0,4]。
    * @type {number}
    */
   this.rippleIntensity = options.rippleIntensity ?? 1;
@@ -194,7 +188,7 @@ function SceneGISWindWaves(options = {}) {
 }
 Object.defineProperties(SceneGISWindWaves.prototype, {
   /**
-   *  FFT size.
+   *  FFT 尺寸。
    * @memberof SceneGISWindWaves.prototype
    * @type {number}
    * @readonly
@@ -205,7 +199,7 @@ Object.defineProperties(SceneGISWindWaves.prototype, {
     },
   },
   /**
-   *  Base-band period in meters.
+   *  基础频带周期，单位为米。
    * @memberof SceneGISWindWaves.prototype
    * @type {number}
    * @readonly
@@ -216,7 +210,7 @@ Object.defineProperties(SceneGISWindWaves.prototype, {
     },
   },
   /**
-   *  Deterministic random seed.
+   *  确定性随机种子。
    * @memberof SceneGISWindWaves.prototype
    * @type {number}
    * @readonly
@@ -227,7 +221,7 @@ Object.defineProperties(SceneGISWindWaves.prototype, {
     },
   },
   /**
-   *  Whether GPU outputs exist.
+   *  是否存在 GPU 输出。
    * @memberof SceneGISWindWaves.prototype
    * @type {boolean}
    * @readonly
@@ -238,7 +232,7 @@ Object.defineProperties(SceneGISWindWaves.prototype, {
     },
   },
   /**
-   *  Estimated significant height of the represented spectrum in meters; available after update.
+   *  已表示频谱的估计有义波高，单位为米，更新后可用。
    * @memberof SceneGISWindWaves.prototype
    * @type {number}
    * @readonly
@@ -399,13 +393,13 @@ SceneGISWindWaves.prototype._update = function (frameState, timeScale = 1) {
   state.time = JulianDate.clone(frameState.time, state.time);
 };
 /**
- *  @returns {boolean} Whether this simulation has been destroyed.
+ *  @returns {boolean} 此模拟是否已销毁。
  */
 SceneGISWindWaves.prototype.isDestroyed = function () {
   return false;
 };
 /**
- *  Releases owned FFT textures and programs; remove borrowing surfaces first.
+ *  释放自有 FFT 纹理与程序，先移除借用水面。
  * @returns {undefined}
  */
 SceneGISWindWaves.prototype.destroy = function () {

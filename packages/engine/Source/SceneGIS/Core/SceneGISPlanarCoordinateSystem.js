@@ -3,20 +3,18 @@ import Frozen from "../../Core/Frozen.js";
 import SceneGISPlanarExtent from "./SceneGISPlanarExtent.js";
 
 /**
- * Defines a bounded planar coordinate system measured in meters. X points east, Y points north,
- * and Z points up. The CRS identifier is opaque metadata; this type does not perform projection
- * or reprojection.
+ * 定义有界米制平面坐标系：X 向东，Y 向北，Z 向上。CRS 标识仅为不透明元数据，此类型不执行投影或重投影。
  *
  * @alias SceneGISPlanarCoordinateSystem
  * @constructor
  *
- * @param {object} options Object with the following properties:
- * @param {SceneGISPlanarExtent} options.extent The strictly square world extent.
- * @param {string} [options.crs] An optional non-empty opaque CRS identifier.
+ * @param {object} options 包含以下属性的对象：
+ * @param {SceneGISPlanarExtent} options.extent 严格正方形的世界范围。
+ * @param {string} [options.crs] 可选的非空、不透明 CRS 标识。
  *
- * @exception {DeveloperError} <code>options.extent</code> is not a SceneGISPlanarExtent.
- * @exception {DeveloperError} The extent is not strictly square.
- * @exception {DeveloperError} <code>options.crs</code> is defined but is not a non-empty string.
+ * @exception {DeveloperError} <code>options.extent</code> 不是 SceneGISPlanarExtent。
+ * @exception {DeveloperError} 范围不是严格正方形。
+ * @exception {DeveloperError} <code>options.crs</code> 已定义但不是非空字符串。
  */
 function SceneGISPlanarCoordinateSystem(options) {
   options = options ?? Frozen.EMPTY_OBJECT;
@@ -42,7 +40,7 @@ function SceneGISPlanarCoordinateSystem(options) {
 
 Object.defineProperties(SceneGISPlanarCoordinateSystem.prototype, {
   /**
-   * Gets the owned, read-only world extent.
+   * 获取自有只读世界范围。
    *
    * @memberof SceneGISPlanarCoordinateSystem.prototype
    * @type {SceneGISPlanarExtent}
@@ -55,7 +53,7 @@ Object.defineProperties(SceneGISPlanarCoordinateSystem.prototype, {
   },
 
   /**
-   * Gets the opaque CRS identifier, if one was supplied.
+   * 获取提供的、不透明 CRS 标识。
    *
    * @memberof SceneGISPlanarCoordinateSystem.prototype
    * @type {string|undefined}

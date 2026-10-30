@@ -12,15 +12,14 @@ function validateIndex(index, maximum, name) {
 }
 
 /**
- * An ordered bottom-to-top collection of planar imagery layers. The
- * collection owns attached layers but never owns their imagery providers.
+ * 从下到上排序的平面影像图层集合。集合拥有已挂载图层，不拥有图层的影像提供者。
  *
  * @alias SceneGISPlanarImageryLayerCollection
  * @constructor
  *
- * @param {object} options Object with the following properties:
- * @param {SceneGISPlanarTilingScheme} options.tilingScheme The exact tiling scheme required by every provider.
- * @exception {DeveloperError} The tiling scheme is invalid.
+ * @param {object} options 包含以下属性的对象：
+ * @param {SceneGISPlanarTilingScheme} options.tilingScheme 全部提供者必须使用的同一切片方案。
+ * @exception {DeveloperError} 切片方案无效。
  */
 function SceneGISPlanarImageryLayerCollection(options) {
   options = options ?? Frozen.EMPTY_OBJECT;
@@ -37,7 +36,7 @@ function SceneGISPlanarImageryLayerCollection(options) {
 
 Object.defineProperties(SceneGISPlanarImageryLayerCollection.prototype, {
   /**
-   * Gets the exact tiling scheme required by every layer provider.
+   * 获取每个图层提供者必须使用的同一切片方案。
    * @memberof SceneGISPlanarImageryLayerCollection.prototype
    * @type {SceneGISPlanarTilingScheme}
    * @readonly
@@ -48,7 +47,7 @@ Object.defineProperties(SceneGISPlanarImageryLayerCollection.prototype, {
     },
   },
   /**
-   * Gets the number of layers.
+   * 获取图层数量。
    * @memberof SceneGISPlanarImageryLayerCollection.prototype
    * @type {number}
    * @readonly
@@ -69,10 +68,10 @@ SceneGISPlanarImageryLayerCollection.prototype._notify = function (
 };
 
 /**
- * Gets the layer at an index.
- * @param {number} index The existing layer index.
- * @returns {SceneGISPlanarImageryLayer} The layer.
- * @exception {DeveloperError} The index is invalid.
+ * 获取指定索引处的图层。
+ * @param {number} index 已有图层索引。
+ * @returns {SceneGISPlanarImageryLayer} 图层。
+ * @exception {DeveloperError} 索引无效。
  */
 SceneGISPlanarImageryLayerCollection.prototype.get = function (index) {
   validateIndex(index, this._layers.length - 1, "index");
@@ -80,20 +79,20 @@ SceneGISPlanarImageryLayerCollection.prototype.get = function (index) {
 };
 
 /**
- * Determines whether this collection contains a layer.
- * @param {SceneGISPlanarImageryLayer} layer The layer to test.
- * @returns {boolean} True when the layer is present.
+ * 判断集合是否包含图层。
+ * @param {SceneGISPlanarImageryLayer} layer 要测试的图层。
+ * @returns {boolean} 图层存在时为 True。
  */
 SceneGISPlanarImageryLayerCollection.prototype.contains = function (layer) {
   return this._layers.includes(layer);
 };
 
 /**
- * Adds a detached layer at an optional bottom-to-top index.
- * @param {SceneGISPlanarImageryLayer} layer The live detached layer.
- * @param {number} [index=this.length] The insertion index.
- * @returns {SceneGISPlanarImageryLayer} The added layer.
- * @exception {DeveloperError} The layer, provider, tiling scheme, or index is invalid.
+ * 在可选的自下而上索引处添加已脱离集合的图层。
+ * @param {SceneGISPlanarImageryLayer} layer 存活且已脱离集合的图层。
+ * @param {number} [index=this.length] 插入索引。
+ * @returns {SceneGISPlanarImageryLayer} 已添加的图层。
+ * @exception {DeveloperError} 图层、提供者、切片方案或索引无效。
  */
 SceneGISPlanarImageryLayerCollection.prototype.add = function (layer, index) {
   if (!(layer instanceof SceneGISPlanarImageryLayer) || layer.isDestroyed()) {
@@ -121,11 +120,11 @@ SceneGISPlanarImageryLayerCollection.prototype.add = function (layer, index) {
 };
 
 /**
- * Creates and adds a layer for a structural provider.
- * @param {SceneGISPlanarImageryProvider} provider The imagery provider.
- * @param {number} [index=this.length] The insertion index.
- * @returns {SceneGISPlanarImageryLayer} The added layer.
- * @exception {DeveloperError} The provider, insertion index, or canonical tiling-scheme identity is invalid.
+ * 为满足结构契约的提供者创建并添加图层。
+ * @param {SceneGISPlanarImageryProvider} provider 影像提供者。
+ * @param {number} [index=this.length] 插入索引。
+ * @returns {SceneGISPlanarImageryLayer} 已添加的图层。
+ * @exception {DeveloperError} 提供者、插入索引或标准切片方案对象身份无效。
  */
 SceneGISPlanarImageryLayerCollection.prototype.addImageryProvider = function (
   provider,
@@ -135,11 +134,11 @@ SceneGISPlanarImageryLayerCollection.prototype.addImageryProvider = function (
 };
 
 /**
- * Removes a layer and optionally destroys it. Providers are never destroyed.
- * @param {SceneGISPlanarImageryLayer} layer The layer to remove.
- * @param {boolean} [destroy=true] Whether to destroy the detached layer.
- * @returns {boolean} True when the layer was removed.
- * @exception {DeveloperError} <code>destroy</code> is not a boolean.
+ * 移除图层并可选地销毁，始终不销毁提供者。
+ * @param {SceneGISPlanarImageryLayer} layer 要移除的图层。
+ * @param {boolean} [destroy=true] 是否销毁脱离集合后的图层。
+ * @returns {boolean} 图层被移除时为 True。
+ * @exception {DeveloperError} <code>destroy</code> 不是布尔值。
  */
 SceneGISPlanarImageryLayerCollection.prototype.remove = function (
   layer,
@@ -164,10 +163,10 @@ SceneGISPlanarImageryLayerCollection.prototype.remove = function (
 };
 
 /**
- * Removes all layers and optionally destroys them.
- * @param {boolean} [destroy=true] Whether to destroy detached layers.
+ * 移除全部图层，并可选地销毁它们。
+ * @param {boolean} [destroy=true] 是否销毁脱离集合后的各图层。
  * @returns {void}
- * @exception {DeveloperError} <code>destroy</code> is not a boolean.
+ * @exception {DeveloperError} <code>destroy</code> 不是布尔值。
  */
 SceneGISPlanarImageryLayerCollection.prototype.removeAll = function (destroy) {
   destroy = destroy ?? true;
@@ -194,37 +193,37 @@ function reorder(collection, layer, target) {
 }
 
 /**
- * Moves a layer one position toward the top.
- * @param {SceneGISPlanarImageryLayer} layer The contained layer.
+ * 将图层向顶部移动一位。
+ * @param {SceneGISPlanarImageryLayer} layer 集合内的图层。
  * @returns {void}
- * @exception {DeveloperError} The layer is not contained.
+ * @exception {DeveloperError} 集合中不包含此图层。
  */
 SceneGISPlanarImageryLayerCollection.prototype.raise = function (layer) {
   reorder(this, layer, this._layers.indexOf(layer) + 1);
 };
 /**
- * Moves a layer one position toward the bottom.
- * @param {SceneGISPlanarImageryLayer} layer The contained layer.
+ * 将图层向底部移动一位。
+ * @param {SceneGISPlanarImageryLayer} layer 集合内的图层。
  * @returns {void}
- * @exception {DeveloperError} The layer is not contained.
+ * @exception {DeveloperError} 集合中不包含此图层。
  */
 SceneGISPlanarImageryLayerCollection.prototype.lower = function (layer) {
   reorder(this, layer, this._layers.indexOf(layer) - 1);
 };
 /**
- * Moves a layer to the top.
- * @param {SceneGISPlanarImageryLayer} layer The contained layer.
+ * 将图层移到顶部。
+ * @param {SceneGISPlanarImageryLayer} layer 集合内的图层。
  * @returns {void}
- * @exception {DeveloperError} The layer is not contained.
+ * @exception {DeveloperError} 集合中不包含此图层。
  */
 SceneGISPlanarImageryLayerCollection.prototype.raiseToTop = function (layer) {
   reorder(this, layer, this._layers.length - 1);
 };
 /**
- * Moves a layer to the bottom.
- * @param {SceneGISPlanarImageryLayer} layer The contained layer.
+ * 将图层移到底部。
+ * @param {SceneGISPlanarImageryLayer} layer 集合内的图层。
  * @returns {void}
- * @exception {DeveloperError} The layer is not contained.
+ * @exception {DeveloperError} 集合中不包含此图层。
  */
 SceneGISPlanarImageryLayerCollection.prototype.lowerToBottom = function (
   layer,
@@ -233,18 +232,18 @@ SceneGISPlanarImageryLayerCollection.prototype.lowerToBottom = function (
 };
 
 /**
- * Returns true if this object was destroyed; otherwise, false.
- * @returns {boolean} True if destroyed.
+ * 此对象已销毁时返回 true，否则返回 false。
+ * @returns {boolean} 已销毁时为 True。
  */
 SceneGISPlanarImageryLayerCollection.prototype.isDestroyed = function () {
   return false;
 };
 
 /**
- * Destroys the collection and its layers without destroying providers.
+ * 销毁集合及其图层，不销毁提供者。
  *
  * @returns {void}
- * @exception {DeveloperError} The collection is owned by a live world.
+ * @exception {DeveloperError} 集合由存活的世界拥有。
  */
 SceneGISPlanarImageryLayerCollection.prototype.destroy = function () {
   if (this._owner !== undefined) {

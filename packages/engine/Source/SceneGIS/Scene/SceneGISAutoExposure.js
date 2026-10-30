@@ -32,32 +32,25 @@ function numberProperty(name, minimum, maximum) {
 }
 
 /**
- * Global histogram eye adaptation for HDR Globe and Planar scenes. Uses bounded
- * GPU metering before native bloom and tone mapping, without geometry replay.
- * Relative luminance maps to middle gray (0.18); this is not calibrated EV100.
- * Native postProcessStages.exposure remains an additional positive multiplier.
+ * 用于 HDR 球面和平面场景的全局直方图自动曝光。在原生泛光和色调映射之前进行有界 GPU 测光，不重绘几何。将相对亮度映射到中灰（0.18），不提供 EV100 标定。原生 postProcessStages.exposure 仍作为额外的正倍率。
  *
- * The Scene owns this controller. Disable releases its GPU resources and restores
- * native manual exposure on the next rendered frame. No automatic settling frames
- * are requested: request-render applications own the animation cadence. Adaptation
- * uses elapsed wall time between rendered frames, not the simulation clock.
- * Call reset after camera cuts or content replacement to meter immediately.
+ * 此控制器归 Scene 所有。禁用会释放 GPU 资源，并在下一次渲染帧恢复原生手动曝光。不自动请求额外收敛帧，按需渲染应用须控制自身刷新节奏。适应过程使用渲染帧之间的实际时间，不使用模拟时钟。相机跳变或内容替换后调用 reset 可立即重新测光。
  *
  * @alias SceneGISAutoExposure
  * @constructor
- * @experimental This feature is not final and is subject to change without Cesium's standard deprecation policy.
- * @param {object} options Initialization options.
- * @param {Scene} options.scene The live Scene. Only one controller may be attached.
- * @param {boolean} [options.enabled=false] Enable automatic exposure; requires HDR and WebGL2 float targets.
- * @param {boolean} [options.locked=false] Freeze adapted gain after the first metered frame.
- * @param {number} [options.exposureCompensation=0] Exposure compensation in stops, applied after adaptation. Range [-10, 10].
- * @param {number} [options.minimumExposure=0.015625] Minimum automatic linear gain, before compensation and native exposure. Range [0.0000152587890625, 65536].
- * @param {number} [options.maximumExposure=64] Maximum automatic linear gain, before compensation and native exposure. Range [0.0000152587890625, 65536].
- * @param {number} [options.speedUp=3] Adaptation speed toward brighter surroundings, in stops per second. Range [0.01, 100].
- * @param {number} [options.speedDown=1] Adaptation speed toward darker surroundings, in stops per second. Range [0.01, 100].
- * @param {number} [options.lowPercent=0.05] Lower retained histogram percentile as a fraction, at least 0.0001 below highPercent. Range [0, 0.99].
- * @param {number} [options.highPercent=0.95] Upper retained histogram percentile as a fraction, at least 0.0001 above lowPercent. Range [0.01, 1].
- * @param {number} [options.centerWeight=0.75] Blend from uniform metering (0) to Gaussian center weighting (1). Range [0, 1].
+ * @experimental 此功能尚未定稿，可能不按 Cesium 标准弃用流程发生变化。
+ * @param {object} options 初始化选项。
+ * @param {Scene} options.scene 存活的 Scene，仅可附加一个控制器。
+ * @param {boolean} [options.enabled=false] 启用自动曝光，要求 HDR 和 WebGL2 浮点目标。
+ * @param {boolean} [options.locked=false] 首次测光帧后冻结适应增益。
+ * @param {number} [options.exposureCompensation=0] 适应后应用的曝光补偿，单位为档，范围 [-10,10]。
+ * @param {number} [options.minimumExposure=0.015625] 曝光补偿和原生曝光之前的自动线性增益下限，范围 [0.0000152587890625,65536]。
+ * @param {number} [options.maximumExposure=64] 曝光补偿和原生曝光之前的自动线性增益上限，范围 [0.0000152587890625,65536]。
+ * @param {number} [options.speedUp=3] 向较亮环境适应的速度，单位为档/秒，范围 [0.01,100]。
+ * @param {number} [options.speedDown=1] 向较暗环境适应的速度，单位为档/秒，范围 [0.01,100]。
+ * @param {number} [options.lowPercent=0.05] 直方图保留下百分位，以比例表示，至少比 highPercent 低 0.0001，范围 [0,0.99]。
+ * @param {number} [options.highPercent=0.95] 直方图保留上百分位，以比例表示，至少比 lowPercent 高 0.0001，范围 [0.01,1]。
+ * @param {number} [options.centerWeight=0.75] 从均匀测光 0 混合到高斯中心加权 1，范围 [0,1]。
  * @example
  * viewer.scene.highDynamicRange = true;
  * const exposure = new Cesium.SceneGISAutoExposure({ scene: viewer.scene, enabled: true });
@@ -98,9 +91,9 @@ function SceneGISAutoExposure(options) {
 }
 
 /**
- * Tests the GPU formats required by the controller. HDR must also be enabled.
- * @param {Scene} scene The Scene to test.
- * @returns {boolean} Whether WebGL2 float color targets are supported.
+ * 测试控制器所需 GPU 格式是否可用，还须启用 HDR。
+ * @param {Scene} scene 需要测试的 Scene。
+ * @returns {boolean} 是否支持 WebGL2 浮点颜色目标。
  */
 SceneGISAutoExposure.isSupported = function (scene) {
   return scene.context.webgl2 && scene.context.colorBufferFloat;
@@ -108,7 +101,7 @@ SceneGISAutoExposure.isSupported = function (scene) {
 
 Object.defineProperties(SceneGISAutoExposure.prototype, {
   /**
-   * Whether automatic exposure is enabled. Disabling releases GPU resources.
+   * 是否启用自动曝光；禁用会释放 GPU 资源。
    * @memberof SceneGISAutoExposure.prototype
    * @type {boolean}
    * @default false
@@ -132,7 +125,7 @@ Object.defineProperties(SceneGISAutoExposure.prototype, {
     },
   },
   /**
-   * Freeze metered gain. Compensation and native exposure remain adjustable.
+   * 冻结测光增益，曝光补偿和原生曝光仍可调整。
    * @memberof SceneGISAutoExposure.prototype
    * @type {boolean}
    * @default false
@@ -150,7 +143,7 @@ Object.defineProperties(SceneGISAutoExposure.prototype, {
     },
   },
   /**
-   * Whether a metered result is available.
+   * 是否存在可用的测光结果。
    * @memberof SceneGISAutoExposure.prototype
    * @type {boolean}
    * @readonly
@@ -161,56 +154,56 @@ Object.defineProperties(SceneGISAutoExposure.prototype, {
     },
   },
   /**
-   * Exposure compensation in stops, applied after adaptation. Range [-10, 10].
+   * 适应后应用的曝光补偿，单位为档，范围 [-10,10]。
    * @memberof SceneGISAutoExposure.prototype
    * @type {number}
    * @default 0
    */
   exposureCompensation: numberProperty("exposureCompensation", -10, 10),
   /**
-   * Minimum automatic linear gain, before compensation and native exposure. Range [0.0000152587890625, 65536].
+   * 曝光补偿和原生曝光之前的自动线性增益下限，范围 [0.0000152587890625,65536]。
    * @memberof SceneGISAutoExposure.prototype
    * @type {number}
    * @default 0.015625
    */
   minimumExposure: numberProperty("minimumExposure", 0.0000152587890625, 65536),
   /**
-   * Maximum automatic linear gain, before compensation and native exposure. Range [0.0000152587890625, 65536].
+   * 曝光补偿和原生曝光之前的自动线性增益上限，范围 [0.0000152587890625,65536]。
    * @memberof SceneGISAutoExposure.prototype
    * @type {number}
    * @default 64
    */
   maximumExposure: numberProperty("maximumExposure", 0.0000152587890625, 65536),
   /**
-   * Adaptation speed toward brighter surroundings, in stops per second. Range [0.01, 100].
+   * 向较亮环境适应的速度，单位为档/秒，范围 [0.01,100]。
    * @memberof SceneGISAutoExposure.prototype
    * @type {number}
    * @default 3
    */
   speedUp: numberProperty("speedUp", 0.01, 100),
   /**
-   * Adaptation speed toward darker surroundings, in stops per second. Range [0.01, 100].
+   * 向较暗环境适应的速度，单位为档/秒，范围 [0.01,100]。
    * @memberof SceneGISAutoExposure.prototype
    * @type {number}
    * @default 1
    */
   speedDown: numberProperty("speedDown", 0.01, 100),
   /**
-   * Lower retained histogram percentile as a fraction. Range [0, 0.99].
+   * 直方图保留下百分位，以比例表示，范围 [0,0.99]。
    * @memberof SceneGISAutoExposure.prototype
    * @type {number}
    * @default 0.05
    */
   lowPercent: numberProperty("lowPercent", 0, 0.99),
   /**
-   * Upper retained histogram percentile as a fraction. Range [0.01, 1].
+   * 直方图保留上百分位，以比例表示，范围 [0.01,1]。
    * @memberof SceneGISAutoExposure.prototype
    * @type {number}
    * @default 0.95
    */
   highPercent: numberProperty("highPercent", 0.01, 1),
   /**
-   * Blend from uniform metering (0) to Gaussian center weighting (1). Range [0, 1].
+   * 从均匀测光 0 混合到高斯中心加权 1，范围 [0,1]。
    * @memberof SceneGISAutoExposure.prototype
    * @type {number}
    * @default 0.75
@@ -236,19 +229,23 @@ SceneGISAutoExposure.prototype._validate = function () {
   }
 };
 
-/** Discard adaptation history and meter immediately on the next rendered frame. */
+/**
+ *  丢弃适应历史，在下一渲染帧立即测光。
+ */
 SceneGISAutoExposure.prototype.reset = function () {
   this._ready = false;
   this._scene.requestRender();
 };
 
-/** @returns {boolean} Whether this controller has been destroyed. */
+/**
+ *  @returns {boolean} 此控制器是否已销毁。
+ */
 SceneGISAutoExposure.prototype.isDestroyed = function () {
   return false;
 };
 
 /**
- * Release GPU resources and detach from the Scene.
+ * 释放 GPU 资源并从 Scene 解绑。
  * @returns {undefined}
  */
 SceneGISAutoExposure.prototype.destroy = function () {

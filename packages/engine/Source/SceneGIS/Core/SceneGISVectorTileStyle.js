@@ -478,13 +478,12 @@ function evaluateProperties(
 }
 
 /**
- * Compiles the scenegis-vector-v1 subset of Style v8 with the independent MapLibre style frontend.
- * The input JSON is copied. This object owns no renderer, requests, or GPU resources.
+ * 使用独立 MapLibre 样式前端编译 Style v8 的 scenegis-vector-v1 子集。输入 JSON 会复制，此对象不拥有渲染器、请求或 GPU 资源。
  * @alias SceneGISVectorTileStyle
  * @constructor
- * @experimental This API is experimental and subject to change.
- * @param {object} style A Style v8 JSON object within the documented V1 profile.
- * @exception {DeveloperError} JSON, style validation, or the supported profile is invalid.
+ * @experimental 此 API 为实验性，可能发生变化。
+ * @param {object} style 文档 V1 范围内的 Style v8 JSON 对象。
+ * @exception {DeveloperError} JSON、样式验证或支持范围无效。
  */
 function SceneGISVectorTileStyle(style) {
   const snapshot = cloneJson(style);
@@ -502,7 +501,9 @@ function SceneGISVectorTileStyle(style) {
   this._snapshot = freezeJson(snapshot);
 }
 
-/** Returns an independent, complete Style JSON document. @private */
+/**
+ *  返回独立完整 Style JSON 文档。 @private
+ */
 SceneGISVectorTileStyle.prototype._getSnapshot = function () {
   return cloneJson(this._snapshot);
 };
@@ -530,7 +531,9 @@ function ruleDefinition(style, layerId, scope, name) {
   return definition;
 }
 
-/** Gets a copied, unevaluated rule; absence is undefined. @private */
+/**
+ *  获取未求值规则的副本，缺失时为 undefined。 @private
+ */
 SceneGISVectorTileStyle.prototype._getRule = function (layerId, scope, name) {
   const definition = ruleDefinition(this, layerId, scope, name);
   const value =
@@ -538,7 +541,9 @@ SceneGISVectorTileStyle.prototype._getRule = function (layerId, scope, name) {
   return value === undefined ? undefined : cloneJson(value);
 };
 
-/** Validates and compiles an immutable candidate before any owner mutation. @private */
+/**
+ *  在所有者发生任何修改前验证并编译不可变候选。 @private
+ */
 SceneGISVectorTileStyle.prototype._withRule = function (
   layerId,
   scope,
@@ -569,7 +574,7 @@ SceneGISVectorTileStyle.prototype._withRule = function (
 
 Object.defineProperties(SceneGISVectorTileStyle.prototype, {
   /**
-   * The glyph PBF URL template, or undefined.
+   * 字形 PBF URL 模板，或 undefined。
    * @memberof SceneGISVectorTileStyle.prototype
    * @type {string|undefined}
    * @readonly
@@ -580,7 +585,7 @@ Object.defineProperties(SceneGISVectorTileStyle.prototype, {
     },
   },
   /**
-   * The single sprite URL base, or undefined.
+   * 单一精灵 URL 基址，或 undefined。
    * @memberof SceneGISVectorTileStyle.prototype
    * @type {string|undefined}
    * @readonly
@@ -591,7 +596,7 @@ Object.defineProperties(SceneGISVectorTileStyle.prototype, {
     },
   },
   /**
-   * The versioned computation profile. Renderer qualification is separate.
+   * 带版本的计算能力范围，渲染器资格独立验证。
    * @memberof SceneGISVectorTileStyle.prototype
    * @type {string}
    * @readonly
@@ -602,7 +607,7 @@ Object.defineProperties(SceneGISVectorTileStyle.prototype, {
     },
   },
   /**
-   * Immutable source configuration. Tiling schemes are supplied independently by the application.
+   * 不可变源配置，切片方案由应用独立提供。
    * @memberof SceneGISVectorTileStyle.prototype
    * @type {object}
    * @readonly
@@ -613,7 +618,7 @@ Object.defineProperties(SceneGISVectorTileStyle.prototype, {
     },
   },
   /**
-   * Immutable layer IDs in style order.
+   * 按样式顺序排列的不可变图层 ID。
    * @memberof SceneGISVectorTileStyle.prototype
    * @type {string[]}
    * @readonly
@@ -626,9 +631,9 @@ Object.defineProperties(SceneGISVectorTileStyle.prototype, {
 });
 
 /**
- * Checks style syntax and the supported profile without constructing a runtime.
- * @param {object} style A Style v8 JSON object.
- * @returns {string[]} Path-bearing diagnostics; empty when valid.
+ * 检查样式语法与支持范围，不构造运行时。
+ * @param {object} style Style v8 JSON 对象。
+ * @returns {string[]} 包含路径的诊断信息，有效时为空。
  */
 SceneGISVectorTileStyle.validate = function (style) {
   try {
@@ -639,12 +644,12 @@ SceneGISVectorTileStyle.validate = function (style) {
 };
 
 /**
- * Gets the invalidation category of a compiled property.
- * @param {string} layerId Style layer ID.
- * @param {string} scope "paint" or "layout".
- * @param {string} name Property name.
- * @returns {string|undefined} constant/source/camera/composite, or undefined for an unset property.
- * @exception {DeveloperError} The layer or scope is invalid.
+ * 获取已编译属性的失效类别。
+ * @param {string} layerId 样式层 ID。
+ * @param {string} scope 取值 "paint" 或 "layout"。
+ * @param {string} name 属性名称。
+ * @returns {string|undefined} 取值 constant/source/camera/composite，未设置属性时为 undefined。
+ * @exception {DeveloperError} 图层或作用域无效。
  */
 SceneGISVectorTileStyle.prototype.getPropertyKind = function (
   layerId,
@@ -659,43 +664,42 @@ SceneGISVectorTileStyle.prototype.getPropertyKind = function (
 };
 
 /**
- * Gets the immutable JSON definition of a layer without evaluating a feature.
- * @param {string} layerId Style layer ID.
- * @returns {object} The recursively frozen layer snapshot.
- * @exception {DeveloperError} The layer does not exist.
+ * 获取图层不可变 JSON 定义，不求值要素。
+ * @param {string} layerId 样式层 ID。
+ * @returns {object} 递归冻结的图层快照。
+ * @exception {DeveloperError} 图层不存在。
  */
 SceneGISVectorTileStyle.prototype.getLayerDefinition = function (layerId) {
   return getLayer(this, layerId).definition;
 };
 
 /**
- * An evaluated layer. Paint colors are unpremultiplied Cesium Color values.
+ * 已求值图层，绘制颜色为非预乘 Cesium Color。
  * @typedef {object} SceneGISVectorTileStyle.EvaluatedLayer
- * @property {string} id Style layer ID.
- * @property {string} type Style layer type.
- * @property {string|undefined} source Source ID.
- * @property {string|undefined} sourceLayer MVT source-layer name.
- * @property {boolean} show Whether zoom, visibility and filter permit this feature.
- * @property {object} layout Evaluated layout properties.
- * @property {object} paint Evaluated paint properties.
+ * @property {string} id 样式层 ID。
+ * @property {string} type 样式层类型。
+ * @property {string|undefined} source 源 ID。
+ * @property {string|undefined} sourceLayer MVT 源图层名称。
+ * @property {boolean} show 缩放、显隐与过滤器是否允许此要素。
+ * @property {object} layout 已求值布局属性。
+ * @property {object} paint 已求值绘制属性。
  */
 
 /**
- * Per-evaluation paint state. The compiled style does not retain this context.
+ * 每次求值的绘制状态，已编译样式不保留此上下文。
  * @typedef {object} SceneGISVectorTileStyle.EvaluationContext
- * @property {object} [featureState] State for this feature, default empty.
- * @property {object} [globalState] Layer-scoped state, default empty.
+ * @property {object} [featureState] 此要素状态，默认空。
+ * @property {object} [globalState] 图层级状态，默认空。
  */
 
 /**
- * Evaluates one layer without mutating the input feature or compiled configuration.
- * Unsafe integer properties enter the style engine as decimal strings; IDs retain their string identity.
- * @param {string} layerId Style layer ID.
- * @param {SceneGISVectorTile.Feature|undefined} feature A decoded feature, or undefined for background.
- * @param {number} zoom Continuous style zoom, independent of source LOD.
- * @param {SceneGISVectorTileStyle.EvaluationContext} [context] Optional paint state for this evaluation.
- * @returns {SceneGISVectorTileStyle.EvaluatedLayer} Layer values; paint and symbol sizes use fractional zoom, other layout/filter values use integer zoom.
- * @exception {DeveloperError} The layer, feature, or zoom is invalid.
+ * 对单个图层求值，不修改输入要素或已编译配置。不安全整数属性以十进制字符串进入样式引擎，ID 保持字符串标识。
+ * @param {string} layerId 样式层 ID。
+ * @param {SceneGISVectorTile.Feature|undefined} feature 解码要素，背景可为 undefined。
+ * @param {number} zoom 连续样式缩放，独立于源 LOD。
+ * @param {SceneGISVectorTileStyle.EvaluationContext} [context] 本次求值可选的绘制状态。
+ * @returns {SceneGISVectorTileStyle.EvaluatedLayer} 图层值；绘制和符号尺寸使用小数缩放，其他布局和过滤值使用整数缩放。
+ * @exception {DeveloperError} 图层、要素或缩放无效。
  */
 SceneGISVectorTileStyle.prototype.evaluateLayer = function (
   layerId,
@@ -747,7 +751,9 @@ SceneGISVectorTileStyle.prototype.evaluateLayer = function (
   };
 };
 
-/** Camera-only values, rather than raw zoom, invalidate a geometry batch. @private */
+/**
+ *  由仅相机相关值而非原始 zoom 使几何批次失效。 @private
+ */
 SceneGISVectorTileStyle.prototype._getGeometryKey = function (
   layerId,
   zoom,
@@ -796,7 +802,9 @@ SceneGISVectorTileStyle.prototype._getGeometryKey = function (
   return JSON.stringify(values);
 };
 
-/** Feature-independent paint can use constant vertex attributes. @private */
+/**
+ *  与要素无关的绘制可使用常量顶点属性。 @private
+ */
 SceneGISVectorTileStyle.prototype._getUniformPaint = function (
   layerId,
   zoom,

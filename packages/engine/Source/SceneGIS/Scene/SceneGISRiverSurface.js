@@ -26,56 +26,43 @@ function validate(river) {
 }
 
 /**
- * A single directed river with authored water levels and currents. Add to Scene.primitives.
- * The World binding is exact and immutable. Globe positions are ECEF, with ellipsoid heights;
- * Planar positions are the bound World's metric XYZ and are never automatically projected.
- * Ordered cross-sections interpolate position height, width and speed. Positive speeds follow
- * the supplied position order; zero stops current advection. Water levels are not terrain heights.
- * Optional polygonHierarchy clips the width envelope, including holes, without defining water levels.
- * Geometry inputs are copied at construction; reconstruct to edit the profile or boundary.
+ * 具有指定水位与水流的单条有向河流，加入 Scene.primitives。World 绑定精确且不可变。球面位置使用 ECEF 和椭球高，平面位置使用所绑定 World 的米制 XYZ，不自动投影。有序横断面插值位置高度、宽度和速度；正速度沿输入位置顺序，零速度停止水流平移。水位不等于地形高度。可选 polygonHierarchy 裁剪含孔洞的宽度包络，不决定水位。几何输入在构造时复制，修改剖面或边界须重建。
  *
- * Globe rivers use the regional water chart and mesh LOD, with projection distortion away from
- * its origin. Adjacent sections are joined with miters; folded or self-touching corridors are
- * rejected. This is visual current advection, not hydraulics, branching, waterfalls or global oceans.
- * Owns two random FFT wave bands, locally oriented along the river. Current speed transports
- * the waves independently of their intrinsic evolution; zero current does not freeze waves.
- * Optional caller-owned windWaves add independent wind waves; current speed does not alter them.
- * Requires SCENE3D, HDR and WebGL2 floating-point targets. Shares SceneGISWaterSurface's opaque
- * depth/color optics and optional finite underwater viewing. Water bodies must not overlap.
+ * 球面河流使用区域水面图表与网格 LOD，远离原点存在投影畸变。相邻断面采用斜接，折叠或自接触河道会被拒绝。此能力是可视化水流平移，不提供水力学、分汊、瀑布或全球海洋。内部拥有沿河局部定向的两个随机 FFT 频带。流速独立搬运波浪，不改变自身演化；零流速不会冻结波浪。可选的调用方所有 windWaves 提供独立风浪，不受河流速度改写。要求 SCENE3D、HDR 和 WebGL2 浮点目标。共享 SceneGISWaterSurface 的不透明深度/颜色光学与可选有限水下观察，水域不得重叠。
  *
  * @alias SceneGISRiverSurface
  * @constructor
- * @param {object} options Object with the following properties.
- * @param {Globe|SceneGISPlanarWorld} options.world Exact World receiving the river.
- * @param {Cartesian3[]} options.positions Ordered centerline positions, including water heights.
- * @param {number|number[]} options.widths Full width in meters, constant or one per position.
- * @param {number|number[]} [options.speeds=1] Horizontal current speed in meters per second, constant or one per position.
- * @param {PolygonHierarchy} [options.polygonHierarchy] Optional World-coordinate shoreline clipping mask. Heights are ignored.
- * @param {SceneGISWindWaves} [options.windWaves] Borrowed optional wind simulation, fixed at construction.
- * @param {number} [options.meshSpacing=1] Finest grid spacing in meters in [0.25, 4], fixed at construction.
- * @param {number} [options.maximumScreenSpaceError=2] Curvature error target in pixels.
- * @param {number} [options.maximumTileCount=512] Quadtree leaf budget, integer in [4, 4096].
- * @param {number} [options.currentSpeedScale=1] Nonnegative multiplier of authored current speeds.
- * @param {number} [options.currentRippleAmplitude=0.12] Maximum current-wave vertical displacement in meters. Also controls wave normals.
- * @param {number} [options.currentRippleLength=12] Dominant current-wave length in meters, at least 0.01.
- * @param {boolean} [options.show=true] Whether the river is visible.
- * @param {*} [options.id] Pick identifier.
- * @param {Color} [options.waterColor] Scene-linear deep-water scattering color; defaults to (0.015, 0.12, 0.14).
- * @param {Cartesian3} [options.absorption] RGB absorption per meter; defaults to (0.45, 0.12, 0.06).
- * @param {Cartesian3} [options.scattering] Optional nonnegative RGB scattering per meter; enables coefficient optics instead of waterColor.
- * @param {number} [options.scatteringAnisotropy=0] Scattering mean cosine in [-0.9, 0.9]; positive favors forward light travel.
- * @param {Color} [options.reflectionColor] Scene-linear environment radiance without physical sky; defaults to (0.2, 0.3, 0.4).
- * @param {number} [options.roughness=0.12] Perceptual roughness in [0.02, 1].
- * @param {number} [options.foamWidth=0.3] Shallow contact foam depth range in meters.
- * @param {number} [options.foamIntensity=0.5] Contact foam strength in [0, 1].
- * @param {number} [options.underwaterDepth=0] Finite vertical depth below the interpolated river profile in meters. Zero disables underwater viewing. Original shores are indexed; profiles retain a separate 1024-triangle budget. Curved optics use a local sphere approximation.
- * @param {number} [options.maximumUnderwaterBoundaryBytes=8388608] Immutable shoreline index texture budget including padding, integer bytes in [1,67108864]. Geometry is not simplified to fit.
- * @param {number} [options.causticsIntensity=0] Approximate visible-receiver caustic strength in [0, 2]. Uses scene depth and actual waves.
- * @param {number} [options.refractionStrength=0.2] Screen-space refraction distortion in [0, 1].
- * @param {boolean} [options.reflections=true] Whether to trace scene reflections.
- * @param {number} [options.maximumReflectionDistance=100] Maximum reflected ray length in meters.
- * @param {number} [options.reflectionThickness=0.5] Reflected hit depth tolerance in meters.
- * @param {number} [options.reflectionSteps=64] Integer reflection traversal budget in [16, 256].
+ * @param {object} options 包含以下属性的对象。
+ * @param {Globe|SceneGISPlanarWorld} options.world 接收河流的精确 World。
+ * @param {Cartesian3[]} options.positions 有序中心线位置，包含水位高度。
+ * @param {number|number[]} options.widths 全宽，单位为米，可以为常数或逐位置数值。
+ * @param {number|number[]} [options.speeds=1] 水平流速，单位为米/秒，可以为常数或逐位置数值。
+ * @param {PolygonHierarchy} [options.polygonHierarchy] 可选世界坐标岸线裁剪掩码，忽略高度。
+ * @param {SceneGISWindWaves} [options.windWaves] 借用的可选风浪模拟，构造时固定。
+ * @param {number} [options.meshSpacing=1] 构造时固定的最精细网格间距，单位为米，范围 [0.25,4]。
+ * @param {number} [options.maximumScreenSpaceError=2] 曲率误差目标，单位为像素。
+ * @param {number} [options.maximumTileCount=512] 四叉树叶节点预算，整数，范围 [4,4096]。
+ * @param {number} [options.currentSpeedScale=1] 设定水流速度的非负倍率。
+ * @param {number} [options.currentRippleAmplitude=0.12] 水流波浪的最大竖直位移，单位为米，同时控制波浪法线。
+ * @param {number} [options.currentRippleLength=12] 水流波浪的主波长，单位为米，至少 0.01。
+ * @param {boolean} [options.show=true] 是否显示河流。
+ * @param {*} [options.id] 拾取标识。
+ * @param {Color} [options.waterColor] 场景线性深水散射色，默认 (0.015,0.12,0.14)。
+ * @param {Cartesian3} [options.absorption] 每米 RGB 吸收，默认 (0.45,0.12,0.06)。
+ * @param {Cartesian3} [options.scattering] 可选的非负每米 RGB 散射系数，启用后以系数光学替代 waterColor。
+ * @param {number} [options.scatteringAnisotropy=0] 散射平均余弦，范围 [-0.9,0.9]，正值偏向光线向前传播。
+ * @param {Color} [options.reflectionColor] 无物理天空时的场景线性环境辐亮度，默认 (0.2,0.3,0.4)。
+ * @param {number} [options.roughness=0.12] 感知粗糙度，范围 [0.02,1]。
+ * @param {number} [options.foamWidth=0.3] 浅水接触白沫深度范围，单位为米。
+ * @param {number} [options.foamIntensity=0.5] 接触白沫强度，范围 [0,1]。
+ * @param {number} [options.underwaterDepth=0] 插值河流剖面下的有限竖直深度，单位为米；0 关闭水下观察。原始岸线具有索引，剖面单独保留 1024 三角形预算。曲面光学使用局部球近似。
+ * @param {number} [options.maximumUnderwaterBoundaryBytes=8388608] 不可变岸线索引纹理预算，包含填充，字节整数范围 [1,67108864]；不会简化几何来适应预算。
+ * @param {number} [options.causticsIntensity=0] 可见接收面的近似焦散强度，范围 [0,2]，使用场景深度与真实波浪。
+ * @param {number} [options.refractionStrength=0.2] 屏幕空间折射扭曲强度，范围 [0,1]。
+ * @param {boolean} [options.reflections=true] 是否追踪场景反射。
+ * @param {number} [options.maximumReflectionDistance=100] 反射射线最大长度，单位为米。
+ * @param {number} [options.reflectionThickness=0.5] 反射命中的深度容差，单位为米。
+ * @param {number} [options.reflectionSteps=64] 整数反射遍历预算，范围 [16,256]。
  * @example
  * const river = viewer.scene.primitives.add(new Cesium.SceneGISRiverSurface({
  *   world: viewer.scene.world,
@@ -97,17 +84,17 @@ function SceneGISRiverSurface(options = {}) {
   }
   this._world = world;
   /**
-   * Nonnegative multiplier of authored current speeds. Zero freezes current advection.
+   * 设定水流速度的非负倍率，0 冻结水流平移。
    * @type {number}
    */
   this.currentSpeedScale = options.currentSpeedScale ?? 1;
   /**
-   * Maximum current-wave vertical displacement in meters. Also controls wave normals.
+   * 水流波浪的最大竖直位移，单位为米，同时控制波浪法线。
    * @type {number}
    */
   this.currentRippleAmplitude = options.currentRippleAmplitude ?? 0.12;
   /**
-   * Dominant current-wave length in meters, at least 0.01.
+   * 水流波浪的主波长，单位为米，至少 0.01。
    * @type {number}
    */
   this.currentRippleLength = options.currentRippleLength ?? 12;
@@ -136,7 +123,7 @@ function SceneGISRiverSurface(options = {}) {
 
 Object.defineProperties(SceneGISRiverSurface.prototype, {
   /**
-   * Immutable shoreline index budget in bytes.
+   * 不可变岸线索引预算，单位为字节。
    * @memberof SceneGISRiverSurface.prototype
    * @type {number}
    * @readonly
@@ -147,7 +134,7 @@ Object.defineProperties(SceneGISRiverSurface.prototype, {
     },
   },
   /**
-   * Allocated shoreline index texture bytes; zero until an active underwater draw.
+   * 已分配岸线索引纹理字节数，首次活动水下绘制前为零。
    * @memberof SceneGISRiverSurface.prototype
    * @type {number}
    * @readonly
@@ -158,7 +145,7 @@ Object.defineProperties(SceneGISRiverSurface.prototype, {
     },
   },
   /**
-   * Approximate visible-receiver caustic strength in [0, 2]. Uses scene depth and actual waves.
+   * 可见接收面的近似焦散强度，范围 [0,2]，使用场景深度与真实波浪。
    * @memberof SceneGISRiverSurface.prototype
    * @type {number}
    */
@@ -171,7 +158,7 @@ Object.defineProperties(SceneGISRiverSurface.prototype, {
     },
   },
   /**
-   * Finite vertical depth below the interpolated mean river profile, in meters. Zero disables underwater viewing.
+   * 插值平均河流剖面下的有限竖直深度，单位为米；0 关闭水下观察。
    * @memberof SceneGISRiverSurface.prototype
    * @type {number}
    */
@@ -184,7 +171,7 @@ Object.defineProperties(SceneGISRiverSurface.prototype, {
     },
   },
   /**
-   * Whether the river is visible.
+   * 是否显示河流。
    * @memberof SceneGISRiverSurface.prototype
    * @type {boolean}
    */
@@ -197,7 +184,7 @@ Object.defineProperties(SceneGISRiverSurface.prototype, {
     },
   },
   /**
-   * Pick identifier.
+   * 拾取标识。
    * @memberof SceneGISRiverSurface.prototype
    * @type {*}
    */
@@ -210,7 +197,7 @@ Object.defineProperties(SceneGISRiverSurface.prototype, {
     },
   },
   /**
-   * Legacy scene-linear deep-water scattering color; ignored when scattering is defined.
+   * 传统场景线性深水散射色，定义 scattering 时忽略。
    * @memberof SceneGISRiverSurface.prototype
    * @type {Color}
    */
@@ -223,7 +210,7 @@ Object.defineProperties(SceneGISRiverSurface.prototype, {
     },
   },
   /**
-   * RGB absorption coefficients per meter.
+   * 每米 RGB 吸收系数。
    * @memberof SceneGISRiverSurface.prototype
    * @type {Cartesian3}
    */
@@ -236,7 +223,7 @@ Object.defineProperties(SceneGISRiverSurface.prototype, {
     },
   },
   /**
-   * Optional nonnegative RGB scattering coefficients per meter. Undefined restores legacy optics.
+   * 可选非负每米 RGB 散射系数，undefined 恢复传统光学。
    * @memberof SceneGISRiverSurface.prototype
    * @type {Cartesian3|undefined}
    */
@@ -249,7 +236,7 @@ Object.defineProperties(SceneGISRiverSurface.prototype, {
     },
   },
   /**
-   * Henyey-Greenstein mean cosine in [-0.9, 0.9]; positive favors forward light travel.
+   * Henyey-Greenstein 平均余弦，范围 [-0.9,0.9]，正值偏向光线向前传播。
    * @memberof SceneGISRiverSurface.prototype
    * @type {number}
    */
@@ -262,7 +249,7 @@ Object.defineProperties(SceneGISRiverSurface.prototype, {
     },
   },
   /**
-   * Environment radiance without physical sky.
+   * 无物理天空时的环境辐亮度。
    * @memberof SceneGISRiverSurface.prototype
    * @type {Color}
    */
@@ -275,7 +262,7 @@ Object.defineProperties(SceneGISRiverSurface.prototype, {
     },
   },
   /**
-   * Perceptual roughness in [0.02, 1].
+   * 感知粗糙度，范围 [0.02,1]。
    * @memberof SceneGISRiverSurface.prototype
    * @type {number}
    */
@@ -288,7 +275,7 @@ Object.defineProperties(SceneGISRiverSurface.prototype, {
     },
   },
   /**
-   * Nonnegative contact foam depth range in meters.
+   * 非负接触白沫深度范围，单位为米。
    * @memberof SceneGISRiverSurface.prototype
    * @type {number}
    */
@@ -301,7 +288,7 @@ Object.defineProperties(SceneGISRiverSurface.prototype, {
     },
   },
   /**
-   * Contact foam strength in [0, 1].
+   * 接触白沫强度，范围 [0,1]。
    * @memberof SceneGISRiverSurface.prototype
    * @type {number}
    */
@@ -314,7 +301,7 @@ Object.defineProperties(SceneGISRiverSurface.prototype, {
     },
   },
   /**
-   * Screen-space refraction distortion in [0, 1].
+   * 屏幕空间折射扭曲强度，范围 [0,1]。
    * @memberof SceneGISRiverSurface.prototype
    * @type {number}
    */
@@ -327,7 +314,7 @@ Object.defineProperties(SceneGISRiverSurface.prototype, {
     },
   },
   /**
-   * Whether to trace scene reflections.
+   * 是否追踪场景反射。
    * @memberof SceneGISRiverSurface.prototype
    * @type {boolean}
    */
@@ -340,7 +327,7 @@ Object.defineProperties(SceneGISRiverSurface.prototype, {
     },
   },
   /**
-   * Positive maximum reflected ray length in meters.
+   * 正的反射射线最大长度，单位为米。
    * @memberof SceneGISRiverSurface.prototype
    * @type {number}
    */
@@ -353,7 +340,7 @@ Object.defineProperties(SceneGISRiverSurface.prototype, {
     },
   },
   /**
-   * Positive reflected hit depth tolerance in meters.
+   * 正的反射命中深度容差，单位为米。
    * @memberof SceneGISRiverSurface.prototype
    * @type {number}
    */
@@ -366,7 +353,7 @@ Object.defineProperties(SceneGISRiverSurface.prototype, {
     },
   },
   /**
-   * Integer reflection traversal budget in [16, 256].
+   * 整数反射遍历预算，范围 [16,256]。
    * @memberof SceneGISRiverSurface.prototype
    * @type {number}
    */
@@ -379,7 +366,7 @@ Object.defineProperties(SceneGISRiverSurface.prototype, {
     },
   },
   /**
-   * Curvature error target in pixels, at least 0.1.
+   * 曲率误差目标，单位为像素，至少 0.1。
    * @memberof SceneGISRiverSurface.prototype
    * @type {number}
    */
@@ -392,7 +379,7 @@ Object.defineProperties(SceneGISRiverSurface.prototype, {
     },
   },
   /**
-   * Quadtree leaf budget, integer in [4, 4096].
+   * 四叉树叶节点预算，整数，范围 [4,4096]。
    * @memberof SceneGISRiverSurface.prototype
    * @type {number}
    */
@@ -405,7 +392,7 @@ Object.defineProperties(SceneGISRiverSurface.prototype, {
     },
   },
   /**
-   * Exact World binding.
+   * 精确 World 绑定。
    * @memberof SceneGISRiverSurface.prototype
    * @type {Globe|SceneGISPlanarWorld}
    * @readonly
@@ -416,7 +403,7 @@ Object.defineProperties(SceneGISRiverSurface.prototype, {
     },
   },
   /**
-   * Whether render resources have been created.
+   * 是否已创建渲染资源。
    * @memberof SceneGISRiverSurface.prototype
    * @type {boolean}
    * @readonly
@@ -427,7 +414,7 @@ Object.defineProperties(SceneGISRiverSurface.prototype, {
     },
   },
   /**
-   * A snapshot of shared water LOD and cache statistics.
+   * 共享水面 LOD 与缓存统计的快照。
    * @memberof SceneGISRiverSurface.prototype
    * @type {SceneGISWaterSurface.MeshStatistics}
    * @readonly
@@ -438,7 +425,7 @@ Object.defineProperties(SceneGISRiverSurface.prototype, {
     },
   },
   /**
-   * Borrowed wind simulation; not destroyed with this river.
+   * 借用的风浪模拟，不随河流销毁。
    * @memberof SceneGISRiverSurface.prototype
    * @type {SceneGISWindWaves|undefined}
    * @readonly
@@ -449,7 +436,7 @@ Object.defineProperties(SceneGISRiverSurface.prototype, {
     },
   },
   /**
-   * Finest grid spacing in meters.
+   * 最精细格网间距，单位为米。
    * @memberof SceneGISRiverSurface.prototype
    * @type {number}
    * @readonly
@@ -462,9 +449,9 @@ Object.defineProperties(SceneGISRiverSurface.prototype, {
 });
 
 /**
- * Gets a conservative World-space bound including current and optional wind displacement.
- * @param {BoundingSphere} [result] Object receiving the bound.
- * @returns {BoundingSphere} The bound.
+ * 获取保守世界空间包围体，包含水流及可选风浪位移。
+ * @param {BoundingSphere} [result] 接收包围体的对象。
+ * @returns {BoundingSphere} 包围体。
  */
 SceneGISRiverSurface.prototype.getBoundingSphere = function (result) {
   result = BoundingSphere.clone(this._mesh.root.bounds, result);
@@ -492,14 +479,14 @@ SceneGISRiverSurface.prototype.update = function (frameState) {
 };
 
 /**
- * @returns {boolean} Whether this river has been destroyed.
+ * @returns {boolean} 此河流是否已销毁。
  */
 SceneGISRiverSurface.prototype.isDestroyed = function () {
   return false;
 };
 
 /**
- * Releases owned geometry, river FFT, shaders and picking resources. The World and optional wind simulation are borrowed.
+ * 释放自有几何、河流 FFT、着色器及拾取资源；World 与可选风浪模拟仅借用。
  * @returns {undefined}
  */
 SceneGISRiverSurface.prototype.destroy = function () {

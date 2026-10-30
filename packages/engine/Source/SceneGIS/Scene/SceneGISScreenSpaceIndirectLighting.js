@@ -30,29 +30,22 @@ function numberProperty(name, minimum, maximum, integer = false) {
 }
 
 /**
- * Estimates one local diffuse light bounce between visible opaque PBR models and
- * 3D Tiles. Globe and Planar share the same eye-space algorithm. Offscreen geometry,
- * unlit materials, terrain receivers, transparency and multiple bounces are excluded.
- * HDR and a qualified single-frustum main-pass MRT layout are required. In particular,
- * clearcoat SSR and SSIL together exceed the eight-attachment prototype budget.
- * No extra geometry is drawn. Stable spatial filtering has no independent history;
- * optional temporal antialiasing remains caller-owned.
+ * 估算可见不透明 PBR 模型和 3D Tiles 之间的一次局部漫反射反弹。球面和平面共用视空间算法，不包含屏幕外几何、unlit 材质、地形接收者、透明表面或多次反弹。要求 HDR 及已验证的单视锥主通道 MRT 布局；清漆 SSR 与 SSIL 同开会超出原型的八附件预算。不额外绘制几何。稳定空间滤波没有独立历史，可选 TAA 仍归调用方控制。
  *
- * The Scene owns the attached effect. Calling destroy earlier detaches it. Disabled
- * effects retain allocated resources; constructing disabled allocates no GPU resources.
+ * 附加效果归 Scene 所有，提前 destroy 可解绑。禁用保留已分配资源；以禁用状态构造时不分配 GPU 资源。
  *
  * @alias SceneGISScreenSpaceIndirectLighting
  * @constructor
- * @experimental This feature is not final and is subject to change without Cesium's standard deprecation policy.
- * @param {object} options Initialization options.
- * @param {Scene} options.scene The live Scene. Only one instance may be attached.
- * @param {boolean} [options.enabled=false] Whether indirect lighting is enabled.
- * @param {number} [options.radius=5.0] Maximum gathering distance in meters, greater than zero.
- * @param {number} [options.thickness=0.5] Assumed surface thickness in meters, greater than zero.
- * @param {number} [options.intensity=1.0] Indirect light multiplier in [0, 4].
- * @param {number} [options.directionCount=4] Hemisphere slice count, an integer in [1, 8].
- * @param {number} [options.stepCount=8] Samples per side of each slice, an integer in [2, 16].
- * @param {number} [options.resolutionScale=0.5] Estimation resolution, either 0.5 or 1.
+ * @experimental 此功能尚未定稿，可能不按 Cesium 标准弃用流程发生变化。
+ * @param {object} options 初始化选项。
+ * @param {Scene} options.scene 存活的 Scene，仅可附加一个实例。
+ * @param {boolean} [options.enabled=false] 是否启用间接光照。
+ * @param {number} [options.radius=5.0] 最大收集距离，单位为米，须大于零。
+ * @param {number} [options.thickness=0.5] 假定表面厚度，单位为米，须大于零。
+ * @param {number} [options.intensity=1.0] 间接光倍率，范围 [0,4]。
+ * @param {number} [options.directionCount=4] 半球切片数，整数，范围 [1,8]。
+ * @param {number} [options.stepCount=8] 每个切片每侧的样本数，整数，范围 [2,16]。
+ * @param {number} [options.resolutionScale=0.5] 估计分辨率，可取 0.5 或 1。
  * @example
  * viewer.scene.highDynamicRange = true;
  * const indirectLighting = new Cesium.SceneGISScreenSpaceIndirectLighting({
@@ -94,9 +87,9 @@ function SceneGISScreenSpaceIndirectLighting(options) {
 }
 
 /**
- * Tests baseline GPU support; the current Scene layout is checked before rendering.
- * @param {Scene} scene The Scene to test.
- * @returns {boolean} Whether the required formats and draw buffers are supported.
+ * 测试基本 GPU 支持，当前 Scene 布局在渲染前检查。
+ * @param {Scene} scene 需要测试的 Scene。
+ * @returns {boolean} 是否支持必需格式与绘制缓冲。
  */
 SceneGISScreenSpaceIndirectLighting.isSupported = function (scene) {
   const c = scene.context;
@@ -112,7 +105,7 @@ SceneGISScreenSpaceIndirectLighting.isSupported = function (scene) {
 
 Object.defineProperties(SceneGISScreenSpaceIndirectLighting.prototype, {
   /**
-   * Whether indirect lighting is enabled.
+   * 是否启用间接光照。
    * @memberof SceneGISScreenSpaceIndirectLighting.prototype
    * @type {boolean}
    * @default false
@@ -134,7 +127,7 @@ Object.defineProperties(SceneGISScreenSpaceIndirectLighting.prototype, {
     },
   },
   /**
-   * Whether the current frame has produced an indirect lighting result.
+   * 当前帧是否已生成间接光照结果。
    * @memberof SceneGISScreenSpaceIndirectLighting.prototype
    * @type {boolean}
    * @readonly
@@ -145,42 +138,42 @@ Object.defineProperties(SceneGISScreenSpaceIndirectLighting.prototype, {
     },
   },
   /**
-   * Maximum gathering distance in meters.
+   * 最大收集距离，单位为米。
    * @memberof SceneGISScreenSpaceIndirectLighting.prototype
    * @type {number}
    * @default 5.0
    */
   radius: numberProperty("radius", Number.EPSILON, Number.MAX_VALUE),
   /**
-   * Assumed surface thickness in meters. Single-layer depth cannot recover true thickness.
+   * 假定表面厚度，单位为米；单层深度无法恢复真实厚度。
    * @memberof SceneGISScreenSpaceIndirectLighting.prototype
    * @type {number}
    * @default 0.5
    */
   thickness: numberProperty("thickness", Number.EPSILON, Number.MAX_VALUE),
   /**
-   * Indirect light multiplier in [0, 4].
+   * 间接光倍率，范围 [0,4]。
    * @memberof SceneGISScreenSpaceIndirectLighting.prototype
    * @type {number}
    * @default 1.0
    */
   intensity: numberProperty("intensity", 0, 4),
   /**
-   * Hemisphere slice count in [1, 8].
+   * 半球切片数，范围 [1,8]。
    * @memberof SceneGISScreenSpaceIndirectLighting.prototype
    * @type {number}
    * @default 4
    */
   directionCount: numberProperty("directionCount", 1, 8, true),
   /**
-   * Samples per side of each slice in [2, 16].
+   * 每个切片每侧的样本数，范围 [2,16]。
    * @memberof SceneGISScreenSpaceIndirectLighting.prototype
    * @type {number}
    * @default 8
    */
   stepCount: numberProperty("stepCount", 2, 16, true),
   /**
-   * Estimation resolution, either 0.5 or 1.
+   * 估计分辨率，可取 0.5 或 1。
    * @memberof SceneGISScreenSpaceIndirectLighting.prototype
    * @type {number}
    * @default 0.5
@@ -213,13 +206,15 @@ SceneGISScreenSpaceIndirectLighting.prototype._validate = function () {
   }
 };
 
-/** @returns {boolean} Whether this effect has been destroyed. */
+/**
+ *  @returns {boolean} 此效果是否已销毁。
+ */
 SceneGISScreenSpaceIndirectLighting.prototype.isDestroyed = function () {
   return false;
 };
 
 /**
- * Releases owned GPU resources and detaches from the Scene.
+ * 释放自有 GPU 资源并从 Scene 解绑。
  * @returns {undefined}
  */
 SceneGISScreenSpaceIndirectLighting.prototype.destroy = function () {

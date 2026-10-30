@@ -144,55 +144,36 @@ function advanceWeather(weather, time) {
 }
 
 /**
- * Camera-local rain and snow for aerial GIS views, in WebGL2 SCENE3D.
- * Add to {@link Scene#primitives}; the collection normally owns destruction.
- * Two bounded GPU particle pools wrap and fade around the observer. Overlapping
- * particles retain world-space motion as the camera moves, including frozen time.
- * Supplying scene also coordinates fog, surface wetness/snow and lens rain/frost.
- * Fog borrows the caller's registered environmentEffects; it never enables that
- * controller or changes lighting, exposure, clouds or clocks. Without scene,
- * this primitive provides independent precipitation only.
+ * 用于 WebGL2 SCENE3D 鸟瞰 GIS 场景的相机局部雨雪。加入 {@link Scene#primitives}，集合通常负责销毁。两个有界 GPU 粒子池围绕观察者循环并淡出，相机移动时保留重叠粒子的世界运动，冻结时间时也如此。提供 scene 后还协调雾、地表湿润/薄雪及镜头雨滴/霜冻。雾借用调用方注册的 environmentEffects，不启用控制器或修改光照、曝光、云与时钟；未提供 scene 时只提供独立降水。
  *
- * Each fog/surface/lens group defaults to automatic control (fog requires a binding).
- * Set a group's automatic=false before adjusting its shared effect externally.
- * Manual groups receive no weather writes, including on clear or hide. Strengths
- * are retained while automatic effects fade out. Bound composition runs before
- * Scene consumers; add this primitive to the supplied Scene and destroy/remove it
- * when no longer needed. Only one scene-bound weather system is allowed per Scene.
+ * 雾、地表和镜头各组默认自动控制，雾须有绑定。在外部修改共享效果前，将对应组 automatic=false。手动组不接收天气写入，包括清除和隐藏；自动效果淡出时保留设定强度。绑定合成先于 Scene 消费者执行，应将图元加入所提供的 Scene，不再使用时销毁或移除。每 Scene 仅允许一个绑定天气系统。
  *
- * Intensity is an artistic density, not a rainfall measurement. Opaque depth testing
- * hides particles behind geometry but does not provide roof shelter or collisions.
- * Sprites are unlit, with no physical accumulation or motion vectors.
- * Globe uses a regional camera-local tangent approximation for altitude and vertical.
- * Quality/radius changes reset both pools; type/intensity/wind transitions reuse them.
- * show=false hides immediately and pauses observed time; intensity=0 fades to clear.
- * Forward time steps are used as supplied. Rewinding time resets the particle sequence.
- * No additional frames are requested in requestRenderMode.
+ * intensity 是艺术化密度，不是降雨测量值。不透明深度测试隐藏被几何挡住的粒子，不提供屋顶遮雨或碰撞。精灵不受光，没有物理积累或运动向量。球面高度与竖直方向使用区域相机局部切平面近似。quality/radius 改变会重置两个池，type/intensity/wind 过渡复用池。show=false 立即隐藏并暂停观测时间，intensity=0 淡出到晴天。向前时间步按原样使用，回退重置粒子序列。requestRenderMode 下不请求额外帧。
  *
  * @alias SceneGISWeather
  * @constructor
- * @param {object} options Configuration.
- * @param {string} options.mode "globe" for ENU or "planar" for fixed world XYZ meters. Must match the Scene world.
- * @param {Scene} [options.scene] Bind complete weather composition to this live SCENE3D Scene.
- * @param {SceneGISEnvironmentEffects} [options.environmentEffects] Borrow the existing fog controller. The caller registers/enables it; omitted means no fog binding.
- * @param {SceneGISSurfaceWeather} [options.surfaceWeather] Borrow a surface setting; otherwise reuse the Scene setting or create one.
- * @param {SceneGISRainLensStage} [options.rainLens] Borrow a stage already in this Scene's collection; otherwise create and own it.
- * @param {SceneGISSnowLensStage} [options.snowLens] Borrow a stage already in this Scene's collection; otherwise create and own it.
- * @param {SceneGISWeather.FogOptions} [options.fog] Fog control; requires scene.
- * @param {SceneGISWeather.SurfaceOptions} [options.surface] Surface control; requires scene.
- * @param {SceneGISWeather.LensOptions} [options.lens] Lens control; requires scene.
- * @param {string} [options.type="rain"] "rain" or "snow".
- * @param {number} [options.intensity=0.6] Target visual density in [0,1].
- * @param {Cartesian2} [options.windVelocity] Horizontal velocity in m/s; Planar XY or Globe east/north. Defaults to (3,0).
- * @param {string} [options.quality="medium"] Total slot budget: low=16K, medium=32K, high=64K.
- * @param {number} [options.radius=1500] Far volume radius in meters, [100,5000].
- * @param {number} [options.ceilingHeight=4500] Precipitation ceiling in meters; Planar world Z or Globe ellipsoid height.
- * @param {number} [options.particleSize=1] Artistic sprite size multiplier, [0.25,4].
- * @param {Color} [options.color=Color.WHITE] Unlit sprite tint and opacity, components in [0,1].
- * @param {number} [options.transitionDuration=3] Seconds for a full-scale intensity/type transition and approximately 95% wind convergence, [0,60]. Zero applies immediately.
- * @param {boolean} [options.show=true] Display the system.
- * @param {boolean} [options.paused=false] Freeze simulation and transitions, while maintaining camera coverage.
- * @throws {DeveloperError} Mode or public values violate their documented contracts.
+ * @param {object} options 配置。
+ * @param {string} options.mode "globe" 使用 ENU，"planar" 使用固定世界 XYZ 米；须匹配 Scene 世界。
+ * @param {Scene} [options.scene] 将完整天气合成绑定到此存活 SCENE3D Scene。
+ * @param {SceneGISEnvironmentEffects} [options.environmentEffects] 借用已有雾控制器，由调用方注册和启用；省略表示不绑定雾。
+ * @param {SceneGISSurfaceWeather} [options.surfaceWeather] 借用地表设置，否则复用 Scene 设置或创建一个。
+ * @param {SceneGISRainLensStage} [options.rainLens] 借用此 Scene 集合中已有的阶段，否则创建并拥有它。
+ * @param {SceneGISSnowLensStage} [options.snowLens] 借用此 Scene 集合中已有的阶段，否则创建并拥有它。
+ * @param {SceneGISWeather.FogOptions} [options.fog] 雾控制，要求 scene。
+ * @param {SceneGISWeather.SurfaceOptions} [options.surface] 地表控制，要求 scene。
+ * @param {SceneGISWeather.LensOptions} [options.lens] 镜头控制，要求 scene。
+ * @param {string} [options.type="rain"] 取值 "rain" 或 "snow"。
+ * @param {number} [options.intensity=0.6] 目标显示密度，范围 [0,1]。
+ * @param {Cartesian2} [options.windVelocity] 水平速度，单位为 m/s，平面为 XY，Globe 为东/北，默认 (3,0)。
+ * @param {string} [options.quality="medium"] 总槽位预算：low=16K、medium=32K、high=64K。
+ * @param {number} [options.radius=1500] 远处体积半径，单位为米，范围 [100,5000]。
+ * @param {number} [options.ceilingHeight=4500] 降水上限高度，单位为米；平面为 World Z，Globe 为椭球高。
+ * @param {number} [options.particleSize=1] 艺术化精灵尺寸倍率，范围 [0.25,4]。
+ * @param {Color} [options.color=Color.WHITE] 不受光精灵的色调与不透明度，各分量范围 [0,1]。
+ * @param {number} [options.transitionDuration=3] 完整强度和类型过渡，以及约 95% 风速收敛的秒数，范围 [0,60]；0 立即应用。
+ * @param {boolean} [options.show=true] 显示系统。
+ * @param {boolean} [options.paused=false] 冻结模拟与过渡，但保持相机覆盖。
+ * @throws {DeveloperError} 模式或公开值违反文档契约。
  * @example
  * const weather = scene.primitives.add(new Cesium.SceneGISWeather({
  *   scene, environmentEffects: effects,
@@ -209,59 +190,59 @@ function SceneGISWeather(options = {}) {
   }
   this._mode = options.mode;
   /**
-   * Target precipitation kind.
+   * 目标降水类型。
    * @type {string}
    */
   this.type = options.type ?? "rain";
   /**
-   * Target visual density, [0,1].
+   * 目标显示密度，范围 [0,1]。
    * @type {number}
    */
   this.intensity = options.intensity ?? 0.6;
   /**
-   * Horizontal velocity in local XY or ENU meters per second.
+   * 局部 XY 或 ENU 水平速度，单位为米/秒。
    * @type {Cartesian2}
    */
   this.windVelocity = Cartesian2.clone(
     options.windVelocity ?? new Cartesian2(3, 0),
   );
   /**
-   * Explicit low/medium/high particle budget. Changing it resets the pools.
+   * 显式 low/medium/high 粒子预算，修改会重置粒子池。
    * @type {string}
    */
   this.quality = options.quality ?? "medium";
   /**
-   * Far volume radius in meters; changing it resets the pools.
+   * 远处体积半径，单位为米，修改会重置粒子池。
    * @type {number}
    */
   this.radius = options.radius ?? 1500;
   /**
-   * Precipitation ceiling in world/ellipsoid meters.
+   * 世界或椭球米制的降水上限高度。
    * @type {number}
    */
   this.ceilingHeight = options.ceilingHeight ?? 4500;
   /**
-   * Artistic sprite size multiplier.
+   * 艺术化精灵尺寸倍率。
    * @type {number}
    */
   this.particleSize = options.particleSize ?? 1;
   /**
-   * Unlit sprite tint and opacity.
+   * 不受光精灵的色调与不透明度。
    * @type {Color}
    */
   this.color = Color.clone(options.color ?? Color.WHITE);
   /**
-   * Transition duration in seconds; zero is immediate.
+   * 过渡时长，单位为秒，0 立即应用。
    * @type {number}
    */
   this.transitionDuration = options.transitionDuration ?? 3;
   /**
-   * Display weather; hidden updates pause observed time.
+   * 显示天气；隐藏更新暂停观测时间。
    * @type {boolean}
    */
   this.show = options.show ?? true;
   /**
-   * Freeze simulation and transitions.
+   * 冻结模拟与过渡。
    * @type {boolean}
    */
   this.paused = options.paused ?? false;
@@ -307,7 +288,8 @@ function SceneGISWeather(options = {}) {
 }
 
 Object.defineProperties(SceneGISWeather.prototype, {
-  /** Shared fog controller; caller-owned, never implicitly enabled.
+  /**
+   *  共享雾控制器，归调用方所有，不隐式启用。
    * @memberof SceneGISWeather.prototype
    * @type {SceneGISEnvironmentEffects|undefined}
    * @readonly
@@ -317,7 +299,8 @@ Object.defineProperties(SceneGISWeather.prototype, {
       return this._effects?.environmentEffects;
     },
   },
-  /** Shared surface setting. Automatically created when scene has none.
+  /**
+   *  共享地表设置，Scene 没有时自动创建。
    * @memberof SceneGISWeather.prototype
    * @type {SceneGISSurfaceWeather|undefined}
    * @readonly
@@ -327,7 +310,8 @@ Object.defineProperties(SceneGISWeather.prototype, {
       return this._effects?.surfaceWeather;
     },
   },
-  /** Shared native rain stage. Set lens.automatic=false for direct manual control.
+  /**
+   *  共享原生雨滴阶段，设 lens.automatic=false 可直接手动控制。
    * @memberof SceneGISWeather.prototype
    * @type {SceneGISRainLensStage|undefined}
    * @readonly
@@ -337,7 +321,8 @@ Object.defineProperties(SceneGISWeather.prototype, {
       return this._effects?.rainLens;
     },
   },
-  /** Shared native frost stage. Geometry/appearance controls remain on this stage.
+  /**
+   *  共享原生霜冻阶段，几何与外观控制仍在该阶段上。
    * @memberof SceneGISWeather.prototype
    * @type {SceneGISSnowLensStage|undefined}
    * @readonly
@@ -347,7 +332,8 @@ Object.defineProperties(SceneGISWeather.prototype, {
       return this._effects?.snowLens;
     },
   },
-  /** Mutable fog automation and full-intensity density. Undefined without scene.
+  /**
+   *  可修改的雾自动控制与满强度密度，未提供 scene 时为 undefined。
    * @memberof SceneGISWeather.prototype
    * @type {SceneGISWeather.FogOptions|undefined}
    * @readonly
@@ -357,7 +343,8 @@ Object.defineProperties(SceneGISWeather.prototype, {
       return this._effects?.fog;
     },
   },
-  /** Mutable full-intensity surface amounts, retained through clear/hide.
+  /**
+   *  可修改的满强度地表数值，清除和隐藏时保留。
    * @memberof SceneGISWeather.prototype
    * @type {SceneGISWeather.SurfaceOptions|undefined}
    * @readonly
@@ -367,7 +354,8 @@ Object.defineProperties(SceneGISWeather.prototype, {
       return this._effects?.surface;
     },
   },
-  /** Mutable rain/frost automation and full-intensity strengths.
+  /**
+   *  可修改的雨滴/霜冻自动控制及满强度数值。
    * @memberof SceneGISWeather.prototype
    * @type {SceneGISWeather.LensOptions|undefined}
    * @readonly
@@ -378,7 +366,7 @@ Object.defineProperties(SceneGISWeather.prototype, {
     },
   },
   /**
-   * Immutable world mode.
+   * 不可变世界模式。
    * @memberof SceneGISWeather.prototype
    * @type {string}
    * @readonly
@@ -389,7 +377,7 @@ Object.defineProperties(SceneGISWeather.prototype, {
     },
   },
   /**
-   * Current transitioned visual intensity.
+   * 当前过渡后的显示强度。
    * @memberof SceneGISWeather.prototype
    * @type {number}
    * @readonly
@@ -400,7 +388,7 @@ Object.defineProperties(SceneGISWeather.prototype, {
     },
   },
   /**
-   * Allocated simulation bytes, including texture padding.
+   * 已分配的模拟字节数，包含纹理填充。
    * @memberof SceneGISWeather.prototype
    * @type {number}
    * @readonly
@@ -507,15 +495,14 @@ SceneGISWeather.prototype.update = function (frameState) {
 };
 
 /**
- * @returns {boolean} Whether this primitive has been destroyed.
+ * @returns {boolean} 此图元是否已销毁。
  */
 SceneGISWeather.prototype.isDestroyed = function () {
   return false;
 };
 
 /**
- * Release owned pools, surface/lens components and the Scene listener. Borrowed
- * resources survive; weather-written fields are restored only if not edited later.
+ * 释放自有粒子池、地表/镜头组件与 Scene 监听。借用资源保留；天气写入字段仅在之后未被编辑时恢复。
  * @returns {undefined}
  */
 SceneGISWeather.prototype.destroy = function () {
@@ -528,35 +515,32 @@ SceneGISWeather.prototype.destroy = function () {
 };
 
 /**
- * Automatic fog writes density/showHeightFog only; other fog parameters stay shared.
- * Direct environment controls remain available when automatic=false.
+ * 自动雾只写入 density/showHeightFog，其他雾参数仍共享。automatic=false 时可以直接控制环境参数。
  * @typedef {object} SceneGISWeather.FogOptions
- * @property {boolean} [automatic=true] Follow weather. Defaults to false without environmentEffects.
- * @property {boolean} [enabled=true] Apply fog while automatic; false clears weather fog.
- * @property {number} [density=0.0003] Extinction per meter at full intensity, [0,0.001].
+ * @property {boolean} [automatic=true] 随天气变化；没有 environmentEffects 时默认 false。
+ * @property {boolean} [enabled=true] 自动模式下应用雾，false 清除天气雾。
+ * @property {number} [density=0.0003] 满强度时的每米消光系数，范围 [0,0.001]。
  */
 
 /**
- * Automatic rain drives wetness/ripples; snow drives coverage. Current values are
- * available on surfaceWeather. Set automatic=false to edit it independently.
+ * 自动雨驱动湿润和涟漪，雪驱动覆盖。当前值可从 surfaceWeather 读取，设 automatic=false 可独立编辑。
  * @typedef {object} SceneGISWeather.SurfaceOptions
- * @property {boolean} [automatic=true] Follow weather; false stops all surface writes.
- * @property {boolean} [enabled=true] Apply automatic coverage; false disables it.
- * @property {number} [wetness=0.8] Full-rain wetness, [0,1].
- * @property {number} [snowCoverage=0.95] Full-snow coverage, [0,1].
- * @property {number} [rippleIntensity=1] Full-rain ripple strength, [0,1].
+ * @property {boolean} [automatic=true] 随天气变化，false 停止全部地表写入。
+ * @property {boolean} [enabled=true] 应用自动覆盖，false 禁用。
+ * @property {number} [wetness=0.8] 全雨状态湿润度，范围 [0,1]。
+ * @property {number} [snowCoverage=0.95] 全雪状态覆盖度，范围 [0,1]。
+ * @property {number} [rippleIntensity=1] 全雨状态涟漪强度，范围 [0,1]。
  */
 
 /**
- * Automatic lens strengths follow the rain/snow mixture. Shape controls remain
- * directly available on rainLens and snowLens; manual mode stops all lens writes.
+ * 自动镜头强度随雨雪混合变化。形状控制仍可直接通过 rainLens 和 snowLens 修改，手动模式停止全部镜头写入。
  * @typedef {object} SceneGISWeather.LensOptions
- * @property {boolean} [automatic=true] Follow weather; false stops all lens writes.
- * @property {boolean} [enabled=true] Apply automatic lens effects.
- * @property {boolean} [rainEnabled=true] Enable automatic rain beads.
- * @property {boolean} [snowEnabled=true] Enable automatic frost.
- * @property {number} [rainIntensity=0.7] Full-rain strength, [0,1].
- * @property {number} [snowIntensity=0.7] Full-snow strength, [0,1].
+ * @property {boolean} [automatic=true] 随天气变化，false 停止全部镜头写入。
+ * @property {boolean} [enabled=true] 应用自动镜头效果。
+ * @property {boolean} [rainEnabled=true] 启用自动雨珠。
+ * @property {boolean} [snowEnabled=true] 启用自动霜冻。
+ * @property {number} [rainIntensity=0.7] 全雨状态强度，范围 [0,1]。
+ * @property {number} [snowIntensity=0.7] 全雪状态强度，范围 [0,1]。
  */
 
 export default SceneGISWeather;

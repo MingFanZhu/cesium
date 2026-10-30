@@ -61,7 +61,7 @@ function signature(doclet) {
 test("locale metadata preserves all canonical symbols, signatures, type data and example code", async () => {
   assert.equal(english.locale, "en-US");
   assert.equal(chinese.locale, "zh-CN");
-  assert.equal(chinese.sourceLocale, "en-US");
+  assert.deepEqual(chinese.sourceLocales, ["en-US", "zh-CN"]);
   assert.deepEqual(
     chinese.doclets.map(signature),
     english.doclets.map(signature),
@@ -86,7 +86,7 @@ test("coverage is honest, source-bound and includes every public extension entry
   const source = await load("translation-source.json");
   assert.equal(report.counts.stale, 0);
   assert.equal(report.counts.unused, 0);
-  assert.ok(report.counts.translated > 3000);
+  assert.ok(report.counts.translated > 2900);
   assert.ok(report.counts.missing > 0);
   assert.equal(report.counts.total, source.units.length);
   assert.equal(
@@ -97,13 +97,28 @@ test("coverage is honest, source-bound and includes every public extension entry
     (doclet) => !doclet.memberof && doclet.exportName?.startsWith("SceneGIS"),
   )) {
     assert.ok(
-      doclet.i18n.translatedFields.some(
+      doclet.i18n.sourceFields.some(
         (field) => field === "description" || field === "classdesc",
       ),
       doclet.id,
     );
   }
+  const ownedIds = new Set(
+    chinese.doclets
+      .filter((doclet) => doclet.sourceLocale === "zh-CN")
+      .map((doclet) => doclet.id),
+  );
+  for (const doclet of chinese.doclets.filter(
+    (doclet) => doclet.sourceLocale === "zh-CN",
+  )) {
+    assert.deepEqual(doclet.i18n.fallbackFields, []);
+    assert.deepEqual(doclet.i18n.translatedFields, []);
+  }
+  for (const unit of report.units) {
+    assert.ok(!ownedIds.has(unit.id), unit.id);
+  }
   for (const unit of source.units) {
+    assert.ok(!ownedIds.has(unit.id), unit.id);
     assert.equal(unit.sourceHash, translations.sourceHash(unit.source));
     assert.doesNotMatch(
       unit.source,

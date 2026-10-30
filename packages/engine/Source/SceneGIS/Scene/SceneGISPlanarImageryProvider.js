@@ -19,14 +19,10 @@ function throwPropertyInstantiationError() {
 }
 
 /**
- * Defines the structural contract for imagery providers used by a
- * {@link SceneGISPlanarWorld}. Implementations declare a continuous canonical
- * level interval in the northwest-origin grid and return images in the provider's
- * declared tile dimensions. This type is not intended to be instantiated
- * directly.
+ * 定义 {@link SceneGISPlanarWorld} 使用的影像提供者结构契约。实现须在西北原点的标准格网中声明连续层级区间，并按提供者声明的瓦片尺寸返回图像。此类型不应直接实例化。
  *
  * @interface
- * @exception {DeveloperError} This interface must not be instantiated directly.
+ * @exception {DeveloperError} 此接口不能直接实例化。
  */
 class SceneGISPlanarImageryProvider {
   constructor() {
@@ -34,7 +30,7 @@ class SceneGISPlanarImageryProvider {
   }
 
   /**
-   * Gets the provider's canonical planar tiling scheme.
+   * 获取提供者的标准平面切片方案。
    * @type {SceneGISPlanarTilingScheme}
    * @constant
    */
@@ -43,7 +39,7 @@ class SceneGISPlanarImageryProvider {
   }
 
   /**
-   * Gets the minimum available canonical level.
+   * 获取可用最低标准层级。
    * @type {number}
    * @constant
    */
@@ -52,8 +48,7 @@ class SceneGISPlanarImageryProvider {
   }
 
   /**
-   * Gets optional coverage in world meter coordinates. Undefined covers the world.
-   * This rectangle does not change canonical tile addresses or image bounds.
+   * 获取可选的世界米制覆盖范围。undefined 表示覆盖全世界，此矩形不改变标准瓦片地址或图像边界。
    * @type {SceneGISPlanarExtent=}
    * @constant
    */
@@ -62,7 +57,7 @@ class SceneGISPlanarImageryProvider {
   }
 
   /**
-   * Gets the maximum available level.
+   * 获取可用最高层级。
    * @type {number}
    * @constant
    */
@@ -71,7 +66,7 @@ class SceneGISPlanarImageryProvider {
   }
 
   /**
-   * Gets the tile width in pixels.
+   * 获取瓦片宽度，单位为像素。
    * @type {number}
    * @constant
    */
@@ -80,7 +75,7 @@ class SceneGISPlanarImageryProvider {
   }
 
   /**
-   * Gets the tile height in pixels.
+   * 获取瓦片高度，单位为像素。
    * @type {number}
    * @constant
    */
@@ -89,7 +84,7 @@ class SceneGISPlanarImageryProvider {
   }
 
   /**
-   * Gets whether imagery has an alpha channel.
+   * 获取影像是否具有 alpha 通道。
    * @type {boolean}
    * @constant
    */
@@ -98,10 +93,7 @@ class SceneGISPlanarImageryProvider {
   }
 
   /**
-   * Gets the event raised for asynchronous tile failures.
-   * The event is structural and must provide <code>addEventListener</code>
-   * and <code>raiseEvent</code>; it does not need to be a Cesium
-   * {@link Event} instance.
+   * 获取异步瓦片失败时触发的事件。此事件采用结构契约，须提供 <code>addEventListener</code> 与 <code>raiseEvent</code>，不必是 Cesium {@link Event} 实例。
    *
    * @type {Pick.<Event.<*>, "addEventListener"|"raiseEvent">}
    * @constant
@@ -111,7 +103,7 @@ class SceneGISPlanarImageryProvider {
   }
 
   /**
-   * Gets the provider attribution.
+   * 获取提供者署名。
    * @type {Credit|undefined}
    * @constant
    */
@@ -120,16 +112,13 @@ class SceneGISPlanarImageryProvider {
   }
 
   /**
-   * Requests an image for a canonical northwest-origin XYZ tile address.
-   * The request may be throttled by returning <code>undefined</code>.
-   * Rejection with statusCode 404 denotes missing imagery without a runtime
-   * errorEvent. Other failures retain the ordinary error/retry behavior.
+   * 按标准西北原点 XYZ 地址请求图像。可返回 <code>undefined</code> 表示限流。以 statusCode 404 拒绝表示影像缺失，不触发运行时 errorEvent；其他失败保留普通错误与重试行为。
    *
-   * @param {number} x The tile X coordinate.
-   * @param {number} y The tile Y coordinate.
-   * @param {number} level The tile level.
-   * @param {Request} request The request used for cancellation and scheduling.
-   * @returns {Promise<ImageBitmap|HTMLImageElement|HTMLCanvasElement>|undefined} The image promise, or undefined when deferred.
+   * @param {number} x 瓦片 X 坐标。
+   * @param {number} y 瓦片 Y 坐标。
+   * @param {number} level 瓦片层级。
+   * @param {Request} request 用于取消与调度的请求。
+   * @returns {Promise<ImageBitmap|HTMLImageElement|HTMLCanvasElement>|undefined} 图像 Promise，延后时为 undefined。
    */
   requestImage(x, y, level, request) {
     DeveloperError.throwInstantiationError();

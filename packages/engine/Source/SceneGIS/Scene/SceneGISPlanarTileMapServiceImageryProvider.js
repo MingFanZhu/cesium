@@ -31,26 +31,23 @@ function matches(actual, expected, scale) {
 }
 
 /**
- * Loads a TMS pyramid in the canonical planar grid. Use fromUrl to read and validate
- * tilemapresource.xml. The synchronous constructor instead uses explicitly configured
- * dimensions and levels with the conventional z/x/y.extension paths.
- * Service rows increase northward; public addresses remain northwest-origin XYZ.
+ * 在标准平面格网中加载 TMS 金字塔。使用 fromUrl 读取并校验 tilemapresource.xml；同步构造函数则使用显式尺寸和层级配置，以及标准 z/x/y.extension 路径。服务行号向北递增，公开地址仍采用西北原点的 XYZ。
  *
  * @alias SceneGISPlanarTileMapServiceImageryProvider
  * @extends SceneGISPlanarUrlTemplateImageryProvider
  *
- * @param {object} options Initialization options.
- * @param {string|Resource} options.url The TMS directory.
- * @param {SceneGISPlanarTilingScheme} options.tilingScheme The world's canonical tiling scheme.
- * @param {string} [options.fileExtension="png"] The image file extension, without a dot.
- * @param {SceneGISPlanarExtent} [options.coverageExtent] Coverage in world meter coordinates; does not change tile addresses.
- * @param {number} [options.minimumLevel=0] The minimum available canonical level.
- * @param {number} [options.maximumLevel] The maximum available level.
- * @param {number} [options.tileWidth=256] The image width in pixels.
- * @param {number} [options.tileHeight=options.tileWidth] The image height in pixels.
- * @param {boolean} [options.hasAlphaChannel=true] Whether imagery has alpha.
- * @param {Credit|string} [options.credit] Attribution.
- * @exception {DeveloperError} The options are invalid.
+ * @param {object} options 初始化选项。
+ * @param {string|Resource} options.url TMS 目录。
+ * @param {SceneGISPlanarTilingScheme} options.tilingScheme 世界的标准切片方案。
+ * @param {string} [options.fileExtension="png"] 图像文件扩展名，不含点号。
+ * @param {SceneGISPlanarExtent} [options.coverageExtent] 世界米制覆盖范围，不改变瓦片地址。
+ * @param {number} [options.minimumLevel=0] 可用最低标准层级。
+ * @param {number} [options.maximumLevel] 可用最高层级。
+ * @param {number} [options.tileWidth=256] 图像宽度，单位为像素。
+ * @param {number} [options.tileHeight=options.tileWidth] 图像高度，单位为像素。
+ * @param {boolean} [options.hasAlphaChannel=true] 影像是否具有 alpha。
+ * @param {Credit|string} [options.credit] 署名。
+ * @exception {DeveloperError} 选项无效。
  */
 class SceneGISPlanarTileMapServiceImageryProvider extends SceneGISPlanarUrlTemplateImageryProvider {
   constructor(options = {}) {
@@ -77,22 +74,18 @@ class SceneGISPlanarTileMapServiceImageryProvider extends SceneGISPlanarUrlTempl
   }
 
   /**
-   * Reads standard TMS metadata. Origin must match the world southwest corner;
-   * SRS must match coordinateSystem.crs and resolutions identify continuous canonical levels.
-   * BoundingBox defines coverage; explicit SDK coverage must be contained within it.
-   * TileSet order values and hrefs are preserved even when the first order is nonzero.
-   * Metadata errors are rejected rather than replaced by a guessed Earth grid.
+   * 读取标准 TMS 元数据。Origin 须匹配世界西南角，SRS 须匹配 coordinateSystem.crs，分辨率须确定连续标准层级。BoundingBox 定义覆盖，SDK 显式覆盖须包含在其中。即使首个 order 非零，也保留 TileSet order 和 href。元数据错误会拒绝，不猜测地球格网代替。
    *
-   * @param {string|Resource} url The TMS directory or tilemapresource XML URL.
-   * @param {object} options Initialization options.
-   * @param {SceneGISPlanarTilingScheme} options.tilingScheme The canonical scheme, including its CRS identifier.
-   * @param {SceneGISPlanarExtent} [options.coverageExtent] Coverage contained within the metadata BoundingBox.
-   * @param {number} [options.minimumLevel] The lowest requested level, defaulting to the first metadata resolution.
-   * @param {number} [options.maximumLevel] A cap on the levels declared in the metadata.
-   * @param {boolean} [options.hasAlphaChannel=true] Whether imagery has alpha.
-   * @param {Credit|string} [options.credit] Attribution.
-   * @returns {Promise<SceneGISPlanarTileMapServiceImageryProvider>} A ready provider.
-   * @exception {RuntimeError} The metadata is missing, malformed, or incompatible with the world grid.
+   * @param {string|Resource} url TMS 目录或 tilemapresource XML URL。
+   * @param {object} options 初始化选项。
+   * @param {SceneGISPlanarTilingScheme} options.tilingScheme 包含 CRS 标识的标准切片方案。
+   * @param {SceneGISPlanarExtent} [options.coverageExtent] 包含在元数据 BoundingBox 内的覆盖范围。
+   * @param {number} [options.minimumLevel] 最低请求层级，默认首个元数据分辨率。
+   * @param {number} [options.maximumLevel] 对元数据声明层级施加的上限。
+   * @param {boolean} [options.hasAlphaChannel=true] 影像是否具有 alpha。
+   * @param {Credit|string} [options.credit] 署名。
+   * @returns {Promise<SceneGISPlanarTileMapServiceImageryProvider>} 就绪的提供者。
+   * @exception {RuntimeError} 元数据缺失、格式错误或与世界格网不兼容。
    *
    * @example
    * const provider = await SceneGISPlanarTileMapServiceImageryProvider.fromUrl("/imagery/", {

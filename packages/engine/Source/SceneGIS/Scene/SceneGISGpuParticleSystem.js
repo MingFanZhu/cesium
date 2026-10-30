@@ -248,59 +248,36 @@ function createResources(system, context) {
 }
 
 /**
- * A programmable GPU particle primitive for WebGL2 SCENE3D, including Globe and Planar.
- * Add to {@link Scene#primitives}; the collection normally owns its destruction.
- * CPU work schedules births only. State updates run in one four-target GPU pass and
- * sprites render as instanced camera-facing quads through native translucency/OIT.
+ * 用于 WebGL2 SCENE3D 的可编程 GPU 粒子图元，支持球面和平面。加入 {@link Scene#primitives}，集合通常负责销毁。CPU 仅调度粒子出生；状态更新由一次四目标 GPU 通道完成，精灵以面向相机的实例化四边形接入原生透明/OIT。
  *
- * The simulationShader must define both GLSL functions:
- * <code>void initializeParticle(inout SceneGISParticle particle)</code> and
- * <code>void updateParticle(inout SceneGISParticle particle, float deltaTime)</code>.
- * SceneGISParticle contains position/velocity (vec3, local meters and meters/second),
- * color (vec4, straight-alpha Cesium-style color), size (vec2, full sprite size in meters),
- * rotation (float, radians counterclockwise on screen), life (float, seconds), age
- * (float, seconds) and seed (float, integer in [0, 16777215]). Age and seed are read-only
- * shader inputs. Other fields are persistent and controlled entirely by the shader;
- * the engine does not integrate velocity or apply any force. Initialization defaults
- * are zero position/velocity/rotation, white color, unit size and five-second life.
- * The update sees the advanced age; setting life to zero kills the particle.
- * <code>sceneGISParticleRandom(seed, stream)</code> returns a deterministic value in [0, 1).
- * Use distinct nonnegative integer streams for independent samples.
- * Optional renderShader defines <code>void styleParticle(inout SceneGISParticle p)</code>.
- * It modifies a draw-local copy without changing stored simulation state, including
- * during frozen time and picking. It shares uniformMap and native vertex builtins.
- * Supplied bounds must include its maximum position/size changes.
+ * simulationShader 必须定义两个 GLSL 函数：<code>void initializeParticle(inout SceneGISParticle particle)</code> 和 <code>void updateParticle(inout SceneGISParticle particle, float deltaTime)</code>。
+ * SceneGISParticle 包含 position/velocity（vec3，局部米和米/秒）、color（vec4，Cesium 风格的非预乘 alpha 颜色）、size（vec2，精灵全尺寸，米）、rotation（float，屏幕逆时针弧度）、life（float，秒）、age（float，秒）和 seed（float，[0,16777215] 内的整数）。age 与 seed 是只读着色器输入，其余字段持久保存并完全由着色器控制；引擎不积分速度或施加力。初始化默认位置、速度和旋转为零，颜色为白，尺寸为一，寿命为五秒。更新时 age 已推进，设置 life=0 可杀死粒子。
+ * <code>sceneGISParticleRandom(seed, stream)</code> 返回 [0,1) 内的确定性数值，不同非负整数 stream 提供独立样本。
+ * 可选 renderShader 定义 <code>void styleParticle(inout SceneGISParticle p)</code>，修改仅用于本次绘制的副本，不改变已保存的模拟状态，在冻结时间和拾取时也如此。它共享 uniformMap 与原生顶点内置变量；调用方提供的包围体必须包含它可能造成的最大位置和尺寸变化。
  *
- * Local state moves with modelMatrix. The caller must keep all positions and sprite
- * extents inside boundingSphere and write finite attributes, nonnegative sizes/colors
- * and alpha in [0, 1]. No CPU readback, per-particle picking, lighting, shadows,
- * collision, automatic bounds or JavaScript updateCallback is provided. Without native
- * OIT, instances are not individually sorted. TAA has no particle motion vectors.
+ * 局部状态随 modelMatrix 移动。调用方须保证全部粒子位置与精灵范围位于 boundingSphere 内，属性有限，尺寸和颜色非负，alpha 在 [0,1]。不提供 CPU 回读、逐粒子拾取、光照、阴影、碰撞、自动包围体或 JavaScript updateCallback。无原生 OIT 时不逐实例排序；TAA 没有粒子运动向量。
  *
- * Births use circular slots; capacity saturation replaces older slots. A forward clock
- * jump passes its actual deltaTime to the shader and retains the newest capacity births.
- * No hidden time clamping/substeps occur. Shader sources, uniform-map keys, capacity,
- * seed and image are immutable. Uniform values can change through the supplied callbacks.
+ * 出生使用循环槽位，容量满时覆盖旧粒子。时钟向前跳变时，着色器接收实际 deltaTime，仅保留最新 capacity 次出生；没有隐式时间截断或子步。着色器源码、uniform-map 键、容量、seed 和 image 均不可变，uniform 值可通过所提供的回调更新。
  *
  * @alias SceneGISGpuParticleSystem
  * @constructor
- * @param {object} options Configuration.
- * @param {string} options.simulationShader Initialization/update function definitions and custom uniform declarations.
- * @param {string} [options.renderShader] Draw-only styleParticle definition and custom uniform declarations. Defaults to an unchanged particle.
- * @param {BoundingSphere} options.boundingSphere Conservative local bounds including maximum sprite extent.
- * @param {object} [options.uniformMap] Callbacks for simulation/render uniforms; evaluated per draw, never per particle. Names beginning with u_sg or czm_ are reserved. Borrowed uniform resources remain caller-owned.
- * @param {number} [options.maximumParticles=65536] Immutable slot capacity, integer in [1, 1048576].
- * @param {number} [options.initialParticles=0] Immutable initial/reset fill, integer from zero through maximumParticles. These particles initialize at age zero before regular emission.
- * @param {number} [options.seed=0] Immutable seed offset, integer in [0, 16777215].
- * @param {number} [options.emissionRate=1000] Births per second; finite and nonnegative.
- * @param {Function} [options.timeSource] Immutable callback returning absolute simulation seconds. Defaults to Scene time. Equal values freeze, decreasing values reset; hidden/paused normal updates consume time without catch-up. Called only during normal rendering.
- * @param {Matrix4} [options.modelMatrix=Matrix4.IDENTITY] Rigid local-to-world transform; use ENU for Globe.
- * @param {HTMLImageElement|HTMLCanvasElement|ImageBitmap} [options.image] Decoded sprite image. Uploaded GPU copy is owned by this primitive; the input is borrowed. Undefined uses a soft disc.
- * @param {boolean} [options.show=true] Show and simulate the system.
- * @param {boolean} [options.paused=false] Freeze simulation while keeping current particles visible.
- * @param {*} [options.id] Object returned by system-level picking.
- * @throws {DeveloperError} Required shader/bounds are missing or options violate their documented ranges.
- * @throws {RuntimeError} On first update, the context lacks WebGL2 or four float color attachments.
+ * @param {object} options 配置。
+ * @param {string} options.simulationShader 初始化和更新函数定义，以及自定义 uniform 声明。
+ * @param {string} [options.renderShader] 仅绘制使用的 styleParticle 定义及自定义 uniform 声明，默认保持粒子不变。
+ * @param {BoundingSphere} options.boundingSphere 包含精灵最大范围的保守局部包围体。
+ * @param {object} [options.uniformMap] 模拟和绘制 uniform 回调，按绘制求值，不逐粒子调用。u_sg 或 czm_ 前缀保留。借用的 uniform 资源仍归调用方所有。
+ * @param {number} [options.maximumParticles=65536] 不可变槽位容量，整数，范围 [1,1048576]。
+ * @param {number} [options.initialParticles=0] 不可变的初始和重置填充量，整数，范围为零到 maximumParticles；这些粒子在常规发射前以零年龄初始化。
+ * @param {number} [options.seed=0] 不可变种子偏移，整数，范围 [0,16777215]。
+ * @param {number} [options.emissionRate=1000] 每秒出生数，须有限且非负。
+ * @param {Function} [options.timeSource] 返回绝对模拟秒数的不可变回调，默认使用 Scene 时间。相同数值冻结，减小则重置；隐藏或暂停时的正常更新会消费时间，不补算。仅在正常渲染时调用。
+ * @param {Matrix4} [options.modelMatrix=Matrix4.IDENTITY] 局部到世界的刚体变换，Globe 使用 ENU。
+ * @param {HTMLImageElement|HTMLCanvasElement|ImageBitmap} [options.image] 已解码精灵图像。图元拥有上传后的 GPU 副本，输入仅借用；未定义时使用柔和圆盘。
+ * @param {boolean} [options.show=true] 显示并模拟系统。
+ * @param {boolean} [options.paused=false] 冻结模拟并保留当前粒子显示。
+ * @param {*} [options.id] 系统级拾取返回的对象。
+ * @throws {DeveloperError} 缺少必需着色器或包围体，或选项超出文档范围。
+ * @throws {RuntimeError} 首次更新时 Context 不支持 WebGL2 或四个浮点颜色附件。
  * @example
  * const acceleration = new Cesium.Cartesian3(0, 0, -2);
  * const particles = scene.primitives.add(new Cesium.SceneGISGpuParticleSystem({
@@ -372,32 +349,32 @@ function SceneGISGpuParticleSystem(options = {}) {
   }
   this._timeSource = options.timeSource;
   /**
-   * Show and simulate; observed hidden frames pause the simulation clock.
+   * 显示并模拟；观测到的隐藏帧会暂停模拟时钟。
    * @type {boolean}
    */
   this.show = options.show ?? true;
   /**
-   * Freeze simulation while continuing to display the current particles.
+   * 冻结模拟，同时继续显示当前粒子。
    * @type {boolean}
    */
   this.paused = options.paused ?? false;
   /**
-   * Births per second. Zero stops emission while living particles continue.
+   * 每秒出生数；0 停止发射，存活粒子继续运行。
    * @type {number}
    */
   this.emissionRate = options.emissionRate ?? 1000;
   /**
-   * Rigid local-to-world transform; changes also move existing particles.
+   * 局部到世界的刚体变换，修改也会移动已有粒子。
    * @type {Matrix4}
    */
   this.modelMatrix = Matrix4.clone(options.modelMatrix ?? Matrix4.IDENTITY);
   /**
-   * Caller-maintained local bounds including sprite extent.
+   * 调用方维护、包含精灵范围的局部包围体。
    * @type {BoundingSphere}
    */
   this.boundingSphere = BoundingSphere.clone(options.boundingSphere);
   /**
-   * User value returned by picking this system.
+   * 拾取此系统返回的用户值。
    * @type {*}
    */
   this.id = options.id;
@@ -412,7 +389,7 @@ function SceneGISGpuParticleSystem(options = {}) {
 
 Object.defineProperties(SceneGISGpuParticleSystem.prototype, {
   /**
-   * Immutable initial/reset fill count.
+   * 不可变的初始和重置填充数量。
    * @memberof SceneGISGpuParticleSystem.prototype
    * @type {number}
    * @readonly
@@ -423,7 +400,7 @@ Object.defineProperties(SceneGISGpuParticleSystem.prototype, {
     },
   },
   /**
-   * Immutable draw-only style function source.
+   * 不可变、仅用于绘制的样式函数源码。
    * @memberof SceneGISGpuParticleSystem.prototype
    * @type {string}
    * @readonly
@@ -434,7 +411,7 @@ Object.defineProperties(SceneGISGpuParticleSystem.prototype, {
     },
   },
   /**
-   * Immutable slot capacity.
+   * 不可变槽位容量。
    * @memberof SceneGISGpuParticleSystem.prototype
    * @type {number}
    * @readonly
@@ -445,7 +422,7 @@ Object.defineProperties(SceneGISGpuParticleSystem.prototype, {
     },
   },
   /**
-   * Immutable shader source.
+   * 不可变着色器源码。
    * @memberof SceneGISGpuParticleSystem.prototype
    * @type {string}
    * @readonly
@@ -456,7 +433,7 @@ Object.defineProperties(SceneGISGpuParticleSystem.prototype, {
     },
   },
   /**
-   * Immutable uniform callback map; callbacks may return changing values.
+   * 不可变 uniform 回调表，回调可以返回变化的数值。
    * @memberof SceneGISGpuParticleSystem.prototype
    * @type {object}
    * @readonly
@@ -467,7 +444,7 @@ Object.defineProperties(SceneGISGpuParticleSystem.prototype, {
     },
   },
   /**
-   * Immutable deterministic seed offset.
+   * 不可变的确定性种子偏移。
    * @memberof SceneGISGpuParticleSystem.prototype
    * @type {number}
    * @readonly
@@ -478,7 +455,7 @@ Object.defineProperties(SceneGISGpuParticleSystem.prototype, {
     },
   },
   /**
-   * Whether an initial GPU state has been published.
+   * 是否已发布初始 GPU 状态。
    * @memberof SceneGISGpuParticleSystem.prototype
    * @type {boolean}
    * @readonly
@@ -489,7 +466,7 @@ Object.defineProperties(SceneGISGpuParticleSystem.prototype, {
     },
   },
   /**
-   * Allocated simulation textures, excluding the optional sprite image.
+   * 已分配的模拟纹理，不含可选精灵图像。
    * @memberof SceneGISGpuParticleSystem.prototype
    * @type {number}
    * @readonly
@@ -502,8 +479,7 @@ Object.defineProperties(SceneGISGpuParticleSystem.prototype, {
 });
 
 /**
- * Refill initialParticles and restart the deterministic emission sequence on the next
- * visible, unpaused normal frame. Reuses allocated resources; pick does not consume reset.
+ * 在下一次可见且未暂停的正常帧重新填充 initialParticles，并重启确定性发射序列。复用已分配资源，拾取不消费重置请求。
  */
 SceneGISGpuParticleSystem.prototype.reset = function () {
   this._reset = true;
@@ -586,15 +562,14 @@ SceneGISGpuParticleSystem.prototype.update = function (frameState) {
 };
 
 /**
- * @returns {boolean} Whether this primitive has been destroyed.
+ * @returns {boolean} 此图元是否已销毁。
  */
 SceneGISGpuParticleSystem.prototype.isDestroyed = function () {
   return false;
 };
 
 /**
- * Release all owned targets, programs, quad, uploaded image and pick ID.
- * Borrowed uniform resources and source images remain caller-owned.
+ * 释放全部自有目标、程序、四边形、已上传图像和拾取 ID；借用的 uniform 资源与源图像仍归调用方所有。
  * @returns {undefined}
  */
 SceneGISGpuParticleSystem.prototype.destroy = function () {

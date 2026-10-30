@@ -250,14 +250,12 @@ function readProvider(layer, resource, options) {
 }
 
 /**
- * Loads a SceneGIS planar terrain layer described by layer.json. Use
- * {@link SceneGISPlanarLayerTerrainProvider.fromUrl} instead of this constructor.
- * The provider owns metadata only; the consuming world owns tile and GPU resources.
+ * 加载由 layer.json 描述的 SceneGIS 平面地形图层。使用 {@link SceneGISPlanarLayerTerrainProvider.fromUrl}，不要直接调用此构造函数。提供者仅拥有元数据，使用它的 World 拥有瓦片和 GPU 资源。
  *
  * @alias SceneGISPlanarLayerTerrainProvider
  * @constructor
- * @param {object} options Internal initialization values produced by fromUrl.
- * @exception {DeveloperError} Use fromUrl to construct this provider.
+ * @param {object} options fromUrl 生成的内部初始化值。
+ * @exception {DeveloperError} 使用 fromUrl 构造此提供者。
  */
 function SceneGISPlanarLayerTerrainProvider(options) {
   if (!options?.provider) {
@@ -338,21 +336,17 @@ Object.defineProperties(SceneGISPlanarLayerTerrainProvider.prototype, {
 });
 
 /**
- * Creates a synchronously ready provider after loading its metadata. Supports
- * scenegis-planar-heightmap-rgb24-v2 and scenegis-planar-quantized-mesh-v2.
- * Availability rows always use Cesium's TMS convention, independently of the
- * tile URL scheme.
- * No coordinate or vertical conversion is performed.
+ * 加载元数据后创建同步就绪的提供者，支持 scenegis-planar-heightmap-rgb24-v2 与 scenegis-planar-quantized-mesh-v2。可用性行号始终采用 Cesium TMS 约定，独立于瓦片 URL 方案。不进行坐标或垂直转换。
  *
- * @param {string|Resource} url The terrain directory or an explicit layer.json URL.
- * @param {object} [options] Options used when constructing the provider.
- * @param {SceneGISPlanarTilingScheme} [options.tilingScheme] An existing world's canonical scheme, whose extent must match the metadata.
- * @param {number} [options.minimumHeight] The conservative global minimum height in metres; required when absent from metadata.
- * @param {number} [options.maximumHeight] The conservative global maximum height in metres; required when absent from metadata.
- * @param {number} [options.levelZeroMaximumGeometricError] The Level-0 error in metres; defaults to one quarter of the declared sample spacing.
- * @param {Credit|string} [options.credit] Attribution overriding layer.json attribution.
- * @returns {Promise<SceneGISPlanarLayerTerrainProvider>} A ready provider.
- * @exception {RuntimeError} Metadata is invalid, unsupported, or lacks a global height range.
+ * @param {string|Resource} url 地形目录或显式 layer.json URL。
+ * @param {object} [options] 构造提供者时使用的选项。
+ * @param {SceneGISPlanarTilingScheme} [options.tilingScheme] 已有世界的标准切片方案，其范围须匹配元数据。
+ * @param {number} [options.minimumHeight] 保守全局最低高度，单位为米，元数据缺失时必需。
+ * @param {number} [options.maximumHeight] 保守全局最高高度，单位为米，元数据缺失时必需。
+ * @param {number} [options.levelZeroMaximumGeometricError] 零级误差，单位为米，默认声明采样间距的四分之一。
+ * @param {Credit|string} [options.credit] 覆盖 layer.json 署名的来源署名。
+ * @returns {Promise<SceneGISPlanarLayerTerrainProvider>} 就绪的提供者。
+ * @exception {RuntimeError} 元数据无效、不支持或缺少全局高度范围。
  *
  * @example
  * const terrain = await Cesium.SceneGISPlanarLayerTerrainProvider.fromUrl("terrain/");
@@ -381,9 +375,9 @@ SceneGISPlanarLayerTerrainProvider.fromUrl = async function (
 };
 
 /**
- * Gets a level's geometric error, including the mesh quantization/skirt floor.
- * @param {number} level The tile level.
- * @returns {number} The error in metres.
+ * 获取指定层级的几何误差，包含网格量化和裙边下限。
+ * @param {number} level 瓦片层级。
+ * @returns {number} 误差，单位为米。
  */
 SceneGISPlanarLayerTerrainProvider.prototype.getLevelMaximumGeometricError =
   function (level) {
@@ -394,11 +388,11 @@ SceneGISPlanarLayerTerrainProvider.prototype.getLevelMaximumGeometricError =
   };
 
 /**
- * Tests metadata availability using canonical northwest-origin XYZ coordinates.
- * @param {number} x The column.
- * @param {number} y The row.
- * @param {number} level The level.
- * @returns {boolean} Whether a tile is present.
+ * 按标准西北原点 XYZ 坐标测试元数据可用性。
+ * @param {number} x 列号。
+ * @param {number} y 行号。
+ * @param {number} level 层级。
+ * @returns {boolean} 瓦片是否存在。
  */
 SceneGISPlanarLayerTerrainProvider.prototype.getTileDataAvailable = function (
   x,
@@ -418,12 +412,12 @@ SceneGISPlanarLayerTerrainProvider.prototype.getTileDataAvailable = function (
 };
 
 /**
- * Requests an available tile without adding retries or a separate tile cache.
- * @param {number} x The column.
- * @param {number} y The row.
- * @param {number} level The level.
- * @param {Request} [request] The caller's scheduler request.
- * @returns {Promise<SceneGISPlanarTerrainData>|undefined} Terrain data, or undefined when scheduling is deferred.
+ * 请求可用瓦片，不增加重试或独立瓦片缓存。
+ * @param {number} x 列号。
+ * @param {number} y 行号。
+ * @param {number} level 层级。
+ * @param {Request} [request] 调用方的调度请求。
+ * @returns {Promise<SceneGISPlanarTerrainData>|undefined} 地形数据；调度延后时为 undefined。
  */
 SceneGISPlanarLayerTerrainProvider.prototype.requestTileGeometry = function (
   x,
@@ -440,11 +434,11 @@ SceneGISPlanarLayerTerrainProvider.prototype.requestTileGeometry = function (
 };
 
 /**
- * All availability was loaded by fromUrl; no additional request is necessary.
- * @param {number} x The column.
- * @param {number} y The row.
- * @param {number} level The level.
- * @returns {undefined} Always undefined.
+ * fromUrl 已加载全部可用性信息，无需额外请求。
+ * @param {number} x 列号。
+ * @param {number} y 行号。
+ * @param {number} level 层级。
+ * @returns {undefined} 始终为 undefined。
  */
 SceneGISPlanarLayerTerrainProvider.prototype.loadTileDataAvailability =
   function (x, y, level) {

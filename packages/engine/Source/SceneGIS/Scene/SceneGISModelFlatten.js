@@ -117,31 +117,22 @@ function preparePolygon(hierarchy) {
 }
 
 /**
- * Flattens existing mesh vertices inside a local XY polygon to a local Z plane,
- * or outside it when inverse is true.
- * Assign this instance to {@link Cesium3DTileset#customShader}. The immutable
- * polygon supports concavity and direct holes; its Z coordinates are ignored.
- * Globe callers supply an ENU frame; a constant ENU Z is not ellipsoid height.
- * Planar callers supply a Cartesian frame in the current world's meters.
+ * 将局部 XY 多边形内的已有网格顶点压到局部 Z 平面；inverse=true 时压平外部。将实例赋给 {@link Cesium3DTileset#customShader}。不可变多边形支持凹轮廓和直接孔洞，忽略其 Z 坐标。球面调用方提供 ENU 坐标系，恒定 ENU Z 不等于椭球高；平面调用方提供当前世界米制笛卡尔坐标系。
  *
- * This is a visual deformation, not polygon clipping or mesh editing. Crossing
- * triangles are not split. CPU mesh queries and exported data remain unchanged.
- * The qualified profile is static mesh 3D Tiles in SCENE3D, without legacy i3dm,
- * classification, skinning, morph animation or another custom shader.
+ * 这是可视化变形，不是多边形裁剪或网格编辑。跨边界三角形不切分，CPU 网格查询及导出数据保持原样。支持范围为 SCENE3D 静态网格 3D Tiles，不包含旧式 i3dm、分类、蒙皮、变形动画或其他自定义着色器。
  *
- * The caller owns this shader. Detach it from all consumers before destroying
- * it, and destroy it before the rendering Context. One Context per instance.
+ * 着色器归调用方所有。销毁前须从全部消费者解绑，并先于渲染 Context 销毁。每实例仅支持一个 Context。
  *
  * @alias SceneGISModelFlatten
  * @constructor
  * @extends CustomShader
- * @param {object} options Configuration.
- * @param {PolygonHierarchy} options.polygonHierarchy Local XY rings, at most 256 total input positions.
- * @param {Matrix4} options.modelMatrix Right-handed rigid local-to-world transform, copied at construction.
- * @param {number} options.height Target local Z in meters.
- * @param {boolean} [options.enabled=true] Whether to deform the mesh.
- * @param {boolean} [options.inverse=false] Preserve the polygon and flatten its complement, including holes.
- * @exception {DeveloperError} The frame, polygon, height or rendering context is unsupported.
+ * @param {object} options 配置。
+ * @param {PolygonHierarchy} options.polygonHierarchy 局部 XY 环，全部输入位置最多 256 个。
+ * @param {Matrix4} options.modelMatrix 右手局部到世界刚体变换，构造时复制。
+ * @param {number} options.height 目标局部 Z，单位为米。
+ * @param {boolean} [options.enabled=true] 是否使网格变形。
+ * @param {boolean} [options.inverse=false] 保留多边形，压平其补集，包含孔洞。
+ * @exception {DeveloperError} 不支持此坐标系、多边形、高度或渲染 Context。
  * @example
  * const flatten = new Cesium.SceneGISModelFlatten({
  *   polygonHierarchy: new Cesium.PolygonHierarchy(localPositions),
@@ -210,7 +201,8 @@ class SceneGISModelFlatten extends CustomShader {
     };
   }
 
-  /** Target Z in the immutable local frame, in meters.
+  /**
+   *  不可变局部坐标系中的目标 Z，单位为米。
    * @type {number}
    */
   get height() {
@@ -221,7 +213,8 @@ class SceneGISModelFlatten extends CustomShader {
     this._revision++;
   }
 
-  /** Whether flattening is enabled. Disabling restores source geometry and bounds.
+  /**
+   *  是否启用压平；禁用恢复源几何和包围体。
    * @type {boolean}
    */
   get enabled() {
@@ -235,10 +228,8 @@ class SceneGISModelFlatten extends CustomShader {
     this._revision++;
   }
 
-  /** Whether to preserve the polygon and flatten its complement within the model.
-   * In inverse mode, the outer boundary stays at its original height, while holes
-   * and their boundaries are flattened. Crossing triangles are not split.
-   * Changing this value does not rebuild the shader or polygon texture.
+  /**
+   *  是否保留多边形并压平模型中的补集。反向模式下外边界保留原始高度，孔洞及其边界被压平。跨边界三角形不切分，修改不重建着色器或多边形纹理。
    * @type {boolean}
    * @default false
    */
@@ -255,7 +246,8 @@ class SceneGISModelFlatten extends CustomShader {
     }
   }
 
-  /** A copy of the immutable local-to-world frame.
+  /**
+   *  不可变局部到世界坐标变换的副本。
    * @type {Matrix4}
    * @readonly
    */

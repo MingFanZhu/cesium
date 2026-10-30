@@ -80,14 +80,14 @@ function validateAddress(name, value) {
 }
 
 /**
- * Immutable CPU terrain data backed by planar quantized-mesh triangles.
+ * 由平面 quantized-mesh 三角形承载的不可变 CPU 地形数据。
  *
  * @alias SceneGISPlanarQuantizedMeshTerrainData
  * @constructor
  *
- * @param {SceneGISPlanarQuantizedMeshTerrainData.ConstructorOptions} options The construction options.
+ * @param {SceneGISPlanarQuantizedMeshTerrainData.ConstructorOptions} options 构造选项。
  *
- * @exception {DeveloperError} The quantized vertices, indices, height interval, topology, edges, or metadata are invalid.
+ * @exception {DeveloperError} 量化顶点、索引、高度区间、拓扑、边界或元数据无效。
  */
 function SceneGISPlanarQuantizedMeshTerrainData(options) {
   options = options ?? Frozen.EMPTY_OBJECT;
@@ -212,7 +212,7 @@ function SceneGISPlanarQuantizedMeshTerrainData(options) {
 
 Object.defineProperties(SceneGISPlanarQuantizedMeshTerrainData.prototype, {
   /**
-   * Gets the minimum decoded surface vertex height in meters.
+   * 获取解码后表面顶点的最小高度，单位为米。
    * @memberof SceneGISPlanarQuantizedMeshTerrainData.prototype
    * @type {number}
    * @readonly
@@ -223,7 +223,7 @@ Object.defineProperties(SceneGISPlanarQuantizedMeshTerrainData.prototype, {
     },
   },
   /**
-   * Gets the maximum decoded surface vertex height in meters.
+   * 获取解码后表面顶点的最大高度，单位为米。
    * @memberof SceneGISPlanarQuantizedMeshTerrainData.prototype
    * @type {number}
    * @readonly
@@ -234,7 +234,7 @@ Object.defineProperties(SceneGISPlanarQuantizedMeshTerrainData.prototype, {
     },
   },
   /**
-   * Gets the tile-specific credits.
+   * 获取瓦片专属署名。
    * @memberof SceneGISPlanarQuantizedMeshTerrainData.prototype
    * @type {Credit[]|undefined}
    * @readonly
@@ -245,7 +245,7 @@ Object.defineProperties(SceneGISPlanarQuantizedMeshTerrainData.prototype, {
     },
   },
   /**
-   * Gets the water mask owned by this tile.
+   * 获取此瓦片所有的水面掩码。
    * @memberof SceneGISPlanarQuantizedMeshTerrainData.prototype
    * @type {Uint8Array|undefined}
    * @readonly
@@ -256,7 +256,7 @@ Object.defineProperties(SceneGISPlanarQuantizedMeshTerrainData.prototype, {
     },
   },
   /**
-   * Gets whether this data was created by upsampling.
+   * 获取数据是否由上采样创建。
    * @memberof SceneGISPlanarQuantizedMeshTerrainData.prototype
    * @type {boolean}
    * @readonly
@@ -378,13 +378,13 @@ SceneGISPlanarQuantizedMeshTerrainData.prototype._createUpsampleTaskPayload =
   };
 
 /**
- * Interpolates the decoded height on the actual quantized surface triangle.
+ * 在实际量化表面三角形上插值解码高度。
  *
- * @param {SceneGISPlanarExtent} extent The tile extent.
- * @param {number} x The planar X coordinate in meters.
- * @param {number} y The planar Y coordinate in meters.
- * @returns {number|undefined} The interpolated height, or undefined outside the extent or surface.
- * @exception {DeveloperError} The extent or coordinates are invalid.
+ * @param {SceneGISPlanarExtent} extent 瓦片范围。
+ * @param {number} x 平面 X 坐标，单位为米。
+ * @param {number} y 平面 Y 坐标，单位为米。
+ * @returns {number|undefined} 插值高度；范围或表面外返回 undefined。
+ * @exception {DeveloperError} 范围或坐标无效。
  */
 SceneGISPlanarQuantizedMeshTerrainData.prototype.interpolateHeight = function (
   extent,
@@ -439,14 +439,14 @@ SceneGISPlanarQuantizedMeshTerrainData.prototype.interpolateHeight = function (
 };
 
 /**
- * Tests direct-child availability using SW=1, SE=2, NW=4, and NE=8.
+ * 按西南 1、东南 2、西北 4、东北 8 测试直接子瓦片可用性。
  *
- * @param {number} thisX This tile's X coordinate.
- * @param {number} thisY This tile's Y coordinate.
- * @param {number} childX The direct child's X coordinate.
- * @param {number} childY The direct child's Y coordinate.
- * @returns {boolean} Whether the direct child is available.
- * @exception {DeveloperError} The addresses do not identify a direct child.
+ * @param {number} thisX 此瓦片的 X 坐标。
+ * @param {number} thisY 此瓦片的 Y 坐标。
+ * @param {number} childX 直接子瓦片的 X 坐标。
+ * @param {number} childY 直接子瓦片的 Y 坐标。
+ * @returns {boolean} 直接子瓦片是否可用。
+ * @exception {DeveloperError} 地址不能确定直接子瓦片。
  */
 SceneGISPlanarQuantizedMeshTerrainData.prototype.isChildAvailable = function (
   thisX,
@@ -480,21 +480,21 @@ SceneGISPlanarQuantizedMeshTerrainData.prototype.isChildAvailable = function (
 };
 
 /**
- * Initialization options for SceneGISPlanarQuantizedMeshTerrainData.
+ * SceneGISPlanarQuantizedMeshTerrainData 的初始化选项。
  *
  * @typedef {object} SceneGISPlanarQuantizedMeshTerrainData.ConstructorOptions
- * @property {Uint16Array} quantizedVertices Owned absolute U, V, and height blocks in the range 0 through 32767.
- * @property {Uint16Array|Uint32Array} indices Owned counter-clockwise surface triangle indices.
- * @property {Uint16Array|Uint32Array} westIndices Owned west edge indices.
- * @property {Uint16Array|Uint32Array} southIndices Owned south edge indices.
- * @property {Uint16Array|Uint32Array} eastIndices Owned east edge indices.
- * @property {Uint16Array|Uint32Array} northIndices Owned north edge indices.
- * @property {number} quantizedMinimumHeight Quantized interval minimum in meters.
- * @property {number} quantizedMaximumHeight Quantized interval maximum in meters.
- * @property {number} [childTileMask=15] Direct child availability bits.
- * @property {Uint8Array} [waterMask] Owned water mask metadata.
- * @property {boolean} [createdByUpsampling=false] Whether this data was upsampled.
- * @property {Credit[]} [credits] Tile-specific credits.
+ * @property {Uint16Array} quantizedVertices 自有绝对 U、V 和高度数据块，范围为 0 到 32767。
+ * @property {Uint16Array|Uint32Array} indices 自有逆时针表面三角形索引。
+ * @property {Uint16Array|Uint32Array} westIndices 自有西边界索引。
+ * @property {Uint16Array|Uint32Array} southIndices 自有南边界索引。
+ * @property {Uint16Array|Uint32Array} eastIndices 自有东边界索引。
+ * @property {Uint16Array|Uint32Array} northIndices 自有北边界索引。
+ * @property {number} quantizedMinimumHeight 量化区间最小值，单位为米。
+ * @property {number} quantizedMaximumHeight 量化区间最大值，单位为米。
+ * @property {number} [childTileMask=15] 直接子瓦片可用位。
+ * @property {Uint8Array} [waterMask] 自有水面掩码元数据。
+ * @property {boolean} [createdByUpsampling=false] 此数据是否由上采样生成。
+ * @property {Credit[]} [credits] 瓦片专属署名。
  */
 
 export default SceneGISPlanarQuantizedMeshTerrainData;

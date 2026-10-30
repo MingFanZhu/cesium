@@ -10,32 +10,22 @@ function unit(value, name) {
 }
 
 /**
- * Approximate wetness and thin snow on opaque PBR models/3D Tiles, lit Phong
- * primitives and Globe/Planar terrain. Uses existing normals and materials;
- * no additional asset attributes, textures or geometry passes are required.
- * Coverage is world-fixed, with geodetic up in Globe and fixed Z in Planar.
- * Terrain retains diffuse lighting with an approximate wet directional highlight.
- * Unlit models, translucent content, classification and water are unchanged.
+ * 为不透明 PBR 模型/3D Tiles、受光 Phong 图元及球面/平面地形提供近似湿润和薄雪。使用已有法线与材质，不增加资源属性、纹理或几何通道。覆盖固定于世界，球面使用大地向上方向，平面使用固定 Z。地形保留漫反射光照，并增加近似湿润方向高光。unlit 模型、透明内容、分类和水面保持不变。
  *
- * Wetness/snow amounts are independent of particle weather and scene time.
- * Optional rain ripples animate the wet normal using Scene time. This does not
- * simulate shelter, drainage, puddle depth, snow thickness or melting. Imagery
- * has no land-cover semantics, so photographed vegetation/water may be covered.
- * The Scene owns this setting; explicit destroy detaches it early. ShaderCache
- * owns derived programs. No textures, framebuffers or extra draws are allocated.
+ * 湿润和雪量独立于粒子天气及场景时间。可选雨滴涟漪按 Scene 时间扰动湿润法线，不模拟遮雨、排水、水洼深度、雪厚或融化。影像没有地物语义，照片中的植被和水面也可能被覆盖。设置归 Scene 所有，提前 destroy 可解绑；ShaderCache 拥有派生程序。不分配纹理、帧缓冲或额外绘制。
  *
  * @alias SceneGISSurfaceWeather
  * @constructor
- * @param {object} options Initialization options.
- * @param {Scene} options.scene The live SCENE3D Scene; only one setting is allowed.
- * @param {boolean} [options.enabled=false] Whether coverage is applied.
- * @param {number} [options.wetness=0] Visual wetness in [0, 1].
- * @param {number} [options.snowCoverage=0] Visual snow coverage in [0, 1].
- * @param {number} [options.patchScale=40] Positive world-space patch size in meters.
- * @param {number} [options.rippleIntensity=0] Visual rain-ring density/strength in [0, 1]. Independent of precipitation particles.
- * @param {number} [options.rippleScale=0.8] Positive rain-ring cell size in meters. Subpixel rings fade out.
- * @param {Color} [options.snowColor] Snow reflectance, default (0.85, 0.9, 0.95).
- * @exception {DeveloperError} Scene and option values must meet their documented contracts.
+ * @param {object} options 初始化选项。
+ * @param {Scene} options.scene 存活的 SCENE3D Scene，仅允许一个设置。
+ * @param {boolean} [options.enabled=false] 是否应用覆盖效果。
+ * @param {number} [options.wetness=0] 可视化湿润度，范围 [0,1]。
+ * @param {number} [options.snowCoverage=0] 可视化雪覆盖，范围 [0,1]。
+ * @param {number} [options.patchScale=40] 正世界空间斑块尺寸，单位为米。
+ * @param {number} [options.rippleIntensity=0] 可视化雨环密度与强度，范围 [0,1]，独立于降水粒子。
+ * @param {number} [options.rippleScale=0.8] 正雨环单元尺寸，单位为米，亚像素雨环会淡出。
+ * @param {Color} [options.snowColor] 雪反照率，默认 (0.85,0.9,0.95)。
+ * @exception {DeveloperError} Scene 与选项须满足文档契约。
  * @example
  * const surfaceWeather = new Cesium.SceneGISSurfaceWeather({
  *   scene: viewer.scene, enabled: true, wetness: 0.7, snowCoverage: 0.0
@@ -69,8 +59,8 @@ function SceneGISSurfaceWeather(options) {
 }
 
 Object.defineProperties(SceneGISSurfaceWeather.prototype, {
-  /** Rain-ring density/strength on wet upward surfaces, [0, 1]. Zero disables rings.
-   * Uses Scene time without requesting animation frames. Snow suppresses ripples.
+  /**
+   *  朝上湿表面的雨环密度与强度，范围 [0,1]，0 禁用雨环。使用 Scene 时间但不请求动画帧；积雪抑制涟漪。
    * @memberof SceneGISSurfaceWeather.prototype
    * @type {number}
    * @default 0
@@ -85,7 +75,8 @@ Object.defineProperties(SceneGISSurfaceWeather.prototype, {
       this._scene.requestRender();
     },
   },
-  /** Positive procedural ripple cell size in world meters. No geometry displacement.
+  /**
+   *  正程序涟漪单元尺寸，单位为世界米，不产生几何位移。
    * @memberof SceneGISSurfaceWeather.prototype
    * @type {number}
    * @default 0.8
@@ -102,7 +93,8 @@ Object.defineProperties(SceneGISSurfaceWeather.prototype, {
       this._scene.requestRender();
     },
   },
-  /** Whether to apply coverage. Changing settings requests a frame.
+  /**
+   *  是否应用覆盖，修改设置会请求一帧。
    * @memberof SceneGISSurfaceWeather.prototype
    * @type {boolean}
    * @default false
@@ -119,7 +111,8 @@ Object.defineProperties(SceneGISSurfaceWeather.prototype, {
       this._scene.requestRender();
     },
   },
-  /** Visual wetness in [0, 1]; does not imply standing water.
+  /**
+   *  可视化湿润度，范围 [0,1]，不表示存在积水。
    * @memberof SceneGISSurfaceWeather.prototype
    * @type {number}
    * @default 0
@@ -134,7 +127,8 @@ Object.defineProperties(SceneGISSurfaceWeather.prototype, {
       this._scene.requestRender();
     },
   },
-  /** Thin snow coverage in [0, 1], biased toward upward-facing geometry.
+  /**
+   *  薄雪覆盖，范围 [0,1]，偏向朝上的几何。
    * @memberof SceneGISSurfaceWeather.prototype
    * @type {number}
    * @default 0
@@ -149,7 +143,8 @@ Object.defineProperties(SceneGISSurfaceWeather.prototype, {
       this._scene.requestRender();
     },
   },
-  /** Positive procedural patch size in world meters.
+  /**
+   *  正程序斑块尺寸，单位为世界米。
    * @memberof SceneGISSurfaceWeather.prototype
    * @type {number}
    * @default 40
@@ -166,8 +161,8 @@ Object.defineProperties(SceneGISSurfaceWeather.prototype, {
       this._scene.requestRender();
     },
   },
-  /** Snow reflectance in linear RGB [0, 1]. Assigned colors are cloned; alpha is ignored.
-   * Request a render after editing the returned Color in place.
+  /**
+   *  线性 RGB [0,1] 的雪反照率。赋值颜色会复制，忽略 alpha。原地修改返回的 Color 后须请求渲染。
    * @memberof SceneGISSurfaceWeather.prototype
    * @type {Color}
    */
@@ -185,11 +180,14 @@ Object.defineProperties(SceneGISSurfaceWeather.prototype, {
   },
 });
 
-/** @returns {boolean} Whether this setting has been destroyed. */
+/**
+ *  @returns {boolean} 此设置是否已销毁。
+ */
 SceneGISSurfaceWeather.prototype.isDestroyed = function () {
   return false;
 };
-/** Detaches coverage and restores original materials.
+/**
+ *  解绑覆盖效果并恢复原始材质。
  * @returns {undefined}
  */
 SceneGISSurfaceWeather.prototype.destroy = function () {

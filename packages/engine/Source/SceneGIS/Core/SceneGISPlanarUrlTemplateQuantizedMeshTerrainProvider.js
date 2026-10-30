@@ -78,14 +78,14 @@ function createTerrainData(provider, result, level) {
 }
 
 /**
- * A coordinate-system-agnostic planar quantized-mesh URL-template provider.
+ * 与坐标系无关的平面 quantized-mesh URL 模板提供者。
  *
  * @alias SceneGISPlanarUrlTemplateQuantizedMeshTerrainProvider
  * @constructor
  *
- * @param {SceneGISPlanarUrlTemplateQuantizedMeshTerrainProvider.ConstructorOptions} options The construction options.
+ * @param {SceneGISPlanarUrlTemplateQuantizedMeshTerrainProvider.ConstructorOptions} options 构造选项。
  *
- * @exception {DeveloperError} The URL, tiling scheme, levels, height range, error, URL scheme, subdomains, or credit are invalid.
+ * @exception {DeveloperError} URL、切片方案、层级、高度范围、误差、URL 方案、子域或署名无效。
  */
 function SceneGISPlanarUrlTemplateQuantizedMeshTerrainProvider(options) {
   options = options ?? Frozen.EMPTY_OBJECT;
@@ -152,7 +152,7 @@ Object.defineProperties(
   SceneGISPlanarUrlTemplateQuantizedMeshTerrainProvider.prototype,
   {
     /**
-     * Gets the caller-supplied canonical tiling scheme.
+     * 获取调用方提供的标准切片方案。
      * @memberof SceneGISPlanarUrlTemplateQuantizedMeshTerrainProvider.prototype
      * @type {SceneGISPlanarTilingScheme}
      * @readonly
@@ -163,7 +163,7 @@ Object.defineProperties(
       },
     },
     /**
-     * Gets the global minimum height in meters.
+     * 获取全局最低高度，单位为米。
      * @memberof SceneGISPlanarUrlTemplateQuantizedMeshTerrainProvider.prototype
      * @type {number}
      * @readonly
@@ -174,7 +174,7 @@ Object.defineProperties(
       },
     },
     /**
-     * Gets the global maximum height in meters.
+     * 获取全局最高高度，单位为米。
      * @memberof SceneGISPlanarUrlTemplateQuantizedMeshTerrainProvider.prototype
      * @type {number}
      * @readonly
@@ -185,7 +185,7 @@ Object.defineProperties(
       },
     },
     /**
-     * Gets the maximum available level.
+     * 获取可用最高层级。
      * @memberof SceneGISPlanarUrlTemplateQuantizedMeshTerrainProvider.prototype
      * @type {number}
      * @readonly
@@ -196,7 +196,7 @@ Object.defineProperties(
       },
     },
     /**
-     * Gets the event observed by the planar terrain runtime.
+     * 获取平面地形运行时观测的事件。
      * @memberof SceneGISPlanarUrlTemplateQuantizedMeshTerrainProvider.prototype
      * @type {Event<function(TileProviderError):void>}
      * @readonly
@@ -207,7 +207,7 @@ Object.defineProperties(
       },
     },
     /**
-     * Gets the provider attribution.
+     * 获取提供者署名。
      * @memberof SceneGISPlanarUrlTemplateQuantizedMeshTerrainProvider.prototype
      * @type {Credit|undefined}
      * @readonly
@@ -218,7 +218,7 @@ Object.defineProperties(
       },
     },
     /**
-     * Gets the owned URL template.
+     * 获取自有 URL 模板。
      * @memberof SceneGISPlanarUrlTemplateQuantizedMeshTerrainProvider.prototype
      * @type {string}
      * @readonly
@@ -229,7 +229,7 @@ Object.defineProperties(
       },
     },
     /**
-     * Gets the URL row scheme.
+     * 获取 URL 行号方案。
      * @memberof SceneGISPlanarUrlTemplateQuantizedMeshTerrainProvider.prototype
      * @type {"xyz"|"tms"}
      * @readonly
@@ -243,10 +243,10 @@ Object.defineProperties(
 );
 
 /**
- * Gets the maximum geometric error for a level.
- * @param {number} level The tile level.
- * @returns {number} The maximum geometric error in meters.
- * @exception {DeveloperError} The level is invalid or unavailable.
+ * 获取某层的最大几何误差。
+ * @param {number} level 瓦片层级。
+ * @returns {number} 最大几何误差，单位为米。
+ * @exception {DeveloperError} 层级无效或不可用。
  */
 SceneGISPlanarUrlTemplateQuantizedMeshTerrainProvider.prototype.getLevelMaximumGeometricError =
   function (level) {
@@ -255,13 +255,13 @@ SceneGISPlanarUrlTemplateQuantizedMeshTerrainProvider.prototype.getLevelMaximumG
   };
 
 /**
- * Requests one quantized-mesh terrain tile.
- * @param {number} x The tile X coordinate.
- * @param {number} y The tile Y coordinate.
- * @param {number} level The tile level.
- * @param {Request} [request] The scheduler request.
- * @returns {Promise<SceneGISPlanarQuantizedMeshTerrainData>|undefined} The terrain data promise, or undefined when deferred.
- * @exception {DeveloperError} The tile address is invalid.
+ * 请求单个 quantized-mesh 地形瓦片。
+ * @param {number} x 瓦片 X 坐标。
+ * @param {number} y 瓦片 Y 坐标。
+ * @param {number} level 瓦片层级。
+ * @param {Request} [request] 调度器请求。
+ * @returns {Promise<SceneGISPlanarQuantizedMeshTerrainData>|undefined} 地形数据 Promise；延后时为 undefined。
+ * @exception {DeveloperError} 瓦片地址无效。
  */
 SceneGISPlanarUrlTemplateQuantizedMeshTerrainProvider.prototype.requestTileGeometry =
   function (x, y, level, request) {
@@ -300,12 +300,12 @@ SceneGISPlanarUrlTemplateQuantizedMeshTerrainProvider.prototype.requestTileGeome
   };
 
 /**
- * Gets full-pyramid availability for a tile address.
- * @param {number} x The tile X coordinate.
- * @param {number} y The tile Y coordinate.
- * @param {number} level The tile level.
- * @returns {boolean} Whether the tile is available.
- * @exception {DeveloperError} The tile address is invalid.
+ * 获取瓦片地址在完整金字塔中的可用性。
+ * @param {number} x 瓦片 X 坐标。
+ * @param {number} y 瓦片 Y 坐标。
+ * @param {number} level 瓦片层级。
+ * @returns {boolean} 瓦片是否可用。
+ * @exception {DeveloperError} 瓦片地址无效。
  */
 SceneGISPlanarUrlTemplateQuantizedMeshTerrainProvider.prototype.getTileDataAvailable =
   function (x, y, level) {
@@ -314,12 +314,12 @@ SceneGISPlanarUrlTemplateQuantizedMeshTerrainProvider.prototype.getTileDataAvail
   };
 
 /**
- * Reports that no availability metadata request is required.
- * @param {number} x The tile X coordinate.
- * @param {number} y The tile Y coordinate.
- * @param {number} level The tile level.
- * @returns {undefined} Always undefined.
- * @exception {DeveloperError} The tile address is invalid.
+ * 报告无需请求可用性元数据。
+ * @param {number} x 瓦片 X 坐标。
+ * @param {number} y 瓦片 Y 坐标。
+ * @param {number} level 瓦片层级。
+ * @returns {undefined} 始终为 undefined。
+ * @exception {DeveloperError} 瓦片地址无效。
  */
 SceneGISPlanarUrlTemplateQuantizedMeshTerrainProvider.prototype.loadTileDataAvailability =
   function (x, y, level) {
@@ -328,18 +328,18 @@ SceneGISPlanarUrlTemplateQuantizedMeshTerrainProvider.prototype.loadTileDataAvai
   };
 
 /**
- * Initialization options for SceneGISPlanarUrlTemplateQuantizedMeshTerrainProvider.
+ * SceneGISPlanarUrlTemplateQuantizedMeshTerrainProvider 的初始化选项。
  *
  * @typedef {object} SceneGISPlanarUrlTemplateQuantizedMeshTerrainProvider.ConstructorOptions
- * @property {string|Resource} url The quantized-mesh URL template.
- * @property {SceneGISPlanarTilingScheme} tilingScheme The caller-supplied canonical tiling scheme.
- * @property {number} maximumLevel The maximum available level.
- * @property {number} minimumHeight The global minimum height in meters.
- * @property {number} maximumHeight The global maximum height in meters.
- * @property {number} levelZeroMaximumGeometricError The Level-0 error in meters.
- * @property {"xyz"|"tms"} [urlScheme="xyz"] The network row scheme.
- * @property {string|string[]} [subdomains="abc"] URL subdomains.
- * @property {Credit|string} [credit] Provider attribution.
+ * @property {string|Resource} url quantized-mesh URL 模板。
+ * @property {SceneGISPlanarTilingScheme} tilingScheme 调用方提供的标准切片方案。
+ * @property {number} maximumLevel 可用最高层级。
+ * @property {number} minimumHeight 全局最低高度，单位为米。
+ * @property {number} maximumHeight 全局最高高度，单位为米。
+ * @property {number} levelZeroMaximumGeometricError 零级误差，单位为米。
+ * @property {"xyz"|"tms"} [urlScheme="xyz"] 网络行号方案。
+ * @property {string|string[]} [subdomains="abc"] URL 子域。
+ * @property {Credit|string} [credit] 提供者署名。
  */
 
 export default SceneGISPlanarUrlTemplateQuantizedMeshTerrainProvider;

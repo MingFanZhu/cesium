@@ -8,19 +8,17 @@ import knockout from "../ThirdParty/knockout.js";
 import SceneGISPlanarHomeButtonViewModel from "./SceneGISPlanarHomeButtonViewModel.js";
 
 /**
- * A button that immediately restores the home view of a planar world.
+ * 立即恢复平面世界初始视图的按钮。
  *
  * @alias SceneGISPlanarHomeButton
  * @constructor
  *
- * @param {Element|string} container The DOM element or ID that contains the widget.
- * @param {Scene} scene The planar scene to control.
- * @param {SceneGISPlanarCameraController} planarCameraController The controller
- *        that owns planar navigation for the scene.
+ * @param {Element|string} container 包含 Widget 的 DOM 元素或 ID。
+ * @param {Scene} scene 要控制的平面场景。
+ * @param {SceneGISPlanarCameraController} planarCameraController 管理场景平面导航的控制器。
  *
- * @exception {DeveloperError} <code>container</code> is required.
- * @exception {DeveloperError} <code>scene</code> or
- *            <code>planarCameraController</code> is invalid.
+ * @exception {DeveloperError} 必须提供 <code>container</code>。
+ * @exception {DeveloperError} <code>scene</code> 或 <code>planarCameraController</code> 无效。
  */
 function SceneGISPlanarHomeButton(container, scene, planarCameraController) {
   //>>includeStart('debug', pragmas.debug);
@@ -58,7 +56,7 @@ cesiumSvgPath: { path: _svgPath, width: 28, height: 28 }",
 
 Object.defineProperties(SceneGISPlanarHomeButton.prototype, {
   /**
-   * Gets the parent container.
+   * 获取父容器。
    *
    * @memberof SceneGISPlanarHomeButton.prototype
    * @type {Element}
@@ -71,7 +69,7 @@ Object.defineProperties(SceneGISPlanarHomeButton.prototype, {
   },
 
   /**
-   * Gets the view model.
+   * 获取视图模型。
    *
    * @memberof SceneGISPlanarHomeButton.prototype
    * @type {SceneGISPlanarHomeButtonViewModel}
@@ -85,14 +83,14 @@ Object.defineProperties(SceneGISPlanarHomeButton.prototype, {
 });
 
 /**
- * @returns {boolean} true if the object has been destroyed; otherwise, false.
+ * @returns {boolean} 对象已销毁时为 true，否则为 false。
  */
 SceneGISPlanarHomeButton.prototype.isDestroyed = function () {
   return false;
 };
 
 /**
- * Destroys the widget.
+ * 销毁 Widget。
  */
 SceneGISPlanarHomeButton.prototype.destroy = function () {
   knockout.cleanNode(this._element);

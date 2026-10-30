@@ -127,34 +127,30 @@ function setClippingCollection(world, key, value, Type) {
 }
 
 /**
- * A bounded, meter-based planar primary world with a flat or heightmap terrain
- * surface, opaque by default, optional geometric lighting, and an ordered collection of
- * raster imagery layers.
- * The world supports programmatically positioned perspective and orthographic
- * cameras in {@link SceneMode.SCENE3D}.
+ * 有界米制平面主世界，提供平坦或高度图地形表面，默认不透明，可选几何光照，以及有序的栅格影像图层集合。支持在 {@link SceneMode.SCENE3D} 中以程序设置透视或正交相机。
  *
  * @alias SceneGISPlanarWorld
  * @constructor
  *
- * @param {object} options Object with the following properties:
- * @param {SceneGISPlanarCoordinateSystem} [options.coordinateSystem] The planar coordinate system, required unless tilingScheme is supplied.
- * @param {SceneGISPlanarTilingScheme} [options.tilingScheme] An existing canonical scheme, for example from a metadata terrain provider. If coordinateSystem is also supplied, both must reference the same object.
- * @param {number} options.maximumLevel The highest selectable surface level.
- * @param {number} [options.maximumScreenSpaceError=2.0] The refinement threshold in pixels.
- * @param {number} [options.tileCacheSize=100] The number of unprotected tiles retained after a frame.
- * @param {Color} [options.baseColor=Color.GRAY] The opaque surface color.
- * @param {boolean} [options.enableLighting=false] Whether geometric Lambert lighting is enabled.
- * @param {ShadowMode} [options.shadows=ShadowMode.RECEIVE_ONLY] Whether the surface casts or receives geometry shadows when scene shadows are enabled.
- * @param {number} [options.lambertDiffuseMultiplier=0.9] The non-negative multiplier applied to Lambert diffuse lighting.
+ * @param {object} options 包含以下属性的对象：
+ * @param {SceneGISPlanarCoordinateSystem} [options.coordinateSystem] 平面坐标系，未提供 tilingScheme 时必需。
+ * @param {SceneGISPlanarTilingScheme} [options.tilingScheme] 已有标准切片方案，例如元数据地形提供者的方案。若同时提供 coordinateSystem，两者须引用同一对象。
+ * @param {number} options.maximumLevel 可选的最高地表层级。
+ * @param {number} [options.maximumScreenSpaceError=2.0] 细化阈值，单位为像素。
+ * @param {number} [options.tileCacheSize=100] 每帧后保留的未保护瓦片数。
+ * @param {Color} [options.baseColor=Color.GRAY] 不透明地表颜色。
+ * @param {boolean} [options.enableLighting=false] 是否启用几何 Lambert 光照。
+ * @param {ShadowMode} [options.shadows=ShadowMode.RECEIVE_ONLY] 场景阴影启用时地表是否投射或接收几何阴影。
+ * @param {number} [options.lambertDiffuseMultiplier=0.9] 应用于 Lambert 漫反射光照的非负倍率。
  *
- * @exception {DeveloperError} <code>options.coordinateSystem</code> is not a SceneGISPlanarCoordinateSystem.
- * @exception {DeveloperError} <code>options.maximumLevel</code> is invalid or exceeds the coordinate system's safe level.
- * @exception {DeveloperError} The root or maximum-level tile scale is not representable as a positive finite Float32 value.
- * @exception {DeveloperError} <code>options.maximumScreenSpaceError</code> is not a finite positive number.
- * @exception {DeveloperError} <code>options.tileCacheSize</code> is not a non-negative integer.
- * @exception {DeveloperError} <code>options.baseColor</code> is not an opaque Color.
- * @exception {DeveloperError} <code>options.enableLighting</code> is not a boolean.
- * @exception {DeveloperError} <code>options.lambertDiffuseMultiplier</code> is not a finite non-negative number.
+ * @exception {DeveloperError} <code>options.coordinateSystem</code> 不是 SceneGISPlanarCoordinateSystem。
+ * @exception {DeveloperError} <code>options.maximumLevel</code> 无效或超过坐标系安全层级。
+ * @exception {DeveloperError} 根瓦片或最高层级瓦片比例无法表示为有限正 Float32。
+ * @exception {DeveloperError} <code>options.maximumScreenSpaceError</code> 不是有限正数。
+ * @exception {DeveloperError} <code>options.tileCacheSize</code> 不是非负整数。
+ * @exception {DeveloperError} <code>options.baseColor</code> 不是不透明 Color。
+ * @exception {DeveloperError} <code>options.enableLighting</code> 不是布尔值。
+ * @exception {DeveloperError} <code>options.lambertDiffuseMultiplier</code> 不是有限非负数。
  */
 function SceneGISPlanarWorld(options) {
   options = options ?? Frozen.EMPTY_OBJECT;
@@ -255,18 +251,12 @@ function SceneGISPlanarWorld(options) {
 
 Object.defineProperties(SceneGISPlanarWorld.prototype, {
   /**
-   * Gets or sets whether ordinary scene content is depth-tested against terrain.
-   * When false, terrain depth is cleared after ground classification, while
-   * content still depth-tests against other content. Terrain queries and ground
-   * classification retain the actual terrain surface. The default preserves
-   * planar terrain occlusion and differs from {@link Globe#depthTestAgainstTerrain}.
-   * Changes take effect on the next render; call Scene.requestRender when using
-   * requestRenderMode.
+   * 获取或设置普通场景内容是否与地形进行深度测试。false 时在贴地分类后清除地形深度，内容之间仍互相进行深度测试。地形查询与贴地分类保留真实地表。默认保留平面地形遮挡，与 {@link Globe#depthTestAgainstTerrain} 不同。下一渲染生效，requestRenderMode 下须调用 Scene.requestRender。
    *
    * @memberof SceneGISPlanarWorld.prototype
    * @type {boolean}
    * @default true
-   * @exception {DeveloperError} The value is not a boolean.
+   * @exception {DeveloperError} 数值不是布尔值。
    */
   depthTestAgainstTerrain: {
     get: function () {
@@ -280,8 +270,7 @@ Object.defineProperties(SceneGISPlanarWorld.prototype, {
     },
   },
   /**
-   * Gets or sets whether terrain casts or receives geometry shadows. Scene
-   * shadows must also be enabled. Only submitted terrain tiles cast shadows.
+   * 获取或设置地形是否投射或接收几何阴影，场景阴影也须启用。仅已提交地形瓦片投射阴影。
    * @memberof SceneGISPlanarWorld.prototype
    * @type {ShadowMode}
    * @default ShadowMode.RECEIVE_ONLY
@@ -295,11 +284,7 @@ Object.defineProperties(SceneGISPlanarWorld.prototype, {
     },
   },
   /**
-   * Gets or sets world-owned terrain clipping planes. Plane coordinates use
-   * planar world metres, transformed by the collection's modelMatrix.
-   * Negative half-spaces are clipped, with Cesium union/intersection semantics.
-   * Changes publish on the next normal render. Requires WebGL 2 and float textures.
-   * Replacing the collection or destroying this World destroys the collection.
+   * 获取或设置 World 所有的地形裁剪平面。平面坐标为平面世界米，经集合 modelMatrix 变换。裁去负半空间，保留 Cesium 交并语义。下一正常渲染发布变化，要求 WebGL 2 和浮点纹理。替换集合或销毁此 World 会销毁集合。
    * @memberof SceneGISPlanarWorld.prototype
    * @type {ClippingPlaneCollection|undefined}
    * @default undefined
@@ -318,12 +303,7 @@ Object.defineProperties(SceneGISPlanarWorld.prototype, {
     },
   },
   /**
-   * Gets or sets world-owned terrain clipping polygons using the same collection
-   * and polygon API as Globe. Positions are straight-edged planar world XY
-   * metres; Z and ellipsoid are not used. Changes publish on
-   * the next normal render. Rendered terrain picking respects clipping;
-   * resident height queries and independent sampling retain source heights.
-   * Replacing the collection or destroying this World destroys the collection.
+   * 获取或设置 World 所有的地形裁剪多边形，复用 Globe 的集合及多边形 API。位置为直边平面世界 XY 米，不使用 Z 或 ellipsoid。下一正常渲染发布变化。已渲染地形拾取遵守裁剪，驻留高度查询与独立采样保留源高度。替换集合或销毁此 World 会销毁集合。
    * @memberof SceneGISPlanarWorld.prototype
    * @type {ClippingPolygonCollection|undefined}
    * @default undefined
@@ -342,7 +322,7 @@ Object.defineProperties(SceneGISPlanarWorld.prototype, {
     },
   },
   /**
-   * Gets the planar coordinate system.
+   * 获取平面坐标系。
    *
    * @memberof SceneGISPlanarWorld.prototype
    * @type {SceneGISPlanarCoordinateSystem}
@@ -354,7 +334,7 @@ Object.defineProperties(SceneGISPlanarWorld.prototype, {
     },
   },
   /**
-   * Gets the canonical single-root tiling scheme.
+   * 获取标准单根切片方案。
    *
    * @memberof SceneGISPlanarWorld.prototype
    * @type {SceneGISPlanarTilingScheme}
@@ -366,7 +346,7 @@ Object.defineProperties(SceneGISPlanarWorld.prototype, {
     },
   },
   /**
-   * Gets the highest selectable surface level.
+   * 获取可选的最高地表层级。
    *
    * @memberof SceneGISPlanarWorld.prototype
    * @type {number}
@@ -378,8 +358,7 @@ Object.defineProperties(SceneGISPlanarWorld.prototype, {
     },
   },
   /**
-   * Gets whether terrain and every shown imagery layer for the current view are
-   * ready or terminally failed. Hidden worlds are loaded by definition.
+   * 获取当前视图的地形与全部可见影像图层是否就绪或已最终失败。隐藏世界按定义视为已加载。
    *
    * @memberof SceneGISPlanarWorld.prototype
    * @type {boolean}
@@ -391,7 +370,7 @@ Object.defineProperties(SceneGISPlanarWorld.prototype, {
     },
   },
   /**
-   * Gets the world-owned ordered planar imagery layers.
+   * 获取 World 所有的有序平面影像图层集合。
    *
    * @memberof SceneGISPlanarWorld.prototype
    * @type {SceneGISPlanarImageryLayerCollection}
@@ -403,9 +382,7 @@ Object.defineProperties(SceneGISPlanarWorld.prototype, {
     },
   },
   /**
-   * Gets the caller-owned planar Environment currently registered with this
-   * world, or undefined. The world keeps only a reference and never destroys
-   * the Environment or its light.
+   * 获取当前注册到此世界、调用方所有的平面 Environment，没有时为 undefined。World 仅保留引用，不销毁 Environment 或其光源。
    *
    * @memberof SceneGISPlanarWorld.prototype
    * @type {SceneGISPlanarEnvironment|undefined}
@@ -417,22 +394,12 @@ Object.defineProperties(SceneGISPlanarWorld.prototype, {
     },
   },
   /**
-   * Gets or sets the caller-owned Cesium Material used to style planar
-   * terrain. Assignment is published by the next successful normal render.
-   * Replacing, clearing, or destroying the world never destroys the material.
-   * The qualified built-ins are ElevationContour, ElevationRamp, SlopeRamp,
-   * and AspectRamp. Custom Fabric sources may consume planar materialInput
-   * fields: normalized tile st/s/str, topology-up normalEC, positionToEyeEC,
-   * the fixed east/north/up tangentToEyeMatrix, absolute world-Z height,
-   * +Z-relative slope, north-clockwise downslope aspect, and waterMask=0.
-   * Only diffuse and alpha are composited; normal, specular, shininess,
-   * emission, translucent passes, and full Globe Material compatibility are
-   * not supported.
+   * 获取或设置调用方所有、用于平面地形样式的 Cesium Material。赋值由下一成功正常渲染发布。替换、清空或销毁世界均不销毁材质。已验证内置材质为 ElevationContour、ElevationRamp、SlopeRamp、AspectRamp。自定义 Fabric 可使用平面 materialInput：归一化瓦片 st/s/str、拓扑向上 normalEC、positionToEyeEC、固定东/北/天 tangentToEyeMatrix、绝对世界 Z 高度、相对 +Z 坡度、从北顺时针的下坡坡向及 waterMask=0。仅合成 diffuse 与 alpha，不支持 normal、specular、shininess、emission、透明通道或完整 Globe Material 兼容性。
    *
    * @memberof SceneGISPlanarWorld.prototype
    * @type {Material|undefined}
    * @default undefined
-   * @exception {DeveloperError} The assigned value is not an undestroyed Material or undefined.
+   * @exception {DeveloperError} 赋值不是未销毁的 Material 或 undefined。
    */
   material: {
     get: function () {
@@ -447,14 +414,11 @@ Object.defineProperties(SceneGISPlanarWorld.prototype, {
     },
   },
   /**
-   * Gets or sets the caller-owned planar terrain provider. The provider must
-   * use this world's canonical tiling scheme. Assigning undefined restores the
-   * flat Z=0 surface. Replacing or destroying the world never destroys the
-   * provider.
+   * 获取或设置调用方所有的平面地形提供者，须使用此世界的标准切片方案。赋值 undefined 恢复平坦 Z=0 表面。替换或销毁世界不销毁提供者。
    *
    * @memberof SceneGISPlanarWorld.prototype
    * @type {SceneGISPlanarTerrainProvider|undefined}
-   * @exception {DeveloperError} The provider contract, canonical tiling identity, height range, maximum level, or geometric error curve is invalid.
+   * @exception {DeveloperError} 提供者契约、标准切片方案身份、高度范围、最高层级或几何误差曲线无效。
    */
   terrainProvider: {
     get: function () {
@@ -477,11 +441,11 @@ Object.defineProperties(SceneGISPlanarWorld.prototype, {
     },
   },
   /**
-   * Gets or sets whether the planar world is shown.
+   * 获取或设置是否显示平面世界。
    *
    * @memberof SceneGISPlanarWorld.prototype
    * @type {boolean}
-   * @exception {DeveloperError} The assigned value is not a boolean.
+   * @exception {DeveloperError} 赋值不是布尔值。
    */
   show: {
     get: function () {
@@ -498,11 +462,11 @@ Object.defineProperties(SceneGISPlanarWorld.prototype, {
     },
   },
   /**
-   * Gets or sets the screen-space error refinement threshold in pixels.
+   * 获取或设置屏幕空间误差细化阈值，单位为像素。
    *
    * @memberof SceneGISPlanarWorld.prototype
    * @type {number}
-   * @exception {DeveloperError} The assigned value is not a finite positive number.
+   * @exception {DeveloperError} 赋值不是有限正数。
    */
   maximumScreenSpaceError: {
     get: function () {
@@ -514,17 +478,12 @@ Object.defineProperties(SceneGISPlanarWorld.prototype, {
     },
   },
   /**
-   * Gets or sets the tile detail distance in planar meters for shallow
-   * perspective views. Tiles beyond this distance retain coarse coverage.
-   * The limit applies fully within 10 degrees of the horizontal plane and
-   * relaxes smoothly until disabled at 20 degrees. Orthographic and top-down
-   * views are unchanged. This does not modify camera visibility or clipping.
-   * Set Infinity to retain unrestricted screen-space-error refinement.
+   * 获取或设置低角度透视的瓦片细节距离，单位为平面米。远处瓦片保留粗覆盖；相对水平面 10 度内完全应用限制，随后平滑放宽，20 度时禁用。正交和俯视不变，不修改相机可见性或裁剪。设为 Infinity 可保持不受限的屏幕空间误差细化。
    *
    * @memberof SceneGISPlanarWorld.prototype
    * @type {number}
    * @default Infinity
-   * @exception {DeveloperError} The assigned value is not positive or Infinity.
+   * @exception {DeveloperError} 赋值不是正数或 Infinity。
    */
   maximumTiltedTileDistance: {
     get: function () {
@@ -536,11 +495,11 @@ Object.defineProperties(SceneGISPlanarWorld.prototype, {
     },
   },
   /**
-   * Gets or sets the number of unprotected tile records retained after a frame.
+   * 获取或设置每帧后保留的未保护瓦片记录数。
    *
    * @memberof SceneGISPlanarWorld.prototype
    * @type {number}
-   * @exception {DeveloperError} The assigned value is not a non-negative integer.
+   * @exception {DeveloperError} 赋值不是非负整数。
    */
   tileCacheSize: {
     get: function () {
@@ -552,11 +511,11 @@ Object.defineProperties(SceneGISPlanarWorld.prototype, {
     },
   },
   /**
-   * Gets or sets the opaque surface color. Values are cloned on get and set.
+   * 获取或设置不透明地表颜色，读取和赋值时均复制。
    *
    * @memberof SceneGISPlanarWorld.prototype
    * @type {Color}
-   * @exception {DeveloperError} The assigned value is not an opaque Color.
+   * @exception {DeveloperError} 赋值不是不透明 Color。
    */
   baseColor: {
     get: function () {
@@ -568,18 +527,12 @@ Object.defineProperties(SceneGISPlanarWorld.prototype, {
     },
   },
   /**
-   * Gets or sets the opacity of the composed surface color, including imagery
-   * and material. This does not multiply vector layer opacity. Values below one
-   * use the translucent pass without writing opaque scene depth, revealing
-   * objects behind the surface. Terrain height and ray queries remain available
-   * at every opacity. Scene depth picking follows the translucent-picking setting.
-   * Changes are published by the next normal render. Translucent sorting follows
-   * the scene's order-independent translucency configuration.
+   * 获取或设置合成地表颜色的不透明度，包含影像和材质，不乘矢量图层不透明度。小于 1 时走透明通道，不写不透明场景深度，从而显示地表后的对象。任意不透明度下地形高度和射线查询仍可用，场景深度拾取遵循透明拾取设置。变化在下一正常渲染发布，透明排序遵循场景顺序无关透明配置。
    *
    * @memberof SceneGISPlanarWorld.prototype
    * @type {number}
    * @default 1.0
-   * @exception {DeveloperError} The value is not finite and between zero and one.
+   * @exception {DeveloperError} 数值非有限值或不在零到一之间。
    */
   opacity: {
     get: function () {
@@ -593,14 +546,12 @@ Object.defineProperties(SceneGISPlanarWorld.prototype, {
     },
   },
   /**
-   * Gets or sets whether fragment geometric Lambert lighting is enabled.
-   * Lighting consumes the owning Scene's light and does not change surface
-   * geometry, terrain selection, or resource ownership.
+   * 获取或设置是否启用片元几何 Lambert 光照。光照消费所属 Scene 光源，不改变地表几何、地形选择或资源所有权。
    *
    * @memberof SceneGISPlanarWorld.prototype
    * @type {boolean}
    * @default false
-   * @exception {DeveloperError} The assigned value is not a boolean.
+   * @exception {DeveloperError} 赋值不是布尔值。
    */
   enableLighting: {
     get: function () {
@@ -612,14 +563,12 @@ Object.defineProperties(SceneGISPlanarWorld.prototype, {
     },
   },
   /**
-   * Gets or sets the multiplier applied to Lambert diffuse lighting. This
-   * value has no effect while {@link SceneGISPlanarWorld#enableLighting} is
-   * false.
+   * 获取或设置 Lambert 漫反射光照倍率，{@link SceneGISPlanarWorld#enableLighting} 为 false 时无效。
    *
    * @memberof SceneGISPlanarWorld.prototype
    * @type {number}
    * @default 0.9
-   * @exception {DeveloperError} The assigned value is not a finite non-negative number.
+   * @exception {DeveloperError} 赋值不是有限非负数。
    */
   lambertDiffuseMultiplier: {
     get: function () {
@@ -633,10 +582,10 @@ Object.defineProperties(SceneGISPlanarWorld.prototype, {
 });
 
 /**
- * Updates pass-invariant state and validates the supported scene mode.
+ * 更新与通道无关的状态，验证所支持的场景模式。
  *
- * @param {object} frameState The state for the current frame.
- * @exception {DeveloperError} The frame is not using {@link SceneMode.SCENE3D}.
+ * @param {object} frameState 当前帧状态。
+ * @exception {DeveloperError} 当前帧未使用 {@link SceneMode.SCENE3D}。
  */
 SceneGISPlanarWorld.prototype.update = function (frameState) {
   if (frameState.mode !== SceneMode.SCENE3D) {
@@ -656,20 +605,20 @@ SceneGISPlanarWorld.prototype.update = function (frameState) {
 };
 
 /**
- * Resets per-frame planar selection state.
+ * 重置逐帧平面选择状态。
  *
- * @param {object} frameState The state for the current frame.
- * @exception {DeveloperError} The world is advanced with a second WebGL Context.
+ * @param {object} frameState 当前帧状态。
+ * @exception {DeveloperError} 使用了第二个 WebGL Context 推进此世界。
  */
 SceneGISPlanarWorld.prototype.beginFrame = function (frameState) {
   this._surface.beginFrame(frameState);
 };
 
 /**
- * Selects visible planar tiles and submits surface color and depth commands.
+ * 选择可见平面瓦片并提交地表颜色和深度命令。
  *
- * @param {object} frameState The state for the current frame.
- * @exception {DeveloperError} The world is rendered with a second WebGL Context.
+ * @param {object} frameState 当前帧状态。
+ * @exception {DeveloperError} 使用了第二个 WebGL Context 渲染世界。
  */
 SceneGISPlanarWorld.prototype.render = function (frameState) {
   if (!this._show) {
@@ -693,11 +642,10 @@ SceneGISPlanarWorld.prototype.render = function (frameState) {
 };
 
 /**
- * Renders the opt-in planar SkyBox, atmosphere, and celestial bodies before
- * ordinary scene geometry.
+ * 在普通场景几何之前绘制显式启用的平面 SkyBox、大气和天体。
  *
- * @param {object} frameState The state for the current frame.
- * @param {object} passState The active environment pass state.
+ * @param {object} frameState 当前帧状态。
+ * @param {object} passState 当前环境通道状态。
  */
 SceneGISPlanarWorld.prototype.renderEnvironment = function (
   frameState,
@@ -773,24 +721,22 @@ function renderPlanarEnvironment(frameState, passState) {
 }
 
 /**
- * Trims unprotected tile records after command execution.
+ * 命令执行后清理未保护瓦片记录。
  *
- * @param {object} frameState The state for the current frame.
+ * @param {object} frameState 当前帧状态。
  */
 SceneGISPlanarWorld.prototype.endFrame = function (frameState) {
   this._surface.endFrame(this._tileCacheSize);
 };
 
 /**
- * Gets the terrain height from the deepest resident direct or upsampled
- * Float32 surface mesh containing a position. This method does not request,
- * create, promote, or retain tiles. Flat fallback content is not terrain.
+ * 从包含位置的最深驻留直接或上采样 Float32 表面网格读取地形高度。不请求、创建、晋升或保留瓦片。平坦后备内容不视为地形。
  *
- * @param {Cartesian3} position The finite planar position. Z is validated but does not affect addressing.
- * @returns {number|undefined} The resident terrain height in meters, or undefined when none is resident.
+ * @param {Cartesian3} position 有限平面位置，验证 Z，但 Z 不参与寻址。
+ * @returns {number|undefined} 驻留地形高度，单位为米；没有驻留地形时为 undefined。
  *
- * @exception {DeveloperError} <code>position</code> is not a Cartesian3 with finite components.
- * @exception {DeveloperError} This world has been destroyed.
+ * @exception {DeveloperError} <code>position</code> 不是各分量有限的 Cartesian3。
+ * @exception {DeveloperError} 此世界已销毁。
  */
 SceneGISPlanarWorld.prototype.getTerrainHeight = function (position) {
   if (
@@ -810,16 +756,14 @@ SceneGISPlanarWorld.prototype.getTerrainHeight = function (position) {
 };
 
 /**
- * Intersects a ray with the actual terrain cover published by the most recent
- * successful normal render. Surface skirts are excluded. A nearest flat
- * fallback occludes farther terrain but does not produce a terrain result.
+ * 将射线与最近一次成功正常渲染发布的实际地形覆盖求交，不包含裙边。最近的平坦后备会遮住更远地形，但自身不产生地形结果。
  *
- * @param {Ray} ray The ray to intersect. Its direction need not be normalized.
- * @param {Cartesian3} [result] The object in which to store the intersection.
- * @returns {Cartesian3|undefined} The nearest terrain intersection, or undefined when none is available.
+ * @param {Ray} ray 待求交射线，方向无需归一化。
+ * @param {Cartesian3} [result] 存储交点的对象。
+ * @returns {Cartesian3|undefined} 最近地形交点；不可用时为 undefined。
  *
- * @exception {DeveloperError} <code>ray</code> does not have a finite origin and non-zero finite direction.
- * @exception {DeveloperError} This world has been destroyed.
+ * @exception {DeveloperError} <code>ray</code> 不具有有限原点和非零有限方向。
+ * @exception {DeveloperError} 此世界已销毁。
  */
 SceneGISPlanarWorld.prototype.pickTerrain = function (ray, result) {
   validateRay(ray);
@@ -827,19 +771,17 @@ SceneGISPlanarWorld.prototype.pickTerrain = function (ray, result) {
 };
 
 /**
- * Computes a four-frustum window ray and intersects it with the actual terrain
- * cover published by the most recent successful normal render. This method
- * does not trigger a render, depth pick, or mathematical Z=0 fallback.
+ * 计算适配四类视锥的窗口射线，与最近成功正常渲染发布的实际地形覆盖求交。不触发渲染、深度拾取或 Z=0 数学平面后备。
  *
- * @param {Cartesian2} windowPosition The finite client-space position with a top-left origin.
- * @param {Scene} scene The live SCENE3D scene whose primary world is this world.
- * @param {Cartesian3} [result] The object in which to store the intersection.
- * @returns {Cartesian3|undefined} The terrain intersection, or undefined for a zero-sized canvas or a miss.
+ * @param {Cartesian2} windowPosition 左上原点、有限的客户端空间位置。
+ * @param {Scene} scene 存活的 SCENE3D Scene，其主世界须为此世界。
+ * @param {Cartesian3} [result] 存储交点的对象。
+ * @returns {Cartesian3|undefined} 地形交点；画布尺寸为零或未命中时为 undefined。
  *
- * @exception {DeveloperError} <code>windowPosition</code> is missing or non-finite.
- * @exception {DeveloperError} <code>scene</code> is missing, destroyed, uses another world, or is not in SCENE3D.
- * @exception {DeveloperError} The scene camera does not use a supported finite frustum and pose.
- * @exception {DeveloperError} This world has been destroyed.
+ * @exception {DeveloperError} 缺少 <code>windowPosition</code> 或数值非有限。
+ * @exception {DeveloperError} 缺少 <code>scene</code>，或其已销毁、使用其他世界、或不处于 SCENE3D。
+ * @exception {DeveloperError} 场景相机没有受支持的有限视锥和姿态。
+ * @exception {DeveloperError} 此世界已销毁。
  */
 SceneGISPlanarWorld.prototype.pickTerrainFromWindowPosition = function (
   windowPosition,
@@ -876,15 +818,14 @@ SceneGISPlanarWorld.prototype.pickTerrainFromWindowPosition = function (
 };
 
 /**
- * Intersects a ray with the bounded mathematical planar surface at Z=0.
- * This operation is independent of rendering, depth picking, and surface LOD.
+ * 将射线与 Z=0 的有界数学平面求交，独立于渲染、深度拾取和地表 LOD。
  *
- * @param {Ray} ray The ray to intersect. Its direction need not be normalized.
- * @param {Cartesian3} [result] The object in which to store the intersection.
- * @returns {Cartesian3|undefined} The intersection, or undefined when the forward ray misses the bounded surface.
+ * @param {Ray} ray 待求交射线，方向无需归一化。
+ * @param {Cartesian3} [result] 存储交点的对象。
+ * @returns {Cartesian3|undefined} 交点；向前射线未命中有界表面时为 undefined。
  *
- * @exception {DeveloperError} <code>ray</code> does not have a finite origin and non-zero finite direction.
- * @exception {DeveloperError} This world has been destroyed.
+ * @exception {DeveloperError} <code>ray</code> 不具有有限原点和非零有限方向。
+ * @exception {DeveloperError} 此世界已销毁。
  */
 SceneGISPlanarWorld.prototype.pick = function (ray, result) {
   validateRay(ray);
@@ -905,18 +846,17 @@ SceneGISPlanarWorld.prototype.pick = function (ray, result) {
 };
 
 /**
- * Computes a four-frustum window ray and intersects it with the bounded
- * mathematical planar surface at Z=0.
+ * 计算适配四类视锥的窗口射线，并与 Z=0 的有界数学平面求交。
  *
- * @param {Cartesian2} windowPosition The finite client-space position with a top-left origin.
- * @param {Scene} scene The live SCENE3D scene whose primary world is this world.
- * @param {Cartesian3} [result] The object in which to store the intersection.
- * @returns {Cartesian3|undefined} The intersection, or undefined for a zero-sized canvas or a miss.
+ * @param {Cartesian2} windowPosition 左上原点、有限的客户端空间位置。
+ * @param {Scene} scene 存活的 SCENE3D Scene，其主世界须为此世界。
+ * @param {Cartesian3} [result] 存储交点的对象。
+ * @returns {Cartesian3|undefined} 交点；画布尺寸为零或未命中时为 undefined。
  *
- * @exception {DeveloperError} <code>windowPosition</code> is missing or non-finite.
- * @exception {DeveloperError} <code>scene</code> is missing, destroyed, uses another world, or is not in SCENE3D.
- * @exception {DeveloperError} The scene camera does not use a supported finite frustum and pose.
- * @exception {DeveloperError} This world has been destroyed.
+ * @exception {DeveloperError} 缺少 <code>windowPosition</code> 或数值非有限。
+ * @exception {DeveloperError} 缺少 <code>scene</code>，或其已销毁、使用其他世界、或不处于 SCENE3D。
+ * @exception {DeveloperError} 场景相机没有受支持的有限视锥和姿态。
+ * @exception {DeveloperError} 此世界已销毁。
  */
 SceneGISPlanarWorld.prototype.pickFromWindowPosition = function (
   windowPosition,
@@ -986,16 +926,16 @@ SceneGISPlanarWorld.prototype._unregisterEnvironment = function (environment) {
 };
 
 /**
- * Returns true if this object was destroyed; otherwise, false.
+ * 此对象已销毁时返回 true，否则返回 false。
  *
- * @returns {boolean} True if this object was destroyed; otherwise, false.
+ * @returns {boolean} 此对象已销毁时为 true，否则为 false。
  */
 SceneGISPlanarWorld.prototype.isDestroyed = function () {
   return false;
 };
 
 /**
- * Destroys tile records and all Context-bound resources owned by this world.
+ * 销毁此世界所有的瓦片记录和依赖 Context 的资源。
  *
  * @returns {void}
  */

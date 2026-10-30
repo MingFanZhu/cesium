@@ -15,18 +15,17 @@ function validatePoint(u, v, height) {
 }
 
 /**
- * Maps one MVT layer's tile-local coordinates into an explicitly matched planar tile.
- * This does not read CRS metadata, reproject, clamp buffers, or sample terrain.
+ * 将一个 MVT 图层的瓦片局部坐标映射到显式匹配的平面瓦片。不读取 CRS 元数据，不重投影、裁剪缓冲区或采样地形。
  * @alias SceneGISVectorTileCoordinates
  * @constructor
- * @experimental This API is experimental and subject to change.
- * @param {object} options The tile mapping.
- * @param {SceneGISPlanarTilingScheme} options.tilingScheme The source's matching tiling scheme.
- * @param {number} options.x Canonical XYZ column.
- * @param {number} options.y Canonical XYZ row, increasing southward.
- * @param {number} options.level Canonical tile level.
- * @param {number} options.extent The layer's positive integer extent.
- * @exception {DeveloperError} The scheme, address, or extent is invalid.
+ * @experimental 此 API 为实验性，可能发生变化。
+ * @param {object} options 瓦片映射。
+ * @param {SceneGISPlanarTilingScheme} options.tilingScheme 与源匹配的切片方案。
+ * @param {number} options.x 标准 XYZ 列号。
+ * @param {number} options.y 标准 XYZ 行号，向南递增。
+ * @param {number} options.level 标准瓦片层级。
+ * @param {number} options.extent 图层的正整数范围。
+ * @exception {DeveloperError} 方案、地址或范围无效。
  */
 function SceneGISVectorTileCoordinates(options) {
   options = options ?? {};
@@ -55,7 +54,7 @@ function SceneGISVectorTileCoordinates(options) {
 
 Object.defineProperties(SceneGISVectorTileCoordinates.prototype, {
   /**
-   * Gets the immutable northwest tile origin in full meter coordinates.
+   * 获取以完整米制坐标表示的不可变西北瓦片原点。
    * @memberof SceneGISVectorTileCoordinates.prototype
    * @type {Cartesian3}
    * @readonly
@@ -68,13 +67,13 @@ Object.defineProperties(SceneGISVectorTileCoordinates.prototype, {
 });
 
 /**
- * Converts tile-local coordinates to origin-relative meters without losing the world origin to Float32.
- * @param {number} u Tile-local X; buffer coordinates are allowed.
- * @param {number} v Tile-local Y, increasing downward.
- * @param {number} [height=0] Absolute Z in meters.
- * @param {Cartesian3} [result] Storage for the result.
- * @returns {Cartesian3} Origin-relative coordinates.
- * @exception {DeveloperError} Input or mapped coordinates are not finite.
+ * 将瓦片局部坐标转换为原点相对米，不因 Float32 丢失世界原点精度。
+ * @param {number} u 瓦片局部 X，允许缓冲区坐标。
+ * @param {number} v 瓦片局部 Y，向下递增。
+ * @param {number} [height=0] 绝对 Z，单位为米。
+ * @param {Cartesian3} [result] 结果存储对象。
+ * @returns {Cartesian3} 相对原点的坐标。
+ * @exception {DeveloperError} 输入或映射坐标非有限值。
  */
 SceneGISVectorTileCoordinates.prototype.toLocal = function (
   u,
@@ -90,13 +89,13 @@ SceneGISVectorTileCoordinates.prototype.toLocal = function (
 };
 
 /**
- * Converts tile-local coordinates to full meter coordinates, flipping Y exactly once.
- * @param {number} u Tile-local X; buffer coordinates are allowed.
- * @param {number} v Tile-local Y, increasing downward.
- * @param {number} [height=0] Absolute Z in meters.
- * @param {Cartesian3} [result] Storage for the result.
- * @returns {Cartesian3} Full planar world coordinates.
- * @exception {DeveloperError} Input or mapped coordinates are not finite.
+ * 将瓦片局部坐标转换为完整米制坐标，仅翻转一次 Y。
+ * @param {number} u 瓦片局部 X，允许缓冲区坐标。
+ * @param {number} v 瓦片局部 Y，向下递增。
+ * @param {number} [height=0] 绝对 Z，单位为米。
+ * @param {Cartesian3} [result] 结果存储对象。
+ * @returns {Cartesian3} 完整平面世界坐标。
+ * @exception {DeveloperError} 输入或映射坐标非有限值。
  */
 SceneGISVectorTileCoordinates.prototype.toWorld = function (
   u,
@@ -114,13 +113,12 @@ SceneGISVectorTileCoordinates.prototype.toWorld = function (
 };
 
 /**
- * Converts reference-plane CSS meters per pixel to continuous style zoom.
- * Tile LOD, source maximum level, and device pixel ratio are not inputs.
- * @param {number} rootWidth The full square root width in meters.
- * @param {number} metersPerPixel Meters per CSS pixel at the chosen reference plane.
- * @param {number} [tileSize=512] Reference tile width in CSS pixels.
- * @returns {number} Continuous style zoom, which may be negative.
- * @exception {DeveloperError} An input is not finite and positive.
+ * 将参考平面的每 CSS 像素米数换算为连续样式缩放。输入不含瓦片 LOD、源最高层级或设备像素比。
+ * @param {number} rootWidth 完整正方形根范围宽度，单位为米。
+ * @param {number} metersPerPixel 所选参考平面上每 CSS 像素对应的米数。
+ * @param {number} [tileSize=512] 参考瓦片宽度，单位为 CSS 像素。
+ * @returns {number} 连续样式缩放，可以为负。
+ * @exception {DeveloperError} 输入非有限值或非正值。
  */
 SceneGISVectorTileCoordinates.computeStyleZoom = function (
   rootWidth,

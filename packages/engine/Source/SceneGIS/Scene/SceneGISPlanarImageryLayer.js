@@ -83,25 +83,25 @@ function colorsEqualRgb(left, right) {
 }
 
 /**
- * An ordered planar raster imagery layer.
+ * 按顺序组织的平面栅格影像图层。
  *
  * @alias SceneGISPlanarImageryLayer
  * @constructor
  *
- * @param {SceneGISPlanarImageryProvider} imageryProvider The structural planar imagery provider.
- * @param {object} [options] Object with the following properties:
- * @param {boolean} [options.show=true] Whether the layer is shown.
- * @param {number} [options.alpha=1.0] The layer opacity.
- * @param {SplitDirection} [options.splitDirection=SplitDirection.NONE] The side of {@link Scene#splitPosition} on which to display this layer.
- * @param {number} [options.brightness=1.0] The layer brightness.
- * @param {number} [options.contrast=1.0] The layer contrast.
- * @param {number} [options.hue=0.0] The layer hue rotation in radians.
- * @param {number} [options.saturation=1.0] The layer saturation.
- * @param {number} [options.gamma=1.0] The layer gamma.
- * @param {Color} [options.colorToAlpha] The raw sampled RGB color made transparent.
- * @param {number} [options.colorToAlphaThreshold=0.004] The strict maximum-channel RGB distance used by color-to-alpha.
+ * @param {SceneGISPlanarImageryProvider} imageryProvider 满足结构契约的平面影像提供者。
+ * @param {object} [options] 包含以下属性的对象：
+ * @param {boolean} [options.show=true] 是否显示图层。
+ * @param {number} [options.alpha=1.0] 图层不透明度。
+ * @param {SplitDirection} [options.splitDirection=SplitDirection.NONE] 在 {@link Scene#splitPosition} 的哪一侧显示此图层。
+ * @param {number} [options.brightness=1.0] 图层亮度。
+ * @param {number} [options.contrast=1.0] 图层对比度。
+ * @param {number} [options.hue=0.0] 图层色相旋转，单位为弧度。
+ * @param {number} [options.saturation=1.0] 图层饱和度。
+ * @param {number} [options.gamma=1.0] 图层 gamma。
+ * @param {Color} [options.colorToAlpha] 要变为透明的原始采样 RGB 颜色。
+ * @param {number} [options.colorToAlphaThreshold=0.004] 颜色转 alpha 使用的严格最大通道 RGB 距离。
  *
- * @exception {DeveloperError} The provider, show flag, alpha, split direction, or filter options are invalid.
+ * @exception {DeveloperError} 提供者、显隐、alpha、分屏方向或滤镜选项无效。
  */
 function SceneGISPlanarImageryLayer(imageryProvider, options) {
   validateImageryProvider(imageryProvider);
@@ -146,7 +146,7 @@ function SceneGISPlanarImageryLayer(imageryProvider, options) {
 
 Object.defineProperties(SceneGISPlanarImageryLayer.prototype, {
   /**
-   * Gets the structural planar imagery provider. The layer does not own it.
+   * 获取满足结构契约的平面影像提供者，图层不拥有它。
    * @memberof SceneGISPlanarImageryLayer.prototype
    * @type {SceneGISPlanarImageryProvider}
    * @readonly
@@ -157,10 +157,10 @@ Object.defineProperties(SceneGISPlanarImageryLayer.prototype, {
     },
   },
   /**
-   * Gets or sets whether this layer participates in loading and composition.
+   * 获取或设置此图层是否参与加载与合成。
    * @memberof SceneGISPlanarImageryLayer.prototype
    * @type {boolean}
-   * @exception {DeveloperError} The assigned value is not a boolean.
+   * @exception {DeveloperError} 赋值不是布尔值。
    */
   show: {
     get: function () {
@@ -177,10 +177,10 @@ Object.defineProperties(SceneGISPlanarImageryLayer.prototype, {
     },
   },
   /**
-   * Gets or sets the finite opacity from zero through one.
+   * 获取或设置从零到一的有限不透明度。
    * @memberof SceneGISPlanarImageryLayer.prototype
    * @type {number}
-   * @exception {DeveloperError} The assigned value is outside the finite range from zero through one.
+   * @exception {DeveloperError} 赋值超出零到一的有限范围。
    */
   alpha: {
     get: function () {
@@ -195,14 +195,11 @@ Object.defineProperties(SceneGISPlanarImageryLayer.prototype, {
     },
   },
   /**
-   * Gets or sets the side of {@link Scene#splitPosition} on which this imagery
-   * layer is displayed. Splitting affects imagery color only, not surface depth
-   * or tile loading. Use {@link Scene#requestRender} after changing the split
-   * direction or splitPosition when explicit rendering is enabled.
+   * 获取或设置此影像图层在 {@link Scene#splitPosition} 的显示侧。分屏仅影响影像颜色，不影响地表深度或瓦片加载。显式渲染启用时，修改分屏方向或 splitPosition 后使用 {@link Scene#requestRender}。
    * @memberof SceneGISPlanarImageryLayer.prototype
    * @type {SplitDirection}
    * @default SplitDirection.NONE
-   * @exception {DeveloperError} The assigned value is not LEFT, NONE, or RIGHT.
+   * @exception {DeveloperError} 赋值不是 LEFT、NONE 或 RIGHT。
    */
   splitDirection: {
     get: function () {
@@ -217,10 +214,10 @@ Object.defineProperties(SceneGISPlanarImageryLayer.prototype, {
     },
   },
   /**
-   * Gets or sets the finite non-negative brightness.
+   * 获取或设置有限非负亮度。
    * @memberof SceneGISPlanarImageryLayer.prototype
    * @type {number}
-   * @exception {DeveloperError} The assigned value is not a finite non-negative number.
+   * @exception {DeveloperError} 赋值不是有限非负数。
    */
   brightness: {
     get: function () {
@@ -235,10 +232,10 @@ Object.defineProperties(SceneGISPlanarImageryLayer.prototype, {
     },
   },
   /**
-   * Gets or sets the finite non-negative contrast.
+   * 获取或设置有限非负对比度。
    * @memberof SceneGISPlanarImageryLayer.prototype
    * @type {number}
-   * @exception {DeveloperError} The assigned value is not a finite non-negative number.
+   * @exception {DeveloperError} 赋值不是有限非负数。
    */
   contrast: {
     get: function () {
@@ -253,10 +250,10 @@ Object.defineProperties(SceneGISPlanarImageryLayer.prototype, {
     },
   },
   /**
-   * Gets or sets the finite hue rotation in radians.
+   * 获取或设置有限的色相旋转，单位为弧度。
    * @memberof SceneGISPlanarImageryLayer.prototype
    * @type {number}
-   * @exception {DeveloperError} The assigned value is not finite.
+   * @exception {DeveloperError} 赋值非有限值。
    */
   hue: {
     get: function () {
@@ -271,10 +268,10 @@ Object.defineProperties(SceneGISPlanarImageryLayer.prototype, {
     },
   },
   /**
-   * Gets or sets the finite non-negative saturation.
+   * 获取或设置有限非负饱和度。
    * @memberof SceneGISPlanarImageryLayer.prototype
    * @type {number}
-   * @exception {DeveloperError} The assigned value is not a finite non-negative number.
+   * @exception {DeveloperError} 赋值不是有限非负数。
    */
   saturation: {
     get: function () {
@@ -289,10 +286,10 @@ Object.defineProperties(SceneGISPlanarImageryLayer.prototype, {
     },
   },
   /**
-   * Gets or sets the finite positive gamma.
+   * 获取或设置有限正 gamma。
    * @memberof SceneGISPlanarImageryLayer.prototype
    * @type {number}
-   * @exception {DeveloperError} The assigned value is not a finite positive number.
+   * @exception {DeveloperError} 赋值不是有限正数。
    */
   gamma: {
     get: function () {
@@ -307,10 +304,10 @@ Object.defineProperties(SceneGISPlanarImageryLayer.prototype, {
     },
   },
   /**
-   * Gets or sets a defensively cloned raw sampled RGB color made transparent.
+   * 获取或设置将变为透明的原始采样 RGB 颜色，采用隔离副本。
    * @memberof SceneGISPlanarImageryLayer.prototype
    * @type {Color|undefined}
-   * @exception {DeveloperError} The assigned value is not undefined or a Color with finite normalized RGB.
+   * @exception {DeveloperError} 赋值不是 undefined 或 RGB 为有限归一化值的 Color。
    */
   colorToAlpha: {
     get: function () {
@@ -325,10 +322,10 @@ Object.defineProperties(SceneGISPlanarImageryLayer.prototype, {
     },
   },
   /**
-   * Gets or sets the inclusive finite color-to-alpha threshold range.
+   * 获取或设置闭区间内有限的颜色转 alpha 阈值。
    * @memberof SceneGISPlanarImageryLayer.prototype
    * @type {number}
-   * @exception {DeveloperError} The assigned value is outside the finite range from zero through one.
+   * @exception {DeveloperError} 赋值超出零到一的有限范围。
    */
   colorToAlphaThreshold: {
     get: function () {
@@ -345,18 +342,18 @@ Object.defineProperties(SceneGISPlanarImageryLayer.prototype, {
 });
 
 /**
- * Returns true if this object was destroyed; otherwise, false.
- * @returns {boolean} True if destroyed.
+ * 此对象已销毁时返回 true，否则返回 false。
+ * @returns {boolean} 已销毁时为 True。
  */
 SceneGISPlanarImageryLayer.prototype.isDestroyed = function () {
   return false;
 };
 
 /**
- * Destroys this detached layer. The imagery provider is not destroyed.
+ * 销毁已脱离集合的图层，不销毁影像提供者。
  *
  * @returns {void}
- * @exception {DeveloperError} The layer is attached to a collection.
+ * @exception {DeveloperError} 图层仍挂载在集合中。
  */
 SceneGISPlanarImageryLayer.prototype.destroy = function () {
   if (this._collection !== undefined) {

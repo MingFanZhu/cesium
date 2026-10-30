@@ -12,26 +12,19 @@ function range(value, name, minimum, maximum) {
 }
 
 /**
- * Optional static frost extending inward from the edges of the camera lens.
- * Add this stage to the supplied Scene's postProcessStages collection, which
- * normally owns its destruction. Like SceneGISRainLensStage, it uses one native
- * color-only stage after tone mapping and before FXAA, preserving source alpha.
+ * 可选的镜头边缘向内延伸的静态霜冻效果。加入指定 Scene 的 postProcessStages 集合，集合通常负责销毁。与 SceneGISRainLensStage 一样，在色调映射之后、FXAA 之前使用一个原生纯颜色阶段，并保留输入 alpha。
  *
- * A packaged grayscale ice-crystal texture supplies the frost pattern. It loads
- * on first enable and is released with the native stage. There is no animation,
- * depth, history, collision pass or additional frame request. This is an artistic
- * frosted-glass overlay, not a crystal-growth simulation. It does not modify rain,
- * surface coverage, lighting, exposure, the camera or the particle system.
+ * 随包的灰度冰晶纹理提供霜花图案，首次启用时加载，随原生阶段释放。没有动画、深度、历史、碰撞通道或额外帧请求。这是艺术化磨砂玻璃覆盖，不是结晶生长模拟。不修改雨、地表覆盖、光照、曝光、相机或粒子系统。
  *
  * @alias SceneGISSnowLensStage
  * @extends PostProcessStage
- * @param {object} options Configuration.
- * @param {Scene} options.scene The live Scene receiving this stage.
- * @param {string} [options.name] Unique native post-process stage name.
- * @param {boolean} [options.enabled=false] Whether to execute the effect.
- * @param {number} [options.intensity=0.5] Frost opacity in [0, 1]. Zero is identity.
- * @param {number} [options.coverage=0.4] Inward extent from the screen edges in [0, 1]. Zero is identity; one reaches the center.
- * @exception {DeveloperError} Configuration violates the documented ranges or Scene ownership.
+ * @param {object} options 配置。
+ * @param {Scene} options.scene 接收此阶段的存活 Scene。
+ * @param {string} [options.name] 唯一的原生后处理阶段名称。
+ * @param {boolean} [options.enabled=false] 是否执行效果。
+ * @param {number} [options.intensity=0.5] 霜冻不透明度，范围 [0,1]；0 不改变输入。
+ * @param {number} [options.coverage=0.4] 从屏幕边缘向内延伸的范围，取值 [0,1]；0 不改变输入，1 达到中心。
+ * @exception {DeveloperError} 配置违反文档范围或 Scene 所有权。
  * @example
  * const lens = scene.postProcessStages.add(new Cesium.SceneGISSnowLensStage({
  *   scene, enabled: true, intensity: 0.7, coverage: 0.4
@@ -72,7 +65,8 @@ class SceneGISSnowLensStage extends PostProcessStage {
     this.coverage = options.coverage ?? 0.4;
   }
 
-  /** Frost opacity in [0, 1]. Zero preserves the input exactly.
+  /**
+   *  霜冻不透明度，范围 [0,1]；0 完整保留输入。
    * @type {number}
    * @default 0.5
    */
@@ -85,7 +79,8 @@ class SceneGISSnowLensStage extends PostProcessStage {
     this._snowScene.requestRender();
   }
 
-  /** Inward extent from the screen edges in [0, 1]. Zero is identity; one reaches the center.
+  /**
+   *  从屏幕边缘向内延伸的范围，取值 [0,1]；0 不改变输入，1 达到中心。
    * @type {number}
    * @default 0.4
    */
@@ -108,7 +103,8 @@ class SceneGISSnowLensStage extends PostProcessStage {
     super.update(context, useLogDepth);
   }
 
-  /** Releases the packaged frost texture and native stage resources.
+  /**
+   *  释放随包霜冻纹理和原生阶段资源。
    * @returns {undefined}
    */
   destroy() {

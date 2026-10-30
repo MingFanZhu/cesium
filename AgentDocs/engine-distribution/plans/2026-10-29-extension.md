@@ -1,7 +1,7 @@
 # SceneGIS distribution extension plan
 
 - Type: extension plan
-- Status: completed
+- Status: active
 - Owner: Architecture Agent
 - Date: 2026-10-29
 - ADR: [0205](../../../Documentation/SceneGIS/Decisions/ADR-0205-scenegis-distribution.md)
@@ -20,6 +20,15 @@ Build outputs and doclets are generated artifacts, never hand maintained or comm
 | -------------------------------------------------- | --------------------------------------------- | ---------------------------------------------------------------------------------------------------- | --------- |
 | [D1 runtime](2026-10-29-d1-runtime.md)             | Current bundler/URL/type chain inspected      | IIFE/ESM, resources, declarations, focused tests, review and local commit                            | completed |
 | [D2 documentation](2026-10-29-d2-documentation.md) | D1 committed; recheck JSDoc template and tags | Complete static docs, doclets/index, offline bundle verification, SDK guide, review and local commit | completed |
+
+## Chinese source and delivery amendment (2026-10-30)
+
+ADR-0207 adds two sequential phases after the completed distribution/localization work:
+
+- [C1 Chinese source](2026-10-30-c1-chinese-source.md): completed and reviewed; all owned public prose and source-language handling migrated with unchanged runtime/types.
+- C2 single Chinese edition: after C1 checkpoint, recheck current generators and simplify output/UI/SDK guidance; full build/type/browser gate and checkpoint. Detailed plan follows C1.
+
+Native comments and build targets remain intact. Native translations stay external; owned Chinese JSDoc is the only maintained prose source. No SDK changes.
 
 ## Risks and overall acceptance
 

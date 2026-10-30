@@ -247,24 +247,22 @@ async function sample(provider, level, positions, rejectOnTileFail) {
 }
 
 /**
- * Provides independent, explicit-level sampling of planar terrain providers.
- * This namespace is not instantiable.
+ * 对平面地形提供者进行独立、显式层级的采样。此命名空间不可实例化。
  *
  * @namespace SceneGISPlanarTerrainSampler
  */
 const SceneGISPlanarTerrainSampler = {};
 
 /**
- * Samples provider terrain at an explicit level without accessing a World
- * cache or modifying the input positions.
+ * 在显式层级采样提供者地形，不访问 World 缓存或修改输入位置。
  *
- * @param {SceneGISPlanarTerrainProvider} terrainProvider The synchronously ready terrain provider.
- * @param {number} level The terrain level to sample.
- * @param {Cartesian3[]} positions The finite planar positions to sample.
- * @param {boolean} [rejectOnTileFail=false] Whether a runtime failure for one tile rejects the entire operation.
- * @returns {Promise<Array<number|undefined>>} Heights in input order, with undefined for outside, unavailable, or tolerated failed tiles.
+ * @param {SceneGISPlanarTerrainProvider} terrainProvider 同步就绪的地形提供者。
+ * @param {number} level 采样的地形层级。
+ * @param {Cartesian3[]} positions 要采样的有限平面位置。
+ * @param {boolean} [rejectOnTileFail=false] 单个瓦片的运行时失败是否使整个操作拒绝。
+ * @returns {Promise<Array<number|undefined>>} 按输入顺序排列的高度；范围外、不可用或容忍失败的瓦片为 undefined。
  *
- * @exception {DeveloperError} The provider, level, positions, or reject policy is invalid.
+ * @exception {DeveloperError} 提供者、层级、位置或拒绝策略无效。
  */
 SceneGISPlanarTerrainSampler.sampleAtLevel = function (
   terrainProvider,

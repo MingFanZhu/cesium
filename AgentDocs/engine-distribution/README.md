@@ -5,12 +5,12 @@
 | Field                  | Value                                         |
 | ---------------------- | --------------------------------------------- |
 | Extension slug         | `engine-distribution`                         |
-| Status                 | `completed`                                   |
+| Status                 | `active`                                      |
 | Planning model         | `extension`                                   |
 | Active extension plan  | [Distribution](plans/2026-10-29-extension.md) |
-| Current phase          | D1, D2 and localization complete              |
+| Current phase          | C1 completed; C2 pending checkpoint           |
 | Active standalone plan | None                                          |
-| Active phase plan      | None                                          |
+| Active phase plan      | [C1](plans/2026-10-30-c1-chinese-source.md)   |
 | Architecture contact   | Architecture Agent (current task)             |
 | Execution contact      | Execution Agent (current task)                |
 | Last updated           | 2026-10-30                                    |
@@ -30,6 +30,12 @@ automatic compatibility checks or registry publication.
 - ADR: [ADR-0205](../../Documentation/SceneGIS/Decisions/ADR-0205-scenegis-distribution.md).
 - SGP: `SGP-0073`, `SGP-0074`.
 - Open discussion: none. No separate review agent requested.
+
+## Current language change
+
+ADR-0207 authorizes Chinese public source JSDoc and a single Chinese documentation edition.
+C1 is completed and [reviewed](reviews/2026-10-30-c1-chinese-source.md); C2 starts after its checkpoint. Existing bilingual handoff below is historical
+until C2 delivery. Native source comments remain English.
 
 ## Latest localization
 

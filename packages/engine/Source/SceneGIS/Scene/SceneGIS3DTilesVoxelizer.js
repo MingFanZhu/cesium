@@ -208,26 +208,16 @@ function finish(job, status, value) {
 }
 
 /**
- * A one-shot, camera-independent 3D Tiles geometry-to-voxel job. Mount it in Scene.primitives
- * after the source tileset and await resultPromise. The source must remain reachable through
- * native PrimitiveCollections in the same Scene, with static geometry and transforms,
- * until the snapshot completes. The job never reparents or attaches the borrowed source.
+ * 一次性、独立于显示相机的 3D Tiles 几何体素化任务。在源瓦片集之后将任务挂载到 Scene.primitives，并等待 resultPromise。快照完成前，源必须始终可通过同一 Scene 的原生 PrimitiveCollection 树访问，且几何与变换保持静态。任务只借用源，不改变其父集合，也不重复挂载。
  *
- * Actively loads the grid region through the native tile request/cache/decoder pipeline.
- * Includes all source triangles regardless of style, visibility, transparency or clipping.
- * Supports static Model-backed glTF/GLB, b3dm and i3dm TRIANGLES, including native instancing
- * and decoding. Rejects point clouds, non-triangle modes, animations, skins, morph targets,
- * custom shaders and vertical exaggeration. It does not reconstruct physical building interiors.
+ * 通过原生瓦片请求、缓存和解码管线主动加载格网区域。包含全部源三角形，不受样式、显隐、透明度或裁剪影响。支持由静态 Model 承载的 glTF/GLB、b3dm 和 i3dm TRIANGLES，以及原生实例化与解码。拒绝点云、非三角形模式、动画、蒙皮、变形目标、自定义着色器和垂直夸张；不重建真实建筑内部结构。
  *
- * The job owns its Worker and borrows the tileset. Removing/destroying the job never destroys
- * the source. Results are caller-owned and remain valid after both job and source are destroyed.
- * Geometry may be read from GPU buffers once during capture; an individual large read can stall
- * the main thread. No per-frame geometry readback takes place after completion.
+ * 任务拥有自己的 Worker，借用瓦片集。移除或销毁任务不会销毁源。结果归调用方所有，任务和源都销毁后仍然有效。捕获期间可能一次性读取 GPU 几何缓冲，单次大规模读取可能阻塞主线程；完成后不逐帧回读几何。
  * @alias SceneGIS3DTilesVoxelizer
  * @constructor
- * @param {SceneGIS3DTilesVoxelizer.Options} options Source, region and budgets.
- * @throws {DeveloperError} Invalid configuration or unmounted source.
- * @experimental This API is subject to change.
+ * @param {SceneGIS3DTilesVoxelizer.Options} options 源、区域与预算。
+ * @throws {DeveloperError} 配置无效或源未挂载。
+ * @experimental 此 API 可能发生变化。
  * @example
  * const job = scene.primitives.add(new Cesium.SceneGIS3DTilesVoxelizer({
  *   scene, tileset, maximumGeometricError: 1,
@@ -305,55 +295,53 @@ function SceneGIS3DTilesVoxelizer(options = {}) {
 
 /**
  * @typedef {object} SceneGIS3DTilesVoxelizer.Options
- * @property {Scene} scene Owning Scene, in SCENE3D with WebGL2.
- * @property {Cesium3DTileset} tileset Borrowed static source in this Scene's native PrimitiveCollection hierarchy, at any depth.
- * @property {SceneGISVoxelizer.Options} grid Grid region and geometry/computation budgets.
- * @property {number} maximumGeometricError Source LOD tolerance in world meters, independent of cell size.
- * Terminal tiles exceeding it fail; ADD ancestors remain included as required by the source hierarchy.
- * @property {number} [maximumTiles=4096] Selected content candidate budget, including pending contents.
- * @property {number} [maximumVisitedTiles=100000] Tested hierarchy-node budget per walk, including culled nodes.
- * @property {number} [maximumSnapshotTilesPerFrame=1] Maximum content tiles captured per normal render frame.
- * @property {number} [timeoutMilliseconds=120000] Wall-time limit from first update through completion.
+ * @property {Scene} scene 所属 Scene，要求 SCENE3D 和 WebGL2。
+ * @property {Cesium3DTileset} tileset 借用的静态源，位于此 Scene 任意深度的原生 PrimitiveCollection 树中。
+ * @property {SceneGISVoxelizer.Options} grid 格网区域及几何与计算预算。
+ * @property {number} maximumGeometricError 以世界米为单位的源 LOD 容差，独立于格宽。末级瓦片仍超出容差时任务失败；按源层级要求保留 ADD 祖先。
+ * @property {number} [maximumTiles=4096] 选中内容候选的预算，包含等待中的内容。
+ * @property {number} [maximumVisitedTiles=100000] 每次遍历最多测试的层级节点数，包含被剔除节点。
+ * @property {number} [maximumSnapshotTilesPerFrame=1] 每个正常渲染帧最多捕获的内容瓦片数。
+ * @property {number} [timeoutMilliseconds=120000] 从首次更新到完成的实际时间上限。
  */
 
 /**
  * @typedef {object} SceneGIS3DTilesVoxelizer.Source
- * @property {boolean} complete Always true on successful publication; incomplete jobs reject.
- * Completeness is relative to the supplied tileset hierarchy and selected LOD, not a watertightness claim.
- * @property {number} maximumGeometricError Requested source error, independent of grid width.
- * @property {SceneGIS3DTilesVoxelizer.Tile[]} tiles Selected content records. ADD ancestors may exceed the target error.
- * @property {number} loadMilliseconds Time until all required content is ready, including frame scheduling.
- * @property {number} snapshotMilliseconds CPU time spent updating/copying selected geometry.
- * @property {number} totalMilliseconds Total wall time including loading, frame scheduling and Worker transfer/computation.
+ * @property {boolean} complete 成功发布时始终为 true，不完整任务会拒绝。完整性相对于输入瓦片层级及选定 LOD，不表示网格水密。
+ * @property {number} maximumGeometricError 请求的源误差，独立于格宽。
+ * @property {SceneGIS3DTilesVoxelizer.Tile[]} tiles 选中的内容记录，ADD 祖先的误差可能超过目标值。
+ * @property {number} loadMilliseconds 全部必需内容就绪所用时间，包含帧调度。
+ * @property {number} snapshotMilliseconds 更新与复制选中几何的 CPU 时间。
+ * @property {number} totalMilliseconds 总实际时间，包含加载、帧调度及 Worker 传输和计算。
  */
 
 /**
  * @typedef {object} SceneGIS3DTilesVoxelizer.Tile
- * @property {string} url Selected content URL.
- * @property {number} geometricError Source geometric error after tile transform scaling, in world meters.
+ * @property {string} url 选中的内容 URL。
+ * @property {number} geometricError 经瓦片变换缩放后的源几何误差，单位为世界米。
  */
 
 /**
  * @typedef {object} SceneGIS3DTilesVoxelizer.Progress
- * @property {number} visitedTiles Hierarchy nodes tested in the latest selection walk.
- * @property {number} waitingTiles Required contents awaiting readiness.
- * @property {number} selectedTiles Ready selected contents.
- * @property {number} capturedTiles Completed content snapshots.
- * @property {number} triangles Triangle count including instances captured so far.
+ * @property {number} visitedTiles 最近一次选择遍历测试的层级节点数。
+ * @property {number} waitingTiles 等待就绪的必需内容数。
+ * @property {number} selectedTiles 已就绪的选中内容数。
+ * @property {number} capturedTiles 已完成的内容快照数。
+ * @property {number} triangles 目前捕获的三角形数，包含实例。
  */
 
 /**
  * @typedef {object} SceneGIS3DTilesVoxelizer.Result
- * @property {number} version Layout version, currently 1.
- * @property {SceneGISVoxelizer.Grid} grid Grid coordinates and fill rule.
- * @property {Uint8Array} data Caller-owned occupancy, x-fastest, 0 empty / 1 surface / 2 grid-enclosed interior.
- * @property {SceneGISVoxelizer.Statistics} statistics Worker computation statistics.
- * @property {SceneGIS3DTilesVoxelizer.Source} source Source selection and timing metadata.
+ * @property {number} version 布局版本，当前为 1。
+ * @property {SceneGISVoxelizer.Grid} grid 格网坐标与填充规则。
+ * @property {Uint8Array} data 调用方所有的占据数组，X 变化最快；0 为空，1 为表面，2 为格网封闭内部。
+ * @property {SceneGISVoxelizer.Statistics} statistics Worker 计算统计。
+ * @property {SceneGIS3DTilesVoxelizer.Source} source 源选择及计时元数据。
  */
 
 Object.defineProperties(SceneGIS3DTilesVoxelizer.prototype, {
   /**
-   * Resolves once to a complete independent snapshot; rejects on failure, cancellation or destruction.
+   * 一次性完成并返回完整独立快照；失败、取消或销毁时拒绝。
    * @memberof SceneGIS3DTilesVoxelizer.prototype
    * @type {Promise<SceneGIS3DTilesVoxelizer.Result>}
    * @readonly
@@ -364,7 +352,7 @@ Object.defineProperties(SceneGIS3DTilesVoxelizer.prototype, {
     },
   },
   /**
-   * loading, snapshot, voxelizing, complete, failed or cancelled.
+   * 状态为 loading、snapshot、voxelizing、complete、failed 或 cancelled。
    * @memberof SceneGIS3DTilesVoxelizer.prototype
    * @type {string}
    * @readonly
@@ -375,7 +363,7 @@ Object.defineProperties(SceneGIS3DTilesVoxelizer.prototype, {
     },
   },
   /**
-   * A progress snapshot: visitedTiles, waitingTiles, selectedTiles, capturedTiles and triangles.
+   * 进度快照：visitedTiles、waitingTiles、selectedTiles、capturedTiles 和 triangles。
    * @memberof SceneGIS3DTilesVoxelizer.prototype
    * @type {SceneGIS3DTilesVoxelizer.Progress}
    * @readonly
@@ -542,7 +530,9 @@ SceneGIS3DTilesVoxelizer.prototype.update = function (frameState) {
   }
 };
 
-/** Cancels owned work. Borrowed requests and cached tiles retain their native ownership. */
+/**
+ *  取消自有工作。借用请求与缓存瓦片保留原生所有权。
+ */
 SceneGIS3DTilesVoxelizer.prototype.cancel = function () {
   finish(
     this,
@@ -551,12 +541,16 @@ SceneGIS3DTilesVoxelizer.prototype.cancel = function () {
   );
 };
 
-/** @returns {boolean} Whether this job has been destroyed. */
+/**
+ *  @returns {boolean} 此任务是否已销毁。
+ */
 SceneGIS3DTilesVoxelizer.prototype.isDestroyed = function () {
   return false;
 };
 
-/** Cancels outstanding work and releases the owned Worker/timer; never destroys the borrowed tileset. */
+/**
+ *  取消未完成工作并释放自有 Worker 和计时器；不销毁借用的瓦片集。
+ */
 SceneGIS3DTilesVoxelizer.prototype.destroy = function () {
   this.cancel();
   this._voxelizer.destroy();

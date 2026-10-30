@@ -8,21 +8,18 @@ import WorkerPool from "./_private/_SceneGISVectorWorkerPool.js";
 let decodePool;
 
 /**
- * An independently decoded MVT URL source with explicit single-root planar addressing.
- * Construction performs no requests. The caller owns request cancellation and any tile cache.
- * A supplied Resource is cloned; its explicit headers, proxy, and retry behavior are preserved.
- * This source does not own the World, GPU resources, or a destroyable runtime.
+ * 独立解码、采用显式单根平面寻址的 MVT URL 数据源。构造时不发起请求，调用方拥有请求取消与瓦片缓存。传入的 Resource 会被复制，并保留显式 headers、proxy 和 retry 行为。此数据源不拥有 World、GPU 资源或需要销毁的运行时。
  * @alias SceneGISVectorTileSource
  * @constructor
- * @experimental This API is experimental and subject to change.
- * @param {object} options Source configuration.
- * @param {string|Resource} options.url A template containing {z}, {x}, and {y}.
- * @param {SceneGISPlanarTilingScheme} options.tilingScheme The explicitly matched source matrix.
- * @param {number} [options.minimumLevel=0] Minimum requestable level.
- * @param {number} [options.maximumLevel=22] Maximum requestable level.
- * @param {string} [options.scheme="xyz"] URL row scheme, "xyz" or "tms".
- * @param {string|Credit} [options.credit] Attribution for the consuming layer.
- * @exception {DeveloperError} Source configuration is invalid.
+ * @experimental 此 API 为实验性，可能发生变化。
+ * @param {object} options 源配置。
+ * @param {string|Resource} options.url 包含 {z}、{x} 和 {y} 的模板。
+ * @param {SceneGISPlanarTilingScheme} options.tilingScheme 显式匹配的源矩阵。
+ * @param {number} [options.minimumLevel=0] 可请求最低层级。
+ * @param {number} [options.maximumLevel=22] 可请求最高层级。
+ * @param {string} [options.scheme="xyz"] URL 行号方案，取值 "xyz" 或 "tms"。
+ * @param {string|Credit} [options.credit] 供消费图层使用的署名。
+ * @exception {DeveloperError} 源配置无效。
  */
 function SceneGISVectorTileSource(options) {
   options = options ?? {};
@@ -75,7 +72,7 @@ function SceneGISVectorTileSource(options) {
 
 Object.defineProperties(SceneGISVectorTileSource.prototype, {
   /**
-   * The matching source matrix.
+   * 匹配的源矩阵。
    * @memberof SceneGISVectorTileSource.prototype
    * @type {SceneGISPlanarTilingScheme}
    * @readonly
@@ -86,7 +83,7 @@ Object.defineProperties(SceneGISVectorTileSource.prototype, {
     },
   },
   /**
-   * The minimum requestable level.
+   * 可请求的最低层级。
    * @memberof SceneGISVectorTileSource.prototype
    * @type {number}
    * @readonly
@@ -97,7 +94,7 @@ Object.defineProperties(SceneGISVectorTileSource.prototype, {
     },
   },
   /**
-   * The maximum requestable level.
+   * 可请求的最高层级。
    * @memberof SceneGISVectorTileSource.prototype
    * @type {number}
    * @readonly
@@ -108,7 +105,7 @@ Object.defineProperties(SceneGISVectorTileSource.prototype, {
     },
   },
   /**
-   * The URL row scheme.
+   * URL 行号方案。
    * @memberof SceneGISVectorTileSource.prototype
    * @type {string}
    * @readonly
@@ -119,7 +116,7 @@ Object.defineProperties(SceneGISVectorTileSource.prototype, {
     },
   },
   /**
-   * Attribution for the consuming layer.
+   * 供消费图层使用的署名。
    * @memberof SceneGISVectorTileSource.prototype
    * @type {Credit|undefined}
    * @readonly
@@ -132,13 +129,13 @@ Object.defineProperties(SceneGISVectorTileSource.prototype, {
 });
 
 /**
- * Builds a resource for a canonical tile address. TMS changes the URL row only.
- * @param {number} x Canonical XYZ column.
- * @param {number} y Canonical XYZ row.
- * @param {number} level Canonical level.
- * @param {Request} [request] Caller-owned request.
- * @returns {Resource} A new resource with resolved tile template values.
- * @exception {DeveloperError} The address or request is invalid.
+ * 为标准瓦片地址创建资源，TMS 仅改变 URL 行号。
+ * @param {number} x 标准 XYZ 列号。
+ * @param {number} y 标准 XYZ 行号。
+ * @param {number} level 标准层级。
+ * @param {Request} [request] 调用方所有的请求。
+ * @returns {Resource} 解析瓦片模板值后的新资源。
+ * @exception {DeveloperError} 地址或请求无效。
  */
 SceneGISVectorTileSource.prototype.getTileResource = function (
   x,
@@ -164,15 +161,14 @@ SceneGISVectorTileSource.prototype.getTileResource = function (
 };
 
 /**
- * Requests and independently decodes a tile. An empty fulfilled response is an empty tile.
- * Network, HTTP, cancellation, and malformed-payload failures remain rejected promises.
- * @param {number} x Canonical XYZ column.
- * @param {number} y Canonical XYZ row.
- * @param {number} level Canonical level.
- * @param {Request} [request] Caller-owned request.
- * @param {boolean} [decode=true] Decode in a Worker; false returns raw MVT bytes for asynchronous preparation.
- * @returns {Promise<SceneGISVectorTile.Data|ArrayBuffer>|undefined} Tile content, or undefined when network scheduling was deferred.
- * @exception {DeveloperError} The address or request is invalid.
+ * 请求并独立解码瓦片。成功返回的空响应表示空瓦片，网络、HTTP、取消和载荷格式错误仍以 Promise 拒绝报告。
+ * @param {number} x 标准 XYZ 列号。
+ * @param {number} y 标准 XYZ 行号。
+ * @param {number} level 标准层级。
+ * @param {Request} [request] 调用方所有的请求。
+ * @param {boolean} [decode=true] 是否在 Worker 解码；false 返回原始 MVT 字节供异步准备。
+ * @returns {Promise<SceneGISVectorTile.Data|ArrayBuffer>|undefined} 瓦片内容；网络调度延后时为 undefined。
+ * @exception {DeveloperError} 地址或请求无效。
  */
 SceneGISVectorTileSource.prototype.requestTile = function (
   x,

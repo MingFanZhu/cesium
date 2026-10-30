@@ -18,23 +18,19 @@ function cloneFinitePosition(position, name) {
 }
 
 /**
- * A CPU-only immutable description of a straight planar polyline.
- * Material st.s is cumulative XYZ length / total length; ground rendering uses XY length.
- * st.t runs from right (0) to left (1): native screen expansion for ordinary lines,
- * XY width for ground lines. Repeating the first position
- * closes the miter join with one 1-to-0 UV seam. Every batch instance starts its own UV.
+ * 直线段平面折线的不可变纯 CPU 几何描述。材质 st.s 为累计 XYZ 长度除以总长度，贴地绘制则使用 XY 长度。st.t 从右侧 0 到左侧 1；普通线使用原生屏幕扩展，贴地线使用 XY 宽度。重复首位置可闭合斜接，产生一处 1 到 0 的 UV 接缝。每个批次实例独立设置 UV 起点。
  *
  * @alias SceneGISPlanarPolylineGeometry
  * @constructor
  *
- * @param {object} options Object with the following properties:
- * @param {Cartesian3[]} options.positions Planar positions in meters.
- * @param {number} options.width The positive line width in pixels.
- * @param {Cartesian3} [options.origin] The local origin. The first normalized position is used by default.
+ * @param {object} options 包含以下属性的对象：
+ * @param {Cartesian3[]} options.positions 平面位置，单位为米。
+ * @param {number} options.width 为正的线宽，单位为像素。
+ * @param {Cartesian3} [options.origin] 局部原点，默认使用首个归一化位置。
  *
- * @exception {DeveloperError} positions must contain at least two distinct finite Cartesian3 values.
- * @exception {DeveloperError} width must be finite and greater than zero.
- * @exception {DeveloperError} origin must be a finite Cartesian3 when defined.
+ * @exception {DeveloperError} positions 必须包含至少两个不同的有限 Cartesian3。
+ * @exception {DeveloperError} width 必须有限且大于零。
+ * @exception {DeveloperError} origin 已定义时必须为有限 Cartesian3。
  */
 function SceneGISPlanarPolylineGeometry(options) {
   options = options ?? {};
@@ -87,7 +83,7 @@ function SceneGISPlanarPolylineGeometry(options) {
 
 Object.defineProperties(SceneGISPlanarPolylineGeometry.prototype, {
   /**
-   * Gets a cloned snapshot of the normalized world positions.
+   * 获取归一化世界位置的快照副本。
    *
    * @memberof SceneGISPlanarPolylineGeometry.prototype
    * @type {Cartesian3[]}
@@ -99,7 +95,7 @@ Object.defineProperties(SceneGISPlanarPolylineGeometry.prototype, {
     },
   },
   /**
-   * Gets the line width in pixels.
+   * 获取线宽，单位为像素。
    *
    * @memberof SceneGISPlanarPolylineGeometry.prototype
    * @type {number}
@@ -111,7 +107,7 @@ Object.defineProperties(SceneGISPlanarPolylineGeometry.prototype, {
     },
   },
   /**
-   * Gets a clone of the local origin in planar world coordinates.
+   * 获取平面世界中局部原点的副本。
    *
    * @memberof SceneGISPlanarPolylineGeometry.prototype
    * @type {Cartesian3}

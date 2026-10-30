@@ -139,13 +139,31 @@ exports.publish = function (data, opts, tutorials) {
     scope: "global",
     type: { names: ["string"] },
     readonly: true,
-    description: "The version of the engine in this SceneGIS distribution.",
+    description: "此发行包的引擎版本字符串。",
     defaultvalue: settings.version,
   });
   // Integration annotations in source comments are not API prose or translation units.
   translations.mapProse(publicDoclets, (text) =>
     text.replace(annotationPattern, ""),
   );
+  const owned = publicDoclets.filter((doclet) => {
+    if (!doclet.meta) {
+      return doclet.longname === "VERSION";
+    }
+    const filename = path
+      .relative(
+        process.cwd(),
+        path.join(doclet.meta.path, doclet.meta.filename),
+      )
+      .replaceAll("\\", "/");
+    return /^packages\/(engine|widgets)\/Source\/SceneGIS\//.test(filename);
+  });
+  const ownSet = new Set(owned);
+  const nativeDoclets = publicDoclets.filter((doclet) => !ownSet.has(doclet));
+  for (const doclet of nativeDoclets) {
+    doclet.sourceLocale = "en-US";
+  }
+  translations.markSourceDoclets(owned, "zh-CN");
   fs.mkdirSync(opts.destination, { recursive: true });
   const locale = settings.locale;
   if (locale === "en-US") {
@@ -155,7 +173,7 @@ exports.publish = function (data, opts, tutorials) {
         {
           schemaVersion: 1,
           sourceLocale: locale,
-          units: translations.collectUnits(publicDoclets),
+          units: translations.collectUnits(nativeDoclets),
         },
         null,
         2,
@@ -166,7 +184,7 @@ exports.publish = function (data, opts, tutorials) {
       settings.translationDirectory,
       locale,
     );
-    const report = translations.localizeDoclets(publicDoclets, catalog);
+    const report = translations.localizeDoclets(nativeDoclets, catalog);
     fs.writeFileSync(
       path.join(opts.destination, "translation-report.json"),
       JSON.stringify(report, null, 2),
@@ -227,7 +245,7 @@ exports.publish = function (data, opts, tutorials) {
     schemaVersion: 1,
     namespace: "SceneGIS",
     locale,
-    sourceLocale: "en-US",
+    sourceLocales: ["en-US", "zh-CN"],
     version: settings.version,
     generator: { name: "JSDoc", version: env.version.number },
   };

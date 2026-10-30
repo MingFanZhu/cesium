@@ -6,20 +6,14 @@ import LightingModel from "../../Scene/Model/LightingModel.js";
 import shader from "../../Shaders/SceneGIS/Antialiasing/SceneGISSpecularAntialiasing.js";
 
 /**
- * Reduces geometry-driven specular aliasing in PBR Models and 3D Tiles.
- * Screen-space derivatives of the unperturbed geometry normal broaden base and
- * clearcoat highlights. Flat mirrors keep their authored roughness. This does
- * not filter normal-map variance, silhouettes, alpha coverage or unlit content.
- * Globe and Planar use the same implementation, independently of MSAA/FXAA/TAA.
- * No additional draw, texture or framebuffer is allocated. The Scene owns the
- * attached setting; explicit destruction detaches it.
+ * 减少 PBR 模型和 3D Tiles 由几何引起的镜面锯齿。通过未扰动几何法线的屏幕导数展宽基础层与清漆高光，平面镜保持设定粗糙度。不处理法线贴图方差、轮廓、alpha 覆盖或 unlit 内容。球面和平面共用实现，独立于 MSAA/FXAA/TAA。不增加绘制、纹理或帧缓冲。附加设置归 Scene 所有，显式销毁可解绑。
  *
  * @alias SceneGISSpecularAntialiasing
  * @constructor
- * @param {object} options Initialization options.
- * @param {Scene} options.scene The live Scene; only one instance may be attached.
- * @param {boolean} [options.enabled=false] Whether geometric filtering is enabled.
- * @exception {DeveloperError} The Scene must be live and have no attached setting; enabled must be boolean.
+ * @param {object} options 初始化选项。
+ * @param {Scene} options.scene 存活的 Scene，仅可附加一个实例。
+ * @param {boolean} [options.enabled=false] 是否启用几何过滤。
+ * @exception {DeveloperError} Scene 须存活且没有附加设置，enabled 须为布尔值。
  * @example
  * const specularAA = new Cesium.SceneGISSpecularAntialiasing({
  *   scene: viewer.scene,
@@ -47,9 +41,7 @@ function SceneGISSpecularAntialiasing(options) {
 
 Object.defineProperties(SceneGISSpecularAntialiasing.prototype, {
   /**
-   * Whether geometric specular filtering is enabled. Changes request a render
-   * without rebuilding model commands. Applications using temporal effects can
-   * reset their histories for an immediate comparison after material changes.
+   * 是否启用几何镜面过滤。修改会请求渲染，不重建模型命令。使用时域效果的应用可在材质变化后重置历史，以便立即对比。
    * @memberof SceneGISSpecularAntialiasing.prototype
    * @type {boolean}
    * @default false
@@ -70,13 +62,15 @@ Object.defineProperties(SceneGISSpecularAntialiasing.prototype, {
   },
 });
 
-/** @returns {boolean} Whether the setting has been destroyed. */
+/**
+ *  @returns {boolean} 设置是否已销毁。
+ */
 SceneGISSpecularAntialiasing.prototype.isDestroyed = function () {
   return false;
 };
 
 /**
- * Detaches the setting and restores authored material roughness.
+ * 解绑设置并恢复设定材质粗糙度。
  * @returns {undefined}
  */
 SceneGISSpecularAntialiasing.prototype.destroy = function () {

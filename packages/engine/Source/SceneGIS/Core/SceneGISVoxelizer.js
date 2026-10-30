@@ -59,15 +59,12 @@ function positiveInteger(name, value) {
 }
 
 /**
- * Asynchronous, explicit static triangle-mesh voxelization in a local metric grid.
- * No Scene or graphics context is required. Each instance owns one lazy Worker and allows
- * one job at a time. Input arrays are copied; cancellation never detaches caller buffers.
- * Results remain valid after this instance is destroyed.
+ * 在局部米制格网中进行异步、显式静态三角网格体素化。不要求 Scene 或图形上下文。每实例拥有一个延迟创建的 Worker，同一时刻仅运行一个任务。输入数组会复制，取消不会分离调用方缓冲。实例销毁后结果仍有效。
  * @alias SceneGISVoxelizer
  * @constructor
- * @param {SceneGISVoxelizer.Options} options Immutable grid and work budgets.
- * @throws {DeveloperError} Invalid grid, transform, fill mode or budget.
- * @experimental This API is subject to change.
+ * @param {SceneGISVoxelizer.Options} options 不可变格网与工作预算。
+ * @throws {DeveloperError} 格网、变换、填充模式或预算无效。
+ * @experimental 此 API 可能发生变化。
  */
 function SceneGISVoxelizer(options = {}) {
   const dimensions = options.dimensions;
@@ -128,58 +125,56 @@ function SceneGISVoxelizer(options = {}) {
 
 /**
  * @typedef {object} SceneGISVoxelizer.Options
- * @property {Cartesian3} dimensions Positive integer cell counts.
- * @property {number} cellSize Cubic cell width in meters.
- * @property {Cartesian3} [minimum=Cartesian3.ZERO] Grid-local minimum corner in meters.
- * @property {Matrix4} [modelMatrix=Matrix4.IDENTITY] Rigid grid-local to world transform (ENU or planar).
- * @property {string} [fillMode="surface"] "surface" or "enclosed". Enclosed fills grid cavities unreachable
- * from the domain boundary, not guaranteed physical interiors. Coarse cells can seal holes; open or clipped meshes can leak.
- * @property {number} [maximumCells=16777216] Output cell budget. Enclosed fill additionally uses a Uint32 queue of this grid's size.
- * @property {number} [maximumInputBytes=268435456] Copied mesh position/index byte budget.
- * @property {number} [maximumTriangles=2000000] Triangle budget.
- * @property {number} [maximumCandidateTests=50000000] Triangle/candidate-cell test budget. Exceeding it rejects the job.
+ * @property {Cartesian3} dimensions 正整数单元数量。
+ * @property {number} cellSize 立方格宽，单位为米。
+ * @property {Cartesian3} [minimum=Cartesian3.ZERO] 格网局部最小角点，单位为米。
+ * @property {Matrix4} [modelMatrix=Matrix4.IDENTITY] 格网局部到世界的刚体变换，可为 ENU 或平面。
+ * @property {string} [fillMode="surface"] 取值 "surface" 或 "enclosed"。enclosed 填充从域边界不可达的格网空腔，不保证等于真实物理内部。粗单元可能封闭孔洞，开放或裁剪网格可能泄漏。
+ * @property {number} [maximumCells=16777216] 输出单元预算，enclosed 填充额外使用与格网大小相同的 Uint32 队列。
+ * @property {number} [maximumInputBytes=268435456] 复制的网格位置和索引字节预算。
+ * @property {number} [maximumTriangles=2000000] 三角形预算。
+ * @property {number} [maximumCandidateTests=50000000] 三角形与候选单元测试预算，超出会拒绝任务。
  */
 
 /**
  * @typedef {object} SceneGISVoxelizer.Mesh
- * @property {Float32Array|Float64Array} positions Packed XYZ positions in mesh-local coordinates.
- * @property {Uint8Array|Uint16Array|Uint32Array} [indices] Triangle indices; absent means unindexed triangles.
- * @property {Matrix4} [modelMatrix=Matrix4.IDENTITY] Affine mesh-local to the same world as the grid.
+ * @property {Float32Array|Float64Array} positions 网格局部坐标中打包的 XYZ 位置。
+ * @property {Uint8Array|Uint16Array|Uint32Array} [indices] 三角形索引，缺失表示无索引三角形。
+ * @property {Matrix4} [modelMatrix=Matrix4.IDENTITY] 网格局部到格网所在世界的仿射变换。
  */
 
 /**
  * @typedef {object} SceneGISVoxelizer.Grid
- * @property {Cartesian3} dimensions Cell counts.
- * @property {number} cellSize Cubic cell width in meters.
- * @property {Cartesian3} minimum Local minimum corner.
- * @property {Matrix4} modelMatrix Grid-local to world transform.
- * @property {string} fillMode Surface or grid-enclosed fill.
+ * @property {Cartesian3} dimensions 单元数量。
+ * @property {number} cellSize 立方格宽，单位为米。
+ * @property {Cartesian3} minimum 局部最小角点。
+ * @property {Matrix4} modelMatrix 格网局部到世界的变换。
+ * @property {string} fillMode 表面或格网封闭填充。
  */
 
 /**
- * A detached snapshot. Cell index is x+nx*(y+ny*z); local center is minimum+(ijk+0.5)*cellSize.
- * Metadata is immutable. Data is caller-owned and mutable; no GPU or source ownership is transferred.
+ * 独立快照。单元索引为 x+nx*(y+ny*z)，局部格心为 minimum+(ijk+0.5)*cellSize。元数据不可变，数据归调用方所有且可修改，不转移 GPU 或源所有权。
  * @typedef {object} SceneGISVoxelizer.Result
- * @property {number} version Layout version, currently 1.
- * @property {SceneGISVoxelizer.Grid} grid Grid coordinates and fill rule.
- * @property {Uint8Array} data 0 empty, 1 conservative surface, 2 grid-enclosed interior.
- * @property {SceneGISVoxelizer.Statistics} statistics Computation statistics at publication time.
+ * @property {number} version 布局版本，当前为 1。
+ * @property {SceneGISVoxelizer.Grid} grid 格网坐标与填充规则。
+ * @property {Uint8Array} data 0 为空，1 为保守表面，2 为格网封闭内部。
+ * @property {SceneGISVoxelizer.Statistics} statistics 发布时的计算统计。
  */
 
 /**
  * @typedef {object} SceneGISVoxelizer.Statistics
- * @property {number} triangles Input triangle count.
- * @property {number} candidateTests Candidate-cell count before occupied-cell shortcuts.
- * @property {number} surfaceCells Number of surface cells.
- * @property {number} interiorCells Number of grid-enclosed cells.
- * @property {number} inputBytes Copied position/index bytes.
- * @property {number} outputBytes Occupancy array bytes.
- * @property {number} computeMilliseconds Worker computation time, excluding loading, copies and message transfer.
+ * @property {number} triangles 输入三角形数。
+ * @property {number} candidateTests 占据单元快捷跳过之前的候选单元数。
+ * @property {number} surfaceCells 表面单元数。
+ * @property {number} interiorCells 格网封闭单元数。
+ * @property {number} inputBytes 复制的位置与索引字节数。
+ * @property {number} outputBytes 占据数组字节数。
+ * @property {number} computeMilliseconds Worker 计算时间，不含加载、复制和消息传输。
  */
 
 Object.defineProperties(SceneGISVoxelizer.prototype, {
   /**
-   * Immutable construction snapshot.
+   * 不可变构造快照。
    * @memberof SceneGISVoxelizer.prototype
    * @type {SceneGISVoxelizer.Grid}
    * @readonly
@@ -190,7 +185,7 @@ Object.defineProperties(SceneGISVoxelizer.prototype, {
     },
   },
   /**
-   * Whether a job is pending.
+   * 是否有待处理任务。
    * @memberof SceneGISVoxelizer.prototype
    * @type {boolean}
    * @readonly
@@ -203,11 +198,10 @@ Object.defineProperties(SceneGISVoxelizer.prototype, {
 });
 
 /**
- * Voxelizes explicit triangles. Touching a cell counts as surface occupancy. Degenerate triangles,
- * nonfinite positions and invalid indices reject the job. Does not repair holes or infer materials.
- * @param {SceneGISVoxelizer.Mesh[]} meshes Static triangle meshes. An empty array produces an empty grid.
- * @returns {Promise<SceneGISVoxelizer.Result>} Independent result; rejects on cancellation, invalid geometry or budget exhaustion.
- * @throws {DeveloperError} Another job is pending or mesh descriptors exceed the configured limits.
+ * 体素化显式三角形，接触单元即计为表面占据。退化三角形、非有限位置或无效索引会拒绝任务。不修复孔洞或推断材质。
+ * @param {SceneGISVoxelizer.Mesh[]} meshes 静态三角网格，空数组生成空格网。
+ * @returns {Promise<SceneGISVoxelizer.Result>} 独立结果；取消、几何无效或预算耗尽时拒绝。
+ * @throws {DeveloperError} 已有待处理任务，或网格描述超出配置限制。
  */
 SceneGISVoxelizer.prototype.voxelize = function (meshes) {
   if (this.busy) {
@@ -322,10 +316,9 @@ SceneGISVoxelizer.prototype.voxelize = function (meshes) {
 };
 
 /**
- * Copies occupancy into a binary solid mask, suitable for SceneGISWindSimulation on the same grid.
- * This conversion does not validate physical solidity or source completeness.
- * @param {SceneGISVoxelizer.Result} result Voxel snapshot.
- * @returns {Uint8Array} New caller-owned array, 0 empty / 1 occupied.
+ * 将占据数据复制为二进制固体掩码，可供相同格网的 SceneGISWindSimulation 使用。此转换不验证物理实体性或源完整性。
+ * @param {SceneGISVoxelizer.Result} result 体素快照。
+ * @returns {Uint8Array} 调用方所有的新数组，0 为空，1 为占据。
  */
 SceneGISVoxelizer.createSolidMask = function (result) {
   if (!(result?.data instanceof Uint8Array)) {
@@ -339,7 +332,9 @@ SceneGISVoxelizer.createSolidMask = function (result) {
   });
 };
 
-/** Cancels the pending job and terminates this instance's Worker. The instance remains reusable. */
+/**
+ *  取消待处理任务并终止此实例的 Worker，实例仍可复用。
+ */
 SceneGISVoxelizer.prototype.cancel = function () {
   const pending = this._pending;
   this._pending = undefined;
@@ -347,12 +342,16 @@ SceneGISVoxelizer.prototype.cancel = function () {
   pending?.reject(new RuntimeError("Voxelization cancelled."));
 };
 
-/** @returns {boolean} Whether this instance has been destroyed. */
+/**
+ *  @returns {boolean} 此实例是否已销毁。
+ */
 SceneGISVoxelizer.prototype.isDestroyed = function () {
   return false;
 };
 
-/** Cancels the job and releases the owned Worker. Previously returned data remains valid. */
+/**
+ *  取消任务并释放自有 Worker，已返回数据仍有效。
+ */
 SceneGISVoxelizer.prototype.destroy = function () {
   this.cancel();
   return destroyObject(this);

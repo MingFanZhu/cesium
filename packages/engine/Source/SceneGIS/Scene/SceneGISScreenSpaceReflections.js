@@ -38,23 +38,19 @@ function numberProperty(name, minimum, maximum, integer = false) {
 }
 
 /**
- * Adds hierarchical screen-space reflections to opaque native PBR models and 3D Tiles.
- * Globe and Planar scenes use the same eye-space tracing. Existing specular IBL supplies
- * missing rays. Transparent objects, classification overlays and offscreen geometry are excluded.
- * HDR must be enabled explicitly. The Scene owns the attached effect and destroys it with the
- * Scene; calling destroy earlier detaches it. Disabled effects retain allocated targets for reuse.
+ * 为不透明原生 PBR 模型和 3D Tiles 添加分层屏幕空间反射。球面和平面共用视空间追踪，未命中由已有镜面 IBL 补足。不包含透明对象、分类覆盖或屏幕外几何。必须显式开启 HDR。附加效果归 Scene 所有并随 Scene 销毁，提前 destroy 可解绑。禁用保留已分配目标以便复用。
  *
  * @alias SceneGISScreenSpaceReflections
  * @constructor
- * @param {object} options Initialization options.
- * @param {Scene} options.scene The live Scene. Only one effect may be attached.
- * @param {boolean} [options.enabled=false] Whether reflections are enabled.
- * @param {number} [options.maximumDistance=100.0] Maximum ray length in meters, greater than zero.
- * @param {number} [options.thickness=0.5] Eye-depth intersection tolerance in meters, greater than zero.
- * @param {number} [options.maximumRoughness=0.6] Perceptual roughness cutoff in (0, 1].
- * @param {number} [options.stepCount=96] Maximum traversal steps per lobe, an integer in [16, 256].
- * @param {number} [options.resolutionScale=0.5] Trace resolution, either 0.5 or 1. Full resolution preserves thin reflectors.
- * @param {boolean} [options.temporalFiltering=true] Whether to reuse validated reflection history. Reprojection accounts for camera motion, not object motion.
+ * @param {object} options 初始化选项。
+ * @param {Scene} options.scene 存活的 Scene，仅可附加一个效果。
+ * @param {boolean} [options.enabled=false] 是否启用反射。
+ * @param {number} [options.maximumDistance=100.0] 最大射线长度，单位为米，须大于零。
+ * @param {number} [options.thickness=0.5] 视空间深度求交容差，单位为米，须大于零。
+ * @param {number} [options.maximumRoughness=0.6] 感知粗糙度截止值，范围 (0,1]。
+ * @param {number} [options.stepCount=96] 每个瓣的最大遍历步数，整数，范围 [16,256]。
+ * @param {number} [options.resolutionScale=0.5] 追踪分辨率，可取 0.5 或 1；全分辨率可保留细反射体。
+ * @param {boolean} [options.temporalFiltering=true] 是否复用已验证反射历史；重投影处理相机运动，不处理物体运动。
  * @example
  * viewer.scene.highDynamicRange = true;
  * const reflections = new Cesium.SceneGISScreenSpaceReflections({
@@ -95,9 +91,9 @@ function SceneGISScreenSpaceReflections(options) {
 }
 
 /**
- * Tests GPU support, independently of the current Scene mode or HDR setting.
- * @param {Scene} scene The Scene to test.
- * @returns {boolean} Whether the required texture and framebuffer formats are supported.
+ * 测试 GPU 支持，独立于当前 Scene 模式和 HDR 设置。
+ * @param {Scene} scene 需要测试的 Scene。
+ * @returns {boolean} 是否支持必需纹理与帧缓冲格式。
  */
 SceneGISScreenSpaceReflections.isSupported = function (scene) {
   const c = scene.context;
@@ -113,7 +109,7 @@ SceneGISScreenSpaceReflections.isSupported = function (scene) {
 
 Object.defineProperties(SceneGISScreenSpaceReflections.prototype, {
   /**
-   * Whether the effect is enabled.
+   * 是否启用效果。
    * @memberof SceneGISScreenSpaceReflections.prototype
    * @type {boolean}
    * @default false
@@ -134,7 +130,7 @@ Object.defineProperties(SceneGISScreenSpaceReflections.prototype, {
     },
   },
   /**
-   * Whether a complete current render has produced reflection data.
+   * 一次完整的当前渲染是否已生成反射数据。
    * @memberof SceneGISScreenSpaceReflections.prototype
    * @type {boolean}
    * @readonly
@@ -145,7 +141,7 @@ Object.defineProperties(SceneGISScreenSpaceReflections.prototype, {
     },
   },
   /**
-   * Maximum ray length in meters.
+   * 最大射线长度，单位为米。
    * @memberof SceneGISScreenSpaceReflections.prototype
    * @type {number}
    * @default 100.0
@@ -156,28 +152,28 @@ Object.defineProperties(SceneGISScreenSpaceReflections.prototype, {
     Number.MAX_VALUE,
   ),
   /**
-   * Eye-depth intersection tolerance in meters.
+   * 视空间深度求交容差，单位为米。
    * @memberof SceneGISScreenSpaceReflections.prototype
    * @type {number}
    * @default 0.5
    */
   thickness: numberProperty("thickness", Number.EPSILON, Number.MAX_VALUE),
   /**
-   * Perceptual roughness cutoff; rougher surfaces retain IBL.
+   * 感知粗糙度截止值，更粗糙表面保留 IBL。
    * @memberof SceneGISScreenSpaceReflections.prototype
    * @type {number}
    * @default 0.6
    */
   maximumRoughness: numberProperty("maximumRoughness", Number.EPSILON, 1),
   /**
-   * Maximum traversal steps per lobe in [16, 256].
+   * 每个瓣的最大遍历步数，范围 [16,256]。
    * @memberof SceneGISScreenSpaceReflections.prototype
    * @type {number}
    * @default 96
    */
   stepCount: numberProperty("stepCount", 16, 256, true),
   /**
-   * Trace resolution, either 0.5 or 1. Lower resolution reduces tracing and history cost.
+   * 追踪分辨率，可取 0.5 或 1；较低分辨率减少追踪和历史成本。
    * @memberof SceneGISScreenSpaceReflections.prototype
    * @type {number}
    * @default 0.5
@@ -195,8 +191,7 @@ Object.defineProperties(SceneGISScreenSpaceReflections.prototype, {
     },
   },
   /**
-   * Whether to reuse validated reflection history. Call reset after discontinuous light
-   * or content edits. Camera-only reprojection cannot correctly track moving objects.
+   * 是否复用已验证反射历史。光照或内容不连续变化后调用 reset；仅按相机重投影不能正确跟踪运动物体。
    * @memberof SceneGISScreenSpaceReflections.prototype
    * @type {boolean}
    * @default true
@@ -216,8 +211,7 @@ Object.defineProperties(SceneGISScreenSpaceReflections.prototype, {
 });
 
 /**
- * Discards reflection history after discontinuous scene, lighting or material edits.
- * Requests one render; does not schedule convergence frames.
+ * 场景、光照或材质发生不连续修改后丢弃反射历史。请求一次渲染，不调度收敛帧。
  */
 SceneGISScreenSpaceReflections.prototype.reset = function () {
   requestRender(this);
@@ -237,13 +231,15 @@ SceneGISScreenSpaceReflections.prototype._validate = function () {
   }
 };
 
-/** @returns {boolean} Whether this effect has been destroyed. */
+/**
+ *  @returns {boolean} 此效果是否已销毁。
+ */
 SceneGISScreenSpaceReflections.prototype.isDestroyed = function () {
   return false;
 };
 
 /**
- * Releases all owned GPU resources and detaches from the Scene.
+ * 释放全部自有 GPU 资源并从 Scene 解绑。
  * @returns {undefined}
  */
 SceneGISScreenSpaceReflections.prototype.destroy = function () {

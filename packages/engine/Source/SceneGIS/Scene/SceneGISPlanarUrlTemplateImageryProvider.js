@@ -29,30 +29,27 @@ function copySubdomains(value) {
 }
 
 /**
- * Provides planar raster tiles from a URL template. Supported tags are
- * x, y, z, s, reverseX, reverseY, reverseZ, width, height, westProjected,
- * southProjected, eastProjected, and northProjected. Projected bounds use
- * the world's meter coordinates. Additional tags can be supplied with customTags.
+ * 通过 URL 模板提供平面栅格瓦片。支持 x、y、z、s、reverseX、reverseY、reverseZ、width、height、westProjected、southProjected、eastProjected 和 northProjected 标签。投影范围使用世界米制坐标，可通过 customTags 增加标签。
  *
  * @alias SceneGISPlanarUrlTemplateImageryProvider
  * @constructor
  *
- * @param {object} options Object with the following properties:
- * @param {string|Resource} options.url The URL template or Resource.
- * @param {SceneGISPlanarTilingScheme} options.tilingScheme The canonical planar tiling scheme.
- * @param {"xyz"|"tms"} [options.urlScheme="xyz"] The URL row scheme.
- * @param {number} [options.maximumLevel=options.tilingScheme.maximumSafeLevel] The maximum available level.
- * @param {number} [options.tileWidth=256] The image width in pixels.
- * @param {number} [options.tileHeight=options.tileWidth] The image height in pixels.
- * @param {string|string[]} [options.subdomains="abc"] The URL subdomains.
- * @param {boolean} [options.hasAlphaChannel=true] Whether images have an alpha channel.
- * @param {Credit|string} [options.credit] The provider attribution.
- * @param {SceneGISPlanarExtent} [options.coverageExtent] Coverage in world meter coordinates; does not change tile addresses.
- * @param {number} [options.minimumLevel=0] The minimum available canonical level.
- * @param {object} [options.customTags] Functions keyed by tag name, called with (provider, x, y, level).
- * @param {object} [options.urlSchemeZeroPadding] Minimum digit widths keyed by braced tag, such as {"{x}": "0000"}.
+ * @param {object} options 包含以下属性的对象：
+ * @param {string|Resource} options.url URL 模板或 Resource。
+ * @param {SceneGISPlanarTilingScheme} options.tilingScheme 标准平面切片方案。
+ * @param {"xyz"|"tms"} [options.urlScheme="xyz"] URL 行号方案。
+ * @param {number} [options.maximumLevel=options.tilingScheme.maximumSafeLevel] 可用最高层级。
+ * @param {number} [options.tileWidth=256] 图像宽度，单位为像素。
+ * @param {number} [options.tileHeight=options.tileWidth] 图像高度，单位为像素。
+ * @param {string|string[]} [options.subdomains="abc"] URL 子域。
+ * @param {boolean} [options.hasAlphaChannel=true] 图像是否具有 alpha 通道。
+ * @param {Credit|string} [options.credit] 提供者署名。
+ * @param {SceneGISPlanarExtent} [options.coverageExtent] 世界米制覆盖范围，不改变瓦片地址。
+ * @param {number} [options.minimumLevel=0] 可用最低标准层级。
+ * @param {object} [options.customTags] 以标签名为键的函数，使用 (provider, x, y, level) 调用。
+ * @param {object} [options.urlSchemeZeroPadding] 按带花括号标签指定的最小数字宽度，如 {"{x}": "0000"}。
  *
- * @exception {DeveloperError} The URL, tiling scheme, levels, dimensions, subdomains, alpha flag, or credit are invalid.
+ * @exception {DeveloperError} URL、切片方案、层级、尺寸、子域、alpha 标志或署名无效。
  */
 function SceneGISPlanarUrlTemplateImageryProvider(options) {
   options = options ?? Frozen.EMPTY_OBJECT;
@@ -141,7 +138,7 @@ function SceneGISPlanarUrlTemplateImageryProvider(options) {
 
 Object.defineProperties(SceneGISPlanarUrlTemplateImageryProvider.prototype, {
   /**
-   * Gets the canonical planar tiling scheme.
+   * 获取标准平面切片方案。
    * @memberof SceneGISPlanarUrlTemplateImageryProvider.prototype
    * @type {SceneGISPlanarTilingScheme}
    * @readonly
@@ -152,8 +149,7 @@ Object.defineProperties(SceneGISPlanarUrlTemplateImageryProvider.prototype, {
     },
   },
   /**
-   * Gets optional coverage in world meter coordinates. Outside this rectangle the
-   * layer is transparent; canonical tile bounds and addresses are unchanged.
+   * 获取可选世界米制覆盖范围。矩形外图层透明，标准瓦片边界与地址不变。
    * @memberof SceneGISPlanarUrlTemplateImageryProvider.prototype
    * @type {SceneGISPlanarExtent|undefined}
    * @readonly
@@ -164,7 +160,7 @@ Object.defineProperties(SceneGISPlanarUrlTemplateImageryProvider.prototype, {
     },
   },
   /**
-   * Gets the minimum available canonical level.
+   * 获取可用最低标准层级。
    * @memberof SceneGISPlanarUrlTemplateImageryProvider.prototype
    * @type {number}
    * @readonly
@@ -175,7 +171,7 @@ Object.defineProperties(SceneGISPlanarUrlTemplateImageryProvider.prototype, {
     },
   },
   /**
-   * Gets the maximum available level.
+   * 获取可用最高层级。
    * @memberof SceneGISPlanarUrlTemplateImageryProvider.prototype
    * @type {number}
    * @readonly
@@ -186,7 +182,7 @@ Object.defineProperties(SceneGISPlanarUrlTemplateImageryProvider.prototype, {
     },
   },
   /**
-   * Gets the tile width in pixels.
+   * 获取瓦片宽度，单位为像素。
    * @memberof SceneGISPlanarUrlTemplateImageryProvider.prototype
    * @type {number}
    * @readonly
@@ -197,7 +193,7 @@ Object.defineProperties(SceneGISPlanarUrlTemplateImageryProvider.prototype, {
     },
   },
   /**
-   * Gets the tile height in pixels.
+   * 获取瓦片高度，单位为像素。
    * @memberof SceneGISPlanarUrlTemplateImageryProvider.prototype
    * @type {number}
    * @readonly
@@ -208,7 +204,7 @@ Object.defineProperties(SceneGISPlanarUrlTemplateImageryProvider.prototype, {
     },
   },
   /**
-   * Gets whether imagery has an alpha channel.
+   * 获取影像是否具有 alpha 通道。
    * @memberof SceneGISPlanarUrlTemplateImageryProvider.prototype
    * @type {boolean}
    * @readonly
@@ -219,7 +215,7 @@ Object.defineProperties(SceneGISPlanarUrlTemplateImageryProvider.prototype, {
     },
   },
   /**
-   * Gets the event raised for asynchronous tile failures.
+   * 获取异步瓦片失败时触发的事件。
    * @memberof SceneGISPlanarUrlTemplateImageryProvider.prototype
    * @type {Event<function(TileProviderError):void>}
    * @readonly
@@ -230,7 +226,7 @@ Object.defineProperties(SceneGISPlanarUrlTemplateImageryProvider.prototype, {
     },
   },
   /**
-   * Gets the provider attribution.
+   * 获取提供者署名。
    * @memberof SceneGISPlanarUrlTemplateImageryProvider.prototype
    * @type {Credit|undefined}
    * @readonly
@@ -241,7 +237,7 @@ Object.defineProperties(SceneGISPlanarUrlTemplateImageryProvider.prototype, {
     },
   },
   /**
-   * Gets the owned URL template.
+   * 获取自有 URL 模板。
    * @memberof SceneGISPlanarUrlTemplateImageryProvider.prototype
    * @type {string}
    * @readonly
@@ -252,7 +248,7 @@ Object.defineProperties(SceneGISPlanarUrlTemplateImageryProvider.prototype, {
     },
   },
   /**
-   * Gets the URL row scheme.
+   * 获取 URL 行号方案。
    * @memberof SceneGISPlanarUrlTemplateImageryProvider.prototype
    * @type {"xyz"|"tms"}
    * @readonly
@@ -265,14 +261,14 @@ Object.defineProperties(SceneGISPlanarUrlTemplateImageryProvider.prototype, {
 });
 
 /**
- * Requests an image for a canonical northwest-origin XYZ tile address.
+ * 按标准西北原点 XYZ 地址请求图像。
  *
- * @param {number} x The tile X coordinate.
- * @param {number} y The tile Y coordinate.
- * @param {number} level The tile level.
- * @param {Request} request The request used for cancellation and scheduling.
- * @returns {Promise<ImageBitmap|HTMLImageElement>|undefined} The image promise, or undefined when deferred.
- * @exception {DeveloperError} The tile address or level is invalid.
+ * @param {number} x 瓦片 X 坐标。
+ * @param {number} y 瓦片 Y 坐标。
+ * @param {number} level 瓦片层级。
+ * @param {Request} request 用于取消与调度的请求。
+ * @returns {Promise<ImageBitmap|HTMLImageElement>|undefined} 图像 Promise，延后时为 undefined。
+ * @exception {DeveloperError} 瓦片地址或层级无效。
  */
 SceneGISPlanarUrlTemplateImageryProvider.prototype.requestImage = function (
   x,

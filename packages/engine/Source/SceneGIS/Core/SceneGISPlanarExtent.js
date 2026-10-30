@@ -11,21 +11,21 @@ function checkFiniteNumber(name, value) {
 }
 
 /**
- * A read-only two-dimensional extent in planar world coordinates.
+ * 平面世界坐标系中的只读二维范围。
  *
  * @alias SceneGISPlanarExtent
  * @constructor
  *
- * @param {object} options Object with the following properties:
- * @param {number} options.minimumX The minimum X coordinate in meters.
- * @param {number} options.minimumY The minimum Y coordinate in meters.
- * @param {number} options.maximumX The maximum X coordinate in meters.
- * @param {number} options.maximumY The maximum Y coordinate in meters.
+ * @param {object} options 包含以下属性的对象：
+ * @param {number} options.minimumX 最小 X 坐标，单位为米。
+ * @param {number} options.minimumY 最小 Y 坐标，单位为米。
+ * @param {number} options.maximumX 最大 X 坐标，单位为米。
+ * @param {number} options.maximumY 最大 Y 坐标，单位为米。
  *
- * @exception {DeveloperError} Any boundary is not a finite number.
- * @exception {DeveloperError} <code>maximumX</code> is not greater than <code>minimumX</code>.
- * @exception {DeveloperError} <code>maximumY</code> is not greater than <code>minimumY</code>.
- * @exception {DeveloperError} The derived width or height is not finite.
+ * @exception {DeveloperError} 任一边界不是有限数。
+ * @exception {DeveloperError} <code>maximumX</code> 不大于 <code>minimumX</code>。
+ * @exception {DeveloperError} <code>maximumY</code> 不大于 <code>minimumY</code>。
+ * @exception {DeveloperError} 计算出的宽或高非有限值。
  */
 function SceneGISPlanarExtent(options) {
   options = options ?? Frozen.EMPTY_OBJECT;
@@ -60,7 +60,7 @@ function SceneGISPlanarExtent(options) {
 
 Object.defineProperties(SceneGISPlanarExtent.prototype, {
   /**
-   * Gets the minimum X coordinate in meters.
+   * 获取最小 X 坐标，单位为米。
    *
    * @memberof SceneGISPlanarExtent.prototype
    * @type {number}
@@ -73,7 +73,7 @@ Object.defineProperties(SceneGISPlanarExtent.prototype, {
   },
 
   /**
-   * Gets the minimum Y coordinate in meters.
+   * 获取最小 Y 坐标，单位为米。
    *
    * @memberof SceneGISPlanarExtent.prototype
    * @type {number}
@@ -86,7 +86,7 @@ Object.defineProperties(SceneGISPlanarExtent.prototype, {
   },
 
   /**
-   * Gets the maximum X coordinate in meters.
+   * 获取最大 X 坐标，单位为米。
    *
    * @memberof SceneGISPlanarExtent.prototype
    * @type {number}
@@ -99,7 +99,7 @@ Object.defineProperties(SceneGISPlanarExtent.prototype, {
   },
 
   /**
-   * Gets the maximum Y coordinate in meters.
+   * 获取最大 Y 坐标，单位为米。
    *
    * @memberof SceneGISPlanarExtent.prototype
    * @type {number}
@@ -112,7 +112,7 @@ Object.defineProperties(SceneGISPlanarExtent.prototype, {
   },
 
   /**
-   * Gets the width in meters.
+   * 获取宽度，单位为米。
    *
    * @memberof SceneGISPlanarExtent.prototype
    * @type {number}
@@ -125,7 +125,7 @@ Object.defineProperties(SceneGISPlanarExtent.prototype, {
   },
 
   /**
-   * Gets the height in meters.
+   * 获取高度，单位为米。
    *
    * @memberof SceneGISPlanarExtent.prototype
    * @type {number}
@@ -139,10 +139,10 @@ Object.defineProperties(SceneGISPlanarExtent.prototype, {
 });
 
 /**
- * Duplicates an extent.
+ * 复制范围。
  *
- * @param {SceneGISPlanarExtent} extent The extent to duplicate.
- * @returns {SceneGISPlanarExtent|undefined} A new extent, or <code>undefined</code> if the input is undefined.
+ * @param {SceneGISPlanarExtent} extent 要复制的范围。
+ * @returns {SceneGISPlanarExtent|undefined} 新的范围；输入未定义时返回 <code>undefined</code>。
  */
 SceneGISPlanarExtent.clone = function (extent) {
   if (!defined(extent)) {
@@ -158,11 +158,11 @@ SceneGISPlanarExtent.clone = function (extent) {
 };
 
 /**
- * Compares two extents for exact equality.
+ * 精确比较两个范围是否相等。
  *
- * @param {SceneGISPlanarExtent} [left] The first extent.
- * @param {SceneGISPlanarExtent} [right] The second extent.
- * @returns {boolean} <code>true</code> if both extents are equal; otherwise, <code>false</code>.
+ * @param {SceneGISPlanarExtent} [left] 第一个范围。
+ * @param {SceneGISPlanarExtent} [right] 第二个范围。
+ * @returns {boolean} 两个范围相等时为 <code>true</code>，否则为 <code>false</code>。
  */
 SceneGISPlanarExtent.equals = function (left, right) {
   return (
@@ -177,15 +177,14 @@ SceneGISPlanarExtent.equals = function (left, right) {
 };
 
 /**
- * Determines whether a planar position is inside an extent. All four boundaries are inclusive.
- * The position's Z coordinate, if present, is ignored.
+ * 判断平面位置是否位于范围内，四条边界均包含。若位置具有 Z 坐标，则忽略该分量。
  *
- * @param {SceneGISPlanarExtent} extent The extent to test.
- * @param {Cartesian2|Cartesian3} position The planar position to test.
- * @returns {boolean} <code>true</code> if the position is inside the extent; otherwise, <code>false</code>.
+ * @param {SceneGISPlanarExtent} extent 要测试的范围。
+ * @param {Cartesian2|Cartesian3} position 要测试的平面位置。
+ * @returns {boolean} 位置在范围内时为 <code>true</code>，否则为 <code>false</code>。
  *
- * @exception {DeveloperError} <code>extent</code> is not a SceneGISPlanarExtent.
- * @exception {DeveloperError} The position does not have finite X and Y coordinates.
+ * @exception {DeveloperError} <code>extent</code> 不是 SceneGISPlanarExtent。
+ * @exception {DeveloperError} 位置不具有有限 X、Y 坐标。
  */
 SceneGISPlanarExtent.contains = function (extent, position) {
   if (!(extent instanceof SceneGISPlanarExtent)) {

@@ -7,23 +7,16 @@ import SceneGISPointLight from "./SceneGISPointLight.js";
 import SceneGISRectAreaLight from "./SceneGISRectAreaLight.js";
 
 /**
- * A tiled-light collection attached to one WebGL2 Scene. Adds up to 256 local
- * lights alongside Scene.light, without replacing the Sun/Moon or its shadows.
- * Receivers are lit PBR models/3D Tiles, Phong primitives and lit Globe/Planar
- * terrain in SCENE3D. Unlit materials and custom lighting shaders are unchanged.
- * Local lights do not cast shadows, illuminate participating media, or provide GI.
- * Native emissive materials and bloom remain independent of these light sources.
+ * 绑定到单个 WebGL2 Scene 的分块局部光源集合，可在 Scene.light 之外添加最多 256 个局部光，不替换日月光源或其阴影。SCENE3D 下的受光 PBR 模型/3D Tiles、Phong 图元和球面/平面受光地形可接收；不改变 unlit 材质或自定义光照着色器。局部光不投影、不照亮参与介质，也不提供 GI；原生自发光材质与泛光独立。
  *
- * The Scene owns this collection and destroys it before its Context. Explicit
- * destroy detaches it early. Light descriptors are borrowed, never destroyed.
- * The collection owns shared GPU light tables. No extra geometry passes are allocated.
+ * 集合归 Scene 所有，在 Context 前销毁；显式提前 destroy 会解除绑定。光源描述对象仅借用，不会被销毁。集合拥有共享 GPU 光源表，不增加几何绘制通道。
  *
  * @alias SceneGISLightCollection
  * @constructor
- * @param {object} options Object with the following properties.
- * @param {Scene} options.scene The Scene to attach to; only one live collection is allowed.
- * @param {boolean} [options.show=true] Whether local lights contribute.
- * @exception {DeveloperError} A live SCENE3D Scene without another light collection is required.
+ * @param {object} options 包含以下属性的对象。
+ * @param {Scene} options.scene 要附加的 Scene，仅允许一个存活集合。
+ * @param {boolean} [options.show=true] 局部光是否参与受光。
+ * @exception {DeveloperError} 要求存活的 SCENE3D Scene，且未附加其他光源集合。
  * @example
  * const lights = new Cesium.SceneGISLightCollection({ scene: viewer.scene });
  * lights.add(new Cesium.SceneGISPointLight({
@@ -50,7 +43,7 @@ function SceneGISLightCollection(options = Frozen.EMPTY_OBJECT) {
   // Private street diagnostic: compare candidates with the complete GPU light table.
   this._tiled = true;
   /**
-   * Whether local lighting contributes. Request a frame after editing in request-render mode.
+   * 局部光是否参与受光；按需渲染模式修改后须请求一帧。
    * @type {boolean}
    * @default true
    */
@@ -62,7 +55,8 @@ function SceneGISLightCollection(options = Frozen.EMPTY_OBJECT) {
   scene.requestRender();
 }
 
-/** Maximum number of descriptors in a collection, including hidden lights.
+/**
+ *  集合中最多的描述对象数，包含隐藏光源。
  * @type {number}
  * @readonly
  */
@@ -70,7 +64,7 @@ SceneGISLightCollection.MAXIMUM_LIGHTS = LightTiles.maximumLights;
 
 Object.defineProperties(SceneGISLightCollection.prototype, {
   /**
-   * The number of borrowed light descriptors.
+   * 借用的光源描述对象数量。
    * @memberof SceneGISLightCollection.prototype
    * @type {number}
    * @readonly
@@ -83,10 +77,10 @@ Object.defineProperties(SceneGISLightCollection.prototype, {
 });
 
 /**
- * Adds a descriptor; adding the same instance again returns it without duplication.
- * @param {SceneGISPointLight|SceneGISSpotLight|SceneGISRectAreaLight} light The light to borrow.
- * @returns {SceneGISPointLight|SceneGISSpotLight|SceneGISRectAreaLight} The supplied light.
- * @exception {DeveloperError} The light type must be supported and capacity must not be exceeded.
+ * 添加描述对象；重复添加同一实例时直接返回，不重复保存。
+ * @param {SceneGISPointLight|SceneGISSpotLight|SceneGISRectAreaLight} light 要借用的光源。
+ * @returns {SceneGISPointLight|SceneGISSpotLight|SceneGISRectAreaLight} 传入的光源。
+ * @exception {DeveloperError} 必须支持此光源类型，且未超过容量。
  */
 SceneGISLightCollection.prototype.add = function (light) {
   if (
@@ -108,8 +102,10 @@ SceneGISLightCollection.prototype.add = function (light) {
   return light;
 };
 
-/** @param {SceneGISPointLight|SceneGISSpotLight|SceneGISRectAreaLight} light The light to remove.
- * @returns {boolean} Whether it was removed. */
+/**
+ *  @param {SceneGISPointLight|SceneGISSpotLight|SceneGISRectAreaLight} light 要移除的光源。
+ * @returns {boolean} 是否已移除。
+ */
 SceneGISLightCollection.prototype.remove = function (light) {
   const index = this._lights.indexOf(light);
   if (index === -1) {
@@ -119,30 +115,40 @@ SceneGISLightCollection.prototype.remove = function (light) {
   this._scene.requestRender();
   return true;
 };
-/** Removes all borrowed lights without destroying them. */
+/**
+ *  移除全部借用光源，不销毁它们。
+ */
 SceneGISLightCollection.prototype.removeAll = function () {
   this._lights.length = 0;
   this._scene.requestRender();
 };
-/** @param {SceneGISPointLight|SceneGISSpotLight|SceneGISRectAreaLight} light The light to find.
- * @returns {boolean} Whether the collection contains the light. */
+/**
+ *  @param {SceneGISPointLight|SceneGISSpotLight|SceneGISRectAreaLight} light 要查找的光源。
+ * @returns {boolean} 集合是否包含此光源。
+ */
 SceneGISLightCollection.prototype.contains = function (light) {
   return this._lights.includes(light);
 };
-/** @param {number} index An integer in [0, length).
- * @returns {SceneGISPointLight|SceneGISSpotLight|SceneGISRectAreaLight} The light at the index. */
+/**
+ *  @param {number} index [0,length) 内的整数。
+ * @returns {SceneGISPointLight|SceneGISSpotLight|SceneGISRectAreaLight} 指定索引处的光源。
+ */
 SceneGISLightCollection.prototype.get = function (index) {
   if (!Number.isInteger(index) || index < 0 || index >= this.length) {
     throw new DeveloperError("index must be an integer in [0, length).");
   }
   return this._lights[index];
 };
-/** @returns {boolean} Whether the collection has been destroyed. */
+/**
+ *  @returns {boolean} 集合是否已销毁。
+ */
 SceneGISLightCollection.prototype.isDestroyed = function () {
   return false;
 };
-/** Detaches the collection and releases its CPU references and GPU tables. Light descriptors remain usable.
- * @returns {undefined} */
+/**
+ *  解绑集合并释放 CPU 引用与 GPU 表，光源描述对象仍可使用。
+ * @returns {undefined}
+ */
 SceneGISLightCollection.prototype.destroy = function () {
   this._state?.tiles?.destroy();
   this.removeAll();

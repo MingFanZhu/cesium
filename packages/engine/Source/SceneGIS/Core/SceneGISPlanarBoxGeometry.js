@@ -20,14 +20,14 @@ function cloneFiniteCartesian3(value, name, positive) {
 }
 
 /**
- * An immutable CPU description of a planar box centered at a meter-based position.
+ * 以米制位置为中心的平面盒体不可变 CPU 几何描述。
  *
  * @alias SceneGISPlanarBoxGeometry
  * @constructor
- * @param {object} options Object with the following properties:
- * @param {Cartesian3} options.center The center in planar world coordinates.
- * @param {Cartesian3} options.dimensions The positive dimensions in meters.
- * @exception {DeveloperError} center or dimensions is invalid.
+ * @param {object} options 包含以下属性的对象：
+ * @param {Cartesian3} options.center 平面世界坐标中的中心。
+ * @param {Cartesian3} options.dimensions 为正的尺寸，单位为米。
+ * @exception {DeveloperError} center 或 dimensions 无效。
  */
 function SceneGISPlanarBoxGeometry(options) {
   options = options ?? {};
@@ -55,7 +55,7 @@ function SceneGISPlanarBoxGeometry(options) {
 
 Object.defineProperties(SceneGISPlanarBoxGeometry.prototype, {
   /**
-   * Gets a clone of the center in planar world coordinates.
+   * 获取平面世界中心坐标的副本。
    * @memberof SceneGISPlanarBoxGeometry.prototype
    * @type {Cartesian3}
    * @readonly
@@ -66,7 +66,7 @@ Object.defineProperties(SceneGISPlanarBoxGeometry.prototype, {
     },
   },
   /**
-   * Gets a clone of the positive dimensions in meters.
+   * 获取正尺寸的副本，单位为米。
    * @memberof SceneGISPlanarBoxGeometry.prototype
    * @type {Cartesian3}
    * @readonly

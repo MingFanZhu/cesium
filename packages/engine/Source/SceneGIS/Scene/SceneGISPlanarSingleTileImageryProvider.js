@@ -4,21 +4,19 @@ import SceneGISPlanarTilingScheme from "../Core/SceneGISPlanarTilingScheme.js";
 import SceneGISPlanarUrlTemplateImageryProvider from "./SceneGISPlanarUrlTemplateImageryProvider.js";
 
 /**
- * Maps a single image onto the entire planar world. Image pixels may have a
- * different aspect ratio than the square world. Higher terrain levels sample
- * this level-zero image using the normal ancestor texture transform.
+ * 将单张图像映射到整个平面世界。图像像素宽高比可以不同于正方形世界；更高地形层级通过标准祖先纹理变换采样这张零级图像。
  *
  * @alias SceneGISPlanarSingleTileImageryProvider
  * @extends SceneGISPlanarUrlTemplateImageryProvider
  *
- * @param {object} options Initialization options.
- * @param {string|Resource} options.url The image URL or Resource.
- * @param {SceneGISPlanarTilingScheme} options.tilingScheme The canonical tiling scheme.
- * @param {number} options.tileWidth The image's natural width in pixels.
- * @param {number} options.tileHeight The image's natural height in pixels.
- * @param {boolean} [options.hasAlphaChannel=true] Whether the image has alpha.
- * @param {Credit|string} [options.credit] Attribution.
- * @exception {DeveloperError} Dimensions, URL, or tiling scheme are invalid.
+ * @param {object} options 初始化选项。
+ * @param {string|Resource} options.url 图像 URL 或 Resource。
+ * @param {SceneGISPlanarTilingScheme} options.tilingScheme 标准切片方案。
+ * @param {number} options.tileWidth 图像原始宽度，单位为像素。
+ * @param {number} options.tileHeight 图像原始高度，单位为像素。
+ * @param {boolean} [options.hasAlphaChannel=true] 图像是否具有 alpha。
+ * @param {Credit|string} [options.credit] 署名。
+ * @exception {DeveloperError} 尺寸、URL 或切片方案无效。
  */
 class SceneGISPlanarSingleTileImageryProvider extends SceneGISPlanarUrlTemplateImageryProvider {
   constructor(options = {}) {
@@ -37,16 +35,14 @@ class SceneGISPlanarSingleTileImageryProvider extends SceneGISPlanarUrlTemplateI
   }
 
   /**
-   * Loads an image and detects its natural size. The provider retains a reusable
-   * HTML image rather than sharing a closable ImageBitmap between layers.
-   * Providers remain caller-owned and have no GPU resources or destroy requirement.
+   * 加载图像并检测原始尺寸。提供者保留可复用 HTML 图像，不在图层间共享可关闭的 ImageBitmap。提供者仍归调用方所有，无 GPU 资源，也不要求销毁。
    *
-   * @param {string|Resource} url The image URL or Resource.
-   * @param {object} options Initialization options.
-   * @param {SceneGISPlanarTilingScheme} options.tilingScheme The canonical tiling scheme.
-   * @param {boolean} [options.hasAlphaChannel=true] Whether the image has alpha.
-   * @param {Credit|string} [options.credit] Attribution.
-   * @returns {Promise<SceneGISPlanarSingleTileImageryProvider>} A ready provider.
+   * @param {string|Resource} url 图像 URL 或 Resource。
+   * @param {object} options 初始化选项。
+   * @param {SceneGISPlanarTilingScheme} options.tilingScheme 标准切片方案。
+   * @param {boolean} [options.hasAlphaChannel=true] 图像是否具有 alpha。
+   * @param {Credit|string} [options.credit] 署名。
+   * @returns {Promise<SceneGISPlanarSingleTileImageryProvider>} 就绪的提供者。
    */
   static async fromUrl(url, options = {}) {
     if (
@@ -70,12 +66,12 @@ class SceneGISPlanarSingleTileImageryProvider extends SceneGISPlanarUrlTemplateI
   }
 
   /**
-   * Requests the root image. An image loaded by fromUrl can be shared by layers.
-   * @param {number} x Must be zero.
-   * @param {number} y Must be zero.
-   * @param {number} level Must be zero.
-   * @param {Request} [request] The scheduling and cancellation request.
-   * @returns {Promise<HTMLImageElement|ImageBitmap>|undefined} The image or undefined when throttled.
+   * 请求根图像，fromUrl 加载的图像可由图层共享。
+   * @param {number} x 必须为零。
+   * @param {number} y 必须为零。
+   * @param {number} level 必须为零。
+   * @param {Request} [request] 调度与取消请求。
+   * @returns {Promise<HTMLImageElement|ImageBitmap>|undefined} 图像；限流时为 undefined。
    */
   requestImage(x, y, level, request) {
     this._validateTileAddress(x, y, level);

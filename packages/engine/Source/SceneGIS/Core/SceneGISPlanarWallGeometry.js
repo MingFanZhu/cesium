@@ -37,16 +37,16 @@ function cloneHeights(source, length, name) {
 }
 
 /**
- * A CPU-only immutable description of a vertical wall along a planar XY route.
+ * 沿平面 XY 路径生成竖直墙面的不可变纯 CPU 几何描述。
  *
  * @alias SceneGISPlanarWallGeometry
  * @constructor
- * @param {object} options Object with the following properties:
- * @param {Cartesian3[]} options.positions The route positions in planar meters.
- * @param {number[]} [options.minimumHeights] Bottom heights in meters. Zero is used by default.
- * @param {number[]} [options.maximumHeights] Top heights in meters. Position Z is used by default.
- * @param {Cartesian3} [options.origin] The local origin. The first bottom position is used by default.
- * @exception {DeveloperError} The positions, heights, origin, or derived wall is invalid.
+ * @param {object} options 包含以下属性的对象：
+ * @param {Cartesian3[]} options.positions 路径位置，单位为平面米。
+ * @param {number[]} [options.minimumHeights] 底部高度，单位为米，默认为零。
+ * @param {number[]} [options.maximumHeights] 顶部高度，单位为米，默认使用位置 Z。
+ * @param {Cartesian3} [options.origin] 局部原点，默认使用首个底部位置。
+ * @exception {DeveloperError} 位置、高度、原点或派生墙面无效。
  */
 function SceneGISPlanarWallGeometry(options) {
   options = options ?? {};
@@ -141,7 +141,7 @@ function SceneGISPlanarWallGeometry(options) {
 
 Object.defineProperties(SceneGISPlanarWallGeometry.prototype, {
   /**
-   * Gets a cloned snapshot of the wall route.
+   * 获取墙面路径的快照副本。
    *
    * @memberof SceneGISPlanarWallGeometry.prototype
    * @type {Cartesian3[]}
@@ -153,7 +153,7 @@ Object.defineProperties(SceneGISPlanarWallGeometry.prototype, {
     },
   },
   /**
-   * Gets a cloned snapshot of the explicitly supplied minimum heights.
+   * 获取显式提供的最小高度快照副本。
    *
    * @memberof SceneGISPlanarWallGeometry.prototype
    * @type {number[]|undefined}
@@ -165,7 +165,7 @@ Object.defineProperties(SceneGISPlanarWallGeometry.prototype, {
     },
   },
   /**
-   * Gets a cloned snapshot of the explicitly supplied maximum heights.
+   * 获取显式提供的最大高度快照副本。
    *
    * @memberof SceneGISPlanarWallGeometry.prototype
    * @type {number[]|undefined}
@@ -177,7 +177,7 @@ Object.defineProperties(SceneGISPlanarWallGeometry.prototype, {
     },
   },
   /**
-   * Gets a clone of the local origin in planar world coordinates.
+   * 获取平面世界中局部原点的副本。
    *
    * @memberof SceneGISPlanarWallGeometry.prototype
    * @type {Cartesian3}

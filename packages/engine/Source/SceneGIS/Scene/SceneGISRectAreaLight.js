@@ -4,35 +4,24 @@ import Frozen from "../../Core/Frozen.js";
 import Validation from "./_private/_SceneGISLightValidation.js";
 
 /**
- * A uniformly emitting rectangular area light for {@link SceneGISLightCollection}.
- * Position is the rectangle center in ECEF (Globe) or Cartesian meters (Planar).
- * Direction is the emission normal; up sets the height axis after orthogonalization.
- * Width points along cross(direction, up). Inputs are cloned and remain mutable.
- * Call Scene.requestRender after edits in request-render mode.
+ * 用于 {@link SceneGISLightCollection} 的均匀发光矩形面光源。位置为球面 ECEF 或平面米制笛卡尔坐标中的矩形中心；direction 为出光法线，up 正交化后定义高度轴，宽度方向为 cross(direction, up)。输入会复制，属性仍可修改；按需渲染模式修改后调用 Scene.requestRender。
  *
- * Intensity is emitted linear HDR radiance: increasing area at fixed intensity
- * increases total output. It differs from the irradiance-at-one-meter scale of
- * point/spot lights. Range applies a smooth center-distance fade after integration.
- * Diffuse uses polygon integration; specular uses an isotropic GGX LTC fit,
- * including clearcoat. Phong specular is approximated by a matched GGX roughness.
- * Anisotropic materials use isotropic area-light specular.
- * No shadows, participating media or visible geometry are created. This borrowed
- * CPU descriptor may be shared by collections and needs no destruction.
+ * intensity 为发射的线性 HDR 辐亮度：固定强度时增大面积会增加总出光量，不同于点光/聚光的一米处辐照度尺度。积分后按距中心距离进行平滑 range 衰减。漫反射使用多边形积分，镜面使用各向同性 GGX LTC 拟合，包含清漆层；Phong 镜面近似为匹配粗糙度的 GGX，各向异性材质也使用各向同性面光高光。不创建阴影、参与介质照明或可见几何。此借用的 CPU 描述对象可由集合共享，无需销毁。
  *
  * @alias SceneGISRectAreaLight
  * @constructor
- * @param {object} options Object with the following properties.
- * @param {Cartesian3} options.position World-space center.
- * @param {Cartesian3} options.direction Nonzero world-space emission direction.
- * @param {Cartesian3} options.up Nonzero world-space height direction, independent of direction.
- * @param {number} [options.width=1] Positive rectangle width in meters.
- * @param {number} [options.height=1] Positive rectangle height in meters.
- * @param {Color} [options.color=Color.WHITE] Linear RGB color; alpha is ignored.
- * @param {number} [options.intensity=1] Nonnegative emitted HDR radiance scale.
- * @param {number} [options.range=100] Positive center-distance influence range in meters.
- * @param {boolean} [options.twoSided=false] Whether both faces emit.
- * @param {boolean} [options.show=true] Whether the light contributes.
- * @exception {DeveloperError} Values must be finite and satisfy their documented bounds.
+ * @param {object} options 包含以下属性的对象。
+ * @param {Cartesian3} options.position 世界空间中心。
+ * @param {Cartesian3} options.direction 非零世界空间出光方向。
+ * @param {Cartesian3} options.up 非零世界空间高度方向，须与 direction 独立。
+ * @param {number} [options.width=1] 正矩形宽度，单位为米。
+ * @param {number} [options.height=1] 正矩形高度，单位为米。
+ * @param {Color} [options.color=Color.WHITE] 线性 RGB 颜色，忽略 alpha。
+ * @param {number} [options.intensity=1] 非负发射 HDR 辐亮度倍率。
+ * @param {number} [options.range=100] 正的中心距离影响范围，单位为米。
+ * @param {boolean} [options.twoSided=false] 是否双面发光。
+ * @param {boolean} [options.show=true] 光源是否参与受光。
+ * @exception {DeveloperError} 各值须有限且满足文档范围。
  * @example
  * const panel = lights.add(new Cesium.SceneGISRectAreaLight({
  *   position: new Cesium.Cartesian3(0, 0, 6),
@@ -42,49 +31,59 @@ import Validation from "./_private/_SceneGISLightValidation.js";
  * }));
  */
 function SceneGISRectAreaLight(options = Frozen.EMPTY_OBJECT) {
-  /** World-space center.
+  /**
+   *  世界空间中心。
    * @type {Cartesian3}
    */
   this.position = Cartesian3.clone(options.position);
-  /** World-space emission normal, normalized during rendering.
+  /**
+   *  世界空间出光法线，在渲染时归一化。
    * @type {Cartesian3}
    */
   this.direction = Cartesian3.clone(options.direction);
-  /** World-space height direction, orthogonalized during rendering.
+  /**
+   *  世界空间高度方向，在渲染时正交化。
    * @type {Cartesian3}
    */
   this.up = Cartesian3.clone(options.up);
-  /** Positive width in meters.
+  /**
+   *  正宽度，单位为米。
    * @type {number}
    * @default 1
    */
   this.width = options.width ?? 1;
-  /** Positive height in meters.
+  /**
+   *  正高度，单位为米。
    * @type {number}
    * @default 1
    */
   this.height = options.height ?? 1;
-  /** Linear RGB color; alpha is ignored.
+  /**
+   *  线性 RGB 颜色，忽略 alpha。
    * @type {Color}
    * @default Color.WHITE
    */
   this.color = Color.clone(options.color ?? Color.WHITE);
-  /** Nonnegative emitted HDR radiance scale.
+  /**
+   *  非负发射 HDR 辐亮度倍率。
    * @type {number}
    * @default 1
    */
   this.intensity = options.intensity ?? 1;
-  /** Positive center-distance influence range in meters.
+  /**
+   *  正的中心距离影响范围，单位为米。
    * @type {number}
    * @default 100
    */
   this.range = options.range ?? 100;
-  /** Whether both faces emit.
+  /**
+   *  是否双面发光。
    * @type {boolean}
    * @default false
    */
   this.twoSided = options.twoSided ?? false;
-  /** Whether the light contributes.
+  /**
+   *  光源是否参与受光。
    * @type {boolean}
    * @default true
    */

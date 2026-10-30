@@ -200,6 +200,28 @@ test("source hashing normalizes CRLF without depending on brand namespace", () =
   assert.equal(docs[0].description, "执行一步。");
 });
 
+test("direct source-language prose has provenance without external translation gaps", () => {
+  const member = {
+    longname: "Example#value",
+    name: "value",
+    description: "当前值。",
+  };
+  const docs = [
+    { longname: "Example", description: "自有类型。", properties: [member] },
+    member,
+  ];
+  translations.markSourceDoclets(docs, "zh-CN");
+  assert.equal(docs[0].sourceLocale, "zh-CN");
+  assert.deepEqual(docs[0].i18n.sourceFields, [
+    "description",
+    "properties/value/description",
+  ]);
+  assert.deepEqual(docs[0].i18n.fallbackFields, []);
+  assert.deepEqual(docs[0].i18n.translatedFields, []);
+  assert.equal(docs[0].properties[0].i18n, undefined);
+  assert.equal(member.description, "当前值。");
+});
+
 test("inline URL link labels can be translated while the URL target stays fixed", () => {
   const docs = [
     {

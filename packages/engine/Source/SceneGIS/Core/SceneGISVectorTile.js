@@ -306,52 +306,49 @@ function decodeLayer(bytes) {
 }
 
 /**
- * Independent, coordinate-neutral MVT 2.1 decoding utilities.
+ * 独立且与坐标系无关的 MVT 2.1 解码工具。
  * @namespace SceneGISVectorTile
- * @experimental This API is experimental and subject to change.
+ * @experimental 此 API 为实验性，可能发生变化。
  */
 const SceneGISVectorTile = {};
 
 /**
- * Coordinates use the tile's X-right, Y-down integer grid. Polygon rings omit
- * the repeated closing endpoint.
+ * 坐标采用瓦片 X 向右、Y 向下的整数格网；多边形环省略重复闭合端点。
  * @typedef {object} SceneGISVectorTile.Geometry
- * @property {Float64Array[]} parts Interleaved XY arrays: one point set, lines, or rings.
- * @property {Uint32Array} polygonStarts Exterior-ring indices; empty for points and lines.
+ * @property {Float64Array[]} parts 交错 XY 数组，表示点集、线或环。
+ * @property {Uint32Array} polygonStarts 外环索引，点和线为空。
  */
 
 /**
- * A decoded feature with lossless source identity.
+ * 保留无损源标识的解码要素。
  * @typedef {object} SceneGISVectorTile.Feature
- * @property {string|undefined} id The decimal source feature ID, or undefined when absent.
- * @property {number} type The MVT geometry type: point 1, line 2, polygon 3.
- * @property {Object<string, string|number|boolean|bigint>} properties Source scalar values; unsafe integers use bigint.
- * @property {SceneGISVectorTile.Geometry} geometry Tile-local geometry.
+ * @property {string|undefined} id 十进制源要素 ID，缺失时为 undefined。
+ * @property {number} type MVT 几何类型：点 1、线 2、多边形 3。
+ * @property {Object<string, string|number|boolean|bigint>} properties 源标量值，不安全整数使用 bigint。
+ * @property {SceneGISVectorTile.Geometry} geometry 瓦片局部几何。
  */
 
 /**
- * A decoded source layer.
+ * 已解码的源图层。
  * @typedef {object} SceneGISVectorTile.Layer
- * @property {string} name The source-layer name.
- * @property {number} version The MVT major version, always 2.
- * @property {number} extent The layer's tile-local extent.
- * @property {SceneGISVectorTile.Feature[]} features Decoded features in source order.
+ * @property {string} name 源图层名称。
+ * @property {number} version MVT 主版本，始终为 2。
+ * @property {number} extent 图层的瓦片局部范围。
+ * @property {SceneGISVectorTile.Feature[]} features 按源顺序排列的解码要素。
  */
 
 /**
- * Caller-owned decoded data with no requests or GPU resources.
+ * 调用方所有的解码数据，没有请求或 GPU 资源。
  * @typedef {object} SceneGISVectorTile.Data
- * @property {SceneGISVectorTile.Layer[]} layers Source layers in encoded order.
+ * @property {SceneGISVectorTile.Layer[]} layers 按编码顺序排列的源图层。
  */
 
 /**
- * Decodes MVT bytes without modifying or retaining the input buffer.
- * Empty bytes produce an empty tile. This checks encoding and geometry commands,
- * but does not repair or fully validate polygon topology.
- * @param {ArrayBuffer|Uint8Array} buffer Decompressed protobuf bytes.
- * @returns {SceneGISVectorTile.Data} Independently owned data.
- * @exception {DeveloperError} The input is not an ArrayBuffer or Uint8Array.
- * @exception {RuntimeError} The payload is malformed or outside the supported MVT profile.
+ * 解码 MVT 字节，不修改或保留输入缓冲。空字节生成空瓦片。检查编码与几何命令，但不修复或完整验证多边形拓扑。
+ * @param {ArrayBuffer|Uint8Array} buffer 已解压 protobuf 字节。
+ * @returns {SceneGISVectorTile.Data} 独立所有的数据。
+ * @exception {DeveloperError} 输入不是 ArrayBuffer 或 Uint8Array。
+ * @exception {RuntimeError} 载荷格式错误或超出支持的 MVT 范围。
  */
 SceneGISVectorTile.decode = function (buffer) {
   if (!(buffer instanceof ArrayBuffer) && !(buffer instanceof Uint8Array)) {

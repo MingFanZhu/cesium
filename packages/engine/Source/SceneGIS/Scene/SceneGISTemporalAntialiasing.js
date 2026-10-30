@@ -7,20 +7,15 @@ import SceneMode from "../../Scene/SceneMode.js";
 import Renderer from "./_private/_SceneGISTemporalAntialiasing.js";
 
 /**
- * Temporally antialiases HDR Globe and Planar scenes using render-only subpixel samples.
- * Static geometry is reprojected using camera motion, with depth rejection and color clipping.
- * Object motion vectors are not available: animated objects, translucent content and labels
- * can soften or retain trails. Background pixels use current color. Native overlays remain sharp.
- * The Scene owns the attached effect. Disabling releases history; enabling starts fresh.
- * Request-render scenes accumulate only on requested renders. MSAA and FXAA remain caller-owned.
+ * 通过仅作用于渲染的亚像素采样，为 HDR 球面和平面场景提供时域抗锯齿。静态几何根据相机运动重投影，结合深度拒绝与颜色裁剪。没有物体运动向量，动画对象、透明内容和标注可能柔化或残留拖尾。背景像素使用当前颜色，原生覆盖内容保持清晰。附加效果归 Scene 所有，禁用释放历史，启用重新开始。按需渲染场景仅在请求的帧上积累；MSAA 和 FXAA 仍归调用方控制。
  *
  * @alias SceneGISTemporalAntialiasing
  * @constructor
- * @param {object} options Initialization options.
- * @param {Scene} options.scene The live Scene; only one effect may be attached.
- * @param {boolean} [options.enabled=false] Whether temporal antialiasing is enabled.
- * @param {number} [options.historyWeight=0.9] Base history contribution in [0, 0.95]; zero disables history blending.
- * @exception {RuntimeError} Enabled TAA requires HDR, SCENE3D and supported WebGL2 targets; stereo is excluded.
+ * @param {object} options 初始化选项。
+ * @param {Scene} options.scene 存活的 Scene，仅可附加一个效果。
+ * @param {boolean} [options.enabled=false] 是否启用时域抗锯齿。
+ * @param {number} [options.historyWeight=0.9] 基础历史贡献，范围 [0,0.95]，0 禁用历史混合。
+ * @exception {RuntimeError} 启用 TAA 要求 HDR、SCENE3D 及受支持 WebGL2 目标，不支持立体渲染。
  * @example
  * scene.highDynamicRange = true;
  * scene.msaaSamples = 1;
@@ -51,9 +46,9 @@ function SceneGISTemporalAntialiasing(options) {
 }
 
 /**
- * Tests GPU support independently of Scene configuration.
- * @param {Scene} scene The Scene to test.
- * @returns {boolean} Whether the required framebuffer formats are supported.
+ * 测试 GPU 支持，独立于 Scene 配置。
+ * @param {Scene} scene 需要测试的 Scene。
+ * @returns {boolean} 是否支持必需帧缓冲格式。
  */
 SceneGISTemporalAntialiasing.isSupported = function (scene) {
   const c = scene.context;
@@ -69,7 +64,7 @@ SceneGISTemporalAntialiasing.isSupported = function (scene) {
 
 Object.defineProperties(SceneGISTemporalAntialiasing.prototype, {
   /**
-   * Whether TAA is enabled. Disabling releases all GPU history.
+   * 是否启用 TAA，禁用释放全部 GPU 历史。
    * @memberof SceneGISTemporalAntialiasing.prototype
    * @type {boolean}
    * @default false
@@ -96,9 +91,7 @@ Object.defineProperties(SceneGISTemporalAntialiasing.prototype, {
     },
   },
   /**
-   * Base history contribution; lower values respond faster to changing content.
-   * After depth rejection and color clipping, luminance differences can increase
-   * history retention to suppress subpixel flicker. Zero disables history blending.
+   * 基础历史贡献，较低值对内容变化响应更快。深度拒绝和颜色裁剪后，亮度差异可提高历史保留以抑制亚像素闪烁。0 禁用历史混合。
    * @memberof SceneGISTemporalAntialiasing.prototype
    * @type {number}
    * @default 0.9
@@ -116,7 +109,7 @@ Object.defineProperties(SceneGISTemporalAntialiasing.prototype, {
     },
   },
   /**
-   * Whether the last render successfully produced a temporal result.
+   * 上次渲染是否成功生成时域结果。
    * @memberof SceneGISTemporalAntialiasing.prototype
    * @type {boolean}
    * @readonly
@@ -129,8 +122,7 @@ Object.defineProperties(SceneGISTemporalAntialiasing.prototype, {
 });
 
 /**
- * Discards history, for example after an application camera cut or scene replacement.
- * The next rendered frame publishes current color immediately.
+ * 丢弃历史，例如应用相机跳切或场景替换后；下一渲染帧立即发布当前颜色。
  */
 SceneGISTemporalAntialiasing.prototype.reset = function () {
   this._ready = false;
@@ -156,13 +148,15 @@ SceneGISTemporalAntialiasing.prototype._validate = function () {
   }
 };
 
-/** @returns {boolean} Whether this effect has been destroyed. */
+/**
+ *  @returns {boolean} 此效果是否已销毁。
+ */
 SceneGISTemporalAntialiasing.prototype.isDestroyed = function () {
   return false;
 };
 
 /**
- * Releases owned resources and detaches from the Scene.
+ * 释放自有资源并从 Scene 解绑。
  * @returns {undefined}
  */
 SceneGISTemporalAntialiasing.prototype.destroy = function () {

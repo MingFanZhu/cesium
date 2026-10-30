@@ -615,27 +615,17 @@ function validateAerialPerspectiveDistanceScale(mode, name, value) {
 }
 
 /**
- * Controls the SceneGIS advanced physical atmosphere and aerial-perspective
- * pipeline for either a native Globe or a SceneGIS planar world.
- * A caller-installed scene.light DirectionalLight controls surface, model and
- * cloud illumination without changing celestial sky directions. Installing a
- * SunLight restores automatic Sun/Moon lighting. Caller lights are never owned
- * or overwritten by this controller.
+ * 控制原生 Globe 或 SceneGIS 平面世界的高级物理大气与空气透视管线。调用方安装的 scene.light DirectionalLight 驱动地表、模型和云的受光，不改变天空天体方向；安装 SunLight 可恢复自动日月光照。此控制器不拥有也不改写调用方的光源。
  *
- * Explicitly constructed controllers are caller-owned. Register them with a
- * Scene controller host and remove them before destroying the host. They are
- * disabled by default and perform no resource request or Scene mutation until
- * their first enabled update. Scene.environmentEffects can instead return a
- * Scene-owned lightweight default; control its properties without registering
- * or removing it. Explicitly registered controllers take precedence.
+ * 显式构造的控制器归调用方所有。应注册到 Scene 控制器宿主，并在销毁宿主前移除。默认禁用，首次启用更新之前不请求资源或修改 Scene。Scene.environmentEffects 也可能返回 Scene 所有的轻量默认实例；直接修改其属性即可，无需注册或移除。显式注册的控制器优先。
  *
  * @alias SceneGISEnvironmentEffects
  * @constructor
  *
- * @param {SceneGISEnvironmentEffects.ConstructorOptions} options Configuration options.
+ * @param {SceneGISEnvironmentEffects.ConstructorOptions} options 配置选项。
  *
- * @exception {DeveloperError} options.mode must be exactly "globe" or "planar".
- * @exception {DeveloperError} Planar mode requires a live SceneGISPlanarWorld and Globe mode forbids world.
+ * @exception {DeveloperError} options.mode 必须精确为 "globe" 或 "planar"。
+ * @exception {DeveloperError} 平面模式要求存活的 SceneGISPlanarWorld，球面模式禁止传入 world。
  */
 function SceneGISEnvironmentEffects(options) {
   options = options ?? Frozen.EMPTY_OBJECT;
@@ -882,21 +872,18 @@ function SceneGISEnvironmentEffects(options) {
 }
 
 /**
- * Tests whether a live Scene exposes the complete A2 WebGL2 RGBA16F profile.
- * This method is read-only and never attaches a pipeline or allocates resources.
+ * 检查存活 Scene 是否具备完整 A2 WebGL2 RGBA16F 能力。此方法只读，不挂载管线或分配资源。
  *
  * @function
- * @param {Scene} scene The Scene to test.
- * @returns {boolean} Whether the complete advanced-environment profile is supported.
- * @exception {DeveloperError} scene must be a live Scene.
+ * @param {Scene} scene 需要测试的 Scene。
+ * @returns {boolean} 是否支持完整高级环境能力。
+ * @exception {DeveloperError} scene 必须是存活的 Scene。
  */
 SceneGISEnvironmentEffects.isSupported = isSupported;
 
 Object.defineProperties(SceneGISEnvironmentEffects.prototype, {
   /**
-   * Whether final HDR/LDR display uses the fixed Earth solar-spectrum white point.
-   * Applies globally after scene composition, preserving atmospheric color changes.
-   * Does not estimate the current illuminant or alter lighting, exposure or imagery.
+   * 最终 HDR/LDR 显示是否使用固定地球太阳光谱白点。在场景合成后全局应用，保留大气颜色变化，不估计当前光源，也不改动光照、曝光或影像。
    *
    * @memberof SceneGISEnvironmentEffects.prototype
    * @type {boolean}
@@ -931,7 +918,7 @@ Object.defineProperties(SceneGISEnvironmentEffects.prototype, {
     },
   },
   /**
-   * Whether the atmosphere and enabled clouds are ready for the current depth mode.
+   * 大气和已启用云是否适配当前深度模式并已就绪。
    * @memberof SceneGISEnvironmentEffects.prototype
    * @type {boolean}
    * @readonly
@@ -955,7 +942,7 @@ Object.defineProperties(SceneGISEnvironmentEffects.prototype, {
     },
   },
   /**
-   * Gets or sets whether advanced environment effects are active.
+   * 获取或设置高级环境效果是否启用。
    *
    * @memberof SceneGISEnvironmentEffects.prototype
    * @type {boolean}
@@ -983,7 +970,7 @@ Object.defineProperties(SceneGISEnvironmentEffects.prototype, {
     },
   },
   /**
-   * Gets or sets whether the physical atmosphere, Sun and stars background are shown.
+   * 获取或设置是否显示物理大气、太阳和星空背景。
    *
    * @memberof SceneGISEnvironmentEffects.prototype
    * @type {boolean}
@@ -1014,7 +1001,7 @@ Object.defineProperties(SceneGISEnvironmentEffects.prototype, {
     },
   },
   /**
-   * Gets or sets whether opaque geometry receives aerial perspective.
+   * 获取或设置不透明几何是否接收空气透视。
    *
    * @memberof SceneGISEnvironmentEffects.prototype
    * @type {boolean}
@@ -1045,9 +1032,7 @@ Object.defineProperties(SceneGISEnvironmentEffects.prototype, {
     },
   },
   /**
-   * Gets or sets the scene-linear scale applied to physical background radiance.
-   * Also calibrates aerial, cloud and height-fog source radiance. The default appearance scale is
-   * 2.5 in both worlds, independently of display HDR or exposure.
+   * 获取或设置物理背景辐亮度的场景线性倍率，同时标定空气透视、云和高度雾源辐亮度。两世界默认外观倍率均为 2.5，独立于显示 HDR 和曝光。
    *
    * @memberof SceneGISEnvironmentEffects.prototype
    * @type {number}
@@ -1067,8 +1052,7 @@ Object.defineProperties(SceneGISEnvironmentEffects.prototype, {
     },
   },
   /**
-   * Gets or sets the aerial radiance scale, relative to
-   * {@link SceneGISEnvironmentEffects#backgroundRadianceScale} on both worlds.
+   * 获取或设置空气透视辐亮度倍率，两世界均相对于 {@link SceneGISEnvironmentEffects#backgroundRadianceScale}。
    *
    * @memberof SceneGISEnvironmentEffects.prototype
    * @type {number}
@@ -1087,19 +1071,12 @@ Object.defineProperties(SceneGISEnvironmentEffects.prototype, {
     },
   },
   /**
-   * Gets or sets the finite-receiver atmospheric lookup distance scale.
-   * Values below one reduce both aerial scattering and attenuation. Zero
-   * removes them; one preserves the physical lookup distance. Initial vacuum
-   * is excluded. Sky background, lighting, cloud density, height fog and actual
-   * geometry/depth are unchanged. This is an artistic endpoint remapping.
-   * Globe supports finite values in [0, 8] and defaults to 0.5.
-   * Planar requires 1.0 and defaults to 1.0.
-   * Updates reuse existing GPU resources and request a render.
+   * 获取或设置有限接收点的大气查询距离倍率。小于 1 同时减少空气散射和衰减；0 移除二者，1 保留物理查询距离，不包含初始真空段。天空背景、光照、云密度、高度雾及真实几何/深度不变。这是艺术化端点映射。球面支持 [0,8] 内有限值，默认 0.5；平面仅允许 1.0，默认 1.0。更新复用已有 GPU 资源并请求渲染。
    *
    * @memberof SceneGISEnvironmentEffects.prototype
    * @type {number}
    * @default 0.5 (Globe), 1.0 (Planar)
-   * @exception {DeveloperError} The value is outside the supported range or non-unit in Planar mode.
+   * @exception {DeveloperError} 数值超出支持范围，或平面模式下不为 1。
    */
   aerialPerspectiveDistanceScale: {
     get: function () {
@@ -1111,9 +1088,7 @@ Object.defineProperties(SceneGISEnvironmentEffects.prototype, {
     },
   },
   /**
-   * Gets or sets the Globe, Planar surface and physical model direct and diffuse sky radiance scale.
-   * The default appearance scale is 1.2 in both worlds. This artistic adjustment
-   * is independent of display HDR and exposure.
+   * 获取或设置球面、平面地表与物理模型的直射和天空漫反射辐亮度倍率。两世界默认外观倍率均为 1.2，此艺术调整独立于显示 HDR 与曝光。
    *
    * @memberof SceneGISEnvironmentEffects.prototype
    * @type {number}
@@ -1128,18 +1103,12 @@ Object.defineProperties(SceneGISEnvironmentEffects.prototype, {
     },
   },
   /**
-   * Gets or sets the artistic night ambient irradiance floor multiplier.
-   * Physical sky irradiance smoothly replaces this blue-gray hemisphere as
-   * daylight increases. Zero disables the fill; one preserves the reference
-   * deep-night level. Materials, normals and ambient occlusion still apply.
-   * This does not change the sky background, Moon light, or exposure.
-   * Globe and Planar support finite values in [0, 8].
-   * Updates reuse existing GPU resources and request a render.
+   * 获取或设置艺术化夜间环境辐照度下限倍率。随日光增强，物理天空辐照度平滑替代蓝灰半球补光。0 关闭补光，1 保留参考深夜亮度；材质、法线和环境遮蔽仍生效。不改变天空背景、月光或曝光。球面和平面支持 [0,8] 内有限值，更新复用已有 GPU 资源并请求渲染。
    *
    * @memberof SceneGISEnvironmentEffects.prototype
    * @type {number}
    * @default 1.0
-   * @exception {DeveloperError} The value is outside the supported range.
+   * @exception {DeveloperError} 数值超出支持范围。
    */
   nightAmbientIntensity: {
     get: function () {
@@ -1151,7 +1120,7 @@ Object.defineProperties(SceneGISEnvironmentEffects.prototype, {
     },
   },
   /**
-   * Gets or sets whether exponential height fog is shown.
+   * 获取或设置是否显示指数高度雾。
    *
    * @memberof SceneGISEnvironmentEffects.prototype
    * @type {boolean}
@@ -1180,7 +1149,7 @@ Object.defineProperties(SceneGISEnvironmentEffects.prototype, {
     },
   },
   /**
-   * Gets or sets the base-height extinction coefficient per meter.
+   * 获取或设置基准高度的每米消光系数。
    *
    * @memberof SceneGISEnvironmentEffects.prototype
    * @type {number}
@@ -1194,7 +1163,7 @@ Object.defineProperties(SceneGISEnvironmentEffects.prototype, {
     },
   },
   /**
-   * Gets or sets the exponential height falloff per meter.
+   * 获取或设置每米指数高度衰减系数。
    *
    * @memberof SceneGISEnvironmentEffects.prototype
    * @type {number}
@@ -1208,7 +1177,7 @@ Object.defineProperties(SceneGISEnvironmentEffects.prototype, {
     },
   },
   /**
-   * Gets or sets the density reference height in meters.
+   * 获取或设置密度参考高度，单位为米。
    *
    * @memberof SceneGISEnvironmentEffects.prototype
    * @type {number}
@@ -1222,7 +1191,7 @@ Object.defineProperties(SceneGISEnvironmentEffects.prototype, {
     },
   },
   /**
-   * Gets or sets the distance in meters before fog starts along each ray.
+   * 获取或设置每条射线上雾开始前的距离，单位为米。
    *
    * @memberof SceneGISEnvironmentEffects.prototype
    * @type {number}
@@ -1236,7 +1205,7 @@ Object.defineProperties(SceneGISEnvironmentEffects.prototype, {
     },
   },
   /**
-   * Gets or sets the maximum fog opacity.
+   * 获取或设置雾的最大不透明度。
    *
    * @memberof SceneGISEnvironmentEffects.prototype
    * @type {number}
@@ -1250,7 +1219,7 @@ Object.defineProperties(SceneGISEnvironmentEffects.prototype, {
     },
   },
   /**
-   * Gets or sets the scene-linear ambient fog inscattering scale.
+   * 获取或设置场景线性的环境雾入散射倍率。
    *
    * @memberof SceneGISEnvironmentEffects.prototype
    * @type {number}
@@ -1264,7 +1233,7 @@ Object.defineProperties(SceneGISEnvironmentEffects.prototype, {
     },
   },
   /**
-   * Gets or sets the scene-linear directional fog inscattering scale.
+   * 获取或设置场景线性的方向性雾入散射倍率。
    *
    * @memberof SceneGISEnvironmentEffects.prototype
    * @type {number}
@@ -1284,7 +1253,7 @@ Object.defineProperties(SceneGISEnvironmentEffects.prototype, {
     },
   },
   /**
-   * Gets or sets the directional fog lobe exponent.
+   * 获取或设置雾的方向性瓣指数。
    *
    * @memberof SceneGISEnvironmentEffects.prototype
    * @type {number}
@@ -1304,7 +1273,7 @@ Object.defineProperties(SceneGISEnvironmentEffects.prototype, {
     },
   },
   /**
-   * Gets or sets whether the single-deck volumetric cloud core is shown.
+   * 获取或设置是否显示单云层体积云主体。
    *
    * @memberof SceneGISEnvironmentEffects.prototype
    * @type {boolean}
@@ -1333,8 +1302,7 @@ Object.defineProperties(SceneGISEnvironmentEffects.prototype, {
     },
   },
   /**
-   * Gets or sets whether volumetric clouds attenuate direct light on supported surfaces and models.
-   * Also supplies distant cloud self-shadowing; local cloud self-shadowing remains active when disabled.
+   * 获取或设置体积云是否衰减支持表面和模型的直射光，并提供远处云自阴影；禁用时局部云自阴影仍生效。
    *
    * @memberof SceneGISEnvironmentEffects.prototype
    * @type {boolean}
@@ -1348,7 +1316,7 @@ Object.defineProperties(SceneGISEnvironmentEffects.prototype, {
     },
   },
   /**
-   * Gets or sets whether cloud shadow length modulates atmosphere and fog directional inscatter.
+   * 获取或设置是否使用云影长度调制大气和雾的方向性入散射。
    *
    * @memberof SceneGISEnvironmentEffects.prototype
    * @type {boolean}
@@ -1362,7 +1330,7 @@ Object.defineProperties(SceneGISEnvironmentEffects.prototype, {
     },
   },
   /**
-   * Gets or sets whether scene-wide HDR bloom is shown.
+   * 获取或设置是否显示全场景 HDR 泛光。
    *
    * @memberof SceneGISEnvironmentEffects.prototype
    * @type {boolean}
@@ -1376,7 +1344,7 @@ Object.defineProperties(SceneGISEnvironmentEffects.prototype, {
     },
   },
   /**
-   * Gets or sets whether Sun-gated lens artifacts are shown.
+   * 获取或设置是否显示受太阳可见性控制的镜头光学效果。
    *
    * @memberof SceneGISEnvironmentEffects.prototype
    * @type {boolean}
@@ -1426,7 +1394,7 @@ Object.defineProperties(SceneGISEnvironmentEffects.prototype, {
     },
   },
   /**
-   * Gets or sets the exact low, medium, or high cloud budget.
+   * 获取或设置精确取值 low、medium 或 high 的云预算。
    *
    * @memberof SceneGISEnvironmentEffects.prototype
    * @type {string}
@@ -1449,7 +1417,7 @@ Object.defineProperties(SceneGISEnvironmentEffects.prototype, {
     },
   },
   /**
-   * Gets or sets the immutable cloud morphology preset.
+   * 获取或设置不可变云形态预设。
    *
    * @memberof SceneGISEnvironmentEffects.prototype
    * @type {string}
@@ -1472,7 +1440,7 @@ Object.defineProperties(SceneGISEnvironmentEffects.prototype, {
     },
   },
   /**
-   * Gets or sets the global cloud coverage bias.
+   * 获取或设置全局云覆盖偏置。
    *
    * @memberof SceneGISEnvironmentEffects.prototype
    * @type {number}
@@ -1486,8 +1454,7 @@ Object.defineProperties(SceneGISEnvironmentEffects.prototype, {
     },
   },
   /**
-   * Gets or sets the dimensionless authored-material density multiplier.
-   * The material supplies extinction coefficients per meter in both worlds.
+   * 获取或设置设定材质密度的无量纲倍率，两世界材质均提供以每米计的消光系数。
    *
    * @memberof SceneGISEnvironmentEffects.prototype
    * @type {number}
@@ -1501,7 +1468,7 @@ Object.defineProperties(SceneGISEnvironmentEffects.prototype, {
     },
   },
   /**
-   * Gets or sets cloud base height in meters above the world reference ground.
+   * 获取或设置相对世界参考地面的云底高度，单位为米。
    *
    * @memberof SceneGISEnvironmentEffects.prototype
    * @type {number}
@@ -1515,7 +1482,7 @@ Object.defineProperties(SceneGISEnvironmentEffects.prototype, {
     },
   },
   /**
-   * Gets or sets cloud deck thickness in meters.
+   * 获取或设置云层厚度，单位为米。
    *
    * @memberof SceneGISEnvironmentEffects.prototype
    * @type {number}
@@ -1529,7 +1496,7 @@ Object.defineProperties(SceneGISEnvironmentEffects.prototype, {
     },
   },
   /**
-   * Gets or sets clockwise wind direction from local North in radians.
+   * 获取或设置从局部北向顺时针计算的风向，单位为弧度。
    *
    * @memberof SceneGISEnvironmentEffects.prototype
    * @type {number}
@@ -1543,7 +1510,7 @@ Object.defineProperties(SceneGISEnvironmentEffects.prototype, {
     },
   },
   /**
-   * Gets or sets cloud advection speed in meters per second.
+   * 获取或设置云平流速度，单位为米/秒。
    *
    * @memberof SceneGISEnvironmentEffects.prototype
    * @type {number}
@@ -1557,7 +1524,7 @@ Object.defineProperties(SceneGISEnvironmentEffects.prototype, {
     },
   },
   /**
-   * Gets or sets caller-owned cloud simulation time in seconds.
+   * 获取或设置调用方控制的云模拟时间，单位为秒。
    *
    * @memberof SceneGISEnvironmentEffects.prototype
    * @type {number}
@@ -1571,8 +1538,7 @@ Object.defineProperties(SceneGISEnvironmentEffects.prototype, {
     },
   },
   /**
-   * Gets or sets cloud radiance calibration relative to
-   * backgroundRadianceScale in both worlds.
+   * 获取或设置两世界中相对 backgroundRadianceScale 的云辐亮度标定。
    *
    * @memberof SceneGISEnvironmentEffects.prototype
    * @type {number}
@@ -1586,7 +1552,7 @@ Object.defineProperties(SceneGISEnvironmentEffects.prototype, {
     },
   },
   /**
-   * Gets or sets whether readable Globe or Planar Moonlight participates in the primary light.
+   * 获取或设置球面或平面的可读月光是否参与主光源。
    *
    * @memberof SceneGISEnvironmentEffects.prototype
    * @type {boolean}
@@ -1600,12 +1566,7 @@ Object.defineProperties(SceneGISEnvironmentEffects.prototype, {
     },
   },
   /**
-   * Whether procedural stars appear in the perspective atmosphere background,
-   * attenuated by atmosphere, fog and clouds. Stars fade in during twilight.
-   * Globe and astronomical Planar worlds use simulation time; manual Planar
-   * lighting uses fixed world axes. Positions are synthetic, not a star catalog.
-   * Requires showAtmosphere. No star images are downloaded. Warm toggles reuse
-   * the deterministic star buffer. Orthographic views have no angular star field.
+   * 是否在透视大气背景中显示经大气、雾和云衰减的程序星空。星光在暮光时渐显。球面和星历平面世界使用模拟时间，手动平面光照使用固定世界轴。星位是合成位置，不是星表。要求 showAtmosphere，不下载星空图像。热切换复用确定性星光缓冲，正交视图没有角度星空。
    *
    * @memberof SceneGISEnvironmentEffects.prototype
    * @type {boolean}
@@ -1620,8 +1581,7 @@ Object.defineProperties(SceneGISEnvironmentEffects.prototype, {
     },
   },
   /**
-   * Scene-linear star brightness in the inclusive range 0–64, independent of
-   * backgroundRadianceScale. This affects the visible background, not lighting.
+   * 场景线性星光亮度，闭区间 0–64，独立于 backgroundRadianceScale；仅改变可见背景，不改变光照。
    *
    * @memberof SceneGISEnvironmentEffects.prototype
    * @type {number}
@@ -1636,7 +1596,7 @@ Object.defineProperties(SceneGISEnvironmentEffects.prototype, {
     },
   },
   /**
-   * Gets or sets the readable full-phase Globe or Planar Moonlight scale.
+   * 获取或设置球面或平面满月可读月光倍率。
    *
    * @memberof SceneGISEnvironmentEffects.prototype
    * @type {number}
@@ -1743,51 +1703,51 @@ SceneGISEnvironmentEffects.prototype._validateRenderFrame = function () {
 };
 
 /**
- * Initialization options for SceneGISEnvironmentEffects.
+ * SceneGISEnvironmentEffects 的初始化选项。
  *
  * @typedef {object} SceneGISEnvironmentEffects.ConstructorOptions
- * @property {string} mode Exact "globe" or "planar" geometry mode.
- * @property {SceneGISPlanarWorld} [world] Required only for planar mode.
- * @property {boolean} [enabled=false] Whether advanced effects are active.
- * @property {boolean} [showAtmosphere=true] Whether to render atmosphere and Sun background.
- * @property {boolean} [whiteBalance=true] Whether final HDR/LDR display uses the fixed Earth solar-spectrum white point.
- * @property {boolean} [showAerialPerspective=true] Whether to composite opaque geometry aerial perspective.
- * @property {boolean} [showHeightFog=true] Whether to apply single-layer exponential height fog.
- * @property {boolean} [showClouds=true] Whether to render the single-deck volumetric cloud core.
- * @property {boolean} [showCloudShadows=true] Whether volumetric clouds attenuate direct light on supported surfaces and models and supply distant cloud self-shadowing.
- * @property {boolean} [showCrepuscularRays=true] Whether cloud shadow length modulates atmosphere and fog directional inscatter.
- * @property {boolean} [showBloom=true] Whether scene-wide HDR bloom is shown.
- * @property {boolean} [showLensFlare=true] Whether Sun-gated lens artifacts are shown.
- * @property {boolean} [showMoonlight=true] Whether readable Globe or Planar Moonlight participates in the primary directional light.
- * @property {boolean} [showStars=true] Whether the physical atmosphere background includes stars, attenuated by atmosphere, fog and clouds.
- * @property {number} [starIntensity=1.0] Scene-linear star brightness in the inclusive range 0–64, independent of backgroundRadianceScale.
- * @property {string} [cloudQuality] Exact "low", "medium", or "high" cloud budget. Defaults to "high" on Globe and "medium" on Planar.
- * @property {string} [cloudPreset="cumulus"] Exact "cumulus", "stratus", "cirrus", or "mixed" immutable morphology preset.
- * @property {number} [cloudCoverage] Global cloud coverage bias in the inclusive range 0–1. Defaults to 0.3 on Globe and 0.45 on Planar.
- * @property {number} [cloudDensity] Dimensionless authored-material density multiplier in the inclusive range 0–64. Defaults to 1.0 in both worlds.
- * @property {number} [cloudBaseHeight] Cloud base height in meters in the inclusive range -500–20000. Defaults to 750.0 on Globe and 1500.0 on Planar.
- * @property {number} [cloudThickness=4500.0] Cloud deck thickness in meters in the inclusive range 0–20000.
- * @property {number} [cloudWindDirection=0.785398] Clockwise wind direction from local North in radians, in the inclusive range -pi–pi.
- * @property {number} [cloudWindSpeed=20.0] Cloud advection speed in meters per second in the inclusive range 0–200.
- * @property {number} [cloudTime=0.0] Caller-owned simulation seconds in the inclusive range -1000000000–1000000000.
- * @property {number} [cloudRadianceScale] Cloud radiance calibration relative to backgroundRadianceScale in the inclusive range 0–64. Defaults to 1.0 in both worlds.
- * @property {number} [backgroundRadianceScale=2.5] Scene-linear scale applied to background, aerial, cloud and height-fog source radiance, in the inclusive range 0–64. The default appearance scale is the same in both worlds.
- * @property {number} [aerialRadianceScale=1.0] Aerial radiance scale in the inclusive range 0–64, relative to backgroundRadianceScale on both worlds.
- * @property {number} [aerialPerspectiveDistanceScale] Finite-receiver atmospheric lookup distance scale in [0, 8]. Defaults to 0.5 on Globe and 1.0 on Planar; Planar requires one. Scales scattering and attenuation together, excluding initial vacuum. Does not change background sky, lighting or geometry.
- * @property {number} [surfaceRadianceScale=1.2] Globe, Planar surface and physical model direct/diffuse sky radiance scale, in the inclusive range 0–64. Independent of display HDR and exposure.
- * @property {number} [nightAmbientIntensity=1.0] Artistic blue-gray night ambient floor multiplier in [0, 8]; zero disables it. Blends according to physical sky irradiance, before material/ambient occlusion. Globe and Planar. Independent of Moon light and exposure.
- * @property {number} [bloomThreshold=10.0] HDR bloom threshold in the inclusive RGBA16F range 0–65504.
- * @property {number} [bloomIntensity=0.005] Scene-wide bloom intensity in the inclusive range 0–64.
- * @property {number} [lensFlareIntensity=5.0] Sun-gated lens artifact intensity in the inclusive range 0–64.
- * @property {number} [moonlightIntensity=1.0] Readable full-phase Globe or Planar Moonlight scale in the inclusive range 0–64.
- * @property {number} [heightFogDensity=0.000008] Base-height extinction coefficient per meter, in the inclusive range 0–0.001.
- * @property {number} [heightFogHeightFalloff=0.0002] Exponential height falloff per meter, in the inclusive range 0–0.001.
- * @property {number} [heightFogBaseHeight=0.0] Density reference height in meters, in the inclusive range -60000–60000.
- * @property {number} [heightFogStartDistance=250.0] Fog-free ray distance in meters, in the inclusive range 0–300000.
- * @property {number} [heightFogMaximumOpacity=0.7] Maximum fog opacity, in the inclusive range 0–1.
- * @property {number} [heightFogInscatteringScale=0.35] Ambient fog source scale, in the inclusive range 0–64.
- * @property {number} [heightFogDirectionalInscatteringScale=0.15] Directional fog source scale, in the inclusive range 0–64.
- * @property {number} [heightFogDirectionalInscatteringExponent=8.0] Directional lobe exponent, in the inclusive range 1–128.
+ * @property {string} mode 几何模式，精确取值为 "globe" 或 "planar"。
+ * @property {SceneGISPlanarWorld} [world] 仅平面模式需要。
+ * @property {boolean} [enabled=false] 高级效果是否启用。
+ * @property {boolean} [showAtmosphere=true] 是否绘制大气和太阳背景。
+ * @property {boolean} [whiteBalance=true] 最终 HDR/LDR 显示是否使用固定的地球太阳光谱白点。
+ * @property {boolean} [showAerialPerspective=true] 是否为不透明几何合成空气透视。
+ * @property {boolean} [showHeightFog=true] 是否应用单层指数高度雾。
+ * @property {boolean} [showClouds=true] 是否绘制单云层体积云主体。
+ * @property {boolean} [showCloudShadows=true] 体积云是否衰减支持表面和模型的直射光，并提供远处云自阴影。
+ * @property {boolean} [showCrepuscularRays=true] 是否使用云影长度调制大气与雾的方向性入散射。
+ * @property {boolean} [showBloom=true] 是否显示全场景 HDR 泛光。
+ * @property {boolean} [showLensFlare=true] 是否显示受太阳可见性控制的镜头光学效果。
+ * @property {boolean} [showMoonlight=true] 球面或平面的可读月光是否参与主方向光。
+ * @property {boolean} [showStars=true] 物理大气背景是否包含经大气、雾和云衰减的星空。
+ * @property {number} [starIntensity=1.0] 场景线性星光亮度，闭区间 0–64，独立于 backgroundRadianceScale。
+ * @property {string} [cloudQuality] 云计算预算，精确取值为 "low"、"medium" 或 "high"；球面默认 "high"，平面默认 "medium"。
+ * @property {string} [cloudPreset="cumulus"] 不可变云形态预设，精确取值为 "cumulus"、"stratus"、"cirrus" 或 "mixed"。
+ * @property {number} [cloudCoverage] 全局云覆盖偏置，闭区间 0–1；球面默认 0.3，平面默认 0.45。
+ * @property {number} [cloudDensity] 设定材质密度的无量纲倍率，闭区间 0–64，两世界默认均为 1.0。
+ * @property {number} [cloudBaseHeight] 云底高度，单位为米，闭区间 -500–20000；球面默认 750.0，平面默认 1500.0。
+ * @property {number} [cloudThickness=4500.0] 云层厚度，单位为米，闭区间 0–20000。
+ * @property {number} [cloudWindDirection=0.785398] 从局部北向顺时针计算的风向，单位为弧度，闭区间 -pi–pi。
+ * @property {number} [cloudWindSpeed=20.0] 云平流速度，单位为米/秒，闭区间 0–200。
+ * @property {number} [cloudTime=0.0] 调用方控制的模拟秒数，闭区间 -1000000000–1000000000。
+ * @property {number} [cloudRadianceScale] 相对 backgroundRadianceScale 的云辐亮度标定，闭区间 0–64，两世界默认均为 1.0。
+ * @property {number} [backgroundRadianceScale=2.5] 作用于背景、空气透视、云和高度雾源辐亮度的场景线性倍率，闭区间 0–64；两世界使用相同默认外观倍率。
+ * @property {number} [aerialRadianceScale=1.0] 相对 backgroundRadianceScale 的空气透视辐亮度倍率，两世界范围均为闭区间 0–64。
+ * @property {number} [aerialPerspectiveDistanceScale] 有限接收点的大气查询距离倍率，范围 [0,8]。球面默认 0.5，平面默认且仅允许 1.0。同步缩放散射与衰减，不包含初始真空段，不改变背景天空、光照或几何。
+ * @property {number} [surfaceRadianceScale=1.2] 球面、平面地表和物理模型的直射及天空漫反射辐亮度倍率，闭区间 0–64，独立于显示 HDR 与曝光。
+ * @property {number} [nightAmbientIntensity=1.0] 艺术化蓝灰夜间环境光下限倍率，范围 [0,8]，0 关闭。按物理天空辐照度混合，位于材质和环境遮蔽之前，支持球面和平面，独立于月光及曝光。
+ * @property {number} [bloomThreshold=10.0] HDR 泛光阈值，范围为 RGBA16F 闭区间 0–65504。
+ * @property {number} [bloomIntensity=0.005] 全场景泛光强度，闭区间 0–64。
+ * @property {number} [lensFlareIntensity=5.0] 受太阳可见性控制的镜头光学效果强度，闭区间 0–64。
+ * @property {number} [moonlightIntensity=1.0] 球面或平面满月可读月光的倍率，闭区间 0–64。
+ * @property {number} [heightFogDensity=0.000008] 基准高度的消光系数，单位为每米，闭区间 0–0.001。
+ * @property {number} [heightFogHeightFalloff=0.0002] 指数高度衰减系数，单位为每米，闭区间 0–0.001。
+ * @property {number} [heightFogBaseHeight=0.0] 密度参考高度，单位为米，闭区间 -60000–60000。
+ * @property {number} [heightFogStartDistance=250.0] 射线的无雾起始距离，单位为米，闭区间 0–300000。
+ * @property {number} [heightFogMaximumOpacity=0.7] 雾的最大不透明度，闭区间 0–1。
+ * @property {number} [heightFogInscatteringScale=0.35] 环境雾源倍率，闭区间 0–64。
+ * @property {number} [heightFogDirectionalInscatteringScale=0.15] 方向性雾源倍率，闭区间 0–64。
+ * @property {number} [heightFogDirectionalInscatteringExponent=8.0] 方向性瓣指数，闭区间 1–128。
  */
 
 export default SceneGISEnvironmentEffects;

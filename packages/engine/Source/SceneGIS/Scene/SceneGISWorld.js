@@ -3,13 +3,10 @@
 import DeveloperError from "../../Core/DeveloperError.js";
 
 /**
- * Defines the lifecycle contract for the primary world owned by a {@link Scene}.
- * Implementations are selected when the scene is constructed and are structurally
- * compatible with this interface. This type is not intended to be instantiated
- * directly.
+ * 定义 {@link Scene} 所有的主世界生命周期契约。实现在场景构造时选择，并与此接口保持结构兼容。此类型不应直接实例化。
  *
  * @interface
- * @exception {DeveloperError} This interface must not be instantiated directly.
+ * @exception {DeveloperError} 此接口不能直接实例化。
  */
 class SceneGISWorld {
   constructor() {
@@ -17,14 +14,14 @@ class SceneGISWorld {
   }
 
   /**
-   * Gets or sets whether the world is shown.
+   * 获取或设置是否显示世界。
    *
    * @type {boolean}
    */
   show;
 
   /**
-   * Gets whether the tiles required for the current view are loaded.
+   * 获取当前视图必需瓦片是否已加载。
    *
    * @type {boolean}
    * @readonly
@@ -32,9 +29,9 @@ class SceneGISWorld {
   tilesLoaded;
 
   /**
-   * Updates pass-invariant world state before rendering begins.
+   * 渲染开始前更新与通道无关的世界状态。
    *
-   * @param {object} frameState The state for the current frame.
+   * @param {object} frameState 当前帧状态。
    * @returns {void}
    */
   update(frameState) {
@@ -42,9 +39,9 @@ class SceneGISWorld {
   }
 
   /**
-   * Prepares the world at the beginning of a rendered frame.
+   * 渲染帧开始时准备世界。
    *
-   * @param {object} frameState The state for the current frame.
+   * @param {object} frameState 当前帧状态。
    * @returns {void}
    */
   beginFrame(frameState) {
@@ -52,9 +49,9 @@ class SceneGISWorld {
   }
 
   /**
-   * Adds the world's rendering commands for the current frame.
+   * 添加此世界当前帧的渲染命令。
    *
-   * @param {object} frameState The state for the current frame.
+   * @param {object} frameState 当前帧状态。
    * @returns {void}
    */
   render(frameState) {
@@ -62,10 +59,10 @@ class SceneGISWorld {
   }
 
   /**
-   * Renders world-owned background environment content before ordinary geometry.
+   * 在普通几何之前绘制 World 所有的背景环境内容。
    *
-   * @param {object} frameState The state for the current frame.
-   * @param {object} passState The active render pass state.
+   * @param {object} frameState 当前帧状态。
+   * @param {object} passState 当前渲染通道状态。
    * @returns {void}
    */
   renderEnvironment(frameState, passState) {
@@ -73,9 +70,9 @@ class SceneGISWorld {
   }
 
   /**
-   * Completes the world's work at the end of a rendered frame.
+   * 渲染帧结束时完成世界工作。
    *
-   * @param {object} frameState The state for the current frame.
+   * @param {object} frameState 当前帧状态。
    * @returns {void}
    */
   endFrame(frameState) {
@@ -83,9 +80,9 @@ class SceneGISWorld {
   }
 
   /**
-   * Returns true if this object was destroyed; otherwise, false.
+   * 此对象已销毁时返回 true，否则返回 false。
    *
-   * @returns {boolean} True if this object was destroyed; otherwise, false.
+   * @returns {boolean} 此对象已销毁时为 true，否则为 false。
    *
    * @see SceneGISWorld#destroy
    */
@@ -94,7 +91,7 @@ class SceneGISWorld {
   }
 
   /**
-   * Destroys resources owned by this world.
+   * 销毁此世界所有的资源。
    *
    * @returns {void}
    *

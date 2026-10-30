@@ -17,17 +17,17 @@ function cloneCenter(value) {
 }
 
 /**
- * An immutable CPU description of a planar cylinder aligned with local Z.
+ * 沿局部 Z 轴对齐的平面圆柱不可变 CPU 几何描述。
  *
  * @alias SceneGISPlanarCylinderGeometry
  * @constructor
- * @param {object} options Object with the following properties:
- * @param {Cartesian3} options.center The center in planar world coordinates.
- * @param {number} options.length The positive length in meters.
- * @param {number} options.topRadius The nonnegative top radius in meters.
- * @param {number} options.bottomRadius The nonnegative bottom radius in meters.
- * @param {number} [options.slices=128] The safe-integer perimeter subdivision count.
- * @exception {DeveloperError} Any option is invalid.
+ * @param {object} options 包含以下属性的对象：
+ * @param {Cartesian3} options.center 平面世界坐标中的中心。
+ * @param {number} options.length 为正的长度，单位为米。
+ * @param {number} options.topRadius 非负顶面半径，单位为米。
+ * @param {number} options.bottomRadius 非负底面半径，单位为米。
+ * @param {number} [options.slices=128] 安全整数范围内的周向细分数。
+ * @exception {DeveloperError} 任一选项无效。
  */
 function SceneGISPlanarCylinderGeometry(options) {
   options = options ?? {};

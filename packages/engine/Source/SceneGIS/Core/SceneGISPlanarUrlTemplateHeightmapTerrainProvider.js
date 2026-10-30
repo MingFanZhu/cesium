@@ -205,29 +205,27 @@ function decodeLercResult(provider, result, level) {
 }
 
 /**
- * Provides boundary-sampled planar heightmaps from a coordinate-agnostic URL
- * template containing any of <code>{x}</code>, <code>{y}</code>,
- * <code>{z}</code>, and <code>{s}</code>.
+ * 通过与坐标系无关的 URL 模板提供含边界采样的平面高度图，模板可包含 <code>{x}</code>、<code>{y}</code>、<code>{z}</code> 和 <code>{s}</code>。
  *
  * @alias SceneGISPlanarUrlTemplateHeightmapTerrainProvider
  * @constructor
  *
- * @param {object} options Object with the following properties:
- * @param {string|Resource} options.url The URL template or Resource.
- * @param {SceneGISPlanarTilingScheme} options.tilingScheme The caller-supplied canonical planar tiling scheme.
- * @param {number} options.maximumLevel The maximum available level.
- * @param {number} options.heightmapWidth The number of west-to-east samples.
- * @param {number} options.heightmapHeight The number of north-to-south samples.
- * @param {number} options.minimumHeight The global minimum height in meters.
- * @param {number} options.maximumHeight The global maximum height in meters.
- * @param {"image"|"lerc"} options.format The encoded tile format.
- * @param {"xyz"|"tms"} [options.urlScheme="xyz"] The URL row scheme.
- * @param {string|string[]} [options.subdomains="abc"] The URL subdomains.
- * @param {Credit|string} [options.credit] The provider attribution.
- * @param {SceneGISPlanarHeightmapTerrainData.Structure} [options.structure] The required RGBA height structure for image format.
- * @param {number} [options.levelZeroMaximumGeometricError] The Level-0 maximum geometric error in meters.
+ * @param {object} options 包含以下属性的对象：
+ * @param {string|Resource} options.url URL 模板或 Resource。
+ * @param {SceneGISPlanarTilingScheme} options.tilingScheme 调用方提供的标准平面切片方案。
+ * @param {number} options.maximumLevel 可用最高层级。
+ * @param {number} options.heightmapWidth 从西到东的样本数。
+ * @param {number} options.heightmapHeight 从北到南的样本数。
+ * @param {number} options.minimumHeight 全局最低高度，单位为米。
+ * @param {number} options.maximumHeight 全局最高高度，单位为米。
+ * @param {"image"|"lerc"} options.format 瓦片编码格式。
+ * @param {"xyz"|"tms"} [options.urlScheme="xyz"] URL 行号方案。
+ * @param {string|string[]} [options.subdomains="abc"] URL 子域。
+ * @param {Credit|string} [options.credit] 提供者署名。
+ * @param {SceneGISPlanarHeightmapTerrainData.Structure} [options.structure] 图像格式必需的 RGBA 高度结构。
+ * @param {number} [options.levelZeroMaximumGeometricError] 零级最大几何误差，单位为米。
  *
- * @exception {DeveloperError} The URL, tiling scheme, levels, dimensions, height range, format, subdomains, credit, structure, or geometric error are invalid.
+ * @exception {DeveloperError} URL、切片方案、层级、尺寸、高度范围、格式、子域、署名、结构或几何误差无效。
  */
 function SceneGISPlanarUrlTemplateHeightmapTerrainProvider(options) {
   options = options ?? Frozen.EMPTY_OBJECT;
@@ -321,7 +319,7 @@ Object.defineProperties(
   SceneGISPlanarUrlTemplateHeightmapTerrainProvider.prototype,
   {
     /**
-     * Gets the caller-supplied canonical planar tiling scheme.
+     * 获取调用方提供的标准平面切片方案。
      * @memberof SceneGISPlanarUrlTemplateHeightmapTerrainProvider.prototype
      * @type {SceneGISPlanarTilingScheme}
      * @readonly
@@ -332,7 +330,7 @@ Object.defineProperties(
       },
     },
     /**
-     * Gets the global minimum height in meters.
+     * 获取全局最低高度，单位为米。
      * @memberof SceneGISPlanarUrlTemplateHeightmapTerrainProvider.prototype
      * @type {number}
      * @readonly
@@ -343,7 +341,7 @@ Object.defineProperties(
       },
     },
     /**
-     * Gets the global maximum height in meters.
+     * 获取全局最高高度，单位为米。
      * @memberof SceneGISPlanarUrlTemplateHeightmapTerrainProvider.prototype
      * @type {number}
      * @readonly
@@ -354,7 +352,7 @@ Object.defineProperties(
       },
     },
     /**
-     * Gets the maximum available level.
+     * 获取可用最高层级。
      * @memberof SceneGISPlanarUrlTemplateHeightmapTerrainProvider.prototype
      * @type {number}
      * @readonly
@@ -365,7 +363,7 @@ Object.defineProperties(
       },
     },
     /**
-     * Gets the event observed by the planar terrain runtime.
+     * 获取平面地形运行时观测的事件。
      * @memberof SceneGISPlanarUrlTemplateHeightmapTerrainProvider.prototype
      * @type {Event<function(TileProviderError):void>}
      * @readonly
@@ -376,7 +374,7 @@ Object.defineProperties(
       },
     },
     /**
-     * Gets the provider attribution.
+     * 获取提供者署名。
      * @memberof SceneGISPlanarUrlTemplateHeightmapTerrainProvider.prototype
      * @type {Credit|undefined}
      * @readonly
@@ -387,7 +385,7 @@ Object.defineProperties(
       },
     },
     /**
-     * Gets the owned URL template.
+     * 获取自有 URL 模板。
      * @memberof SceneGISPlanarUrlTemplateHeightmapTerrainProvider.prototype
      * @type {string}
      * @readonly
@@ -398,7 +396,7 @@ Object.defineProperties(
       },
     },
     /**
-     * Gets the URL row scheme.
+     * 获取 URL 行号方案。
      * @memberof SceneGISPlanarUrlTemplateHeightmapTerrainProvider.prototype
      * @type {"xyz"|"tms"}
      * @readonly
@@ -409,7 +407,7 @@ Object.defineProperties(
       },
     },
     /**
-     * Gets the west-to-east sample count.
+     * 获取从西到东的样本数。
      * @memberof SceneGISPlanarUrlTemplateHeightmapTerrainProvider.prototype
      * @type {number}
      * @readonly
@@ -420,7 +418,7 @@ Object.defineProperties(
       },
     },
     /**
-     * Gets the north-to-south sample count.
+     * 获取从北到南的样本数。
      * @memberof SceneGISPlanarUrlTemplateHeightmapTerrainProvider.prototype
      * @type {number}
      * @readonly
@@ -431,7 +429,7 @@ Object.defineProperties(
       },
     },
     /**
-     * Gets the encoded tile format.
+     * 获取瓦片编码格式。
      * @memberof SceneGISPlanarUrlTemplateHeightmapTerrainProvider.prototype
      * @type {"image"|"lerc"}
      * @readonly
@@ -445,10 +443,10 @@ Object.defineProperties(
 );
 
 /**
- * Gets the maximum geometric error for a level.
- * @param {number} level The tile level.
- * @returns {number} The maximum geometric error in meters.
- * @exception {DeveloperError} The level is outside the provider range.
+ * 获取某层的最大几何误差。
+ * @param {number} level 瓦片层级。
+ * @returns {number} 最大几何误差，单位为米。
+ * @exception {DeveloperError} 层级超出提供者范围。
  */
 SceneGISPlanarUrlTemplateHeightmapTerrainProvider.prototype.getLevelMaximumGeometricError =
   function (level) {
@@ -457,13 +455,13 @@ SceneGISPlanarUrlTemplateHeightmapTerrainProvider.prototype.getLevelMaximumGeome
   };
 
 /**
- * Requests terrain data for a canonical northwest-origin XYZ tile address.
- * @param {number} x The tile X coordinate.
- * @param {number} y The tile Y coordinate.
- * @param {number} level The tile level.
- * @param {Request} request The request used for cancellation and scheduling.
- * @returns {Promise<SceneGISPlanarTerrainData>|undefined} The terrain promise, or undefined when deferred.
- * @exception {DeveloperError} The tile address or level is invalid.
+ * 按标准西北原点 XYZ 地址请求地形数据。
+ * @param {number} x 瓦片 X 坐标。
+ * @param {number} y 瓦片 Y 坐标。
+ * @param {number} level 瓦片层级。
+ * @param {Request} request 用于取消与调度的请求。
+ * @returns {Promise<SceneGISPlanarTerrainData>|undefined} 地形 Promise；延后时为 undefined。
+ * @exception {DeveloperError} 瓦片地址或层级无效。
  */
 SceneGISPlanarUrlTemplateHeightmapTerrainProvider.prototype.requestTileGeometry =
   function (x, y, level, request) {
@@ -512,12 +510,12 @@ SceneGISPlanarUrlTemplateHeightmapTerrainProvider.prototype.requestTileGeometry 
   };
 
 /**
- * Returns full-pyramid availability for a canonical tile address.
- * @param {number} x The tile X coordinate.
- * @param {number} y The tile Y coordinate.
- * @param {number} level The tile level.
- * @returns {boolean} Whether the provider exposes the tile.
- * @exception {DeveloperError} The tile address or level is invalid.
+ * 返回标准瓦片地址在完整金字塔中的可用性。
+ * @param {number} x 瓦片 X 坐标。
+ * @param {number} y 瓦片 Y 坐标。
+ * @param {number} level 瓦片层级。
+ * @returns {boolean} 提供者是否暴露此瓦片。
+ * @exception {DeveloperError} 瓦片地址或层级无效。
  */
 SceneGISPlanarUrlTemplateHeightmapTerrainProvider.prototype.getTileDataAvailable =
   function (x, y, level) {
@@ -526,12 +524,12 @@ SceneGISPlanarUrlTemplateHeightmapTerrainProvider.prototype.getTileDataAvailable
   };
 
 /**
- * This full-pyramid provider has no availability metadata to load.
- * @param {number} x The tile X coordinate.
- * @param {number} y The tile Y coordinate.
- * @param {number} level The tile level.
- * @returns {undefined} Always undefined.
- * @exception {DeveloperError} The tile address or level is invalid.
+ * 此完整金字塔提供者没有需要加载的可用性元数据。
+ * @param {number} x 瓦片 X 坐标。
+ * @param {number} y 瓦片 Y 坐标。
+ * @param {number} level 瓦片层级。
+ * @returns {undefined} 始终为 undefined。
+ * @exception {DeveloperError} 瓦片地址或层级无效。
  */
 SceneGISPlanarUrlTemplateHeightmapTerrainProvider.prototype.loadTileDataAvailability =
   function (x, y, level) {

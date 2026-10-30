@@ -195,12 +195,6 @@
       "text": "根据以度为单位的经度和纬度创建 Cartographic 实例，结果对象中的角度以弧度表示。"
     },
     {
-      "id": "VERSION",
-      "field": "description",
-      "sourceHash": "sha256:d61928cf82203885babc2e3fe4729ce7227251d46235dd9e6a3762f1edd7d9b3",
-      "text": "此发行包的引擎版本字符串。"
-    },
-    {
       "id": "Scene",
       "field": "params/options.canvas/description",
       "sourceHash": "sha256:0fdba2355190692712ad92a1ebaa2d13316f7bc0bf71fbf14e89c6a8185a8b44",

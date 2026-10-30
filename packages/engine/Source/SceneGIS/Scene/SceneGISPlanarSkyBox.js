@@ -65,19 +65,17 @@ function validateSources(sources) {
 }
 
 /**
- * A caller-owned fixed-axis cube-map sky box for a planar SceneGIS world.
- * Face directions are positiveX east, positiveY north, and positiveZ up.
- * Sources must already be loaded and are immutable after construction.
+ * 调用方所有的平面世界固定轴立方体天空盒。各面方向为 positiveX 向东、positiveY 向北、positiveZ 向上。源必须预先加载，构造后不可变。
  *
  * @alias SceneGISPlanarSkyBox
  * @constructor
  *
- * @param {object} options Object with the following properties:
- * @param {object} options.sources Six same-type, identically sized square, preloaded, non-URL cube-map faces.
- * @param {Credit|string} [options.credit] Credit displayed while the sky box is rendered.
+ * @param {object} options 包含以下属性的对象：
+ * @param {object} options.sources 六个同类型、相同正方形尺寸、已预加载且非 URL 的立方体贴图面。
+ * @param {Credit|string} [options.credit] 天空盒绘制时显示的署名。
  *
- * @exception {DeveloperError} Six same-type, identically sized square, preloaded non-URL faces are not supplied.
- * @exception {DeveloperError} options.credit is not a Credit or string.
+ * @exception {DeveloperError} 未提供六个同类型、相同正方形尺寸、已预加载且非 URL 的面。
+ * @exception {DeveloperError} options.credit 不是 Credit 或字符串。
  */
 function SceneGISPlanarSkyBox(options) {
   options = options ?? Frozen.EMPTY_OBJECT;
@@ -107,7 +105,7 @@ function SceneGISPlanarSkyBox(options) {
 
 Object.defineProperties(SceneGISPlanarSkyBox.prototype, {
   /**
-   * Gets the immutable preloaded face collection.
+   * 获取不可变的预加载面集合。
    *
    * @memberof SceneGISPlanarSkyBox.prototype
    * @type {object}
@@ -120,7 +118,7 @@ Object.defineProperties(SceneGISPlanarSkyBox.prototype, {
   },
 
   /**
-   * Gets the optional credit.
+   * 获取可选署名。
    *
    * @memberof SceneGISPlanarSkyBox.prototype
    * @type {Credit|undefined}
@@ -142,16 +140,16 @@ SceneGISPlanarSkyBox.prototype._update = function (frameState, useHdr) {
 };
 
 /**
- * Returns true if this object was destroyed; otherwise, false.
+ * 此对象已销毁时返回 true，否则返回 false。
  *
- * @returns {boolean} True if this object was destroyed; otherwise, false.
+ * @returns {boolean} 此对象已销毁时为 true，否则为 false。
  */
 SceneGISPlanarSkyBox.prototype.isDestroyed = function () {
   return false;
 };
 
 /**
- * Destroys the cube-map resources owned by this sky box.
+ * 销毁此天空盒自有的立方体贴图资源。
  *
  * @returns {undefined}
  */

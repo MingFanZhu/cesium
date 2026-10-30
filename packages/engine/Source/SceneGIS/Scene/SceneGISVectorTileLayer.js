@@ -831,36 +831,29 @@ function publishOrder(layer) {
 }
 
 /**
- * Renders independently decoded vector tiles on a SceneGIS planar world or WGS84 Globe.
- * Add this object to scene.primitives. The collection then owns its lifetime.
- * Construction does not request data or allocate GPU resources. Scene, World,
- * style, and source overrides are borrowed. Rule setters derive a layer-owned immutable style;
- * source configuration remains fixed. GPU refresh is asynchronous and preserves source caches.
- * Uses a flat fast path without a terrainProvider, and direct ground rendering
- * with a provider. Ground rendering requires WebGL2, float and depth textures.
- * Published resident ancestors or descendants cover pending desired tiles
- * within the cache budget. A cache without spare slots may evict that coverage.
+ * 将独立解码的矢量瓦片绘制到 SceneGIS 平面世界或 WGS84 Globe。加入 scene.primitives 后由集合拥有生命周期。构造时不请求数据或分配 GPU 资源。Scene、World、style 和 source 覆盖配置均为借用。规则 setter 生成图层所有的不可变样式，源配置保持固定。GPU 异步刷新并保留源缓存。
+ * 无 terrainProvider 时使用平坦快速路径，有 provider 时直接贴地绘制。贴地路径要求 WebGL2、浮点纹理和深度纹理。在缓存预算内，已发布驻留的祖先或后代瓦片可覆盖等待中的目标瓦片；缓存无空余槽位时可能逐出该覆盖。
  * @alias SceneGISVectorTileLayer
  * @constructor
- * @experimental This API is experimental and subject to change.
- * @param {object} options Layer configuration.
- * @param {Scene} options.scene The live SCENE3D Scene with a planar world or WGS84 Globe.
- * @param {SceneGISPlanarTilingScheme} [options.tilingScheme] Vector source matrix. Planar uses the World identity; Globe defaults to the EPSG:3857 single-root matrix.
- * @param {SceneGISVectorTileStyle|object} options.style A V1 style within the flat V3B1 rendered profile.
- * @param {Object.<string, SceneGISVectorTileSource>} [options.sources] Source overrides using the world's scheme.
- * @param {number} [options.tileCacheSize=64] Maximum resident tiles per source, including visible tiles.
- * @param {number} [options.maximumVisibleTiles=32] Maximum desired tiles per source; coarsen LOD within availability to fit.
- * @param {number} [options.maximumRequests=8] Maximum in-flight requests for this layer.
- * @param {number} [options.maximumUploadsPerFrame=2] Maximum tile batch publications per normal frame.
- * @param {number} [options.maximumUploadTimePerFrame=4] Soft CPU milliseconds for tile GPU publication per normal frame.
- * @param {number} [options.maximumUploadBytesPerFrame=4194304] Soft tile buffer upload byte budget per normal frame. One indivisible batch may exceed it.
- * @param {number} [options.maximumSymbolCandidates=2048] Maximum point-symbol candidates per view, selected by style priority.
- * @param {number} [options.maximumGlyphRanges=64] Maximum cached 256-code-point glyph pages per symbol cohort. An atomic replacement may additionally retain the published cohort's pages until commit, at most twice this limit.
- * @param {number} [options.maximumSymbolRequests=4] Maximum concurrent glyph/sprite resource jobs.
- * @param {number} [options.opacity=1] Per-feature opacity multiplier in [0, 1]; not composited group opacity.
- * @param {boolean} [options.show=true] Whether the layer is shown.
- * @param {boolean} [options.allowPicking=true] Whether feature pick resources are created.
- * @exception {DeveloperError} Scene, style, sources, or budget configuration is invalid.
+ * @experimental 此 API 为实验性，可能发生变化。
+ * @param {object} options 图层配置。
+ * @param {Scene} options.scene 具有平面世界或 WGS84 Globe 的存活 SCENE3D Scene。
+ * @param {SceneGISPlanarTilingScheme} [options.tilingScheme] 矢量源矩阵。平面使用 World 对象身份，Globe 默认使用 EPSG:3857 单根矩阵。
+ * @param {SceneGISVectorTileStyle|object} options.style 平坦 V3B1 渲染范围内的 V1 样式。
+ * @param {Object.<string, SceneGISVectorTileSource>} [options.sources] 使用世界切片方案的源覆盖配置。
+ * @param {number} [options.tileCacheSize=64] 每源最多驻留瓦片数，包含可见瓦片。
+ * @param {number} [options.maximumVisibleTiles=32] 每个源最多的目标瓦片数，在可用范围内降低 LOD 以适应预算。
+ * @param {number} [options.maximumRequests=8] 此图层最多进行中的请求数。
+ * @param {number} [options.maximumUploadsPerFrame=2] 每正常帧最多发布的瓦片批次数。
+ * @param {number} [options.maximumUploadTimePerFrame=4] 每正常帧用于瓦片 GPU 发布的 CPU 软毫秒预算。
+ * @param {number} [options.maximumUploadBytesPerFrame=4194304] 每正常帧的瓦片缓冲上传软字节预算，单个不可拆批次可能超出预算。
+ * @param {number} [options.maximumSymbolCandidates=2048] 每视图最多的点符号候选数，按样式优先级选择。
+ * @param {number} [options.maximumGlyphRanges=64] 每个符号代际最多缓存的 256 码位字形页数。原子替换在提交前可额外保留已发布代际的页，最多为此限制的两倍。
+ * @param {number} [options.maximumSymbolRequests=4] 最多并行的字形/精灵资源任务数。
+ * @param {number} [options.opacity=1] 逐要素不透明度倍率，范围 [0,1]，不是组合后的组不透明度。
+ * @param {boolean} [options.show=true] 是否显示图层。
+ * @param {boolean} [options.allowPicking=true] 是否创建要素拾取资源。
+ * @exception {DeveloperError} Scene、样式、源或预算配置无效。
  */
 function SceneGISVectorTileLayer(options) {
   options = options ?? {};
@@ -1027,8 +1020,7 @@ function validateOpacity(value) {
 
 Object.defineProperties(SceneGISVectorTileLayer.prototype, {
   /**
-   * Multiplies each feature's style opacity, including backgrounds and symbols.
-   * This is not composited group opacity. Zero skips drawing and picking while retaining data.
+   * 乘每个要素的样式不透明度，包含背景和符号，不是组合后的组不透明度。0 跳过绘制和拾取，但保留数据。
    * @memberof SceneGISVectorTileLayer.prototype
    * @type {number}
    * @default 1
@@ -1046,7 +1038,7 @@ Object.defineProperties(SceneGISVectorTileLayer.prototype, {
     },
   },
   /**
-   * Gets or sets visibility. Hidden layers retain data and cancel requests on normal update.
+   * 获取或设置显隐。隐藏图层保留数据，在正常更新时取消请求。
    * @memberof SceneGISVectorTileLayer.prototype
    * @type {boolean}
    * @default true
@@ -1066,7 +1058,7 @@ Object.defineProperties(SceneGISVectorTileLayer.prototype, {
     },
   },
   /**
-   * The borrowed Scene.
+   * 借用的 Scene。
    * @memberof SceneGISVectorTileLayer.prototype
    * @type {Scene}
    * @readonly
@@ -1077,8 +1069,7 @@ Object.defineProperties(SceneGISVectorTileLayer.prototype, {
     },
   },
   /**
-   * The current immutable style frontend. Successful rule setters replace this reference;
-   * previously returned or caller-supplied styles remain unchanged.
+   * 当前不可变样式前端。成功规则 setter 会替换此引用，之前返回或调用方提供的样式不变。
    * @memberof SceneGISVectorTileLayer.prototype
    * @type {SceneGISVectorTileStyle}
    * @readonly
@@ -1089,7 +1080,7 @@ Object.defineProperties(SceneGISVectorTileLayer.prototype, {
     },
   },
   /**
-   * Whether a successful normal update has occurred.
+   * 是否已发生一次成功正常更新。
    * @memberof SceneGISVectorTileLayer.prototype
    * @type {boolean}
    * @readonly
@@ -1100,7 +1091,7 @@ Object.defineProperties(SceneGISVectorTileLayer.prototype, {
     },
   },
   /**
-   * Whether the current view has no pending work; terminal failures are reported through errorEvent.
+   * 当前视图是否没有待处理工作；最终失败通过 errorEvent 报告。
    * @memberof SceneGISVectorTileLayer.prototype
    * @type {boolean}
    * @readonly
@@ -1118,7 +1109,7 @@ Object.defineProperties(SceneGISVectorTileLayer.prototype, {
     },
   },
   /**
-   * Reports failures during normal update. Tile errors contain source/tile; symbol errors contain resource instead.
+   * 报告正常更新中的失败。瓦片错误包含 source/tile，符号错误改为包含 resource。
    * @memberof SceneGISVectorTileLayer.prototype
    * @type {Event}
    * @readonly
@@ -1129,7 +1120,7 @@ Object.defineProperties(SceneGISVectorTileLayer.prototype, {
     },
   },
   /**
-   * Returns a fresh diagnostic snapshot; tile counts are not byte budgets.
+   * 返回新的诊断快照，瓦片数量不是字节预算。
    * @memberof SceneGISVectorTileLayer.prototype
    * @type {object}
    * @readonly
@@ -1321,8 +1312,8 @@ SceneGISVectorTileLayer.prototype.update = function (frameState) {
 };
 
 /**
- * Tests whether this layer has been destroyed.
- * @returns {boolean} Whether destroyed.
+ * 测试此图层是否已销毁。
+ * @returns {boolean} 是否已销毁。
  */
 SceneGISVectorTileLayer.prototype.isDestroyed = function () {
   return false;
@@ -1376,17 +1367,11 @@ function setRule(layer, layerId, scope, name, value) {
 }
 
 /**
- * Changes one existing style layer's paint rule. Input is copied and validated synchronously.
- * Null removes the explicit rule and restores the profile default; undefined is invalid.
- * Getters reflect a successful change immediately. Normal renders asynchronously prepare affected
- * batches or symbol candidates using cached MVT; old content remains until replacement is ready.
- * Hidden layers retain edits until shown. Sources, opacity and feature/global state are preserved.
- * No GPU work occurs in this method. Asynchronous failures use errorEvent; tilesLoaded describes
- * current-view pending work, not success. Unchanged rules do not schedule work.
- * @param {string} styleLayerId ID inside the Style document, not a resource-tree ID.
- * @param {string} name Supported paint property for this style layer's type.
- * @param {*} value A finite JSON literal/expression, or null to remove the rule.
- * @exception {DeveloperError} The layer, property or value is invalid, or this object was destroyed.
+ * 修改已有样式层的一条绘制规则。输入复制并同步验证，null 移除显式规则并恢复预设默认，undefined 无效。getter 立即反映成功修改。正常渲染从缓存 MVT 异步准备受影响批次或符号候选，替换就绪前保留旧内容。隐藏图层保留修改，直至显示。保留源、不透明度及要素/全局状态。本方法不执行 GPU 工作。异步失败使用 errorEvent；tilesLoaded 表示当前视图的待处理工作，不表示成功。规则不变时不调度工作。
+ * @param {string} styleLayerId Style 文档内的 ID，不是资源树 ID。
+ * @param {string} name 此样式层类型支持的绘制属性。
+ * @param {*} value 有限 JSON 字面量或表达式，null 移除规则。
+ * @exception {DeveloperError} 图层、属性或数值无效，或此对象已销毁。
  */
 SceneGISVectorTileLayer.prototype.setPaintProperty = function (
   styleLayerId,
@@ -1397,11 +1382,11 @@ SceneGISVectorTileLayer.prototype.setPaintProperty = function (
 };
 
 /**
- * Gets an independent copy of the explicit, unevaluated paint rule.
- * @param {string} styleLayerId ID inside the Style document.
- * @param {string} name Supported paint property.
- * @returns {*} JSON rule, or undefined when not explicitly set (including after removal).
- * @exception {DeveloperError} The layer/property is invalid or this object was destroyed.
+ * 获取显式、未求值绘制规则的独立副本。
+ * @param {string} styleLayerId Style 文档内的 ID。
+ * @param {string} name 支持的绘制属性。
+ * @returns {*} JSON 规则；未显式设置时为 undefined，包含移除之后。
+ * @exception {DeveloperError} 图层或属性无效，或此对象已销毁。
  */
 SceneGISVectorTileLayer.prototype.getPaintProperty = function (
   styleLayerId,
@@ -1411,13 +1396,11 @@ SceneGISVectorTileLayer.prototype.getPaintProperty = function (
 };
 
 /**
- * Changes an existing style layer's layout rule, including visibility.
- * Uses the validation, null-removal, immediate getter and asynchronous refresh semantics of setPaintProperty.
- * Symbol edits re-prepare affected candidates and placement, retaining reusable glyph/sprite/shaping resources.
- * @param {string} styleLayerId ID inside the Style document.
- * @param {string} name Supported layout property for this style layer's type.
- * @param {*} value A finite JSON literal/expression, or null to restore the default.
- * @exception {DeveloperError} The layer, property or value is invalid, or this object was destroyed.
+ * 修改已有样式层的布局规则，包含 visibility。沿用 setPaintProperty 的验证、null 移除、立即 getter 与异步刷新语义。符号修改重新准备受影响候选及布局，保留可复用字形、精灵和文字整形资源。
+ * @param {string} styleLayerId Style 文档内的 ID。
+ * @param {string} name 此样式层类型支持的布局属性。
+ * @param {*} value 有限 JSON 字面量或表达式，null 恢复默认。
+ * @exception {DeveloperError} 图层、属性或数值无效，或此对象已销毁。
  */
 SceneGISVectorTileLayer.prototype.setLayoutProperty = function (
   styleLayerId,
@@ -1428,11 +1411,11 @@ SceneGISVectorTileLayer.prototype.setLayoutProperty = function (
 };
 
 /**
- * Gets an independent copy of the explicit, unevaluated layout rule.
- * @param {string} styleLayerId ID inside the Style document.
- * @param {string} name Supported layout property.
- * @returns {*} JSON rule, or undefined when not explicitly set.
- * @exception {DeveloperError} The layer/property is invalid or this object was destroyed.
+ * 获取显式、未求值布局规则的独立副本。
+ * @param {string} styleLayerId Style 文档内的 ID。
+ * @param {string} name 支持的布局属性。
+ * @returns {*} JSON 规则；未显式设置时为 undefined。
+ * @exception {DeveloperError} 图层或属性无效，或此对象已销毁。
  */
 SceneGISVectorTileLayer.prototype.getLayoutProperty = function (
   styleLayerId,
@@ -1442,82 +1425,77 @@ SceneGISVectorTileLayer.prototype.getLayoutProperty = function (
 };
 
 /**
- * Changes a non-background style layer's filter. Null removes filtering; undefined is invalid.
- * Validates synchronously, then refreshes affected batches/candidates asynchronously from cached MVT.
- * Getters reflect the accepted filter immediately; in-flight older results cannot overwrite it.
- * @param {string} styleLayerId ID inside the Style document.
- * @param {Array|null} filter A supported expression/legacy filter, or null to remove it.
- * @exception {DeveloperError} The layer/filter is invalid or this object was destroyed.
+ * 修改非背景样式层的过滤器。null 移除过滤，undefined 无效。同步验证后，从缓存 MVT 异步刷新受影响批次和候选。getter 立即反映已接受过滤器，进行中的旧结果不能覆盖它。
+ * @param {string} styleLayerId Style 文档内的 ID。
+ * @param {Array|null} filter 支持的表达式或旧式过滤器，null 用于移除。
+ * @exception {DeveloperError} 图层或过滤器无效，或此对象已销毁。
  */
 SceneGISVectorTileLayer.prototype.setFilter = function (styleLayerId, filter) {
   setRule(this, styleLayerId, "filter", undefined, filter);
 };
 
 /**
- * Gets an independent copy of the explicit filter.
- * @param {string} styleLayerId Non-background ID inside the Style document.
- * @returns {Array|undefined} The filter, or undefined when not set.
- * @exception {DeveloperError} The layer is invalid or this object was destroyed.
+ * 获取显式过滤器的独立副本。
+ * @param {string} styleLayerId Style 文档中的非背景 ID。
+ * @returns {Array|undefined} 过滤器，未设置时为 undefined。
+ * @exception {DeveloperError} 图层无效或此对象已销毁。
  */
 SceneGISVectorTileLayer.prototype.getFilter = function (styleLayerId) {
   return this._style._getRule(styleLayerId, "filter");
 };
 
 /**
- * Returns an independent complete Style v8 JSON snapshot of all accepted rules, including pending edits.
- * Does not wait for GPU refresh. Includes original name/metadata/source/resource definitions and omits
- * temporary feature/global state, Layer show/opacity, and source override objects.
- * @returns {object} A mutable JSON snapshot; modifying it does not change this Layer.
- * @exception {DeveloperError} This object was destroyed.
+ * 返回已接受全部规则的独立完整 Style v8 JSON 快照，包含待处理修改，不等待 GPU 刷新。保留原始 name、metadata、source 和 resource 定义，省略临时要素/全局状态、Layer show/opacity 及源覆盖对象。
+ * @returns {object} 可修改 JSON 快照，修改它不会改变此 Layer。
+ * @exception {DeveloperError} 此对象已销毁。
  */
 SceneGISVectorTileLayer.prototype.getStyle = function () {
   return this._style._getSnapshot();
 };
 
 /**
- * Identifies an MVT feature across tile and level boundaries.
+ * 跨瓦片与层级边界标识 MVT 要素。
  * @typedef {object} SceneGISVectorTileLayer.FeatureIdentifier
- * @property {string} source Style source ID.
- * @property {string} sourceLayer MVT source-layer name.
- * @property {string|number} id Feature ID; numeric IDs must be safe integers.
+ * @property {string} source 样式源 ID。
+ * @property {string} sourceLayer MVT 源图层名称。
+ * @property {string|number} id 要素 ID，数值 ID 须为安全整数。
  */
 
 /**
- * Merges JSON properties into a feature's paint state. Applies on subsequent normal renders without requesting MVT again.
- * State persists across tile eviction until removed or the layer is destroyed. Features sharing source/sourceLayer/id share state.
- * @param {SceneGISVectorTileLayer.FeatureIdentifier} target Feature identity.
- * @param {object} state Finite JSON properties; input is copied.
- * @exception {DeveloperError} The identity or JSON data is invalid.
+ * 将 JSON 属性合并到要素绘制状态，后续正常渲染生效，不重新请求 MVT。状态跨瓦片逐出保留，直至显式移除或图层销毁。source/sourceLayer/id 相同的要素共享状态。
+ * @param {SceneGISVectorTileLayer.FeatureIdentifier} target 要素标识。
+ * @param {object} state 有限 JSON 属性，输入会复制。
+ * @exception {DeveloperError} 标识或 JSON 数据无效。
  */
 SceneGISVectorTileLayer.prototype.setFeatureState = function (target, state) {
   this._states.set(target, state, false);
 };
 
 /**
- * Returns a copy of a feature's state, or an empty object.
- * @param {SceneGISVectorTileLayer.FeatureIdentifier} target Feature identity.
- * @returns {object} Independent JSON snapshot.
- * @exception {DeveloperError} The identity is invalid.
+ * 返回要素状态副本，没有状态时返回空对象。
+ * @param {SceneGISVectorTileLayer.FeatureIdentifier} target 要素标识。
+ * @returns {object} 独立 JSON 快照。
+ * @exception {DeveloperError} 标识无效。
  */
 SceneGISVectorTileLayer.prototype.getFeatureState = function (target) {
   return State.copy(this._states.get(target));
 };
 
 /**
- * Deletes one state property, or all state for the specified feature.
- * @param {SceneGISVectorTileLayer.FeatureIdentifier} target Feature identity.
- * @param {string} [key] Property to remove; omit to remove the feature state.
- * @exception {DeveloperError} The identity or key is invalid.
+ * 删除指定要素的一个状态属性或全部状态。
+ * @param {SceneGISVectorTileLayer.FeatureIdentifier} target 要素标识。
+ * @param {string} [key] 要移除的属性；省略则移除全部要素状态。
+ * @exception {DeveloperError} 标识或键无效。
  */
 SceneGISVectorTileLayer.prototype.removeFeatureState = function (target, key) {
   this._states.set(target, undefined, true, key);
 };
 
 /**
- * Sets a layer-scoped global paint property. Null deletes the property; expressions should supply their own defaults.
- * @param {string} key Property name.
- * @param {*} value Finite JSON value, or null to remove the property.
- * @exception {DeveloperError} The key or JSON value is invalid.
+ * 设置图层级全局绘制属性，null 删除属性；表达式须自行提供默认值。
+ * @param {string} key 属性名称。
+ * @param {*} value 有限 JSON 值，null 用于移除属性。
+ * @exception {DeveloperError} 键或 JSON 值无效。
  */
 SceneGISVectorTileLayer.prototype.setGlobalStateProperty = function (
   key,
@@ -1527,16 +1505,15 @@ SceneGISVectorTileLayer.prototype.setGlobalStateProperty = function (
 };
 
 /**
- * Returns a copy of all layer-scoped global paint state.
- * @returns {object} Independent JSON snapshot.
+ * 返回全部图层级全局绘制状态的副本。
+ * @returns {object} 独立 JSON 快照。
  */
 SceneGISVectorTileLayer.prototype.getGlobalState = function () {
   return State.copy(this._states.global);
 };
 
 /**
- * Cancels requests and destroys all owned batches. Borrowed Scene, World, style, and sources remain live.
- * After destruction only isDestroyed may be called.
+ * 取消请求并销毁全部自有批次，借用的 Scene、World、style 和 source 仍存活。销毁后仅可调用 isDestroyed。
  * @returns {undefined}
  */
 SceneGISVectorTileLayer.prototype.destroy = function () {

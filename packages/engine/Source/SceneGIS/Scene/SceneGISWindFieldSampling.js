@@ -2,24 +2,19 @@ import DeveloperError from "../../Core/DeveloperError.js";
 import shaderSource from "../../Shaders/SceneGIS/Wind/SceneGISWindSampling.js";
 
 /**
- * Public GPU consumer adapter for cell-centered wind atlases. Append shaderSource to a GLSL shader
- * and merge createUniformMap(field) into native sampler callbacks. Functions use simulation-local
- * meters: sceneGISWindInside, sceneGISWindSolid, sceneGISWindSample (vec4 velocity m/s + tracer).
- * Trilinear interpolation omits solid corners and renormalizes weights; samples inside solid or
- * outside domain return zero. This is a display sampler, not a conservative transport operator.
- * Resolve live field getters each draw. Never destroy borrowed textures; destroy consumers first.
+ * 格心风场图集的公开 GPU 消费适配器。将 shaderSource 追加到 GLSL 着色器，并将 createUniformMap(field) 合并到原生采样器回调。函数使用模拟局部米制坐标：sceneGISWindInside、sceneGISWindSolid、sceneGISWindSample（vec4，速度 m/s 与示踪量）。三线性插值忽略固体角点并重新归一化权重，固体内部或域外采样返回零。这是显示采样器，不是守恒输运算子。每次绘制须解析实时场 getter；不得销毁借用纹理，应先销毁消费者。
  * @namespace SceneGISWindFieldSampling
  */
 const SceneGISWindFieldSampling = {
   /**
-   * GLSL declarations and sampling functions, using the u_sgWind prefix.
+   * 使用 u_sgWind 前缀的 GLSL 声明和采样函数。
    * @type {string}
    * @readonly
    */
   shaderSource,
   /**
-   * @param {SceneGISWindSimulation.GpuField} field Ready borrowed GPU descriptor.
-   * @returns {object} Uniform callbacks; do not replace their texture ownership.
+   * @param {SceneGISWindSimulation.GpuField} field 已就绪的借用 GPU 描述对象。
+   * @returns {object} Uniform 回调，不改变其纹理所有权。
    */
   createUniformMap(field) {
     if (!field) {

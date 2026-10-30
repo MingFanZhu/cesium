@@ -154,42 +154,34 @@ function validateOptions(options) {
 }
 
 /**
- * Streams MCI4 segmented Gaussian products with budgeted CPU/GPU residency and
- * asynchronous per-instance sorting. Requires WebGL2 and HTTP Range support.
- * Source coordinates are metres. The effective transform is modelMatrix times
- * the artifact's localToFixed transform; both must be proper rigid transforms.
- * Use an ENU matrix on a globe or a Cartesian matrix in a planar world.
- * The primitive owns requests, Workers, presentation resources and GPU pages.
- * It renders captured appearance, without PBR relighting or per-splat picking.
- * Validated Pages use an independent IndexedDB cache by default. Set
- * usePersistentCache to false to disable it; maximumPersistentCacheBytes and
- * maximumPersistentCacheStagingBytes limit storage and CPU staging separately.
+ * 流式加载 MCI4 分段 Gaussian 产品，提供有预算的 CPU/GPU 驻留管理与逐实例异步排序。要求 WebGL2 和 HTTP Range 支持。源坐标单位为米，有效变换为 modelMatrix 乘以产品的 localToFixed，两者都必须是保向刚体变换。球面使用 ENU 矩阵，平面使用笛卡尔矩阵。
+ * 图元拥有请求、Worker、显示资源和 GPU 页。按采集外观绘制，不进行 PBR 重新受光或逐高斯点拾取。验证后的页默认使用独立 IndexedDB 缓存；usePersistentCache=false 可关闭，maximumPersistentCacheBytes 和 maximumPersistentCacheStagingBytes 分别限制持久存储与 CPU 暂存。
  *
  * @alias SceneGISGaussianSegmentedPrimitive
  * @constructor
- * @param {object} options Initialization options. Memory budgets are bytes.
- * @param {string|Resource} options.url URL of scene.mcl.json.
- * @param {number} options.maximumSelectedSplats Maximum visible splats.
- * @param {number} options.maximumCoverageSlots Maximum active coverage slots.
- * @param {number} options.maximumCpuBytes Total CPU residency budget.
- * @param {number} options.maximumGpuBytes Total GPU residency budget.
- * @param {number} options.maximumCpuPageBytes CPU page budget within the total.
- * @param {number} options.replacementCpuEscrowBytes CPU page replacement reserve.
- * @param {number} options.maximumGpuPageBytes GPU page budget within the total.
- * @param {number} options.replacementGpuEscrowBytes GPU page replacement reserve.
- * @param {number} options.maximumSortWorkingSetBytes Worker sort memory budget.
- * @param {Matrix4} [options.modelMatrix=Matrix4.IDENTITY] Placement transform.
- * @param {boolean} [options.show=true] Whether to draw the current content.
- * @param {Color} [options.color=Color.WHITE] Color multiplier.
- * @param {number} [options.falloff=1] Positive Gaussian alpha falloff multiplier.
- * @param {number} [options.refineErrorPixels=16] Refinement error threshold.
- * @param {number} [options.coarsenErrorPixels=12] Lower coarsening threshold.
- * @param {number} [options.minimumLeafLogicalLevel=1] Finest allowed leaf LOD, 0 or 1.
- * @param {boolean} [options.usePersistentCache=true] Cache validated pages in IndexedDB.
- * @param {number} [options.maximumPersistentCacheBytes=4294967296] Disk cache budget.
- * @param {number} [options.maximumPersistentCacheStagingBytes=67108864] Cache staging budget.
- * @param {boolean} [options.requestPersistentStorage=true] Request persistent browser storage.
- * @exception {DeveloperError} Required budgets or transform are invalid.
+ * @param {object} options 初始化选项，内存预算单位为字节。
+ * @param {string|Resource} options.url scene.mcl.json 的 URL。
+ * @param {number} options.maximumSelectedSplats 最大可见高斯点数。
+ * @param {number} options.maximumCoverageSlots 最大活动覆盖槽位数。
+ * @param {number} options.maximumCpuBytes CPU 总驻留预算。
+ * @param {number} options.maximumGpuBytes GPU 总驻留预算。
+ * @param {number} options.maximumCpuPageBytes 总预算中的 CPU 页预算。
+ * @param {number} options.replacementCpuEscrowBytes CPU 页替换预留量。
+ * @param {number} options.maximumGpuPageBytes 总预算中的 GPU 页预算。
+ * @param {number} options.replacementGpuEscrowBytes GPU 页替换预留量。
+ * @param {number} options.maximumSortWorkingSetBytes Worker 排序内存预算。
+ * @param {Matrix4} [options.modelMatrix=Matrix4.IDENTITY] 放置变换。
+ * @param {boolean} [options.show=true] 是否绘制当前内容。
+ * @param {Color} [options.color=Color.WHITE] 颜色倍率。
+ * @param {number} [options.falloff=1] 为正的 Gaussian alpha 衰减倍率。
+ * @param {number} [options.refineErrorPixels=16] 细化误差阈值。
+ * @param {number} [options.coarsenErrorPixels=12] 降低精度的下阈值。
+ * @param {number} [options.minimumLeafLogicalLevel=1] 允许的最精细叶级 LOD，取值 0 或 1。
+ * @param {boolean} [options.usePersistentCache=true] 是否在 IndexedDB 缓存已验证页。
+ * @param {number} [options.maximumPersistentCacheBytes=4294967296] 磁盘缓存预算。
+ * @param {number} [options.maximumPersistentCacheStagingBytes=67108864] 缓存暂存预算。
+ * @param {boolean} [options.requestPersistentStorage=true] 请求浏览器持久存储。
+ * @exception {DeveloperError} 必需预算或变换无效。
  * @see SceneGISGaussianSegmentedPrimitive#destroy
  */
 function SceneGISGaussianSegmentedPrimitive(options = {}) {
@@ -249,16 +241,15 @@ SceneGISGaussianSegmentedPrimitive.prototype.update = function (frameState) {
 };
 
 /**
- * Reports completion of resource cleanup, including pending Worker acknowledgements.
- * @returns {boolean} Whether cleanup is complete.
+ * 报告资源清理是否完成，包含等待中的 Worker 确认。
+ * @returns {boolean} 清理是否已完成。
  */
 SceneGISGaussianSegmentedPrimitive.prototype.isDestroyed = function () {
   return this._controller.destroyed;
 };
 
 /**
- * Requests destruction. Idempotent; an owned timer finishes pending Worker cleanup
- * after removal from a collection. No further rendering is required for cleanup.
+ * 请求销毁，操作幂等。移出集合后，自有计时器继续完成待处理 Worker 清理，无需继续渲染。
  * @returns {undefined}
  */
 SceneGISGaussianSegmentedPrimitive.prototype.destroy = function () {
@@ -275,7 +266,7 @@ SceneGISGaussianSegmentedPrimitive.prototype.destroy = function () {
 
 Object.defineProperties(SceneGISGaussianSegmentedPrimitive.prototype, {
   /**
-   * World-space bounds, available after the index is loaded. Do not mutate.
+   * 世界空间包围体，索引加载后可用，不得修改。
    * @memberof SceneGISGaussianSegmentedPrimitive.prototype
    * @type {BoundingSphere|undefined}
    * @readonly
@@ -303,7 +294,8 @@ Object.defineProperties(SceneGISGaussianSegmentedPrimitive.prototype, {
       return this._controller.state;
     },
   },
-  /** Whether a current presentation is ready. Camera movement may start more work.
+  /**
+   *  当前显示结果是否就绪，相机移动可能触发更多工作。
    * @memberof SceneGISGaussianSegmentedPrimitive.prototype
    * @type {boolean}
    * @readonly
@@ -313,7 +305,8 @@ Object.defineProperties(SceneGISGaussianSegmentedPrimitive.prototype, {
       return this._controller.ready;
     },
   },
-  /** Most recent terminal or cleanup error, if any.
+  /**
+   *  最近的终止或清理错误，没有时为空。
    * @memberof SceneGISGaussianSegmentedPrimitive.prototype
    * @type {Error|undefined}
    * @readonly
@@ -323,7 +316,8 @@ Object.defineProperties(SceneGISGaussianSegmentedPrimitive.prototype, {
       return this._controller.error ?? this._destroyCleanupError;
     },
   },
-  /** Snapshot of resource, streaming and sorting diagnostics. Creating it has CPU cost.
+  /**
+   *  资源、流式加载与排序诊断快照，创建快照具有 CPU 成本。
    * @memberof SceneGISGaussianSegmentedPrimitive.prototype
    * @type {object}
    * @readonly
@@ -333,7 +327,8 @@ Object.defineProperties(SceneGISGaussianSegmentedPrimitive.prototype, {
       return this._controller.statistics;
     },
   },
-  /** Draw visibility; hiding does not release the resident cache.
+  /**
+   *  绘制显隐，隐藏不会释放驻留缓存。
    * @memberof SceneGISGaussianSegmentedPrimitive.prototype
    * @type {boolean}
    */
@@ -345,8 +340,8 @@ Object.defineProperties(SceneGISGaussianSegmentedPrimitive.prototype, {
       this._show = !!value;
     },
   },
-  /** Placement. Assign a matrix to notify the streaming and sorting controllers.
-   * Do not modify the returned matrix in place.
+  /**
+   *  放置变换。通过赋值矩阵通知流式加载和排序控制器，不要原地修改返回的矩阵。
    * @memberof SceneGISGaussianSegmentedPrimitive.prototype
    * @type {Matrix4}
    */

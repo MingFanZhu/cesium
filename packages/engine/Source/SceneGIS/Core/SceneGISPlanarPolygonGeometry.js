@@ -155,19 +155,19 @@ function validateHoles(outer, holes) {
 }
 
 /**
- * A CPU-only immutable description of a simple planar polygon.
+ * 简单平面多边形的不可变纯 CPU 几何描述。
  *
  * @alias SceneGISPlanarPolygonGeometry
  * @constructor
- * @param {object} options Object with the following properties:
- * @param {Cartesian3[]} options.positions The outer top ring.
- * @param {Cartesian3[][]} [options.holes=[]] Direct top hole rings.
- * @param {Cartesian3[]} [options.bottomPositions] Flattened bottom vertices matching all normalized top rings.
- * @param {boolean} [options.closeTop=true] Whether to create the top cap.
- * @param {boolean} [options.closeBottom=true] Whether to create the bottom cap.
- * @param {number} [options.stRotation=0] Texture-coordinate rotation in radians about the normalized UV center.
- * @param {Cartesian3} [options.origin] The local origin.
- * @exception {DeveloperError} The rings, bottom positions, flags, or derived geometry are invalid.
+ * @param {object} options 包含以下属性的对象：
+ * @param {Cartesian3[]} options.positions 顶面外环。
+ * @param {Cartesian3[][]} [options.holes=[]] 顶面的直接孔洞环。
+ * @param {Cartesian3[]} [options.bottomPositions] 与全部归一化顶面环匹配、按顺序展开的底部顶点。
+ * @param {boolean} [options.closeTop=true] 是否创建顶盖。
+ * @param {boolean} [options.closeBottom=true] 是否创建底盖。
+ * @param {number} [options.stRotation=0] 围绕归一化 UV 中心的纹理坐标旋转，单位为弧度。
+ * @param {Cartesian3} [options.origin] 局部原点。
+ * @exception {DeveloperError} 环、底部位置、标志或派生几何无效。
  */
 function SceneGISPlanarPolygonGeometry(options) {
   options = options ?? {};
@@ -290,7 +290,7 @@ function SceneGISPlanarPolygonGeometry(options) {
 
 Object.defineProperties(SceneGISPlanarPolygonGeometry.prototype, {
   /**
-   * Gets the texture-coordinate rotation in radians.
+   * 获取纹理坐标旋转，单位为弧度。
    * @memberof SceneGISPlanarPolygonGeometry.prototype
    * @type {number}
    * @readonly
@@ -301,7 +301,7 @@ Object.defineProperties(SceneGISPlanarPolygonGeometry.prototype, {
     },
   },
   /**
-   * Gets a cloned snapshot of the normalized outer top ring.
+   * 获取归一化顶面外环的快照副本。
    *
    * @memberof SceneGISPlanarPolygonGeometry.prototype
    * @type {Cartesian3[]}
@@ -313,7 +313,7 @@ Object.defineProperties(SceneGISPlanarPolygonGeometry.prototype, {
     },
   },
   /**
-   * Gets cloned snapshots of the direct top hole rings.
+   * 获取顶面直接孔洞环的快照副本。
    *
    * @memberof SceneGISPlanarPolygonGeometry.prototype
    * @type {Cartesian3[][]}
@@ -325,7 +325,7 @@ Object.defineProperties(SceneGISPlanarPolygonGeometry.prototype, {
     },
   },
   /**
-   * Gets a clone of the local origin in planar world coordinates.
+   * 获取平面世界中局部原点的副本。
    *
    * @memberof SceneGISPlanarPolygonGeometry.prototype
    * @type {Cartesian3}
@@ -337,7 +337,7 @@ Object.defineProperties(SceneGISPlanarPolygonGeometry.prototype, {
     },
   },
   /**
-   * Gets whether the top cap is present.
+   * 获取是否存在顶盖。
    *
    * @memberof SceneGISPlanarPolygonGeometry.prototype
    * @type {boolean}
@@ -349,7 +349,7 @@ Object.defineProperties(SceneGISPlanarPolygonGeometry.prototype, {
     },
   },
   /**
-   * Gets whether the bottom cap is present.
+   * 获取是否存在底盖。
    *
    * @memberof SceneGISPlanarPolygonGeometry.prototype
    * @type {boolean}

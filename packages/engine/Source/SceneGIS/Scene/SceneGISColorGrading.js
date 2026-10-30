@@ -85,23 +85,19 @@ function numberProperty(name, minimum, maximum) {
 }
 
 /**
- * Optional linear HDR white balance and color grading in native tone mapping.
- * The Scene owns this controller; it adds no texture, framebuffer or render pass.
- * Grading follows exposure and precedes the native tone curve and output gamma.
- * Automatic metering, bloom generation, TAA history and scene lighting are unchanged.
- * Global white balance cannot correct multiple illuminants independently.
+ * 在原生色调映射中提供可选的线性 HDR 白平衡和调色。控制器归 Scene 所有，不增加纹理、帧缓冲或渲染通道。处理顺序为曝光之后、原生色调曲线和输出 gamma 之前。自动测光、泛光生成、TAA 历史与场景光照保持不变。全局白平衡不能分别校正多个光源。
  *
  * @alias SceneGISColorGrading
  * @constructor
- * @param {object} options Initialization options.
- * @param {Scene} options.scene A live Scene; only one controller may be attached.
- * @param {boolean} [options.enabled=false] Enable grading. Requires HDR.
- * @param {number} [options.temperature=6500] Daylight camera white temperature in kelvin, [4000, 25000]. Higher values warm the image; 6500 is neutral.
- * @param {number} [options.tint=0] Green (-1) to magenta (1) correction; 0 is neutral.
- * @param {number} [options.contrast=1] Luminance contrast about exposed linear middle gray 0.18, [0.5, 2].
- * @param {number} [options.saturation=1] Luminance-preserving saturation, [0, 2]; 0 is grayscale.
- * @throws {DeveloperError} Invalid options or another controller is attached.
- * @throws {RuntimeError} Grading is enabled without HDR.
+ * @param {object} options 初始化选项。
+ * @param {Scene} options.scene 存活的 Scene，仅可附加一个控制器。
+ * @param {boolean} [options.enabled=false] 启用调色，要求 HDR。
+ * @param {number} [options.temperature=6500] 日光相机白温，单位为开尔文，范围 [4000,25000]。值越高画面越暖，6500 为中性。
+ * @param {number} [options.tint=0] 从绿色 -1 到洋红色 1 的校正，0 为中性。
+ * @param {number} [options.contrast=1] 围绕曝光后的线性中灰 0.18 调整亮度对比度，范围 [0.5,2]。
+ * @param {number} [options.saturation=1] 保持亮度的饱和度，范围 [0,2]；0 为灰度。
+ * @throws {DeveloperError} 选项无效或已有其他控制器附加。
+ * @throws {RuntimeError} 未开启 HDR 却启用了调色。
  * @example
  * viewer.scene.highDynamicRange = true;
  * const grading = new Cesium.SceneGISColorGrading({
@@ -135,7 +131,7 @@ function SceneGISColorGrading(options) {
 
 Object.defineProperties(SceneGISColorGrading.prototype, {
   /**
-   * Whether grading is enabled. Requires HDR; disabling restores native rendering.
+   * 是否启用调色；要求 HDR，禁用会恢复原生渲染。
    * @memberof SceneGISColorGrading.prototype
    * @type {boolean}
    * @default false
@@ -156,28 +152,28 @@ Object.defineProperties(SceneGISColorGrading.prototype, {
     },
   },
   /**
-   * Daylight camera white temperature in kelvin, [4000, 25000]. Higher warms.
+   * 日光相机白温，单位为开尔文，范围 [4000,25000]，值越高画面越暖。
    * @memberof SceneGISColorGrading.prototype
    * @type {number}
    * @default 6500
    */
   temperature: numberProperty("temperature", 4000, 25000),
   /**
-   * Green (-1) to magenta (1) correction. Dimensionless, not calibrated camera tint.
+   * 从绿色 -1 到洋红色 1 的无量纲校正，不是经过标定的相机色调。
    * @memberof SceneGISColorGrading.prototype
    * @type {number}
    * @default 0
    */
   tint: numberProperty("tint", -1, 1),
   /**
-   * Luminance contrast about exposed linear middle gray 0.18, [0.5, 2].
+   * 围绕曝光后的线性中灰 0.18 调整亮度对比度，范围 [0.5,2]。
    * @memberof SceneGISColorGrading.prototype
    * @type {number}
    * @default 1
    */
   contrast: numberProperty("contrast", 0.5, 2),
   /**
-   * Luminance-preserving saturation, [0, 2]; zero produces grayscale.
+   * 保持亮度的饱和度，范围 [0,2]，0 产生灰度图。
    * @memberof SceneGISColorGrading.prototype
    * @type {number}
    * @default 1
@@ -185,13 +181,15 @@ Object.defineProperties(SceneGISColorGrading.prototype, {
   saturation: numberProperty("saturation", 0, 2),
 });
 
-/** @returns {boolean} Whether the controller has been destroyed. */
+/**
+ *  @returns {boolean} 控制器是否已销毁。
+ */
 SceneGISColorGrading.prototype.isDestroyed = function () {
   return false;
 };
 
 /**
- * Detach the controller. The next rendered frame restores the native tone shader.
+ * 解绑控制器，下一渲染帧恢复原生色调着色器。
  * @returns {undefined}
  */
 SceneGISColorGrading.prototype.destroy = function () {

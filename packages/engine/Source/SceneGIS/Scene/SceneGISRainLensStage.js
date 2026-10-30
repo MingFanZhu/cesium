@@ -13,30 +13,20 @@ function range(value, name, minimum, maximum) {
 }
 
 /**
- * Optional screen-space rain beads and falling water trails. Add this stage to
- * the supplied Scene's postProcessStages collection, which normally owns its
- * destruction. Uses one native color-only stage after tone mapping, before FXAA.
- * It does not change the camera, exposure, weather, depth or source alpha.
+ * 可选的屏幕空间镜头雨珠与下落水痕。加入指定 Scene 的 postProcessStages 集合，集合通常负责销毁。在色调映射之后、FXAA 之前使用一个原生纯颜色阶段，不改变相机、曝光、天气、深度或输入 alpha。
  *
- * Animation follows Scene time; frozen time freezes drops and rewinding is
- * deterministic. A packaged 256x256 raindrop refraction/height sprite supplies
- * the droplet profile. Native image uniforms load it on first enable and own its
- * texture lifetime; the post-process cache owns the output framebuffer.
- * Visible scene color approximates wide-field reflection without a scene
- * capture. The meniscus has subtle attenuation, without a fixed white glint.
- * No extra frames, history or collision passes are requested.
- * This is an artistic lens effect, not a lens-fluid simulation.
+ * 动画遵循 Scene 时间，冻结时雨滴冻结，时间回退具有确定性。随包提供的 256x256 雨滴折射/高度精灵定义液滴轮廓。原生图像 uniform 在首次启用时加载，并拥有纹理生命周期；后处理缓存拥有输出帧缓冲。用可见场景颜色近似广角反射，不另捕获场景。弯月面只有轻微衰减，没有固定白色高光。不请求额外帧、历史或碰撞通道。这是艺术化镜头效果，不是镜头液体模拟。
  *
  * @alias SceneGISRainLensStage
  * @extends PostProcessStage
- * @param {object} options Configuration.
- * @param {Scene} options.scene The live Scene receiving this stage.
- * @param {string} [options.name] Unique native post-process stage name.
- * @param {boolean} [options.enabled=false] Whether to execute the effect.
- * @param {number} [options.intensity=0.5] Droplet coverage in [0, 1]. Zero is identity.
- * @param {number} [options.dropletSize=36] Droplet scale in drawing-buffer pixels, [8, 128].
- * @param {number} [options.distortion=12] Maximum refraction scale in pixels, [0, 40].
- * @exception {DeveloperError} Configuration violates the documented ranges or Scene ownership.
+ * @param {object} options 配置。
+ * @param {Scene} options.scene 接收此阶段的存活 Scene。
+ * @param {string} [options.name] 唯一的原生后处理阶段名称。
+ * @param {boolean} [options.enabled=false] 是否执行效果。
+ * @param {number} [options.intensity=0.5] 液滴覆盖度，范围 [0,1]；0 不改变输入。
+ * @param {number} [options.dropletSize=36] 液滴尺寸，单位为绘制缓冲区像素，范围 [8,128]。
+ * @param {number} [options.distortion=12] 最大折射倍率，单位为像素，范围 [0,40]。
+ * @exception {DeveloperError} 配置违反文档范围或 Scene 所有权。
  * @example
  * const lens = scene.postProcessStages.add(new Cesium.SceneGISRainLensStage({
  *   scene, enabled: true, intensity: 0.7
@@ -81,7 +71,8 @@ class SceneGISRainLensStage extends PostProcessStage {
     this.distortion = options.distortion ?? 12;
   }
 
-  /** Droplet coverage in [0, 1]. Zero preserves the input exactly.
+  /**
+   *  液滴覆盖度，范围 [0,1]；0 完整保留输入。
    * @type {number}
    * @default 0.5
    */
@@ -93,7 +84,8 @@ class SceneGISRainLensStage extends PostProcessStage {
     this._rainState.intensity = value;
     this._rainScene.requestRender();
   }
-  /** Droplet scale in drawing-buffer pixels, [8, 128].
+  /**
+   *  液滴尺寸，单位为绘制缓冲区像素，范围 [8,128]。
    * @type {number}
    * @default 36
    */
@@ -105,7 +97,8 @@ class SceneGISRainLensStage extends PostProcessStage {
     this._rainState.size = value;
     this._rainScene.requestRender();
   }
-  /** Refraction scale in pixels, [0, 40].
+  /**
+   *  折射倍率，单位为像素，范围 [0,40]。
    * @type {number}
    * @default 12
    */
@@ -134,7 +127,8 @@ class SceneGISRainLensStage extends PostProcessStage {
     super.update(context, useLogDepth);
   }
 
-  /** Releases the packaged sprite and native stage resources.
+  /**
+   *  释放随包精灵与原生阶段资源。
    * @returns {undefined}
    */
   destroy() {

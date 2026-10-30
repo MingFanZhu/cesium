@@ -121,6 +121,7 @@
 
 ## 语言
 
-- JavaScript、GLSL、JSDoc、源码注释、标识符和 SGP 标记说明使用英文。
+- JavaScript、GLSL、标识符、实现注释和 SGP 标记说明使用英文。
+- SceneGIS 自有公共 API 的 JSDoc 自然语言说明直接使用中文，包括参数、返回值、异常、生命周期和示例标题；类型、标签、API 名称和示例代码保留英文。Cesium upstream-owned 源码的原生英文注释保持原样，中文发行文档通过独立生成路径合并翻译。
 - SceneGIS 提交信息使用中文；上游同步提交可保留其原始提交信息。
 - SceneGIS 架构与开发文档可以使用中文，但关键术语、路径、命令和 API 名称保持英文原文。

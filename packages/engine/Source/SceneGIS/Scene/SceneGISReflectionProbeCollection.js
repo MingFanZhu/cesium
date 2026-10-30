@@ -7,21 +7,15 @@ import SceneGISReflectionProbe from "./SceneGISReflectionProbe.js";
 import Renderer from "./_private/_SceneGISReflectionProbes.js";
 
 /**
- * Scene-owned local reflection probes for native physical-sky PBR models in Globe and Planar.
- * Explicit model/scene IBL maps take precedence. Capture includes opaque and alpha-masked
- * standalone glTF models, their material lighting and optional native directional shadows.
- * It excludes transparent surfaces, tiled streaming, terrain, clouds and recursive reflection.
- * Default sky diffuse is attenuated by coarse directional visibility; no diffuse bounce is added.
- * SSR keeps priority for valid screen hits. No geometry is rendered for clean probes.
+ * 由 Scene 所有的局部反射探针集合，供球面和平面中使用原生物理天空的 PBR 模型消费。显式模型/场景 IBL 贴图优先。捕获包含不透明与 alpha 掩码的独立 glTF 模型、材质受光及可选原生方向光阴影，不包含透明表面、流式瓦片、地形、云或递归反射。默认天空漫反射按粗略方向可见度衰减，不增加漫反射反弹。SSR 对有效屏幕命中保持优先，干净探针不重绘几何。
  *
- * The Scene destroys the collection before its Context. Removing a probe releases its maps;
- * source models and probe descriptors are borrowed. Call capture again after content/light edits.
+ * Scene 在 Context 前销毁集合。移除探针释放其贴图；源模型和探针描述对象仅借用。内容或光照修改后须再次调用 capture。
  *
  * @alias SceneGISReflectionProbeCollection
  * @constructor
- * @param {object} options Initialization options.
- * @param {Scene} options.scene A live single-view SCENE3D Scene with HDR enabled.
- * @param {number} [options.resolution=128] Cube face size, one of 32, 64, 128 or 256.
+ * @param {object} options 初始化选项。
+ * @param {Scene} options.scene 存活的单视图 SCENE3D Scene，须启用 HDR。
+ * @param {number} [options.resolution=128] 立方体面尺寸，可取 32、64、128 或 256。
  * @example
  * const probes = new Cesium.SceneGISReflectionProbeCollection({ scene });
  * probes.add(new Cesium.SceneGISReflectionProbe({
@@ -87,21 +81,21 @@ function flag(name) {
 
 Object.defineProperties(SceneGISReflectionProbeCollection.prototype, {
   /**
-   * Whether probes contribute. Cached captures are retained.
+   * 探针是否参与计算，保留已缓存捕获。
    * @memberof SceneGISReflectionProbeCollection.prototype
    * @type {boolean}
    * @default true
    */
   show: flag("show"),
   /**
-   * Whether captured geometry contributes specular radiance.
+   * 捕获几何是否贡献镜面辐亮度。
    * @memberof SceneGISReflectionProbeCollection.prototype
    * @type {boolean}
    * @default true
    */
   reflections: flag("reflections"),
   /**
-   * Whether captured visibility attenuates default environment lighting.
+   * 捕获的可见性是否衰减默认环境光。
    * @memberof SceneGISReflectionProbeCollection.prototype
    * @type {boolean}
    * @default true
@@ -129,9 +123,10 @@ Object.defineProperties(SceneGISReflectionProbeCollection.prototype, {
   },
 });
 
-/** Adds a descriptor. At most two probes may be bound, including uncaptured probes.
- * @param {SceneGISReflectionProbe} probe An unowned descriptor.
- * @returns {SceneGISReflectionProbe} The added descriptor.
+/**
+ *  添加描述对象，最多绑定两个探针，包含尚未捕获的探针。
+ * @param {SceneGISReflectionProbe} probe 尚未归属其他所有者的描述对象。
+ * @returns {SceneGISReflectionProbe} 已添加的描述对象。
  */
 SceneGISReflectionProbeCollection.prototype.add = function (probe) {
   if (this._pending) {
@@ -158,9 +153,9 @@ SceneGISReflectionProbeCollection.prototype.add = function (probe) {
 };
 
 /**
- * Releases a probe's maps, retaining its descriptor.
- * @param {SceneGISReflectionProbe} probe The probe.
- * @returns {boolean} Whether removed.
+ * 释放探针贴图，保留描述对象。
+ * @param {SceneGISReflectionProbe} probe 探针。
+ * @returns {boolean} 是否已移除。
  */
 SceneGISReflectionProbeCollection.prototype.remove = function (probe) {
   if (this._pending) {
@@ -178,8 +173,8 @@ SceneGISReflectionProbeCollection.prototype.remove = function (probe) {
 };
 
 /**
- * @param {number} index Probe index.
- * @returns {SceneGISReflectionProbe} The descriptor.
+ * @param {number} index 探针索引。
+ * @returns {SceneGISReflectionProbe} 描述对象。
  */
 SceneGISReflectionProbeCollection.prototype.get = function (index) {
   if (!Number.isInteger(index) || index < 0 || index >= this.length) {
@@ -189,13 +184,10 @@ SceneGISReflectionProbeCollection.prototype.get = function (index) {
 };
 
 /**
- * Captures complete loaded models in the next render, independent of the viewer direction.
- * Each source must be a ready, fully textured standalone Model directly in scene.primitives.
- * Capturing can stall that frame. Concurrent requests are rejected; failures retain old maps.
- * The promise resolves after all requested probes publish, or rejects on capture failure/destroy.
+ * 下一次渲染时捕获完整已加载模型，独立于观察者方向。每个源须为直接位于 scene.primitives 的已就绪、纹理完整的独立 Model。捕获可能阻塞此帧，拒绝并发请求；失败保留旧贴图。全部请求探针发布后 Promise 完成，捕获失败或销毁时拒绝。
  *
- * @param {Model[]} sources Loaded models to borrow for this request.
- * @returns {Promise<void>} Completion of this explicit capture.
+ * @param {Model[]} sources 本次请求借用的已加载模型。
+ * @returns {Promise<void>} 此显式捕获的完成 Promise。
  */
 SceneGISReflectionProbeCollection.prototype.capture = function (sources) {
   if (this._scene.useWebVR) {
@@ -235,13 +227,13 @@ SceneGISReflectionProbeCollection.prototype.capture = function (sources) {
 };
 
 /**
- * @returns {boolean} Whether destroyed.
+ * @returns {boolean} 是否已销毁。
  */
 SceneGISReflectionProbeCollection.prototype.isDestroyed = function () {
   return false;
 };
 /**
- * Releases owned resources and detaches. Borrowed models/descriptors remain usable.
+ * 释放自有资源并解绑，借用模型和描述对象仍可使用。
  * @returns {undefined}
  */
 SceneGISReflectionProbeCollection.prototype.destroy = function () {

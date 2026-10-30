@@ -20,47 +20,35 @@ function boolean(value, name) {
 }
 
 /**
- * Projects a borrowed SDR video onto observer-visible opaque scene surfaces.
- * Add to the bound Scene's postProcessStages, which owns destruction. Globe
- * coordinates are ECEF; planar coordinates are the current World's metre XYZ.
- * Source selection and depth capture are independent of the display camera and
- * solar shadow map. Missing media or observer coverage leaves the scene intact.
+ * 将借用的 SDR 视频投射到观察者可见的不透明场景表面。加入所绑定 Scene 的 postProcessStages，由集合负责销毁。球面坐标为 ECEF，平面为当前 World 的米制 XYZ。源选择与深度捕获独立于显示相机及太阳阴影图；媒体或观察者覆盖缺失时保留原画面。
  *
- * Video is contained inside the angular rectangle without stretching. Letterbox
- * regions retain scene colors. Black is content. Compositing follows exposure and
- * tone mapping; this is a display overlay, not a physical projector light.
- * Opaque depth defines receivers. Transparent surfaces neither receive nor block;
- * the overlay can cover transparent foreground at an opaque receiver's pixel.
- * Native post-process ordering defines overlap between projections and analyses.
+ * 视频等比例容纳于角度矩形内，不拉伸；留黑边区域保留场景颜色，视频黑色本身仍是内容。合成位于曝光和色调映射之后，是显示覆盖而非物理投影灯。不透明深度定义接收者，透明面既不接收也不阻挡，因此覆盖可能绘制在不透明接收点像素前的透明物体之上。多个投影和分析的叠加遵循原生后处理顺序。
  *
- * The caller controls playback, audio, seeking, src and srcObject. This class never
- * pauses the video or stops stream tracks. Requires WebGL2, SCENE3D and video frame
- * callback support. Finite depth resolution and source LOD bound precision.
- * This API is experimental.
+ * 播放、音频、跳转、src 和 srcObject 均由调用方控制。此类不会暂停视频或停止流轨道。要求 WebGL2、SCENE3D 及视频帧回调支持。精度受有限深度分辨率与源 LOD 约束，此 API 为实验性。
  *
  * @alias SceneGISVideoProjection
  * @extends PostProcessStage
- * @param {object} options Configuration.
- * @param {Scene} options.scene Live SCENE3D Scene.
- * @param {Globe|SceneGISWorld} options.world Exact World attached to scene.
- * @param {HTMLVideoElement} options.video Borrowed, WebGL-readable SDR video.
- * @param {Cartesian3} options.position Projector position in World metres.
- * @param {Cartesian3} options.direction Projector forward direction.
- * @param {Cartesian3} options.up Projector up, not parallel to direction.
- * @param {number} [options.distance=1000] Maximum radial distance in metres.
- * @param {number} [options.near=0.5] Near clipping distance in metres.
- * @param {number} [options.horizontalAngle=Math.PI/2] Horizontal angle, radians in (0, PI).
- * @param {number} [options.verticalAngle=Math.PI/3] Vertical angle, radians in (0, PI).
- * @param {number} [options.resolution=1024] Square observer depth-map size.
- * @param {Array<Model|Cesium3DTileset|SceneGISS3MLayer|Primitive|SceneGISPlanarPrimitive>} [options.sources=[]] Borrowed explicit occluders in scene.primitives, not a receiver filter.
- * @param {boolean} [options.terrain=true] Include World terrain in occlusion.
- * @param {number} [options.depthBias=0.1] Metric depth comparison tolerance.
- * @param {number} [options.opacity=1] Display blend weight, in [0, 1].
- * @param {boolean} [options.flipY=false] Additional vertical media flip.
- * @param {boolean} [options.enabled=true] Select, capture and project.
- * @param {boolean} [options.showFrustum=false] Show range outline independently.
- * @param {string} [options.name] Unique post-process stage name.
- * @exception {DeveloperError} Invalid geometry, media capabilities or Scene / World binding.
+ * @param {object} options 配置。
+ * @param {Scene} options.scene 存活的 SCENE3D Scene。
+ * @param {Globe|SceneGISWorld} options.world 挂载到 scene 的精确 World。
+ * @param {HTMLVideoElement} options.video 借用且可由 WebGL 读取的 SDR 视频。
+ * @param {Cartesian3} options.position 投影器位置，单位为 World 米。
+ * @param {Cartesian3} options.direction 投影器前向方向。
+ * @param {Cartesian3} options.up 投影器向上方向，不得与 direction 平行。
+ * @param {number} [options.distance=1000] 最大径向距离，单位为米。
+ * @param {number} [options.near=0.5] 近裁剪距离，单位为米。
+ * @param {number} [options.horizontalAngle=Math.PI/2] 水平角，单位为弧度，范围 (0,PI)。
+ * @param {number} [options.verticalAngle=Math.PI/3] 竖直角，单位为弧度，范围 (0,PI)。
+ * @param {number} [options.resolution=1024] 正方形观察者深度图尺寸。
+ * @param {Array<Model|Cesium3DTileset|SceneGISS3MLayer|Primitive|SceneGISPlanarPrimitive>} [options.sources=[]] 借用 scene.primitives 中的显式遮挡物，不是接收者过滤器。
+ * @param {boolean} [options.terrain=true] 遮挡是否包含 World 地形。
+ * @param {number} [options.depthBias=0.1] 米制深度比较容差。
+ * @param {number} [options.opacity=1] 显示混合权重，范围 [0,1]。
+ * @param {boolean} [options.flipY=false] 附加的媒体竖直翻转。
+ * @param {boolean} [options.enabled=true] 选择、捕获并投影。
+ * @param {boolean} [options.showFrustum=false] 独立显示范围轮廓。
+ * @param {string} [options.name] 唯一后处理阶段名称。
+ * @exception {DeveloperError} 几何、媒体能力或 Scene/World 绑定无效。
  * @example
  * const projection = scene.postProcessStages.add(new Cesium.SceneGISVideoProjection({
  *   scene, world: scene.world, video, position, direction, up,
@@ -103,7 +91,8 @@ class SceneGISVideoProjection extends PostProcessStage {
     (state.scene._sceneGISObservers ??= new Set()).add(this);
   }
 
-  /** Exact owning Scene.
+  /**
+   *  精确所属 Scene。
    * @type {Scene}
    * @readonly
    */
@@ -111,7 +100,8 @@ class SceneGISVideoProjection extends PostProcessStage {
     return this._observer.scene;
   }
 
-  /** Exact bound World.
+  /**
+   *  精确绑定的 World。
    * @type {Globe|SceneGISWorld}
    * @readonly
    */
@@ -119,7 +109,8 @@ class SceneGISVideoProjection extends PostProcessStage {
     return this._observer.world;
   }
 
-  /** Borrowed media. Replacement detaches old callbacks without stopping playback.
+  /**
+   *  借用的媒体。替换仅解绑旧回调，不停止播放。
    *
    * @type {HTMLVideoElement}
    */
@@ -133,7 +124,8 @@ class SceneGISVideoProjection extends PostProcessStage {
     }
   }
 
-  /** Display blend weight.
+  /**
+   *  显示混合权重。
    * @type {number}
    * @default 1
    */
@@ -145,7 +137,8 @@ class SceneGISVideoProjection extends PostProcessStage {
     this.scene.requestRender();
   }
 
-  /** Additional vertical media flip.
+  /**
+   *  附加的媒体竖直翻转。
    * @type {boolean}
    * @default false
    */
@@ -157,7 +150,8 @@ class SceneGISVideoProjection extends PostProcessStage {
     this.scene.requestRender();
   }
 
-  /** Show the depth-tested yellow observer outline, independently of enabled.
+  /**
+   *  显示经深度测试的黄色观察者轮廓，独立于 enabled。
    *
    * @type {boolean}
    * @default false
@@ -170,7 +164,8 @@ class SceneGISVideoProjection extends PostProcessStage {
     this.scene.requestRender();
   }
 
-  /** Complete observer coverage for the current render.
+  /**
+   *  当前渲染的完整观察者覆盖。
    * @type {boolean}
    * @readonly
    */
@@ -178,7 +173,8 @@ class SceneGISVideoProjection extends PostProcessStage {
     return this.enabled && this._observer.analysisReady;
   }
 
-  /** A valid media frame has been uploaded.
+  /**
+   *  是否已上传有效媒体帧。
    * @type {boolean}
    * @readonly
    */
@@ -186,7 +182,8 @@ class SceneGISVideoProjection extends PostProcessStage {
     return this._observer.media.ready;
   }
 
-  /** Both media and observer coverage are ready.
+  /**
+   *  媒体与观察者覆盖是否均已就绪。
    * @type {boolean}
    * @readonly
    */
@@ -194,7 +191,8 @@ class SceneGISVideoProjection extends PostProcessStage {
     return this.analysisReady && this.videoReady;
   }
 
-  /** One of disabled, error, loading-video, loading-coverage or ready.
+  /**
+   *  状态为 disabled、error、loading-video、loading-coverage 或 ready。
    *
    * @type {string}
    * @readonly
@@ -213,7 +211,8 @@ class SceneGISVideoProjection extends PostProcessStage {
         : "loading-coverage";
   }
 
-  /** Most recent media or coverage failure.
+  /**
+   *  最近媒体或覆盖失败。
    * @type {Error|undefined}
    * @readonly
    */
@@ -221,7 +220,8 @@ class SceneGISVideoProjection extends PostProcessStage {
     return this._observer.media.error ?? this._observer.error;
   }
 
-  /** Raised for media upload or observer capture errors.
+  /**
+   *  媒体上传或观察者捕获错误时触发。
    * @type {Event}
    * @readonly
    */
@@ -229,8 +229,8 @@ class SceneGISVideoProjection extends PostProcessStage {
     return this._observer.errorEvent;
   }
 
-  /** Capture draws / CPU time, cumulative upload count / RGBA bytes and last upload
-   * CPU time. These times do not measure GPU completion.
+  /**
+   *  捕获绘制次数与 CPU 时间、累计上传次数与 RGBA 字节数、最近上传 CPU 时间；这些时间不测量 GPU 完成耗时。
    * @type {object}
    * @readonly
    */
@@ -244,15 +244,16 @@ class SceneGISVideoProjection extends PostProcessStage {
     };
   }
 
-  /** Atomically changes the projector; omitted scalar values retain their value.
-   * @param {object} options Observer configuration.
-   * @param {Cartesian3} options.position World position.
-   * @param {Cartesian3} options.direction Forward direction.
-   * @param {Cartesian3} options.up Up direction.
-   * @param {number} [options.distance] Maximum radial distance in metres.
-   * @param {number} [options.near] Near clipping distance in metres.
-   * @param {number} [options.horizontalAngle] Horizontal angle in radians.
-   * @param {number} [options.verticalAngle] Vertical angle in radians.
+  /**
+   *  原子修改投影器，省略的标量保留原值。
+   * @param {object} options 观察者配置。
+   * @param {Cartesian3} options.position 世界位置。
+   * @param {Cartesian3} options.direction 前向方向。
+   * @param {Cartesian3} options.up 向上方向。
+   * @param {number} [options.distance] 最大径向距离，单位为米。
+   * @param {number} [options.near] 近裁剪距离，单位为米。
+   * @param {number} [options.horizontalAngle] 水平角，单位为弧度。
+   * @param {number} [options.verticalAngle] 竖直角，单位为弧度。
    */
   setView(options) {
     Observer.setView(this._observer, options);
@@ -272,7 +273,8 @@ class SceneGISVideoProjection extends PostProcessStage {
     super.update(context, useLogDepth);
   }
 
-  /** Releases owned resources, never borrowed video, tracks or sources.
+  /**
+   *  释放自有资源，不释放借用视频、轨道或源。
    * @returns {undefined}
    */
   destroy() {

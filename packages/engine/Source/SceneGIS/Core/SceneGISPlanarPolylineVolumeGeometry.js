@@ -272,17 +272,17 @@ function appendTriangle(world, origin, a, b, c, local, normals, indices) {
 }
 
 /**
- * A CPU-only immutable description of a planar polyline-volume sweep.
+ * 沿平面折线扫掠体的不可变纯 CPU 几何描述。
  *
  * @alias SceneGISPlanarPolylineVolumeGeometry
  * @constructor
- * @param {object} options Object with the following properties:
- * @param {Cartesian3[]} options.polylinePositions The route center positions in planar meters.
- * @param {Cartesian2[]} options.shapePositions The simple cross-section ring.
- * @param {CornerType} [options.cornerType=CornerType.ROUNDED] The planar corner style.
- * @param {number} [options.cornerGranularity=CesiumMath.RADIANS_PER_DEGREE] The positive rounded-corner angular step.
- * @param {Cartesian3} [options.origin] The local origin. The first route position is used by default.
- * @exception {DeveloperError} The route, shape, corner options, origin, or derived mesh is invalid.
+ * @param {object} options 包含以下属性的对象：
+ * @param {Cartesian3[]} options.polylinePositions 路径中心位置，单位为平面米。
+ * @param {Cartesian2[]} options.shapePositions 简单截面环。
+ * @param {CornerType} [options.cornerType=CornerType.ROUNDED] 平面转角样式。
+ * @param {number} [options.cornerGranularity=CesiumMath.RADIANS_PER_DEGREE] 为正的圆角角度步长。
+ * @param {Cartesian3} [options.origin] 局部原点，默认使用首个路径位置。
+ * @exception {DeveloperError} 路径、截面、转角选项、原点或派生网格无效。
  */
 function SceneGISPlanarPolylineVolumeGeometry(options) {
   options = options ?? {};
@@ -394,7 +394,7 @@ function SceneGISPlanarPolylineVolumeGeometry(options) {
 
 Object.defineProperties(SceneGISPlanarPolylineVolumeGeometry.prototype, {
   /**
-   * Gets a cloned snapshot of the route center positions.
+   * 获取路径中心位置的快照副本。
    *
    * @memberof SceneGISPlanarPolylineVolumeGeometry.prototype
    * @type {Cartesian3[]}
@@ -408,7 +408,7 @@ Object.defineProperties(SceneGISPlanarPolylineVolumeGeometry.prototype, {
     },
   },
   /**
-   * Gets a cloned snapshot of the normalized cross-section ring.
+   * 获取归一化截面环的快照副本。
    *
    * @memberof SceneGISPlanarPolylineVolumeGeometry.prototype
    * @type {Cartesian2[]}
@@ -420,7 +420,7 @@ Object.defineProperties(SceneGISPlanarPolylineVolumeGeometry.prototype, {
     },
   },
   /**
-   * Gets the planar corner style.
+   * 获取平面转角样式。
    *
    * @memberof SceneGISPlanarPolylineVolumeGeometry.prototype
    * @type {CornerType}
@@ -432,7 +432,7 @@ Object.defineProperties(SceneGISPlanarPolylineVolumeGeometry.prototype, {
     },
   },
   /**
-   * Gets the rounded-corner angular step.
+   * 获取圆角角度步长。
    *
    * @memberof SceneGISPlanarPolylineVolumeGeometry.prototype
    * @type {number}
@@ -444,7 +444,7 @@ Object.defineProperties(SceneGISPlanarPolylineVolumeGeometry.prototype, {
     },
   },
   /**
-   * Gets a clone of the local origin in planar world coordinates.
+   * 获取平面世界中局部原点的副本。
    *
    * @memberof SceneGISPlanarPolylineVolumeGeometry.prototype
    * @type {Cartesian3}

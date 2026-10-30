@@ -26,79 +26,60 @@ function validateControls(simulation) {
 }
 
 /**
- * A borrowed, live view of a wind simulation's completed GPU field. Never destroy or modify
- * the textures. Resolve getters when binding uniforms, after the producer update; do not cache
- * texture identities across versions or resets. All samples are cell-centered. The atlas pixel
- * for cell (i,j,k) is (i+(k%atlasColumns)*nx, j+floor(k/atlasColumns)*ny).
- * Local sample position is minimum+(cell+0.5)*cellSize. Solids have zero velocity.
+ * 借用的实时风场已完成 GPU 数据视图。不得销毁或修改纹理。生产者更新后绑定 uniform 时解析 getter，不要跨版本或重置缓存纹理身份。全部采样位于格心，单元 (i,j,k) 的图集像素为 (i+(k%atlasColumns)*nx, j+floor(k/atlasColumns)*ny)，局部位置为 minimum+(cell+0.5)*cellSize。固体速度为零。
  * @typedef {object} SceneGISWindSimulation.GpuField
- * @property {SceneGISWindSimulation.GpuTexture} velocityTexture RGBA32F: local velocity xyz in m/s and dimensionless density ratio w.
- * @property {SceneGISWindSimulation.GpuTexture} solidTexture RGBA8: red equals one for solid, zero for fluid.
- * @property {SceneGISWindSimulation.GpuTexture} concentrationTexture RGBA32F: r dimensionless tracer, g local outgoing transport CFL; b/a reserved zero.
- * @property {Cartesian3} dimensions Read-only cell counts.
- * @property {Cartesian3} minimum Read-only local domain minimum in meters.
- * @property {number} cellSize Cubic cell width in meters.
- * @property {number} atlasColumns Number of Z slices per atlas row.
- * @property {Matrix4} modelMatrix Current rigid local-to-world transform, borrowed read-only.
- * @property {number} version Monotonically increasing completed-state version, including reset.
- * @property {number} generation Reset generation.
- * @property {string} contextId Renderer context identity; consumers must use the same context.
- * @property {number} simulationTime Completed physical seconds since reset.
+ * @property {SceneGISWindSimulation.GpuTexture} velocityTexture RGBA32F：局部速度 xyz 单位为 m/s，w 为无量纲密度比。
+ * @property {SceneGISWindSimulation.GpuTexture} solidTexture RGBA8：红通道为 1 表示固体，0 表示流体。
+ * @property {SceneGISWindSimulation.GpuTexture} concentrationTexture RGBA32F：r 为无量纲示踪量，g 为局部流出输运 CFL，b/a 保留为零。
+ * @property {Cartesian3} dimensions 只读单元数量。
+ * @property {Cartesian3} minimum 只读局部域最小点，单位为米。
+ * @property {number} cellSize 立方格宽，单位为米。
+ * @property {number} atlasColumns 每图集行的 Z 切片数。
+ * @property {Matrix4} modelMatrix 当前局部到世界刚体变换，仅只读借用。
+ * @property {number} version 单调递增的已完成状态版本，包含重置。
+ * @property {number} generation 重置代际。
+ * @property {string} contextId 渲染 Context 身份，消费者必须使用同一 Context。
+ * @property {number} simulationTime 自重置起已完成的物理秒数。
  */
 
 /**
- * Opaque borrowed native texture handle accepted by engine sampler uniform callbacks.
- * Do not construct, mutate or destroy it. This interface does not expose Renderer internals.
+ * 可供引擎采样器 uniform 回调使用的不透明借用原生纹理句柄。不得构造、修改或销毁，不公开 Renderer 内部实现。
  * @typedef {object} SceneGISWindSimulation.GpuTexture
- * @property {number} width Atlas width in pixels.
- * @property {number} height Atlas height in pixels.
+ * @property {number} width 图集宽度，单位为像素。
+ * @property {number} height 图集高度，单位为像素。
  */
 
 /**
- * GPU-resident local isothermal air flow using D3Q19 MRT and optional Smagorinsky LES.
- * Mount once in Scene.primitives before GPU field consumers. No display is created by this
- * object. The collection normally owns destruction. Globe and Planar use the same local-meter
- * solver; modelMatrix must be rigid. Static solids and no-slip faces use halfway bounce-back.
- * Open faces lie at the outer cell centers; wall/slip faces lie at domain faces. Inlets use
- * non-equilibrium extrapolation; outlets use first-order convection at prescribed normal wind.
- * Keep recirculation away from outlets and verify downstream buffer sensitivity.
- * It is not a certified engineering CFD solver.
+ * 常驻 GPU 的局部等温空气流动求解器，使用 D3Q19 MRT 和可选 Smagorinsky LES。在 GPU 场消费者之前挂载一次到 Scene.primitives。此对象不创建显示，集合通常负责销毁。球面和平面共用局部米制求解器，modelMatrix 必须为刚体。静态固体与无滑移面采用半格反弹；开放面位于最外层格心，墙面/滑移面位于域边界。入口采用非平衡外推，出口按指定法向风速进行一阶对流。应让回流远离出口，并验证下游缓冲区敏感性。这不是经过工程认证的 CFD 求解器。
  *
- * Layout and physical options are construction snapshots. Recreate to change them. Fixed dt
- * converts uL=u*dt/dx and tau=0.5+3*nu*dt/dx^2. Require input Mach<=0.1 and
- * 0.5000001<tau<=2. Runtime acceleration may exceed the low-Mach regime; no hidden velocity clamp,
- * viscosity change or instability reset is applied. Unresolved walls and constant-coefficient LES
- * require independent domain/grid validation. State uses FP32 deviation populations (f-w).
+ * 布局与物理选项在构造时快照保存，修改须重建。固定 dt 的换算为 uL=u*dt/dx，tau=0.5+3*nu*dt/dx^2。要求输入 Mach<=0.1 且 0.5000001<tau<=2。运行时加速可能超出低马赫数范围；不会隐式截断速度、修改黏度或遇到不稳定时自动重置。未解析的壁面与常系数 LES 须独立进行域和网格验证。状态使用 FP32 偏差分布（f-w）。
  *
- * Normal Scene-time increments accumulate work; maximumStepsPerFrame limits execution, without
- * changing dt or discarding debt. Pause stops accrual; queued single steps still execute. Picking
- * and repeated updates with the same frame number never advance state. Time rewind resets.
- * Request-render applications must request frames explicitly. Destroy consumers before producer.
+ * 正常 Scene 时间增量积累工作，maximumStepsPerFrame 只限制执行步数，不改变 dt 或丢弃欠账。暂停停止累计，已排队单步仍执行。拾取及同帧号重复更新不推进状态；时间回退会重置。按需渲染应用须显式请求帧。销毁顺序为先消费者、后生产者。
  *
  * @alias SceneGISWindSimulation
  * @constructor
- * @param {object} [options] Configuration.
- * @param {Cartesian3} [options.dimensions=new Cartesian3(128,128,32)] Integer cell counts >=4; product <=2097152.
- * @param {Cartesian3} [options.minimum=Cartesian3.ZERO] Local domain minimum in meters.
- * @param {number} [options.cellSize=2] Cubic cell width in meters.
- * @param {number} [options.timeStep=0.02] Fixed physical seconds per step.
- * @param {number} [options.kinematicViscosity=0.000015] Molecular kinematic viscosity in m^2/s.
- * @param {number} [options.smagorinskyConstant=0.12] Constant in [0,0.2]; zero disables LES.
- * @param {number} [options.windSpeed=5] Prescribed horizontal speed in m/s.
- * @param {number} [options.windDirection=0] Flow-towards angle, radians counterclockwise from local +X.
- * @param {Cartesian3} [options.initialVelocity] Initial fluid m/s; defaults to the prescribed wind.
- * @param {Cartesian3} [options.acceleration=Cartesian3.ZERO] Constant physical body acceleration in m/s^2 (MRT Guo forcing).
- * @param {SceneGISWindSimulation.BoundaryConditions} [options.boundaryConditions] Six domain faces.
- * @param {Uint8Array} [options.solidMask] Copied x-fastest 0/1 cells, index x+nx*(y+ny*z).
- * @param {number} [options.tracerDiffusivity=0] Explicit scalar diffusivity in m^2/s; 6*D*dt/dx^2 <= 0.5. First-order upwind also has numerical diffusion.
- * @param {SceneGISWindSimulation.TracerSource[]} [options.tracerSources=[]] Up to 16 passive source spheres.
- * @param {Matrix4} [options.modelMatrix=Matrix4.IDENTITY] Rigid local-to-world placement, copied.
- * @param {boolean} [options.paused=false] Initially pause physical time accumulation.
- * @param {number} [options.maximumStepsPerFrame=4] Maximum fixed steps per normal frame, integer 1..64.
- * @param {boolean} [options.enableGpuTiming=false] Collect asynchronous GPU batch timing when the WebGL extension exists.
- * @throws {DeveloperError} Invalid grid, units, controls or rigid transform.
- * @throws {RuntimeError} First update lacks SCENE3D/WebGL2/four float attachments or atlas capacity.
- * @experimental This API is subject to change while urban-flow qualification is in progress.
+ * @param {object} [options] 配置。
+ * @param {Cartesian3} [options.dimensions=new Cartesian3(128,128,32)] 整数单元数须 >=4，总乘积 <=2097152。
+ * @param {Cartesian3} [options.minimum=Cartesian3.ZERO] 局部域最小点，单位为米。
+ * @param {number} [options.cellSize=2] 立方格宽，单位为米。
+ * @param {number} [options.timeStep=0.02] 每步固定物理秒数。
+ * @param {number} [options.kinematicViscosity=0.000015] 分子运动黏度，单位为 m^2/s。
+ * @param {number} [options.smagorinskyConstant=0.12] [0,0.2] 内的常数，0 禁用 LES。
+ * @param {number} [options.windSpeed=5] 指定水平风速，单位为 m/s。
+ * @param {number} [options.windDirection=0] 风吹向的角度，从局部 +X 逆时针计，单位为弧度。
+ * @param {Cartesian3} [options.initialVelocity] 初始流体速度，单位为 m/s，默认指定来流风速。
+ * @param {Cartesian3} [options.acceleration=Cartesian3.ZERO] 恒定物理体加速度，单位为 m/s^2，采用 MRT Guo 力项。
+ * @param {SceneGISWindSimulation.BoundaryConditions} [options.boundaryConditions] 计算域六个面。
+ * @param {Uint8Array} [options.solidMask] 会复制的 X 最快 0/1 单元数组，索引为 x+nx*(y+ny*z)。
+ * @param {number} [options.tracerDiffusivity=0] 显式标量扩散率，单位为 m^2/s，须满足 6*D*dt/dx^2 <= 0.5。一阶迎风格式也具有数值扩散。
+ * @param {SceneGISWindSimulation.TracerSource[]} [options.tracerSources=[]] 最多 16 个被动球形源。
+ * @param {Matrix4} [options.modelMatrix=Matrix4.IDENTITY] 局部到世界刚体放置变换，会复制。
+ * @param {boolean} [options.paused=false] 初始是否暂停物理时间累计。
+ * @param {number} [options.maximumStepsPerFrame=4] 每正常帧最多固定步数，整数 1..64。
+ * @param {boolean} [options.enableGpuTiming=false] WebGL 扩展可用时收集异步 GPU 批次计时。
+ * @throws {DeveloperError} 格网、单位、控制项或刚体变换无效。
+ * @throws {RuntimeError} 首次更新缺少 SCENE3D、WebGL2、四个浮点附件或足够图集容量。
+ * @experimental 城市流动验证期间此 API 可能发生变化。
  * @example
  * const wind = scene.primitives.add(new Cesium.SceneGISWindSimulation({
  *   modelMatrix: Cesium.Transforms.eastNorthUpToFixedFrame(origin),
@@ -120,17 +101,17 @@ function SceneGISWindSimulation(options = {}) {
   this._tracer = undefined;
   this._queries = new Set();
   /**
-   * Rigid placement. Moving it does not alter the local solution.
+   * 刚体放置，移动不改变局部解。
    * @type {Matrix4}
    */
   this.modelMatrix = Matrix4.clone(options.modelMatrix ?? Matrix4.IDENTITY);
   /**
-   * Pause Scene-time accumulation; explicit steps remain possible.
+   * 暂停 Scene 时间累计，仍可显式单步。
    * @type {boolean}
    */
   this.paused = options.paused ?? false;
   /**
-   * Fixed-step work budget, integer 1..64.
+   * 固定步长工作预算，整数 1..64。
    * @type {number}
    */
   this.maximumStepsPerFrame = options.maximumStepsPerFrame ?? 4;
@@ -149,33 +130,28 @@ function SceneGISWindSimulation(options = {}) {
 }
 
 /**
- * A spherical, dimensionless passive source. Injection is uniform per fluid cell whose center
- * lies in the sphere. Solids receive none; a source can overlap domain limits. Rate is not mass/s.
+ * 球形无量纲被动源。球内每个流体格心单元均匀注入，固体不接收，源可与域边界重叠。rate 不是质量/秒。
  * @typedef {object} SceneGISWindSimulation.TracerSource
- * @property {Cartesian3} position Simulation-local meters.
- * @property {number} radius Positive radius in meters.
- * @property {number} rate Nonnegative tracer units per second per fluid cell.
- * @property {boolean} [enabled=true] Whether to inject.
+ * @property {Cartesian3} position 模拟局部米制坐标。
+ * @property {number} radius 正半径，单位为米。
+ * @property {number} rate 每流体单元每秒的非负示踪单位数。
+ * @property {boolean} [enabled=true] 是否注入。
  */
 
 /**
- * Face modes: "wind" classifies inward/outward/tangent prescribed wind as inlet/outlet/slip;
- * "inlet" and "outlet" require the corresponding nonzero normal wind component.
- * "wall" is no-slip; "slip" is specular free-slip; "periodic" must be paired on an axis.
- * Oblique wind can have two inlets and two outlets. At mixed open corners inlet takes priority;
- * multiple outlets use the sum of their one-sided convective fluxes.
+ * 面模式："wind" 将指定风的向内、向外或切向分量分类为入口、出口或滑移；"inlet" 和 "outlet" 要求对应非零法向风分量。"wall" 为无滑移，"slip" 为镜面自由滑移，"periodic" 须在同轴成对。斜向风可有两个入口和两个出口。混合开放角点入口优先，多出口使用各自单侧对流通量之和。
  * @typedef {object} SceneGISWindSimulation.BoundaryConditions
- * @property {string} [xMin="wind"] Minimum X face.
- * @property {string} [xMax="wind"] Maximum X face.
- * @property {string} [yMin="wind"] Minimum Y face.
- * @property {string} [yMax="wind"] Maximum Y face.
- * @property {string} [zMin="wall"] Ground face.
- * @property {string} [zMax="slip"] Top face.
+ * @property {string} [xMin="wind"] 最小 X 面。
+ * @property {string} [xMax="wind"] 最大 X 面。
+ * @property {string} [yMin="wind"] 最小 Y 面。
+ * @property {string} [yMax="wind"] 最大 Y 面。
+ * @property {string} [zMin="wall"] 地面。
+ * @property {string} [zMax="slip"] 顶面。
  */
 
 Object.defineProperties(SceneGISWindSimulation.prototype, {
   /**
-   * Whether requested GPU timing is supported after initialization.
+   * 初始化后是否支持所请求的 GPU 计时。
    * @memberof SceneGISWindSimulation.prototype
    * @type {boolean}
    * @readonly
@@ -186,8 +162,7 @@ Object.defineProperties(SceneGISWindSimulation.prototype, {
     },
   },
   /**
-   * Latest non-disjoint completed batch measurement, excluding drawing and initial allocation.
-   * Polls during normal renders; undefined before completion, when disabled or unsupported.
+   * 最新无失效区间的已完成批次测量，不含绘制与初始分配。正常渲染期间轮询；完成前、禁用或不支持时为 undefined。
    * @memberof SceneGISWindSimulation.prototype
    * @type {SceneGISWindSimulation.GpuTiming|undefined}
    * @readonly
@@ -198,7 +173,7 @@ Object.defineProperties(SceneGISWindSimulation.prototype, {
     },
   },
   /**
-   * Whether GPU state is allocated.
+   * 是否已分配 GPU 状态。
    * @memberof SceneGISWindSimulation.prototype
    * @type {boolean}
    * @readonly
@@ -209,7 +184,7 @@ Object.defineProperties(SceneGISWindSimulation.prototype, {
     },
   },
   /**
-   * Completed physical seconds since reset.
+   * 自重置起已完成的物理秒数。
    * @memberof SceneGISWindSimulation.prototype
    * @type {number}
    * @readonly
@@ -220,7 +195,7 @@ Object.defineProperties(SceneGISWindSimulation.prototype, {
     },
   },
   /**
-   * Fixed physical seconds per step.
+   * 每步固定物理秒数。
    * @memberof SceneGISWindSimulation.prototype
    * @type {number}
    * @readonly
@@ -231,7 +206,7 @@ Object.defineProperties(SceneGISWindSimulation.prototype, {
     },
   },
   /**
-   * Pending Scene-time seconds plus queued manual work.
+   * 待处理 Scene 时间秒数，加上排队的手动工作。
    * @memberof SceneGISWindSimulation.prototype
    * @type {number}
    * @readonly
@@ -242,7 +217,7 @@ Object.defineProperties(SceneGISWindSimulation.prototype, {
     },
   },
   /**
-   * Completed steps in the latest normal frame.
+   * 最近正常帧完成的步数。
    * @memberof SceneGISWindSimulation.prototype
    * @type {number}
    * @readonly
@@ -253,7 +228,7 @@ Object.defineProperties(SceneGISWindSimulation.prototype, {
     },
   },
   /**
-   * Owned texture bytes, excluding shared renderer resources.
+   * 自有纹理字节数，不含共享渲染资源。
    * @memberof SceneGISWindSimulation.prototype
    * @type {number}
    * @readonly
@@ -267,14 +242,14 @@ Object.defineProperties(SceneGISWindSimulation.prototype, {
 
 /**
  * @typedef {object} SceneGISWindSimulation.GpuTiming
- * @property {number} millisecondsPerStep GPU elapsed batch milliseconds / completed steps, velocity plus tracer.
- * @property {number} steps Number of physical steps in the measured batch.
- * @property {number} version Completed field version at batch end.
+ * @property {number} millisecondsPerStep GPU 批次耗时毫秒数除以完成步数，包含速度与示踪求解。
+ * @property {number} steps 测量批次中的物理步数。
+ * @property {number} version 批次结束时的已完成场版本。
  */
 
 /**
- * Queue fixed steps, including while paused; the per-frame budget still applies.
- * @param {number} [count=1] Integer 1..1000000.
+ * 排队固定步数，暂停时也允许，仍受每帧预算限制。
+ * @param {number} [count=1] 整数 1..1000000。
  */
 SceneGISWindSimulation.prototype.step = function (count = 1) {
   if (
@@ -289,25 +264,24 @@ SceneGISWindSimulation.prototype.step = function (count = 1) {
   }
   this._queued += count;
 };
-/** Restore initial fields/time on the next normal render and cancel already queued work.
- * Steps queued after this call execute after the reset, including while paused.
+/**
+ *  下一正常渲染恢复初始场与时间，并取消已排队工作。此调用后排队的步数在重置后执行，暂停时也执行。
  */
 SceneGISWindSimulation.prototype.reset = function () {
   this._reset = true;
   this._queued = 0;
 };
 /**
- * Get the live borrowed GPU descriptor; does not initialize or step the solver.
- * @returns {SceneGISWindSimulation.GpuField|undefined} Undefined before first normal render.
+ * 获取实时借用 GPU 描述对象，不初始化或推进求解器。
+ * @returns {SceneGISWindSimulation.GpuField|undefined} 首次正常渲染之前为 undefined。
  */
 SceneGISWindSimulation.prototype.getGpuField = function () {
   return this._field;
 };
 
 /**
- * Replace source configuration atomically without clearing concentration or resetting velocity.
- * New injection takes effect on the next physical step. Inputs are copied.
- * @param {SceneGISWindSimulation.TracerSource[]} sources At most 16 spheres.
+ * 原子替换源配置，不清空浓度或重置速度。新注入在下一物理步生效，输入会复制。
+ * @param {SceneGISWindSimulation.TracerSource[]} sources 最多 16 个球。
  */
 SceneGISWindSimulation.prototype.setTracerSources = function (sources) {
   this._sources = Tracer.sources(sources);
@@ -315,11 +289,9 @@ SceneGISWindSimulation.prototype.setTracerSources = function (sources) {
 };
 
 /**
- * Snapshot one nearest cell without blocking on a full field readback. The returned Promise uses
- * native PBO/fence polling; at most 16 requests can be outstanding. Destruction rejects them.
- * Call after ready. Position must be inside the half-open local domain.
- * @param {Cartesian3} position Local meters.
- * @returns {Promise<SceneGISWindSimulation.Sample>} Completed snapshot with its version/time.
+ * 快照最近单元，不阻塞等待完整场回读。返回 Promise 使用原生 PBO/fence 轮询，最多同时有 16 个请求；销毁会拒绝请求。须在 ready 后调用，位置必须在半开局部域内。
+ * @param {Cartesian3} position 局部米制坐标。
+ * @returns {Promise<SceneGISWindSimulation.Sample>} 包含版本和时间的已完成快照。
  */
 SceneGISWindSimulation.prototype.sampleAsync = function (position) {
   model.finiteVector("sample position", position);
@@ -343,14 +315,14 @@ SceneGISWindSimulation.prototype.sampleAsync = function (position) {
 
 /**
  * @typedef {object} SceneGISWindSimulation.Sample
- * @property {Cartesian3} velocity Local m/s.
- * @property {number} density Dimensionless density ratio.
- * @property {number} concentration Dimensionless tracer amount.
- * @property {number} tracerCfl Outgoing scalar CFL; values >1 violate positivity stability.
- * @property {boolean} solid Whether the sampled cell is solid.
- * @property {Cartesian3} cell Integer cell index.
- * @property {number} version Snapshot version.
- * @property {number} simulationTime Snapshot physical seconds.
+ * @property {Cartesian3} velocity 局部速度，单位为 m/s。
+ * @property {number} density 无量纲密度比。
+ * @property {number} concentration 无量纲示踪量。
+ * @property {number} tracerCfl 流出标量 CFL，大于 1 时违反正性稳定条件。
+ * @property {boolean} solid 采样单元是否为固体。
+ * @property {Cartesian3} cell 整数单元索引。
+ * @property {number} version 快照版本。
+ * @property {number} simulationTime 快照物理秒数。
  */
 
 function createField(simulation) {
@@ -461,13 +433,13 @@ SceneGISWindSimulation.prototype.update = function (frameState) {
   this._debt = Math.max(0, this._debt - (count - manual) * dt);
 };
 /**
- * @returns {boolean} Whether this simulation has been destroyed.
+ * @returns {boolean} 此模拟是否已销毁。
  */
 SceneGISWindSimulation.prototype.isDestroyed = function () {
   return false;
 };
 /**
- * Release all owned GPU resources. Borrowed descriptors become invalid.
+ * 释放全部自有 GPU 资源，借用描述对象随即失效。
  * @returns {undefined}
  */
 SceneGISWindSimulation.prototype.destroy = function () {

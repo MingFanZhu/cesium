@@ -223,19 +223,13 @@ function refinePage(layer, page, frameState) {
 }
 
 /**
- * A S3M 1.0 mesh layer using native Model rendering, metadata picking and GPU
- * instancing. Create with {@link SceneGISS3MLayer.fromUrl}, then add to
- * scene.primitives. Supports SCENE3D only.
+ * 使用原生 Model 渲染、元数据拾取和 GPU 实例化的 S3M 1.0 网格图层。通过 {@link SceneGISS3MLayer.fromUrl} 创建后加入 scene.primitives，仅支持 SCENE3D。
  *
- * Planar coordinates are local metres transformed by an explicit modelMatrix;
- * no CRS projection is performed. The layer owns its Models, Worker and requests,
- * but does not own the World. Use camera.flyToBoundingSphere(layer.boundingSphere)
- * to frame it. Picked ModelFeature objects expose s3mId, idKind and geometry;
- * their primitive.id is this layer. Missing authored IDs use idKind="geometry".
+ * 平面坐标是经显式 modelMatrix 变换的局部米制坐标，不进行 CRS 投影。图层拥有自身的 Model、Worker 和请求，不拥有 World。使用 camera.flyToBoundingSphere(layer.boundingSphere) 取景。拾取到的 ModelFeature 提供 s3mId、idKind 和 geometry，其 primitive.id 为此图层。缺失原始 ID 时使用 idKind="geometry"。
  *
  * @alias SceneGISS3MLayer
  * @constructor
- * @param {object} options Internal factory options.
+ * @param {object} options 内部工厂选项。
  */
 function SceneGISS3MLayer(options) {
   if (!options?._config || !options._resource) {
@@ -286,9 +280,7 @@ function SceneGISS3MLayer(options) {
     "maximumScreenSpaceError",
   );
   /**
-   * Whether the layer renders and requests new content. Existing cached content
-   * remains owned until eviction or destroy. Request a frame after changing it
-   * when using Scene.requestRenderMode.
+   * 图层是否渲染并请求新内容。已有缓存内容保留所有权直至逐出或销毁。Scene.requestRenderMode 下修改后须请求一帧。
    * @type {boolean}
    * @default true
    */
@@ -326,22 +318,21 @@ function SceneGISS3MLayer(options) {
 }
 
 /**
- * Loads a S3M 1.0 JSON SCP or iServer layer config. Resolution means config ready;
- * content is requested after the layer is added to a matching Scene.
+ * 加载 S3M 1.0 JSON SCP 或 iServer 图层配置。完成仅表示配置就绪，图层加入匹配 Scene 后才请求内容。
  *
- * @param {string|Resource} url Configuration URL, preserving Resource headers and query parameters.
- * @param {object} [options] Object with the following properties:
- * @param {SceneGISPlanarWorld} [options.world] Explicit live planar World; omit for a Globe.
- * @param {Matrix4} [options.modelMatrix] Local metre coordinates to world coordinates. Required for planar.
- * @param {boolean} [options.show=true] Whether to render and request content.
- * @param {number} [options.lodRangeScale=1] Multiplier for authored distance and pixel LOD ranges.
- * @param {number} [options.maximumScreenSpaceError=16] Threshold for geometric-error range mode.
- * @param {number} [options.maximumDepth=Infinity] Explicit subtree depth cap, with root depth zero.
- * @param {number} [options.maximumRequests=6] Maximum in-flight content pipelines, including decode and GPU preparation.
- * @param {number} [options.maximumCachedTiles=64] Soft content-cache limit; visible coverage and its ancestors are retained.
- * @param {number} [options.maximumCachedBytes=268435456] Soft GPU buffer/texture budget; visible coverage may exceed it.
- * @param {Credit} [options.credit] Optional attribution displayed while rendering.
- * @returns {Promise<SceneGISS3MLayer>} A config-ready layer.
+ * @param {string|Resource} url 配置 URL，保留 Resource 请求头和查询参数。
+ * @param {object} [options] 包含以下属性的对象：
+ * @param {SceneGISPlanarWorld} [options.world] 显式存活平面 World；Globe 时省略。
+ * @param {Matrix4} [options.modelMatrix] 局部米制坐标到世界坐标的变换，平面模式必需。
+ * @param {boolean} [options.show=true] 是否绘制并请求内容。
+ * @param {number} [options.lodRangeScale=1] 设定距离与像素 LOD 范围的倍率。
+ * @param {number} [options.maximumScreenSpaceError=16] 几何误差范围模式的阈值。
+ * @param {number} [options.maximumDepth=Infinity] 显式子树深度上限，根深度为零。
+ * @param {number} [options.maximumRequests=6] 最大进行中内容管线数，包含解码与 GPU 准备。
+ * @param {number} [options.maximumCachedTiles=64] 软内容缓存上限，保留可见覆盖及其祖先。
+ * @param {number} [options.maximumCachedBytes=268435456] 软 GPU 缓冲/纹理预算，可见覆盖可能超过预算。
+ * @param {Credit} [options.credit] 渲染时显示的可选署名。
+ * @returns {Promise<SceneGISS3MLayer>} 配置已就绪的图层。
  */
 SceneGISS3MLayer.fromUrl = async function (url, options = {}) {
   validatePlacement(options);
@@ -360,18 +351,10 @@ SceneGISS3MLayer.fromUrl = async function (url, options = {}) {
 
 Object.defineProperties(SceneGISS3MLayer.prototype, {
   /**
-   * Complete local-metre-to-World placement matrix, including the SCP ENU frame
-   * when the Globe placement was inferred. Assigning replaces that placement;
-   * it is not an extra transform multiplied by the SCP frame.
-   * Assignment clones the input and requests a frame. The getter returns a live
-   * matrix, like Cesium3DTileset.modelMatrix; after editing it in place, request
-   * a frame when using Scene.requestRenderMode.
-   * Normal rendering applies changes to cached and subsequently loaded content,
-   * culling and LOD without decoding again. Pick-only passes retain the last
-   * normal-render placement. boundingSphere reflects edits immediately.
+   * 完整的局部米制到 World 放置矩阵；推断 Globe 放置时包含 SCP ENU 坐标系。赋值会替换整个放置，不是额外乘到 SCP 坐标系上的变换。赋值复制输入并请求一帧。getter 返回实时矩阵，类似 Cesium3DTileset.modelMatrix；原地修改后，在 Scene.requestRenderMode 下须请求一帧。正常渲染将变化应用到缓存及后续加载内容、剔除和 LOD，无需重新解码。仅拾取通道保留上次正常渲染的放置。boundingSphere 会立即反映修改。
    * @memberof SceneGISS3MLayer.prototype
    * @type {Matrix4}
-   * @exception {DeveloperError} The matrix must be finite and affine with nonzero scale.
+   * @exception {DeveloperError} 矩阵须有限、为仿射变换且缩放非零。
    */
   modelMatrix: {
     get: function () {
@@ -392,7 +375,8 @@ Object.defineProperties(SceneGISS3MLayer.prototype, {
       return this._world;
     },
   },
-  /** World-space bounds, available as soon as fromUrl resolves.
+  /**
+   *  世界空间包围体，fromUrl 完成后即可使用。
    * @memberof SceneGISS3MLayer.prototype
    * @type {BoundingSphere}
    * @readonly
@@ -409,8 +393,8 @@ Object.defineProperties(SceneGISS3MLayer.prototype, {
       return BoundingSphere.clone(this._boundingSphere);
     },
   },
-  /** True when the last normal render view has no pending content. Failed
-   * replacements retain parent coverage and are reported by tileFailed.
+  /**
+   *  最近正常渲染视图没有待处理内容时为 True。替换失败时保留父级覆盖，并通过 tileFailed 报告。
    * @memberof SceneGISS3MLayer.prototype
    * @type {boolean}
    * @readonly
@@ -422,7 +406,8 @@ Object.defineProperties(SceneGISS3MLayer.prototype, {
       );
     },
   },
-  /** Receives (error, contentUrl) once per failed content load; no automatic retry.
+  /**
+   *  每次内容加载失败时接收一次 (error, contentUrl)，不自动重试。
    * @memberof SceneGISS3MLayer.prototype
    * @type {Event}
    * @readonly
@@ -432,8 +417,8 @@ Object.defineProperties(SceneGISS3MLayer.prototype, {
       return this._tileFailed;
     },
   },
-  /** Snapshot of requests, failedTiles, cachedTiles, selectedPages, selectedDepth,
-   * pendingTiles, geometryByteLength and texturesByteLength.
+  /**
+   *  requests、failedTiles、cachedTiles、selectedPages、selectedDepth、pendingTiles、geometryByteLength 和 texturesByteLength 的快照。
    * @memberof SceneGISS3MLayer.prototype
    * @type {SceneGISS3MLayer.Statistics}
    * @readonly
@@ -474,14 +459,14 @@ Object.defineProperties(SceneGISS3MLayer.prototype, {
 
 /**
  * @typedef {object} SceneGISS3MLayer.Statistics
- * @property {number} requests Cumulative started tile requests.
- * @property {number} failedTiles Cumulative failed tile loads.
- * @property {number} cachedTiles Resident or loading tiles.
- * @property {number} pendingTiles In-flight content pipelines.
- * @property {number} selectedPages Selected native Models.
- * @property {number} selectedDepth Deepest selected tile depth.
- * @property {number} geometryByteLength Resident GPU geometry bytes.
- * @property {number} texturesByteLength Resident GPU texture bytes.
+ * @property {number} requests 累计启动的瓦片请求数。
+ * @property {number} failedTiles 累计失败瓦片加载数。
+ * @property {number} cachedTiles 驻留或加载中的瓦片数。
+ * @property {number} pendingTiles 进行中的内容管线数。
+ * @property {number} selectedPages 选中的原生 Model 数。
+ * @property {number} selectedDepth 选中瓦片的最大深度。
+ * @property {number} geometryByteLength 驻留 GPU 几何字节数。
+ * @property {number} texturesByteLength 驻留 GPU 纹理字节数。
  */
 
 SceneGISS3MLayer.prototype._wake = function () {
@@ -897,14 +882,14 @@ SceneGISS3MLayer.prototype.update = function (frameState) {
 };
 
 /**
- * @returns {boolean} Whether this layer has been destroyed.
+ * @returns {boolean} 此图层是否已销毁。
  */
 SceneGISS3MLayer.prototype.isDestroyed = function () {
   return false;
 };
 
 /**
- * Releases this layer's requests, Worker and native Models. Never destroys its World.
+ * 释放此图层的请求、Worker 与原生 Model，不销毁其 World。
  * @returns {undefined}
  */
 SceneGISS3MLayer.prototype.destroy = function () {
