@@ -2,18 +2,18 @@
 
 ## Metadata
 
-| Field                  | Value                                                     |
-| ---------------------- | --------------------------------------------------------- |
-| Extension slug         | `engine-distribution`                                     |
-| Status                 | `completed`                                               |
-| Planning model         | `extension`                                               |
-| Active extension plan  | [Distribution](plans/2026-10-29-extension.md)             |
-| Current phase          | C2 completed and reviewed                                 |
-| Active standalone plan | None                                                      |
-| Active phase plan      | None; latest [C2](plans/2026-10-30-c2-chinese-edition.md) |
-| Architecture contact   | Architecture Agent (current task)                         |
-| Execution contact      | Execution Agent (current task)                            |
-| Last updated           | 2026-10-30                                                |
+| Field                  | Value                                                                     |
+| ---------------------- | ------------------------------------------------------------------------- |
+| Extension slug         | `engine-distribution`                                                     |
+| Status                 | `completed`                                                               |
+| Planning model         | `extension`                                                               |
+| Active extension plan  | [Distribution](plans/2026-10-29-extension.md)                             |
+| Current phase          | C2 completed and reviewed                                                 |
+| Active standalone plan | None; latest [Native batch](plans/2026-10-30-native-translation-batch.md) |
+| Active phase plan      | None; latest [C2](plans/2026-10-30-c2-chinese-edition.md)                 |
+| Architecture contact   | Architecture Agent (current task)                                         |
+| Execution contact      | Execution Agent (current task)                                            |
+| Last updated           | 2026-10-30                                                                |
 
 ## Scope
 
@@ -41,7 +41,7 @@ and committed as `05362428b6`; [C2](plans/2026-10-30-c2-chinese-edition.md) is
 
 All 73 owned API source files maintain Chinese prose directly. The 2,337 published owned
 fields include synthetic VERSION and bypass external translation. Native English comments
-remain intact; independent catalogs translate 2,960 of 15,294 native fields. The 12,334 remaining
+remain intact; independent catalogs translate 4,287 of 15,294 native fields. The 11,007 remaining
 native fields retain English, with zero stale/unused entries. Each build overwrites source
 inventory/report without altering maintained catalogs. Historical bilingual delivery in
 [ADR-0206](../../Documentation/SceneGIS/Decisions/ADR-0206-documentation-localization.md) and
@@ -59,6 +59,17 @@ No upstream or runtime changes.
 [reviewed](reviews/2026-10-29-asset-directories.md). SGP-0074 filters directory entries in the
 shared asset stream. Rebuilt artifact has zero empty directories; 8 Node and 7 browser tests pass.
 
+## Latest native translation batch
+
+[Native translation batch](plans/2026-10-30-native-translation-batch.md) is completed and
+[reviewed](reviews/2026-10-30-native-translation-batch.md). Added 1,327 entries and completed
+all 1,476 fields of 18 common scene/camera/imagery/tileset/primitive/entity/data-source roots.
+Native coverage rises from 19.4% to 28.0%; the source-derived report keeps the remaining gaps.
+
+Docs-only build, 22 Node checks and three focused browser docs cases pass. All non-prose
+metadata, types, examples and URLs remain unchanged. Verified source typos are clarified only
+in Chinese; upstream source, generator, runtime and SDK stay intact. No SGP or new open finding.
+
 ## Current handoff
 
 Generate the complete artifact with `npx gulp buildSceneGIS`; docs-only with buildSceneGISDocs.
@@ -72,4 +83,4 @@ resources, both Worlds, Chinese docs, name-only filtering, links and lifecycle. 
 also passes. [SDK guide](../../Documentation/SceneGIS/Distribution.md) and
 [translation maintenance](../../Documentation/i18n/README.md) cover consumption and native updates.
 No SDK edits or upstream-owned files in C1/C2; inherited native JSDoc/lint warnings remain.
-No unresolved new finding or active phase.
+Latest catalog gate is the native batch above. No unresolved new finding or active plan.

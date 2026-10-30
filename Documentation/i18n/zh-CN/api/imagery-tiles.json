@@ -1,0 +1,2118 @@
+{
+  "schemaVersion": 1,
+  "locale": "zh-CN",
+  "entries": [
+    {
+      "id": "Cesium3DTileFeature.getPropertyInherited",
+      "field": "description",
+      "sourceHash": "sha256:5152a983c7fe4732890e3d1b84dea8baa83c1eb814959a1e028c0e1573dcc4e7",
+      "text": "返回给定名称的要素属性副本，检查 3D Tiles 1.0 格式、EXT_structural_metadata 和旧版 EXT_feature_metadata glTF 扩展，以及瓦片集 JSON（3D Tiles 1.1）或 3DTILES_metadata 扩展中的全部元数据。按从具体到一般的顺序匹配名称，返回首个匹配值。检查顺序如下：<ol><li>按语义匹配批次表（结构化元数据）属性</li><li>按属性 ID 匹配批次表（结构化元数据）属性</li><li>按语义匹配内容元数据属性</li><li>按属性匹配内容元数据属性</li><li>按语义匹配瓦片元数据属性</li><li>按属性 ID 匹配瓦片元数据属性</li><li>按语义匹配子树元数据属性</li><li>按属性 ID 匹配子树元数据属性</li><li>按语义匹配组元数据属性</li><li>按属性 ID 匹配组元数据属性</li><li>按语义匹配瓦片集元数据属性</li><li>按属性 ID 匹配瓦片集元数据属性</li><li>否则返回 undefined</li></ol><p>3D Tiles Next 详情参见 3D Tiles 的 {@link https://github.com/CesiumGS/3d-tiles/tree/main/extensions/3DTILES_metadata|3DTILES_metadata 扩展}，以及 glTF 的 {@link https://github.com/CesiumGS/glTF/tree/3d-tiles-next/extensions/2.0/Vendor/EXT_structural_metadata|EXT_structural_metadata 扩展}。旧版 glTF 扩展参见 {@link https://github.com/CesiumGS/glTF/tree/3d-tiles-next/extensions/2.0/Vendor/EXT_feature_metadata|EXT_feature_metadata 扩展}。</p>"
+    },
+    {
+      "id": "Cesium3DTileFeature.getPropertyInherited",
+      "field": "params/batchId/description",
+      "sourceHash": "sha256:334f9b369ab443a12104cc71d21edbc438c1034467bd53f9ff433712d1513038",
+      "text": "要查询属性的要素批次 ID（或要素 ID）。"
+    },
+    {
+      "id": "Cesium3DTileFeature.getPropertyInherited",
+      "field": "params/content/description",
+      "sourceHash": "sha256:ace7e944e34faa69e321ee467bc691c685ba10671594032c079907605600f346",
+      "text": "用于访问元数据的内容对象。"
+    },
+    {
+      "id": "Cesium3DTileFeature.getPropertyInherited",
+      "field": "params/name/description",
+      "sourceHash": "sha256:e002dcd0916c418ca84537298f1b4f1847a778c58f7bf5e8817c527ebea71523",
+      "text": "要素的语义或属性 ID。在每种粒度的元数据中，先检查语义，再检查属性 ID。"
+    },
+    {
+      "id": "Cesium3DTileFeature.getPropertyInherited",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:f75f480b4290acc6dc1f1a208cca56fa45ae3653fec3da384bd298dd80cdce15",
+      "text": "属性值；若要素没有此属性，则返回 <code>undefined</code>。"
+    },
+    {
+      "id": "Cesium3DTileFeature",
+      "field": "classdesc",
+      "sourceHash": "sha256:66c4d8d9b853d4939c96ff5209eceac4de1d929ba6d8ab71f1f5a59f4cb79caa",
+      "text": "{@link Cesium3DTileset} 中的一个要素。<p>提供对瓦片批次表中要素属性的访问，并可分别通过 {@link Cesium3DTileFeature#show} 和 {@link Cesium3DTileFeature#color} 显示/隐藏要素及更改高亮颜色。</p><p>对 <code>Cesium3DTileFeature</code> 的修改仅在瓦片内容的生命周期内有效。若内容因离开视野、需要为可见瓦片腾出缓存空间等原因卸载，可监听 {@link Cesium3DTileset#tileUnload} 保存修改，再监听 {@link Cesium3DTileset#tileVisible} 重新应用。</p><p>不要直接构造此对象。请通过 {@link Cesium3DTileContent#getFeature} 或 {@link Scene#pick} 拾取访问。</p>"
+    },
+    {
+      "id": "Cesium3DTileFeature#color",
+      "field": "description",
+      "sourceHash": "sha256:dc3adf7f9de561cc467084b286d5caed5e308187446a4ddb5d4fbcfb0868c7fb",
+      "text": "获取或设置与要素颜色相乘的高亮颜色。为白色时不改变要素颜色。计算样式颜色时，会为全部要素设置此属性。"
+    },
+    {
+      "id": "Cesium3DTileFeature#featureId",
+      "field": "description",
+      "sourceHash": "sha256:bbc510e6154d42aaf9d8533169b9ee23390570099ae1f4c7f6f0e8e8ac41be52",
+      "text": "获取与此要素关联的要素 ID。对于 3D Tiles 1.0，返回批次 ID；对于 EXT_mesh_features，返回选定要素 ID 集中的要素 ID。"
+    },
+    {
+      "id": "Cesium3DTileFeature#getProperty",
+      "field": "description",
+      "sourceHash": "sha256:7c775d70ea3b66cba255bd2104d3d3a25bacebe3133772a84ebed5dee3e918e6",
+      "text": "返回给定名称的要素属性值副本。使用批次表层次结构时，也包含要素所属类和继承类的属性。"
+    },
+    {
+      "id": "Cesium3DTileFeature#getProperty",
+      "field": "params/name/description",
+      "sourceHash": "sha256:1d563bfdab1974fb0a02ca01600b3df70346dd8d59e7280bd1db72e5105d382b",
+      "text": "区分大小写的属性名称。"
+    },
+    {
+      "id": "Cesium3DTileFeature#getProperty",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:f75f480b4290acc6dc1f1a208cca56fa45ae3653fec3da384bd298dd80cdce15",
+      "text": "属性值；若要素没有此属性，则返回 <code>undefined</code>。"
+    },
+    {
+      "id": "Cesium3DTileFeature#getPropertyIds",
+      "field": "description",
+      "sourceHash": "sha256:91ceb191381fbb4646c05154feb611fc46e925eedbf1011e07de658d598407d0",
+      "text": "返回要素的属性 ID 数组。使用批次表层次结构时，也包含要素所属类和继承类的属性。"
+    },
+    {
+      "id": "Cesium3DTileFeature#getPropertyIds",
+      "field": "params/results/description",
+      "sourceHash": "sha256:0f1f582cfbcab738a0807be7a5a416b2e54e1e5f9471fa3ab4851b4b6025a9a9",
+      "text": "用于保存结果的数组。"
+    },
+    {
+      "id": "Cesium3DTileFeature#getPropertyIds",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:07b3bb19bf1cd34e983a9f64de3f836ad8bc8f7973e3efaf72461dc469ad2da2",
+      "text": "要素的属性 ID。"
+    },
+    {
+      "id": "Cesium3DTileFeature#hasProperty",
+      "field": "description",
+      "sourceHash": "sha256:2e1c2db0e93def31c0fa7220f1303965fbcba2ef6609c2681892b76ce9b0fa52",
+      "text": "返回要素是否包含此属性。使用批次表层次结构时，也包含要素所属类和继承类的属性。"
+    },
+    {
+      "id": "Cesium3DTileFeature#hasProperty",
+      "field": "params/name/description",
+      "sourceHash": "sha256:1d563bfdab1974fb0a02ca01600b3df70346dd8d59e7280bd1db72e5105d382b",
+      "text": "区分大小写的属性名称。"
+    },
+    {
+      "id": "Cesium3DTileFeature#hasProperty",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:cd256c2ab9781ac0aade19a4078af43fc69c89e4352aa0ddc76ce50989136ece",
+      "text": "要素是否包含此属性。"
+    },
+    {
+      "id": "Cesium3DTileFeature#polylinePositions",
+      "field": "description",
+      "sourceHash": "sha256:6a5b91d48129cf7413fe64d45a6ec03810e5551574db00796e5122ca1a0986c9",
+      "text": "获取包含折线 ECEF 位置的类型化数组。若 {@link Cesium3DTileset#vectorKeepDecodedPositions} 为 false，或此要素不是矢量瓦片中的折线，则返回 undefined。"
+    },
+    {
+      "id": "Cesium3DTileFeature#primitive",
+      "field": "description",
+      "sourceHash": "sha256:1825a01b93d71741115ab793c59f6da8877780641af78d10d60fa357f22bf265",
+      "text": "{@link Scene#pick} 返回的全部对象都具有 <code>primitive</code> 属性。此属性返回包含该要素的瓦片集。"
+    },
+    {
+      "id": "Cesium3DTileFeature#setProperty",
+      "field": "description",
+      "sourceHash": "sha256:ffabcc13e8f5fc211b693c13c65412fc8747f71533e65b63aeaeb04f8be78e1a",
+      "text": "设置给定名称的要素属性值。<p>若该名称的属性不存在，则创建它。</p>"
+    },
+    {
+      "id": "Cesium3DTileFeature#setProperty",
+      "field": "exceptions/0/description",
+      "sourceHash": "sha256:62ad3d79724a85ade450969f2aec59b06b2b657e17f3455b211a04638f5f4436",
+      "text": "从批次表层次结构继承的属性是只读的。"
+    },
+    {
+      "id": "Cesium3DTileFeature#setProperty",
+      "field": "params/name/description",
+      "sourceHash": "sha256:1d563bfdab1974fb0a02ca01600b3df70346dd8d59e7280bd1db72e5105d382b",
+      "text": "区分大小写的属性名称。"
+    },
+    {
+      "id": "Cesium3DTileFeature#setProperty",
+      "field": "params/value/description",
+      "sourceHash": "sha256:d7c84e0f1a5a99e586972a02ef155f4eb94505f412a973fddba330e37901eecc",
+      "text": "要复制的属性值。"
+    },
+    {
+      "id": "Cesium3DTileFeature#show",
+      "field": "description",
+      "sourceHash": "sha256:798f9c3403a98333fde5a1d10a7f7222f374401f6865c7168842a0968ae4b097",
+      "text": "获取或设置是否显示要素。计算样式的 show 时，会为全部要素设置此属性。"
+    },
+    {
+      "id": "Cesium3DTileFeature#tileset",
+      "field": "description",
+      "sourceHash": "sha256:fe6c4a32c9ac1fbd7e8f057296a6230898c47a177812bf4a6adca5b8964ac6fa",
+      "text": "获取包含此要素的瓦片集。"
+    },
+    {
+      "id": "Cesium3DTileset.ConstructorOptions",
+      "field": "description",
+      "sourceHash": "sha256:e00af2a70b1900dfeaddc26e2243ec41c64d18e7bba797ef6348e2da4bf40dec",
+      "text": "Cesium3DTileset 构造函数的初始化选项。"
+    },
+    {
+      "id": "Cesium3DTileset.ConstructorOptions",
+      "field": "properties/asynchronouslyLoadImagery/description",
+      "sourceHash": "sha256:694137ab8ee271bf7c53119bad4833e1298eda89187a32eca22e0583ee393356",
+      "text": "是否异步加载覆盖在瓦片集表面的影像。为 <code>true</code> 时，在影像纹理加载完成前，使用瓦片内容的原始纹理显示。为 <code>false</code> 时，在影像就绪前不显示瓦片内容。"
+    },
+    {
+      "id": "Cesium3DTileset.ConstructorOptions",
+      "field": "properties/backFaceCulling/description",
+      "sourceHash": "sha256:2a9afdfb6c8698861824613415b0c5f716aff38d331629cd9a493099374b6e72",
+      "text": "是否剔除背向相机的几何体。为 true 时，背面剔除由 glTF 材质的 doubleSided 属性决定；为 false 时，禁用背面剔除。"
+    },
+    {
+      "id": "Cesium3DTileset.ConstructorOptions",
+      "field": "properties/baseScreenSpaceError/description",
+      "sourceHash": "sha256:e6679b4516bea3f9d26dc7d268ba10c5acc832404b595355ef8b4d7ef19ac9d8",
+      "text": "当 <code>skipLevelOfDetail</code> 为 <code>true</code> 时，开始跳过细节级别之前必须达到的屏幕空间误差。"
+    },
+    {
+      "id": "Cesium3DTileset.ConstructorOptions",
+      "field": "properties/cacheBytes/description",
+      "sourceHash": "sha256:b2674dc0413905e68bacf22eb304d0b39259e47e0b7b370480c7d4083bdf5457",
+      "text": "若缓存包含当前视图不需要的瓦片，则将其裁减到此大小，单位为字节。"
+    },
+    {
+      "id": "Cesium3DTileset.ConstructorOptions",
+      "field": "properties/classificationType/description",
+      "sourceHash": "sha256:6c1ca9ce244c08dc36317f061ff0de6578fb89d91b4306df52f79acb863333d5",
+      "text": "决定此瓦片集对地形、3D Tiles 或两者进行分类。限制条件详见 {@link Cesium3DTileset#classificationType}。"
+    },
+    {
+      "id": "Cesium3DTileset.ConstructorOptions",
+      "field": "properties/clippingPlanes/description",
+      "sourceHash": "sha256:67948081d583f0d3cb4f7b5d1bd84fb2f9e99da9d37fd84fe31351c2dfc018ab",
+      "text": "用于选择性禁用瓦片集渲染的 {@link ClippingPlaneCollection}。"
+    },
+    {
+      "id": "Cesium3DTileset.ConstructorOptions",
+      "field": "properties/clippingPolygons/description",
+      "sourceHash": "sha256:a1d966fa11ec856eba09d111540ce18fbd7a161958edf69fbba961e3f04bf792",
+      "text": "用于选择性禁用瓦片集渲染的 {@link ClippingPolygonCollection}。"
+    },
+    {
+      "id": "Cesium3DTileset.ConstructorOptions",
+      "field": "properties/cullRequestsWhileMoving/description",
+      "sourceHash": "sha256:c519251b3ce90ef2d6e5782c1afc0c1b0e17d4921ef3c1d54f5fd61e36b08666",
+      "text": "优化选项。不请求由于相机移动而在返回时很可能已不再使用的瓦片。此优化仅适用于静止瓦片集。"
+    },
+    {
+      "id": "Cesium3DTileset.ConstructorOptions",
+      "field": "properties/cullRequestsWhileMovingMultiplier/description",
+      "sourceHash": "sha256:a328c8d91beea1a3db73ece477b307c10730919eb0c28051885231ab49cbd4ce",
+      "text": "优化选项。移动期间裁减请求时使用的倍数。值越大，裁减越激进；值越小，裁减越保守。"
+    },
+    {
+      "id": "Cesium3DTileset.ConstructorOptions",
+      "field": "properties/cullWithChildrenBounds/description",
+      "sourceHash": "sha256:90bce0727597acd8cd17fde27dabbf8f159d77c59688a5bf841219776b08fc66",
+      "text": "优化选项。是否使用子瓦片包围体的并集来裁除瓦片。"
+    },
+    {
+      "id": "Cesium3DTileset.ConstructorOptions",
+      "field": "properties/debugColorizeTiles/description",
+      "sourceHash": "sha256:195a64ef392af27af278b08f55dde657a329de48b6456e2eff113cf704d828c0",
+      "text": "仅供调试。为 true 时，为每个瓦片分配随机颜色。"
+    },
+    {
+      "id": "Cesium3DTileset.ConstructorOptions",
+      "field": "properties/debugFreezeFrame/description",
+      "sourceHash": "sha256:68ff36899a21da7b055b7e45772689cd95173ae4a86f197cca19b0957461eaa3",
+      "text": "仅供调试。决定是否只使用上一帧的瓦片进行渲染。"
+    },
+    {
+      "id": "Cesium3DTileset.ConstructorOptions",
+      "field": "properties/debugHeatmapTilePropertyName/description",
+      "sourceHash": "sha256:f2ac2bbf26ea223b2fa75e9c64f01a34572b8f90db4487e15cd75e2e75ac6419",
+      "text": "用于热力图着色的瓦片变量名称。全部已渲染瓦片按各自指定变量值的相对大小着色。"
+    },
+    {
+      "id": "Cesium3DTileset.ConstructorOptions",
+      "field": "properties/debugShowBoundingVolume/description",
+      "sourceHash": "sha256:c531ce12ceea68b86140809ec125488acd03974249f0af567cc451e5ef51b71c",
+      "text": "仅供调试。为 true 时，渲染每个瓦片的包围体。"
+    },
+    {
+      "id": "Cesium3DTileset.ConstructorOptions",
+      "field": "properties/debugShowContentBoundingVolume/description",
+      "sourceHash": "sha256:c125bc2dc874114e73089a9efac15482868d721f064fb11b25ae50dbbfe89ba0",
+      "text": "仅供调试。为 true 时，渲染每个瓦片内容的包围体。"
+    },
+    {
+      "id": "Cesium3DTileset.ConstructorOptions",
+      "field": "properties/debugShowGeometricError/description",
+      "sourceHash": "sha256:65cc867b967e196162a66f93d2d67caff9a536f44dc0d1dc00f2526f62ad2e6a",
+      "text": "仅供调试。为 true 时，绘制标签以标示每个瓦片的几何误差。"
+    },
+    {
+      "id": "Cesium3DTileset.ConstructorOptions",
+      "field": "properties/debugShowMemoryUsage/description",
+      "sourceHash": "sha256:750a4b11c6b8e2237416346f203741f350d3a2647e0cb1593631c92240d7a24b",
+      "text": "仅供调试。为 true 时，绘制标签以标示每个瓦片纹理和几何体占用的内存，单位为 MB。"
+    },
+    {
+      "id": "Cesium3DTileset.ConstructorOptions",
+      "field": "properties/debugShowRenderingStatistics/description",
+      "sourceHash": "sha256:8e6f0550aa5ee73c4ec4c4e53ef4323ec5cec9f39817e3702e00061e9e68fcfc",
+      "text": "仅供调试。为 true 时，绘制标签以标示每个瓦片的命令、点、三角形和要素数量。"
+    },
+    {
+      "id": "Cesium3DTileset.ConstructorOptions",
+      "field": "properties/debugShowUrl/description",
+      "sourceHash": "sha256:c6291c1130ca68a57607c2120177065f1200ce1ac401dbad0612c497d0d0a128",
+      "text": "仅供调试。为 true 时，绘制标签以标示每个瓦片的 URL。"
+    },
+    {
+      "id": "Cesium3DTileset.ConstructorOptions",
+      "field": "properties/debugShowViewerRequestVolume/description",
+      "sourceHash": "sha256:693a36aa5cdc1605a616c3dba89075903828feb61f26863880d3241dc9c135f4",
+      "text": "仅供调试。为 true 时，渲染每个瓦片的观察者请求体积。"
+    },
+    {
+      "id": "Cesium3DTileset.ConstructorOptions",
+      "field": "properties/debugWireframe/description",
+      "sourceHash": "sha256:4e48cf6363af09347007d56c1ed3b4f77cca9e78836d971def7c2561ad0c2c71",
+      "text": "仅供调试。为 true 时，以线框方式渲染每个瓦片的内容。"
+    },
+    {
+      "id": "Cesium3DTileset.ConstructorOptions",
+      "field": "properties/dynamicScreenSpaceError/description",
+      "sourceHash": "sha256:9217e392052b19d81d385d9b2caee667179323818c2dd7658eefc84dbbb5814b",
+      "text": "优化选项。在街道高度的地平线视角中，对远离相机的瓦片使用较低分辨率。这可减少加载数据量并改善瓦片集加载时间，代价是远处画质略有降低。"
+    },
+    {
+      "id": "Cesium3DTileset.ConstructorOptions",
+      "field": "properties/dynamicScreenSpaceErrorDensity/description",
+      "sourceHash": "sha256:5f38fa490734e4ca1b04a7b904539157c07e67daa41e63c141664b4b0a389673",
+      "text": "类似于 {@link Fog#density}，此项控制 {@link Cesium3DTileset#dynamicScreenSpaceError} 优化开始生效的相机距离。较大值会使更靠近相机的瓦片受到影响。"
+    },
+    {
+      "id": "Cesium3DTileset.ConstructorOptions",
+      "field": "properties/dynamicScreenSpaceErrorFactor/description",
+      "sourceHash": "sha256:8edfd8b80ee233db1cb8a599ee4d35ff042e69a34ae980cb38225831cf0a2c20",
+      "text": "控制地平线瓦片 {@link Cesium3DTileset#dynamicScreenSpaceError} 优化强度的参数。较大值会加载较低分辨率瓦片，提高运行性能，但略微降低视觉质量。"
+    },
+    {
+      "id": "Cesium3DTileset.ConstructorOptions",
+      "field": "properties/dynamicScreenSpaceErrorHeightFalloff/description",
+      "sourceHash": "sha256:32fa80411f93fca3c794222ea0235066d547282fa006f48099411e2311c63e6c",
+      "text": "以瓦片集高度比例定义“街道高度”相机视角的范围。相机低于此高度时，{@link Cesium3DTileset#dynamicScreenSpaceError} 优化效果最大，高于此值时逐渐减弱。"
+    },
+    {
+      "id": "Cesium3DTileset.ConstructorOptions",
+      "field": "properties/edgeDisplayMode/description",
+      "sourceHash": "sha256:c9093d7f33483dcbf7b87440363e35415cc027737f8dd5271f8eedf34b088ffb",
+      "text": "控制来自 glTF {@link https://github.com/KhronosGroup/glTF/pull/2479|EXT_mesh_primitive_edge_visibility} 扩展的边缘相对于表面几何体的渲染方式。"
+    },
+    {
+      "id": "Cesium3DTileset.ConstructorOptions",
+      "field": "properties/ellipsoid/description",
+      "sourceHash": "sha256:86c3dcc3028b9339f1e5b2104585e907ec246c43ce1778141e7762ec2a3675d0",
+      "text": "决定地球大小和形状的椭球。"
+    },
+    {
+      "id": "Cesium3DTileset.ConstructorOptions",
+      "field": "properties/enableCollision/description",
+      "sourceHash": "sha256:af7fde29e37cfbc2994ca7a01e8ecef9b0f4f5f9e4bfa3efd3903b774a1a05c7",
+      "text": "为 <code>true</code> 时，启用相机或 CPU 拾取的碰撞检测。在此值为 <code>true</code> 时，若 {@link ScreenSpaceCameraController#enableCollisionDetection} 为 true，则阻止相机进入瓦片集表面以下。此项也影响 {@link HeightReference.CLAMP_TO_GROUND} 将对象贴合到 3D Tiles 表面的行为。若 <code>enableCollision</code> 为 <code>false</code>，实体可能无法正确贴合瓦片集几何体。"
+    },
+    {
+      "id": "Cesium3DTileset.ConstructorOptions",
+      "field": "properties/enableDebugWireframe/description",
+      "sourceHash": "sha256:d5790a82c1087fd84de0dfb71f783828c707cbee2466936ef6c8481e2cb2d446",
+      "text": "仅供调试。在 WebGL1 中，必须为 true 才能使用 debugWireframe。瓦片集创建后不可更改。"
+    },
+    {
+      "id": "Cesium3DTileset.ConstructorOptions",
+      "field": "properties/enablePick/description",
+      "sourceHash": "sha256:187d1c70a29c5e2ebfe7917b69d61af5c5eb51c080aa6e57cc66139fe67bafd7",
+      "text": "是否在 WebGL 1 中允许碰撞检测及使用 <code>pick</code> 进行 CPU 拾取。在 WebGL 2 及以上版本中忽略此项。WebGL 1 下为 true 时，<code>pick</code> 可正确工作，但会占用更多内存；为 false 时，模型内存占用较少，但 <code>pick</code> 始终返回 <code>undefined</code>。瓦片集加载后不可更改。"
+    },
+    {
+      "id": "Cesium3DTileset.ConstructorOptions",
+      "field": "properties/enableShowOutline/description",
+      "sourceHash": "sha256:66a5fe686ee182025e813671be11ee2cb88188dfc38ba071bbbc2138ff6208fb",
+      "text": "是否为使用 {@link https://github.com/KhronosGroup/glTF/tree/master/extensions/2.0/Vendor/CESIUM_primitive_outline|CESIUM_primitive_outline} 扩展的模型启用轮廓。设为 false 可避免加载时的额外几何处理；此时忽略 showOutlines 和 outlineColor 选项。"
+    },
+    {
+      "id": "Cesium3DTileset.ConstructorOptions",
+      "field": "properties/environmentMapOptions/description",
+      "sourceHash": "sha256:63e8ad2fb4a8c79e1010a27a6f33c34b5a0d972d2cb8faaa592f6039b6642f5b",
+      "text": "管理此瓦片集动态环境贴图的属性。"
+    },
+    {
+      "id": "Cesium3DTileset.ConstructorOptions",
+      "field": "properties/featureIdLabel/description",
+      "sourceHash": "sha256:1365d4bf81a7a8290e105747a860326158b11df7b6fe975731889839a41f157d",
+      "text": "用于拾取和样式设置的要素 ID 集标签。对于 EXT_mesh_features，使用要素 ID 的 label 属性；若未指定，使用 \"featureId_N\"，其中 N 为其在 featureIds 数组中的索引。EXT_feature_metadata 没有 label 字段，因此此类要素 ID 集始终标为 \"featureId_N\"，N 为其在全部要素 ID 列表中的索引，列表中要素 ID 顶点属性先于要素 ID 纹理。若 featureIdLabel 为整数 N，则自动转为字符串 \"featureId_N\"。逐图元和逐实例要素 ID 同时存在时，优先使用实例要素 ID。"
+    },
+    {
+      "id": "Cesium3DTileset.ConstructorOptions",
+      "field": "properties/foveatedConeSize/description",
+      "sourceHash": "sha256:51f3f2e9cdbaeb9bc5a26115c9a0516d43854be9121d3f6a5c8ca1bb0dda8050",
+      "text": "优化选项。当 {@link Cesium3DTileset#foveatedScreenSpaceError} 为 true 时，控制决定哪些瓦片延迟加载的锥体大小。锥内瓦片立即加载；锥外瓦片可能根据偏离锥体的程度及屏幕空间误差延迟加载，由 {@link Cesium3DTileset#foveatedInterpolationCallback} 和 {@link Cesium3DTileset#foveatedMinimumScreenSpaceErrorRelaxation} 控制。设为 0.0 时，锥体退化为相机位置沿观察方向的一条线；设为 1.0 时，锥体覆盖相机整个视野，相当于禁用此效果。"
+    },
+    {
+      "id": "Cesium3DTileset.ConstructorOptions",
+      "field": "properties/foveatedInterpolationCallback/description",
+      "sourceHash": "sha256:66b57435df13aaa7ecfbdb90811a1a32eb48bb947ceebf513792d98edcbcaab1",
+      "text": "优化选项。当 {@link Cesium3DTileset#foveatedScreenSpaceError} 为 true 时，控制锥外瓦片的屏幕空间误差提高幅度，在 {@link Cesium3DTileset#foveatedMinimumScreenSpaceErrorRelaxation} 与 {@link Cesium3DTileset#maximumScreenSpaceError} 之间插值。"
+    },
+    {
+      "id": "Cesium3DTileset.ConstructorOptions",
+      "field": "properties/foveatedMinimumScreenSpaceErrorRelaxation/description",
+      "sourceHash": "sha256:03badd9615df649ef1b1f4ca9b050e093f809d652839f72e1d98cc307e30d1cc",
+      "text": "优化选项。当 {@link Cesium3DTileset#foveatedScreenSpaceError} 为 true 时，控制锥外瓦片初始的屏幕空间误差放宽量。根据给定 {@link Cesium3DTileset#foveatedInterpolationCallback}，误差从此瓦片集设置值开始提高，最大至 {@link Cesium3DTileset#maximumScreenSpaceError}。"
+    },
+    {
+      "id": "Cesium3DTileset.ConstructorOptions",
+      "field": "properties/foveatedScreenSpaceError/description",
+      "sourceHash": "sha256:73663679d3da6e8393566badbf03627cba6651a9008de9fa79f0d4961c9b14ac",
+      "text": "优化选项。临时提高屏幕边缘瓦片的屏幕空间误差，以优先加载屏幕中心瓦片。由 {@link Cesium3DTileset#foveatedConeSize} 确定的屏幕中心瓦片全部加载后，屏幕空间误差恢复正常。"
+    },
+    {
+      "id": "Cesium3DTileset.ConstructorOptions",
+      "field": "properties/foveatedTimeDelay/description",
+      "sourceHash": "sha256:c2f5e912c1b9c8729213101c29f768d5849144aa2edea154ffb3b7ba0d4bcffd",
+      "text": "优化选项。当 {@link Cesium3DTileset#foveatedScreenSpaceError} 为 true 时，控制相机停止移动后，开始加载延迟瓦片之前的等待时间，单位为秒。此延迟可避免相机移动时请求屏幕边缘瓦片。设为 0.0 时，立即请求当前视图的全部瓦片。"
+    },
+    {
+      "id": "Cesium3DTileset.ConstructorOptions",
+      "field": "properties/heightReference/description",
+      "sourceHash": "sha256:6962f583288cd76469656878a4550b5df010a5f95ddca9ace1af7efd1a073e6d",
+      "text": "设置矢量瓦片集中要素的 {@link HeightReference}。"
+    },
+    {
+      "id": "Cesium3DTileset.ConstructorOptions",
+      "field": "properties/imageBasedLighting/description",
+      "sourceHash": "sha256:2168c7a68833c2f30fcfb1f00ddb2fdc43266f97be856e3b086c18b73b491386",
+      "text": "管理此瓦片集基于图像照明的属性。"
+    },
+    {
+      "id": "Cesium3DTileset.ConstructorOptions",
+      "field": "properties/immediatelyLoadDesiredLevelOfDetail/description",
+      "sourceHash": "sha256:3b186e2a7a3c6b82b8b46068c8afdd2a92a4e67759715549419af76c5db9aef6",
+      "text": "当 <code>skipLevelOfDetail</code> 为 <code>true</code> 时，仅下载满足最大屏幕空间误差的瓦片。忽略跳级系数，只加载目标细节级别的瓦片。"
+    },
+    {
+      "id": "Cesium3DTileset.ConstructorOptions",
+      "field": "properties/instanceFeatureIdLabel/description",
+      "sourceHash": "sha256:0168e57b182f737d48d938dc7a7eeafee77f9dfdf6c9c0ca6f7b0b7e0b112a95",
+      "text": "用于拾取和样式设置的实例要素 ID 集标签。若 instanceFeatureIdLabel 为整数 N，则自动转为字符串 \"instanceFeatureId_N\"。逐图元和逐实例要素 ID 同时存在时，优先使用实例要素 ID。"
+    },
+    {
+      "id": "Cesium3DTileset.ConstructorOptions",
+      "field": "properties/lightColor/description",
+      "sourceHash": "sha256:776e37dbe2229c0f16e9c407f8869bcf1c2c6371189056cb65b5e5e1951f138f",
+      "text": "模型着色使用的光照颜色。为 <code>undefined</code> 时，使用场景的光照颜色。"
+    },
+    {
+      "id": "Cesium3DTileset.ConstructorOptions",
+      "field": "properties/loadSiblings/description",
+      "sourceHash": "sha256:1d8462b660ff20a60252dea5e74d46019305e994b29cc85b706ad0d9d24b2ecd",
+      "text": "当 <code>skipLevelOfDetail</code> 为 <code>true</code> 时，决定遍历期间是否始终下载可见瓦片的兄弟瓦片。"
+    },
+    {
+      "id": "Cesium3DTileset.ConstructorOptions",
+      "field": "properties/maximumCacheOverflowBytes/description",
+      "sourceHash": "sha256:94dfff74484ecb5d8491b6c98a70893af8979a4cdab4812576885e3af31d86f7",
+      "text": "当前视图需要的内存超过 {@link Cesium3DTileset#cacheBytes} 时，允许缓存额外占用的最大内存，单位为字节。"
+    },
+    {
+      "id": "Cesium3DTileset.ConstructorOptions",
+      "field": "properties/maximumScreenSpaceError/description",
+      "sourceHash": "sha256:41ac4ee5c0d3f8bd1324175bcc8efff8c8e4c9640fc7123f2fd6ddd2c65e58cf",
+      "text": "用于驱动细节级别细化的最大屏幕空间误差。"
+    },
+    {
+      "id": "Cesium3DTileset.ConstructorOptions",
+      "field": "properties/modelForwardAxis/description",
+      "sourceHash": "sha256:22d1ecd8085ec585a20200609350aa8f06b602e8b7960688271c4fd89b80c843",
+      "text": "加载瓦片内容模型时，视为前方的坐标轴。"
+    },
+    {
+      "id": "Cesium3DTileset.ConstructorOptions",
+      "field": "properties/modelMatrix/description",
+      "sourceHash": "sha256:680a5d07b733b3881be75f4e8f6ab888ecc1745668407d83259d48ee01442dcd",
+      "text": "变换瓦片集根瓦片的 4x4 变换矩阵。"
+    },
+    {
+      "id": "Cesium3DTileset.ConstructorOptions",
+      "field": "properties/modelUpAxis/description",
+      "sourceHash": "sha256:ccb209f0d51365f1096a036b0a48e6842fd51d709863b8d2ebdad8a5e895fa00",
+      "text": "加载瓦片内容模型时，视为上方的坐标轴。"
+    },
+    {
+      "id": "Cesium3DTileset.ConstructorOptions",
+      "field": "properties/outlineColor/description",
+      "sourceHash": "sha256:56ed3803bb7cd74623ade9b13216c6c345e04a72df4a6c022f6d6335d816728e",
+      "text": "渲染轮廓时使用的颜色。"
+    },
+    {
+      "id": "Cesium3DTileset.ConstructorOptions",
+      "field": "properties/pointCloudShading/description",
+      "sourceHash": "sha256:344e5013f263fcae85203c9d636d0955f3457033b89532e55ac908ac2c181a61",
+      "text": "构造 {@link PointCloudShading} 对象的选项，用于根据几何误差和光照控制点衰减。"
+    },
+    {
+      "id": "Cesium3DTileset.ConstructorOptions",
+      "field": "properties/preferLeaves/description",
+      "sourceHash": "sha256:90862c682fd96a30336cff5485e8680f1f37a777d986c9fa343ea555d49b9ee6",
+      "text": "优化选项。优先加载叶子瓦片。"
+    },
+    {
+      "id": "Cesium3DTileset.ConstructorOptions",
+      "field": "properties/preloadFlightDestinations/description",
+      "sourceHash": "sha256:fbd9941c906a87ad3699142b9d78b7f8522ed843cfe7688d01b83a438c94ff9e",
+      "text": "优化选项。在相机飞行期间预加载飞行目的地处的瓦片。"
+    },
+    {
+      "id": "Cesium3DTileset.ConstructorOptions",
+      "field": "properties/preloadWhenHidden/description",
+      "sourceHash": "sha256:2b80bdd23198df036e638feefb4565988024e6228deab0fec8f855b6def3c983",
+      "text": "当 <code>tileset.show</code> 为 <code>false</code> 时预加载瓦片。按瓦片集可见的情况加载，但不渲染。"
+    },
+    {
+      "id": "Cesium3DTileset.ConstructorOptions",
+      "field": "properties/progressiveResolutionHeightFraction/description",
+      "sourceHash": "sha256:57fb15e4fdb409d26618e3f01308173c570add2ac97a1ad17d46bff0a00ab59b",
+      "text": "优化选项。若值在 (0.0, 0.5] 范围内，优先加载在降低后的屏幕分辨率 <code>progressiveResolutionHeightFraction*screenHeight</code> 下达到或超过对应屏幕空间误差的瓦片。这有助于快速显示一层瓦片，同时继续加载完整分辨率内容。"
+    },
+    {
+      "id": "Cesium3DTileset.ConstructorOptions",
+      "field": "properties/projectTo2D/description",
+      "sourceHash": "sha256:d79f7d8cd01b9bf1c93acc8b874362fc4db798b71add8b75ff95d6ac09297d22",
+      "text": "是否将瓦片集精确投影到二维。为 true 时，精确投影但占用更多内存；为 false 时，内存占用较少，仍可在二维/哥伦布视图中渲染，但投影位置可能不准确。瓦片集创建后不可更改。"
+    },
+    {
+      "id": "Cesium3DTileset.ConstructorOptions",
+      "field": "properties/scene/description",
+      "sourceHash": "sha256:0a97b0350d837c4226f14f67521261c9fea29d9699164b249563a41b719cae28",
+      "text": "瓦片集将渲染到的 {@link CesiumWidget#scene}。若瓦片集指定 {@link heightReference}，以将点、线和标签等 3D Tiles 矢量内容贴合到地形或 3D Tiles，则必须提供。"
+    },
+    {
+      "id": "Cesium3DTileset.ConstructorOptions",
+      "field": "properties/shadows/description",
+      "sourceHash": "sha256:b538eb03f3fe0ad4ac4d08bf608f344a4fd0709760e15243809fb902a7adfb38",
+      "text": "决定瓦片集是否投射或接收光源产生的阴影。"
+    },
+    {
+      "id": "Cesium3DTileset.ConstructorOptions",
+      "field": "properties/show/description",
+      "sourceHash": "sha256:207946017b1e15cbd0b3a1eb04b64f10f8875f0f29dbbe2ef8b8385df0ae3b26",
+      "text": "决定是否显示瓦片集。"
+    },
+    {
+      "id": "Cesium3DTileset.ConstructorOptions",
+      "field": "properties/showCreditsOnScreen/description",
+      "sourceHash": "sha256:d6fe9de16f37cff2d9aa3f75d563cc07d412e5756b2f4d8496afbcd9e43b2e5a",
+      "text": "是否在屏幕上显示此瓦片集的版权信息。"
+    },
+    {
+      "id": "Cesium3DTileset.ConstructorOptions",
+      "field": "properties/showOutline/description",
+      "sourceHash": "sha256:c00ba378e517d28be15c00381c3c19553e834c45106e7609ba38355951885dd2",
+      "text": "是否显示使用 {@link https://github.com/KhronosGroup/glTF/tree/master/extensions/2.0/Vendor/CESIUM_primitive_outline|CESIUM_primitive_outline} 扩展的模型轮廓。为 true 时显示，为 false 时不显示。"
+    },
+    {
+      "id": "Cesium3DTileset.ConstructorOptions",
+      "field": "properties/skipLevelOfDetail/description",
+      "sourceHash": "sha256:3832e19e6d2e3aab5ba083ebb515b9be8ebb8b02746aad700401087686101d60",
+      "text": "优化选项。决定遍历期间是否跳过细节级别。"
+    },
+    {
+      "id": "Cesium3DTileset.ConstructorOptions",
+      "field": "properties/skipLevels/description",
+      "sourceHash": "sha256:fb570473c2d819a2300adcbab7f40fb85d1dc112bdc1a8c3342b128a59d9963e",
+      "text": "当 <code>skipLevelOfDetail</code> 为 <code>true</code> 时，定义加载瓦片所跳过最少级别数的常量。为 0 时不跳级。与 <code>skipScreenSpaceErrorFactor</code> 配合决定加载哪些瓦片。"
+    },
+    {
+      "id": "Cesium3DTileset.ConstructorOptions",
+      "field": "properties/skipScreenSpaceErrorFactor/description",
+      "sourceHash": "sha256:afec3d8805128528b4d9f530b3052050072ed78a090de0e0cb39d5562bd013fe",
+      "text": "当 <code>skipLevelOfDetail</code> 为 <code>true</code> 时，定义跳级所需最小屏幕空间误差的倍数。与 <code>skipLevels</code> 配合决定加载哪些瓦片。"
+    },
+    {
+      "id": "Cesium3DTileset.ConstructorOptions",
+      "field": "properties/splitDirection/description",
+      "sourceHash": "sha256:614a4c9cd08a4e3183f22659f1d41f62e6d58e6b4b27f118e3e3d385de11715d",
+      "text": "应用于此瓦片集的 {@link SplitDirection} 分屏方式。"
+    },
+    {
+      "id": "Cesium3DTileset.ConstructorOptions",
+      "field": "properties/vectorClassificationOnly/description",
+      "sourceHash": "sha256:aec8b0c5380693c9044affdf3f2bac01027c1eb2ab0241e6c79fa2be8d2eb9e9",
+      "text": "指示仅使用瓦片集中的矢量瓦片进行分类。"
+    },
+    {
+      "id": "Cesium3DTileset.ConstructorOptions",
+      "field": "properties/vectorKeepDecodedPositions/description",
+      "sourceHash": "sha256:a7d026b4a7247aeeb173bae6493edd0173d993083e1ed5423290ea97339fbc8d",
+      "text": "是否在内存中保留矢量瓦片解码后的位置。与 {@link Cesium3DTileFeature.getPolylinePositions} 配合使用。"
+    },
+    {
+      "id": "Cesium3DTileset.foveatedInterpolationCallback",
+      "field": "description",
+      "sourceHash": "sha256:69fc01598294ea3c49d4ac74c7318760b5f95a5c1eb99314998a7574e2943ec6",
+      "text": "优化选项。当 {@link Cesium3DTileset#foveatedScreenSpaceError} 为 true 时，作为回调控制锥外瓦片的屏幕空间误差提高幅度，在 {@link Cesium3DTileset#foveatedMinimumScreenSpaceErrorRelaxation} 与 {@link Cesium3DTileset#maximumScreenSpaceError} 之间插值。"
+    },
+    {
+      "id": "Cesium3DTileset.foveatedInterpolationCallback",
+      "field": "params/p/description",
+      "sourceHash": "sha256:07e74dbf8c3a0f4fab75db84d79ee873a12a5bd54c84b4c65d9ee43d4cf96208",
+      "text": "插值起始值。"
+    },
+    {
+      "id": "Cesium3DTileset.foveatedInterpolationCallback",
+      "field": "params/q/description",
+      "sourceHash": "sha256:a4f15ca9f8cfee88583240a1bc3d85a91f4c8cf6a9f003d797183afb71ac2554",
+      "text": "插值结束值。"
+    },
+    {
+      "id": "Cesium3DTileset.foveatedInterpolationCallback",
+      "field": "params/time/description",
+      "sourceHash": "sha256:096c0d8f290fefc6efef61d94745ad8cf9cf275841f12b039644f84b359625a7",
+      "text": "插值时间，通常在 <code>[0.0, 1.0]</code> 范围内。"
+    },
+    {
+      "id": "Cesium3DTileset.foveatedInterpolationCallback",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:4f43f4fcf7a598cb1055bd64cc5d43f32b0b07ef707d753d3d7acc1404b6d580",
+      "text": "插值后的值。"
+    },
+    {
+      "id": "Cesium3DTileset.fromIonAssetId",
+      "field": "description",
+      "sourceHash": "sha256:fdcaeaad114f3f07db8cc73d5226aa36dc5c9832c3070a1032de6c95500b60c2",
+      "text": "根据 Cesium ion 资源 ID 创建 {@link https://github.com/CesiumGS/3d-tiles/tree/main/specification|3D Tiles 瓦片集}，用于流式加载海量异构三维地理空间数据。"
+    },
+    {
+      "id": "Cesium3DTileset.fromIonAssetId",
+      "field": "exceptions/0/description",
+      "sourceHash": "sha256:f6ac8ac9cbb7ba6b77f769f836e2bae1f3ebb2a05d0726048d3753ad63360523",
+      "text": "瓦片集资源版本不是 0.0、1.0 或 1.1，或瓦片集包含不受支持的必需扩展。"
+    },
+    {
+      "id": "Cesium3DTileset.fromIonAssetId",
+      "field": "params/assetId/description",
+      "sourceHash": "sha256:e37d482d7aed7f418435371895cc23ed69bf576cabad8041c4fa9b3a575577db",
+      "text": "Cesium ion 资源 ID。"
+    },
+    {
+      "id": "Cesium3DTileset.fromUrl",
+      "field": "description",
+      "sourceHash": "sha256:a9163e9b90254cbc58edee1671f79f79e72c166610276b52e18d6f3daf2c1a78",
+      "text": "创建 {@link https://github.com/CesiumGS/3d-tiles/tree/main/specification|3D Tiles 瓦片集}，用于流式加载海量异构三维地理空间数据。"
+    },
+    {
+      "id": "Cesium3DTileset.fromUrl",
+      "field": "exceptions/0/description",
+      "sourceHash": "sha256:f6ac8ac9cbb7ba6b77f769f836e2bae1f3ebb2a05d0726048d3753ad63360523",
+      "text": "瓦片集资源版本不是 0.0、1.0 或 1.1，或瓦片集包含不受支持的必需扩展。"
+    },
+    {
+      "id": "Cesium3DTileset.fromUrl",
+      "field": "params/url/description",
+      "sourceHash": "sha256:61512562a23a156fe899d0cca78328c4a5b890e0ff3274b4a31cc4c54cf4ac52",
+      "text": "瓦片集 JSON 文件的 URL。"
+    },
+    {
+      "id": "Cesium3DTileset.loadJson",
+      "field": "description",
+      "sourceHash": "sha256:350b9d6a50c47a6e3d9e86c74730ea348f9a0df28dffb73fe773ef6d812e5721",
+      "text": "提供用于覆盖瓦片集 JSON 请求方法的 hook，适用于从远程服务器获取瓦片集的场景。"
+    },
+    {
+      "id": "Cesium3DTileset.loadJson",
+      "field": "params/tilesetUrl/description",
+      "sourceHash": "sha256:12f57b62abdcdf6e07daf7b5897006d43812be6bb31433569724478a3fcc4b07",
+      "text": "要获取的 JSON 文件 URL。"
+    },
+    {
+      "id": "Cesium3DTileset.loadJson",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:c37efdacdfa271b516e048a48ea82b13427c388adbb20170da1c0bffba0d0b5d",
+      "text": "兑现为所获取 JSON 数据的 Promise。"
+    },
+    {
+      "id": "Cesium3DTileset",
+      "field": "exceptions/0/description",
+      "sourceHash": "sha256:c43d011a408fdb9ea6ce86854740bb2417f3a39adf6ff4cbbb4d37e50ca59835",
+      "text": "瓦片集必须使用 3D Tiles 0.0 或 1.0 版本。"
+    },
+    {
+      "id": "Cesium3DTileset",
+      "field": "experimental/0",
+      "sourceHash": "sha256:14eae4ad72b4bb73833839140d7b833162823841881a76217e5983ab56b1809b",
+      "text": "通过草案 glTF 扩展 {@link https://github.com/CesiumGS/glTF/tree/draft-splat-spz/extensions/2.0/Khronos/KHR_gaussian_splatting | KHR_gaussian_splatting} 和 {@link https://github.com/CesiumGS/glTF/tree/draft-splat-spz/extensions/2.0/Khronos/KHR_gaussian_splatting_compression_spz_2 | KHR_gaussian_splatting_compression_spz_2} 加载 SPZ 压缩高斯泼溅内容的能力属于实验功能，可能不遵循 Cesium 标准弃用政策而发生变化。"
+    },
+    {
+      "id": "Cesium3DTileset#allTilesLoaded",
+      "field": "description",
+      "sourceHash": "sha256:f8dfc4e452836b581946741a04b607364e1e3c7b22e981fadfd3aaebe3287f4b",
+      "text": "当前帧中所有满足屏幕空间误差要求的瓦片加载完成时触发的事件，表示此视图所需的瓦片集内容已全部加载。<p>此事件在场景完成渲染后的帧末触发。</p>"
+    },
+    {
+      "id": "Cesium3DTileset#asset",
+      "field": "description",
+      "sourceHash": "sha256:aa3de63ea06dd7a3ece58e0c52a604449b30838ca74a3d4b3e27a346e66cb567",
+      "text": "获取瓦片集的 asset 对象，其中包含瓦片集元数据。<p>完整属性集合参见 3D Tiles 规范中的 {@link https://github.com/CesiumGS/3d-tiles/tree/main/specification#reference-asset|asset 模式参考}。</p>"
+    },
+    {
+      "id": "Cesium3DTileset#backFaceCulling",
+      "field": "description",
+      "sourceHash": "sha256:fa770eae7075a04e87d4294ced283cba79120b73662b34b36f02f86b810f4398",
+      "text": "是否剔除背向相机的几何体。为 true 时，背面剔除由 glTF 材质的 doubleSided 属性决定；为 false 时，禁用背面剔除。"
+    },
+    {
+      "id": "Cesium3DTileset#basePath",
+      "field": "description",
+      "sourceHash": "sha256:806e28ca01d9d4d9a40720455f63730c829c83da7ad3b2d39b3201f818e0daef",
+      "text": "瓦片集 JSON 文件中非绝对路径所相对的基础路径。"
+    },
+    {
+      "id": "Cesium3DTileset#baseScreenSpaceError",
+      "field": "description",
+      "sourceHash": "sha256:d8ffffb85e2ccf2b2335ba8bdd0b8eed472cdb74e7d99966408f0baa8230f57c",
+      "text": "开始跳过细节级别之前必须达到的屏幕空间误差。<p>仅在 {@link Cesium3DTileset#skipLevelOfDetail} 为 <code>true</code> 时使用。</p>"
+    },
+    {
+      "id": "Cesium3DTileset#boundingSphere",
+      "field": "description",
+      "sourceHash": "sha256:6db53fb5f7147043c1342f254c8628ee6e7869b4df13e3ea45d287bd2ed12c31",
+      "text": "瓦片集的包围球。"
+    },
+    {
+      "id": "Cesium3DTileset#cacheBytes",
+      "field": "description",
+      "sourceHash": "sha256:1c5789f1b20da9ceb2ae68d89d2bef118f1d3eb99789141696e3279e9f3ee1c0",
+      "text": "缓存瓦片所使用的 GPU 显存量，单位为字节。根据已加载瓦片的几何体、纹理和批次表纹理估算；点云还包括逐点元数据。<p>通过卸载视野外的瓦片来遵守此预算。</p><p>若减小此值需要卸载瓦片，则在下一帧执行卸载。</p><p>若当前视图为满足 {@link Cesium3DTileset#maximumScreenSpaceError} 所确定的目标屏幕空间误差，需要的瓦片大小超过 <code>cacheBytes</code>，则已加载瓦片的内存占用允许超出 <code>cacheBytes</code>，最多额外使用 <code>maximumCacheOverflowBytes</code>。例如，<code>cacheBytes</code> 为 500000，而满足屏幕空间误差需要 600000 字节的瓦片时，若 <code>maximumCacheOverflowBytes</code> 至少为 100000，则可加载 600000 字节的瓦片。这些瓦片离开视野后会被卸载。</p>"
+    },
+    {
+      "id": "Cesium3DTileset#cacheBytes",
+      "field": "exceptions/0/description",
+      "sourceHash": "sha256:1ae7e2f12d7d8b2e80dfd4501db47a0d9e83e81604df94601db4f85bdff533e2",
+      "text": "<code>cacheBytes</code> 的类型必须为 'number'，且大于等于 0。"
+    },
+    {
+      "id": "Cesium3DTileset#classificationType",
+      "field": "description",
+      "sourceHash": "sha256:3514a69c7ada8d0e0a39260bf4bfab91505924602d05483e7eda5c2d04d0bf25",
+      "text": "决定此瓦片集对地形、3D Tiles 或两者进行分类。<p>此选项仅适用于包含批量三维模型、glTF 内容、几何数据或矢量数据的瓦片集。即使未定义此值，矢量和几何数据也必须作为分类体渲染，并默认作用于地形及其他 3D Tiles 瓦片集。</p><p>对批量三维模型和 glTF 瓦片集启用时，glTF 必须满足以下要求和限制：<ul><li>不能包含形变目标、蒙皮或动画。</li><li>不能包含 <code>EXT_mesh_gpu_instancing</code> 扩展。</li><li>只有 TRIANGLES 网格可用于分类其他资源。</li><li>网格必须封闭且无孔洞。</li><li>必须提供 <code>POSITION</code> 语义。</li><li>若同时存在 <code>_BATCHID</code> 和索引缓冲，相同批次 ID 的全部索引必须占据索引缓冲中的连续区段。</li><li>若存在 <code>_BATCHID</code> 但没有索引缓冲，相同批次 ID 的全部位置必须占据位置缓冲中的连续区段。</li></ul></p><p>此外，点和实例化三维模型不支持分类。</p><p>接受分类的 3D Tiles 或地形必须不透明。</p>"
+    },
+    {
+      "id": "Cesium3DTileset#clippingPlanes",
+      "field": "description",
+      "sourceHash": "sha256:67948081d583f0d3cb4f7b5d1bd84fb2f9e99da9d37fd84fe31351c2dfc018ab",
+      "text": "用于选择性禁用瓦片集渲染的 {@link ClippingPlaneCollection}。"
+    },
+    {
+      "id": "Cesium3DTileset#clippingPolygons",
+      "field": "description",
+      "sourceHash": "sha256:a1d966fa11ec856eba09d111540ce18fbd7a161958edf69fbba961e3f04bf792",
+      "text": "用于选择性禁用瓦片集渲染的 {@link ClippingPolygonCollection}。"
+    },
+    {
+      "id": "Cesium3DTileset#colorBlendAmount",
+      "field": "description",
+      "sourceHash": "sha256:d6f4fc24ac71056f5e08b23d6fa4b34b8fa36a8151f540c3bbc98873cee39e81",
+      "text": "当 {@link Cesium3DTileset#colorBlendMode} 为 <code>MIX</code> 时，用于在原始颜色和要素颜色之间线性插值的值。0.0 为原始颜色，1.0 为要素颜色，中间值则为两者混合。"
+    },
+    {
+      "id": "Cesium3DTileset#colorBlendMode",
+      "field": "description",
+      "sourceHash": "sha256:14277e172ba1c35d2b17bb63c01d77832fe38569577b913e4b642ea4bf5b7092",
+      "text": "定义通过 Cesium API 或声明式样式设置的逐要素颜色，如何与要素原始颜色混合，例如 glTF 材质颜色或瓦片中的逐点颜色。"
+    },
+    {
+      "id": "Cesium3DTileset#cullRequestsWhileMoving",
+      "field": "description",
+      "sourceHash": "sha256:c519251b3ce90ef2d6e5782c1afc0c1b0e17d4921ef3c1d54f5fd61e36b08666",
+      "text": "优化选项。不请求由于相机移动而在返回时很可能已不再使用的瓦片。此优化仅适用于静止瓦片集。"
+    },
+    {
+      "id": "Cesium3DTileset#cullRequestsWhileMovingMultiplier",
+      "field": "description",
+      "sourceHash": "sha256:a328c8d91beea1a3db73ece477b307c10730919eb0c28051885231ab49cbd4ce",
+      "text": "优化选项。移动期间裁减请求时使用的倍数。值越大，裁减越激进；值越小，裁减越保守。"
+    },
+    {
+      "id": "Cesium3DTileset#customShader",
+      "field": "description",
+      "sourceHash": "sha256:f13fbb93bc60a8f2dd17d33018d5bf7bedcca5f100746964b58e7e969e0c83ec",
+      "text": "应用于瓦片集中全部瓦片的自定义着色器。仅适用于使用 {@link Model} 的内容。与 {@link Cesium3DTileStyle} 同时使用可能导致未定义行为。"
+    },
+    {
+      "id": "Cesium3DTileset#debugColorizeTiles",
+      "field": "description",
+      "sourceHash": "sha256:66c87120147877bc9d4c63be7bcb0137b8736f768c2cd2d5264e25fcbf0d9f60",
+      "text": "此属性仅供调试，未针对生产环境优化。<p>为 true 时，为每个瓦片分配随机颜色。可用于观察哪些要素属于哪些瓦片，尤其是在加法细化中，父瓦片与子瓦片的要素可能交错显示。</p>"
+    },
+    {
+      "id": "Cesium3DTileset#debugFreezeFrame",
+      "field": "description",
+      "sourceHash": "sha256:59f76491f8a63868cab72ad9d1bc5b13ddbbd556607542a40d3bf45b0f6e6095",
+      "text": "此属性仅供调试，未针对生产环境优化。<p>决定是否只使用上一帧的瓦片渲染。这会将瓦片集“冻结”在上一帧，从而可缩小视图查看先前渲染了哪些内容。</p>"
+    },
+    {
+      "id": "Cesium3DTileset#debugShowBoundingVolume",
+      "field": "description",
+      "sourceHash": "sha256:c53673f1070bec7e4c278e3a2dcb0b342fe298e63e0e208685a687262f0d3678",
+      "text": "此属性仅供调试，未针对生产环境优化。<p>为 true 时，渲染每个可见瓦片的包围体。若瓦片具有内容包围体或为空，则为白色；否则为红色。尚未满足屏幕空间误差并仍向后代细化的瓦片为黄色。</p>"
+    },
+    {
+      "id": "Cesium3DTileset#debugShowContentBoundingVolume",
+      "field": "description",
+      "sourceHash": "sha256:a8dd8279e43b5f7f85c62df42e711297207b367e0885433de8c060b1dde6d571",
+      "text": "此属性仅供调试，未针对生产环境优化。<p>为 true 时，渲染每个可见瓦片内容的包围体。若瓦片具有内容包围体，则为蓝色；否则为红色。</p>"
+    },
+    {
+      "id": "Cesium3DTileset#debugShowGeometricError",
+      "field": "description",
+      "sourceHash": "sha256:508abb15bd27379013a5d2b0f793c7ae4c5dd8680f5018a5da7c8b1cd6167e4e",
+      "text": "此属性仅供调试，未针对生产环境优化。<p>为 true 时，绘制标签以标示每个瓦片的几何误差。</p>"
+    },
+    {
+      "id": "Cesium3DTileset#debugShowMemoryUsage",
+      "field": "description",
+      "sourceHash": "sha256:288abb411b12a8b5258d35170d68e1d85cd0122f1a8108fa9ee7e7f335a96acc",
+      "text": "此属性仅供调试，未针对生产环境优化。<p>为 true 时，绘制标签以标示每个瓦片几何体和纹理的内存占用。</p>"
+    },
+    {
+      "id": "Cesium3DTileset#debugShowRenderingStatistics",
+      "field": "description",
+      "sourceHash": "sha256:e698b96d61d0ff195bf96ec6490d93c81d381bb322790a2024d04c2b2a12fbdb",
+      "text": "此属性仅供调试，未针对生产环境优化。<p>为 true 时，绘制标签以标示每个瓦片的命令、点、三角形和要素数量。</p>"
+    },
+    {
+      "id": "Cesium3DTileset#debugShowUrl",
+      "field": "description",
+      "sourceHash": "sha256:0125cf6fd0f318d4dac9505765405daddf53fd095ca7ad5bbaae5f221e1d030f",
+      "text": "此属性仅供调试，未针对生产环境优化。<p>为 true 时，绘制标签以标示每个瓦片的 URL。</p>"
+    },
+    {
+      "id": "Cesium3DTileset#debugShowViewerRequestVolume",
+      "field": "description",
+      "sourceHash": "sha256:00057685778685b0635c6d80582cfbcb387d09701134b59942c3f131748d9ca3",
+      "text": "此属性仅供调试，未针对生产环境优化。<p>为 true 时，渲染每个瓦片的观察者请求体积。</p>"
+    },
+    {
+      "id": "Cesium3DTileset#debugWireframe",
+      "field": "description",
+      "sourceHash": "sha256:aeafdfbc3c8e0404be5378114b7116d92b385541aebd7dec744ca801a31eb1b9",
+      "text": "此属性仅供调试，未针对生产环境优化。<p>为 true 时，以线框方式渲染每个瓦片的内容。</p>"
+    },
+    {
+      "id": "Cesium3DTileset#destroy",
+      "field": "description",
+      "sourceHash": "sha256:b385add820d9f47d540aad147f1cdf85f05e8c6cb81c3928a59c8fd5f7bd8d69",
+      "text": "销毁此对象持有的 WebGL 资源。显式销毁可确定地释放 WebGL 资源，而不依赖垃圾回收器回收此对象。<br /><br />对象销毁后不应再使用；调用除 <code>isDestroyed</code> 以外的任何函数都会抛出 {@link DeveloperError}。因此，应像示例中那样将返回值（<code>undefined</code>）赋给该对象变量。"
+    },
+    {
+      "id": "Cesium3DTileset#dynamicScreenSpaceError",
+      "field": "description",
+      "sourceHash": "sha256:418f4c89ab76ac3deaf2946594abf74c5f94cfd33f1b9a3d91a455e21d5e08f3",
+      "text": "优化选项。在街道高度的地平线视角中，对远离相机的瓦片使用较低分辨率。这可减少加载数据量并改善瓦片集加载时间，代价是远处画质略有降低。<p>当相机靠近瓦片集地平面并观察地平线时，此优化效果最强。对于 box 和 region 等紧密贴合内容的包围体，结果也更准确。"
+    },
+    {
+      "id": "Cesium3DTileset#dynamicScreenSpaceErrorDensity",
+      "field": "description",
+      "sourceHash": "sha256:4283caad70d1c559d781c51a7d9c38c703a8da455d82341b3c35f2292342ff27",
+      "text": "类似于 {@link Fog#density}，此项控制 {@link Cesium3DTileset#dynamicScreenSpaceError} 优化开始生效的相机距离。较大值会影响更靠近相机的瓦片。此值必须非负。<p>此优化随相机距离按钟形曲线逐渐降低瓦片的屏幕空间误差（SSE），使远处选择较低分辨率瓦片。靠近相机时不调整；较远处的 SSE 最多降低 {@link Cesium3DTileset#dynamicScreenSpaceErrorFactor}，以误差像素数计。</p><p>提高密度会使钟形曲线更窄，从而影响更近的瓦片，类似于让雾靠近相机。</p><p>密度为 0 时，此优化不影响瓦片集。</p>"
+    },
+    {
+      "id": "Cesium3DTileset#dynamicScreenSpaceErrorFactor",
+      "field": "description",
+      "sourceHash": "sha256:e3a0bd52548d0a44719ca9c98686123715bd651a7a616aa79136f57e6a2daa0a",
+      "text": "控制地平线瓦片 {@link Cesium3DTileset#dynamicScreenSpaceError} 优化强度的参数。较大值会加载较低分辨率瓦片，提高运行性能，但略微降低视觉质量。此值必须非负。<p>具体而言，此参数表示远离相机的瓦片可获得的最大屏幕空间误差（SSE）调整量，单位为像素。优化原理详见 {@link Cesium3DTileset#dynamicScreenSpaceErrorDensity}。</p><p>SSE 系数为 0 时，此优化不影响瓦片集。</p>"
+    },
+    {
+      "id": "Cesium3DTileset#dynamicScreenSpaceErrorHeightFalloff",
+      "field": "description",
+      "sourceHash": "sha256:fc00d634672a6b31c6abee440756a405b638696d4cc6a008efec6702164553a1",
+      "text": "以瓦片集高度比例定义 {@link Cesium3DTileset#dynamicScreenSpaceError} 优化的“街道高度”。相机低于此高度时，动态屏幕空间误差优化效果最大，高于此值时逐渐减弱。有效范围为 0.0 至 1.0。<p>"
+    },
+    {
+      "id": "Cesium3DTileset#edgeDisplayMode",
+      "field": "description",
+      "sourceHash": "sha256:829f90c618107289999e2dff1238817cbde62a3f27034190e433459bb2e13985",
+      "text": "控制 glTF {@link https://github.com/KhronosGroup/glTF/pull/2479|EXT_mesh_primitive_edge_visibility} 扩展的边缘相对于表面几何体的渲染方式。未声明该扩展的瓦片内容图元不受影响。"
+    },
+    {
+      "id": "Cesium3DTileset#edgeDisplayMode",
+      "field": "experimental/0",
+      "sourceHash": "sha256:460e31793a0efaefeb54f7cc7c444baaa9285a7f864a724e6670fa3b1fe7bd5e",
+      "text": "此功能使用尚未定稿的 glTF 规范内容，可能不遵循 Cesium 标准弃用政策而发生变化。"
+    },
+    {
+      "id": "Cesium3DTileset#ellipsoid",
+      "field": "description",
+      "sourceHash": "sha256:fb4a1681d118dae00051b389ec191dd712e5fc1315373468480c20e9c5fb314f",
+      "text": "获取描述地球形状的椭球。"
+    },
+    {
+      "id": "Cesium3DTileset#enableCollision",
+      "field": "description",
+      "sourceHash": "sha256:6c8be239d4bd1a6f0426b251a91763d8776cb38859e40e101ec9740425e8136b",
+      "text": "为 <code>true</code> 时，允许相机碰撞或拾取使用碰撞检测。在此值为 <code>true</code> 时，若 {@link ScreenSpaceCameraController#enableCollisionDetection} 为 true，则阻止相机进入瓦片集表面或其下方。若瓦片集包含大量顶点的瓦片，可能影响性能。"
+    },
+    {
+      "id": "Cesium3DTileset#environmentMapManager",
+      "field": "description",
+      "sourceHash": "sha256:2a7e36b288564ef667ef95da8e7c6261454bb68c13c3de99ae3d76f5a27451b8",
+      "text": "管理此模型动态环境贴图的属性，会影响光照。"
+    },
+    {
+      "id": "Cesium3DTileset#examineVectorLinesFunction",
+      "field": "description",
+      "sourceHash": "sha256:08e1ceed4ff0685a9d47c12a84ffa169d6e33cff0474aa6f55453237b46b3fce",
+      "text": "流式加载过程中用于检查矢量线的函数。"
+    },
+    {
+      "id": "Cesium3DTileset#extensions",
+      "field": "description",
+      "sourceHash": "sha256:9821f2d6993cc80eda9f5b23e144b9a098f19de8a57e14448f6f299cbacc0ddf",
+      "text": "获取瓦片集的 extensions 对象属性。"
+    },
+    {
+      "id": "Cesium3DTileset#extras",
+      "field": "description",
+      "sourceHash": "sha256:08dd52bbb742b2c6ac88dc383afec2a143c445c6e52576a879d5c86288f06983",
+      "text": "返回瓦片集 JSON 顶层的 <code>extras</code> 属性，其中包含应用自定义元数据。若不存在 <code>extras</code>，则返回 <code>undefined</code>。"
+    },
+    {
+      "id": "Cesium3DTileset#featureIdLabel",
+      "field": "description",
+      "sourceHash": "sha256:2f5827270fdd229a78b4411dc7a338c7d2cf4e905b951a356261da6b10af1ae8",
+      "text": "用于拾取和样式设置的要素 ID 集标签。<p>对于 EXT_mesh_features，使用要素 ID 的 label 属性；若未指定，使用 \"featureId_N\"，其中 N 为其在 featureIds 数组中的索引。EXT_feature_metadata 没有 label 字段，因此此类要素 ID 集始终标为 \"featureId_N\"，N 为其在全部要素 ID 列表中的索引，列表中要素 ID 顶点属性先于要素 ID 纹理。</p><p>若 featureIdLabel 为整数 N，则自动转为字符串 \"featureId_N\"。逐图元和逐实例要素 ID 同时存在时，优先使用实例要素 ID。</p>"
+    },
+    {
+      "id": "Cesium3DTileset#foveatedConeSize",
+      "field": "description",
+      "sourceHash": "sha256:5b36045c50e4f7018429e084049d341fa15a4b1406adb4459044c4cf10e878f2",
+      "text": "优化选项。当 {@link Cesium3DTileset#foveatedScreenSpaceError} 为 true 时，控制决定哪些瓦片延迟加载的锥体大小。锥内瓦片立即加载；锥外瓦片是否延迟，取决于偏离锥体的程度，以及 {@link Cesium3DTileset#foveatedInterpolationCallback} 和 {@link Cesium3DTileset#foveatedMinimumScreenSpaceErrorRelaxation}。设为 0.0 时，锥体退化为相机位置沿观察方向的一条线；设为 1.0 时，锥体覆盖相机整个视野，相当于禁用此效果。"
+    },
+    {
+      "id": "Cesium3DTileset#foveatedInterpolationCallback",
+      "field": "description",
+      "sourceHash": "sha256:a04b4c1d432e7271e8a4c11fbc600cbd7c58b57a7bdd25af848a0df85d811c4a",
+      "text": "获取或设置控制锥外瓦片屏幕空间误差提高幅度的回调，在 {@link Cesium3DTileset#foveatedMinimumScreenSpaceErrorRelaxation} 与 {@link Cesium3DTileset#maximumScreenSpaceError} 之间插值。"
+    },
+    {
+      "id": "Cesium3DTileset#foveatedMinimumScreenSpaceErrorRelaxation",
+      "field": "description",
+      "sourceHash": "sha256:381d7071310aa2102f74000978421564975d674d60d191c2719892d39ef66724",
+      "text": "优化选项。当 {@link Cesium3DTileset#foveatedScreenSpaceError} 为 true 时，控制锥外瓦片初始的屏幕空间误差放宽量。根据给定 {@link Cesium3DTileset#foveatedInterpolationCallback}，误差从此值开始提高，最大至 {@link Cesium3DTileset#maximumScreenSpaceError}。"
+    },
+    {
+      "id": "Cesium3DTileset#foveatedScreenSpaceError",
+      "field": "description",
+      "sourceHash": "sha256:8cfc8c5e8ed4d5e292db23c5f094d090031905b16adc528cd206e05ce66b7981",
+      "text": "优化选项。临时提高屏幕边缘瓦片的屏幕空间误差，以优先加载屏幕中心瓦片。由 {@link Cesium3DTileset#foveatedConeSize} 确定的屏幕中心瓦片全部加载后，屏幕空间误差恢复正常。"
+    },
+    {
+      "id": "Cesium3DTileset#foveatedTimeDelay",
+      "field": "description",
+      "sourceHash": "sha256:815a475ac912f6d2343d803fdbc8b2650d33059f5bfe7b74ecc1a7687b3d5ab8",
+      "text": "优化选项。当 {@link Cesium3DTileset#foveatedScreenSpaceError} 为 true 时，控制相机停止移动后，开始加载延迟瓦片之前的等待时间，单位为秒。此延迟可避免相机移动时请求屏幕边缘瓦片。设为 0.0 时，立即请求当前视图的全部瓦片。"
+    },
+    {
+      "id": "Cesium3DTileset#getHeight",
+      "field": "description",
+      "sourceHash": "sha256:866000770bc0ba61a73f5ecbeb4c70f6f72617bb4c7b8ca0ea85306753b40e47",
+      "text": "获取给定地理坐标处已加载表面的高度。只考虑已加载瓦片的网格，不一定使用瓦片集可用的最高细节级别。采样点云时，此函数始终返回 undefined。"
+    },
+    {
+      "id": "Cesium3DTileset#getHeight",
+      "field": "params/cartographic/description",
+      "sourceHash": "sha256:bf111eb31bfa5576ff41794731c608828453608c495412e583a00a5ba99f70af",
+      "text": "要查询高度的地理坐标。"
+    },
+    {
+      "id": "Cesium3DTileset#getHeight",
+      "field": "params/scene/description",
+      "sourceHash": "sha256:edf19330c504e907591e46d19e22ef7a21c68a3d3c4494564523fa60a2a3d994",
+      "text": "用于可视化的场景。"
+    },
+    {
+      "id": "Cesium3DTileset#getHeight",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:eba2cd4eb1ca55953c3b9e7d1f479c994ac32fabe88a15e45600bb9c1ff050a3",
+      "text": "此地理坐标处的高度；若无法找到，则返回 undefined。"
+    },
+    {
+      "id": "Cesium3DTileset#hasExtension",
+      "field": "description",
+      "sourceHash": "sha256:356971608fac19b538e38ab4aae21dea0223e2afcd5c0160b6baf46ea529a567",
+      "text": "若瓦片集 JSON 文件在 extensionsUsed 中列出了此扩展，则为 <code>true</code>；否则为 <code>false</code>。"
+    },
+    {
+      "id": "Cesium3DTileset#hasExtension",
+      "field": "params/extensionName/description",
+      "sourceHash": "sha256:e8371d73515faebe072ef8a4eb0da400b624dc3a7c9898696a6321733b47a611",
+      "text": "要检查的扩展名称。"
+    },
+    {
+      "id": "Cesium3DTileset#hasExtension",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:356971608fac19b538e38ab4aae21dea0223e2afcd5c0160b6baf46ea529a567",
+      "text": "若瓦片集 JSON 文件在 extensionsUsed 中列出了此扩展，则为 <code>true</code>；否则为 <code>false</code>。"
+    },
+    {
+      "id": "Cesium3DTileset#heightReference",
+      "field": "description",
+      "sourceHash": "sha256:03e7c685789a8a88917ab720fd4a39064d19890a4c611bb0c3141a5a058e82c7",
+      "text": "指定高度是否相对于地形、3D Tiles 或两者。<p>此项仅适用于含矢量数据瓦片集中的点要素。必须通过 options.scene 传入 Viewer 的场景。</p>"
+    },
+    {
+      "id": "Cesium3DTileset#imageBasedLighting",
+      "field": "description",
+      "sourceHash": "sha256:7c1c47d3565dd95295cf5d1146efd1f979e01b90fd3aeb0d45274604a351b50e",
+      "text": "管理此瓦片集基于图像照明的属性。"
+    },
+    {
+      "id": "Cesium3DTileset#imageryLayers",
+      "field": "description",
+      "sourceHash": "sha256:3718991cc4af96eb8b8319f33fc8340004f02209e9bb81e94e364e5c61794bdd",
+      "text": "提供二维地理配准影像数据的 <code>ImageryLayer</code> 对象集合，影像将覆盖渲染在瓦片集之上。影像会贴覆到 glTF、B3DM、PNTS 或 GeoJSON 瓦片内容上。"
+    },
+    {
+      "id": "Cesium3DTileset#immediatelyLoadDesiredLevelOfDetail",
+      "field": "description",
+      "sourceHash": "sha256:5a1bfa3550139d2850361f8f72e8a1a16fe1f464d1b9c6758921452555b72d33",
+      "text": "为 true 时，仅下载满足最大屏幕空间误差的瓦片。忽略跳级系数，只加载目标细节级别的瓦片。<p>仅在 {@link Cesium3DTileset#skipLevelOfDetail} 为 <code>true</code> 时使用。</p>"
+    },
+    {
+      "id": "Cesium3DTileset#initialTilesLoaded",
+      "field": "description",
+      "sourceHash": "sha256:fc24685d763f1354dd529699b9cbefe53a47594203b6d4018889f526ea4bc954",
+      "text": "当前帧中所有满足屏幕空间误差要求的瓦片加载完成时触发的事件。仅在初始视图的全部瓦片加载完成时触发一次。<p>此事件在场景完成渲染后的帧末触发。</p>"
+    },
+    {
+      "id": "Cesium3DTileset#instanceFeatureIdLabel",
+      "field": "description",
+      "sourceHash": "sha256:bf00ca874cdd7962bdd6cc420d5b1b0e2895b472a90865ef009ca1f3e92e049d",
+      "text": "用于拾取和样式设置的实例要素 ID 集标签。<p>若 instanceFeatureIdLabel 为整数 N，则自动转为字符串 \"instanceFeatureId_N\"。逐图元和逐实例要素 ID 同时存在时，优先使用实例要素 ID。</p>"
+    },
+    {
+      "id": "Cesium3DTileset#isDestroyed",
+      "field": "description",
+      "sourceHash": "sha256:aea7b697937631c90ae3fc0ec55b81ba0ddc7abe4d6045848b2031f9bed60091",
+      "text": "若此对象已销毁，返回 true；否则返回 false。<br /><br />对象销毁后不应再使用；调用除 <code>isDestroyed</code> 以外的任何函数都会抛出 {@link DeveloperError}。"
+    },
+    {
+      "id": "Cesium3DTileset#lightColor",
+      "field": "description",
+      "sourceHash": "sha256:8992f1f720b9c1fc674b80b813a9a1e4c9a27af55a50f304660c91eb4110382e",
+      "text": "模型着色使用的光照颜色。为 <code>undefined</code> 时，使用场景的光照颜色。<p>例如，设置 <code>tileset.imageBasedLighting.imageBasedLightingFactor = new Cartesian2(0.0, 0.0)</code> 禁用额外光源后，瓦片集会明显变暗。此时，提高光源强度可使瓦片集更亮。</p>"
+    },
+    {
+      "id": "Cesium3DTileset#loadProgress",
+      "field": "description",
+      "sourceHash": "sha256:ea538d90c532736a5268de4c63e45bef019a097a16afcbacb5e612c2952cd4b4",
+      "text": "指示新瓦片加载进度的事件。请求新瓦片、请求的瓦片下载完成，以及下载内容处理完成可供渲染时，均会触发。<p>事件监听器接收待处理的瓦片请求数 <code>numberOfPendingRequests</code> 和正在处理的瓦片数 <code>numberOfTilesProcessing</code>。</p><p>此事件在场景完成渲染后的帧末触发。</p>"
+    },
+    {
+      "id": "Cesium3DTileset#loadSiblings",
+      "field": "description",
+      "sourceHash": "sha256:6e21f417722971b4450060fc23a7e58f9620782e3ceb5a6cf394b949521b718c",
+      "text": "决定遍历期间是否始终下载可见瓦片的兄弟瓦片。这可用于确保观察者向左或向右转动时，瓦片已经可用。<p>仅在 {@link Cesium3DTileset#skipLevelOfDetail} 为 <code>true</code> 时使用。</p>"
+    },
+    {
+      "id": "Cesium3DTileset#makeStyleDirty",
+      "field": "description",
+      "sourceHash": "sha256:432c98c23758c8949e4801c31065157b6c9252c1f754d7037a82b594f19e96d4",
+      "text": "将瓦片集的 {@link Cesium3DTileset#style} 标为需要更新，强制所有要素在下一次可见帧中重新计算样式。"
+    },
+    {
+      "id": "Cesium3DTileset#maximumCacheOverflowBytes",
+      "field": "description",
+      "sourceHash": "sha256:45af93040beaf68d67035887fa86ff44369f79ea9b2f482cc34dcdac94bddc68",
+      "text": "用于缓存瓦片的额外 GPU 显存上限，单位为字节。<p>若当前视图为满足 {@link Cesium3DTileset#maximumScreenSpaceError} 所确定的目标屏幕空间误差，所需瓦片大小超过 <code>cacheBytes</code> 与 <code>maximumCacheOverflowBytes</code> 之和，则调整 {@link Cesium3DTileset#memoryAdjustedScreenSpaceError}，直到满足调整后误差要求的瓦片占用小于 <code>cacheBytes</code> 与 <code>maximumCacheOverflowBytes</code> 之和。</p>"
+    },
+    {
+      "id": "Cesium3DTileset#maximumCacheOverflowBytes",
+      "field": "exceptions/0/description",
+      "sourceHash": "sha256:ae121c1528134cefb809b24ffca9f7d90b5eb0878b410af76b2e772794d8f213",
+      "text": "<code>maximumCacheOverflowBytes</code> 的类型必须为 'number'，且大于等于 0。"
+    },
+    {
+      "id": "Cesium3DTileset#maximumScreenSpaceError",
+      "field": "description",
+      "sourceHash": "sha256:0441aef336419abb8f3a82fe9a6feacfd8a266d871dad3511ed4f7bae50775ab",
+      "text": "用于驱动细节级别细化的最大屏幕空间误差。此值有助于决定瓦片何时向后代细化，因此是平衡性能与视觉质量的关键。<p>瓦片屏幕空间误差近似等于：在瓦片位置渲染一个半径为其<b>几何误差</b>的球体时，球体在屏幕上的像素宽度。若此值超过 <code>maximumScreenSpaceError</code>，瓦片会向后代细化。</p><p>可能需要根据瓦片集调整 <code>maximumScreenSpaceError</code> 以取得合适平衡。较大值可提升性能，但会降低视觉质量。</p>"
+    },
+    {
+      "id": "Cesium3DTileset#maximumScreenSpaceError",
+      "field": "exceptions/0/description",
+      "sourceHash": "sha256:8fd5482a756a9c85990c5348add16a975cf5e9cc9a99f85856114852c80b770c",
+      "text": "<code>maximumScreenSpaceError</code> 必须大于等于零。"
+    },
+    {
+      "id": "Cesium3DTileset#modelMatrix",
+      "field": "description",
+      "sourceHash": "sha256:e309d11242760a1ca8c537250544c52565f54838778c3850edf90cd50043eaa4",
+      "text": "变换整个瓦片集的 4x4 变换矩阵。"
+    },
+    {
+      "id": "Cesium3DTileset#outlineColor",
+      "field": "description",
+      "sourceHash": "sha256:56ed3803bb7cd74623ade9b13216c6c345e04a72df4a6c022f6d6335d816728e",
+      "text": "渲染轮廓时使用的颜色。"
+    },
+    {
+      "id": "Cesium3DTileset#pointCloudShading",
+      "field": "description",
+      "sourceHash": "sha256:0fddd6782b482cd9dc1499a712b2f389578d1c0bab01f049a1caf6989db4fbc7",
+      "text": "根据几何误差和眼穹照明控制点大小的选项。"
+    },
+    {
+      "id": "Cesium3DTileset#preferLeaves",
+      "field": "description",
+      "sourceHash": "sha256:90862c682fd96a30336cff5485e8680f1f37a777d986c9fa343ea555d49b9ee6",
+      "text": "优化选项。优先加载叶子瓦片。"
+    },
+    {
+      "id": "Cesium3DTileset#preloadFlightDestinations",
+      "field": "description",
+      "sourceHash": "sha256:1df7822a40d84b2dc9d85ffb2505bfb816e628639bf8dbb9d18aba5f84e9d1e6",
+      "text": "优化选项。在相机飞行期间获取目的地处的瓦片。"
+    },
+    {
+      "id": "Cesium3DTileset#preloadWhenHidden",
+      "field": "description",
+      "sourceHash": "sha256:2b80bdd23198df036e638feefb4565988024e6228deab0fec8f855b6def3c983",
+      "text": "当 <code>tileset.show</code> 为 <code>false</code> 时预加载瓦片。按瓦片集可见的情况加载，但不渲染。"
+    },
+    {
+      "id": "Cesium3DTileset#progressiveResolutionHeightFraction",
+      "field": "description",
+      "sourceHash": "sha256:57fb15e4fdb409d26618e3f01308173c570add2ac97a1ad17d46bff0a00ab59b",
+      "text": "优化选项。若值在 (0.0, 0.5] 范围内，优先加载在降低后的屏幕分辨率 <code>progressiveResolutionHeightFraction*screenHeight</code> 下达到或超过对应屏幕空间误差的瓦片。这有助于快速显示一层瓦片，同时继续加载完整分辨率内容。"
+    },
+    {
+      "id": "Cesium3DTileset#properties",
+      "field": "description",
+      "sourceHash": "sha256:b129daf53db49484d128712a6560426c4833e116d30b3ce28bdc057e14d1b9f1",
+      "text": "获取瓦片集的属性字典对象，其中包含逐要素属性的元数据。<p>完整属性集合参见 3D Tiles 规范中的 {@link https://github.com/CesiumGS/3d-tiles/tree/main/specification#reference-properties|properties 模式参考}。</p>"
+    },
+    {
+      "id": "Cesium3DTileset#resource",
+      "field": "description",
+      "sourceHash": "sha256:51d7fe9aaca438c4ab8a640051dc17e7128875f9de396dcd60cfe530c808652f",
+      "text": "用于获取瓦片集 JSON 文件的资源。"
+    },
+    {
+      "id": "Cesium3DTileset#root",
+      "field": "description",
+      "sourceHash": "sha256:1527650ee45b5942fe7cb2b7c15fbe5ae448571004671492815814cdb9c599fd",
+      "text": "根瓦片。"
+    },
+    {
+      "id": "Cesium3DTileset#scene",
+      "field": "description",
+      "sourceHash": "sha256:0a97b0350d837c4226f14f67521261c9fea29d9699164b249563a41b719cae28",
+      "text": "瓦片集将渲染到的 {@link CesiumWidget#scene}。若瓦片集指定 {@link heightReference}，以将点、线和标签等 3D Tiles 矢量内容贴合到地形或 3D Tiles，则必须提供。"
+    },
+    {
+      "id": "Cesium3DTileset#shadows",
+      "field": "description",
+      "sourceHash": "sha256:127ed6d4e446366684db0dc9cae04992f2097e687011d88c564dbb832c95ddd2",
+      "text": "决定瓦片集是否投射或接收光源产生的阴影。<p>启用阴影会影响性能。投射阴影的瓦片集必须渲染两次，一次从相机视角，一次从光源视角。</p><p>仅当 {@link Viewer#shadows} 为 <code>true</code> 时渲染阴影。</p>"
+    },
+    {
+      "id": "Cesium3DTileset#show",
+      "field": "description",
+      "sourceHash": "sha256:207946017b1e15cbd0b3a1eb04b64f10f8875f0f29dbbe2ef8b8385df0ae3b26",
+      "text": "决定是否显示瓦片集。"
+    },
+    {
+      "id": "Cesium3DTileset#showCreditsOnScreen",
+      "field": "description",
+      "sourceHash": "sha256:3f638e25cbf6c231bbe30da83168bd5c6cc954cba1b1e3b7c23d709b67b555ea",
+      "text": "决定是否在屏幕上显示瓦片集的版权信息。"
+    },
+    {
+      "id": "Cesium3DTileset#showOutline",
+      "field": "description",
+      "sourceHash": "sha256:7f0ef4838f172aef1629509a37b04e0763a6a16f2ddd641ac691d39d31460d94",
+      "text": "是否显示使用 {@link https://github.com/KhronosGroup/glTF/tree/master/extensions/2.0/Vendor/CESIUM_primitive_outline|CESIUM_primitive_outline} 扩展的模型轮廓。为 true 时显示，为 false 时不显示。"
+    },
+    {
+      "id": "Cesium3DTileset#skipLevelOfDetail",
+      "field": "description",
+      "sourceHash": "sha256:f7b27ce5a4e51ca44910d768276abd56d7fcbf6adee47aad889bc115060a5b1c",
+      "text": "优化选项。决定遍历期间是否跳过细节级别。<p>替换细化遍历的常规策略是将树的全部层级保存在内存中，并要求所有子瓦片加载后父瓦片才能细化。此优化可完全跳过树中的部分层级，并允许子瓦片与父瓦片同时渲染，从而显著减少瓦片集所需内存。</p>"
+    },
+    {
+      "id": "Cesium3DTileset#skipLevels",
+      "field": "description",
+      "sourceHash": "sha256:b0c538ffd3004b444b61d354345a33850510c54bf67c4f05c657c5a757b73825",
+      "text": "定义加载瓦片时所跳过最少级别数的常量。为 0 时不跳级。例如，若瓦片位于第 1 级，则仅加载层级大于 2 的瓦片。<p>仅在 {@link Cesium3DTileset#skipLevelOfDetail} 为 <code>true</code> 时使用。</p>"
+    },
+    {
+      "id": "Cesium3DTileset#skipScreenSpaceErrorFactor",
+      "field": "description",
+      "sourceHash": "sha256:5bf85aca5cf162c870fce819b3f9220acf1f7eea4bbc6e3013dcd7c3099f457a",
+      "text": "定义跳级所需最小屏幕空间误差的倍数。例如，若瓦片的屏幕空间误差为 100，则仅加载叶子瓦片，或屏幕空间误差满足 <code><= 100 / skipScreenSpaceErrorFactor</code> 的瓦片。<p>仅在 {@link Cesium3DTileset#skipLevelOfDetail} 为 <code>true</code> 时使用。</p>"
+    },
+    {
+      "id": "Cesium3DTileset#splitDirection",
+      "field": "description",
+      "sourceHash": "sha256:d4bd497c60a4ec4039a40e6ec6ae860ab6d8fd5e63de3d345f079976b5bb0455",
+      "text": "应用于此瓦片集的 {@link SplitDirection}。"
+    },
+    {
+      "id": "Cesium3DTileset#style",
+      "field": "description",
+      "sourceHash": "sha256:8081a79ea4295215ea6f30ac71c55760f5b99ca18cd7f69cf28a42204cd47ac5",
+      "text": "使用 {@link https://github.com/CesiumGS/3d-tiles/tree/main/specification/Styling|3D Tiles 样式语言} 定义并应用于瓦片集中每个要素的样式。<p>赋值 <code>undefined</code> 可移除样式，将瓦片集外观恢复为未应用样式时的默认状态。</p><p>样式在触发 {@link Cesium3DTileset#tileVisible} 事件之前应用，因此 <code>tileVisible</code> 中的代码可在样式应用后手动设置要素属性，例如颜色和显示状态。赋予新样式时，所有手动设置的属性都会被覆盖。</p><p>使用恒为 \"true\" 的条件，为未被前置条件覆盖的对象指定 Color；否则使用默认颜色 Cesium.Color.White。同样，可使用恒为 \"true\" 的条件指定其 show 属性；否则使用默认显示值 true。</p>"
+    },
+    {
+      "id": "Cesium3DTileset#tileFailed",
+      "field": "description",
+      "sourceHash": "sha256:7012f1c2ce23cf499d517f2ae1153667cc12e1c9b7fa51831a068f70a7c427ce",
+      "text": "指示瓦片内容加载失败的事件。<p>若没有事件监听器，错误信息会输出到控制台。</p><p>传给监听器的错误对象包含两个属性：<ul><li><code>url</code>：加载失败的瓦片 URL。</li><li><code>message</code>：错误信息。</li></ul><p>若瓦片包含多个内容，每个发生错误的内部内容分别触发一次此事件。</p>"
+    },
+    {
+      "id": "Cesium3DTileset#tileLoad",
+      "field": "description",
+      "sourceHash": "sha256:32bd5042c49ece2df05ce9f5e3714d34bccdafa31316265b90691b80eed263ad",
+      "text": "指示瓦片内容加载完成的事件。<p>监听器接收已加载的 {@link Cesium3DTile}。</p><p>此事件在帧渲染期间的瓦片集遍历过程中触发，使对瓦片的更新可在同一帧生效。不要在事件监听器中创建或修改 Cesium 实体或图元。</p>"
+    },
+    {
+      "id": "Cesium3DTileset#tilesLoaded",
+      "field": "description",
+      "sourceHash": "sha256:bd3778ae129009a15d45846f099cee8867dd1293d69cfb714c62a5844d4d1773",
+      "text": "为 <code>true</code> 时，当前帧中所有满足屏幕空间误差要求的瓦片均已加载，表示此视图所需的瓦片集内容已全部加载。"
+    },
+    {
+      "id": "Cesium3DTileset#tileUnload",
+      "field": "description",
+      "sourceHash": "sha256:3c5323a58267c8cf26cf78aacaf97789ee10852161031f08e4696557324ea10e",
+      "text": "指示瓦片内容卸载的事件。<p>监听器接收被卸载的 {@link Cesium3DTile}。</p><p>此事件在帧渲染期间、瓦片内容卸载前立即触发，使监听器仍可访问瓦片内容。不要在事件监听器中创建或修改 Cesium 实体或图元。</p>"
+    },
+    {
+      "id": "Cesium3DTileset#tileVisible",
+      "field": "description",
+      "sourceHash": "sha256:30b7433a663944fc4530b26672bff692d2aec551d0ea9be739f0aff90e9193a2",
+      "text": "每帧为每个可见瓦片触发一次，可用于手动设置瓦片集样式。<p>监听器接收可见的 {@link Cesium3DTile}。</p><p>此事件在帧渲染期间的瓦片集遍历过程中触发，使对瓦片的更新可在同一帧生效。不要在事件监听器中创建或修改 Cesium 实体或图元。</p>"
+    },
+    {
+      "id": "Cesium3DTileset#timeSinceLoad",
+      "field": "description",
+      "sourceHash": "sha256:437c32b591e50fc12b96e5e06debd0a7d5cfb1bd1c4da67444c53f6ea3a78a4d",
+      "text": "返回瓦片集加载并首次更新后经过的时间，单位为毫秒。"
+    },
+    {
+      "id": "Cesium3DTileset#totalMemoryUsageInBytes",
+      "field": "description",
+      "sourceHash": "sha256:ea5cedcb5e9999ddadfbf31f6e9e5be26d89b5110ee1ca77a20b67480713c233",
+      "text": "瓦片集使用的 GPU 显存总量，单位为字节。根据已加载瓦片的几何体、纹理、批次表纹理和二进制元数据估算。"
+    },
+    {
+      "id": "Cesium3DTileset#trimLoadedTiles",
+      "field": "description",
+      "sourceHash": "sha256:aa893bcfb3809059ca9f24429f9f398c7ed214511d5bff2537f8aac737db8369",
+      "text": "卸载上一帧未被选中的全部瓦片。可用于显式管理瓦片缓存，使已加载瓦片总量降至 {@link Cesium3DTileset#cacheBytes} 以下。<p>卸载在下一帧进行，以使全部 WebGL 删除调用都发生在渲染循环内。</p>"
+    },
+    {
+      "id": "Cesium3DTileset#vectorClassificationOnly",
+      "field": "description",
+      "sourceHash": "sha256:aec8b0c5380693c9044affdf3f2bac01027c1eb2ab0241e6c79fa2be8d2eb9e9",
+      "text": "指示仅使用瓦片集中的矢量瓦片进行分类。"
+    },
+    {
+      "id": "Cesium3DTileset#vectorKeepDecodedPositions",
+      "field": "description",
+      "sourceHash": "sha256:3da6dcf4322757052aa1999d63a6aa3d5af547a603d8b95f3dbc99abcdfafcbe",
+      "text": "是否在内存中保留矢量瓦片解码后的位置。与 {@link Cesium3DTileFeature.getPolylinePositions} 配合使用。"
+    },
+    {
+      "id": "Cesium3DTileStyle",
+      "field": "description",
+      "sourceHash": "sha256:951f2ae8b8fdc7d01a095c465d30af97cbc703b36c2e2f7a2212f1afa95ac091",
+      "text": "应用于 {@link Cesium3DTileset} 的样式。<p>计算使用 {@link https://github.com/CesiumGS/3d-tiles/tree/main/specification/Styling|3D Tiles 样式语言} 定义的表达式。</p>"
+    },
+    {
+      "id": "Cesium3DTileStyle",
+      "field": "params/style/description",
+      "sourceHash": "sha256:41a8f8be04548e2f4692682ee8640bbb6e502bae49d8e6a8a1ff142e38487d7d",
+      "text": "定义样式的对象。"
+    },
+    {
+      "id": "Cesium3DTileStyle#anchorLineColor",
+      "field": "description",
+      "sourceHash": "sha256:7db60a465cbaaa3ca2c7ca6586f3ee1e3f0cf764259a968503ca1eddc7d19316",
+      "text": "获取或设置用于计算样式 <code>anchorLineColor</code> 属性的 {@link StyleExpression} 对象。也可使用定义颜色样式的字符串或对象。getter 返回内部的 {@link Expression} 或 {@link ConditionsExpression}，可能与传给 setter 的值不同。<p>表达式必须返回 <code>Color</code>。</p><p>此表达式仅适用于矢量瓦片中的点要素。</p>"
+    },
+    {
+      "id": "Cesium3DTileStyle#anchorLineEnabled",
+      "field": "description",
+      "sourceHash": "sha256:2a0233e886819413540bc5f11acdd76e113ddebe80cc21788c3db75d90ba19db",
+      "text": "获取或设置用于计算样式 <code>anchorLineEnabled</code> 属性的 {@link StyleExpression} 对象。也可使用定义布尔样式的字符串或对象。getter 返回内部的 {@link Expression} 或 {@link ConditionsExpression}，可能与传给 setter 的值不同。<p>表达式必须返回 <code>Boolean</code>。</p><p>此表达式仅适用于矢量瓦片中的点要素。</p>"
+    },
+    {
+      "id": "Cesium3DTileStyle#backgroundColor",
+      "field": "description",
+      "sourceHash": "sha256:47fc1f4c54976298f98f3a9cbb1241b2ba51d5d3efb89d5b4a9884358534ad68",
+      "text": "获取或设置用于计算样式 <code>backgroundColor</code> 属性的 {@link StyleExpression} 对象。也可使用定义颜色样式的字符串或对象。getter 返回内部的 {@link Expression} 或 {@link ConditionsExpression}，可能与传给 setter 的值不同。<p>表达式必须返回 <code>Color</code>。</p><p>此表达式仅适用于矢量瓦片中的点要素。</p>"
+    },
+    {
+      "id": "Cesium3DTileStyle#backgroundEnabled",
+      "field": "description",
+      "sourceHash": "sha256:2081904a388a387b6673efa1437a196643ae2a275d1b9253434692616eeac73a",
+      "text": "获取或设置用于计算样式 <code>backgroundEnabled</code> 属性的 {@link StyleExpression} 对象。也可使用定义布尔样式的字符串或对象。getter 返回内部的 {@link Expression} 或 {@link ConditionsExpression}，可能与传给 setter 的值不同。<p>表达式必须返回 <code>Boolean</code>。</p><p>此表达式仅适用于矢量瓦片中的点要素。</p>"
+    },
+    {
+      "id": "Cesium3DTileStyle#backgroundPadding",
+      "field": "description",
+      "sourceHash": "sha256:cd5276d5dd7063ae1f407d751988798db679f1b8420525cec473833353c07f40",
+      "text": "获取或设置用于计算样式 <code>backgroundPadding</code> 属性的 {@link StyleExpression} 对象。也可使用定义vec2样式的字符串或对象。getter 返回内部的 {@link Expression} 或 {@link ConditionsExpression}，可能与传给 setter 的值不同。<p>表达式必须返回 <code>Cartesian2</code>。</p><p>此表达式仅适用于矢量瓦片中的点要素。</p>"
+    },
+    {
+      "id": "Cesium3DTileStyle#color",
+      "field": "description",
+      "sourceHash": "sha256:1b1bdfbb8d145966c50b9075abb4a7a2fad9b77ef1ea7935658259b4bb6d5823",
+      "text": "获取或设置用于计算样式 <code>color</code> 属性的 {@link StyleExpression} 对象。也可使用定义颜色样式的字符串或对象。getter 返回内部的 {@link Expression} 或 {@link ConditionsExpression}，可能与传给 setter 的值不同。<p>表达式必须返回 <code>Color</code>。</p><p>此表达式适用于全部瓦片格式。</p>"
+    },
+    {
+      "id": "Cesium3DTileStyle#disableDepthTestDistance",
+      "field": "description",
+      "sourceHash": "sha256:57a3a5239a2982e6c8211fc14b3eb4041a6f68c9adf0039d51d76e1dccd808d1",
+      "text": "获取或设置用于计算样式 <code>disableDepthTestDistance</code> 属性的 {@link StyleExpression} 对象。也可使用定义数值样式的字符串或对象。getter 返回内部的 {@link Expression} 或 {@link ConditionsExpression}，可能与传给 setter 的值不同。<p>表达式必须返回 <code>Number</code>。</p><p>此表达式仅适用于矢量瓦片中的点要素。</p>"
+    },
+    {
+      "id": "Cesium3DTileStyle#distanceDisplayCondition",
+      "field": "description",
+      "sourceHash": "sha256:adff513e97625766802b119364287d8e114fa4bbc9c39c24a92839a422f12a2e",
+      "text": "获取或设置用于计算样式 <code>distanceDisplayCondition</code> 属性的 {@link StyleExpression} 对象。也可使用定义vec2样式的字符串或对象。getter 返回内部的 {@link Expression} 或 {@link ConditionsExpression}，可能与传给 setter 的值不同。<p>表达式必须返回 <code>Cartesian2</code>。</p><p>此表达式仅适用于矢量瓦片中的点要素。</p>"
+    },
+    {
+      "id": "Cesium3DTileStyle#font",
+      "field": "description",
+      "sourceHash": "sha256:2a69f1c5b4f0db8d9759eb685699fd419931d79a6a7fc7cf8f70b99e3a10c5cf",
+      "text": "获取或设置用于计算样式 <code>font</code> 属性的 {@link StyleExpression} 对象。也可使用定义字符串样式的字符串或对象。getter 返回内部的 {@link Expression} 或 {@link ConditionsExpression}，可能与传给 setter 的值不同。<p>表达式必须返回 <code>String</code>。</p><p>此表达式仅适用于矢量瓦片中的点要素。</p>"
+    },
+    {
+      "id": "Cesium3DTileStyle#heightOffset",
+      "field": "description",
+      "sourceHash": "sha256:97ba13b4cd34874f1b52f5157eddc135adb0c9a65f35003b32db9afe715a16e3",
+      "text": "获取或设置用于计算样式 <code>heightOffset</code> 属性的 {@link StyleExpression} 对象。也可使用定义数值样式的字符串或对象。getter 返回内部的 {@link Expression} 或 {@link ConditionsExpression}，可能与传给 setter 的值不同。<p>表达式必须返回 <code>Number</code>。</p><p>此表达式仅适用于矢量瓦片中的点要素。</p>"
+    },
+    {
+      "id": "Cesium3DTileStyle#horizontalOrigin",
+      "field": "description",
+      "sourceHash": "sha256:a2096c1267fe425213e062beee36c1ab4cad08273a116c2c4473607e43c095e8",
+      "text": "获取或设置用于计算样式 <code>horizontalOrigin</code> 属性的 {@link StyleExpression} 对象。也可使用定义数值样式的字符串或对象。getter 返回内部的 {@link Expression} 或 {@link ConditionsExpression}，可能与传给 setter 的值不同。<p>表达式必须返回 <code>HorizontalOrigin</code>。</p><p>此表达式仅适用于矢量瓦片中的点要素。</p>"
+    },
+    {
+      "id": "Cesium3DTileStyle#image",
+      "field": "description",
+      "sourceHash": "sha256:9617ec46a2ced54096f936aa569d6c74b49ce81721349b6f7272897e129bd3ba",
+      "text": "获取或设置用于计算样式 <code>image</code> 属性的 {@link StyleExpression} 对象。也可使用定义字符串样式的字符串或对象。getter 返回内部的 {@link Expression} 或 {@link ConditionsExpression}，可能与传给 setter 的值不同。<p>表达式必须返回 <code>String</code>。</p><p>此表达式仅适用于矢量瓦片中的点要素。</p>"
+    },
+    {
+      "id": "Cesium3DTileStyle#labelColor",
+      "field": "description",
+      "sourceHash": "sha256:aa7f38e794181b10d3b75e238d3d7d41989f6e7ecfa54e9373d91b0a073425cd",
+      "text": "获取或设置用于计算样式 <code>labelColor</code> 属性的 {@link StyleExpression} 对象。也可使用定义颜色样式的字符串或对象。getter 返回内部的 {@link Expression} 或 {@link ConditionsExpression}，可能与传给 setter 的值不同。<p>表达式必须返回 <code>Color</code>。</p><p>此表达式仅适用于矢量瓦片中的点要素。</p>"
+    },
+    {
+      "id": "Cesium3DTileStyle#labelHorizontalOrigin",
+      "field": "description",
+      "sourceHash": "sha256:7bcd2bca5027248d83075d736b6170061f451ca8e0856af3f08f6e34959c62c8",
+      "text": "获取或设置用于计算样式 <code>labelHorizontalOrigin</code> 属性的 {@link StyleExpression} 对象。也可使用定义数值样式的字符串或对象。getter 返回内部的 {@link Expression} 或 {@link ConditionsExpression}，可能与传给 setter 的值不同。<p>表达式必须返回 <code>HorizontalOrigin</code>。</p><p>此表达式仅适用于矢量瓦片中的点要素。</p>"
+    },
+    {
+      "id": "Cesium3DTileStyle#labelOutlineColor",
+      "field": "description",
+      "sourceHash": "sha256:4dd6afd74391d83f199efb0d4dd2974a5940cf82a4c0528655a0cfb7ab01d32e",
+      "text": "获取或设置用于计算样式 <code>labelOutlineColor</code> 属性的 {@link StyleExpression} 对象。也可使用定义颜色样式的字符串或对象。getter 返回内部的 {@link Expression} 或 {@link ConditionsExpression}，可能与传给 setter 的值不同。<p>表达式必须返回 <code>Color</code>。</p><p>此表达式仅适用于矢量瓦片中的点要素。</p>"
+    },
+    {
+      "id": "Cesium3DTileStyle#labelOutlineWidth",
+      "field": "description",
+      "sourceHash": "sha256:3fca7159d10daf04a0f7d8bb70b1dae5f5a22161ee63a4fb7414e54ba95f9331",
+      "text": "获取或设置用于计算样式 <code>labelOutlineWidth</code> 属性的 {@link StyleExpression} 对象。也可使用定义数值样式的字符串或对象。getter 返回内部的 {@link Expression} 或 {@link ConditionsExpression}，可能与传给 setter 的值不同。<p>表达式必须返回 <code>Number</code>。</p><p>此表达式仅适用于矢量瓦片中的点要素。</p>"
+    },
+    {
+      "id": "Cesium3DTileStyle#labelStyle",
+      "field": "description",
+      "sourceHash": "sha256:9cd8fdb6818c39377a8f0d285d62d4e96173e3393f7961b705152f464792d557",
+      "text": "获取或设置用于计算样式 <code>label style</code> 属性的 {@link StyleExpression} 对象。也可使用定义数值样式的字符串或对象。getter 返回内部的 {@link Expression} 或 {@link ConditionsExpression}，可能与传给 setter 的值不同。<p>表达式必须返回 <code>LabelStyle</code>。</p><p>此表达式仅适用于矢量瓦片中的点要素。</p>"
+    },
+    {
+      "id": "Cesium3DTileStyle#labelText",
+      "field": "description",
+      "sourceHash": "sha256:fe357c71f0cd456a4ef29af679e4c78a3fee08fd0889a97404850377ffe9022f",
+      "text": "获取或设置用于计算样式 <code>labelText</code> 属性的 {@link StyleExpression} 对象。也可使用定义字符串样式的字符串或对象。getter 返回内部的 {@link Expression} 或 {@link ConditionsExpression}，可能与传给 setter 的值不同。<p>表达式必须返回 <code>String</code>。</p><p>此表达式仅适用于矢量瓦片中的点要素。</p>"
+    },
+    {
+      "id": "Cesium3DTileStyle#labelVerticalOrigin",
+      "field": "description",
+      "sourceHash": "sha256:445365379b3f9c1fe85f6baf12f537325cb534b8dcb5f40a369e102d96c8c490",
+      "text": "获取或设置用于计算样式 <code>labelVerticalOrigin</code> 属性的 {@link StyleExpression} 对象。也可使用定义数值样式的字符串或对象。getter 返回内部的 {@link Expression} 或 {@link ConditionsExpression}，可能与传给 setter 的值不同。<p>表达式必须返回 <code>VerticalOrigin</code>。</p><p>此表达式仅适用于矢量瓦片中的点要素。</p>"
+    },
+    {
+      "id": "Cesium3DTileStyle#meta",
+      "field": "description",
+      "sourceHash": "sha256:9699375be3d12794bdbc05ecc58c883035685e830b989a2f63beac266ed813a8",
+      "text": "获取或设置包含应用自定义表达式的对象。这些表达式可显式求值，例如用于 UI 显示。"
+    },
+    {
+      "id": "Cesium3DTileStyle#pointOutlineColor",
+      "field": "description",
+      "sourceHash": "sha256:2f489bffc632d5085dfba77b1143760731559b1e063ce9a69520b85993fbecd1",
+      "text": "获取或设置用于计算样式 <code>pointOutlineColor</code> 属性的 {@link StyleExpression} 对象。也可使用定义颜色样式的字符串或对象。getter 返回内部的 {@link Expression} 或 {@link ConditionsExpression}，可能与传给 setter 的值不同。<p>表达式必须返回 <code>Color</code>。</p><p>此表达式仅适用于矢量瓦片中的点要素。</p>"
+    },
+    {
+      "id": "Cesium3DTileStyle#pointOutlineWidth",
+      "field": "description",
+      "sourceHash": "sha256:3b1e2bfa5719b72d9fb30c7aa1cce08019551dd3fee390efe0aa28daaa53ce9c",
+      "text": "获取或设置用于计算样式 <code>pointOutlineWidth</code> 属性的 {@link StyleExpression} 对象。也可使用定义数值样式的字符串或对象。getter 返回内部的 {@link Expression} 或 {@link ConditionsExpression}，可能与传给 setter 的值不同。<p>表达式必须返回 <code>Number</code>。</p><p>此表达式仅适用于矢量瓦片中的点要素。</p>"
+    },
+    {
+      "id": "Cesium3DTileStyle#pointSize",
+      "field": "description",
+      "sourceHash": "sha256:398d986d85b0b3acd92c9189d5735f4e0b8d42b91224214aa1c63e71f7d0aff0",
+      "text": "获取或设置用于计算样式 <code>pointSize</code> 属性的 {@link StyleExpression} 对象。也可使用定义点大小样式的字符串或对象。getter 返回内部的 {@link Expression} 或 {@link ConditionsExpression}，可能与传给 setter 的值不同。<p>表达式必须返回 <code>Number</code>。</p><p>此表达式仅适用于矢量瓦片或点云瓦片中的点要素。</p>"
+    },
+    {
+      "id": "Cesium3DTileStyle#scaleByDistance",
+      "field": "description",
+      "sourceHash": "sha256:557775c7f843b1663297c367a23b8f34e601fc1c77291fd027e9f1f66d1e1f51",
+      "text": "获取或设置用于计算样式 <code>scaleByDistance</code> 属性的 {@link StyleExpression} 对象。也可使用定义vec4样式的字符串或对象。getter 返回内部的 {@link Expression} 或 {@link ConditionsExpression}，可能与传给 setter 的值不同。<p>表达式必须返回 <code>Cartesian4</code>。</p><p>此表达式仅适用于矢量瓦片中的点要素。</p>"
+    },
+    {
+      "id": "Cesium3DTileStyle#show",
+      "field": "description",
+      "sourceHash": "sha256:0e30c3556659608ab5506c8330f303dc8c57cf30bc9737823b2f7efffb8760c0",
+      "text": "获取或设置用于计算样式 <code>show</code> 属性的 {@link StyleExpression} 对象。也可使用布尔值、定义显示样式的字符串或对象。getter 返回内部的 {@link Expression} 或 {@link ConditionsExpression}，可能与传给 setter 的值不同。<p>表达式必须返回或可转换为 <code>Boolean</code>。</p><p>此表达式适用于全部瓦片格式。</p>"
+    },
+    {
+      "id": "Cesium3DTileStyle#style",
+      "field": "description",
+      "sourceHash": "sha256:5478bbdfa6c39c97c21834a5c05fb78ca2524da8df2209713310e6453c1fd3dc",
+      "text": "获取使用 {@link https://github.com/CesiumGS/3d-tiles/tree/main/specification/Styling|3D Tiles 样式语言} 定义样式的对象。"
+    },
+    {
+      "id": "Cesium3DTileStyle#translucencyByDistance",
+      "field": "description",
+      "sourceHash": "sha256:e3820259143e8d53394e158190e3edbcc7e3ed73ff7dc6b37057115e415c8817",
+      "text": "获取或设置用于计算样式 <code>translucencyByDistance</code> 属性的 {@link StyleExpression} 对象。也可使用定义vec4样式的字符串或对象。getter 返回内部的 {@link Expression} 或 {@link ConditionsExpression}，可能与传给 setter 的值不同。<p>表达式必须返回 <code>Cartesian4</code>。</p><p>此表达式仅适用于矢量瓦片中的点要素。</p>"
+    },
+    {
+      "id": "Cesium3DTileStyle#verticalOrigin",
+      "field": "description",
+      "sourceHash": "sha256:54ece2370afb271ac8adde8fc600b9b54e542f5f6cc73633d9151aef78e1765a",
+      "text": "获取或设置用于计算样式 <code>verticalOrigin</code> 属性的 {@link StyleExpression} 对象。也可使用定义数值样式的字符串或对象。getter 返回内部的 {@link Expression} 或 {@link ConditionsExpression}，可能与传给 setter 的值不同。<p>表达式必须返回 <code>VerticalOrigin</code>。</p><p>此表达式仅适用于矢量瓦片中的点要素。</p>"
+    },
+    {
+      "id": "ImageryLayer.ConstructorOptions",
+      "field": "description",
+      "sourceHash": "sha256:8b52ff225a96e54cec1d0e837ecb88d1091c646ebba54c8de2271311306d5fd9",
+      "text": "ImageryLayer 构造函数的初始化选项。"
+    },
+    {
+      "id": "ImageryLayer.ConstructorOptions",
+      "field": "properties/alpha/description",
+      "sourceHash": "sha256:0ca33f0afea9adaf82fec129aedc533fe25afbe6f9dbc1e7ff4d8f6dea26b525",
+      "text": "图层的 alpha 混合值，范围为 0.0 至 1.0。可为数值，或签名为 <code>function(frameState, layer, x, y, level)</code> 的函数。函数接收当前帧状态、本图层，以及需要 alpha 值的影像瓦片的 x、y 和 level 坐标，并应返回该瓦片使用的 alpha 值。"
+    },
+    {
+      "id": "ImageryLayer.ConstructorOptions",
+      "field": "properties/brightness/description",
+      "sourceHash": "sha256:5f6829f08cfd818ea65db361d32b188f0acb268363f53833f2fd7491e1f377df",
+      "text": "图层亮度。1.0 保持原始影像颜色，小于 1.0 变暗，大于 1.0 变亮。可为数值，或签名为 <code>function(frameState, layer, x, y, level)</code> 的函数。函数接收当前帧状态、本图层，以及需要亮度值的影像瓦片的 x、y 和 level 坐标，并应返回该瓦片使用的亮度值。该函数每帧、每瓦片都会执行，因此必须足够快。"
+    },
+    {
+      "id": "ImageryLayer.ConstructorOptions",
+      "field": "properties/colorToAlpha/description",
+      "sourceHash": "sha256:8e8ff2c0d3a2a6105c317709c7a2cf3dec4a1dde487baaabe3513c577c9bbe30",
+      "text": "要转为透明的颜色。"
+    },
+    {
+      "id": "ImageryLayer.ConstructorOptions",
+      "field": "properties/colorToAlphaThreshold/description",
+      "sourceHash": "sha256:2d47d87c6c69788b2eb86fb14e01c5762ff84a2d06d18a1c29ec56e63eec71b2",
+      "text": "颜色转透明的阈值。"
+    },
+    {
+      "id": "ImageryLayer.ConstructorOptions",
+      "field": "properties/contrast/description",
+      "sourceHash": "sha256:6c1adab312a26bdeff8c6fc30ff1d87dbe170174798faca91b5fd81a8b4e7911",
+      "text": "图层对比度。1.0 保持原始影像颜色，小于 1.0 降低对比度，大于 1.0 提高对比度。可为数值，或签名为 <code>function(frameState, layer, x, y, level)</code> 的函数。函数接收当前帧状态、本图层，以及需要对比度的影像瓦片的 x、y 和 level 坐标，并应返回该瓦片使用的对比度值。该函数每帧、每瓦片都会执行，因此必须足够快。"
+    },
+    {
+      "id": "ImageryLayer.ConstructorOptions",
+      "field": "properties/cutoutRectangle/description",
+      "sourceHash": "sha256:63037e8e2ec90f98c47c19f8f3d9af668d928f94703853cfd8b8f741e678f650",
+      "text": "用于裁去此 ImageryLayer 部分内容的地理坐标矩形范围。"
+    },
+    {
+      "id": "ImageryLayer.ConstructorOptions",
+      "field": "properties/dayAlpha/description",
+      "sourceHash": "sha256:8c60eb409311e11a7a205eb935a862e8e03b9b6a5a8540ff3e266bc0c7b3a72f",
+      "text": "图层在地球昼面上的 alpha 混合值，范围为 0.0 至 1.0。可为数值，或签名为 <code>function(frameState, layer, x, y, level)</code> 的函数。函数接收当前帧状态、本图层，以及需要 alpha 值的影像瓦片的 x、y 和 level 坐标，并应返回该瓦片使用的 alpha 值。仅在 <code>enableLighting</code> 为 <code>true</code> 时生效。"
+    },
+    {
+      "id": "ImageryLayer.ConstructorOptions",
+      "field": "properties/gamma/description",
+      "sourceHash": "sha256:b915ffdf4b29ceeaec49b3290d3bbf17f3375978e2fd39f4a0feca31d4d9ee14",
+      "text": "图层的伽马校正。1.0 保持原始影像颜色。可为数值，或签名为 <code>function(frameState, layer, x, y, level)</code> 的函数。函数接收当前帧状态、本图层，以及需要伽马值的影像瓦片的 x、y 和 level 坐标，并应返回该瓦片使用的伽马值。该函数每帧、每瓦片都会执行，因此必须足够快。"
+    },
+    {
+      "id": "ImageryLayer.ConstructorOptions",
+      "field": "properties/hue/description",
+      "sourceHash": "sha256:8d68625ac7598ba9dcf9ce94fa61549d62ef24e6d0e97baf870813881e746ad4",
+      "text": "图层色相。0.0 保持原始影像颜色。可为数值，或签名为 <code>function(frameState, layer, x, y, level)</code> 的函数。函数接收当前帧状态、本图层，以及需要色相值的影像瓦片的 x、y 和 level 坐标，并应返回该瓦片使用的色相值。该函数每帧、每瓦片都会执行，因此必须足够快。"
+    },
+    {
+      "id": "ImageryLayer.ConstructorOptions",
+      "field": "properties/magnificationFilter/description",
+      "sourceHash": "sha256:fdb8039ac8a61612b74922d220241ee404fb7c0ba1775c48f0a4b841c918e05e",
+      "text": "应用于此图层的纹理放大过滤器。可选值为 <code>TextureMagnificationFilter.LINEAR</code> 和 <code>TextureMagnificationFilter.NEAREST</code>。"
+    },
+    {
+      "id": "ImageryLayer.ConstructorOptions",
+      "field": "properties/maximumAnisotropy/description",
+      "sourceHash": "sha256:36af4d5b1ef2c7bee0f90ec55d027380f630cefde10999a8deaba92001d42d9e",
+      "text": "纹理过滤使用的最大各向异性级别。若未指定，则使用 WebGL 支持的最大各向异性。较大值可改善地平线视角下的影像质量。"
+    },
+    {
+      "id": "ImageryLayer.ConstructorOptions",
+      "field": "properties/maximumTerrainLevel/description",
+      "sourceHash": "sha256:48d861f8590d9ed12966ab3152a4a0025d4b230ba75d17721ba982f038d80134",
+      "text": "显示此影像图层的最大地形细节级别；为 undefined 时，在所有级别显示。零级为细节最少的级别。"
+    },
+    {
+      "id": "ImageryLayer.ConstructorOptions",
+      "field": "properties/minificationFilter/description",
+      "sourceHash": "sha256:f8f76db707d8a6c7260c5f8f9cc0350ff20d9751abc1833392a8ec8917b18bec",
+      "text": "应用于此图层的纹理缩小过滤器。可选值为 <code>TextureMinificationFilter.LINEAR</code> 和 <code>TextureMinificationFilter.NEAREST</code>。"
+    },
+    {
+      "id": "ImageryLayer.ConstructorOptions",
+      "field": "properties/minimumTerrainLevel/description",
+      "sourceHash": "sha256:a25678a722e0078076921ec1f9ced0a7258728fbbb690e2ea2e049e6a08cb153",
+      "text": "显示此影像图层的最小地形细节级别；为 undefined 时，在所有级别显示。零级为细节最少的级别。"
+    },
+    {
+      "id": "ImageryLayer.ConstructorOptions",
+      "field": "properties/nightAlpha/description",
+      "sourceHash": "sha256:6e64f2ab642cd162c0ba443452ded5f91f199ef44af71290587f846f9af600d9",
+      "text": "图层在地球夜面上的 alpha 混合值，范围为 0.0 至 1.0。可为数值，或签名为 <code>function(frameState, layer, x, y, level)</code> 的函数。函数接收当前帧状态、本图层，以及需要 alpha 值的影像瓦片的 x、y 和 level 坐标，并应返回该瓦片使用的 alpha 值。仅在 <code>enableLighting</code> 为 <code>true</code> 时生效。"
+    },
+    {
+      "id": "ImageryLayer.ConstructorOptions",
+      "field": "properties/rectangle/description",
+      "sourceHash": "sha256:bf84f2e5f0c5ebadd603930246638fc195c010bc395a260c89836fc808172fa0",
+      "text": "图层矩形范围，可用于限制影像提供者的可见部分。"
+    },
+    {
+      "id": "ImageryLayer.ConstructorOptions",
+      "field": "properties/saturation/description",
+      "sourceHash": "sha256:721aa6799eb6935f47ecead63c62389442cd387aad06999feceddbdfc00bf61c",
+      "text": "图层饱和度。1.0 保持原始影像颜色，小于 1.0 降低饱和度，大于 1.0 提高饱和度。可为数值，或签名为 <code>function(frameState, layer, x, y, level)</code> 的函数。函数接收当前帧状态、本图层，以及需要饱和度的影像瓦片的 x、y 和 level 坐标，并应返回该瓦片使用的饱和度值。该函数每帧、每瓦片都会执行，因此必须足够快。"
+    },
+    {
+      "id": "ImageryLayer.ConstructorOptions",
+      "field": "properties/show/description",
+      "sourceHash": "sha256:273119cb1fb5d3c572452650627861e324d42d0c0d25b10e62f136e7cc614120",
+      "text": "为 true 时显示图层，否则不显示。"
+    },
+    {
+      "id": "ImageryLayer.ConstructorOptions",
+      "field": "properties/splitDirection/description",
+      "sourceHash": "sha256:58d4b4b84474be492ca06494f4282181cbbb6062adde26cda1c04f768978b8d8",
+      "text": "应用于此图层的 {@link SplitDirection} 分屏方式。"
+    },
+    {
+      "id": "ImageryLayer.DEFAULT_APPLY_COLOR_TO_ALPHA_THRESHOLD",
+      "field": "description",
+      "sourceHash": "sha256:a77b5d4375598761673f0b5dbc40f323cc6998025ee96f627337328834f27e62",
+      "text": "若构造时或影像提供者未指定颜色转透明阈值，则使用此默认值。"
+    },
+    {
+      "id": "ImageryLayer.DEFAULT_BRIGHTNESS",
+      "field": "description",
+      "sourceHash": "sha256:aa98ca765c2982558385710a31a76099e8617f903a90d44d02459ac298abbb2b",
+      "text": "若构造时或影像提供者未指定亮度，则使用此图层默认亮度。此值本身不会改变影像亮度。"
+    },
+    {
+      "id": "ImageryLayer.DEFAULT_CONTRAST",
+      "field": "description",
+      "sourceHash": "sha256:73204bafd69097c576388ceb4a41c70ac5fa33893706d4bef616b29c9bdee241",
+      "text": "若构造时或影像提供者未指定对比度，则使用此图层默认对比度。此值本身不会改变影像对比度。"
+    },
+    {
+      "id": "ImageryLayer.DEFAULT_GAMMA",
+      "field": "description",
+      "sourceHash": "sha256:a706021f9032fac470875de96bd6198e90e583557ce34d6723cf301882ac0433",
+      "text": "若构造时或影像提供者未指定伽马值，则使用此图层默认伽马值。此值本身不会改变影像伽马值。"
+    },
+    {
+      "id": "ImageryLayer.DEFAULT_HUE",
+      "field": "description",
+      "sourceHash": "sha256:b0a64bacd11f00568c2c36f63066c88fd75a3c9f554255e115bfe2055ae93129",
+      "text": "若构造时或影像提供者未指定色相，则使用此图层默认色相。此值本身不会改变影像色相。"
+    },
+    {
+      "id": "ImageryLayer.DEFAULT_MAGNIFICATION_FILTER",
+      "field": "description",
+      "sourceHash": "sha256:1b0be228721895eb6a97a2e590305221d4e5d0b5a5da0cf004312c9ccefd0aa9",
+      "text": "若构造时或影像提供者未指定纹理放大过滤器，则使用此默认值。"
+    },
+    {
+      "id": "ImageryLayer.DEFAULT_MINIFICATION_FILTER",
+      "field": "description",
+      "sourceHash": "sha256:be785d586e55ac3b646dc9e737ec90877b1b7902a6d3306920c55194f55d5f35",
+      "text": "若构造时或影像提供者未指定纹理缩小过滤器，则使用此默认值。"
+    },
+    {
+      "id": "ImageryLayer.DEFAULT_SATURATION",
+      "field": "description",
+      "sourceHash": "sha256:ba2fc4d2c295f4dd75caedc002f2942b5d0ff89e6a2eff8af7eb4b1c47c29f3a",
+      "text": "若构造时或影像提供者未指定饱和度，则使用此图层默认饱和度。此值本身不会改变影像饱和度。"
+    },
+    {
+      "id": "ImageryLayer.DEFAULT_SPLIT",
+      "field": "description",
+      "sourceHash": "sha256:0a8f0cc3de36adf4bf3c084bdbaf7fa189b103492db7da62f73951531a98e77a",
+      "text": "若构造时或影像提供者未指定分屏方式，则使用此默认值。"
+    },
+    {
+      "id": "ImageryLayer.ErrorEventCallback",
+      "field": "description",
+      "sourceHash": "sha256:15086e4f00b387a9cbe19a71924d8e97373cd654d3e5919a5d954785bed21fa6",
+      "text": "发生错误时调用的函数。"
+    },
+    {
+      "id": "ImageryLayer.ErrorEventCallback",
+      "field": "params/err/description",
+      "sourceHash": "sha256:b761f1134645ff39729f055b3c8a97d4ac9324b3831b2894630b48370362e628",
+      "text": "包含所发生错误详细信息的对象。"
+    },
+    {
+      "id": "ImageryLayer.fromProviderAsync",
+      "field": "description",
+      "sourceHash": "sha256:47a2c868d9c46e100d2d037a40d6f632e4c7cdb056ebb359dc2ee29ec80c3d08",
+      "text": "从异步影像提供者创建影像图层。图层负责处理异步加载或错误，并在就绪后开始渲染影像。"
+    },
+    {
+      "id": "ImageryLayer.fromProviderAsync",
+      "field": "params/imageryProviderPromise/description",
+      "sourceHash": "sha256:86728ea5297fa373296b8c1ebd89cdc065400cf8d9b47b218fab006bb41e2e7f",
+      "text": "兑现为影像提供者的 Promise。"
+    },
+    {
+      "id": "ImageryLayer.fromProviderAsync",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:f8ac119736bc76e489a62b190695537eb4a25bae46749f78d845c0bac857af65",
+      "text": "创建的影像图层。"
+    },
+    {
+      "id": "ImageryLayer.fromWorldImagery",
+      "field": "description",
+      "sourceHash": "sha256:ebd5452e99146210aa64a840ed69d0206c2c65ecc4be5ad26be8580e1b475bf0",
+      "text": "为 ion 的默认全球底图创建影像图层，当前底图为 Bing Maps。图层负责处理异步加载或错误，并在就绪后开始渲染影像。"
+    },
+    {
+      "id": "ImageryLayer.fromWorldImagery",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:c2664781088b6330141d26c97101c22aab956bc111ee9d5821cb2b4256d8cb3b",
+      "text": "创建的影像图层。\r\r* @example\r// Create a new base layer\rconst viewer = new Cesium.Viewer(\"cesiumContainer\", {\r  baseLayer: Cesium.ImageryLayer.fromWorldImagery();\r});"
+    },
+    {
+      "id": "ImageryLayer.ReadyEventCallback",
+      "field": "description",
+      "sourceHash": "sha256:ed5f3f30d854565a79bb44ed8e2a6a09f6c9bdcc1bca9bdbb40545e34d4c8ca4",
+      "text": "提供者创建完成时调用的函数。"
+    },
+    {
+      "id": "ImageryLayer.ReadyEventCallback",
+      "field": "params/provider/description",
+      "sourceHash": "sha256:bc8a0bbbe1edd187db470dc54d7a1e181090f3386becb0372078f6f4b3b9b855",
+      "text": "创建的影像提供者。"
+    },
+    {
+      "id": "ImageryLayer.WorldImageryConstructorOptions",
+      "field": "description",
+      "sourceHash": "sha256:dd3fa2b3fc37be286424b9acaadd618af9dadaec2c9c2f70763e98307b31c1d9",
+      "text": "ImageryLayer.fromWorldImagery 的初始化选项。"
+    },
+    {
+      "id": "ImageryLayer.WorldImageryConstructorOptions",
+      "field": "properties/options.style/description",
+      "sourceHash": "sha256:eab41e99074d369d3b75f073ff6484299b3e678e5ac4ed4dd689bd8311307a6a",
+      "text": "底图影像样式，目前仅支持 AERIAL、AERIAL_WITH_LABELS 和 ROAD。"
+    },
+    {
+      "id": "ImageryLayer",
+      "field": "params/imageryProvider/description",
+      "sourceHash": "sha256:07600535a32dccef8ed4d4ae94b655e5c72c9c6e3e8d9c119e179fdef3c59b5d",
+      "text": "要使用的影像提供者。"
+    },
+    {
+      "id": "ImageryLayer#alpha",
+      "field": "description",
+      "sourceHash": "sha256:4c1a02836c27be638592d95a4b72b6fb2df126ea699a3f2185bc1259a0011d3d",
+      "text": "图层的 alpha 混合值，0.0 表示完全透明，1.0 表示完全不透明。"
+    },
+    {
+      "id": "ImageryLayer#brightness",
+      "field": "description",
+      "sourceHash": "sha256:16f9ab0db50322aaa3d44577c43c226b5bc95e952dc27bcc5d0d25eeaeacdc1d",
+      "text": "图层亮度。1.0 保持原始影像颜色，小于 1.0 变暗，大于 1.0 变亮。"
+    },
+    {
+      "id": "ImageryLayer#colorToAlpha",
+      "field": "description",
+      "sourceHash": "sha256:7cd2a90a4ea31157e1bdfe3b50ff45937bfbd13fcd94c1a85d68cec283adf911",
+      "text": "应设置为透明的颜色值。"
+    },
+    {
+      "id": "ImageryLayer#colorToAlphaThreshold",
+      "field": "description",
+      "sourceHash": "sha256:dc41c8c6b332cb254cb7d29c64484515e7e582a5e3879408d17822b924a78049",
+      "text": "归一化到 0 至 1 的颜色转透明阈值。"
+    },
+    {
+      "id": "ImageryLayer#contrast",
+      "field": "description",
+      "sourceHash": "sha256:d8aa677f74688e95f3a28c2f6eab6a3da4381269b30f52d401d06fdbb0ef40c8",
+      "text": "图层对比度。1.0 保持原始影像颜色，小于 1.0 降低对比度，大于 1.0 提高对比度。"
+    },
+    {
+      "id": "ImageryLayer#cutoutRectangle",
+      "field": "description",
+      "sourceHash": "sha256:113e0ad8ac201f124531420b07ca0a24d082b610c9491779ed888e88f33d346c",
+      "text": "在此影像图层中裁去内容的矩形范围。"
+    },
+    {
+      "id": "ImageryLayer#dayAlpha",
+      "field": "description",
+      "sourceHash": "sha256:985d7f55539c4258cb922b8a5c1813350f36954979d3fae8d1aaf4b635607548",
+      "text": "图层在地球昼面上的 alpha 混合值，0.0 表示完全透明，1.0 表示完全不透明。仅在 {@link Globe#enableLighting} 为 <code>true</code> 时生效。"
+    },
+    {
+      "id": "ImageryLayer#destroy",
+      "field": "description",
+      "sourceHash": "sha256:b385add820d9f47d540aad147f1cdf85f05e8c6cb81c3928a59c8fd5f7bd8d69",
+      "text": "销毁此对象持有的 WebGL 资源。显式销毁可确定地释放 WebGL 资源，而不依赖垃圾回收器回收此对象。<br /><br />对象销毁后不应再使用；调用除 <code>isDestroyed</code> 以外的任何函数都会抛出 {@link DeveloperError}。因此，应像示例中那样将返回值（<code>undefined</code>）赋给该对象变量。"
+    },
+    {
+      "id": "ImageryLayer#errorEvent",
+      "field": "description",
+      "sourceHash": "sha256:e540869bbe56ea051afda2acffe06a7e0b9f7bc11c77293b11cbc20ae915d90e",
+      "text": "获取影像提供者发生异步错误时触发的事件。订阅此事件可收到错误通知，并尝试恢复。事件监听器接收所抛出的错误实例。"
+    },
+    {
+      "id": "ImageryLayer#gamma",
+      "field": "description",
+      "sourceHash": "sha256:f7880cd132a0b1eeae65cf6798741a77cd71cd9edc0517856a51368e39df987b",
+      "text": "应用于此图层的伽马校正。1.0 保持原始影像颜色。"
+    },
+    {
+      "id": "ImageryLayer#getImageryRectangle",
+      "field": "description",
+      "sourceHash": "sha256:8f4b108c49afb72ec9a8a039ab19b6da2613be09ae75d7fd26967cab720612fe",
+      "text": "计算图层矩形与影像提供者可用矩形的交集，得到此图层可提供影像的整体边界。"
+    },
+    {
+      "id": "ImageryLayer#getImageryRectangle",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:c8e767baac846b5d2005bc47d597d540703a13839a96bdf79b67c6f8c8261cd1",
+      "text": "定义此图层可提供影像整体边界的矩形。"
+    },
+    {
+      "id": "ImageryLayer#hue",
+      "field": "description",
+      "sourceHash": "sha256:ef8cb23500b3ddd23f0e788bc1d931c3010aedf6ab40363ed4338cd2b0cb96c8",
+      "text": "图层色相，单位为弧度。0.0 保持原始影像颜色。"
+    },
+    {
+      "id": "ImageryLayer#imageryProvider",
+      "field": "description",
+      "sourceHash": "sha256:c16bd0603606fb63b7b5cc50f8d8e5da938f6aed9a025971a8a2ecfc27a55f42",
+      "text": "获取此图层的影像提供者。在 {@link ImageryLayer#ready} 返回 true 之前不应调用。"
+    },
+    {
+      "id": "ImageryLayer#isBaseLayer",
+      "field": "description",
+      "sourceHash": "sha256:f24e83935fc5b014d4ca015b77d5bf49b06f6f94ad1727550ce6e55cb419d896",
+      "text": "获取此图层是否为 {@link ImageryLayerCollection} 中的基础图层。基础图层位于所有其他图层下方。其特殊之处是，即使实际矩形不覆盖全球，也会将边缘纹素拉伸到整个地球，从而按全球范围处理。"
+    },
+    {
+      "id": "ImageryLayer#isBaseLayer",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:611610e425dc47db8e22829706c9cd52db0f30884514977353999f13cda75108",
+      "text": "若此图层为基础图层，则返回 true；否则返回 false。"
+    },
+    {
+      "id": "ImageryLayer#isDestroyed",
+      "field": "description",
+      "sourceHash": "sha256:aea7b697937631c90ae3fc0ec55b81ba0ddc7abe4d6045848b2031f9bed60091",
+      "text": "若此对象已销毁，返回 true；否则返回 false。<br /><br />对象销毁后不应再使用；调用除 <code>isDestroyed</code> 以外的任何函数都会抛出 {@link DeveloperError}。"
+    },
+    {
+      "id": "ImageryLayer#magnificationFilter",
+      "field": "description",
+      "sourceHash": "sha256:3df04bdae7fb43e570b92e4d8165ed97b6f5e9d4cfe18da0fc287f4f0ff4a957",
+      "text": "应用于此图层的 {@link TextureMagnificationFilter}。可选值为 {@link TextureMagnificationFilter.LINEAR}（默认）和 {@link TextureMagnificationFilter.NEAREST}。要生效，必须在添加影像图层后立即设置。纹理一旦加载，便无法更改其过滤器。"
+    },
+    {
+      "id": "ImageryLayer#minificationFilter",
+      "field": "description",
+      "sourceHash": "sha256:479e684c7fb181309b9df1e0fe228f068213d18821d4cd2f8dbb3a1c1ee4d925",
+      "text": "应用于此图层的 {@link TextureMinificationFilter}。可选值为 {@link TextureMinificationFilter.LINEAR}（默认）和 {@link TextureMinificationFilter.NEAREST}。要生效，必须在添加影像图层后立即设置。纹理一旦加载，便无法更改其过滤器。"
+    },
+    {
+      "id": "ImageryLayer#nightAlpha",
+      "field": "description",
+      "sourceHash": "sha256:a47c81407804e549d7b7fbc45a967009fd67fd94804dfd520c6fa7a113821f98",
+      "text": "图层在地球夜面上的 alpha 混合值，0.0 表示完全透明，1.0 表示完全不透明。仅在 {@link Globe#enableLighting} 为 <code>true</code> 时生效。"
+    },
+    {
+      "id": "ImageryLayer#ready",
+      "field": "description",
+      "sourceHash": "sha256:216021cbdb463987be228679cb7af35f513e5cc37bd6dbdd74a4826066f3b15b",
+      "text": "影像提供者成功创建后返回 true，否则返回 false。"
+    },
+    {
+      "id": "ImageryLayer#readyEvent",
+      "field": "description",
+      "sourceHash": "sha256:e4970e7d34ed201862f7bce5921c74ac3f3824b60e0d1c6a383c4adc2edaece4",
+      "text": "获取影像提供者成功创建后触发的事件。事件监听器接收创建的 {@link ImageryProvider} 实例。"
+    },
+    {
+      "id": "ImageryLayer#rectangle",
+      "field": "description",
+      "sourceHash": "sha256:18a8426518e8500e790979d6491b55c32b5ef01e06c8b2718e00b0e06b1fed36",
+      "text": "获取图层矩形范围。若其小于 {@link ImageryProvider} 的矩形范围，则仅显示影像提供者的一部分内容。"
+    },
+    {
+      "id": "ImageryLayer#saturation",
+      "field": "description",
+      "sourceHash": "sha256:111889a3739b6e79afde39eef2de62a3cbbeb6823b97fc8f1478174e9604d57d",
+      "text": "图层饱和度。1.0 保持原始影像颜色，小于 1.0 降低饱和度，大于 1.0 提高饱和度。"
+    },
+    {
+      "id": "ImageryLayer#show",
+      "field": "description",
+      "sourceHash": "sha256:371bb7157cf42627c668044b2515b570b26b52d4a719719541b5d0fb28737e3d",
+      "text": "决定是否显示此图层。"
+    },
+    {
+      "id": "ImageryLayer#splitDirection",
+      "field": "description",
+      "sourceHash": "sha256:0dfa9c832ca298b882e2f212cb9fed72eb3063c684056dbe33b455e3ccefd909",
+      "text": "应用于此图层的 {@link SplitDirection}。"
+    },
+    {
+      "id": "ImageryLayerCollection#add",
+      "field": "description",
+      "sourceHash": "sha256:6e20d550b0a25571525fcff41f1750be6f7dcf9e34d10c669a52347c26fcb878",
+      "text": "将图层添加到集合。"
+    },
+    {
+      "id": "ImageryLayerCollection#add",
+      "field": "exceptions/0/description",
+      "sourceHash": "sha256:33f69bf82d016ca79e8eda5bba154f0ceaac71653692afdb52108b781981f03f",
+      "text": "若提供 index，必须大于等于零，且小于等于图层数量。"
+    },
+    {
+      "id": "ImageryLayerCollection#add",
+      "field": "params/index/description",
+      "sourceHash": "sha256:a633161cc7c35b990d69481648b6f1ed68d46333bb9a36af78a1e8ac642d44c8",
+      "text": "添加图层的位置索引。若省略，则添加到全部现有图层上方。"
+    },
+    {
+      "id": "ImageryLayerCollection#add",
+      "field": "params/layer/description",
+      "sourceHash": "sha256:1241013cba2c44f8fac2bcabebc36fe8c0c8633ba2f71bd5d901cd9d7e06d525",
+      "text": "要添加的图层。"
+    },
+    {
+      "id": "ImageryLayerCollection#addImageryProvider",
+      "field": "description",
+      "sourceHash": "sha256:96e148cb90a719f4348e67d5c19ed95da687d21340cb06635f8d07e4eb7fd7a0",
+      "text": "使用给定 ImageryProvider 创建新图层，并添加到集合。"
+    },
+    {
+      "id": "ImageryLayerCollection#addImageryProvider",
+      "field": "params/imageryProvider/description",
+      "sourceHash": "sha256:7516e536bd5987751aeec528a675865f01199bc2ccb0fc25c824bc3c5c265709",
+      "text": "用于创建新图层的影像提供者。"
+    },
+    {
+      "id": "ImageryLayerCollection#addImageryProvider",
+      "field": "params/index/description",
+      "sourceHash": "sha256:6b92f7d02c853594d5f46935823e66635ef82b1a476b72c1bbdcffb55bbc750b",
+      "text": "添加图层的位置索引。若省略，则添加到全部现有图层上方。"
+    },
+    {
+      "id": "ImageryLayerCollection#addImageryProvider",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:3b17a5ead0c42f77c3b4e3e0353b376dcd66c0b6c034c0a924eb572a3e165c15",
+      "text": "新创建的图层。"
+    },
+    {
+      "id": "ImageryLayerCollection#contains",
+      "field": "description",
+      "sourceHash": "sha256:ba6796a26da5e00b8319638d56fc23e1e4bf97ba4a595eab9d08996b158c6ecb",
+      "text": "检查集合是否包含给定图层。"
+    },
+    {
+      "id": "ImageryLayerCollection#contains",
+      "field": "params/layer/description",
+      "sourceHash": "sha256:b5b419cef3f0df3a75b03cd4811968ad8d3a40a8e7ebef2ca7af8f56edefc3c0",
+      "text": "要检查的图层。"
+    },
+    {
+      "id": "ImageryLayerCollection#contains",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:300e3ad4121151422f38b255341ef6ad1f8266c566cead477b95919f8178e89d",
+      "text": "若集合包含此图层，则返回 true；否则返回 false。"
+    },
+    {
+      "id": "ImageryLayerCollection#destroy",
+      "field": "description",
+      "sourceHash": "sha256:c6589bf19bb9c7995fec408d2e8d1e4935774f1995a9851c913f49742c72129b",
+      "text": "销毁此集合中所有图层持有的 WebGL 资源。显式销毁可确定地释放 WebGL 资源，而不依赖垃圾回收器。<br /><br />对象销毁后不应再使用；调用除 <code>isDestroyed</code> 以外的任何函数都会抛出 {@link DeveloperError}。因此，应像示例中那样将返回值（<code>undefined</code>）赋给该对象变量。"
+    },
+    {
+      "id": "ImageryLayerCollection#get",
+      "field": "description",
+      "sourceHash": "sha256:417c8b637e1534a270c48b8d438ff920ff1f7a07c08d6079bde14dd9d1ab2821",
+      "text": "通过索引从集合中获取图层。"
+    },
+    {
+      "id": "ImageryLayerCollection#get",
+      "field": "params/index/description",
+      "sourceHash": "sha256:fd6dee5a50020d7b4037ddac52c7ca24022528843aab8b1947472f651e2bd099",
+      "text": "要获取的索引。"
+    },
+    {
+      "id": "ImageryLayerCollection#get",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:c7d8169af9b6cccb20b3817e745a0a63eed822ca0182d5f1a87b5b8831d01b15",
+      "text": "给定索引处的影像图层。"
+    },
+    {
+      "id": "ImageryLayerCollection#indexOf",
+      "field": "description",
+      "sourceHash": "sha256:3b7c066ba4713d482ae172525053bb8245270015ea6dfec72e4c4f2a77b8c0b9",
+      "text": "确定给定图层在集合中的索引。"
+    },
+    {
+      "id": "ImageryLayerCollection#indexOf",
+      "field": "params/layer/description",
+      "sourceHash": "sha256:026bcf1479d759027a95acfe975eeb24e7ac73ae5a4844d9a67a342c5566eed0",
+      "text": "要查找其索引的图层。"
+    },
+    {
+      "id": "ImageryLayerCollection#indexOf",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:8e4d8bc6aa843584c1bbcb0975284e725f47ea12c6ffef60e0ecec99adc5e4e1",
+      "text": "图层在集合中的索引；若集合中不存在该图层，则返回 -1。"
+    },
+    {
+      "id": "ImageryLayerCollection#isDestroyed",
+      "field": "description",
+      "sourceHash": "sha256:aea7b697937631c90ae3fc0ec55b81ba0ddc7abe4d6045848b2031f9bed60091",
+      "text": "若此对象已销毁，返回 true；否则返回 false。<br /><br />对象销毁后不应再使用；调用除 <code>isDestroyed</code> 以外的任何函数都会抛出 {@link DeveloperError}。"
+    },
+    {
+      "id": "ImageryLayerCollection#isDestroyed",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:3617521521496b9e9891569bde8afb6b76b6c1e9a3bb0704ec12f852b7bac7a7",
+      "text": "若此对象已销毁，返回 true；否则返回 false。"
+    },
+    {
+      "id": "ImageryLayerCollection#layerAdded",
+      "field": "description",
+      "sourceHash": "sha256:97182bf5570d17da772c42d3c382d4b0d2df9a4d498630af741d7ba67bbf65a7",
+      "text": "图层添加到集合时触发的事件。处理器接收新增图层及其插入索引。"
+    },
+    {
+      "id": "ImageryLayerCollection#layerMoved",
+      "field": "description",
+      "sourceHash": "sha256:ab3db17c91f1c984c3b11758b0b149f7eeabbceae1cfd02e3e68817a6c2cae81",
+      "text": "图层在集合中的位置变化时触发的事件。处理器接收移动的图层、移动后的新索引和移动前的旧索引。"
+    },
+    {
+      "id": "ImageryLayerCollection#layerRemoved",
+      "field": "description",
+      "sourceHash": "sha256:9de420090b1a47d3679839f721343a8efc43c17fd5df8a1f099a78c32a2bfac1",
+      "text": "图层从集合中移除时触发的事件。处理器接收被移除的图层及其原索引。"
+    },
+    {
+      "id": "ImageryLayerCollection#layerShownOrHidden",
+      "field": "description",
+      "sourceHash": "sha256:8a9268428a1c1fcbc81e47a489fc0cc21781af99d27c9cea41e7998373bc8edb",
+      "text": "通过 {@link ImageryLayer#show} 显示或隐藏图层时触发的事件。处理器接收图层引用、图层在集合中的索引和布尔标志；当前显示为 true，当前隐藏为 false。"
+    },
+    {
+      "id": "ImageryLayerCollection#length",
+      "field": "description",
+      "sourceHash": "sha256:d4a132ccf7fcb0516e5525f1be712070fd2f31e48795f9e128887a77f4e078aa",
+      "text": "获取此集合中的图层数量。"
+    },
+    {
+      "id": "ImageryLayerCollection#lower",
+      "field": "description",
+      "sourceHash": "sha256:6700d248f9cf75785338e407a65c7daff5fe55f3f980dca68bb9a72f30a4a557",
+      "text": "将图层在集合中下移一个位置。"
+    },
+    {
+      "id": "ImageryLayerCollection#lower",
+      "field": "exceptions/0/description",
+      "sourceHash": "sha256:1151c381af93b353658ed2eaded28cabcec66bb5be5e02863a1082bd935b4301",
+      "text": "layer 不在此集合中。"
+    },
+    {
+      "id": "ImageryLayerCollection#lower",
+      "field": "params/layer/description",
+      "sourceHash": "sha256:30a55339b2519388767183993d36ef1d74447e25293d8774bbf834e5d67c13ca",
+      "text": "要移动的图层。"
+    },
+    {
+      "id": "ImageryLayerCollection#lowerToBottom",
+      "field": "description",
+      "sourceHash": "sha256:28a90ca3b781669d53df92a5f42ba6946c97481fd8e4c94a05fc682b34be05d4",
+      "text": "将图层移到集合最底部。"
+    },
+    {
+      "id": "ImageryLayerCollection#lowerToBottom",
+      "field": "exceptions/0/description",
+      "sourceHash": "sha256:1151c381af93b353658ed2eaded28cabcec66bb5be5e02863a1082bd935b4301",
+      "text": "layer 不在此集合中。"
+    },
+    {
+      "id": "ImageryLayerCollection#lowerToBottom",
+      "field": "params/layer/description",
+      "sourceHash": "sha256:30a55339b2519388767183993d36ef1d74447e25293d8774bbf834e5d67c13ca",
+      "text": "要移动的图层。"
+    },
+    {
+      "id": "ImageryLayerCollection#pickImageryLayerFeatures",
+      "field": "description",
+      "sourceHash": "sha256:dfddb74a1155cca2856f92bda3079e97883fca76e61489b25ab057ddb9e0910e",
+      "text": "异步确定拾取射线相交的影像图层要素。通过对拾取射线相交的每个影像瓦片调用 {@link ImageryProvider#pickFeatures} 来查找要素。若要从屏幕位置生成拾取射线，请使用 {@link Camera.getPickRay}。"
+    },
+    {
+      "id": "ImageryLayerCollection#pickImageryLayerFeatures",
+      "field": "params/ray/description",
+      "sourceHash": "sha256:3366933e9f93e4cc140bf74157c505fae8c8e87ba5af9142d369be1d28c2f066",
+      "text": "要进行求交测试的射线。"
+    },
+    {
+      "id": "ImageryLayerCollection#pickImageryLayerFeatures",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:f395195bbf30c9e453e4067a107c91f6227f4c877257d6a4bfdf0f6faa4736e8",
+      "text": "兑现为拾取射线相交要素数组的 Promise。若能迅速确定没有相交要素，例如没有活动影像提供者支持 {@link ImageryProvider#pickFeatures}，或拾取射线未与表面相交，则此函数返回 undefined。"
+    },
+    {
+      "id": "ImageryLayerCollection#pickImageryLayers",
+      "field": "description",
+      "sourceHash": "sha256:09462b2c07ef74509f30fb245f9a4e728e51a7c5870eae6bbb785f468f5a9eae",
+      "text": "确定与拾取射线相交的影像图层。若要从屏幕位置生成拾取射线，请使用 {@link Camera.getPickRay}。"
+    },
+    {
+      "id": "ImageryLayerCollection#pickImageryLayers",
+      "field": "params/ray/description",
+      "sourceHash": "sha256:3366933e9f93e4cc140bf74157c505fae8c8e87ba5af9142d369be1d28c2f066",
+      "text": "要进行求交测试的射线。"
+    },
+    {
+      "id": "ImageryLayerCollection#pickImageryLayers",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:cf43f31b5b6e494327cc32a139ba1c63eb0a339e1a89a7a7090e49dd8aaa106f",
+      "text": "包含与给定拾取射线相交的所有图层的数组；若未选中图层，则返回 undefined。"
+    },
+    {
+      "id": "ImageryLayerCollection#raise",
+      "field": "description",
+      "sourceHash": "sha256:da1a26f0d72db4594582f8a24fd6f6c8e5d32b428093f3a769688c2f015d7d02",
+      "text": "将图层在集合中上移一个位置。"
+    },
+    {
+      "id": "ImageryLayerCollection#raise",
+      "field": "exceptions/0/description",
+      "sourceHash": "sha256:1151c381af93b353658ed2eaded28cabcec66bb5be5e02863a1082bd935b4301",
+      "text": "layer 不在此集合中。"
+    },
+    {
+      "id": "ImageryLayerCollection#raise",
+      "field": "params/layer/description",
+      "sourceHash": "sha256:30a55339b2519388767183993d36ef1d74447e25293d8774bbf834e5d67c13ca",
+      "text": "要移动的图层。"
+    },
+    {
+      "id": "ImageryLayerCollection#raiseToTop",
+      "field": "description",
+      "sourceHash": "sha256:558bbbb0ec6454c40f2d45a197022f5ceae042cceca0d00128d3fa0de9dd59c4",
+      "text": "将图层移到集合最顶部。"
+    },
+    {
+      "id": "ImageryLayerCollection#raiseToTop",
+      "field": "exceptions/0/description",
+      "sourceHash": "sha256:1151c381af93b353658ed2eaded28cabcec66bb5be5e02863a1082bd935b4301",
+      "text": "layer 不在此集合中。"
+    },
+    {
+      "id": "ImageryLayerCollection#raiseToTop",
+      "field": "params/layer/description",
+      "sourceHash": "sha256:30a55339b2519388767183993d36ef1d74447e25293d8774bbf834e5d67c13ca",
+      "text": "要移动的图层。"
+    },
+    {
+      "id": "ImageryLayerCollection#remove",
+      "field": "description",
+      "sourceHash": "sha256:37d3a98a267a2b0fc1f15efd6d518aa1c502f95bc9279cbc8ccf69c7ce4aaa43",
+      "text": "若集合中存在此图层，则将其移除。"
+    },
+    {
+      "id": "ImageryLayerCollection#remove",
+      "field": "params/destroy/description",
+      "sourceHash": "sha256:ac022702ed6678cd7a5c15a8b6d6f4d1a2e9cd490153dda05338af048eb13c04",
+      "text": "是否在移除图层的同时销毁它们。"
+    },
+    {
+      "id": "ImageryLayerCollection#remove",
+      "field": "params/layer/description",
+      "sourceHash": "sha256:1cf99b5c450ceb1370c96c72d0862a94a064fd598a808c315226b1e32308bc35",
+      "text": "要移除的图层。"
+    },
+    {
+      "id": "ImageryLayerCollection#remove",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:1bd46674436c8e698181e77cc828c1e82ea50f733079157c7d4db30bb4b35c98",
+      "text": "若图层原本存在于集合中并已移除，则返回 true；若图层不在集合中，则返回 false。"
+    },
+    {
+      "id": "ImageryLayerCollection#removeAll",
+      "field": "description",
+      "sourceHash": "sha256:ac167a16a3d7e31c471796af6e6579722ac5dd8c639e0faefae9bb28ba884fa1",
+      "text": "移除此集合中的全部图层。"
+    },
+    {
+      "id": "ImageryLayerCollection#removeAll",
+      "field": "params/destroy/description",
+      "sourceHash": "sha256:ac022702ed6678cd7a5c15a8b6d6f4d1a2e9cd490153dda05338af048eb13c04",
+      "text": "是否在移除图层的同时销毁它们。"
+    }
+  ]
+}

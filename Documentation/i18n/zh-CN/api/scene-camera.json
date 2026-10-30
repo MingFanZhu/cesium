@@ -1,0 +1,3780 @@
+{
+  "schemaVersion": 1,
+  "locale": "zh-CN",
+  "entries": [
+    {
+      "id": "Camera.DEFAULT_OFFSET",
+      "field": "description",
+      "sourceHash": "sha256:d83334a099f2514a70dff4e264ab16150b4fe7840bcbf768b0e470456610fc69",
+      "text": "相机飞向包含包围球的位置时，默认使用的方位角、俯仰角和距离。"
+    },
+    {
+      "id": "Camera.DEFAULT_VIEW_FACTOR",
+      "field": "description",
+      "sourceHash": "sha256:92a1bff1e47e36f2af9339f475dd2cd39ceebc28b792def6bfe29f7dfac7ce52",
+      "text": "相机对准矩形后，将相机位置乘以此标量，再将所得向量加回原相机位置。值为零表示相机可看到整个 {@link Camera#DEFAULT_VIEW_RECTANGLE}；大于零会使其远离该范围，小于零则使其靠近该范围。"
+    },
+    {
+      "id": "Camera.DEFAULT_VIEW_RECTANGLE",
+      "field": "description",
+      "sourceHash": "sha256:3a8fc676f109f8d37798d4eaddeceda0e5110cc7736826d889dd6d0fefb63e50",
+      "text": "创建相机时默认查看的矩形范围。"
+    },
+    {
+      "id": "Camera.FlightCancelledCallback",
+      "field": "description",
+      "sourceHash": "sha256:8c1b76eb0d505242f9fbebd8e7af451f327a37c41afd942ba4d748b362e2357f",
+      "text": "飞行取消时执行的函数。"
+    },
+    {
+      "id": "Camera.FlightCompleteCallback",
+      "field": "description",
+      "sourceHash": "sha256:30752d3463457d6ea373e1701b4d08e8d1a1740e88a8f3813974389f43b88b70",
+      "text": "飞行完成时执行的函数。"
+    },
+    {
+      "id": "Camera#cameraToWorldCoordinates",
+      "field": "description",
+      "sourceHash": "sha256:df3d9b20996dbe04a4fec46f2b1d7d2df87b7d7528a862677e5622f2fbb73c05",
+      "text": "将向量或点从相机参考坐标系转换为世界坐标。"
+    },
+    {
+      "id": "Camera#cameraToWorldCoordinates",
+      "field": "params/cartesian/description",
+      "sourceHash": "sha256:e5bc93a2e7e7df08cb0461651278286414122f1c21d9965724f1bb6307a76f5d",
+      "text": "待转换的向量或点。"
+    },
+    {
+      "id": "Camera#cameraToWorldCoordinates",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:cfa12d40913a9857e43abbfd292950cef698a894deabce91c696013d11005b03",
+      "text": "转换后的向量或点。"
+    },
+    {
+      "id": "Camera#cameraToWorldCoordinatesPoint",
+      "field": "description",
+      "sourceHash": "sha256:4b475610a8865dddaa19bd52fc156b1636f772d5a616f23e98e2f4b7410264dc",
+      "text": "将点从相机参考坐标系转换为世界坐标。"
+    },
+    {
+      "id": "Camera#cameraToWorldCoordinatesPoint",
+      "field": "params/cartesian/description",
+      "sourceHash": "sha256:2f44789cc0b656e480f172bceb04766a01bf590d17ca6873536f8aab56895534",
+      "text": "待转换的点。"
+    },
+    {
+      "id": "Camera#cameraToWorldCoordinatesPoint",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:9e1d23815f7a352426b47887249cf8feb3cb196d1aab2c1e323a8d41e6f25100",
+      "text": "转换后的点。"
+    },
+    {
+      "id": "Camera#cameraToWorldCoordinatesVector",
+      "field": "description",
+      "sourceHash": "sha256:7afb63a9227db7673ec1626073f887dbc76d617ffe7c8cda250c868b0277dc29",
+      "text": "将向量从相机参考坐标系转换为世界坐标。"
+    },
+    {
+      "id": "Camera#cameraToWorldCoordinatesVector",
+      "field": "params/cartesian/description",
+      "sourceHash": "sha256:be4d0146dfeffad32d3591a85ee2428f3aad137e63b248e8fa70096f8772c18a",
+      "text": "待转换的向量。"
+    },
+    {
+      "id": "Camera#cameraToWorldCoordinatesVector",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:e5480ef724f6a5e9ffd717296d3e03d41e7e9cdda5a6c1e57ec656a41ef587cf",
+      "text": "转换后的向量。"
+    },
+    {
+      "id": "Camera#cancelFlight",
+      "field": "description",
+      "sourceHash": "sha256:b1b92447a148da9a4068511d833181958bd41566c917563c7296a9216496f247",
+      "text": "取消当前相机飞行，并使相机保持在当前位置。若当前没有飞行，则不执行任何操作。"
+    },
+    {
+      "id": "Camera#changed",
+      "field": "description",
+      "sourceHash": "sha256:9d979a42d392a821fa20d09fe0931fa172fb9fc96137afd13d6a66968b2fbef7",
+      "text": "获取相机变化达到 <code>percentageChanged</code> 时触发的事件。"
+    },
+    {
+      "id": "Camera#completeFlight",
+      "field": "description",
+      "sourceHash": "sha256:7e9d795231354546164cef0fc7818903272c7ed8ee8b2361f3917b0d5c9ad038",
+      "text": "完成当前相机飞行，并立即将相机移至最终目的地。若当前没有飞行，则不执行任何操作。"
+    },
+    {
+      "id": "Camera#computeViewRectangle",
+      "field": "description",
+      "sourceHash": "sha256:9a278afe91fc257c2ac572c3def8e0897866c8b744937bf30deaaf8710b003ef",
+      "text": "计算椭球上的近似可见矩形范围。"
+    },
+    {
+      "id": "Camera#computeViewRectangle",
+      "field": "exceptions/0/description",
+      "sourceHash": "sha256:6327d16f0859fe84341d73a7fa51ae56904012f5d7738a798f725d7a6a4319ec",
+      "text": "主世界不是 Globe 时，不支持 computeViewRectangle。"
+    },
+    {
+      "id": "Camera#computeViewRectangle",
+      "field": "params/ellipsoid/description",
+      "sourceHash": "sha256:d78ff53a85d5f6474e97407586e72217a61924a83786013b25ed22f4bb1c233d",
+      "text": "要计算其可见区域的椭球。"
+    },
+    {
+      "id": "Camera#computeViewRectangle",
+      "field": "params/result/description",
+      "sourceHash": "sha256:8b614457fd5785ba2916bf870b70f5ba5850b79e38f4e427c6d61861f852fcbd",
+      "text": "用于保存结果的矩形对象。"
+    },
+    {
+      "id": "Camera#computeViewRectangle",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:3cc4b353b8db4d74bc968fd5852e74b57b197ca9b22fe07f7e77794a362c14d0",
+      "text": "可见矩形范围；若椭球完全不可见，则返回 undefined。"
+    },
+    {
+      "id": "Camera#constrainedAxis",
+      "field": "description",
+      "sourceHash": "sha256:ff3e498ee1f3b73138b18762276a2227e50da0edae11e7ff6a8947d23c25aef4",
+      "text": "若设置此轴，相机在任一方向上都无法旋转越过该轴。"
+    },
+    {
+      "id": "Camera#defaultLookAmount",
+      "field": "description",
+      "sourceHash": "sha256:2d71867b07c82fe8cb6af6061b4622041b19f657a1bd54639a67c51f2a46ab24",
+      "text": "调用 look 系列方法时未提供参数所使用的默认相机旋转量。"
+    },
+    {
+      "id": "Camera#defaultMoveAmount",
+      "field": "description",
+      "sourceHash": "sha256:2eed28a9fdbeca49e419e14994d804cde97825fc1f73bc6d4d02fa05cd970539",
+      "text": "调用 move 系列方法时未提供参数所使用的默认相机移动量。"
+    },
+    {
+      "id": "Camera#defaultRotateAmount",
+      "field": "description",
+      "sourceHash": "sha256:825972f3c03f8ace470eff339c90dc152228b3e236cbacca5316ca01b0832783",
+      "text": "调用 rotate 系列方法时未提供参数所使用的默认相机旋转量。"
+    },
+    {
+      "id": "Camera#defaultZoomAmount",
+      "field": "description",
+      "sourceHash": "sha256:8cb54ee3a4c05175d77e8966b2eb7dc57bf2f8afd3b29a8272fa99a9961a4f82",
+      "text": "调用 zoom 系列方法时未提供参数所使用的默认相机移动量。"
+    },
+    {
+      "id": "Camera#direction",
+      "field": "description",
+      "sourceHash": "sha256:a80dc871f4a54f455d600b2334e53e1ac08a2a15aa843aa24d9b8093c7add418",
+      "text": "相机的观察方向。"
+    },
+    {
+      "id": "Camera#directionWC",
+      "field": "description",
+      "sourceHash": "sha256:d4664827a52ea6473e798d071035172c302c8bfe2b6a66e1dfdff62642d4279f",
+      "text": "获取世界坐标中的相机观察方向。"
+    },
+    {
+      "id": "Camera#distanceToBoundingSphere",
+      "field": "description",
+      "sourceHash": "sha256:37389f3808b0262911491428ce0927ae609ef0dbbcf7a30835d9400f8da213bb",
+      "text": "返回相机到包围球前表面的距离。"
+    },
+    {
+      "id": "Camera#distanceToBoundingSphere",
+      "field": "params/boundingSphere/description",
+      "sourceHash": "sha256:51d85ff911117fa06a02c4baf92a8e8bff395f791072a3766e615ca2b90a4552",
+      "text": "世界坐标中的包围球。"
+    },
+    {
+      "id": "Camera#distanceToBoundingSphere",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:f800c145cd617977160531303bb20008c38f6bf9a1f443cf7d38714074d3ea2b",
+      "text": "到包围球的距离。"
+    },
+    {
+      "id": "Camera#flyHome",
+      "field": "description",
+      "sourceHash": "sha256:245107278ee279b09f326464d89406742322ba7e5dd094a4fb9bb61a0f9af2c4",
+      "text": "使相机飞向初始视图。使用 {@link Camera#.DEFAULT_VIEW_RECTANGLE} 设置三维场景的默认视图。二维和哥伦布视图的初始视图会显示整张地图。"
+    },
+    {
+      "id": "Camera#flyHome",
+      "field": "params/duration/description",
+      "sourceHash": "sha256:1d0d9a05dfb5c0279cf926f6ac052a726c4052852f7427752f640e5136f79175",
+      "text": "飞行持续时间，单位为秒。若省略，Cesium 会尝试根据飞行距离计算理想时长。参见 {@link Camera#flyTo}。对于活动的 {@link SceneGISPlanarWorld}，会飞向带留白的平面范围，使用固定的 +X 向东、+Y 向北、+Z 向上坐标轴。"
+    },
+    {
+      "id": "Camera#flyTo",
+      "field": "description",
+      "sourceHash": "sha256:3cb44d3015add914850a730dd242bbfef55696a09e4744dfc0f2cd945d828877",
+      "text": "使相机从当前位置飞向新位置。"
+    },
+    {
+      "id": "Camera#flyTo",
+      "field": "exceptions/0/description",
+      "sourceHash": "sha256:f830c0a07204194655c5eb6c4ead07abd59b16cf660424a8e7d2640bdcf95cbb",
+      "text": "若提供 direction 或 up 中的任意一个，则必须同时提供两者。"
+    },
+    {
+      "id": "Camera#flyTo",
+      "field": "exceptions/1/description",
+      "sourceHash": "sha256:02c5e4ebbc7732ea56a9c710187cbc30decc5f6628555cfbbe9cd5d12c60bcb2",
+      "text": "在活动的 {@link SceneGISPlanarWorld} 中，destination 不是有限的 Cartesian3、为 Rectangle，或定义了 flyOverLongitude/flyOverLongitudeWeight。"
+    },
+    {
+      "id": "Camera#flyTo",
+      "field": "params/options.cancel/description",
+      "sourceHash": "sha256:468ec40b56428f631f9f752ba44dd61c0e80156974885c769ecd2e8cb1789f1f",
+      "text": "飞行取消时执行的函数。"
+    },
+    {
+      "id": "Camera#flyTo",
+      "field": "params/options.complete/description",
+      "sourceHash": "sha256:8a32ff9bc27262dee2b103c70e10334c971df52f28dc630d66b3d70e6ea4d8ac",
+      "text": "飞行完成时执行的函数。"
+    },
+    {
+      "id": "Camera#flyTo",
+      "field": "params/options.convert/description",
+      "sourceHash": "sha256:9a41e7d5424f4643340187041e7dd3f19d25ab6e20b776eb09d457f5884ba48a",
+      "text": "是否将目的地从世界坐标转换为场景坐标，仅在非三维模式下相关。默认值为 <code>true</code>。"
+    },
+    {
+      "id": "Camera#flyTo",
+      "field": "params/options.destination/description",
+      "sourceHash": "sha256:47e8b0d7143e904570a9706ad4ff8f5c3f92885b6e68eaa7039c78e9fb2b1772",
+      "text": "相机的最终世界坐标位置，或从俯视角度应能看到的矩形范围。"
+    },
+    {
+      "id": "Camera#flyTo",
+      "field": "params/options.duration/description",
+      "sourceHash": "sha256:e592547f55aac01c6638ad0113c2d8f75247240127bf672f98110b30b7780693",
+      "text": "飞行持续时间，单位为秒。若省略，Cesium 会尝试根据飞行距离计算理想时长。"
+    },
+    {
+      "id": "Camera#flyTo",
+      "field": "params/options.easingFunction/description",
+      "sourceHash": "sha256:cfa59a020782138906fdffe6b479d10688a24905a01f435ea6ed2a46edd9a837",
+      "text": "控制飞行持续期间的时间插值方式。"
+    },
+    {
+      "id": "Camera#flyTo",
+      "field": "params/options.endTransform/description",
+      "sourceHash": "sha256:deb39be36e59e64e51585480b1337aec29966daabbe0dc8bfce8d244f9072e3f",
+      "text": "表示飞行完成后相机所在参考坐标系的变换矩阵。"
+    },
+    {
+      "id": "Camera#flyTo",
+      "field": "params/options.flyOverLongitude/description",
+      "sourceHash": "sha256:015db7f353d9c9f77e250cca3f76f7952f5d90580b30a1754badb9ddf5d34a90",
+      "text": "球面上两点之间总有两条路径。此选项强制相机选择经过指定经度的飞行方向。"
+    },
+    {
+      "id": "Camera#flyTo",
+      "field": "params/options.flyOverLongitudeWeight/description",
+      "sourceHash": "sha256:94b5a8003e77c1c2a813b76255342f05bde71816a85ab8a5df34797ae802c9fc",
+      "text": "仅当经过 flyOverLongitude 指定经度的路径长度不超过最短路径长度乘以 flyOverLongitudeWeight 时，才采用该路径。"
+    },
+    {
+      "id": "Camera#flyTo",
+      "field": "params/options.maximumHeight/description",
+      "sourceHash": "sha256:63eaa8eb69c95c4437f654fec544011366467c6e9bfe5738bfa5f2651296278e",
+      "text": "飞行最高点的最大高度。"
+    },
+    {
+      "id": "Camera#flyTo",
+      "field": "params/options.orientation/description",
+      "sourceHash": "sha256:3f5d4231d43c6eb3e1a2a70ea4ba8874dc74ace36f601eaa66357dbf5c558c75",
+      "text": "包含 direction 和 up，或 heading、pitch 和 roll 属性的对象。默认观察方向在三维中指向参考坐标系中心，在哥伦布视图中指向 z 轴负方向。向上方向在三维中指向局部北方，在哥伦布视图中指向 y 轴正方向。二维无限滚动模式不使用此朝向。"
+    },
+    {
+      "id": "Camera#flyTo",
+      "field": "params/options.pitchAdjustHeight/description",
+      "sourceHash": "sha256:6ffd051ec9ea9f55789ebbe845062c5d6abb9a5fbc90b3c482157f5c4afe172f",
+      "text": "若相机飞行高度超过此值，则在飞行期间调整俯仰角向下观察，以保持地球位于视口内。"
+    },
+    {
+      "id": "Camera#flyToBoundingSphere",
+      "field": "description",
+      "sourceHash": "sha256:d3103e2d1414bb036c1263334d2eeb5d3c1cc8e5f9a35aa8d9ca3dd1fabac831",
+      "text": "使相机飞向当前视图能够容纳给定包围球的位置。<p>偏移使用以包围球中心为原点的局部东、北、天参考坐标系中的 heading、pitch 和 range。方位角和俯仰角均在该局部参考坐标系中定义。方位角从 y 轴起算，朝 x 轴方向增加；俯仰角从 xy 平面起算，正值位于平面下方，负值位于平面上方。range 为到中心的距离。若 range 为零，则自动计算可使整个包围球可见的距离。</p><p>二维和哥伦布视图必须采用俯视视角，相机会位于目标上方并向下观察。相对目标的高度为 range，方位朝向局部北方。</p>"
+    },
+    {
+      "id": "Camera#flyToBoundingSphere",
+      "field": "exceptions/0/description",
+      "sourceHash": "sha256:c022614e15abe1584ec6c1f500efbd8841def54feb7139663243e3c89a44716c",
+      "text": "在活动的 {@link SceneGISPlanarWorld} 中，包围球或偏移无效，或定义了 flyOverLongitude/flyOverLongitudeWeight。"
+    },
+    {
+      "id": "Camera#flyToBoundingSphere",
+      "field": "params/boundingSphere/description",
+      "sourceHash": "sha256:4fb1c5ea10ce41c775a346a1728d6c80b075e7c8f0b1e19c94aebaaf69b4297b",
+      "text": "要观察的包围球，使用世界坐标。"
+    },
+    {
+      "id": "Camera#flyToBoundingSphere",
+      "field": "params/options.cancel/description",
+      "sourceHash": "sha256:468ec40b56428f631f9f752ba44dd61c0e80156974885c769ecd2e8cb1789f1f",
+      "text": "飞行取消时执行的函数。"
+    },
+    {
+      "id": "Camera#flyToBoundingSphere",
+      "field": "params/options.complete/description",
+      "sourceHash": "sha256:8a32ff9bc27262dee2b103c70e10334c971df52f28dc630d66b3d70e6ea4d8ac",
+      "text": "飞行完成时执行的函数。"
+    },
+    {
+      "id": "Camera#flyToBoundingSphere",
+      "field": "params/options.duration/description",
+      "sourceHash": "sha256:e592547f55aac01c6638ad0113c2d8f75247240127bf672f98110b30b7780693",
+      "text": "飞行持续时间，单位为秒。若省略，Cesium 会尝试根据飞行距离计算理想时长。"
+    },
+    {
+      "id": "Camera#flyToBoundingSphere",
+      "field": "params/options.easingFunction/description",
+      "sourceHash": "sha256:cfa59a020782138906fdffe6b479d10688a24905a01f435ea6ed2a46edd9a837",
+      "text": "控制飞行持续期间的时间插值方式。"
+    },
+    {
+      "id": "Camera#flyToBoundingSphere",
+      "field": "params/options.endTransform/description",
+      "sourceHash": "sha256:deb39be36e59e64e51585480b1337aec29966daabbe0dc8bfce8d244f9072e3f",
+      "text": "表示飞行完成后相机所在参考坐标系的变换矩阵。"
+    },
+    {
+      "id": "Camera#flyToBoundingSphere",
+      "field": "params/options.flyOverLongitude/description",
+      "sourceHash": "sha256:015db7f353d9c9f77e250cca3f76f7952f5d90580b30a1754badb9ddf5d34a90",
+      "text": "球面上两点之间总有两条路径。此选项强制相机选择经过指定经度的飞行方向。"
+    },
+    {
+      "id": "Camera#flyToBoundingSphere",
+      "field": "params/options.flyOverLongitudeWeight/description",
+      "sourceHash": "sha256:94b5a8003e77c1c2a813b76255342f05bde71816a85ab8a5df34797ae802c9fc",
+      "text": "仅当经过 flyOverLongitude 指定经度的路径长度不超过最短路径长度乘以 flyOverLongitudeWeight 时，才采用该路径。"
+    },
+    {
+      "id": "Camera#flyToBoundingSphere",
+      "field": "params/options.maximumHeight/description",
+      "sourceHash": "sha256:63eaa8eb69c95c4437f654fec544011366467c6e9bfe5738bfa5f2651296278e",
+      "text": "飞行最高点的最大高度。"
+    },
+    {
+      "id": "Camera#flyToBoundingSphere",
+      "field": "params/options.offset/description",
+      "sourceHash": "sha256:b9d965c8ecf71488a5080c69e4d0bf7cf073218362e6256943cb40521f7106fd",
+      "text": "以目标为中心的局部东、北、天参考坐标系中相对于目标的偏移。"
+    },
+    {
+      "id": "Camera#flyToBoundingSphere",
+      "field": "params/options.pitchAdjustHeight/description",
+      "sourceHash": "sha256:6ffd051ec9ea9f55789ebbe845062c5d6abb9a5fbc90b3c482157f5c4afe172f",
+      "text": "若相机飞行高度超过此值，则在飞行期间调整俯仰角向下观察，以保持地球位于视口内。"
+    },
+    {
+      "id": "Camera#frustum",
+      "field": "description",
+      "sourceHash": "sha256:ee70aa4fb386a1cdae3b456796e6156394f58ff7602e2f4bfa7f636bfa07ff65",
+      "text": "视野覆盖的空间区域。平面世界在三维模式下也支持 OrthographicOffCenterFrustum。"
+    },
+    {
+      "id": "Camera#getMagnitude",
+      "field": "description",
+      "sourceHash": "sha256:6249789b1875e320aef534094f7637473fa4e8b8ea8d78b9c2ed0b659c356fcd",
+      "text": "获取相机位置的模。在三维中为位置向量的模；在二维和哥伦布视图中为到地图的距离。"
+    },
+    {
+      "id": "Camera#getMagnitude",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:3a9d664df2a26e83c8dadfce118be53410038fe02b137c19d2fcb6ef82d128cb",
+      "text": "位置的模。"
+    },
+    {
+      "id": "Camera#getPickRay",
+      "field": "description",
+      "sourceHash": "sha256:e1e4d770be32e45f56f2a51c9869e97e8bea363425a0ca8055ef34d1c7e98c79",
+      "text": "在世界坐标中创建从相机位置穿过 <code>windowPosition</code> 处像素的射线。"
+    },
+    {
+      "id": "Camera#getPickRay",
+      "field": "params/windowPosition/description",
+      "sourceHash": "sha256:ef41e0a7a53896f893a1a99309882d9763f1e08a80aa0176ccc608ed9319148f",
+      "text": "像素的 x 和 y 坐标。"
+    },
+    {
+      "id": "Camera#getPickRay",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:ab402888441629d701ddd36064526d24248435199d150b00f596d41d4e0e9d3b",
+      "text": "返回射线的 {@link Cartesian3} 位置和方向；若无法确定拾取射线，则返回 undefined。"
+    },
+    {
+      "id": "Camera#getPixelSize",
+      "field": "description",
+      "sourceHash": "sha256:62daeab13bef97060dcc5b2072ea7a5da48f075488894879bbf041c86b2cbfb3",
+      "text": "返回像素对应的米制尺寸。"
+    },
+    {
+      "id": "Camera#getPixelSize",
+      "field": "params/boundingSphere/description",
+      "sourceHash": "sha256:51d85ff911117fa06a02c4baf92a8e8bff395f791072a3766e615ca2b90a4552",
+      "text": "世界坐标中的包围球。"
+    },
+    {
+      "id": "Camera#getPixelSize",
+      "field": "params/drawingBufferHeight/description",
+      "sourceHash": "sha256:ecfafaef5a34867508fda0516cbb497a6df43831934ab2d0abc7aca9153b0310",
+      "text": "绘图缓冲的高度。"
+    },
+    {
+      "id": "Camera#getPixelSize",
+      "field": "params/drawingBufferWidth/description",
+      "sourceHash": "sha256:779c206388b6a6329dafdbfe7a9987f7670790c827a52adee219c72a3d543be5",
+      "text": "绘图缓冲的宽度。"
+    },
+    {
+      "id": "Camera#getPixelSize",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:b940e659a7b55dadd2f1ed041de845cf1cad3f04f75826199815558e666f6667",
+      "text": "像素对应的米制尺寸。"
+    },
+    {
+      "id": "Camera#getRectangleCameraCoordinates",
+      "field": "description",
+      "sourceHash": "sha256:ec170a90ee29cdbd430a3b8aab730442727bedd5233812853441ec30007e12db",
+      "text": "获取观察椭球或地图上某矩形范围所需的相机位置。"
+    },
+    {
+      "id": "Camera#getRectangleCameraCoordinates",
+      "field": "exceptions/0/description",
+      "sourceHash": "sha256:6b25eddae5775d2daac36a94a13ba3e71a502dc3ae51a6439f1f3f569834d21a",
+      "text": "主世界不是 Globe 时，不支持 getRectangleCameraCoordinates。"
+    },
+    {
+      "id": "Camera#getRectangleCameraCoordinates",
+      "field": "params/rectangle/description",
+      "sourceHash": "sha256:2d661b86d80866c0fe8be58fab364a35c70cf9222cf81f5927d00cae596eb7ef",
+      "text": "要观察的矩形范围。"
+    },
+    {
+      "id": "Camera#getRectangleCameraCoordinates",
+      "field": "params/result/description",
+      "sourceHash": "sha256:23a480f46332f7a4c9abc978fb1adf8c1f788a9b637ba555aaf97cd3f477c1f5",
+      "text": "观察该矩形范围所需的相机位置。"
+    },
+    {
+      "id": "Camera#getRectangleCameraCoordinates",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:23a480f46332f7a4c9abc978fb1adf8c1f788a9b637ba555aaf97cd3f477c1f5",
+      "text": "观察该矩形范围所需的相机位置。"
+    },
+    {
+      "id": "Camera#heading",
+      "field": "description",
+      "sourceHash": "sha256:37276c15da9a9941fc6d6baa84b322b449ffbefaac16d341366419d0f78da009",
+      "text": "获取相机方位角，单位为弧度。对于活动的 {@link SceneGISPlanarWorld}，从固定世界 +Y 轴向 +X 轴顺时针量取。"
+    },
+    {
+      "id": "Camera#inverseTransform",
+      "field": "description",
+      "sourceHash": "sha256:978bfd8a7734660cc46194f669cacfdfaeb42e04e9d84ef863071fa39b2667bd",
+      "text": "获取相机变换矩阵的逆矩阵。"
+    },
+    {
+      "id": "Camera#inverseViewMatrix",
+      "field": "description",
+      "sourceHash": "sha256:6f362a8dca3d35c0feccdc67ffcdddca7a41bd733c46784e5b5f2df6fd211d60",
+      "text": "获取视图矩阵的逆矩阵。"
+    },
+    {
+      "id": "Camera#look",
+      "field": "description",
+      "sourceHash": "sha256:399d28b8b766ea4641290bd5fa73365d01362cbff3f04fb37c15d908542b4e54",
+      "text": "将相机的每个朝向向量绕 <code>axis</code> 旋转 <code>angle</code>。"
+    },
+    {
+      "id": "Camera#look",
+      "field": "params/angle/description",
+      "sourceHash": "sha256:4278ae5c7f29339c052e402437e0f101836a5b438e96ce93a7fa674623116f55",
+      "text": "旋转角度，单位为弧度。默认值为 <code>defaultLookAmount</code>。"
+    },
+    {
+      "id": "Camera#look",
+      "field": "params/axis/description",
+      "sourceHash": "sha256:2286cb42570b983230e054911c0ea7f8b9808122d78682b2d2b6acb9e0b0f1af",
+      "text": "旋转所绕的轴。"
+    },
+    {
+      "id": "Camera#lookAt",
+      "field": "description",
+      "sourceHash": "sha256:8b27136e76797f0e2f65dfbbc103be03eab44175fc08e6616de378f4b5ed7e53",
+      "text": "使用目标和偏移设置相机位置及朝向。目标必须为世界坐标。偏移可采用以目标为中心的局部东、北、天参考坐标系中的笛卡尔坐标，或 heading、pitch 和 range。笛卡尔偏移相对于变换矩阵所定义参考坐标系的中心；若使用 heading、pitch 和 range，则方位角和俯仰角在该变换矩阵定义的参考坐标系中量取。方位角从 y 轴起算，朝 x 轴方向增加；俯仰角从 xy 平面起算，正值位于平面下方，负值位于平面上方。range 为到中心的距离。在二维中必须采用俯视视角，相机会位于目标上方并向下观察，其高度为偏移向量的模。方位角根据偏移确定；若无法确定，则朝北。"
+    },
+    {
+      "id": "Camera#lookAt",
+      "field": "exceptions/0/description",
+      "sourceHash": "sha256:8e522fc570b1069a9c665793a9e3a642fd5a35492c5dce8a2a90948ca4bd8811",
+      "text": "形变过渡期间不支持 lookAt。"
+    },
+    {
+      "id": "Camera#lookAt",
+      "field": "exceptions/1/description",
+      "sourceHash": "sha256:5415e48d2784f6de4054228670741783ccccef7a200c465dfec30ea0d46cc7b0",
+      "text": "在活动的 {@link SceneGISPlanarWorld} 中，目标或偏移包含非有限值或发生退化。目标参考坐标系仅使用固定平面坐标轴和平移。"
+    },
+    {
+      "id": "Camera#lookAt",
+      "field": "params/offset/description",
+      "sourceHash": "sha256:b9d965c8ecf71488a5080c69e4d0bf7cf073218362e6256943cb40521f7106fd",
+      "text": "以目标为中心的局部东、北、天参考坐标系中相对于目标的偏移。"
+    },
+    {
+      "id": "Camera#lookAt",
+      "field": "params/target/description",
+      "sourceHash": "sha256:9db47401547d4b687757cc95c96fad44c84ccc0739713b6561638befdccef596",
+      "text": "世界坐标中的目标位置。"
+    },
+    {
+      "id": "Camera#lookAtTransform",
+      "field": "description",
+      "sourceHash": "sha256:d369dcbb33ac0492e2fa576c71fea67929d60089cec4323a8ae8f28394857d6d",
+      "text": "使用目标和变换矩阵设置相机位置及朝向。偏移可采用笛卡尔坐标或 heading、pitch 和 range。笛卡尔偏移相对于变换矩阵所定义参考坐标系的中心；若使用 heading、pitch 和 range，则方位角和俯仰角在该变换矩阵定义的参考坐标系中量取。方位角从 y 轴起算，朝 x 轴方向增加；俯仰角从 xy 平面起算，正值位于平面下方，负值位于平面上方。range 为到中心的距离。在二维中必须采用俯视视角，相机会位于参考坐标系中心上方，其高度为偏移向量的模。方位角根据偏移确定；若无法确定，则朝北。"
+    },
+    {
+      "id": "Camera#lookAtTransform",
+      "field": "exceptions/0/description",
+      "sourceHash": "sha256:96382263962803708b3a9a7f40aebf978a5f4cb753a94db018dd334b9e031ab8",
+      "text": "形变过渡期间不支持 lookAtTransform。"
+    },
+    {
+      "id": "Camera#lookAtTransform",
+      "field": "params/offset/description",
+      "sourceHash": "sha256:3cfb47fe03cdcc6be21c57b2270fc88cc8f5975dafebbd1b2b9bd6d469161941",
+      "text": "以目标为中心的参考坐标系中相对于目标的偏移。"
+    },
+    {
+      "id": "Camera#lookAtTransform",
+      "field": "params/transform/description",
+      "sourceHash": "sha256:e053d0e15dfc44a3a0c4cdc3ec5d373ee1918747d13d32b0b8a81ec1810175cd",
+      "text": "定义参考坐标系的变换矩阵。"
+    },
+    {
+      "id": "Camera#lookAtWorldPosition",
+      "field": "description",
+      "sourceHash": "sha256:313360c207dbc379c64cc93c48056a2db5acaf0b18469e6767df49a8d9ae0cee",
+      "text": "设置相机朝向，使其观察世界坐标中的目标位置。相机的向上向量会与目标位置处的世界向上向量对齐。若相机就在目标位置，则以该处的世界向上向量确定朝向。在平面世界中，世界向上方向固定为 +Z，忽略 ellipsoid 参数。保留相机位置和参考变换。"
+    },
+    {
+      "id": "Camera#lookAtWorldPosition",
+      "field": "params/ellipsoid/description",
+      "sourceHash": "sha256:ecaf8ae542739cfe1c973ae84233596f866f7942b3b6f45dd439283b7436ce07",
+      "text": "用于确定世界向上方向的椭球。"
+    },
+    {
+      "id": "Camera#lookAtWorldPosition",
+      "field": "params/target/description",
+      "sourceHash": "sha256:9db47401547d4b687757cc95c96fad44c84ccc0739713b6561638befdccef596",
+      "text": "世界坐标中的目标位置。"
+    },
+    {
+      "id": "Camera#lookDown",
+      "field": "description",
+      "sourceHash": "sha256:0e97a3d30e49bbe6dc02cc82a893a9dd3291dc299d3272b8fc3c23c94470b283",
+      "text": "在非二维模式下，将相机绕其右向量、朝向上向量的反方向旋转 amount 弧度。"
+    },
+    {
+      "id": "Camera#lookDown",
+      "field": "params/amount/description",
+      "sourceHash": "sha256:a22ac852fc43570bbdc9bc286bdeb676f44d57201f7075fce2bef32e8a279667",
+      "text": "旋转量，单位为弧度。默认值为 <code>defaultLookAmount</code>。"
+    },
+    {
+      "id": "Camera#lookLeft",
+      "field": "description",
+      "sourceHash": "sha256:69a9d408776c2b6c8b1abc9f197a1d78809ffe4cb9463cc679bf9aa066aae415",
+      "text": "在非二维模式下，将相机绕其向上向量、朝右向量的反方向旋转 amount 弧度。"
+    },
+    {
+      "id": "Camera#lookLeft",
+      "field": "params/amount/description",
+      "sourceHash": "sha256:a22ac852fc43570bbdc9bc286bdeb676f44d57201f7075fce2bef32e8a279667",
+      "text": "旋转量，单位为弧度。默认值为 <code>defaultLookAmount</code>。"
+    },
+    {
+      "id": "Camera#lookRight",
+      "field": "description",
+      "sourceHash": "sha256:6b9a268513177a0105ae09f79dd852aeeed404a596cb823ad80b71436e5a3f03",
+      "text": "在非二维模式下，将相机绕其向上向量、朝右向量方向旋转 amount 弧度。"
+    },
+    {
+      "id": "Camera#lookRight",
+      "field": "params/amount/description",
+      "sourceHash": "sha256:a22ac852fc43570bbdc9bc286bdeb676f44d57201f7075fce2bef32e8a279667",
+      "text": "旋转量，单位为弧度。默认值为 <code>defaultLookAmount</code>。"
+    },
+    {
+      "id": "Camera#lookUp",
+      "field": "description",
+      "sourceHash": "sha256:00e1aa639496630bd1bd14f0c9fc324d73f8ebe8044cb972ac1be56a1f886d27",
+      "text": "在非二维模式下，将相机绕其右向量、朝向上向量方向旋转 amount 弧度。"
+    },
+    {
+      "id": "Camera#lookUp",
+      "field": "params/amount/description",
+      "sourceHash": "sha256:a22ac852fc43570bbdc9bc286bdeb676f44d57201f7075fce2bef32e8a279667",
+      "text": "旋转量，单位为弧度。默认值为 <code>defaultLookAmount</code>。"
+    },
+    {
+      "id": "Camera#maximumZoomFactor",
+      "field": "description",
+      "sourceHash": "sha256:ae251435ee808e2a4b98f01dddf09c7f2d528e7cc73ad4890b9971086d0964fd",
+      "text": "与地图尺寸相乘后，用于确定相机从表面缩小时位置限制的系数。默认值为 1.5，仅适用于地图可旋转的二维模式。"
+    },
+    {
+      "id": "Camera#move",
+      "field": "description",
+      "sourceHash": "sha256:b29aa15c6165c31264942a809b72656beb6837d43d86cd1e514f373d3019034b",
+      "text": "将相机位置沿 <code>direction</code> 平移 <code>amount</code>。"
+    },
+    {
+      "id": "Camera#move",
+      "field": "params/amount/description",
+      "sourceHash": "sha256:b7c0dd1abe0e844ee131f6a2ed4ad659373b9b596ec51c11cec3e2cf5ff796bc",
+      "text": "移动量，单位为米。默认值为 <code>defaultMoveAmount</code>。"
+    },
+    {
+      "id": "Camera#move",
+      "field": "params/direction/description",
+      "sourceHash": "sha256:fdef2d7d5bc8d799cd605344aa316e803464ae074b5bee2b0db8281e4aec0437",
+      "text": "移动方向。"
+    },
+    {
+      "id": "Camera#moveBackward",
+      "field": "description",
+      "sourceHash": "sha256:133b073a1b89ef86ed7fe7bc6589d95a272117ac35e98d4e027a557fe164af6e",
+      "text": "将相机位置沿观察向量的反方向平移 <code>amount</code>。在二维模式下执行缩小，而不平移相机位置。"
+    },
+    {
+      "id": "Camera#moveBackward",
+      "field": "params/amount/description",
+      "sourceHash": "sha256:b7c0dd1abe0e844ee131f6a2ed4ad659373b9b596ec51c11cec3e2cf5ff796bc",
+      "text": "移动量，单位为米。默认值为 <code>defaultMoveAmount</code>。"
+    },
+    {
+      "id": "Camera#moveDown",
+      "field": "description",
+      "sourceHash": "sha256:bb96defeb3b3de00ecdb9e6d2ca200ceefacdde7f4b3b96b59fa859ad2bd90a0",
+      "text": "将相机位置沿向上向量的反方向平移 <code>amount</code>。"
+    },
+    {
+      "id": "Camera#moveDown",
+      "field": "params/amount/description",
+      "sourceHash": "sha256:b7c0dd1abe0e844ee131f6a2ed4ad659373b9b596ec51c11cec3e2cf5ff796bc",
+      "text": "移动量，单位为米。默认值为 <code>defaultMoveAmount</code>。"
+    },
+    {
+      "id": "Camera#moveEnd",
+      "field": "description",
+      "sourceHash": "sha256:187f8d2e9095c524c8849379ba165025963fc09ad19b224287a6be19a164d710",
+      "text": "获取相机停止移动时触发的事件。"
+    },
+    {
+      "id": "Camera#moveForward",
+      "field": "description",
+      "sourceHash": "sha256:64f2ff90b293c53aad3767158dceb6e1bf1d51d892775077fff9b6a80c663e8f",
+      "text": "将相机位置沿观察向量方向平移 <code>amount</code>。在二维模式下执行放大，而不平移相机位置。"
+    },
+    {
+      "id": "Camera#moveForward",
+      "field": "params/amount/description",
+      "sourceHash": "sha256:b7c0dd1abe0e844ee131f6a2ed4ad659373b9b596ec51c11cec3e2cf5ff796bc",
+      "text": "移动量，单位为米。默认值为 <code>defaultMoveAmount</code>。"
+    },
+    {
+      "id": "Camera#moveLeft",
+      "field": "description",
+      "sourceHash": "sha256:d8ab6c8394b14d78f9e6858cb1063cdfe6e60e3ec8162e2ff1c1182e1f567f34",
+      "text": "将相机位置沿右向量的反方向平移 <code>amount</code>。"
+    },
+    {
+      "id": "Camera#moveLeft",
+      "field": "params/amount/description",
+      "sourceHash": "sha256:b7c0dd1abe0e844ee131f6a2ed4ad659373b9b596ec51c11cec3e2cf5ff796bc",
+      "text": "移动量，单位为米。默认值为 <code>defaultMoveAmount</code>。"
+    },
+    {
+      "id": "Camera#moveRight",
+      "field": "description",
+      "sourceHash": "sha256:9f9030d4e34cfce34d61f1b6ad7c6ea902ffe1393a693800109dc7e78811f1a1",
+      "text": "将相机位置沿右向量方向平移 <code>amount</code>。"
+    },
+    {
+      "id": "Camera#moveRight",
+      "field": "params/amount/description",
+      "sourceHash": "sha256:b7c0dd1abe0e844ee131f6a2ed4ad659373b9b596ec51c11cec3e2cf5ff796bc",
+      "text": "移动量，单位为米。默认值为 <code>defaultMoveAmount</code>。"
+    },
+    {
+      "id": "Camera#moveStart",
+      "field": "description",
+      "sourceHash": "sha256:3b5c66238179d006257c6887da0ccf9ff432c03fe90dc1621c7dc46176c52f48",
+      "text": "获取相机开始移动时触发的事件。"
+    },
+    {
+      "id": "Camera#moveUp",
+      "field": "description",
+      "sourceHash": "sha256:aeb127a6a1fbfff199091da8cfaf9d755633834da36666e6e40a07fcb6af2fac",
+      "text": "将相机位置沿向上向量方向平移 <code>amount</code>。"
+    },
+    {
+      "id": "Camera#moveUp",
+      "field": "params/amount/description",
+      "sourceHash": "sha256:b7c0dd1abe0e844ee131f6a2ed4ad659373b9b596ec51c11cec3e2cf5ff796bc",
+      "text": "移动量，单位为米。默认值为 <code>defaultMoveAmount</code>。"
+    },
+    {
+      "id": "Camera#percentageChanged",
+      "field": "description",
+      "sourceHash": "sha256:7d980f76b8eb51afec11536aba5d778d6f9ee0a4170ce0df6d790c763bfe35ee",
+      "text": "触发 <code>changed</code> 事件前相机必须达到的变化量，取值为 [0, 1] 范围内的比例。"
+    },
+    {
+      "id": "Camera#pickEllipsoid",
+      "field": "description",
+      "sourceHash": "sha256:bbd154a095dbd757c7f870de22e4dff6c20fdf150a422770edb066cd860fe7f0",
+      "text": "拾取椭球或地图。"
+    },
+    {
+      "id": "Camera#pickEllipsoid",
+      "field": "exceptions/0/description",
+      "sourceHash": "sha256:a9c17cf0aec1b8f82e6951d367496fdae80506608cc270f6eaa133f2ce284df1",
+      "text": "主世界不是 Globe 时，不支持 pickEllipsoid。"
+    },
+    {
+      "id": "Camera#pickEllipsoid",
+      "field": "params/ellipsoid/description",
+      "sourceHash": "sha256:d0adfc95c37c3e5e5d51bbb6488976d317d70989ee9b13cc766b7ddfe819fca8",
+      "text": "要拾取的椭球。"
+    },
+    {
+      "id": "Camera#pickEllipsoid",
+      "field": "params/windowPosition/description",
+      "sourceHash": "sha256:ef41e0a7a53896f893a1a99309882d9763f1e08a80aa0176ccc608ed9319148f",
+      "text": "像素的 x 和 y 坐标。"
+    },
+    {
+      "id": "Camera#pickEllipsoid",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:8753b61539b8510ac1fec1967eba61de252447ca2a8849cd666995a3bac61de4",
+      "text": "若拾取到椭球或地图，则返回其表面点的世界坐标；否则返回 undefined。"
+    },
+    {
+      "id": "Camera#pitch",
+      "field": "description",
+      "sourceHash": "sha256:e5a0fd86d9080fa316c59593cb7be296e22e5b3567030de183dcd2a813163136",
+      "text": "获取相机俯仰角，单位为弧度。对于活动的 {@link SceneGISPlanarWorld}，从固定世界 XY 平面量取。"
+    },
+    {
+      "id": "Camera#position",
+      "field": "description",
+      "sourceHash": "sha256:23d445942e29a2e088c07713c29432d8672cbae41581f85ad6b76f04f316533f",
+      "text": "相机位置。"
+    },
+    {
+      "id": "Camera#positionCartographic",
+      "field": "description",
+      "sourceHash": "sha256:630b06b0e70f69833e9119147f902178f1b9ef93862ed09d60b001238fd4f1bc",
+      "text": "获取相机的 {@link Cartographic} 位置，经纬度使用弧度，高度使用米。在二维和哥伦布视图中，若相机位于地图之外，返回的经纬度可能超出有效经纬度范围。"
+    },
+    {
+      "id": "Camera#positionWC",
+      "field": "description",
+      "sourceHash": "sha256:33a58f2d57d31b1d2eb8cab4aa4d2039f392fa374430f466399f0c681e4a0aa7",
+      "text": "获取相机在世界坐标中的位置。"
+    },
+    {
+      "id": "Camera#right",
+      "field": "description",
+      "sourceHash": "sha256:567d4c217088275f15917f64f9818417404769aed70dc0bc6027f5b64e03f0fa",
+      "text": "相机的右方向。"
+    },
+    {
+      "id": "Camera#rightWC",
+      "field": "description",
+      "sourceHash": "sha256:6036b0c521a82f5b608291970337645e2f24f952ed578c480d8a29eb75971c3c",
+      "text": "获取相机在世界坐标中的右方向。"
+    },
+    {
+      "id": "Camera#roll",
+      "field": "description",
+      "sourceHash": "sha256:073b8cac6d374a3869de87c5c9fbfa0d1ce08ef9a855bbee7b9d2eacacac10f9",
+      "text": "获取相机横滚角，单位为弧度。对于活动的 {@link SceneGISPlanarWorld}，绕固定坐标轴下的观察方向量取。"
+    },
+    {
+      "id": "Camera#rotate",
+      "field": "description",
+      "sourceHash": "sha256:cdf5b4be59715d9467074ddfd5dcddb6e86a5e828975eebbacf2a0262d6ac1da",
+      "text": "使相机绕 <code>axis</code> 旋转 <code>angle</code>。相机位置到其参考坐标系中心的距离保持不变。"
+    },
+    {
+      "id": "Camera#rotate",
+      "field": "params/angle/description",
+      "sourceHash": "sha256:97597b1205252e19a318ff82cceb06e72aa1de8fbe4c90fb2331cc11d3e59d8e",
+      "text": "旋转角度，单位为弧度。默认值为 <code>defaultRotateAmount</code>。"
+    },
+    {
+      "id": "Camera#rotate",
+      "field": "params/axis/description",
+      "sourceHash": "sha256:f057436d84298c31e260a24883cb08e280af4387cf109f22900bcfbee38e3ff5",
+      "text": "旋转所绕的轴，使用世界坐标。"
+    },
+    {
+      "id": "Camera#rotateDown",
+      "field": "description",
+      "sourceHash": "sha256:58cc822935b0716b1418048013cc58da40294388bbef44bf506d1b4efa6c4d0b",
+      "text": "使相机绕其参考坐标系中心向下旋转 angle。"
+    },
+    {
+      "id": "Camera#rotateDown",
+      "field": "params/angle/description",
+      "sourceHash": "sha256:97597b1205252e19a318ff82cceb06e72aa1de8fbe4c90fb2331cc11d3e59d8e",
+      "text": "旋转角度，单位为弧度。默认值为 <code>defaultRotateAmount</code>。"
+    },
+    {
+      "id": "Camera#rotateLeft",
+      "field": "description",
+      "sourceHash": "sha256:e9c9c97daf76f5fdcc4c19c4f20060e74af7cc4ec36152335d8df4b4fc7ecdaf",
+      "text": "使相机绕其参考坐标系中心向左旋转 angle。"
+    },
+    {
+      "id": "Camera#rotateLeft",
+      "field": "params/angle/description",
+      "sourceHash": "sha256:97597b1205252e19a318ff82cceb06e72aa1de8fbe4c90fb2331cc11d3e59d8e",
+      "text": "旋转角度，单位为弧度。默认值为 <code>defaultRotateAmount</code>。"
+    },
+    {
+      "id": "Camera#rotateRight",
+      "field": "description",
+      "sourceHash": "sha256:8e167feb468f65a2d808f0b3e459d9aacf278db0618209bf097f64222e5b9f8e",
+      "text": "使相机绕其参考坐标系中心向右旋转 angle。"
+    },
+    {
+      "id": "Camera#rotateRight",
+      "field": "params/angle/description",
+      "sourceHash": "sha256:97597b1205252e19a318ff82cceb06e72aa1de8fbe4c90fb2331cc11d3e59d8e",
+      "text": "旋转角度，单位为弧度。默认值为 <code>defaultRotateAmount</code>。"
+    },
+    {
+      "id": "Camera#rotateUp",
+      "field": "description",
+      "sourceHash": "sha256:093d0df6296e556152ed241721c658aad06568e11d998781a22e004fefde65b3",
+      "text": "使相机绕其参考坐标系中心向上旋转 angle。"
+    },
+    {
+      "id": "Camera#rotateUp",
+      "field": "params/angle/description",
+      "sourceHash": "sha256:97597b1205252e19a318ff82cceb06e72aa1de8fbe4c90fb2331cc11d3e59d8e",
+      "text": "旋转角度，单位为弧度。默认值为 <code>defaultRotateAmount</code>。"
+    },
+    {
+      "id": "Camera#setView",
+      "field": "exceptions/0/description",
+      "sourceHash": "sha256:415aa0e9732dab66737d3ec8536ebb104a1bbef4cec200594573e899a963b0c8",
+      "text": "在活动的 {@link SceneGISPlanarWorld} 中，目的地不是有限的 Cartesian3、为 Rectangle，或固定坐标轴下的朝向/变换无效。"
+    },
+    {
+      "id": "Camera#setView",
+      "field": "params/options.convert/description",
+      "sourceHash": "sha256:9a41e7d5424f4643340187041e7dd3f19d25ab6e20b776eb09d457f5884ba48a",
+      "text": "是否将目的地从世界坐标转换为场景坐标，仅在非三维模式下相关。默认值为 <code>true</code>。"
+    },
+    {
+      "id": "Camera#setView",
+      "field": "params/options.destination/description",
+      "sourceHash": "sha256:47e8b0d7143e904570a9706ad4ff8f5c3f92885b6e68eaa7039c78e9fb2b1772",
+      "text": "相机的最终世界坐标位置，或从俯视角度应能看到的矩形范围。"
+    },
+    {
+      "id": "Camera#setView",
+      "field": "params/options.endTransform/description",
+      "sourceHash": "sha256:85cf669730ac8bcc2a922da6d2ab1252258f966b40c6fb916a55e75cd4d56566",
+      "text": "表示相机参考坐标系的变换矩阵。"
+    },
+    {
+      "id": "Camera#setView",
+      "field": "params/options.orientation/description",
+      "sourceHash": "sha256:65eedf6f3cb75feb2673df98fcd3f5ef4cf56aa36ea87e5075836e88ebe0a13d",
+      "text": "包含 direction 和 up，或 heading、pitch 和 roll 属性的对象。默认观察方向在三维中指向参考坐标系中心，在哥伦布视图中指向 z 轴负方向。向上方向在三维中指向局部北方，在哥伦布视图中指向 y 轴正方向。二维无限滚动模式不使用此朝向。"
+    },
+    {
+      "id": "Camera#switchToOrthographicFrustum",
+      "field": "description",
+      "sourceHash": "sha256:200f6e8caa013f4a2abc0652235d01acdf63b0994db4ba1944886d113cdd5f49",
+      "text": "将视锥/投影切换为正交。在二维中不执行任何操作，因为二维始终使用正交投影。"
+    },
+    {
+      "id": "Camera#switchToPerspectiveFrustum",
+      "field": "description",
+      "sourceHash": "sha256:de499ebcbb2cce9f9a9a9076ee078d8a0e79110e0839432d5ee5950b44820729",
+      "text": "将视锥/投影切换为透视。在二维中不执行任何操作，因为二维必须始终使用正交投影。"
+    },
+    {
+      "id": "Camera#transform",
+      "field": "description",
+      "sourceHash": "sha256:8525e29eb0ed924e8165b655d3790a494fd9071b4f6e882059b3f6ac58a10201",
+      "text": "获取相机的参考坐标系。该变换的逆矩阵会追加到视图矩阵中。"
+    },
+    {
+      "id": "Camera#twistLeft",
+      "field": "description",
+      "sourceHash": "sha256:eb011114458123cdb99e35dce382ecee10e55614bc93f4e997a375c825d8195a",
+      "text": "使相机绕其观察方向向量逆时针旋转 amount 弧度。"
+    },
+    {
+      "id": "Camera#twistLeft",
+      "field": "params/amount/description",
+      "sourceHash": "sha256:a22ac852fc43570bbdc9bc286bdeb676f44d57201f7075fce2bef32e8a279667",
+      "text": "旋转量，单位为弧度。默认值为 <code>defaultLookAmount</code>。"
+    },
+    {
+      "id": "Camera#twistRight",
+      "field": "description",
+      "sourceHash": "sha256:145569b2fb7a8af89b351e8424987484a04416f6ec27a50560ed0010b5d4c906",
+      "text": "使相机绕其观察方向向量顺时针旋转 amount 弧度。"
+    },
+    {
+      "id": "Camera#twistRight",
+      "field": "params/amount/description",
+      "sourceHash": "sha256:a22ac852fc43570bbdc9bc286bdeb676f44d57201f7075fce2bef32e8a279667",
+      "text": "旋转量，单位为弧度。默认值为 <code>defaultLookAmount</code>。"
+    },
+    {
+      "id": "Camera#up",
+      "field": "description",
+      "sourceHash": "sha256:5e060ec4ac9e2f20d18f5c5cc0560ab61ba9a3e0e4a75e08db95f3e8892db6bc",
+      "text": "相机的向上方向。"
+    },
+    {
+      "id": "Camera#upWC",
+      "field": "description",
+      "sourceHash": "sha256:56b94507af085b6536d0b1eb84e00264db6e2b773820e165e2a134ac6e0880a5",
+      "text": "获取相机在世界坐标中的向上方向。"
+    },
+    {
+      "id": "Camera#viewBoundingSphere",
+      "field": "description",
+      "sourceHash": "sha256:71d0ac618dbb02752bd5741047450dccf941819894ffa21b221d9c548ef28f19",
+      "text": "设置相机，使当前视图包含给定包围球。<p>偏移使用以包围球中心为原点的局部东、北、天参考坐标系中的 heading、pitch 和 range。方位角和俯仰角均在该局部参考坐标系中定义。方位角从 y 轴起算，朝 x 轴方向增加；俯仰角从 xy 平面起算，正值位于平面下方，负值位于平面上方。range 为到中心的距离。若 range 为零，则自动计算可使整个包围球可见的距离。</p><p>二维中必须采用俯视视角，相机会位于目标上方并向下观察，其高度为 range。方位角根据偏移确定；若无法确定，则朝北。</p>"
+    },
+    {
+      "id": "Camera#viewBoundingSphere",
+      "field": "exceptions/0/description",
+      "sourceHash": "sha256:6d98b3115da53436e72bc6f0b752177ae2ecbe8e9c929564ee790919aeb8bdef",
+      "text": "形变过渡期间不支持 viewBoundingSphere。在活动的 {@link SceneGISPlanarWorld} 中，偏移使用固定的 +X 向东、+Y 向北、+Z 向上坐标轴解释。"
+    },
+    {
+      "id": "Camera#viewBoundingSphere",
+      "field": "params/boundingSphere/description",
+      "sourceHash": "sha256:4fb1c5ea10ce41c775a346a1728d6c80b075e7c8f0b1e19c94aebaaf69b4297b",
+      "text": "要观察的包围球，使用世界坐标。"
+    },
+    {
+      "id": "Camera#viewBoundingSphere",
+      "field": "params/offset/description",
+      "sourceHash": "sha256:b9d965c8ecf71488a5080c69e4d0bf7cf073218362e6256943cb40521f7106fd",
+      "text": "以目标为中心的局部东、北、天参考坐标系中相对于目标的偏移。"
+    },
+    {
+      "id": "Camera#viewMatrix",
+      "field": "description",
+      "sourceHash": "sha256:90b7812c4585b7a4edb6bd3aa44c4d84b448a34f3afa9ea90a7700d125862af1",
+      "text": "获取视图矩阵。"
+    },
+    {
+      "id": "Camera#worldToCameraCoordinates",
+      "field": "description",
+      "sourceHash": "sha256:33e7ececb40af185184904eff7ebe0ce516547b141a9edb53b3f036a5f90b9c9",
+      "text": "将向量或点从世界坐标转换为相机参考坐标系中的坐标。"
+    },
+    {
+      "id": "Camera#worldToCameraCoordinates",
+      "field": "params/cartesian/description",
+      "sourceHash": "sha256:e5bc93a2e7e7df08cb0461651278286414122f1c21d9965724f1bb6307a76f5d",
+      "text": "待转换的向量或点。"
+    },
+    {
+      "id": "Camera#worldToCameraCoordinates",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:cfa12d40913a9857e43abbfd292950cef698a894deabce91c696013d11005b03",
+      "text": "转换后的向量或点。"
+    },
+    {
+      "id": "Camera#worldToCameraCoordinatesPoint",
+      "field": "description",
+      "sourceHash": "sha256:2148d3335ba779af16fa1b816ec2f5e72be340d8a8a34fa4350e72f312bf7631",
+      "text": "将点从世界坐标转换为相机参考坐标系中的坐标。"
+    },
+    {
+      "id": "Camera#worldToCameraCoordinatesPoint",
+      "field": "params/cartesian/description",
+      "sourceHash": "sha256:2f44789cc0b656e480f172bceb04766a01bf590d17ca6873536f8aab56895534",
+      "text": "待转换的点。"
+    },
+    {
+      "id": "Camera#worldToCameraCoordinatesPoint",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:9e1d23815f7a352426b47887249cf8feb3cb196d1aab2c1e323a8d41e6f25100",
+      "text": "转换后的点。"
+    },
+    {
+      "id": "Camera#worldToCameraCoordinatesVector",
+      "field": "description",
+      "sourceHash": "sha256:905084bb4bdf00e041f55f10575f5616491bdbfd1321667e651a349e5b8eda97",
+      "text": "将向量从世界坐标转换为相机参考坐标系中的坐标。"
+    },
+    {
+      "id": "Camera#worldToCameraCoordinatesVector",
+      "field": "params/cartesian/description",
+      "sourceHash": "sha256:be4d0146dfeffad32d3591a85ee2428f3aad137e63b248e8fa70096f8772c18a",
+      "text": "待转换的向量。"
+    },
+    {
+      "id": "Camera#worldToCameraCoordinatesVector",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:e5480ef724f6a5e9ffd717296d3e03d41e7e9cdda5a6c1e57ec656a41ef587cf",
+      "text": "转换后的向量。"
+    },
+    {
+      "id": "Camera#zoomIn",
+      "field": "description",
+      "sourceHash": "sha256:a353a04de60d0e31972979f539db620ae03b3e5a9ae6c8787d2f4c9998379199",
+      "text": "沿相机观察向量方向缩放 <code>amount</code>。在使用正交视锥的平面世界中，将水平跨度减小 <code>amount</code> 米，最小减至近平面距离，而不移动相机。"
+    },
+    {
+      "id": "Camera#zoomIn",
+      "field": "params/amount/description",
+      "sourceHash": "sha256:54106c9105558f20a035beeebb6f7661355f4ef6c29419f55f8693d36b17ff00",
+      "text": "移动量。默认值为 <code>defaultZoomAmount</code>。"
+    },
+    {
+      "id": "Camera#zoomOut",
+      "field": "description",
+      "sourceHash": "sha256:5c1bfcaf954753aee59a023c8bcac31beaaaf621929c4f859968068ba91281c5",
+      "text": "沿相机观察向量的反方向缩放 <code>amount</code>。在使用正交视锥的平面世界中，将水平跨度增加 <code>amount</code> 米，而不移动相机。"
+    },
+    {
+      "id": "Camera#zoomOut",
+      "field": "params/amount/description",
+      "sourceHash": "sha256:54106c9105558f20a035beeebb6f7661355f4ef6c29419f55f8693d36b17ff00",
+      "text": "移动量。默认值为 <code>defaultZoomAmount</code>。"
+    },
+    {
+      "id": "CesiumWidget",
+      "field": "exceptions/0/description",
+      "sourceHash": "sha256:a32c282b167b77335c61e4f1422e007fbbef3c536b72457f3f99be4fdf0412f0",
+      "text": "文档中不存在 ID 为 \"container\" 的元素。"
+    },
+    {
+      "id": "CesiumWidget",
+      "field": "exceptions/1/description",
+      "sourceHash": "sha256:d212e3145bd24caf57e07760dc031e5afe28266bdc957d179261d5756b55cd58",
+      "text": "同时指定了 <code>options.world</code> 和 <code>options.globe</code>。"
+    },
+    {
+      "id": "CesiumWidget",
+      "field": "exceptions/2/description",
+      "sourceHash": "sha256:6c153b3b8437641fe8d034721e1eebfbb77cd9fa349ee8c53576e6abbeb3e30f",
+      "text": "指定了非 Globe 的 <code>options.world</code>，同时还指定了仅适用于 Globe 的 <code>options.baseLayer</code>、<code>options.terrainProvider</code> 或 <code>options.terrain</code> 选项。"
+    },
+    {
+      "id": "CesiumWidget",
+      "field": "params/options.automaticallyTrackDataSourceClocks/description",
+      "sourceHash": "sha256:f2e84af110db20b65d486f69143f82ec525d99ecb6b6b8476e984493e20e482e",
+      "text": "为 true 时，此控件自动跟踪新加入 DataSource 的时钟设置，并在其时钟变化时更新。若要独立配置时钟，请设为 false。"
+    },
+    {
+      "id": "CesiumWidget",
+      "field": "params/options.baseLayer/description",
+      "sourceHash": "sha256:4add57f73314a0f73021403226c3f7e587f662234fb3c0a25d44a4b7aec80f07",
+      "text": "应用于地球的最底层影像图层。设为 <code>false</code> 时不添加影像提供者。"
+    },
+    {
+      "id": "CesiumWidget",
+      "field": "params/options.blurActiveElementOnCanvasFocus/description",
+      "sourceHash": "sha256:782c30296321735f975a32c1323eb689c9db87517ac8bc436939c4f2b4131e6d",
+      "text": "为 true 时，单击控件的 canvas 会使当前活动元素失去焦点。若单击 canvas 只是为了获取位置或实体数据，并非要使 canvas 成为活动元素，可将此项设为 false。"
+    },
+    {
+      "id": "CesiumWidget",
+      "field": "params/options.clock/description",
+      "sourceHash": "sha256:866c08d4b9293888797b5e8974b34336ae11c4fd1e5c253a616847e09df76edb",
+      "text": "用于控制当前时间的时钟。"
+    },
+    {
+      "id": "CesiumWidget",
+      "field": "params/options.contextOptions/description",
+      "sourceHash": "sha256:85270bcfbcd919ea505041bcba1f6f39638ab9eac2abaf15c37aa95f41c51705",
+      "text": "传给 {@link Scene} 的上下文及 WebGL 创建属性。"
+    },
+    {
+      "id": "CesiumWidget",
+      "field": "params/options.creditContainer/description",
+      "sourceHash": "sha256:05b6f9d35176439a1cf51b8e302dea49e3daf70a10d7f99336bda0fe5504a596",
+      "text": "容纳 {@link CreditDisplay} 的 DOM 元素或其 ID。若未指定，则将版权信息添加到控件自身的底部。"
+    },
+    {
+      "id": "CesiumWidget",
+      "field": "params/options.creditViewport/description",
+      "sourceHash": "sha256:747ea886b5816ae647d97f99b4947876898c29bca090072be00577a93d986eac",
+      "text": "容纳 {@link CreditDisplay} 所创建版权弹窗的 DOM 元素或其 ID。若未指定，弹窗显示在控件本身上方。"
+    },
+    {
+      "id": "CesiumWidget",
+      "field": "params/options.dataSources/description",
+      "sourceHash": "sha256:d7960e9f8e652a30fac16485d19356fc5669362fd277b668296d81fdbc90a684",
+      "text": "由此控件可视化的数据源集合。若提供此参数，则视为该实例归调用者所有，控件销毁时不会销毁此集合。"
+    },
+    {
+      "id": "CesiumWidget",
+      "field": "params/options.ellipsoid/description",
+      "sourceHash": "sha256:11cf2509681ecbaa94d721b2ebad91e5b4cae7e51520ac2bf204ac8f2531e468",
+      "text": "默认椭球。"
+    },
+    {
+      "id": "CesiumWidget",
+      "field": "params/options.globe/description",
+      "sourceHash": "sha256:f1ad07b4dec8fdc7ed4512c2eb723dea38809a265061588a0bdd92972657d8aa",
+      "text": "场景使用的地球对象。设为 <code>false</code> 时不添加地球，并默认隐藏天空大气。"
+    },
+    {
+      "id": "CesiumWidget",
+      "field": "params/options.mapMode2D/description",
+      "sourceHash": "sha256:bfc4d5ea2b5c659aaddd5f30de802cf171b832cc1cdd0a84c46a7c233dae6d70",
+      "text": "决定二维地图是否可旋转或在水平方向无限滚动。"
+    },
+    {
+      "id": "CesiumWidget",
+      "field": "params/options.mapProjection/description",
+      "sourceHash": "sha256:94be0214e0bd3a38ec9b889db2b1e3ebbc3219a5f1f9f12afcf7cc0c8fed1129",
+      "text": "二维和哥伦布视图模式使用的地图投影。"
+    },
+    {
+      "id": "CesiumWidget",
+      "field": "params/options.maximumRenderTimeChange/description",
+      "sourceHash": "sha256:e1891b20efc29ecfd0a702eee0b7b9e59a4b5128d1af0caf9d6aa9c22f953788",
+      "text": "若 requestRenderMode 为 true，此值定义触发渲染请求前允许的最大模拟时间变化量。参见 {@link https://cesium.com/blog/2018/01/24/cesium-scene-rendering-performance/|通过显式渲染提升性能}。"
+    },
+    {
+      "id": "CesiumWidget",
+      "field": "params/options.msaaSamples/description",
+      "sourceHash": "sha256:1a507dc0c1b441f30c8133a0ffaff64c24671fadd0309ece82d8c5be538a8822",
+      "text": "渲染目标的采样数。SceneGIS 延迟渲染要求为 1；边缘平滑请选择 FXAA 或 SceneGIS 时间抗锯齿。"
+    },
+    {
+      "id": "CesiumWidget",
+      "field": "params/options.orderIndependentTranslucency/description",
+      "sourceHash": "sha256:9cc92a90d6c4821589c24d930c99ee69a24ceb9cd5f7271148cfa61a4e0f5b50",
+      "text": "为 true 且配置支持时，使用顺序无关透明。"
+    },
+    {
+      "id": "CesiumWidget",
+      "field": "params/options.requestRenderMode/description",
+      "sourceHash": "sha256:f5003231c2ef93b6d28595946e3749c925b0defa6dd559024b1527347924e5b2",
+      "text": "若为 true，仅在场景变化判定有需要时渲染一帧。启用后可提升应用性能，但在此模式下需要使用 {@link Scene#requestRender} 显式请求渲染新帧。通过其他 API 修改场景后，许多情况下都需要这样做。参见 {@link https://cesium.com/blog/2018/01/24/cesium-scene-rendering-performance/|通过显式渲染提升性能}。"
+    },
+    {
+      "id": "CesiumWidget",
+      "field": "params/options.scene3DOnly/description",
+      "sourceHash": "sha256:66d4ecb409e922a491e41ca64d3ae62723eb85c159e7722227f7d528b10adc74",
+      "text": "为 <code>true</code> 时，每个几何实例仅在三维中渲染，以节省 GPU 显存。"
+    },
+    {
+      "id": "CesiumWidget",
+      "field": "params/options.sceneMode/description",
+      "sourceHash": "sha256:4766bec27a9c154e0a414188f9b54a1c7929b9b1cdb417fe4d8425a63d087b7e",
+      "text": "初始场景模式。"
+    },
+    {
+      "id": "CesiumWidget",
+      "field": "params/options.shadows/description",
+      "sourceHash": "sha256:b6e6ec9258f2a166c94cb0ddf7dc62eac250f23a5e89861b06e5f05e4b7b2d71",
+      "text": "决定光源是否投射阴影。"
+    },
+    {
+      "id": "CesiumWidget",
+      "field": "params/options.shouldAnimate/description",
+      "sourceHash": "sha256:a7a2c55d58b7d7e9b5ae8f3bfa5e445ef97f8ea6f55bb957feaded4ff4a1ef38",
+      "text": "为 <code>true</code> 时，时钟默认尝试推进模拟时间；为 <code>false</code> 时不推进。"
+    },
+    {
+      "id": "CesiumWidget",
+      "field": "params/options.showRenderLoopErrors/description",
+      "sourceHash": "sha256:feb4072ceea1e303706a85792c5d599dd12342c7b7c57dd2ab8c4ea713f49e59",
+      "text": "为 true 时，若渲染循环发生错误，此控件会自动向用户显示包含错误信息的 HTML 面板。"
+    },
+    {
+      "id": "CesiumWidget",
+      "field": "params/options.skyAtmosphere/description",
+      "sourceHash": "sha256:243d2d6c8a1ca3c08a4980cd353c66f3f47f86549e977b4c67bfc653ceabe255",
+      "text": "蓝色天空及地球边缘的辉光。使用默认椭球时启用。设为 <code>false</code> 可关闭。"
+    },
+    {
+      "id": "CesiumWidget",
+      "field": "params/options.skyBox/description",
+      "sourceHash": "sha256:16ffd8fdbcf7006a02696372a0432aaf8e2b81f653f242bb58d5bdbc254062d9",
+      "text": "用于渲染星空的天空盒。为 <code>undefined</code> 且使用 WGS84 椭球时，使用默认星空。设为 <code>false</code> 时，不添加天空盒、太阳和月球。"
+    },
+    {
+      "id": "CesiumWidget",
+      "field": "params/options.targetFrameRate/description",
+      "sourceHash": "sha256:2cec24724c55ed30895276d09dab20c2653d39746186cc000557c714be2ebecd",
+      "text": "使用默认渲染循环时的目标帧率。"
+    },
+    {
+      "id": "CesiumWidget",
+      "field": "params/options.terrain/description",
+      "sourceHash": "sha256:2cf91f590ac82eaa127d70a6eec1f75e5a5994b9a63918969a92618e6203de19",
+      "text": "用于处理异步地形提供者的 terrain 对象。仅在 options.terrainProvider 为 undefined 时可指定。"
+    },
+    {
+      "id": "CesiumWidget",
+      "field": "params/options.terrainProvider/description",
+      "sourceHash": "sha256:dcfbb9b0d455a7114aee0b833e7dc393cf1903e47b25058c10081c9bfa820986",
+      "text": "地形提供者。"
+    },
+    {
+      "id": "CesiumWidget",
+      "field": "params/options.terrainShadows/description",
+      "sourceHash": "sha256:44d9a8a8ae5ad20481f4e5edd62ef3d58677428fab10e5ae94e31e9a139564b5",
+      "text": "决定地形是否投射或接收光源产生的阴影。"
+    },
+    {
+      "id": "CesiumWidget",
+      "field": "params/options.useBrowserRecommendedResolution/description",
+      "sourceHash": "sha256:8d559bf3a6001bb906320b898bef21cedc0cb9b03d68382e0f081a71bcf2c9a4",
+      "text": "为 true 时，以浏览器建议的分辨率渲染，忽略 <code>window.devicePixelRatio</code>。"
+    },
+    {
+      "id": "CesiumWidget",
+      "field": "params/options.useDefaultRenderLoop/description",
+      "sourceHash": "sha256:5ebbc8c1b587a97f83cd73f437c475f544966dc931c6031788dacac82fe71459",
+      "text": "为 true 时，由此控件控制渲染循环；否则不控制。"
+    },
+    {
+      "id": "CesiumWidget",
+      "field": "params/options.world/description",
+      "sourceHash": "sha256:2d922e1ce8fed3cb2626e0009804b7435fd760fe603686220fd19fc647bcf9d5",
+      "text": "场景要使用的非 Globe 主世界。此项与 <code>options.globe</code> 互斥。设为 <code>false</code> 时，不创建主世界或默认地球环境。"
+    },
+    {
+      "id": "CesiumWidget#addController",
+      "field": "description",
+      "sourceHash": "sha256:f839cb0f722e2a508ef80b7a51893d4396eae3c636b8b9da697b6e56c1a2e7bb",
+      "text": "向控件的场景添加控制器。控制器是 {@link Controller} 接口的实现，用于处理输入事件、相机动画和其他交互。"
+    },
+    {
+      "id": "CesiumWidget#addController",
+      "field": "params/controller/description",
+      "sourceHash": "sha256:696d6630fd95a9ef9bd0749039e3dbb6e790f0c592506ffda498d5d7467ebdaa",
+      "text": "<code>Controller</code> 接口的实现。"
+    },
+    {
+      "id": "CesiumWidget#allowDataSourcesToSuspendAnimation",
+      "field": "description",
+      "sourceHash": "sha256:2aa0c3217375aa391660fd5d6ef687e4e96b16c772bf4866de75df56cd2d3c16",
+      "text": "获取或设置是否允许数据源暂时暂停动画，以避免向用户显示不完整画面。例如，后台处理异步图元时，在几何体就绪之前，时钟不会推进。"
+    },
+    {
+      "id": "CesiumWidget#camera",
+      "field": "description",
+      "sourceHash": "sha256:2e396c88538c45e553cc60e10b4fa0201eb38c2b18e877d79094160e1fd8045b",
+      "text": "获取相机。"
+    },
+    {
+      "id": "CesiumWidget#canvas",
+      "field": "description",
+      "sourceHash": "sha256:d45a92370d158526f936186692de10433cb1a6d7bc7d87aaaa6954cd95fdcd07",
+      "text": "获取 canvas。"
+    },
+    {
+      "id": "CesiumWidget#clock",
+      "field": "description",
+      "sourceHash": "sha256:2868c519cf6ec920f21079b0fc73e680d4ae00b8576718b633b6aa6f060e4e40",
+      "text": "获取时钟。"
+    },
+    {
+      "id": "CesiumWidget#clockTrackedDataSource",
+      "field": "description",
+      "sourceHash": "sha256:9dad7492a94197ba2e20d7ed3b4fc8636aa35e36a2399b66fe58ca0a61615539",
+      "text": "获取或设置由控件时钟跟踪的数据源。"
+    },
+    {
+      "id": "CesiumWidget#creditContainer",
+      "field": "description",
+      "sourceHash": "sha256:ee5cf805f87e86438f6e686a3888b3b10406109a24b73e6aa61840190a5fdd29",
+      "text": "获取版权信息容器。"
+    },
+    {
+      "id": "CesiumWidget#creditDisplay",
+      "field": "description",
+      "sourceHash": "sha256:0cdb378868f50034e7fbd533828bd2cc242022d55bec895e37186a4d83ee0966",
+      "text": "管理在屏幕及灯箱中显示的版权信息列表。"
+    },
+    {
+      "id": "CesiumWidget#creditViewport",
+      "field": "description",
+      "sourceHash": "sha256:73c0e52dacc4220e0b0ae4a394b290bbc96cc2afd25598a28de35af94429e462",
+      "text": "获取版权信息视口。"
+    },
+    {
+      "id": "CesiumWidget#dataSourceDisplay",
+      "field": "description",
+      "sourceHash": "sha256:4c89a3002db47e0882e4f24779ca7f17a46fe38440bf2019cc46c1994e30c847",
+      "text": "获取用于 {@link DataSource} 可视化的显示对象。"
+    },
+    {
+      "id": "CesiumWidget#dataSources",
+      "field": "description",
+      "sourceHash": "sha256:39b6ea110ce41eef437f916f87f62047c296a43b154395ad1ee80c6ddccdbb05",
+      "text": "获取要可视化的 {@link DataSource} 实例集合。"
+    },
+    {
+      "id": "CesiumWidget#ellipsoid",
+      "field": "description",
+      "sourceHash": "sha256:089f783bcdfafa344e4684b9242b9db12fd4d601ff3cf3e0626835918647dfd0",
+      "text": "获取场景的默认椭球。"
+    },
+    {
+      "id": "CesiumWidget#entities",
+      "field": "description",
+      "sourceHash": "sha256:c9033786161d516b1c52646cce185763a8bb336d2325ddf6950cd6039d8e170e",
+      "text": "获取不属于特定数据源的实体集合。这是 [dataSourceDisplay.defaultDataSource.entities]{@link CesiumWidget#dataSourceDisplay} 的快捷方式。"
+    },
+    {
+      "id": "CesiumWidget#flyTo",
+      "field": "description",
+      "sourceHash": "sha256:ab8075443be684be02773726a8203a4f6e4800f8b6f0a6c93185b52557f2d924",
+      "text": "使相机飞向给定实体、实体数组或数据源。若数据源或可视化内容仍在加载，此方法会等待数据就绪后再执行飞行。<p>偏移使用以包围球中心为原点的局部东、北、天参考坐标系中的 heading、pitch 和 range。方位角和俯仰角均在该局部参考坐标系中定义。方位角从 y 轴起算，朝 x 轴方向增加；俯仰角从 xy 平面起算，正值位于平面下方，负值位于平面上方。range 为到中心的距离。若 range 为零，则自动计算可使整个包围球可见的距离。</p><p>二维中必须采用俯视视角，相机会位于目标上方并向下观察，其高度为 range。方位角根据偏移确定；若无法确定，则朝北。</p>"
+    },
+    {
+      "id": "CesiumWidget#flyTo",
+      "field": "exceptions/0/description",
+      "sourceHash": "sha256:32f80019a36500dcdfc212818a91a2f271c71eb886517d7c60238f95643acd66",
+      "text": "在平面世界中，解析后的目标、偏移、持续时间或最大高度不属于所支持的平面配置范围。"
+    },
+    {
+      "id": "CesiumWidget#flyTo",
+      "field": "params/options.duration/description",
+      "sourceHash": "sha256:121798e162302f09e7c8453c21d5a57cc7ae4152fc505fd7a2c8af7f754c222e",
+      "text": "飞行持续时间，单位为秒。"
+    },
+    {
+      "id": "CesiumWidget#flyTo",
+      "field": "params/options.maximumHeight/description",
+      "sourceHash": "sha256:63eaa8eb69c95c4437f654fec544011366467c6e9bfe5738bfa5f2651296278e",
+      "text": "飞行最高点的最大高度。"
+    },
+    {
+      "id": "CesiumWidget#flyTo",
+      "field": "params/options.offset/description",
+      "sourceHash": "sha256:b9d965c8ecf71488a5080c69e4d0bf7cf073218362e6256943cb40521f7106fd",
+      "text": "以目标为中心的局部东、北、天参考坐标系中相对于目标的偏移。"
+    },
+    {
+      "id": "CesiumWidget#flyTo",
+      "field": "params/target/description",
+      "sourceHash": "sha256:309dac3d5358aebbc49ca5d8c19f39c219af4eb377e9978b432540173685e645",
+      "text": "要观察的目标。对于平面世界，解析后的目标必须为 Entity、Entity 数组、EntityCollection、entities 属性为 EntityCollection 的 DataSource，或已使用平面世界坐标的 Cesium3DTileset。瓦片集必须属于场景的图元集合树；发起操作时会应用其当前 root/model 变换。移除或销毁瓦片集会取消视图取景。不会重新投影地理坐标。"
+    },
+    {
+      "id": "CesiumWidget#flyTo",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:b5bfd5261e1142a2bc9035bdcfef32b1f4a24cf1845d20a0f2211f87ee0d745a",
+      "text": "飞行成功时兑现为 true 的 Promise；若目标当前未在场景中可视化，或飞行已取消，则兑现为 false。//TODO: 清理关于实体的表述。"
+    },
+    {
+      "id": "CesiumWidget#imageryLayers",
+      "field": "description",
+      "sourceHash": "sha256:6811377586b80a6a428c4e06e26fcff9954bd895436124da94819611c64f1dce",
+      "text": "获取将在球体上绘制的影像图层集合。"
+    },
+    {
+      "id": "CesiumWidget#removeController",
+      "field": "description",
+      "sourceHash": "sha256:5ddc041676be4b9c3ca817e55e5b4def2f4a1fe8554e5241568ab23b78d03bff",
+      "text": "从控件的场景中移除控制器。控制器是 {@link Controller} 接口的实现，用于处理输入事件、相机动画和其他交互。"
+    },
+    {
+      "id": "CesiumWidget#removeController",
+      "field": "params/controller/description",
+      "sourceHash": "sha256:696d6630fd95a9ef9bd0749039e3dbb6e790f0c592506ffda498d5d7467ebdaa",
+      "text": "<code>Controller</code> 接口的实现。"
+    },
+    {
+      "id": "CesiumWidget#render",
+      "field": "description",
+      "sourceHash": "sha256:7500e70e623092514a7b8383423ea1e29525bb32b4af58173afbb2542559e2c9",
+      "text": "渲染场景。除非 <code>useDefaultRenderLoop</code> 设为 false，否则自动调用此函数。"
+    },
+    {
+      "id": "CesiumWidget#resize",
+      "field": "description",
+      "sourceHash": "sha256:1b29438e415fc7d4f5ea7b74c740a712dfb40aac0f993d0dab83b8b6a5a75fe5",
+      "text": "更新 canvas 尺寸、相机宽高比和视口尺寸。除非 <code>useDefaultRenderLoop</code> 设为 false，否则会按需自动调用此函数。"
+    },
+    {
+      "id": "CesiumWidget#resolutionScale",
+      "field": "description",
+      "sourceHash": "sha256:3b2bbc6f7a1283e3801c213e3bc1b998992a517cb7d20152bdd64ac766037366",
+      "text": "获取或设置渲染分辨率的缩放系数。小于 1.0 可提升低性能设备的运行速度；大于 1.0 则先以更高分辨率渲染再缩小，以提高画面质量。例如，控件布局尺寸为 640x480 时，设为 0.5 会先以 320x240 渲染再放大；设为 2.0 会先以 1280x960 渲染再缩小。"
+    },
+    {
+      "id": "CesiumWidget#scene",
+      "field": "description",
+      "sourceHash": "sha256:859c70460a2e2157d7d2706c7a064e0f24437b7c1fcc2682b9893829947368f8",
+      "text": "获取场景。"
+    },
+    {
+      "id": "CesiumWidget#screenSpaceEventHandler",
+      "field": "description",
+      "sourceHash": "sha256:4bad81342a46a359e95141c3b070c5196e6e5a3c4287afcd5d9fd6ccc3d763e3",
+      "text": "获取屏幕空间事件处理器。"
+    },
+    {
+      "id": "CesiumWidget#showErrorPanel",
+      "field": "description",
+      "sourceHash": "sha256:9b85f1b6cff7cf08ffa8b6ff40a2ab6a028b17f82391f702b1d3d6884461e7e5",
+      "text": "向用户显示包含标题及详细错误信息的面板，可通过“确定”按钮关闭。构造控件时若 showRenderLoopErrors 不为 false，渲染循环出错后会自动显示此面板。"
+    },
+    {
+      "id": "CesiumWidget#showErrorPanel",
+      "field": "params/error/description",
+      "sourceHash": "sha256:38ab0fa7bcca6d4c0f8c2c89452cf95f47a599ef72c91f076b6a75a27ff8d195",
+      "text": "要在错误面板中显示的错误。此字符串使用 {@link formatError} 格式化后，以文本形式显示。"
+    },
+    {
+      "id": "CesiumWidget#showErrorPanel",
+      "field": "params/message/description",
+      "sourceHash": "sha256:1be94d5d0269c867cbc030583b9df4f3e0ae647aaa202c01fbfd4788e69247f9",
+      "text": "在详细错误之前向用户显示的帮助信息。此字符串按 HTML 解释。"
+    },
+    {
+      "id": "CesiumWidget#showErrorPanel",
+      "field": "params/title/description",
+      "sourceHash": "sha256:dbdbe2be7c821c354a4569ab26083fbcb87c6272d6bfb01bd572d8957de39840",
+      "text": "错误面板标题。此字符串按文本解释。"
+    },
+    {
+      "id": "CesiumWidget#targetFrameRate",
+      "field": "description",
+      "sourceHash": "sha256:047ac7dd4400adcbd19f21366b56caead368f4872401d8d39c08b02c83044391",
+      "text": "获取或设置 <code>useDefaultRenderLoop</code> 为 true 时控件的目标帧率。若为 undefined，由浏览器的 requestAnimationFrame 实现决定帧率。若已定义，必须大于 0。设置超过底层 requestAnimationFrame 能力的帧率不会产生额外效果。"
+    },
+    {
+      "id": "CesiumWidget#terrainProvider",
+      "field": "description",
+      "sourceHash": "sha256:84adfdd09110fce100d0673344254184bc801f6a218333166fb8a5a02a7669ca",
+      "text": "为地球提供表面几何体的地形提供者。"
+    },
+    {
+      "id": "CesiumWidget#trackedEntity",
+      "field": "description",
+      "sourceHash": "sha256:3b8cd8ccf5fd941ed6e670ee70f7cf91b8d3af7c8653b5bfe2af28a1f6536a17",
+      "text": "获取或设置相机当前跟踪的 Entity 实例。"
+    },
+    {
+      "id": "CesiumWidget#trackedEntity",
+      "field": "exceptions/0/description",
+      "sourceHash": "sha256:36d0a7a059bf9cd925d2d99e890173b62c1d6eb26a92f4decddfce2583d47760",
+      "text": "在平面世界中，此值不是位置参考系为 FIXED 且跟踪参考坐标系为 AUTODETECT 或 ENU 的 Entity。"
+    },
+    {
+      "id": "CesiumWidget#trackedEntityChanged",
+      "field": "description",
+      "sourceHash": "sha256:e39f9b0aa7a0c918d07288375f28fdc05d53e2f6ff1ef781794aafe3babdb440",
+      "text": "获取被跟踪实体变化时触发的事件。"
+    },
+    {
+      "id": "CesiumWidget#useBrowserRecommendedResolution",
+      "field": "description",
+      "sourceHash": "sha256:576e39ab9c304ebc14b03c263f97370be7d86cb273ebd251c03fb2e2b71f1fd5",
+      "text": "是否使用浏览器建议分辨率的布尔标志。为 true 时，忽略浏览器的设备像素比，改用 1.0，即按 CSS 像素而非设备像素渲染。这可提升高像素密度低性能设备的运行速度。为 false 时，按设备像素渲染。无论此标志为 true 还是 false，{@link CesiumWidget#resolutionScale} 都仍然生效。"
+    },
+    {
+      "id": "CesiumWidget#useDefaultRenderLoop",
+      "field": "description",
+      "sourceHash": "sha256:ec0760dfe102720fa4109ac6b6a059a2612288630f44303036a3b2929c46e26a",
+      "text": "获取或设置是否由此控件控制渲染循环。为 true 时，控件使用 requestAnimationFrame 渲染、调整控件尺寸并驱动模拟时钟。设为 false 时，必须在自定义渲染循环中手动调用 <code>resize</code> 和 <code>render</code> 方法。若渲染发生错误，会触发 {@link Scene} 的 <code>renderError</code> 事件，并将此属性设为 false。错误处理后必须将其重新设为 true 才能继续渲染。"
+    },
+    {
+      "id": "CesiumWidget#zoomTo",
+      "field": "description",
+      "sourceHash": "sha256:be8b6f1654317ab28084ed052c34c2a196b4e46af63f5025270675f4a0ab90aa",
+      "text": "异步设置相机，使其观察给定实体、实体数组或数据源。若数据源或可视化内容仍在加载，此方法会等待数据就绪后再执行缩放。<p>偏移使用以包围球中心为原点的局部东、北、天参考坐标系中的 heading、pitch 和 range。方位角和俯仰角均在该局部参考坐标系中定义。方位角从 y 轴起算，朝 x 轴方向增加；俯仰角从 xy 平面起算，正值位于平面下方，负值位于平面上方。range 为到中心的距离。若 range 为零，则自动计算可使整个包围球可见的距离。</p><p>二维中必须采用俯视视角，相机会位于目标上方并向下观察，其高度为 range。方位角根据偏移确定；若无法确定，则朝北。</p>"
+    },
+    {
+      "id": "CesiumWidget#zoomTo",
+      "field": "exceptions/0/description",
+      "sourceHash": "sha256:da59ade9c2e33417fb2aa76493275547192772a2b5514dc49a1bae1a698ac278",
+      "text": "在平面世界中，解析后的目标或偏移不属于所支持的平面配置范围。"
+    },
+    {
+      "id": "CesiumWidget#zoomTo",
+      "field": "params/offset/description",
+      "sourceHash": "sha256:f99ea80c0e55444631d7f3922c177d3bbf4037a4ed4f320d9b384c954c7f6371",
+      "text": "局部东、北、天参考坐标系中相对于实体中心的偏移。"
+    },
+    {
+      "id": "CesiumWidget#zoomTo",
+      "field": "params/target/description",
+      "sourceHash": "sha256:309dac3d5358aebbc49ca5d8c19f39c219af4eb377e9978b432540173685e645",
+      "text": "要观察的目标。对于平面世界，解析后的目标必须为 Entity、Entity 数组、EntityCollection、entities 属性为 EntityCollection 的 DataSource，或已使用平面世界坐标的 Cesium3DTileset。瓦片集必须属于场景的图元集合树；发起操作时会应用其当前 root/model 变换。移除或销毁瓦片集会取消视图取景。不会重新投影地理坐标。"
+    },
+    {
+      "id": "CesiumWidget#zoomTo",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:10c8d3ce5b1793daede61b7e7f85fcbf26b07718beee2c54e84e7de8902f9bad",
+      "text": "缩放成功时兑现为 true 的 Promise；若目标当前未在场景中可视化，或缩放已取消，则兑现为 false。"
+    },
+    {
+      "id": "Globe",
+      "field": "description",
+      "sourceHash": "sha256:02e00a637c73733b88b98f15d0de4efb54380fe8bc9f36003043dd974842bcac",
+      "text": "场景中渲染的地球，包含地形（{@link Globe#terrainProvider}）和影像图层（{@link Globe#imageryLayers}）。使用 {@link Scene#globe} 访问地球。"
+    },
+    {
+      "id": "Globe",
+      "field": "params/ellipsoid/description",
+      "sourceHash": "sha256:61cc197c6497e13520dc5ae4500972effc53401b8ab68321753ec57453fda59d",
+      "text": "决定地球的大小和形状。"
+    },
+    {
+      "id": "Globe#atmosphereBrightnessShift",
+      "field": "description",
+      "sourceHash": "sha256:a2d16b05b058d1fa0ea3a84a18e9a861bda5c0567170480e08d381828ef7674d",
+      "text": "应用于大气的亮度偏移。默认值为 0.0，即不偏移。偏移为 -1.0 时完全变暗，使太空背景显露。"
+    },
+    {
+      "id": "Globe#atmosphereHueShift",
+      "field": "description",
+      "sourceHash": "sha256:6ea96e1e8c9b57131131142772524f729d5a2f47d03289506dd80fd1ff8bb1a1",
+      "text": "应用于大气的色相偏移。默认值为 0.0，即不偏移。偏移为 1.0 表示遍历可用色相的完整一圈。"
+    },
+    {
+      "id": "Globe#atmosphereLightIntensity",
+      "field": "description",
+      "sourceHash": "sha256:079ee619d2f76a452a3c0a94ada64337b4e82bf067f6c33dbef0d527480d252c",
+      "text": "计算地表大气颜色时使用的光照强度。"
+    },
+    {
+      "id": "Globe#atmosphereMieAnisotropy",
+      "field": "description",
+      "sourceHash": "sha256:7dcce32db6406a41eac0ef089fb0b7e7e1c026cc456c8509514b2e3aeccaeb79",
+      "text": "米氏散射所考虑介质的各向异性。<p>有效值范围为 -1.0 至 1.0。</p>"
+    },
+    {
+      "id": "Globe#atmosphereMieCoefficient",
+      "field": "description",
+      "sourceHash": "sha256:783407a60d0d7fca2eb716eee971fdd49468f1f39198c52634f852e66fb5478a",
+      "text": "地表大气散射方程使用的米氏散射系数。"
+    },
+    {
+      "id": "Globe#atmosphereMieScaleHeight",
+      "field": "description",
+      "sourceHash": "sha256:6ccdc94c622b5d70ceeefac1a0bdc7745964430a30b6205bb9452d6feef8bf20",
+      "text": "地表大气散射方程使用的米氏标高，单位为米。"
+    },
+    {
+      "id": "Globe#atmosphereRayleighCoefficient",
+      "field": "description",
+      "sourceHash": "sha256:17dbeb93417a4766af975230da3a0043a3dcbb1a3701929727afe546af71666e",
+      "text": "地表大气散射方程使用的瑞利散射系数。"
+    },
+    {
+      "id": "Globe#atmosphereRayleighScaleHeight",
+      "field": "description",
+      "sourceHash": "sha256:64e032a0e5b4ec7751ddfc748c32ae0f1cccc5320cdd812da79327bf52b64b90",
+      "text": "地表大气散射方程使用的瑞利标高，单位为米。"
+    },
+    {
+      "id": "Globe#atmosphereSaturationShift",
+      "field": "description",
+      "sourceHash": "sha256:b145c14c520c14153331023820c48ba4212c20225b8d7be9f29e0ed84222d1bc",
+      "text": "应用于大气的饱和度偏移。默认值为 0.0，即不偏移。偏移为 -1.0 时呈单色。"
+    },
+    {
+      "id": "Globe#backFaceCulling",
+      "field": "description",
+      "sourceHash": "sha256:a15bf470f85a28a304b0d624b1c9d0d32fbce9d3f9318647547d7ca64ee2ac00",
+      "text": "是否剔除背向相机的地形。相机位于地下或启用半透明时，不剔除背面。"
+    },
+    {
+      "id": "Globe#baseColor",
+      "field": "description",
+      "sourceHash": "sha256:2d844991f1e4f2924b00f50bbfbd843727acc1716d72eefd9c6aa132b4b9c1d0",
+      "text": "获取或设置没有可用影像时的地球颜色。"
+    },
+    {
+      "id": "Globe#cartographicLimitRectangle",
+      "field": "description",
+      "sourceHash": "sha256:c4ddf03be9923bfe5d874e2279612f35c1d9bfbc2438dbfbd578911847b4ce6f",
+      "text": "指定用于将地球渲染限制在某地理范围内的 {@link Rectangle}。默认覆盖地理坐标的最大范围。"
+    },
+    {
+      "id": "Globe#clippingPlanes",
+      "field": "description",
+      "sourceHash": "sha256:0539820d271f1d89c94f73b5002e07332b1477de48c85b40b01098341d316c01",
+      "text": "指定 {@link ClippingPlaneCollection}，用于选择性地禁用各平面外侧的渲染。"
+    },
+    {
+      "id": "Globe#clippingPolygons",
+      "field": "description",
+      "sourceHash": "sha256:f3ef896fbe7c354e8041a93990b3d6805b65919ee39cec6364647449d8489440",
+      "text": "指定 {@link ClippingPolygonCollection}，用于选择性地禁用多边形列表内侧或外侧的渲染。"
+    },
+    {
+      "id": "Globe#depthTestAgainstTerrain",
+      "field": "description",
+      "sourceHash": "sha256:77a5fec862367fd695a968c754bbb3efc142577e2ceb21ef5f02b57b36d3931c",
+      "text": "为 true 时，对广告牌、折线、标签等图元与地形表面进行深度测试；为 false 时，除图元位于地球另一侧外，始终将其绘制在地形之上。对图元进行地形深度测试的缺点是，轻微数值噪声或地形细节级别切换，有时会使原本位于表面的图元消失在地形下方。"
+    },
+    {
+      "id": "Globe#destroy",
+      "field": "description",
+      "sourceHash": "sha256:b385add820d9f47d540aad147f1cdf85f05e8c6cb81c3928a59c8fd5f7bd8d69",
+      "text": "销毁此对象持有的 WebGL 资源。显式销毁可确定地释放 WebGL 资源，而不依赖垃圾回收器回收此对象。<br /><br />对象销毁后不应再使用；调用除 <code>isDestroyed</code> 以外的任何函数都会抛出 {@link DeveloperError}。因此，应像示例中那样将返回值（<code>undefined</code>）赋给该对象变量。"
+    },
+    {
+      "id": "Globe#dynamicAtmosphereLighting",
+      "field": "description",
+      "sourceHash": "sha256:2b2b9279993ea7b2af49663f519ece040c88b2514c31b8a7a99cfac792ff55d1",
+      "text": "启用大气和雾的动态光照效果。仅在 <code>enableLighting</code> 为 <code>true</code> 时生效。"
+    },
+    {
+      "id": "Globe#dynamicAtmosphereLightingFromSun",
+      "field": "description",
+      "sourceHash": "sha256:0befa9942d46c49050cf23cf0fa81a074725a5bd1a88c6336e0dc8e037451667",
+      "text": "大气动态光照是否使用太阳方向，而非场景光源方向。仅在 <code>enableLighting</code> 和 <code>dynamicAtmosphereLighting</code> 均为 <code>true</code> 时生效。"
+    },
+    {
+      "id": "Globe#ellipsoid",
+      "field": "description",
+      "sourceHash": "sha256:b9d2857406b5679c689849f1192b01fa313364efe0d95f38ef79a3b84bb2fbc3",
+      "text": "获取描述此地球形状的椭球。"
+    },
+    {
+      "id": "Globe#enableLighting",
+      "field": "description",
+      "sourceHash": "sha256:4e0de0a7cbe95b2f70e3984d8f1775afba16301e1af61f707d4ff641c54446e2",
+      "text": "启用使用场景光源照亮地球。"
+    },
+    {
+      "id": "Globe#fillHighlightColor",
+      "field": "description",
+      "sourceHash": "sha256:e48536b6915cebdd10ea7d33a0ee39b628d233614e9fcebcc61f898f2faebc4a",
+      "text": "用于高亮地形填补瓦片的颜色。若为 undefined，则不高亮填补瓦片。alpha 值用于与瓦片实际颜色进行透明混合。地形填补瓦片不代表真实地形表面，因此某些应用可能需要通过视觉效果提示这些区域不应被信赖。"
+    },
+    {
+      "id": "Globe#getHeight",
+      "field": "description",
+      "sourceHash": "sha256:11e4d57aee7c0e1971fffacca406d732d2bdcf4d6cae0236d9d13b35f6cbb5ce",
+      "text": "获取给定地理坐标处的表面高度。"
+    },
+    {
+      "id": "Globe#getHeight",
+      "field": "params/cartographic/description",
+      "sourceHash": "sha256:bf111eb31bfa5576ff41794731c608828453608c495412e583a00a5ba99f70af",
+      "text": "要查询高度的地理坐标。"
+    },
+    {
+      "id": "Globe#getHeight",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:eba2cd4eb1ca55953c3b9e7d1f479c994ac32fabe88a15e45600bb9c1ff050a3",
+      "text": "此地理坐标处的高度；若无法找到，则返回 undefined。"
+    },
+    {
+      "id": "Globe#imageryLayers",
+      "field": "description",
+      "sourceHash": "sha256:6416e9ac54fbe6c942734e579e03ffb174fbb3793ef603c8912ce7e14246ec5a",
+      "text": "获取将在此地球上渲染的影像图层集合。"
+    },
+    {
+      "id": "Globe#imageryLayersUpdatedEvent",
+      "field": "description",
+      "sourceHash": "sha256:12e43a2b474ce00be3021df0539d4ee209bdc4cd468decafb4650a238194fa16",
+      "text": "获取在影像图层添加、显示、隐藏、移动或移除时触发的事件。"
+    },
+    {
+      "id": "Globe#isDestroyed",
+      "field": "description",
+      "sourceHash": "sha256:aea7b697937631c90ae3fc0ec55b81ba0ddc7abe4d6045848b2031f9bed60091",
+      "text": "若此对象已销毁，返回 true；否则返回 false。<br /><br />对象销毁后不应再使用；调用除 <code>isDestroyed</code> 以外的任何函数都会抛出 {@link DeveloperError}。"
+    },
+    {
+      "id": "Globe#lambertDiffuseMultiplier",
+      "field": "description",
+      "sourceHash": "sha256:7529a340fd078008eaf8dbeaf404fcc4a7eee573e1eabb25f5b676ee364e9d4d",
+      "text": "调整地形 Lambert 光照的倍数。此值与 GlobeFS.glsl 中 <code>czm_getLambertDiffuse</code> 的结果相乘。仅在 <code>enableLighting</code> 为 <code>true</code> 时生效。"
+    },
+    {
+      "id": "Globe#lightingFadeInDistance",
+      "field": "description",
+      "sourceHash": "sha256:a319e6f477cb222780f19868e8cc7de3bc6fab07056dbe4a023a5304e95b3a41",
+      "text": "光照恢复的距离。仅在 <code>enableLighting</code> 或 <code>showGroundAtmosphere</code> 为 <code>true</code> 时生效。"
+    },
+    {
+      "id": "Globe#lightingFadeOutDistance",
+      "field": "description",
+      "sourceHash": "sha256:34ca00e519076e36e841ac6eefaee93cec3283ae4204b8be62a3e3e0b5957b99",
+      "text": "所有区域均被照亮时的距离。仅在 <code>enableLighting</code> 或 <code>showGroundAtmosphere</code> 为 <code>true</code> 时生效。"
+    },
+    {
+      "id": "Globe#loadingDescendantLimit",
+      "field": "description",
+      "sourceHash": "sha256:9f8f7532c3e3c415320d58e52bd5bf1efb8b90f7f50b0270b9a3749e31052001",
+      "text": "获取或设置将正在加载的后代瓦片数量判为“过多”的阈值。若某瓦片有过多正在加载的后代，则会先加载并渲染该瓦片，再加载并渲染后代。这可更早向用户反馈加载正在进行，但代价是总体加载时间更长。设为 0 会逐级加载瓦片，显著增加加载时间；设为较大值（例如 1000）可尽量减少加载瓦片数量，但通常会在长时间等待后一次性出现细节。"
+    },
+    {
+      "id": "Globe#material",
+      "field": "description",
+      "sourceHash": "sha256:3b5359c4255434c6ec0ff5bbafde57ecb1f45287778212643599142b0a477505",
+      "text": "获取或设置 Globe 的材质外观。可使用多种内置 {@link Material} 对象之一，或使用 {@link https://github.com/CesiumGS/cesium/wiki/Fabric|Fabric} 编写自定义材质。"
+    },
+    {
+      "id": "Globe#maximumScreenSpaceError",
+      "field": "description",
+      "sourceHash": "sha256:68b5c86befa94b838a16f8f764f27f2971a6ab4df58d67dbc4e3e9d3a5c99ffb",
+      "text": "用于驱动细节级别细化的最大屏幕空间误差。较大值可提升性能，但会降低视觉质量。"
+    },
+    {
+      "id": "Globe#nightFadeInDistance",
+      "field": "description",
+      "sourceHash": "sha256:4275c36252413d121e46bd434c67eef6ea0713564791e6e06dec9a3bf2152ef2",
+      "text": "地表大气中的夜间暗色开始渐入，使其过渡为无光照地表大气的距离。仅在 <code>showGroundAtmosphere</code>、<code>enableLighting</code> 和 <code>dynamicAtmosphereLighting</code> 均为 <code>true</code> 时生效。"
+    },
+    {
+      "id": "Globe#nightFadeOutDistance",
+      "field": "description",
+      "sourceHash": "sha256:21297f660e652dbdd32b7004782ac6746ca56925c2652bbb1cd346598e92211b",
+      "text": "地表大气中的夜间暗色开始渐出，使其过渡为有光照地表大气的距离。仅在 <code>showGroundAtmosphere</code>、<code>enableLighting</code> 和 <code>dynamicAtmosphereLighting</code> 均为 <code>true</code> 时生效。"
+    },
+    {
+      "id": "Globe#oceanNormalMapUrl",
+      "field": "description",
+      "sourceHash": "sha256:81cb96b325e23d668c2b041ed3483b231ffc3a2ac9b2eda122f41f07a03c74b9",
+      "text": "用于渲染海洋波浪的法线贴图。仅当配置的地形提供者包含水体掩码时，设置此属性才会生效。"
+    },
+    {
+      "id": "Globe#pick",
+      "field": "description",
+      "sourceHash": "sha256:003afd83cbaf0658fc61ae954efc5ef7214ab25483a986785171ec51832dc86d",
+      "text": "求射线与已渲染地球表面的交点。射线必须使用世界坐标。"
+    },
+    {
+      "id": "Globe#pick",
+      "field": "params/ray/description",
+      "sourceHash": "sha256:3366933e9f93e4cc140bf74157c505fae8c8e87ba5af9142d369be1d28c2f066",
+      "text": "要进行求交测试的射线。"
+    },
+    {
+      "id": "Globe#pick",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:e57d9736472ede7ef341db1f87bf91a9e7a57b830b72b3d43bd3cff3a5a7d010",
+      "text": "交点；若未找到，则返回 <code>undefined</code>。"
+    },
+    {
+      "id": "Globe#preloadAncestors",
+      "field": "description",
+      "sourceHash": "sha256:61ebc9e896c00c8baa2334aa5e80f5bbf3d7d2db07f44db20163b9a63a25a665",
+      "text": "获取或设置是否预加载已渲染瓦片的祖先。设为 true 可改善缩小浏览体验，并在平移后新显露区域提供更多细节，代价是需要加载更多瓦片。"
+    },
+    {
+      "id": "Globe#preloadSiblings",
+      "field": "description",
+      "sourceHash": "sha256:4ae62bf9c88cd9c09a9704b9c872b52aa11b76bd8a2193438bd724e3cf3a81a7",
+      "text": "获取或设置是否预加载已渲染瓦片的兄弟瓦片。设为 true 时，即使被裁除，也会加载与已渲染瓦片具有相同父级的瓦片。这可能改善平移浏览体验，代价是需要加载更多瓦片。"
+    },
+    {
+      "id": "Globe#shadows",
+      "field": "description",
+      "sourceHash": "sha256:23d2c0859c601506848aecee5c278425dc6e3b1717759ce5bc7d63d9b16f4137",
+      "text": "决定地球是否投射或接收光源产生的阴影。启用地球投射阴影可能影响性能，因为需要从光源视角再次渲染地形。目前只有视野内的地形会投射阴影。默认不投射阴影。"
+    },
+    {
+      "id": "Globe#show",
+      "field": "description",
+      "sourceHash": "sha256:b104eabda368768010180bd53de62741b8909b1f9430dec8322168be3d1b576e",
+      "text": "决定是否显示地球。"
+    },
+    {
+      "id": "Globe#showGroundAtmosphere",
+      "field": "description",
+      "sourceHash": "sha256:00224897a5703261494e33a4f03d8a461aeb48be5c63a30f01bbd2c124a6c576",
+      "text": "启用地表大气，从 <code>lightingFadeInDistance</code> 到 <code>lightingFadeOutDistance</code> 之间的距离观察时，将其绘制在地球表面之上。"
+    },
+    {
+      "id": "Globe#showSkirts",
+      "field": "description",
+      "sourceHash": "sha256:a41a70242d55820053c8d46c5cd1c74fd89a139f14954305f845bc95cddd4074",
+      "text": "是否显示地形裙边。裙边是从瓦片边缘向下延伸的几何体，用于隐藏相邻瓦片之间的接缝。相机位于地下或启用半透明时，始终隐藏裙边。"
+    },
+    {
+      "id": "Globe#showWaterEffect",
+      "field": "description",
+      "sourceHash": "sha256:041136c7712b9978e1fded75d9521d23148bc002cb2f160ab97e22157ed530c2",
+      "text": "为 true 时，在地球的水域显示动态波浪效果；否则不显示。若 <code>terrainProvider</code> 不提供水体掩码，则忽略此属性。"
+    },
+    {
+      "id": "Globe#terrainProvider",
+      "field": "description",
+      "sourceHash": "sha256:77401cae0329775218342f513767917f5210babcb72e581822f95deaba4df1f7",
+      "text": "为此地球提供表面几何体的地形提供者。"
+    },
+    {
+      "id": "Globe#terrainProviderChanged",
+      "field": "description",
+      "sourceHash": "sha256:10d953b8f8931b243cd017c6e1ebd9297b865e63311eccda70b541c32da51608",
+      "text": "获取更改地形提供者时触发的事件。"
+    },
+    {
+      "id": "Globe#tileCacheSize",
+      "field": "description",
+      "sourceHash": "sha256:a90996f93d88a48e0a22d896d82d6ce282120c70ac6d7924b5cc79eb9d65e2c2",
+      "text": "地形瓦片缓存大小，以瓦片数量计。超过此数量的瓦片，只要本帧渲染不再需要，就会被释放。较大值会占用更多内存，但例如先缩小再放大时，可更快显示细节。"
+    },
+    {
+      "id": "Globe#tileLoadProgressEvent",
+      "field": "description",
+      "sourceHash": "sha256:5c1f6227ba2071cd3c551d4ea7fc941ee433d8967bfc67f223ea4386d32c0250",
+      "text": "获取瓦片加载队列长度自上一渲染帧起发生变化时触发的事件。队列为空时，当前视图所需的全部地形和影像均已加载。事件传入加载队列的新长度。"
+    },
+    {
+      "id": "Globe#tilesLoaded",
+      "field": "description",
+      "sourceHash": "sha256:a9c602207c4e4c1028a40ae0ad48f33eb2c9de8c8075227dcf478bdad1454e9d",
+      "text": "瓦片加载队列为空时返回 <code>true</code>，否则返回 <code>false</code>。队列为空表示当前视图所需的全部地形和影像均已加载。"
+    },
+    {
+      "id": "Globe#translucency",
+      "field": "description",
+      "sourceHash": "sha256:b3b8ec8449df72994f12bcc5770b6103524456e8f2d236719d459f0e940cc9e3",
+      "text": "控制地球半透明效果的属性。"
+    },
+    {
+      "id": "Globe#undergroundColor",
+      "field": "description",
+      "sourceHash": "sha256:4df91dd1f2e888c57c71e86e5456d2d7f54f1bd4fea577e369f25f41588e1c1f",
+      "text": "相机位于地下或地球为半透明时，渲染地球背面的颜色；根据相机距离与地球颜色混合。<br /><br />将 <code>undergroundColor</code> 设为 <code>undefined</code> 可禁用地下着色。"
+    },
+    {
+      "id": "Globe#undergroundColorAlphaByDistance",
+      "field": "description",
+      "sourceHash": "sha256:7de878279532b903e398ab3866b8bde0416d42a149fc526941e58fdc3f078063",
+      "text": "获取或设置将 {@link Globe#undergroundColor} 与地球颜色混合时使用的近、远距离。当相机距离处于指定的 {@link NearFarScalar#near} 和 {@link NearFarScalar#far} 范围内时，alpha 在 {@link NearFarScalar#nearValue} 与 {@link NearFarScalar#farValue} 之间插值。超出范围后，alpha 钳制到最近端点的值。若未定义，则不将地下颜色与地球颜色混合。<br /> <br />相机位于椭球上方时，从椭球上的最近点而非相机位置计算距离。"
+    },
+    {
+      "id": "Globe#vertexShadowDarkness",
+      "field": "description",
+      "sourceHash": "sha256:858f4c69abc2520b306fff40ced424465ca315e66ffca7233c470b24b8109c0b",
+      "text": "决定顶点阴影的暗度。仅在 <code>enableLighting</code> 为 <code>true</code> 时生效。"
+    },
+    {
+      "id": "Scene.defaultLogDepthBuffer",
+      "field": "description",
+      "sourceHash": "sha256:afc2ba1dba2e03caf6882887128238437faca4a7a71af815a639fbd52d2756f9",
+      "text": "设置新建 Scene 的 {@link Scene#logarithmicDepthBuffer} 默认值。此属性依赖 fragmentDepth 支持。"
+    },
+    {
+      "id": "Scene",
+      "field": "exceptions/0/description",
+      "sourceHash": "sha256:87fe99bb201a6d5c0c1cd7d8c4259d8b64c2453c17fdf43fee309b92edbc5591",
+      "text": "必须提供 options 和 options.canvas。"
+    },
+    {
+      "id": "Scene",
+      "field": "params/options.depthPlaneEllipsoidOffset/description",
+      "sourceHash": "sha256:cea857a031e673ee28ac0f3da62c81754df7b37013e4866f691ebcbb0d733b2f",
+      "text": "调整 DepthPlane，以解决椭球零高程以下的渲染伪影。"
+    },
+    {
+      "id": "Scene",
+      "field": "params/options.maximumRenderTimeChange/description",
+      "sourceHash": "sha256:5b6ffbabbf98dd9f4efa853d0b04fec9ec12696745ca8b5f833de6149808098c",
+      "text": "若 requestRenderMode 为 true，此值定义触发渲染请求前允许的最大模拟时间变化量。参见 {@link https://cesium.com/blog/2018/01/24/cesium-scene-rendering-performance/|通过显式渲染提升性能}。"
+    },
+    {
+      "id": "Scene",
+      "field": "params/options.msaaSamples/description",
+      "sourceHash": "sha256:8be0207330008798be54c44fd9b013ef457e7e4984c0a5e8857e03a9471022fc",
+      "text": "渲染目标的采样数。SceneGIS 延迟渲染要求为 1；边缘平滑请选择 FXAA 或 SceneGIS 时间抗锯齿。"
+    },
+    {
+      "id": "Scene",
+      "field": "params/options.requestRenderMode/description",
+      "sourceHash": "sha256:f5003231c2ef93b6d28595946e3749c925b0defa6dd559024b1527347924e5b2",
+      "text": "若为 true，仅在场景变化判定有需要时渲染一帧。启用后可提升应用性能，但在此模式下需要使用 {@link Scene#requestRender} 显式请求渲染新帧。通过其他 API 修改场景后，许多情况下都需要这样做。参见 {@link https://cesium.com/blog/2018/01/24/cesium-scene-rendering-performance/|通过显式渲染提升性能}。"
+    },
+    {
+      "id": "Scene#_enableEdgeVisibility",
+      "field": "description",
+      "sourceHash": "sha256:4c0a183719d78bdec81a50a06d9e20567f3558e80ca733718c5a6c4829fcb042",
+      "text": "是否为 3D Tiles 启用边缘可见性渲染。启用后会创建具有多个渲染目标的帧缓冲，用于高级边缘检测和可见性处理。"
+    },
+    {
+      "id": "Scene#atmosphere",
+      "field": "description",
+      "sourceHash": "sha256:2b216ea84d7c78e16c316b82b008d15f9121191a23a40fbcb7e83b9eea94da22",
+      "text": "影响 3D Tiles 和模型渲染的大气光照设置。请与负责绘制天空的 {@link Scene#skyAtmosphere} 区分。"
+    },
+    {
+      "id": "Scene#backgroundColor",
+      "field": "description",
+      "sourceHash": "sha256:6615877d1d74f381a0001f022d41caa6672efc6c0140c1994edf24a572cd6441",
+      "text": "背景颜色，仅在没有天空盒，即 {@link Scene#skyBox} 为 <code>undefined</code> 时可见。"
+    },
+    {
+      "id": "Scene#camera",
+      "field": "description",
+      "sourceHash": "sha256:934ae19f7abcb0a67a5db11e62f999b83086db5487b09c5a260c4487b9d8ef59",
+      "text": "获取或设置相机。"
+    },
+    {
+      "id": "Scene#cameraUnderground",
+      "field": "description",
+      "sourceHash": "sha256:195037c22083c245b556b98cf88d77a1e980b1b71daf54913e21b5d1acbb6c69",
+      "text": "相机是否位于地球表面以下。"
+    },
+    {
+      "id": "Scene#canvas",
+      "field": "description",
+      "sourceHash": "sha256:8cbd93fd95c445c37790180b626e2628f1ba5b0c7a19e3b7330a804703d77362",
+      "text": "获取此场景绑定的 canvas 元素。"
+    },
+    {
+      "id": "Scene#cartesianToCanvasCoordinates",
+      "field": "description",
+      "sourceHash": "sha256:7284cf012ff7f26bcf72ddcf1d4f5e7257b22ef439c260d92158f32bcb2d3c30",
+      "text": "将笛卡尔坐标位置转换为 canvas 坐标。通常用于将 HTML 元素放在与场景对象相同的屏幕位置。"
+    },
+    {
+      "id": "Scene#cartesianToCanvasCoordinates",
+      "field": "params/position/description",
+      "sourceHash": "sha256:6cbcd6562e6261911edbc3c4129192612a64815beb95676ef48f778b5e8cd887",
+      "text": "笛卡尔坐标位置。"
+    },
+    {
+      "id": "Scene#cartesianToCanvasCoordinates",
+      "field": "params/result/description",
+      "sourceHash": "sha256:18306c46b7705235e86a3e509a3be17e029fa8ec966cb3eef8a311085b114d61",
+      "text": "可选的结果对象，用于返回输入位置转换后的 canvas 坐标。"
+    },
+    {
+      "id": "Scene#cartesianToCanvasCoordinates",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:778d71f4e72f8cbe4a8016d39087812ddf31eedd820a1bb0a197a0d512982743",
+      "text": "修改后的 result 参数；未提供时返回新建的 Cartesian2 实例。如果输入位置接近椭球中心，可能为 <code>undefined</code>。"
+    },
+    {
+      "id": "Scene#clampToHeight",
+      "field": "description",
+      "sourceHash": "sha256:5474837db50f12da0ae806484f42c5a3b99bda8669caa459a7395fd85954b7aa",
+      "text": "沿大地表面法线将给定笛卡尔坐标位置贴合到场景几何体。返回贴合后的位置；若没有可贴合的场景几何体，则返回 <code>undefined</code>。可用于将对象贴合到地球、3D Tiles 或场景中的图元。<p>此函数仅对当前视图中渲染的地球瓦片和 3D Tiles 进行贴合。对于其他所有图元，无论其是否可见，都会参与贴合。</p>"
+    },
+    {
+      "id": "Scene#clampToHeight",
+      "field": "exceptions/0/description",
+      "sourceHash": "sha256:6aa34bc08be0e4d297ff74ca8b02a9c7666651341841c6cc2c2a7d5d4ea8cbdf",
+      "text": "clampToHeight 仅支持三维模式。"
+    },
+    {
+      "id": "Scene#clampToHeight",
+      "field": "exceptions/1/description",
+      "sourceHash": "sha256:595ca6d168d450e4f27282f2ba2986bceb2eab52204438f00536adc1d1436026",
+      "text": "clampToHeight 需要深度纹理支持。请检查 clampToHeightSupported。"
+    },
+    {
+      "id": "Scene#clampToHeight",
+      "field": "exceptions/2/description",
+      "sourceHash": "sha256:43ff4ea794101b4a38bb4ff9988aaadb56a3a65d5b7b580b77aedd224da5daaf",
+      "text": "主世界不是 Globe 时，不支持 clampToHeight。"
+    },
+    {
+      "id": "Scene#clampToHeight",
+      "field": "params/cartesian/description",
+      "sourceHash": "sha256:3713eea7f8a91a47e6c4a4ca37d7fafab515991a8692ab90bb435aab6628b49f",
+      "text": "笛卡尔坐标位置。"
+    },
+    {
+      "id": "Scene#clampToHeight",
+      "field": "params/objectsToExclude/description",
+      "sourceHash": "sha256:dc3256307d1914a200c17448f4684a5a1da5603b50ff44e8194298210c0648f9",
+      "text": "贴合时排除的图元、实体或 3D Tiles 要素列表。"
+    },
+    {
+      "id": "Scene#clampToHeight",
+      "field": "params/result/description",
+      "sourceHash": "sha256:051036f5353628cfe64f725fca6e42d300b98b077bde63b1390c511c1ec4544c",
+      "text": "可选的结果对象，用于返回贴合后的位置。"
+    },
+    {
+      "id": "Scene#clampToHeight",
+      "field": "params/width/description",
+      "sourceHash": "sha256:4de6eae8767af9bd6ae6c3843ff02e351d8be47b7cc344856fd459518fc62b64",
+      "text": "求交体积的宽度，单位为米。"
+    },
+    {
+      "id": "Scene#clampToHeight",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:587fd41e205ef5dd76b62f997bfe1f9208fee41e63661a2137ba78aa254e2acb",
+      "text": "修改后的 result 参数；未提供时返回新建的 Cartesian3 实例。若没有可贴合的场景几何体，可能为 <code>undefined</code>。"
+    },
+    {
+      "id": "Scene#clampToHeightMostDetailed",
+      "field": "description",
+      "sourceHash": "sha256:18dc6e8b6c5a2ad72541d4a3441625dad0d64c5269463be2e9174080617121f0",
+      "text": "针对一组 {@link Cartesian3} 位置发起异步 {@link Scene#clampToHeight} 查询，使用场景中 3D Tiles 瓦片集的最高细节级别。返回在查询完成时兑现的 Promise。每个位置都会原地修改。若某个位置由于无法采样到几何体或发生其他错误而无法贴合，数组中的对应元素会设为 undefined。"
+    },
+    {
+      "id": "Scene#clampToHeightMostDetailed",
+      "field": "exceptions/0/description",
+      "sourceHash": "sha256:272e0958c14f8ce77754f1044392623bbb768b0f2e2bec970bbbc97af3e8706d",
+      "text": "clampToHeightMostDetailed 仅支持三维模式。"
+    },
+    {
+      "id": "Scene#clampToHeightMostDetailed",
+      "field": "exceptions/1/description",
+      "sourceHash": "sha256:86436df978dfba480d543971ed2ad3a08eeed87fb1a5547f80b06f0affb117aa",
+      "text": "clampToHeightMostDetailed 需要深度纹理支持。请检查 clampToHeightSupported。"
+    },
+    {
+      "id": "Scene#clampToHeightMostDetailed",
+      "field": "exceptions/2/description",
+      "sourceHash": "sha256:e3e8d93b1b5f3aafc0f1781a8d6407d12c99ccfd5f2fa4545286c970bbd85b77",
+      "text": "主世界不是 Globe 时，不支持 clampToHeightMostDetailed。"
+    },
+    {
+      "id": "Scene#clampToHeightMostDetailed",
+      "field": "params/cartesians/description",
+      "sourceHash": "sha256:1c1d30fc423c308e84af7d8e102cd1f5146ee54088a296c9b9da09a5f32d6215",
+      "text": "需要更新为贴合后位置的笛卡尔坐标数组。"
+    },
+    {
+      "id": "Scene#clampToHeightMostDetailed",
+      "field": "params/objectsToExclude/description",
+      "sourceHash": "sha256:dc3256307d1914a200c17448f4684a5a1da5603b50ff44e8194298210c0648f9",
+      "text": "贴合时排除的图元、实体或 3D Tiles 要素列表。"
+    },
+    {
+      "id": "Scene#clampToHeightMostDetailed",
+      "field": "params/width/description",
+      "sourceHash": "sha256:4de6eae8767af9bd6ae6c3843ff02e351d8be47b7cc344856fd459518fc62b64",
+      "text": "求交体积的宽度，单位为米。"
+    },
+    {
+      "id": "Scene#clampToHeightMostDetailed",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:29f1bb6dc54cc8faeeaa2d1aeb937840f88d3d5fd6fff70fe993ff1327232d8b",
+      "text": "查询完成后兑现为传入位置列表的 Promise。无法贴合的位置可能变为 <code>undefined</code>。"
+    },
+    {
+      "id": "Scene#clampToHeightSupported",
+      "field": "description",
+      "sourceHash": "sha256:082c90f9fedb7597e2850013eb523f321ef04c437d93a1e5690ab9b78991a786",
+      "text": "若支持 {@link Scene#clampToHeight} 和 {@link Scene#clampToHeightMostDetailed} 函数，则返回 <code>true</code>。"
+    },
+    {
+      "id": "Scene#completeMorph",
+      "field": "description",
+      "sourceHash": "sha256:03084eb1dbbd29b93e0d90efb56c7bd8f49c2041e12355d98a28f56c5585e3c6",
+      "text": "立即完成当前正在进行的模式过渡。"
+    },
+    {
+      "id": "Scene#completeMorphOnUserInput",
+      "field": "description",
+      "sourceHash": "sha256:873f35fcb44fa4616c6e50b6e3e4d8ce31bd20ae5b5152dac6fbc5cfb7d90e98",
+      "text": "是否在用户输入时立即完成场景过渡动画。"
+    },
+    {
+      "id": "Scene#controllerHost",
+      "field": "description",
+      "sourceHash": "sha256:b392d22bcfb18a47f7bd078fc3ab6e2e635ff09bc43a1461bcc41b85b6f96663",
+      "text": "收集可注册到场景的 <code>Controller</code> 对象数组，用于处理输入事件、相机动画和其他交互。"
+    },
+    {
+      "id": "Scene#debugCommandFilter",
+      "field": "description",
+      "sourceHash": "sha256:f074274953947f71d213d3e9063e94d1829acef4040de5b886ea65b9b31d9bd0",
+      "text": "此属性仅供调试，不应在生产环境中使用。<p>用于决定执行哪些命令的函数。如下方示例所示，此函数接收命令的 <code>owner</code> 作为参数，并返回布尔值，指示是否执行该命令。</p><p>默认值为 <code>undefined</code>，表示执行全部命令。</p>"
+    },
+    {
+      "id": "Scene#debugFrustumStatistics",
+      "field": "description",
+      "sourceHash": "sha256:fc0128b82d2b85c9fcb18bfa711de17bc236567d8f67b28aa632813e9325ffea",
+      "text": "此属性仅供调试，不应在生产环境中使用。<p>当 {@link Scene.debugShowFrustums} 为 <code>true</code> 时，此属性包含每个视锥执行命令数的统计信息。<code>totalCommands</code> 为不计重叠的总执行命令数。<code>commandsInFrustums</code> 是记录命令重复执行次数的数组，例如有多少命令同时覆盖两个或三个视锥。</p>"
+    },
+    {
+      "id": "Scene#debugShowCommands",
+      "field": "description",
+      "sourceHash": "sha256:6c8b3a789b3e1fe550d77c55f11d5e0c67e8e34c6a332bc6e5ab8074004de014",
+      "text": "此属性仅供调试，不应在生产环境中使用。<p>为 <code>true</code> 时，为命令随机着色。可用于性能分析，识别场景或模型中命令密集、可能受益于合批的部分。</p>"
+    },
+    {
+      "id": "Scene#debugShowDepthFrustum",
+      "field": "description",
+      "sourceHash": "sha256:25b3b84fa8e826d1ada7d49e556636c615d76dc3652b3ff1eb652f5bfa0d06c7",
+      "text": "此属性仅供调试，不应在生产环境中使用。<p>指定显示哪个视锥的深度信息。</p>"
+    },
+    {
+      "id": "Scene#debugShowFramesPerSecond",
+      "field": "description",
+      "sourceHash": "sha256:6d0070bfcfd07653a4190dc9af05268e6f2f2deae617113a871d1483ad7ddd08",
+      "text": "此属性仅供调试，不应在生产环境中使用。<p>显示每秒帧数和帧间时间。</p>"
+    },
+    {
+      "id": "Scene#debugShowFrustumPlanes",
+      "field": "description",
+      "sourceHash": "sha256:93e646e9dfe30a7028a0cebdd168b7a46a7703fe5c1c17c98ea01c0e3c546286",
+      "text": "此属性仅供调试，不应在生产环境中使用。<p>为 <code>true</code> 时，绘制轮廓以显示相机视锥的边界。</p>"
+    },
+    {
+      "id": "Scene#debugShowFrustums",
+      "field": "description",
+      "sourceHash": "sha256:9af409263ce058b46a5c5e3a276d6412d48bd3f02761ab5dedfe7f2b877aa1b3",
+      "text": "此属性仅供调试，不应在生产环境中使用。<p>为 <code>true</code> 时，根据命令覆盖的视锥对其着色。最近视锥中的命令着红色，次近视锥中的命令着绿色，最远视锥中的命令着蓝色。如果命令覆盖多个视锥，则合并颜色分量，例如同时覆盖前两个视锥的命令着黄色。</p>"
+    },
+    {
+      "id": "Scene#destroy",
+      "field": "description",
+      "sourceHash": "sha256:b385add820d9f47d540aad147f1cdf85f05e8c6cb81c3928a59c8fd5f7bd8d69",
+      "text": "销毁此对象持有的 WebGL 资源。显式销毁可确定地释放 WebGL 资源，而不依赖垃圾回收器回收此对象。<br /><br />对象销毁后不应再使用；调用除 <code>isDestroyed</code> 以外的任何函数都会抛出 {@link DeveloperError}。因此，应像示例中那样将返回值（<code>undefined</code>）赋给该对象变量。"
+    },
+    {
+      "id": "Scene#drawingBufferHeight",
+      "field": "description",
+      "sourceHash": "sha256:72aedb325e06e954128b2e0fb4f28d1beb231ddc7081c4ac4b69a3242de6dab8",
+      "text": "底层 GL 上下文的 drawingBufferHeight。"
+    },
+    {
+      "id": "Scene#drawingBufferWidth",
+      "field": "description",
+      "sourceHash": "sha256:78c3ddfec0a5e628da970c1bd9de812e80de5b8cec2bce3de883dc03b204be15",
+      "text": "底层 GL 上下文的 drawingBufferWidth。"
+    },
+    {
+      "id": "Scene#drillPick",
+      "field": "description",
+      "sourceHash": "sha256:615c5d84ce87bd1a3be8959ba529a44b8513bfb5c69742f50f94566681e1dffa",
+      "text": "返回指定窗口坐标处所有图元的对象列表，每个对象都包含 <code>primitive</code> 属性。根据图元类型，还可能设置其他属性，以进一步标识拾取对象。列表中的图元按场景中的视觉顺序排列，从前到后。"
+    },
+    {
+      "id": "Scene#drillPick",
+      "field": "exceptions/0/description",
+      "sourceHash": "sha256:69cbf31915554a8fa320ef0a153d1915eb91f358afeec0203d7da5983483e704",
+      "text": "windowPosition 为 undefined。"
+    },
+    {
+      "id": "Scene#drillPick",
+      "field": "params/height/description",
+      "sourceHash": "sha256:c41b18690dccb33d164e6d8664d096ca16fa570f575720daf2ba838e60c90f30",
+      "text": "拾取矩形的高度。"
+    },
+    {
+      "id": "Scene#drillPick",
+      "field": "params/limit/description",
+      "sourceHash": "sha256:7a71a0e13c3bd8e6abe7e454f98600b7776ec86be3a4d590cf56d1d3a94e886b",
+      "text": "若提供此值，则在收集到指定数量的拾取结果后停止穿透拾取。"
+    },
+    {
+      "id": "Scene#drillPick",
+      "field": "params/width/description",
+      "sourceHash": "sha256:c927999f6540d8ab81cdf906d6a53e66c60543991977df5b49f10ce90ec6434e",
+      "text": "拾取矩形的宽度。"
+    },
+    {
+      "id": "Scene#drillPick",
+      "field": "params/windowPosition/description",
+      "sourceHash": "sha256:4dae94b58a739cd049e484e3e87a643617a16ee046a61a035e33163fd8524799",
+      "text": "执行拾取的窗口坐标。"
+    },
+    {
+      "id": "Scene#drillPick",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:270b026505e1281fa51bc71967deca6378f3ed7c98d339cb3561f90efec75556",
+      "text": "对象数组，每个对象包含一个拾取到的图元。"
+    },
+    {
+      "id": "Scene#ellipsoid",
+      "field": "description",
+      "sourceHash": "sha256:64ad4e5f7e94b06bc611c8429591da991fa88bdb2f4886136ea1dbbdb1d0b372",
+      "text": "椭球。若未指定，则使用默认椭球。"
+    },
+    {
+      "id": "Scene#environmentEffects",
+      "field": "description",
+      "sourceHash": "sha256:db51ef5a754a780a7d7c35faae18d4a6e9c5ceef349ae3e6c0b65d5e7f480502",
+      "text": "获取当前生效的高级环境效果。显式注册的控制器具有优先权，即使其已被禁用。否则，Scene 自有的默认环境会为主 Globe 或平面世界启用物理大气、空气透视和高度雾。该默认环境关闭云、云阴影、曙暮光射线、泛光及镜头光晕。"
+    },
+    {
+      "id": "Scene#eyeSeparation",
+      "field": "description",
+      "sourceHash": "sha256:d491c4aa22d79a8b72ebcbba5ef9cb92162f72dde2537f6194ff48e0a97ce0db",
+      "text": "用于 Cardboard 或 WebVR 的双眼间距，单位为米。"
+    },
+    {
+      "id": "Scene#farToNearRatio",
+      "field": "description",
+      "sourceHash": "sha256:9751bc998fd503017c5b85192d36fde1b675b88ce4fc286d5d5b73d6d1cb451d",
+      "text": "使用普通深度缓冲时，多视锥的远近距离比。<p>此值用于生成多视锥中每个视锥的近平面和远平面距离。仅在 {@link Scene#logarithmicDepthBuffer} 为 <code>false</code> 时使用。若 <code>logarithmicDepthBuffer</code> 为 <code>true</code>，请使用 {@link Scene#logarithmicDepthFarToNearRatio}。</p>"
+    },
+    {
+      "id": "Scene#focalLength",
+      "field": "description",
+      "sourceHash": "sha256:081b60ed3669b293c8c222aa4eec477a9bef0898db49dfcd63276445f2529b80",
+      "text": "用于 Cardboard 或 WebVR 的焦距。"
+    },
+    {
+      "id": "Scene#fog",
+      "field": "description",
+      "sourceHash": "sha256:bfddd61c78bf024079adc0f5105e598f67cfec1d50e295dbc1e08ba8e5df302d",
+      "text": "在地平线视角下，将大气效果与远离相机的几何体混合。通过减少渲染几何体和地形请求，可进一步提升性能。使用 WGS84 以外的椭球时，默认禁用。"
+    },
+    {
+      "id": "Scene#gamma",
+      "field": "description",
+      "sourceHash": "sha256:bf62252cb0368c71ceff14774e646a0f9310241a28a14fb05f355c56f6b7b211",
+      "text": "用于伽马校正的值。延迟渲染在 HDR 和 LDR 显示中都使用此值。"
+    },
+    {
+      "id": "Scene#getCompressedTextureFormatSupported",
+      "field": "description",
+      "sourceHash": "sha256:8cca83afa987d584b383f892d829fc5f327a39332715c7dbc560eea7d65ca0e7",
+      "text": "判断是否支持某种压缩纹理格式。"
+    },
+    {
+      "id": "Scene#getCompressedTextureFormatSupported",
+      "field": "params/format/description",
+      "sourceHash": "sha256:c640b95d31e479c908dae73b5aa8783dd657f22473324f09cb9f9dd0d378d80e",
+      "text": "纹理格式。可使用格式名称或 WebGL 扩展名称，例如 s3tc 或 WEBGL_compressed_texture_s3tc。"
+    },
+    {
+      "id": "Scene#getCompressedTextureFormatSupported",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:7d02da1964ac6634cf689ac69c6dfad24e6c05f83658cf637668b87cc62beae6",
+      "text": "是否支持此格式。"
+    },
+    {
+      "id": "Scene#globe",
+      "field": "description",
+      "sourceHash": "sha256:cd0ef9ba8d34678b95584a56e610209146d9b0ac312e9f53fe9fcc3949dccab4",
+      "text": "获取或设置用于深度测试的椭球。"
+    },
+    {
+      "id": "Scene#globe",
+      "field": "exceptions/0/description",
+      "sourceHash": "sha256:311ce886bc4e0b163f996d76a5b57b3034f7989f57c4a759e7bc568f0a55c4eb",
+      "text": "非 Globe 世界处于活动状态时，不支持赋予已定义的 Globe。"
+    },
+    {
+      "id": "Scene#groundPrimitives",
+      "field": "description",
+      "sourceHash": "sha256:6a54b7d69e272eef4ec985a867c989c6db484c84663160618ee9037ecfb99a29",
+      "text": "获取贴地图元集合。"
+    },
+    {
+      "id": "Scene#highDynamicRange",
+      "field": "description",
+      "sourceHash": "sha256:0c26a265eda297717b26d45d463dea34fe68806f9363f99a152b5a15754f7a97",
+      "text": "是否使用高动态范围渲染。在延迟管线中，关闭此项会在显示输出时跳过曝光和色调映射，但仍保留线性浮点光照及透明度处理。LDR 输出会限制 RGB 范围并应用伽马校正。"
+    },
+    {
+      "id": "Scene#highDynamicRangeSupported",
+      "field": "description",
+      "sourceHash": "sha256:f0d04b1dd068d3d15671bf28960b189cf64f68431ca731000ba497d7c9114c2d",
+      "text": "是否支持高动态范围渲染。"
+    },
+    {
+      "id": "Scene#id",
+      "field": "description",
+      "sourceHash": "sha256:c33cbc0bf0c23163f034091f3f426fd50d87a3d54fe7470bef21275c74162ddc",
+      "text": "获取此场景的唯一标识符。"
+    },
+    {
+      "id": "Scene#invertClassification",
+      "field": "description",
+      "sourceHash": "sha256:707db3fe83b0a358193d9571e13d98b1e8bffd8e71c66ecaf867366396a7e532",
+      "text": "为 <code>false</code> 时，3D Tiles 正常渲染。为 <code>true</code> 时，已分类的 3D Tiles 几何体正常渲染，未分类几何体的颜色则乘以 {@link Scene#invertClassificationColor}。"
+    },
+    {
+      "id": "Scene#invertClassificationColor",
+      "field": "description",
+      "sourceHash": "sha256:3404e57b9efb2c3e278073ea20f4034fa279d3c4a9ea9bb6f8448b2f815f1fa2",
+      "text": "当 {@link Scene#invertClassification} 为 <code>true</code> 时，未分类 3D Tiles 几何体的高亮颜色。<p>当颜色的 alpha 小于 1.0 时，3D Tiles 的未分类部分无法与已分类部分正确混合。</p><p>此外，当颜色的 alpha 小于 1.0 时，必须支持 WEBGL_depth_texture 和 EXT_frag_depth WebGL 扩展。</p>"
+    },
+    {
+      "id": "Scene#invertClassificationSupported",
+      "field": "description",
+      "sourceHash": "sha256:b7ab534e782c724c15869fe60ef0c6e9d60a07d05d96679b042c3647fc301996",
+      "text": "若支持 {@link Scene#invertClassification}，则返回 <code>true</code>。"
+    },
+    {
+      "id": "Scene#isDestroyed",
+      "field": "description",
+      "sourceHash": "sha256:aea7b697937631c90ae3fc0ec55b81ba0ddc7abe4d6045848b2031f9bed60091",
+      "text": "若此对象已销毁，返回 true；否则返回 false。<br /><br />对象销毁后不应再使用；调用除 <code>isDestroyed</code> 以外的任何函数都会抛出 {@link DeveloperError}。"
+    },
+    {
+      "id": "Scene#lastRenderTime",
+      "field": "description",
+      "sourceHash": "sha256:3479b0500d0802d18c964069c92e30b3ec686b491bf6edc27637d1ef74886d4b",
+      "text": "获取场景上次渲染时的模拟时间。若场景尚未渲染过，则返回 <code>undefined</code>。"
+    },
+    {
+      "id": "Scene#light",
+      "field": "description",
+      "sourceHash": "sha256:09b7cf9d99567fef8ae9c717ef654cffe1e92f4af867924895caac55fd88a281",
+      "text": "用于着色的光源。默认使用来自太阳的方向光。"
+    },
+    {
+      "id": "Scene#logarithmicDepthBuffer",
+      "field": "description",
+      "sourceHash": "sha256:6a84553f12dc9f2d45e199c63c5e488926f0d26757d7913dda32ea9d34735627",
+      "text": "是否使用对数深度缓冲。启用后可减少多视锥中的视锥数量，从而提升性能。此属性依赖 fragmentDepth 支持。"
+    },
+    {
+      "id": "Scene#logarithmicDepthFarToNearRatio",
+      "field": "description",
+      "sourceHash": "sha256:92bcacfa0c41cec42685422ce3ab95765d60a740420c7ffcaa0da71f20420bd4",
+      "text": "使用对数深度缓冲时，多视锥的远近距离比。<p>此值用于生成多视锥中每个视锥的近平面和远平面距离。仅在 {@link Scene#logarithmicDepthBuffer} 为 <code>true</code> 时使用。若 <code>logarithmicDepthBuffer</code> 为 <code>false</code>，请使用 {@link Scene#farToNearRatio}。</p>"
+    },
+    {
+      "id": "Scene#mapMode2D",
+      "field": "description",
+      "sourceHash": "sha256:bfc4d5ea2b5c659aaddd5f30de802cf171b832cc1cdd0a84c46a7c233dae6d70",
+      "text": "决定二维地图是否可旋转或在水平方向无限滚动。"
+    },
+    {
+      "id": "Scene#mapProjection",
+      "field": "description",
+      "sourceHash": "sha256:56e2b2e52539e85d1a60d2be0615efad7700882fcced7375236a388b563896ff",
+      "text": "获取二维和哥伦布视图模式使用的地图投影。"
+    },
+    {
+      "id": "Scene#maximumAliasedLineWidth",
+      "field": "description",
+      "sourceHash": "sha256:edcd452822ded16805a1ca4af95f7665137ecd9edddaba2b4f03d7f1a49fae31",
+      "text": "此 WebGL 实现支持的最大非抗锯齿线宽，单位为像素，至少为 1。"
+    },
+    {
+      "id": "Scene#maximumCubeMapSize",
+      "field": "description",
+      "sourceHash": "sha256:ff0f3026d2558ab064f1e20e12b6d1a962d00877c28e928c672de45cf3fee8b3",
+      "text": "此 WebGL 实现支持的立方体贴图单条边的最大像素长度，至少为 16。"
+    },
+    {
+      "id": "Scene#maximumRenderTimeChange",
+      "field": "description",
+      "sourceHash": "sha256:763df9dd5458c6a46d9dfd0f61598310e3a6ffdd2ece9971b7cae6091785c7e3",
+      "text": "若 {@link Scene#requestRenderMode} 为 <code>true</code>，此值定义触发渲染请求前允许的最大模拟时间变化量。较小的值会增加渲染帧数，较大的值会减少渲染帧数。若为 <code>undefined</code>，模拟时间变化永远不会请求渲染。此值会影响光照、实体属性更新和动画等场景变化的渲染频率。"
+    },
+    {
+      "id": "Scene#minimumDisableDepthTestDistance",
+      "field": "description",
+      "sourceHash": "sha256:315bd81654e3a904f7b641c46e005c742f4cfdc0330ddab418386481491b673a",
+      "text": "距相机达到此距离时，禁用广告牌、标签和点的深度测试，例如防止被地形裁切。设为零时始终进行深度测试；小于零时始终不进行深度测试。广告牌、标签或点自身的 disableDepthTestDistance 属性会覆盖此值。"
+    },
+    {
+      "id": "Scene#mode",
+      "field": "description",
+      "sourceHash": "sha256:3b186fb0e8ca88bf0b54e2c133633d5f2f936b3b19926cc75c168600b95ad680",
+      "text": "获取或设置场景当前模式。"
+    },
+    {
+      "id": "Scene#moon",
+      "field": "description",
+      "sourceHash": "sha256:880b00fc82e719c5bdfcb4f50996830ae32ef0a18a260ce8fa516784285df95b",
+      "text": "月球对象 {@link Moon}。"
+    },
+    {
+      "id": "Scene#morphComplete",
+      "field": "description",
+      "sourceHash": "sha256:4d62154abe7a3720db39de305a8eee61ce851ac9064d64f280b66263d09cf34c",
+      "text": "场景过渡完成时触发的事件。"
+    },
+    {
+      "id": "Scene#morphStart",
+      "field": "description",
+      "sourceHash": "sha256:98baf35d8163957ea324c2bf9cd1337d9fcd5c215f83ff40f1ff1f5f0b554afa",
+      "text": "场景过渡开始时触发的事件。"
+    },
+    {
+      "id": "Scene#morphTime",
+      "field": "description",
+      "sourceHash": "sha256:224d8a3e44598bfcb1ff52ece8be01ab6dfb9c73c9c3850d5ed8be8903198d2c",
+      "text": "二维/哥伦布视图与三维之间的当前形变过渡进度，0.0 表示二维或哥伦布视图，1.0 表示三维。"
+    },
+    {
+      "id": "Scene#morphTo2D",
+      "field": "description",
+      "sourceHash": "sha256:e34809954623769f7d18354093bccfd8bd8485caa1c8c6656955960271157342",
+      "text": "异步将场景切换为二维模式。"
+    },
+    {
+      "id": "Scene#morphTo2D",
+      "field": "params/duration/description",
+      "sourceHash": "sha256:8f6ad49e143e4c7945c2f7e6529e201b92d9ac81c8c52c4ee4cbc0298542c7d0",
+      "text": "过渡动画完成所需的时间，单位为秒。"
+    },
+    {
+      "id": "Scene#morphTo3D",
+      "field": "description",
+      "sourceHash": "sha256:aebe7f208f07337058b18d84611c6ff0a065d92c8eee97aef3e52abb90bfd949",
+      "text": "异步将场景切换为三维模式。"
+    },
+    {
+      "id": "Scene#morphTo3D",
+      "field": "params/duration/description",
+      "sourceHash": "sha256:8f6ad49e143e4c7945c2f7e6529e201b92d9ac81c8c52c4ee4cbc0298542c7d0",
+      "text": "过渡动画完成所需的时间，单位为秒。"
+    },
+    {
+      "id": "Scene#morphToColumbusView",
+      "field": "description",
+      "sourceHash": "sha256:97914bc79113284468d3b700a030657adc63a7c007a89e51f50f7a45b23ceff1",
+      "text": "异步将场景切换为哥伦布视图。"
+    },
+    {
+      "id": "Scene#morphToColumbusView",
+      "field": "params/duration/description",
+      "sourceHash": "sha256:8f6ad49e143e4c7945c2f7e6529e201b92d9ac81c8c52c4ee4cbc0298542c7d0",
+      "text": "过渡动画完成所需的时间，单位为秒。"
+    },
+    {
+      "id": "Scene#msaaSamples",
+      "field": "description",
+      "sourceHash": "sha256:8fd590b431e4d1b300b362223e8caed0eb462340da6ad608731acfb41209c70f",
+      "text": "多重采样抗锯齿的采样率，大于 1 时启用 MSAA。SceneGIS 延迟渲染不接受多重采样；请使用 FXAA 或时间抗锯齿。"
+    },
+    {
+      "id": "Scene#msaaSupported",
+      "field": "description",
+      "sourceHash": "sha256:f1548b4239e3706f72669578a6dc3baa32ac3c9dce2b35800b1fa386aca22a25",
+      "text": "若 Scene 的上下文支持 MSAA，则返回 <code>true</code>。"
+    },
+    {
+      "id": "Scene#nearToFarDistance2D",
+      "field": "description",
+      "sourceHash": "sha256:45cbba58412294a128508353b59401f0d7912946a10b425bedbf82653cbbcb20",
+      "text": "二维模式下，多视锥中每个视锥的统一深度范围，单位为米。如果贴近表面的图元或模型出现深度冲突，减小此值可消除伪影，但会降低性能。增大此值则可提升性能，但可能使贴近表面的图元之间出现深度冲突。"
+    },
+    {
+      "id": "Scene#orderIndependentTranslucency",
+      "field": "description",
+      "sourceHash": "sha256:87c2a02d3089eef615be3de06146d7e303db201eac9dbdabd91ac090ed331c51",
+      "text": "获取场景是否启用了顺序无关透明。此值仅反映最初的构造选项；在特定系统配置中，还可能有其他因素导致 OIT 无法工作。"
+    },
+    {
+      "id": "Scene#pick",
+      "field": "params/height/description",
+      "sourceHash": "sha256:c41b18690dccb33d164e6d8664d096ca16fa570f575720daf2ba838e60c90f30",
+      "text": "拾取矩形的高度。"
+    },
+    {
+      "id": "Scene#pick",
+      "field": "params/width/description",
+      "sourceHash": "sha256:c927999f6540d8ab81cdf906d6a53e66c60543991977df5b49f10ce90ec6434e",
+      "text": "拾取矩形的宽度。"
+    },
+    {
+      "id": "Scene#pick",
+      "field": "params/windowPosition/description",
+      "sourceHash": "sha256:4dae94b58a739cd049e484e3e87a643617a16ee046a61a035e33163fd8524799",
+      "text": "执行拾取的窗口坐标。"
+    },
+    {
+      "id": "Scene#pick",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:9910f5a0de0c54179a4c3f908b2430e14d652825f892d23c1c8bfe2799446f1a",
+      "text": "包含拾取图元的对象；若该位置没有对象，则返回 <code>undefined</code>。"
+    },
+    {
+      "id": "Scene#pickAsync",
+      "field": "description",
+      "sourceHash": "sha256:1293b200cd2b9f4d155c598d1e755bf07b8ff95abdacc41de663768a264a7558",
+      "text": "执行与 Scene.pick 相同的操作，但以异步方式进行，不阻塞主渲染线程。需要 WebGL2，否则使用回退实现。"
+    },
+    {
+      "id": "Scene#pickAsync",
+      "field": "params/height/description",
+      "sourceHash": "sha256:c41b18690dccb33d164e6d8664d096ca16fa570f575720daf2ba838e60c90f30",
+      "text": "拾取矩形的高度。"
+    },
+    {
+      "id": "Scene#pickAsync",
+      "field": "params/width/description",
+      "sourceHash": "sha256:c927999f6540d8ab81cdf906d6a53e66c60543991977df5b49f10ce90ec6434e",
+      "text": "拾取矩形的宽度。"
+    },
+    {
+      "id": "Scene#pickAsync",
+      "field": "params/windowPosition/description",
+      "sourceHash": "sha256:4dae94b58a739cd049e484e3e87a643617a16ee046a61a035e33163fd8524799",
+      "text": "执行拾取的窗口坐标。"
+    },
+    {
+      "id": "Scene#pickAsync",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:9910f5a0de0c54179a4c3f908b2430e14d652825f892d23c1c8bfe2799446f1a",
+      "text": "包含拾取图元的对象；若该位置没有对象，则返回 <code>undefined</code>。"
+    },
+    {
+      "id": "Scene#pickMetadata",
+      "field": "description",
+      "sourceHash": "sha256:fe5803690816db3d572d0b55355a536ab4a25e82e3994b81e90ff9b4ec4f2082",
+      "text": "拾取给定窗口位置处的元数据值。"
+    },
+    {
+      "id": "Scene#pickMetadata",
+      "field": "params/className/description",
+      "sourceHash": "sha256:10fe4de36682a2a579866360be12371eefcda6296e2919ae9f1b1b4678a7c26c",
+      "text": "要拾取其属性值的元数据类名称。"
+    },
+    {
+      "id": "Scene#pickMetadata",
+      "field": "params/propertyName/description",
+      "sourceHash": "sha256:ab59c8031212ea870f5d3872afaa61215687741b4002cd2bb04abf936c335d17",
+      "text": "要拾取其值的元数据属性名称。"
+    },
+    {
+      "id": "Scene#pickMetadata",
+      "field": "params/schemaId/description",
+      "sourceHash": "sha256:d747f813b44debd6cb2b694ae5428a2e657854039b475e645c4186f7e810274a",
+      "text": "要从中拾取值的元数据模式 ID。若为 <code>undefined</code>，则不考虑模式 ID，只从匹配给定类名和属性名的对象中拾取值。"
+    },
+    {
+      "id": "Scene#pickMetadata",
+      "field": "params/windowPosition/description",
+      "sourceHash": "sha256:4dae94b58a739cd049e484e3e87a643617a16ee046a61a035e33163fd8524799",
+      "text": "执行拾取的窗口坐标。"
+    },
+    {
+      "id": "Scene#pickMetadata",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:b05bd370cb77caeb3b529cbeb2d82857542667f8c8cea7fa2815d272fcd4bec4",
+      "text": "元数据值；若给定位置未找到匹配元数据，则返回 <code>undefined</code>。"
+    },
+    {
+      "id": "Scene#pickMetadataSchema",
+      "field": "description",
+      "sourceHash": "sha256:82547cd6879901ab2faebb8b0fc622e8321c2838d4718038fac135346a18fc45",
+      "text": "拾取给定位置处对象的元数据模式。"
+    },
+    {
+      "id": "Scene#pickMetadataSchema",
+      "field": "params/windowPosition/description",
+      "sourceHash": "sha256:4dae94b58a739cd049e484e3e87a643617a16ee046a61a035e33163fd8524799",
+      "text": "执行拾取的窗口坐标。"
+    },
+    {
+      "id": "Scene#pickMetadataSchema",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:ed57e1bcb43819c424be43f40fbeb116c856fe8c8e41163c35b5c08e39f72b29",
+      "text": "元数据模式；若给定位置没有带关联元数据的对象，则返回 <code>undefined</code>。"
+    },
+    {
+      "id": "Scene#pickPosition",
+      "field": "exceptions/0/description",
+      "sourceHash": "sha256:4052da6137c61cfd481cc487e5bd9974cac4d8709f7964d4be081b9e023d5642",
+      "text": "不支持从深度缓冲中拾取。请检查 pickPositionSupported。"
+    },
+    {
+      "id": "Scene#pickPosition",
+      "field": "params/result/description",
+      "sourceHash": "sha256:6824b0f5c43e9912c962f8d23666fa9d0bd547c965425c4170ab7bbe4a187796",
+      "text": "用于保存结果的对象。"
+    },
+    {
+      "id": "Scene#pickPosition",
+      "field": "params/windowPosition/description",
+      "sourceHash": "sha256:4dae94b58a739cd049e484e3e87a643617a16ee046a61a035e33163fd8524799",
+      "text": "执行拾取的窗口坐标。"
+    },
+    {
+      "id": "Scene#pickPosition",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:3713eea7f8a91a47e6c4a4ca37d7fafab515991a8692ab90bb435aab6628b49f",
+      "text": "笛卡尔坐标位置。"
+    },
+    {
+      "id": "Scene#pickPositionSupported",
+      "field": "description",
+      "sourceHash": "sha256:7aa1588d8874621eb714088cb7f855580415b56f44837f69cb7e25bd4d08bb39",
+      "text": "若支持 {@link Scene#pickPosition} 函数，则返回 <code>true</code>。"
+    },
+    {
+      "id": "Scene#pickTranslucentDepth",
+      "field": "description",
+      "sourceHash": "sha256:c6b878457a23c71bdd2cee77728129b3cbfa2049ebdeb8e8948734b78db9133d",
+      "text": "为 <code>true</code> 时，启用使用深度缓冲拾取半透明几何体。要使此功能生效，{@link Scene#useDepthPicking} 也必须为 true。<p>启用后会降低性能，因为需要额外的绘制调用来写入半透明几何体的深度。</p>"
+    },
+    {
+      "id": "Scene#pickVoxel",
+      "field": "description",
+      "sourceHash": "sha256:d1b8a27a63996eea1c3a910cdd0dab719a49f85e813e3bcd50e82a5bf527f48e",
+      "text": "返回指定窗口坐标处渲染的体素样本所对应的 {@link VoxelCell}；若该位置未渲染体素，则返回 <code>undefined</code>。"
+    },
+    {
+      "id": "Scene#pickVoxel",
+      "field": "params/height/description",
+      "sourceHash": "sha256:c41b18690dccb33d164e6d8664d096ca16fa570f575720daf2ba838e60c90f30",
+      "text": "拾取矩形的高度。"
+    },
+    {
+      "id": "Scene#pickVoxel",
+      "field": "params/width/description",
+      "sourceHash": "sha256:c927999f6540d8ab81cdf906d6a53e66c60543991977df5b49f10ce90ec6434e",
+      "text": "拾取矩形的宽度。"
+    },
+    {
+      "id": "Scene#pickVoxel",
+      "field": "params/windowPosition/description",
+      "sourceHash": "sha256:4dae94b58a739cd049e484e3e87a643617a16ee046a61a035e33163fd8524799",
+      "text": "执行拾取的窗口坐标。"
+    },
+    {
+      "id": "Scene#pickVoxel",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:9910126c1724ad4037fb0cd2dce8c7b80b7e8552a5e3adc8a0e95f7498456c08",
+      "text": "拾取位置处渲染的体素单元信息；若该位置未渲染体素，则返回 <code>undefined</code>。"
+    },
+    {
+      "id": "Scene#postProcessStages",
+      "field": "description",
+      "sourceHash": "sha256:e8e2413fc848a77f1694725e5c205b5df2601d17b3e2d8687cd17cd77bc622d3",
+      "text": "应用于最终渲染结果的后处理效果。"
+    },
+    {
+      "id": "Scene#postRender",
+      "field": "description",
+      "sourceHash": "sha256:978896d776bdfb73770ddffa68e6a1ee4c84942e2877a1dcd474d48cc1949c3e",
+      "text": "获取场景渲染完成后立即触发的事件。订阅者接收的第一个参数为 Scene 实例，第二个参数为当前时间。"
+    },
+    {
+      "id": "Scene#postUpdate",
+      "field": "description",
+      "sourceHash": "sha256:e680d73ba1e61dfbd48ad139f89e21995a9483bfc4f70cbaf59c5aed09d31ab8",
+      "text": "获取场景更新完成后、渲染之前立即触发的事件。订阅者接收的第一个参数为 Scene 实例，第二个参数为当前时间。"
+    },
+    {
+      "id": "Scene#preRender",
+      "field": "description",
+      "sourceHash": "sha256:faa5b7b7dd6edbc0448b52b488e4cc884b1c432142980b796ed02cdda98f271b",
+      "text": "获取场景更新完成后、开始渲染前立即触发的事件。订阅者接收的第一个参数为 Scene 实例，第二个参数为当前时间。"
+    },
+    {
+      "id": "Scene#preUpdate",
+      "field": "description",
+      "sourceHash": "sha256:5baf3c4cd1969763825a559a6f55ca01dfecd3d1ea2ce4251dc465dc1484c295",
+      "text": "获取场景更新或渲染之前触发的事件。订阅者接收的第一个参数为 Scene 实例，第二个参数为当前时间。"
+    },
+    {
+      "id": "Scene#render",
+      "field": "description",
+      "sourceHash": "sha256:f8926318c82001e171bd458b37d463267aff6a415e969e9b479cbde4d41a53bb",
+      "text": "更新并渲染场景。通常无需直接调用，因为 {@link CesiumWidget} 会自动执行。"
+    },
+    {
+      "id": "Scene#render",
+      "field": "params/time/description",
+      "sourceHash": "sha256:d03bd21908461b12e3f11211196cd27f174c22c9b96e5a5c98d10bfca5cc8143",
+      "text": "要渲染的模拟时间。"
+    },
+    {
+      "id": "Scene#renderError",
+      "field": "description",
+      "sourceHash": "sha256:4e31e679f311ec685d2b5e11a3e7374bf915a7d28f410348a09817ddd8e80605",
+      "text": "获取在 <code>render</code> 函数内部抛出错误时触发的事件。事件处理器仅接收 Scene 实例和所抛出的错误两个参数。默认在触发此事件后不再重新抛出错误；可通过设置 <code>rethrowRenderErrors</code> 属性改变此行为。"
+    },
+    {
+      "id": "Scene#requestRenderMode",
+      "field": "description",
+      "sourceHash": "sha256:4779cbd3260a7a740e88d704b7ead3489dec03d6bd610c6e2786814ea71b2d40",
+      "text": "为 <code>true</code> 时，仅在场景变化判定有需要时渲染一帧。启用后可提升应用性能，但在此模式下需要使用 {@link Scene#requestRender} 显式请求渲染新帧。通过其他 API 修改场景后，许多情况下都需要这样做。"
+    },
+    {
+      "id": "Scene#rethrowRenderErrors",
+      "field": "description",
+      "sourceHash": "sha256:e381ff1cae0db632159b485eb20298f080050c83ea82158913e5e45ff0f4c9fa",
+      "text": "为触发 <code>renderError</code> 事件，<code>render</code> 中发生的异常总会被捕获。此属性为 true 时，触发事件后会重新抛出错误；为 false 时，<code>render</code> 函数在触发事件后正常返回。"
+    },
+    {
+      "id": "Scene#sampleHeight",
+      "field": "description",
+      "sourceHash": "sha256:1581de84395376ec27e3572a5b1e6813b925502f01e610a8da48f45f3d4ccd61",
+      "text": "返回给定地理坐标位置处场景几何体的高度；若没有可采样高度的场景几何体，则返回 <code>undefined</code>。输入位置的高度会被忽略。可用于将对象贴合到地球、3D Tiles 或场景中的图元。<p>此函数仅从当前视图中渲染的地球瓦片和 3D Tiles 采样高度。对于其他所有图元，无论其是否可见，都会参与高度采样。</p>"
+    },
+    {
+      "id": "Scene#sampleHeight",
+      "field": "exceptions/0/description",
+      "sourceHash": "sha256:df903c1aeea794a4cf4f30ec951f7694a307e3ecb15769e0de140710bef7bda8",
+      "text": "sampleHeight 仅支持三维模式。"
+    },
+    {
+      "id": "Scene#sampleHeight",
+      "field": "exceptions/1/description",
+      "sourceHash": "sha256:e6bd99fb7fe6e978c71a4ae2f92acfdb441aba4732cf14270ed3e1a7e3fd5fd4",
+      "text": "sampleHeight 需要深度纹理支持。请检查 sampleHeightSupported。"
+    },
+    {
+      "id": "Scene#sampleHeight",
+      "field": "exceptions/2/description",
+      "sourceHash": "sha256:724b7f90847a9ed7be3ddb25b15a6138b986c0930794ccdd0086119f7c6abbcf",
+      "text": "主世界不是 Globe 时，不支持 sampleHeight。"
+    },
+    {
+      "id": "Scene#sampleHeight",
+      "field": "params/objectsToExclude/description",
+      "sourceHash": "sha256:ae576684620cbba5cabb49814dfe63136e6b2bfc02aa9122f04b4ef19ae20168",
+      "text": "高度采样时排除的图元、实体或 3D Tiles 要素列表。"
+    },
+    {
+      "id": "Scene#sampleHeight",
+      "field": "params/position/description",
+      "sourceHash": "sha256:efe97bef9f8257a477971bdbb1c9d3408c562fa38b2d4e8c31876072d4e43cfb",
+      "text": "要采样高度的地理坐标位置。"
+    },
+    {
+      "id": "Scene#sampleHeight",
+      "field": "params/width/description",
+      "sourceHash": "sha256:4de6eae8767af9bd6ae6c3843ff02e351d8be47b7cc344856fd459518fc62b64",
+      "text": "求交体积的宽度，单位为米。"
+    },
+    {
+      "id": "Scene#sampleHeight",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:675bfb89f7c07da8423c4470ce7a07cd4a81142615e70f79ed1cf7ea73d0b7cb",
+      "text": "高度。若没有可采样高度的场景几何体，可能为 <code>undefined</code>。"
+    },
+    {
+      "id": "Scene#sampleHeightMostDetailed",
+      "field": "description",
+      "sourceHash": "sha256:7f6d3bf24028c0659f1ef37a346f7bb8420369898a4a5bfe9ff74cd42415959e",
+      "text": "针对一组 {@link Cartographic} 位置发起异步 {@link Scene#sampleHeight} 查询，使用场景中 3D Tiles 瓦片集的最高细节级别。输入位置的高度会被忽略。返回在查询完成时兑现的 Promise，并原地修改每个点的高度。若某个位置由于无法采样到几何体或发生其他错误而无法确定高度，其高度会设为 <code>undefined</code>。"
+    },
+    {
+      "id": "Scene#sampleHeightMostDetailed",
+      "field": "exceptions/0/description",
+      "sourceHash": "sha256:0cf4e4877503ff02596f641e55a1ad636228d3891bba5a63348c48ffc663cbf9",
+      "text": "sampleHeightMostDetailed 仅支持三维模式。"
+    },
+    {
+      "id": "Scene#sampleHeightMostDetailed",
+      "field": "exceptions/1/description",
+      "sourceHash": "sha256:b0befbb91b6044f168d9748f73cd45787f8b35ae04fc2d25b95cb6a1dd15da14",
+      "text": "sampleHeightMostDetailed 需要深度纹理支持。请检查 sampleHeightSupported。"
+    },
+    {
+      "id": "Scene#sampleHeightMostDetailed",
+      "field": "exceptions/2/description",
+      "sourceHash": "sha256:51956c989852eb9462dee74acb30a644dd0e4ef1f67b9c9407be29d1e54a2230",
+      "text": "主世界不是 Globe 时，不支持 sampleHeightMostDetailed。"
+    },
+    {
+      "id": "Scene#sampleHeightMostDetailed",
+      "field": "params/objectsToExclude/description",
+      "sourceHash": "sha256:ae576684620cbba5cabb49814dfe63136e6b2bfc02aa9122f04b4ef19ae20168",
+      "text": "高度采样时排除的图元、实体或 3D Tiles 要素列表。"
+    },
+    {
+      "id": "Scene#sampleHeightMostDetailed",
+      "field": "params/positions/description",
+      "sourceHash": "sha256:a325eaa1f0411ed4a496b91dfab2de6fa3bc513dd2c1bedcd05fd6b9ea16d6dc",
+      "text": "需要更新为采样高度的地理坐标数组。"
+    },
+    {
+      "id": "Scene#sampleHeightMostDetailed",
+      "field": "params/width/description",
+      "sourceHash": "sha256:4de6eae8767af9bd6ae6c3843ff02e351d8be47b7cc344856fd459518fc62b64",
+      "text": "求交体积的宽度，单位为米。"
+    },
+    {
+      "id": "Scene#sampleHeightMostDetailed",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:4a1da9de054a288324bf0a121ef5e5009b5d11585f4123fc15bfe31b37cb59b0",
+      "text": "查询完成后兑现为传入位置列表的 Promise。无法确定高度的位置可能变为 <code>undefined</code>。"
+    },
+    {
+      "id": "Scene#sampleHeightSupported",
+      "field": "description",
+      "sourceHash": "sha256:ce0a7b3512fd878bb52635f26241fd291a2e2db86903f1fccfe0ff8d0e7ed9d5",
+      "text": "若支持 {@link Scene#sampleHeight} 和 {@link Scene#sampleHeightMostDetailed} 函数，则返回 <code>true</code>。"
+    },
+    {
+      "id": "Scene#scene3DOnly",
+      "field": "description",
+      "sourceHash": "sha256:59884e3eabf212b2e52d1e130f88f37f9bd7e88ab43fdce6ae9c9b9b4f2b1bad",
+      "text": "获取场景是否已针对仅三维浏览进行优化。"
+    },
+    {
+      "id": "Scene#screenSpaceCameraController",
+      "field": "description",
+      "sourceHash": "sha256:2564aab41fec55dda1a52757a92daf3270773bbd9c0eaac906a91bac3f161a2b",
+      "text": "获取处理相机输入的控制器。"
+    },
+    {
+      "id": "Scene#setTerrain",
+      "field": "description",
+      "sourceHash": "sha256:3567bf4a0bbe03c2fab41e8524820ad69249dda22506a72d8f8af00847f1b846",
+      "text": "更新为地球提供表面几何体的地形。"
+    },
+    {
+      "id": "Scene#setTerrain",
+      "field": "params/terrain/description",
+      "sourceHash": "sha256:2f66b470d09be660867a1f9ab74ba90dd732cf2cb06685df71e570390fb97bae",
+      "text": "地形提供者的异步辅助对象。"
+    },
+    {
+      "id": "Scene#setTerrain",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:857d7bbc9001fd7b1553516f1bbd0c66eb8e667d3a616c6089445b8b0a7c5311",
+      "text": "terrain 地形提供者的异步辅助对象。"
+    },
+    {
+      "id": "Scene#shadowMap",
+      "field": "description",
+      "sourceHash": "sha256:756a3feda5f01256c33ed998346483c073c71b0b4177fd1441d05d36892ff5c5",
+      "text": "场景光源的阴影贴图。启用后，模型、图元和地球可以投射及接收阴影。"
+    },
+    {
+      "id": "Scene#skyAtmosphere",
+      "field": "description",
+      "sourceHash": "sha256:02bace84079e0bebb8901587b2e585efdccf4ed29c7ae0e0e4d43abd5e14589b",
+      "text": "绘制在地球周围的天空大气。"
+    },
+    {
+      "id": "Scene#skyBox",
+      "field": "description",
+      "sourceHash": "sha256:b628796eecbaf15ab570922c556eccfce93e6162e1c6fd5ee21de32d68df0479",
+      "text": "用于绘制星空的 {@link SkyBox}。"
+    },
+    {
+      "id": "Scene#snap",
+      "field": "description",
+      "sourceHash": "sha256:de50cf21fcea7fb3f4b516c5367a70593aaa1649e32a5359f40bf44c91a981d9",
+      "text": "返回 <code>windowPosition</code> 周围屏幕空间区域内的最佳捕捉目标。边缘优先于表面；同类命中中距光标最近者优先。若区域内没有可捕捉几何体，则返回 <code>undefined</code>。<p>仅通过 Model 管线渲染的图元（例如 3D Tiles 和 glTF 模型）可参与捕捉。捕捉需要浮点颜色附件（WebGL2 及 <code>EXT_color_buffer_float</code>）；若不支持，此函数返回 <code>undefined</code>。</p>"
+    },
+    {
+      "id": "Scene#snap",
+      "field": "params/options.height/description",
+      "sourceHash": "sha256:f7d715edbd6558281d822e0d12f4fc805762f27853cc06a0ea4dad8e0fbccbb0",
+      "text": "搜索区域的高度，单位为像素。"
+    },
+    {
+      "id": "Scene#snap",
+      "field": "params/options.width/description",
+      "sourceHash": "sha256:98688b0cdf7beff33f9d41a6731001ad48b840c0663bc50eee9a3a39ffdab08e",
+      "text": "搜索区域的宽度，单位为像素。"
+    },
+    {
+      "id": "Scene#snap",
+      "field": "params/windowPosition/description",
+      "sourceHash": "sha256:1735f8b888331d8813be3b7bd3294e6a6b42efc42f2e8e55b8d535b9c6218603",
+      "text": "搜索区域中心的窗口坐标。"
+    },
+    {
+      "id": "Scene#snap",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:0d9a4dcceb56fa6180f95bcd04c21191a13b440509d5c45cbed4ddf864a992ab",
+      "text": "区域内的最佳捕捉目标；若没有，则返回 <code>undefined</code>。"
+    },
+    {
+      "id": "Scene#specularEnvironmentMaps",
+      "field": "description",
+      "sourceHash": "sha256:63f88a5cfa1dcf4a024517401f76909401bf98e81f977d529a9baa205603f942",
+      "text": "KTX2 文件的 URL，其中包含用于 PBR 模型基于图像照明的镜面环境贴图及经过卷积处理的 mipmap。"
+    },
+    {
+      "id": "Scene#specularEnvironmentMapsSupported",
+      "field": "description",
+      "sourceHash": "sha256:f6df3a9cb00452470e9f2ab466dd76797e6b7a5559e9cbd23fcc40047db91f97",
+      "text": "若支持镜面环境贴图，则返回 <code>true</code>。"
+    },
+    {
+      "id": "Scene#sphericalHarmonicCoefficients",
+      "field": "description",
+      "sourceHash": "sha256:95803300095b2eb5b1f14c5242d00bd75737f0daccfc5b0629ea093146dc0920",
+      "text": "用于 PBR 模型基于图像照明的球谐系数。"
+    },
+    {
+      "id": "Scene#splitPosition",
+      "field": "description",
+      "sourceHash": "sha256:21d0ce5ec459a5f18c8db1d5d8c141d134fd1144e23612856507122ffdcbab43",
+      "text": "获取或设置视口中的分屏位置，有效范围为 0.0 至 1.0。对于 LEFT/RIGHT，0 表示左边缘，1 表示右边缘；对于 TOP/BOTTOM，0 表示上边缘，1 表示下边缘。"
+    },
+    {
+      "id": "Scene#sun",
+      "field": "description",
+      "sourceHash": "sha256:08db636debb77cf1d3e59961860cb9528691602b560d97859648841e71ceb8b6",
+      "text": "太阳对象 {@link Sun}。"
+    },
+    {
+      "id": "Scene#sunBloom",
+      "field": "description",
+      "sourceHash": "sha256:c9ba6170a01a645a663c6628710fbbb92e0514a19e428c937a9e0f8aa33d8623",
+      "text": "启用后对太阳应用泛光滤镜。"
+    },
+    {
+      "id": "Scene#terrainProvider",
+      "field": "description",
+      "sourceHash": "sha256:84adfdd09110fce100d0673344254184bc801f6a218333166fb8a5a02a7669ca",
+      "text": "为地球提供表面几何体的地形提供者。"
+    },
+    {
+      "id": "Scene#terrainProviderChanged",
+      "field": "description",
+      "sourceHash": "sha256:10d953b8f8931b243cd017c6e1ebd9297b865e63311eccda70b541c32da51608",
+      "text": "获取更改地形提供者时触发的事件。"
+    },
+    {
+      "id": "Scene#useDepthPicking",
+      "field": "description",
+      "sourceHash": "sha256:21cb5c05fa4b37fba718dc31c7bd4deef744dfe628f9e2747f743faf725f2db1",
+      "text": "为 <code>true</code> 时，启用基于深度缓冲的拾取。"
+    },
+    {
+      "id": "Scene#useWebVR",
+      "field": "description",
+      "sourceHash": "sha256:19abdb401fefaa69987cda1bb4e73bcaa1ea9950a53f9fbdbfafeea5c45f687b",
+      "text": "为 <code>true</code> 时，将场景分为两个视口，分别显示左眼和右眼的立体视图。用于 Cardboard 和 WebVR。"
+    },
+    {
+      "id": "Scene#verticalExaggeration",
+      "field": "description",
+      "sourceHash": "sha256:9ec3abb10ad403ce71a6d52e1784df790a13441a33a2b9f806e2e23af1fe6a43",
+      "text": "场景的垂直夸张倍数。设为 1.0 时不进行夸张。"
+    },
+    {
+      "id": "Scene#verticalExaggerationRelativeHeight",
+      "field": "description",
+      "sourceHash": "sha256:3515b13974d0b72536f8000f118a2eee7edda73eaeed9c9c1ddf7502c3d63d87",
+      "text": "场景垂直夸张的参考高度。设为 0.0 时，相对于椭球表面进行夸张。"
+    },
+    {
+      "id": "Scene#world",
+      "field": "description",
+      "sourceHash": "sha256:3111c3a6dcfb7d0e6e8ad2bd8fc470091ddccd02975d95bab6fc55d1a4b67867",
+      "text": "获取此场景拥有的主世界。"
+    },
+    {
+      "id": "Viewer.ConstructorOptions",
+      "field": "description",
+      "sourceHash": "sha256:b2fb49f2007035084107ae5286f8a044ff9886e82624c21800d13be384caea16",
+      "text": "Viewer 构造函数的初始化选项。"
+    },
+    {
+      "id": "Viewer.ConstructorOptions",
+      "field": "properties/animation/description",
+      "sourceHash": "sha256:d3aa7ac837b68e73c50e7457e1b30cf1dfa2d7c8ecc2daf966c067c445ab4384",
+      "text": "设为 false 时，不创建 Animation 控件。"
+    },
+    {
+      "id": "Viewer.ConstructorOptions",
+      "field": "properties/automaticallyTrackDataSourceClocks/description",
+      "sourceHash": "sha256:f2e84af110db20b65d486f69143f82ec525d99ecb6b6b8476e984493e20e482e",
+      "text": "为 true 时，此控件自动跟踪新加入 DataSource 的时钟设置，并在其时钟变化时更新。若要独立配置时钟，请设为 false。"
+    },
+    {
+      "id": "Viewer.ConstructorOptions",
+      "field": "properties/baseLayer/description",
+      "sourceHash": "sha256:17112ff0214253b09e5f0971e98ac10dc09eeeb32d6f6d2b28627f90dd43c84f",
+      "text": "应用于地球的最底层影像图层。设为 <code>false</code> 时不添加影像提供者。仅当 `baseLayerPicker` 为 false 时有效，且不能在 `globe` 为 false 时使用。"
+    },
+    {
+      "id": "Viewer.ConstructorOptions",
+      "field": "properties/baseLayerPicker/description",
+      "sourceHash": "sha256:e6bb77589407bcee13b36c3ea205e6c80503a00e6d2832a26473751cda1559fa",
+      "text": "设为 false 时，不创建 BaseLayerPicker 控件。"
+    },
+    {
+      "id": "Viewer.ConstructorOptions",
+      "field": "properties/blurActiveElementOnCanvasFocus/description",
+      "sourceHash": "sha256:4ca238c74aa33dd616259fd0a6ff6f65a557ed6971c05a3baaf163faab0e21d1",
+      "text": "为 true 时，单击 Viewer 的 canvas 会使当前活动元素失去焦点。若单击 canvas 只是为了获取位置或实体数据，并非要使 canvas 成为活动元素，可将此项设为 false。"
+    },
+    {
+      "id": "Viewer.ConstructorOptions",
+      "field": "properties/clockViewModel/description",
+      "sourceHash": "sha256:93989426fabcbd73d555cf8a51238dcbde3e3fbb20f2039e2d19f9a532ae2f84",
+      "text": "用于控制当前时间的时钟视图模型。"
+    },
+    {
+      "id": "Viewer.ConstructorOptions",
+      "field": "properties/contextOptions/description",
+      "sourceHash": "sha256:85270bcfbcd919ea505041bcba1f6f39638ab9eac2abaf15c37aa95f41c51705",
+      "text": "传给 {@link Scene} 的上下文及 WebGL 创建属性。"
+    },
+    {
+      "id": "Viewer.ConstructorOptions",
+      "field": "properties/creditContainer/description",
+      "sourceHash": "sha256:f8e6bd175bdc26b72cfe764236cd7ce10594d1028b4cab0f3b517cd30da85dd9",
+      "text": "容纳 {@link CreditDisplay} 的 DOM 元素或其 ID。若未指定，则将版权信息添加到控件自身的底部。"
+    },
+    {
+      "id": "Viewer.ConstructorOptions",
+      "field": "properties/creditViewport/description",
+      "sourceHash": "sha256:747ea886b5816ae647d97f99b4947876898c29bca090072be00577a93d986eac",
+      "text": "容纳 {@link CreditDisplay} 所创建版权弹窗的 DOM 元素或其 ID。若未指定，弹窗显示在控件本身上方。"
+    },
+    {
+      "id": "Viewer.ConstructorOptions",
+      "field": "properties/dataSources/description",
+      "sourceHash": "sha256:e24813eeed896e5a450e085b3c95f23d1c878808efe6b945195513a0ed2f13be",
+      "text": "由此控件可视化的数据源集合。若提供此参数，则视为该实例归调用者所有，Viewer 销毁时不会销毁此集合。"
+    },
+    {
+      "id": "Viewer.ConstructorOptions",
+      "field": "properties/depthPlaneEllipsoidOffset/description",
+      "sourceHash": "sha256:d909c88d6e9d9523cde2e76cbc7373f82f2e21e2d269554b6fc767d42e2fe8d8",
+      "text": "调整 DepthPlane，以解决椭球零高程以下的渲染伪影。"
+    },
+    {
+      "id": "Viewer.ConstructorOptions",
+      "field": "properties/ellipsoid/description",
+      "sourceHash": "sha256:11cf2509681ecbaa94d721b2ebad91e5b4cae7e51520ac2bf204ac8f2531e468",
+      "text": "默认椭球。"
+    },
+    {
+      "id": "Viewer.ConstructorOptions",
+      "field": "properties/fullscreenButton/description",
+      "sourceHash": "sha256:8477e7836971f751d0633a874d01b83a919c025628acfbd51f7a74f7d5aa0770",
+      "text": "设为 false 时，不创建 FullscreenButton 控件。"
+    },
+    {
+      "id": "Viewer.ConstructorOptions",
+      "field": "properties/fullscreenElement/description",
+      "sourceHash": "sha256:9ef8f487e09d5136eb582be4b01a208bd272b41673b5747aa8e4ad15d1af3fa5",
+      "text": "按下全屏按钮时进入全屏模式的元素或其 ID。"
+    },
+    {
+      "id": "Viewer.ConstructorOptions",
+      "field": "properties/geocoder/description",
+      "sourceHash": "sha256:e3b8bbdace22a8714c851d79fd5393900a0bfd289e52838a87e100d412a75807",
+      "text": "Geocoder 控件搜索时使用的一个或多个地理编码服务。设为 false 时，不创建 Geocoder 控件。"
+    },
+    {
+      "id": "Viewer.ConstructorOptions",
+      "field": "properties/globe/description",
+      "sourceHash": "sha256:f1ad07b4dec8fdc7ed4512c2eb723dea38809a265061588a0bdd92972657d8aa",
+      "text": "场景使用的地球对象。设为 <code>false</code> 时不添加地球，并默认隐藏天空大气。"
+    },
+    {
+      "id": "Viewer.ConstructorOptions",
+      "field": "properties/homeButton/description",
+      "sourceHash": "sha256:5bb2132212310c2aecebde06ce2e87623d3403348a3247e041467d75b421eee8",
+      "text": "设为 false 时，不创建 HomeButton 控件。"
+    },
+    {
+      "id": "Viewer.ConstructorOptions",
+      "field": "properties/imageryProviderViewModels/description",
+      "sourceHash": "sha256:39d90eb90b4c62fc61f4f0eb372ee35e1289ebdbc95598c4998dfdf12188e944",
+      "text": "可供 BaseLayerPicker 选择的 ProviderViewModel 数组。仅当 `baseLayerPicker` 为 true 时有效。"
+    },
+    {
+      "id": "Viewer.ConstructorOptions",
+      "field": "properties/infoBox/description",
+      "sourceHash": "sha256:d907d54a9f4902a240f84f75386389054c2b5ee4718e465d85bf1396e508d6a8",
+      "text": "设为 false 时，不创建 InfoBox 控件。"
+    },
+    {
+      "id": "Viewer.ConstructorOptions",
+      "field": "properties/mapMode2D/description",
+      "sourceHash": "sha256:bfc4d5ea2b5c659aaddd5f30de802cf171b832cc1cdd0a84c46a7c233dae6d70",
+      "text": "决定二维地图是否可旋转或在水平方向无限滚动。"
+    },
+    {
+      "id": "Viewer.ConstructorOptions",
+      "field": "properties/mapProjection/description",
+      "sourceHash": "sha256:94be0214e0bd3a38ec9b889db2b1e3ebbc3219a5f1f9f12afcf7cc0c8fed1129",
+      "text": "二维和哥伦布视图模式使用的地图投影。"
+    },
+    {
+      "id": "Viewer.ConstructorOptions",
+      "field": "properties/maximumRenderTimeChange/description",
+      "sourceHash": "sha256:5b6ffbabbf98dd9f4efa853d0b04fec9ec12696745ca8b5f833de6149808098c",
+      "text": "若 requestRenderMode 为 true，此值定义触发渲染请求前允许的最大模拟时间变化量。参见 {@link https://cesium.com/blog/2018/01/24/cesium-scene-rendering-performance/|通过显式渲染提升性能}。"
+    },
+    {
+      "id": "Viewer.ConstructorOptions",
+      "field": "properties/msaaSamples/description",
+      "sourceHash": "sha256:1a507dc0c1b441f30c8133a0ffaff64c24671fadd0309ece82d8c5be538a8822",
+      "text": "渲染目标的采样数。SceneGIS 延迟渲染要求为 1；边缘平滑请选择 FXAA 或 SceneGIS 时间抗锯齿。"
+    },
+    {
+      "id": "Viewer.ConstructorOptions",
+      "field": "properties/navigationHelpButton/description",
+      "sourceHash": "sha256:9f13909ac0e17c798b44648e0dcd8c8a37b96cbbca74ef4919af32f7f942947b",
+      "text": "设为 false 时，不创建导航帮助按钮。"
+    },
+    {
+      "id": "Viewer.ConstructorOptions",
+      "field": "properties/navigationInstructionsInitiallyVisible/description",
+      "sourceHash": "sha256:02a38c31992d132421311d22d5b7efabc6b9a92060884527921dbb8ddf1bf559",
+      "text": "为 true 时，初始显示导航说明；为 false 时，直到用户显式单击按钮才显示。"
+    },
+    {
+      "id": "Viewer.ConstructorOptions",
+      "field": "properties/orderIndependentTranslucency/description",
+      "sourceHash": "sha256:9cc92a90d6c4821589c24d930c99ee69a24ceb9cd5f7271148cfa61a4e0f5b50",
+      "text": "为 true 且配置支持时，使用顺序无关透明。"
+    },
+    {
+      "id": "Viewer.ConstructorOptions",
+      "field": "properties/planarWorld/description",
+      "sourceHash": "sha256:b48225793729aaf954c3e9ca98290ae1f499fb0f6296fb4c0685a9901db7f2b2",
+      "text": "同步创建平面世界的声明式选项。此项与 <code>world</code> 以及任何已定义的 <code>globe</code> 值互斥。"
+    },
+    {
+      "id": "Viewer.ConstructorOptions",
+      "field": "properties/projectionPicker/description",
+      "sourceHash": "sha256:fd2cbcdf5d990954f056a1be97c0c33cfdc7193c000f3ef5c167af69316d2172",
+      "text": "设为 true 时，创建 ProjectionPicker 控件。"
+    },
+    {
+      "id": "Viewer.ConstructorOptions",
+      "field": "properties/requestRenderMode/description",
+      "sourceHash": "sha256:3a772741a1e39ddc3f989fec7041f53b5a0c363574c741068b7f44a7ce4d55f0",
+      "text": "为 true 时，仅在场景变化判定有需要时渲染一帧。启用后可降低应用的 CPU/GPU 占用及移动设备耗电，但在此模式下需要使用 {@link Scene#requestRender} 显式请求渲染新帧。通过其他 API 修改场景后，许多情况下都需要这样做。参见 {@link https://cesium.com/blog/2018/01/24/cesium-scene-rendering-performance/|通过显式渲染提升性能}。"
+    },
+    {
+      "id": "Viewer.ConstructorOptions",
+      "field": "properties/scene3DOnly/description",
+      "sourceHash": "sha256:66d4ecb409e922a491e41ca64d3ae62723eb85c159e7722227f7d528b10adc74",
+      "text": "为 <code>true</code> 时，每个几何实例仅在三维中渲染，以节省 GPU 显存。"
+    },
+    {
+      "id": "Viewer.ConstructorOptions",
+      "field": "properties/sceneMode/description",
+      "sourceHash": "sha256:4766bec27a9c154e0a414188f9b54a1c7929b9b1cdb417fe4d8425a63d087b7e",
+      "text": "初始场景模式。"
+    },
+    {
+      "id": "Viewer.ConstructorOptions",
+      "field": "properties/sceneModePicker/description",
+      "sourceHash": "sha256:0ebf3ae51816ea481e45330f188607c4d6ca5781b0fee7f43d460e1f57759e02",
+      "text": "设为 false 时，不创建 SceneModePicker 控件。"
+    },
+    {
+      "id": "Viewer.ConstructorOptions",
+      "field": "properties/selectedImageryProviderViewModel/description",
+      "sourceHash": "sha256:0d9604005d95030ec88f02ab71e43d92b6b54a4d4898ff86744c7fa2448a6c4d",
+      "text": "当前底图影像图层的视图模型。若未提供，则使用第一个可用底图。仅当 `baseLayerPicker` 为 true 时有效。"
+    },
+    {
+      "id": "Viewer.ConstructorOptions",
+      "field": "properties/selectedTerrainProviderViewModel/description",
+      "sourceHash": "sha256:722d59112dff7f71ac9471bc9a90d30207eaaab90645f8a0331e7d45b888d5fa",
+      "text": "当前基础地形图层的视图模型。若未提供，则使用第一个可用基础地形。仅当 `baseLayerPicker` 为 true 时有效。"
+    },
+    {
+      "id": "Viewer.ConstructorOptions",
+      "field": "properties/selectionIndicator/description",
+      "sourceHash": "sha256:21faca8da84584d479bf9ea0ef024bee64701f65d3f2b40023826f5d31de1440",
+      "text": "设为 false 时，不创建 SelectionIndicator 控件。"
+    },
+    {
+      "id": "Viewer.ConstructorOptions",
+      "field": "properties/shadows/description",
+      "sourceHash": "sha256:b6e6ec9258f2a166c94cb0ddf7dc62eac250f23a5e89861b06e5f05e4b7b2d71",
+      "text": "决定光源是否投射阴影。"
+    },
+    {
+      "id": "Viewer.ConstructorOptions",
+      "field": "properties/shouldAnimate/description",
+      "sourceHash": "sha256:62a6c91c53fd2f951cf9fcf73d3ef49ff287d817282badb90623bd93164318dc",
+      "text": "为 <code>true</code> 时，时钟默认尝试推进模拟时间；为 <code>false</code> 时不推进。此选项优先于 {@link Viewer#clockViewModel} 的设置。"
+    },
+    {
+      "id": "Viewer.ConstructorOptions",
+      "field": "properties/showRenderLoopErrors/description",
+      "sourceHash": "sha256:feb4072ceea1e303706a85792c5d599dd12342c7b7c57dd2ab8c4ea713f49e59",
+      "text": "为 true 时，若渲染循环发生错误，此控件会自动向用户显示包含错误信息的 HTML 面板。"
+    },
+    {
+      "id": "Viewer.ConstructorOptions",
+      "field": "properties/skyAtmosphere/description",
+      "sourceHash": "sha256:9bd52763a9d33f46e53afb874aeed3f5a051c4df34afa22f9a5f57f7b831c4f7",
+      "text": "蓝色天空及地球边缘的辉光。使用 WGS84 椭球时启用。设为 <code>false</code> 可关闭。"
+    },
+    {
+      "id": "Viewer.ConstructorOptions",
+      "field": "properties/skyBox/description",
+      "sourceHash": "sha256:16ffd8fdbcf7006a02696372a0432aaf8e2b81f653f242bb58d5bdbc254062d9",
+      "text": "用于渲染星空的天空盒。为 <code>undefined</code> 且使用 WGS84 椭球时，使用默认星空。设为 <code>false</code> 时，不添加天空盒、太阳和月球。"
+    },
+    {
+      "id": "Viewer.ConstructorOptions",
+      "field": "properties/targetFrameRate/description",
+      "sourceHash": "sha256:2cec24724c55ed30895276d09dab20c2653d39746186cc000557c714be2ebecd",
+      "text": "使用默认渲染循环时的目标帧率。"
+    },
+    {
+      "id": "Viewer.ConstructorOptions",
+      "field": "properties/terrain/description",
+      "sourceHash": "sha256:2cf91f590ac82eaa127d70a6eec1f75e5a5994b9a63918969a92618e6203de19",
+      "text": "用于处理异步地形提供者的 terrain 对象。仅在 options.terrainProvider 为 undefined 时可指定。"
+    },
+    {
+      "id": "Viewer.ConstructorOptions",
+      "field": "properties/terrainProvider/description",
+      "sourceHash": "sha256:fc4c77231a1cca0e3d1f24303854aa9ddf2abb5c058fce17f94cf105f3d32eaa",
+      "text": "要使用的地形提供者。"
+    },
+    {
+      "id": "Viewer.ConstructorOptions",
+      "field": "properties/terrainProviderViewModels/description",
+      "sourceHash": "sha256:39d90eb90b4c62fc61f4f0eb372ee35e1289ebdbc95598c4998dfdf12188e944",
+      "text": "可供 BaseLayerPicker 选择的 ProviderViewModel 数组。仅当 `baseLayerPicker` 为 true 时有效。"
+    },
+    {
+      "id": "Viewer.ConstructorOptions",
+      "field": "properties/terrainShadows/description",
+      "sourceHash": "sha256:44d9a8a8ae5ad20481f4e5edd62ef3d58677428fab10e5ae94e31e9a139564b5",
+      "text": "决定地形是否投射或接收光源产生的阴影。"
+    },
+    {
+      "id": "Viewer.ConstructorOptions",
+      "field": "properties/timeline/description",
+      "sourceHash": "sha256:4b2cb76f0f08f765a9c5e423c490e93184f2db54554d3df53300397bb1d2ad62",
+      "text": "设为 false 时，不创建 Timeline 控件。"
+    },
+    {
+      "id": "Viewer.ConstructorOptions",
+      "field": "properties/useBrowserRecommendedResolution/description",
+      "sourceHash": "sha256:8d559bf3a6001bb906320b898bef21cedc0cb9b03d68382e0f081a71bcf2c9a4",
+      "text": "为 true 时，以浏览器建议的分辨率渲染，忽略 <code>window.devicePixelRatio</code>。"
+    },
+    {
+      "id": "Viewer.ConstructorOptions",
+      "field": "properties/useDefaultRenderLoop/description",
+      "sourceHash": "sha256:5ebbc8c1b587a97f83cd73f437c475f544966dc931c6031788dacac82fe71459",
+      "text": "为 true 时，由此控件控制渲染循环；否则不控制。"
+    },
+    {
+      "id": "Viewer.ConstructorOptions",
+      "field": "properties/vrButton/description",
+      "sourceHash": "sha256:681de333d7830502f0e04e2aae6d77663b49c82cecbd19527247e030c1bc8724",
+      "text": "设为 true 时，创建 VRButton 控件。"
+    },
+    {
+      "id": "Viewer.ConstructorOptions",
+      "field": "properties/world/description",
+      "sourceHash": "sha256:cfd38dc8966a91783cf6684069530c6953fd00e44d2e0418fa3e8972aa75141a",
+      "text": "要使用的活动平面世界。此项与 <code>planarWorld</code> 以及任何已定义的 <code>globe</code> 值互斥。"
+    },
+    {
+      "id": "Viewer.PlanarExtentOptions",
+      "field": "description",
+      "sourceHash": "sha256:509806ec372521e2ef7f1a8f0211e445c767bc1ba477fde7e33db62ebf25b7c2",
+      "text": "以米为单位的原始正方形平面范围选项。"
+    },
+    {
+      "id": "Viewer.PlanarExtentOptions",
+      "field": "properties/maximumX/description",
+      "sourceHash": "sha256:ded0a1ca903260c04f57e9b447d601505e20e778885656d99cf9f899721eec6e",
+      "text": "最大 X 坐标。"
+    },
+    {
+      "id": "Viewer.PlanarExtentOptions",
+      "field": "properties/maximumY/description",
+      "sourceHash": "sha256:ce917f350bc00b48180011abb91ce8c319f1c04130c26f40e17cd6d33987997b",
+      "text": "最大 Y 坐标。"
+    },
+    {
+      "id": "Viewer.PlanarExtentOptions",
+      "field": "properties/minimumX/description",
+      "sourceHash": "sha256:b708f57970451311df3e14703ff38ed2f9f3c27fafb1d3946488eaaae3af902a",
+      "text": "最小 X 坐标。"
+    },
+    {
+      "id": "Viewer.PlanarExtentOptions",
+      "field": "properties/minimumY/description",
+      "sourceHash": "sha256:47fd1f3e37229d5151ee210d543a8ba6223a2cdd017b81c378a600ad2d57690d",
+      "text": "最小 Y 坐标。"
+    },
+    {
+      "id": "Viewer.PlanarWorldOptions",
+      "field": "description",
+      "sourceHash": "sha256:16bfe357e2142558909b18fa4fce6dea077a97030684109d2f1b99c0793f4151",
+      "text": "用于同步创建 SceneGIS 平面世界的声明式选项。"
+    },
+    {
+      "id": "Viewer.PlanarWorldOptions",
+      "field": "properties/baseColor/description",
+      "sourceHash": "sha256:cf8cb994f6207204f911b1c1df2ad9bf7349bda2a36dcfa19fac89a73e2f07c3",
+      "text": "不透明表面颜色。"
+    },
+    {
+      "id": "Viewer.PlanarWorldOptions",
+      "field": "properties/crs/description",
+      "sourceHash": "sha256:85d17ece3c2ff046ad12baf4b406a66192006a3b2731a9f4ce42e33ce6c6b04a",
+      "text": "可选的非空 CRS 标识符，按不透明标识处理。"
+    },
+    {
+      "id": "Viewer.PlanarWorldOptions",
+      "field": "properties/enableLighting/description",
+      "sourceHash": "sha256:9dd99906e4d5146527336b97247443f29025d51b053d0378927cd6d65bda4a49",
+      "text": "是否启用基于几何法线的 Lambert 光照。"
+    },
+    {
+      "id": "Viewer.PlanarWorldOptions",
+      "field": "properties/extent/description",
+      "sourceHash": "sha256:62c716d661ba2aab9104dd18e560767350b515ce2646afc9475175c620d1abb0",
+      "text": "必须为严格正方形的平面范围。"
+    },
+    {
+      "id": "Viewer.PlanarWorldOptions",
+      "field": "properties/lambertDiffuseMultiplier/description",
+      "sourceHash": "sha256:a53a5c5c57df1b2ad7c5271f7bde183ae2d5233501d19d8b32ae836c5d13b28d",
+      "text": "应用于 Lambert 漫反射光照的非负倍数。"
+    },
+    {
+      "id": "Viewer.PlanarWorldOptions",
+      "field": "properties/maximumLevel/description",
+      "sourceHash": "sha256:203f18a34a0217156dbb949d235b0233fe209f5222cd7e40edcde2ed7939d6b2",
+      "text": "可选择的最高表面层级。"
+    },
+    {
+      "id": "Viewer.PlanarWorldOptions",
+      "field": "properties/maximumScreenSpaceError/description",
+      "sourceHash": "sha256:03a014138cffada6752637ae3337c0ac8c80bd9f0083d7c4c94625ee818d7b00",
+      "text": "细化阈值，单位为像素。"
+    },
+    {
+      "id": "Viewer.PlanarWorldOptions",
+      "field": "properties/tileCacheSize/description",
+      "sourceHash": "sha256:3438ad6ee42761e8eaafe16cd1d91f9b5b5b204fc3b41a4ab91508228b5aea7b",
+      "text": "一帧结束后保留的未受保护瓦片数量。"
+    },
+    {
+      "id": "Viewer.ViewerMixin",
+      "field": "description",
+      "sourceHash": "sha256:c8621355b71bf7eb2bcd75872160550e1f4044f4ea30e77838a5a4c7e569f28c",
+      "text": "为 Viewer 实例扩展功能的函数。"
+    },
+    {
+      "id": "Viewer.ViewerMixin",
+      "field": "params/options/description",
+      "sourceHash": "sha256:a354db70734c130e5d1cf9c6e7de08615013df13dbd3a8bbcf0f5199c24935c3",
+      "text": "传给 mixin 函数的选项对象。"
+    },
+    {
+      "id": "Viewer.ViewerMixin",
+      "field": "params/viewer/description",
+      "sourceHash": "sha256:0588eb71995416c4c2d29a74df270d09a62d071cfd51164f0a17f7866719df48",
+      "text": "Viewer 实例。"
+    },
+    {
+      "id": "Viewer",
+      "field": "exceptions/0/description",
+      "sourceHash": "sha256:a32c282b167b77335c61e4f1422e007fbbef3c536b72457f3f99be4fdf0412f0",
+      "text": "文档中不存在 ID 为 \"container\" 的元素。"
+    },
+    {
+      "id": "Viewer",
+      "field": "exceptions/1/description",
+      "sourceHash": "sha256:cfa4a8c3fad264ee830cca908dc3d82c8f6c0d50e11ea3db79f89935ea25f5b4",
+      "text": "不使用 BaseLayerPicker 控件时，options.selectedImageryProviderViewModel 不可用，请改用 options.baseLayer。"
+    },
+    {
+      "id": "Viewer",
+      "field": "exceptions/2/description",
+      "sourceHash": "sha256:1b3d2498967517dd2101f345f0199520c8c1a4166bc1a442e0876dde5ef0c53a",
+      "text": "不使用 BaseLayerPicker 控件时，options.selectedTerrainProviderViewModel 不可用，请改用 options.terrainProvider。"
+    },
+    {
+      "id": "Viewer",
+      "field": "exceptions/3/description",
+      "sourceHash": "sha256:e688172a1accb67d623e939c734e2a9a529e674bc0258141d8b21dff0e615d8a",
+      "text": "options.world 不是活动的 SceneGISPlanarWorld、options.planarWorld 无效、两种平面入口相互冲突或与 options.globe 冲突，或将平面入口与不兼容平面的选项组合使用。"
+    },
+    {
+      "id": "Viewer#addController",
+      "field": "description",
+      "sourceHash": "sha256:5e1a3ef32b2e5429627eee24f03640da43d46920e7dd73fefb4845f1ff89743e",
+      "text": "向 Viewer 的场景添加控制器。控制器是 {@link Controller} 接口的实现，用于处理输入事件、相机动画和其他交互。"
+    },
+    {
+      "id": "Viewer#addController",
+      "field": "params/controller/description",
+      "sourceHash": "sha256:696d6630fd95a9ef9bd0749039e3dbb6e790f0c592506ffda498d5d7467ebdaa",
+      "text": "<code>Controller</code> 接口的实现。"
+    },
+    {
+      "id": "Viewer#allowDataSourcesToSuspendAnimation",
+      "field": "description",
+      "sourceHash": "sha256:2aa0c3217375aa391660fd5d6ef687e4e96b16c772bf4866de75df56cd2d3c16",
+      "text": "获取或设置是否允许数据源暂时暂停动画，以避免向用户显示不完整画面。例如，后台处理异步图元时，在几何体就绪之前，时钟不会推进。"
+    },
+    {
+      "id": "Viewer#animation",
+      "field": "description",
+      "sourceHash": "sha256:81b717d8839fd856f3a3874f89aab57b4515edb3f95147a98fb87e0048a145c9",
+      "text": "获取 Animation 控件。"
+    },
+    {
+      "id": "Viewer#baseLayerPicker",
+      "field": "description",
+      "sourceHash": "sha256:8b1f27c6ec4d9f08cbe1afdc99d96366411c0933d6fba897826dd93fdcbc3678",
+      "text": "获取 BaseLayerPicker。"
+    },
+    {
+      "id": "Viewer#bottomContainer",
+      "field": "description",
+      "sourceHash": "sha256:aaf207ce2d6fc151d8ec294326525214ffbb18cd1af12b364db6148abb55f547",
+      "text": "获取窗口底部区域的 DOM 元素，其中包含 {@link CreditDisplay}，也可能包含其他内容。"
+    },
+    {
+      "id": "Viewer#canvas",
+      "field": "description",
+      "sourceHash": "sha256:d45a92370d158526f936186692de10433cb1a6d7bc7d87aaaa6954cd95fdcd07",
+      "text": "获取 canvas。"
+    },
+    {
+      "id": "Viewer#cesiumWidget",
+      "field": "description",
+      "sourceHash": "sha256:bb26aed737beb5f8d56d98c0579a5aefeb036ccf561559ea703065e6617d85a8",
+      "text": "获取 CesiumWidget。"
+    },
+    {
+      "id": "Viewer#clock",
+      "field": "description",
+      "sourceHash": "sha256:2868c519cf6ec920f21079b0fc73e680d4ae00b8576718b633b6aa6f060e4e40",
+      "text": "获取时钟。"
+    },
+    {
+      "id": "Viewer#clockTrackedDataSource",
+      "field": "description",
+      "sourceHash": "sha256:8a2d0a1f7c457341c6bf1f368cdc858853c8baa311a93b955292b87ec6bdb8b6",
+      "text": "获取或设置由 Viewer 时钟跟踪的数据源。"
+    },
+    {
+      "id": "Viewer#clockViewModel",
+      "field": "description",
+      "sourceHash": "sha256:ac103959880dcc477bfc9301739d1506c1f834cf71585d2622fc417fe78bec9f",
+      "text": "获取时钟视图模型。"
+    },
+    {
+      "id": "Viewer#creditDisplay",
+      "field": "description",
+      "sourceHash": "sha256:0cdb378868f50034e7fbd533828bd2cc242022d55bec895e37186a4d83ee0966",
+      "text": "管理在屏幕及灯箱中显示的版权信息列表。"
+    },
+    {
+      "id": "Viewer#dataSourceDisplay",
+      "field": "description",
+      "sourceHash": "sha256:4c89a3002db47e0882e4f24779ca7f17a46fe38440bf2019cc46c1994e30c847",
+      "text": "获取用于 {@link DataSource} 可视化的显示对象。"
+    },
+    {
+      "id": "Viewer#dataSources",
+      "field": "description",
+      "sourceHash": "sha256:39b6ea110ce41eef437f916f87f62047c296a43b154395ad1ee80c6ddccdbb05",
+      "text": "获取要可视化的 {@link DataSource} 实例集合。"
+    },
+    {
+      "id": "Viewer#ellipsoid",
+      "field": "description",
+      "sourceHash": "sha256:089f783bcdfafa344e4684b9242b9db12fd4d601ff3cf3e0626835918647dfd0",
+      "text": "获取场景的默认椭球。"
+    },
+    {
+      "id": "Viewer#extend",
+      "field": "description",
+      "sourceHash": "sha256:7c0e2f86386f285a274aa1247267dbd0b7b1acce079005a24744749d62cbc784",
+      "text": "使用给定 mixin 扩展 Viewer 的基础功能。mixin 可向给定 Viewer 实例添加属性、函数或其他行为。"
+    },
+    {
+      "id": "Viewer#extend",
+      "field": "params/mixin/description",
+      "sourceHash": "sha256:99b2a6cf0a696bb23eb1e56fce6a0202d39e0fdd83631930b755e654edea8ca2",
+      "text": "要添加到此实例的 Viewer mixin。"
+    },
+    {
+      "id": "Viewer#extend",
+      "field": "params/options/description",
+      "sourceHash": "sha256:7943a2ce5db04b3e50d783a2729ac124f82a3ffa0033550eba0f93a2d47cbab1",
+      "text": "传给 mixin 函数的选项对象。"
+    },
+    {
+      "id": "Viewer#flyTo",
+      "field": "description",
+      "sourceHash": "sha256:ab8075443be684be02773726a8203a4f6e4800f8b6f0a6c93185b52557f2d924",
+      "text": "使相机飞向给定实体、实体数组或数据源。若数据源或可视化内容仍在加载，此方法会等待数据就绪后再执行飞行。<p>偏移使用以包围球中心为原点的局部东、北、天参考坐标系中的 heading、pitch 和 range。方位角和俯仰角均在该局部参考坐标系中定义。方位角从 y 轴起算，朝 x 轴方向增加；俯仰角从 xy 平面起算，正值位于平面下方，负值位于平面上方。range 为到中心的距离。若 range 为零，则自动计算可使整个包围球可见的距离。</p><p>二维中必须采用俯视视角，相机会位于目标上方并向下观察，其高度为 range。方位角根据偏移确定；若无法确定，则朝北。</p>"
+    },
+    {
+      "id": "Viewer#flyTo",
+      "field": "exceptions/0/description",
+      "sourceHash": "sha256:3176f894701a2e2091b68c2d33f470bef7187ea5dd5e88b42a540f929e857e4e",
+      "text": "在平面 Viewer 中，解析后的目标、偏移、持续时间或最大高度不属于所支持的平面配置范围。"
+    },
+    {
+      "id": "Viewer#flyTo",
+      "field": "params/options.duration/description",
+      "sourceHash": "sha256:121798e162302f09e7c8453c21d5a57cc7ae4152fc505fd7a2c8af7f754c222e",
+      "text": "飞行持续时间，单位为秒。"
+    },
+    {
+      "id": "Viewer#flyTo",
+      "field": "params/options.maximumHeight/description",
+      "sourceHash": "sha256:63eaa8eb69c95c4437f654fec544011366467c6e9bfe5738bfa5f2651296278e",
+      "text": "飞行最高点的最大高度。"
+    },
+    {
+      "id": "Viewer#flyTo",
+      "field": "params/options.offset/description",
+      "sourceHash": "sha256:b9d965c8ecf71488a5080c69e4d0bf7cf073218362e6256943cb40521f7106fd",
+      "text": "以目标为中心的局部东、北、天参考坐标系中相对于目标的偏移。"
+    },
+    {
+      "id": "Viewer#flyTo",
+      "field": "params/target/description",
+      "sourceHash": "sha256:10d90ce67b5fa32f478c78a9b9acae3dfecd7bd601f072c64feac89646ab0193",
+      "text": "要观察的目标。对于平面 Viewer，解析后的目标必须为 Entity、Entity 数组、EntityCollection、entities 属性为 EntityCollection 的 DataSource，或已使用平面世界坐标的 Cesium3DTileset。瓦片集必须属于场景的图元集合树；发起操作时会应用其当前 root/model 变换。移除或销毁瓦片集会取消视图取景。不会重新投影地理坐标。"
+    },
+    {
+      "id": "Viewer#flyTo",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:b5bfd5261e1142a2bc9035bdcfef32b1f4a24cf1845d20a0f2211f87ee0d745a",
+      "text": "飞行成功时兑现为 true 的 Promise；若目标当前未在场景中可视化，或飞行已取消，则兑现为 false。//TODO: 清理关于实体的表述。"
+    },
+    {
+      "id": "Viewer#forceResize",
+      "field": "description",
+      "sourceHash": "sha256:c8aa94428e1f2de1ec2da8c2aef3ba8a2102b99d284295fb0989f504eac57df4",
+      "text": "强制控件重新计算布局，包括控件尺寸和版权信息位置。"
+    },
+    {
+      "id": "Viewer#fullscreenButton",
+      "field": "description",
+      "sourceHash": "sha256:82f4b3b349e17d661ba0b023e4289c453c2aac803bc1a21b157bf7d0ed09e5a0",
+      "text": "获取 FullscreenButton。"
+    },
+    {
+      "id": "Viewer#geocoder",
+      "field": "description",
+      "sourceHash": "sha256:9c763cf7ae62cf990b0f104d578327ab7a18d8375a28e3a500330cdab123603d",
+      "text": "获取 Geocoder。"
+    },
+    {
+      "id": "Viewer#homeButton",
+      "field": "description",
+      "sourceHash": "sha256:dba79a09500aea7a675c9d5d036ca562542fc3780cb638d04d74d3a49770110b",
+      "text": "获取 HomeButton。"
+    },
+    {
+      "id": "Viewer#imageryLayers",
+      "field": "description",
+      "sourceHash": "sha256:6811377586b80a6a428c4e06e26fcff9954bd895436124da94819611c64f1dce",
+      "text": "获取将在球体上绘制的影像图层集合。"
+    },
+    {
+      "id": "Viewer#infoBox",
+      "field": "description",
+      "sourceHash": "sha256:aebf0da89834aac7a9d3c03ff98864dc91f8d0e0783e1b61face0200e1797c1d",
+      "text": "获取信息框。"
+    },
+    {
+      "id": "Viewer#navigationHelpButton",
+      "field": "description",
+      "sourceHash": "sha256:f2ec213d21015883a2f5280562dbbe09cb48823f17437f5ae2c9683194950e0b",
+      "text": "获取 NavigationHelpButton。"
+    },
+    {
+      "id": "Viewer#planarCameraController",
+      "field": "description",
+      "sourceHash": "sha256:e7e4470da218e754f4c83c9695913c91f54bad82c4df4f07fd6ba924ac9a7e23",
+      "text": "获取此 Viewer 拥有的平面相机控制器。"
+    },
+    {
+      "id": "Viewer#planarWorld",
+      "field": "description",
+      "sourceHash": "sha256:bb6862682673d0a6882b2b64072a97e7ebd0ac8963174f8b39ac523be519596e",
+      "text": "获取此 Viewer 解析后使用的平面世界。"
+    },
+    {
+      "id": "Viewer#postProcessStages",
+      "field": "description",
+      "sourceHash": "sha256:71811865072687e3adde0d8605d305e9c161752407f9f30408d1359c3671f4fb",
+      "text": "获取后处理阶段集合。"
+    },
+    {
+      "id": "Viewer#projectionPicker",
+      "field": "description",
+      "sourceHash": "sha256:b3f8573fd0d01ba1725bef3ba5a49a267460bfff3ef4d9081b68b4aa2d6a2128",
+      "text": "获取 ProjectionPicker。"
+    },
+    {
+      "id": "Viewer#removeController",
+      "field": "description",
+      "sourceHash": "sha256:ac4bba5e3c3868903c909f7f78a4c90daeb9135d9878552ad4787d140e3a3f7f",
+      "text": "从 Viewer 的场景中移除控制器。控制器是 {@link Controller} 接口的实现，用于处理输入事件、相机动画和其他交互。"
+    },
+    {
+      "id": "Viewer#removeController",
+      "field": "params/controller/description",
+      "sourceHash": "sha256:696d6630fd95a9ef9bd0749039e3dbb6e790f0c592506ffda498d5d7467ebdaa",
+      "text": "<code>Controller</code> 接口的实现。"
+    },
+    {
+      "id": "Viewer#render",
+      "field": "description",
+      "sourceHash": "sha256:7500e70e623092514a7b8383423ea1e29525bb32b4af58173afbb2542559e2c9",
+      "text": "渲染场景。除非 <code>useDefaultRenderLoop</code> 设为 false，否则自动调用此函数。"
+    },
+    {
+      "id": "Viewer#resize",
+      "field": "description",
+      "sourceHash": "sha256:d0661ccc79ff78bbaa8ff0f3cc7874bf623b09b63ecd6df01a1131ff2a7f0d50",
+      "text": "调整控件尺寸以匹配容器。除非 <code>useDefaultRenderLoop</code> 设为 false，否则会按需自动调用此函数。"
+    },
+    {
+      "id": "Viewer#resolutionScale",
+      "field": "description",
+      "sourceHash": "sha256:3b2bbc6f7a1283e3801c213e3bc1b998992a517cb7d20152bdd64ac766037366",
+      "text": "获取或设置渲染分辨率的缩放系数。小于 1.0 可提升低性能设备的运行速度；大于 1.0 则先以更高分辨率渲染再缩小，以提高画面质量。例如，控件布局尺寸为 640x480 时，设为 0.5 会先以 320x240 渲染再放大；设为 2.0 会先以 1280x960 渲染再缩小。"
+    },
+    {
+      "id": "Viewer#sceneModePicker",
+      "field": "description",
+      "sourceHash": "sha256:557c26c6cd54b96b5bc8dec7e62f97a91378ee028589f8075b3a723be311b54f",
+      "text": "获取 SceneModePicker。"
+    },
+    {
+      "id": "Viewer#screenSpaceEventHandler",
+      "field": "description",
+      "sourceHash": "sha256:4bad81342a46a359e95141c3b070c5196e6e5a3c4287afcd5d9fd6ccc3d763e3",
+      "text": "获取屏幕空间事件处理器。"
+    },
+    {
+      "id": "Viewer#selectedEntity",
+      "field": "description",
+      "sourceHash": "sha256:5f1739dc2876ddd4e2a7197d622f95a35acb6c1d8eaad9c4936bad2c3f7a3caa",
+      "text": "获取或设置需要显示选择指示器的对象实例。如果用户交互拾取了 Cesium3DTilesFeature 实例，此属性会包含一个临时 Entity，其名为 \"feature\" 的属性指向被拾取的实例。"
+    },
+    {
+      "id": "Viewer#selectedEntityChanged",
+      "field": "description",
+      "sourceHash": "sha256:11210305f6233f6def1c7d41b65d8ea8acac8ba31efa77469750585cb44beff7",
+      "text": "获取所选实体变化时触发的事件。"
+    },
+    {
+      "id": "Viewer#selectionIndicator",
+      "field": "description",
+      "sourceHash": "sha256:888186d69f9ae29de2d6393fde8e610e9176aaae58c605c13c6e662b34c69e84",
+      "text": "获取选择指示器。"
+    },
+    {
+      "id": "Viewer#shadowMap",
+      "field": "description",
+      "sourceHash": "sha256:4248550d4b09b104143eee94c32f136e4f6880e3fad1a4ec500dc025e278e29c",
+      "text": "获取场景的阴影贴图。"
+    },
+    {
+      "id": "Viewer#shadows",
+      "field": "description",
+      "sourceHash": "sha256:b6e6ec9258f2a166c94cb0ddf7dc62eac250f23a5e89861b06e5f05e4b7b2d71",
+      "text": "决定光源是否投射阴影。"
+    },
+    {
+      "id": "Viewer#targetFrameRate",
+      "field": "description",
+      "sourceHash": "sha256:047ac7dd4400adcbd19f21366b56caead368f4872401d8d39c08b02c83044391",
+      "text": "获取或设置 <code>useDefaultRenderLoop</code> 为 true 时控件的目标帧率。若为 undefined，由浏览器的 requestAnimationFrame 实现决定帧率。若已定义，必须大于 0。设置超过底层 requestAnimationFrame 能力的帧率不会产生额外效果。"
+    },
+    {
+      "id": "Viewer#terrainProvider",
+      "field": "description",
+      "sourceHash": "sha256:84adfdd09110fce100d0673344254184bc801f6a218333166fb8a5a02a7669ca",
+      "text": "为地球提供表面几何体的地形提供者。"
+    },
+    {
+      "id": "Viewer#terrainShadows",
+      "field": "description",
+      "sourceHash": "sha256:2fce4a3fb63d40d9e68ec5c3cd427f25d2b33030b19878f942be924215d1cf6d",
+      "text": "决定地形是否投射或接收光源产生的阴影。"
+    },
+    {
+      "id": "Viewer#timeline",
+      "field": "description",
+      "sourceHash": "sha256:0283c139dc81f4ecab61708fd10168fafd3d40847605e03e74082343c647f13d",
+      "text": "获取 Timeline 控件。"
+    },
+    {
+      "id": "Viewer#trackedEntity",
+      "field": "description",
+      "sourceHash": "sha256:3b8cd8ccf5fd941ed6e670ee70f7cf91b8d3af7c8653b5bfe2af28a1f6536a17",
+      "text": "获取或设置相机当前跟踪的 Entity 实例。"
+    },
+    {
+      "id": "Viewer#trackedEntity",
+      "field": "exceptions/0/description",
+      "sourceHash": "sha256:e93f82fbf1a0111ae60715cc24445bd091d4b13a1730e0448d4f5f5792651acd",
+      "text": "在平面 Viewer 中，此值不是位置参考系为 FIXED 且跟踪参考坐标系为 AUTODETECT 或 ENU 的 Entity。"
+    },
+    {
+      "id": "Viewer#trackedEntityChanged",
+      "field": "description",
+      "sourceHash": "sha256:e39f9b0aa7a0c918d07288375f28fdc05d53e2f6ff1ef781794aafe3babdb440",
+      "text": "获取被跟踪实体变化时触发的事件。"
+    },
+    {
+      "id": "Viewer#useBrowserRecommendedResolution",
+      "field": "description",
+      "sourceHash": "sha256:19d4da7d6e77c5cb12fe1648f3997fb4b8e19bd811abb80f2fff5315ddf89f8c",
+      "text": "是否使用浏览器建议分辨率的布尔标志。为 true 时，忽略浏览器的设备像素比，改用 1.0，即按 CSS 像素而非设备像素渲染。这可提升高像素密度低性能设备的运行速度。为 false 时，按设备像素渲染。无论此标志为 true 还是 false，{@link Viewer#resolutionScale} 都仍然生效。"
+    },
+    {
+      "id": "Viewer#useDefaultRenderLoop",
+      "field": "description",
+      "sourceHash": "sha256:68974bcd6fca73cdc4bdfa645fb84eeaaeaec4f01cadf150fc5f14c6852d8654",
+      "text": "获取或设置是否由此控件控制渲染循环。为 true 时，控件使用 requestAnimationFrame 渲染、调整控件尺寸并驱动模拟时钟。设为 false 时，必须在自定义渲染循环中手动调用 <code>resize</code> 和 <code>render</code> 方法。若渲染发生错误，会触发 {@link Scene} 的 <code>renderError</code> 事件，并将此属性设为 false。错误处理后必须将其重新设为 true 才能继续渲染。"
+    },
+    {
+      "id": "Viewer#vrButton",
+      "field": "description",
+      "sourceHash": "sha256:a3fd9aeb172ed4f48dc4769d788cc85e46b7bf55d09b836fb96f9b40cd0a03cd",
+      "text": "获取 VRButton。"
+    },
+    {
+      "id": "Viewer#zoomTo",
+      "field": "description",
+      "sourceHash": "sha256:be8b6f1654317ab28084ed052c34c2a196b4e46af63f5025270675f4a0ab90aa",
+      "text": "异步设置相机，使其观察给定实体、实体数组或数据源。若数据源或可视化内容仍在加载，此方法会等待数据就绪后再执行缩放。<p>偏移使用以包围球中心为原点的局部东、北、天参考坐标系中的 heading、pitch 和 range。方位角和俯仰角均在该局部参考坐标系中定义。方位角从 y 轴起算，朝 x 轴方向增加；俯仰角从 xy 平面起算，正值位于平面下方，负值位于平面上方。range 为到中心的距离。若 range 为零，则自动计算可使整个包围球可见的距离。</p><p>二维中必须采用俯视视角，相机会位于目标上方并向下观察，其高度为 range。方位角根据偏移确定；若无法确定，则朝北。</p>"
+    },
+    {
+      "id": "Viewer#zoomTo",
+      "field": "exceptions/0/description",
+      "sourceHash": "sha256:e6d207632a776928d765734ff3d3b6365c49e5d85b245b6fadef20072bffe7cc",
+      "text": "在平面 Viewer 中，解析后的目标或偏移不属于所支持的平面配置范围。"
+    },
+    {
+      "id": "Viewer#zoomTo",
+      "field": "params/offset/description",
+      "sourceHash": "sha256:f99ea80c0e55444631d7f3922c177d3bbf4037a4ed4f320d9b384c954c7f6371",
+      "text": "局部东、北、天参考坐标系中相对于实体中心的偏移。"
+    },
+    {
+      "id": "Viewer#zoomTo",
+      "field": "params/target/description",
+      "sourceHash": "sha256:10d90ce67b5fa32f478c78a9b9acae3dfecd7bd601f072c64feac89646ab0193",
+      "text": "要观察的目标。对于平面 Viewer，解析后的目标必须为 Entity、Entity 数组、EntityCollection、entities 属性为 EntityCollection 的 DataSource，或已使用平面世界坐标的 Cesium3DTileset。瓦片集必须属于场景的图元集合树；发起操作时会应用其当前 root/model 变换。移除或销毁瓦片集会取消视图取景。不会重新投影地理坐标。"
+    },
+    {
+      "id": "Viewer#zoomTo",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:10c8d3ce5b1793daede61b7e7f85fcbf26b07718beee2c54e84e7de8902f9bad",
+      "text": "缩放成功时兑现为 true 的 Promise；若目标当前未在场景中可视化，或缩放已取消，则兑现为 false。"
+    }
+  ]
+}

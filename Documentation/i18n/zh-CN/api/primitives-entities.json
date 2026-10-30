@@ -1,0 +1,2082 @@
+{
+  "schemaVersion": 1,
+  "locale": "zh-CN",
+  "entries": [
+    {
+      "id": "CustomDataSource",
+      "field": "params/name/description",
+      "sourceHash": "sha256:c425d009a86ea0a022599ae195a9e6b8bdcece4df12dd64a2751cf9a0f37242c",
+      "text": "此实例的可读名称。"
+    },
+    {
+      "id": "CustomDataSource#changedEvent",
+      "field": "description",
+      "sourceHash": "sha256:b94ff7939ceab7c88b90056e7db7bae1fdfa9de04248c03da5809a400b5399bc",
+      "text": "获取底层数据发生变化时触发的事件。"
+    },
+    {
+      "id": "CustomDataSource#clock",
+      "field": "description",
+      "sourceHash": "sha256:d6b81e7911f2df2197973d3f70a1a0829858cbe5170a6673abea1d6bdd49276f",
+      "text": "获取或设置此实例的时钟。"
+    },
+    {
+      "id": "CustomDataSource#clustering",
+      "field": "description",
+      "sourceHash": "sha256:ccbf53f979b29ab36bf723f1ee1016f1ceb9246f68c2d4af95eb91b26fe56eeb",
+      "text": "获取或设置此数据源的聚合选项。此对象可由多个数据源共享。"
+    },
+    {
+      "id": "CustomDataSource#entities",
+      "field": "description",
+      "sourceHash": "sha256:976b78e6c2b5f9a8351a5240d327e0812b07c6b42a809b150295d1df26821435",
+      "text": "获取 {@link Entity} 实例集合。"
+    },
+    {
+      "id": "CustomDataSource#errorEvent",
+      "field": "description",
+      "sourceHash": "sha256:829f0851bfbe71a9601c4d0b1b13331625861008f3e81636dc2c24937b8110a5",
+      "text": "获取处理过程中发生错误时触发的事件。"
+    },
+    {
+      "id": "CustomDataSource#isLoading",
+      "field": "description",
+      "sourceHash": "sha256:c6cbfe5b9574d0da244bc70fdda562063d54a1c04a3488bd138c1c8d0840e903",
+      "text": "获取或设置数据源当前是否正在加载数据。"
+    },
+    {
+      "id": "CustomDataSource#loadingEvent",
+      "field": "description",
+      "sourceHash": "sha256:755e0027e6456715daa06d4c30c338e4c40fe5f6c46e5ff5204d1b37923a35c7",
+      "text": "获取数据源开始或停止加载时触发的事件。"
+    },
+    {
+      "id": "CustomDataSource#name",
+      "field": "description",
+      "sourceHash": "sha256:3000c359a7a8d3908ba4068a703c1cfa385ac33a750994bff61bc535c34a669a",
+      "text": "获取或设置此实例的可读名称。"
+    },
+    {
+      "id": "CustomDataSource#show",
+      "field": "description",
+      "sourceHash": "sha256:7438e871c41fb26d7b878ea3fa3e3e858a9c50539f22293dc33344d6e4d2de4c",
+      "text": "获取是否应显示此数据源。"
+    },
+    {
+      "id": "CustomDataSource#update",
+      "field": "description",
+      "sourceHash": "sha256:1e0435ea19f0d20fefa920889b7b1616587fb32f18c1cce5fa8871ac0702120a",
+      "text": "将数据源更新到给定时间。此函数为可选实现，适用于根据当前动画时间或场景状态获取数据的数据源。若已实现，{@link DataSourceDisplay} 会每帧调用一次 update。"
+    },
+    {
+      "id": "CustomDataSource#update",
+      "field": "params/time/description",
+      "sourceHash": "sha256:b97f4749b707cb6e854fe296c681cdbf68d422843d5bbbecef133d0d26261eea",
+      "text": "模拟时间。"
+    },
+    {
+      "id": "CustomDataSource#update",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:2f15539ce01e1ceafc6d9cbeaddeef19b2c2193ce995e615e2b5d2d550433d2c",
+      "text": "若此数据源已准备好在给定时间显示，则为 true；否则为 false。"
+    },
+    {
+      "id": "DataSourceCollection",
+      "field": "description",
+      "sourceHash": "sha256:5ae4d9b38d3aa61e1d222928ae5ea518b753c19c62336c148180666297b86226",
+      "text": "{@link DataSource} 实例的集合。"
+    },
+    {
+      "id": "DataSourceCollection#add",
+      "field": "description",
+      "sourceHash": "sha256:5e27faab8cf86a35518fd6cd8bfd836a3901f0464320b01a988676e4c5c8cb05",
+      "text": "将数据源添加到集合。"
+    },
+    {
+      "id": "DataSourceCollection#add",
+      "field": "params/dataSource/description",
+      "sourceHash": "sha256:352e72c999d4f478ffd2fc53e85361c937ee9e65377ed9a3b4433cbe0cb94040",
+      "text": "要添加到集合的数据源，或兑现为数据源的 Promise。传入 Promise 时，仅在其成功兑现后，才真正将数据源添加到集合。"
+    },
+    {
+      "id": "DataSourceCollection#add",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:c622be1ee74ab463921d04f32b3952577daa000f57b97c19c44d33e407d8cc85",
+      "text": "数据源添加到集合后兑现的 Promise。"
+    },
+    {
+      "id": "DataSourceCollection#contains",
+      "field": "description",
+      "sourceHash": "sha256:7be2b5c03b96fa1ead66c4b06893dc8ecef9f6fa0181727c452d8fe394c3763f",
+      "text": "检查集合是否包含给定数据源。"
+    },
+    {
+      "id": "DataSourceCollection#contains",
+      "field": "params/dataSource/description",
+      "sourceHash": "sha256:89909f9f32f48a1e00b0b97e82cf04acaf4e186ba8cc93656adf249219d4404c",
+      "text": "要检查的数据源。"
+    },
+    {
+      "id": "DataSourceCollection#contains",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:11f55eca924301695a544f1f485c93d15ac8e21069217d51dbcfe7513a66836c",
+      "text": "若集合包含此数据源，则返回 true；否则返回 false。"
+    },
+    {
+      "id": "DataSourceCollection#dataSourceAdded",
+      "field": "description",
+      "sourceHash": "sha256:8dd72ad36e0903a3b812358bdee44a34138c787847e2ad61f506a7034dc5dd30",
+      "text": "数据源添加到集合时触发的事件。处理器接收新增数据源。"
+    },
+    {
+      "id": "DataSourceCollection#dataSourceMoved",
+      "field": "description",
+      "sourceHash": "sha256:882474b40e1d6a3f4aef50a695df17efc5919be7c61b75e9a1159ca579b02f17",
+      "text": "数据源在集合中的位置变化时触发的事件。处理器接收移动的数据源、移动后的新索引和移动前的旧索引。"
+    },
+    {
+      "id": "DataSourceCollection#dataSourceRemoved",
+      "field": "description",
+      "sourceHash": "sha256:d1aa2e8f00bdae552465fa89fcbd616c9fe7cce5676165d4eccb97a26bce14fa",
+      "text": "数据源从集合移除时触发的事件。处理器接收被移除的数据源。"
+    },
+    {
+      "id": "DataSourceCollection#destroy",
+      "field": "description",
+      "sourceHash": "sha256:7c0496c2ac10e1c4f1663b42bc0ca14536908d6e465ae01d520dadddcd92ea03",
+      "text": "销毁此集合中全部数据源持有的资源。显式销毁可确定地释放资源，而不依赖垃圾回收器。对象销毁后不应再使用；调用除 <code>isDestroyed</code> 以外的任何函数都会抛出 {@link DeveloperError}。因此，应像示例中那样将返回值（<code>undefined</code>）赋给该对象变量。"
+    },
+    {
+      "id": "DataSourceCollection#get",
+      "field": "description",
+      "sourceHash": "sha256:14bf850a1cbf1737a0741f0089c90d0263b04802744f5018d1230813b7e131ef",
+      "text": "通过索引从集合中获取数据源。"
+    },
+    {
+      "id": "DataSourceCollection#get",
+      "field": "params/index/description",
+      "sourceHash": "sha256:fd6dee5a50020d7b4037ddac52c7ca24022528843aab8b1947472f651e2bd099",
+      "text": "要获取的索引。"
+    },
+    {
+      "id": "DataSourceCollection#get",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:9d88cefb048ac2c7ffba0278255210763a7c34ee9c393d17cd71c037bec9551e",
+      "text": "指定索引处的数据源。"
+    },
+    {
+      "id": "DataSourceCollection#getByName",
+      "field": "description",
+      "sourceHash": "sha256:a5367ab0006dd2b2f33cb1f388803f1813cbc53d19efb23560199b249c2afa72",
+      "text": "通过名称从集合中获取数据源。"
+    },
+    {
+      "id": "DataSourceCollection#getByName",
+      "field": "params/name/description",
+      "sourceHash": "sha256:d3eb900884eb571900a7f3c56e61b194252598c723c7e07064bd44e0300e6c10",
+      "text": "要查找的名称。"
+    },
+    {
+      "id": "DataSourceCollection#getByName",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:b53d2b5ce99be3734221e791dfec966a377342abc7710cdf3fd0062545249414",
+      "text": "与给定名称匹配的全部数据源列表。"
+    },
+    {
+      "id": "DataSourceCollection#indexOf",
+      "field": "description",
+      "sourceHash": "sha256:8738c43267b9a25af0036e86db3bb392d890e517fdf1e4be6bd75a16f80a2830",
+      "text": "确定给定数据源在集合中的索引。"
+    },
+    {
+      "id": "DataSourceCollection#indexOf",
+      "field": "params/dataSource/description",
+      "sourceHash": "sha256:1ed80b4ff963f6c2cdf2bc24275f7e55a47350f05bc83fb7157fad7a28befc83",
+      "text": "要查找其索引的数据源。"
+    },
+    {
+      "id": "DataSourceCollection#indexOf",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:e8aa9d3f40f70c0806d044302827c25c6ac278e03ed4c1eb471ef47145a7593a",
+      "text": "数据源在集合中的索引；若集合中不存在该数据源，则返回 -1。"
+    },
+    {
+      "id": "DataSourceCollection#isDestroyed",
+      "field": "description",
+      "sourceHash": "sha256:3795059e96fb8039a74930ba0520aaacc5d16b9d1d4a1841f4d8e03b9ecc3eda",
+      "text": "若此对象已销毁，返回 true；否则返回 false。对象销毁后不应再使用；调用除 <code>isDestroyed</code> 以外的任何函数都会抛出 {@link DeveloperError}。"
+    },
+    {
+      "id": "DataSourceCollection#isDestroyed",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:3617521521496b9e9891569bde8afb6b76b6c1e9a3bb0704ec12f852b7bac7a7",
+      "text": "若此对象已销毁，返回 true；否则返回 false。"
+    },
+    {
+      "id": "DataSourceCollection#length",
+      "field": "description",
+      "sourceHash": "sha256:8af348b34cc0a640404f677d39dd91aaa8ef56944a2f8cd7b331c77677380ba4",
+      "text": "获取此集合中的数据源数量。"
+    },
+    {
+      "id": "DataSourceCollection#lower",
+      "field": "description",
+      "sourceHash": "sha256:fa3705808c0448827085cd14fb3b3445e0fd5099e44ed93d131c406e2457e8b8",
+      "text": "将数据源在集合中下移一个位置。"
+    },
+    {
+      "id": "DataSourceCollection#lower",
+      "field": "exceptions/0/description",
+      "sourceHash": "sha256:10513c6251c4fe6e0811c9e9fe2d5d3f6d150be21f8cf045707249221a76007d",
+      "text": "dataSource 不在此集合中。"
+    },
+    {
+      "id": "DataSourceCollection#lower",
+      "field": "params/dataSource/description",
+      "sourceHash": "sha256:6d76506985beb3e19fe86575424c68b868db4113b967c5a61b6bc9d636e50635",
+      "text": "要移动的数据源。"
+    },
+    {
+      "id": "DataSourceCollection#lowerToBottom",
+      "field": "description",
+      "sourceHash": "sha256:ea3837450369f8739e29b6d1043d2e1a40ae55d2670162f391867f5b62d761c6",
+      "text": "将数据源移到集合最底部。"
+    },
+    {
+      "id": "DataSourceCollection#lowerToBottom",
+      "field": "exceptions/0/description",
+      "sourceHash": "sha256:10513c6251c4fe6e0811c9e9fe2d5d3f6d150be21f8cf045707249221a76007d",
+      "text": "dataSource 不在此集合中。"
+    },
+    {
+      "id": "DataSourceCollection#lowerToBottom",
+      "field": "params/dataSource/description",
+      "sourceHash": "sha256:6d76506985beb3e19fe86575424c68b868db4113b967c5a61b6bc9d636e50635",
+      "text": "要移动的数据源。"
+    },
+    {
+      "id": "DataSourceCollection#raise",
+      "field": "description",
+      "sourceHash": "sha256:c886acf7261142e858265dab9729e85134c86ea9cf5cc3f7e78697135bbac262",
+      "text": "将数据源在集合中上移一个位置。"
+    },
+    {
+      "id": "DataSourceCollection#raise",
+      "field": "exceptions/0/description",
+      "sourceHash": "sha256:10513c6251c4fe6e0811c9e9fe2d5d3f6d150be21f8cf045707249221a76007d",
+      "text": "dataSource 不在此集合中。"
+    },
+    {
+      "id": "DataSourceCollection#raise",
+      "field": "params/dataSource/description",
+      "sourceHash": "sha256:6d76506985beb3e19fe86575424c68b868db4113b967c5a61b6bc9d636e50635",
+      "text": "要移动的数据源。"
+    },
+    {
+      "id": "DataSourceCollection#raiseToTop",
+      "field": "description",
+      "sourceHash": "sha256:20e88a5367e88b583c917bce02a206f7c636a216645f7be24c37029e2a047b53",
+      "text": "将数据源移到集合最顶部。"
+    },
+    {
+      "id": "DataSourceCollection#raiseToTop",
+      "field": "exceptions/0/description",
+      "sourceHash": "sha256:10513c6251c4fe6e0811c9e9fe2d5d3f6d150be21f8cf045707249221a76007d",
+      "text": "dataSource 不在此集合中。"
+    },
+    {
+      "id": "DataSourceCollection#raiseToTop",
+      "field": "params/dataSource/description",
+      "sourceHash": "sha256:6d76506985beb3e19fe86575424c68b868db4113b967c5a61b6bc9d636e50635",
+      "text": "要移动的数据源。"
+    },
+    {
+      "id": "DataSourceCollection#remove",
+      "field": "description",
+      "sourceHash": "sha256:3d49cefe24cb88cd865c710e7bb0eacd968f80a1bd84b96e8326cb58936e1057",
+      "text": "若集合中存在此数据源，则将其移除。"
+    },
+    {
+      "id": "DataSourceCollection#remove",
+      "field": "params/dataSource/description",
+      "sourceHash": "sha256:d01a53eea8a4088d4654d23c98706260c41773102d90ad5bdee930ce4a0cadc5",
+      "text": "要移除的数据源。"
+    },
+    {
+      "id": "DataSourceCollection#remove",
+      "field": "params/destroy/description",
+      "sourceHash": "sha256:60599ad3b8f3161fbb52452806ae4231994b0d8722e13667200344340384f40e",
+      "text": "是否在移除数据源的同时销毁它。"
+    },
+    {
+      "id": "DataSourceCollection#remove",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:b835cf3808e65a178cf7082a7c9fb818c6970bbbef0a6aee816186eeba5db659",
+      "text": "若数据源原本存在于集合中并已移除，则返回 true；若数据源不在集合中，则返回 false。"
+    },
+    {
+      "id": "DataSourceCollection#removeAll",
+      "field": "description",
+      "sourceHash": "sha256:feacc03066066d21620b7da7a3b256f766ab92cf77ef98489d5e26a754c05220",
+      "text": "移除此集合中的全部数据源。"
+    },
+    {
+      "id": "DataSourceCollection#removeAll",
+      "field": "params/destroy/description",
+      "sourceHash": "sha256:fea1df8b79cef73acd3809b5329a3f6163078942d8cab81e9a94b49393b14926",
+      "text": "是否在移除数据源的同时销毁它们。"
+    },
+    {
+      "id": "Entity.ConstructorOptions",
+      "field": "description",
+      "sourceHash": "sha256:19957102c5522b8bf588d76b7dec4924854dd751b1c58e398b07f9854a8a40ca",
+      "text": "Entity 构造函数的初始化选项。"
+    },
+    {
+      "id": "Entity.ConstructorOptions",
+      "field": "properties/availability/description",
+      "sourceHash": "sha256:bd965bdb969b2f45613466bbf146d95cec2e6f850c78f881ac6f2718b9dcaf1f",
+      "text": "与此对象关联的可用时间范围，若有。"
+    },
+    {
+      "id": "Entity.ConstructorOptions",
+      "field": "properties/billboard/description",
+      "sourceHash": "sha256:51d52fec0a0da8ca39b3c124a200acc86791ee074bdfba5613526e3ebfeac518",
+      "text": "与此实体关联的广告牌。"
+    },
+    {
+      "id": "Entity.ConstructorOptions",
+      "field": "properties/box/description",
+      "sourceHash": "sha256:c0ea99bf90fa32a736a5d7ed9603222ad0a56380c21647961774ff34d716f359",
+      "text": "与此实体关联的长方体。"
+    },
+    {
+      "id": "Entity.ConstructorOptions",
+      "field": "properties/corridor/description",
+      "sourceHash": "sha256:cc29c1f809032d4a21a1b2b7b78f93d247717275fbdd271f47ec95684e9fa751",
+      "text": "与此实体关联的走廊。"
+    },
+    {
+      "id": "Entity.ConstructorOptions",
+      "field": "properties/cylinder/description",
+      "sourceHash": "sha256:97ed14b098e0bedfc829e9723dc7e1653594a6b5f1f85adf965e56cb7141eea3",
+      "text": "与此实体关联的圆柱体。"
+    },
+    {
+      "id": "Entity.ConstructorOptions",
+      "field": "properties/description/description",
+      "sourceHash": "sha256:d677f65b8b6e49eeaf93a407d7eb395d5ebf4f745de5ec9a9726d1c845971d0b",
+      "text": "用于指定此实体 HTML 描述的字符串 Property。"
+    },
+    {
+      "id": "Entity.ConstructorOptions",
+      "field": "properties/ellipse/description",
+      "sourceHash": "sha256:8b17b71d0f15bd7e6f3f8cc9c95ca7e62dfd107c61b49f71b006c5703fd66ff1",
+      "text": "与此实体关联的椭圆。"
+    },
+    {
+      "id": "Entity.ConstructorOptions",
+      "field": "properties/ellipsoid/description",
+      "sourceHash": "sha256:11d6e82c7438152d4d208708437b44fbc5bcc5fe11c2c19b308318586fa89613",
+      "text": "与此实体关联的椭球。"
+    },
+    {
+      "id": "Entity.ConstructorOptions",
+      "field": "properties/id/description",
+      "sourceHash": "sha256:c2d7fcdb834be3602c936497242697aec9558f756ff1b64cf84aade63b26253a",
+      "text": "此对象的唯一标识符。若未提供，则生成 GUID。"
+    },
+    {
+      "id": "Entity.ConstructorOptions",
+      "field": "properties/label/description",
+      "sourceHash": "sha256:0d0d24771f2c79f218bb386aa012b8220d7cd6fd33a2006714465f8752b534e5",
+      "text": "与此实体关联的 options.label。"
+    },
+    {
+      "id": "Entity.ConstructorOptions",
+      "field": "properties/model/description",
+      "sourceHash": "sha256:ddb1a06038cba611bf5ea8ea49ea33ff817261b599b7ca7f3801789d14911406",
+      "text": "与此实体关联的模型。"
+    },
+    {
+      "id": "Entity.ConstructorOptions",
+      "field": "properties/name/description",
+      "sourceHash": "sha256:d607a1b03a156e782c4c798d6359bb9ef40dee922dfb43f07506e9f4a99b5cbe",
+      "text": "向用户显示的可读名称，无需唯一。"
+    },
+    {
+      "id": "Entity.ConstructorOptions",
+      "field": "properties/orientation/description",
+      "sourceHash": "sha256:eaa9980f17258d0439ab5ba7f4994a7c562f569f8e0c6b76fb08d324f5f73e89",
+      "text": "指定实体相对于地心地固坐标系（ECEF）朝向的 Property。若未定义，则使用实体位置处的东、北、天参考坐标系。"
+    },
+    {
+      "id": "Entity.ConstructorOptions",
+      "field": "properties/parent/description",
+      "sourceHash": "sha256:ebc029b50d1e335c7f93f3db69761e52bbf911a1a7682aabe37c23749fc65911",
+      "text": "与此实体关联的父实体。"
+    },
+    {
+      "id": "Entity.ConstructorOptions",
+      "field": "properties/path/description",
+      "sourceHash": "sha256:516c899678c86e5669317ee82daeb189891c6bbc5d7eb94fb4b36cfefab73a69",
+      "text": "与此实体关联的路径。"
+    },
+    {
+      "id": "Entity.ConstructorOptions",
+      "field": "properties/plane/description",
+      "sourceHash": "sha256:a19ac91cc97d0b379620a7e93e55af0598f86522d8bbe000d495a79b2b94dd9b",
+      "text": "与此实体关联的平面。"
+    },
+    {
+      "id": "Entity.ConstructorOptions",
+      "field": "properties/point/description",
+      "sourceHash": "sha256:9dda288684dff8ec9720d9882f53699aa3922d12b60f8e0fae908db639dd2c1b",
+      "text": "与此实体关联的点。"
+    },
+    {
+      "id": "Entity.ConstructorOptions",
+      "field": "properties/polygon/description",
+      "sourceHash": "sha256:e05a3cacdfbc30caee746ee9d3a0edd646607de21c5683d658a9f216165eded1",
+      "text": "与此实体关联的多边形。"
+    },
+    {
+      "id": "Entity.ConstructorOptions",
+      "field": "properties/polyline/description",
+      "sourceHash": "sha256:0187766f6c4ed6c98a5b7064eb0c3b3bfdb0c62534a0e1e8783eed8522534e42",
+      "text": "与此实体关联的折线。"
+    },
+    {
+      "id": "Entity.ConstructorOptions",
+      "field": "properties/polylineVolume/description",
+      "sourceHash": "sha256:9637c9cd5c8ec81a17851eccacad93ac4c41b072eb6018f0dbb704e173b0bcf8",
+      "text": "与此实体关联的折线体。"
+    },
+    {
+      "id": "Entity.ConstructorOptions",
+      "field": "properties/position/description",
+      "sourceHash": "sha256:587f77c3b171f18b71a3a15d3374e4f169e155ed0448e1a36684e097b418db82",
+      "text": "指定实体位置的 Property。"
+    },
+    {
+      "id": "Entity.ConstructorOptions",
+      "field": "properties/properties/description",
+      "sourceHash": "sha256:c4614e8922b2e017e7705ca554806bd57e066f77bc664a50badb2cf7c45b6100",
+      "text": "与此实体关联的任意属性。"
+    },
+    {
+      "id": "Entity.ConstructorOptions",
+      "field": "properties/rectangle/description",
+      "sourceHash": "sha256:38ac779129c1f04a65bb61f83c2ddc39ec27906023bb99c12bc0a20be919c14f",
+      "text": "与此实体关联的矩形。"
+    },
+    {
+      "id": "Entity.ConstructorOptions",
+      "field": "properties/show/description",
+      "sourceHash": "sha256:6af68515f0cc3778909fa75b0f514e0150488b93a36de39dd080bfd8e14a2bb2",
+      "text": "指示是否显示此实体及其子实体的布尔值。"
+    },
+    {
+      "id": "Entity.ConstructorOptions",
+      "field": "properties/tileset/description",
+      "sourceHash": "sha256:a618bb56c63a50e17d5229e788bb57530c441ce528b2ee9f196f144f1ba70c8a",
+      "text": "与此实体关联的 3D Tiles 瓦片集。"
+    },
+    {
+      "id": "Entity.ConstructorOptions",
+      "field": "properties/trackingReferenceFrame/description",
+      "sourceHash": "sha256:f16be1b2779d37c64f6d91b1650c6aa5a4e05699346907ef9fc598d0f86844e6",
+      "text": "跟踪此实体时使用的参考坐标系。<br/> 若为 <code>undefined</code>，则根据实体速度确定：接近表面且移动缓慢的实体使用局部东、北、天参考坐标系，卫星等高速实体使用 VVLH（航行器速度、局部水平）参考坐标系。"
+    },
+    {
+      "id": "Entity.ConstructorOptions",
+      "field": "properties/viewFrom/description",
+      "sourceHash": "sha256:576993568b38f323b07476bf5021c50d9b1fa31962cb632c8602eb6d77d3a12b",
+      "text": "观察此对象时建议的初始偏移。"
+    },
+    {
+      "id": "Entity.ConstructorOptions",
+      "field": "properties/wall/description",
+      "sourceHash": "sha256:6402d47a192f91d000b1ff93d89bd633fab1b4791ef41d08d771edaac71a023f",
+      "text": "与此实体关联的墙体。"
+    },
+    {
+      "id": "Entity.supportsMaterialsforEntitiesOnTerrain",
+      "field": "description",
+      "sourceHash": "sha256:2bfa4eaa4f740494f2827c636798ee94fb29b33eba9ca34c14887a6e2313ef81",
+      "text": "检查给定 Scene 是否支持覆盖在地形或 3D Tiles 上的实体使用 Color 以外的材质。若不支持，使用非颜色材质且未指定 `height` 的实体，将按高度为 0 渲染。"
+    },
+    {
+      "id": "Entity.supportsMaterialsforEntitiesOnTerrain",
+      "field": "params/scene/description",
+      "sourceHash": "sha256:2602abbd222a7a83c7faadfe2d9124ad21aebd00fb3fd5848f5ec168fcd99d7a",
+      "text": "当前场景。"
+    },
+    {
+      "id": "Entity.supportsMaterialsforEntitiesOnTerrain",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:7baa7aea853a2575883e668a564535f7015e76973ff12bae5e22a9b764bcb20b",
+      "text": "当前场景是否支持贴地实体材质。"
+    },
+    {
+      "id": "Entity.supportsPolylinesOnTerrain",
+      "field": "description",
+      "sourceHash": "sha256:64412c1d81c9aaa29da1dec9bc21cb5c002889763c8cfe7c506d7400716f1ead",
+      "text": "检查给定 Scene 是否支持贴合到地形或 3D Tiles 的折线。若不支持，具有 PolylineGraphics 的实体会使用所给顶点高度和 `arcType` 参数渲染，而不贴合地面。"
+    },
+    {
+      "id": "Entity.supportsPolylinesOnTerrain",
+      "field": "params/scene/description",
+      "sourceHash": "sha256:2602abbd222a7a83c7faadfe2d9124ad21aebd00fb3fd5848f5ec168fcd99d7a",
+      "text": "当前场景。"
+    },
+    {
+      "id": "Entity.supportsPolylinesOnTerrain",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:60939d388de6c09166621eea12da36b4ff104cdd626d4eec2c45212f5ac17662",
+      "text": "当前场景是否支持地形或 3D Tiles 上的折线。"
+    },
+    {
+      "id": "Entity#addProperty",
+      "field": "description",
+      "sourceHash": "sha256:dec9c0a4a78ea3ba4174bff1267545367a4fa98608653dec88034aabd30f4729",
+      "text": "向此对象添加属性。添加后，可通过 {@link Entity#definitionChanged} 观察变化，并通过 {@link CompositeEntityCollection} 参与组合。"
+    },
+    {
+      "id": "Entity#addProperty",
+      "field": "exceptions/0/description",
+      "sourceHash": "sha256:c0d145aef50d70b86b03224cf0989e6c316f2ff80fa9069232f8a9b790fa6aa3",
+      "text": "\"propertyName\" 是保留的属性名称。"
+    },
+    {
+      "id": "Entity#addProperty",
+      "field": "exceptions/1/description",
+      "sourceHash": "sha256:7a47771fd78499f69840264a2e9c4a9318b0bee9a27b1d1784aff871b70193d4",
+      "text": "\"propertyName\" 已注册为属性。"
+    },
+    {
+      "id": "Entity#addProperty",
+      "field": "params/propertyName/description",
+      "sourceHash": "sha256:f7b3e0b44b21eb5b3f88966ae0d4b9a6bdf280b1c14ec444127233cb413efa3a",
+      "text": "要添加的属性名称。"
+    },
+    {
+      "id": "Entity#availability",
+      "field": "description",
+      "sourceHash": "sha256:46dced81a8f2059aef878128b948e6172b67dff99a853756a1fa042946cf1781",
+      "text": "与此对象关联的可用时间范围，若有。若 availability 为 undefined，则假定其他属性对任意给定时间均返回有效数据；若已定义，则其他属性仅在给定时间区间内查询时提供有效数据。"
+    },
+    {
+      "id": "Entity#billboard",
+      "field": "description",
+      "sourceHash": "sha256:29d015292c4d4e4c6b0b71798c4e97e797378712c9c7c9125ac536da0500dda3",
+      "text": "获取或设置广告牌。"
+    },
+    {
+      "id": "Entity#box",
+      "field": "description",
+      "sourceHash": "sha256:e6d4f794f97cfceed4909a4461e166ae8a5fe72e387d98908835341cc5f9ab50",
+      "text": "获取或设置长方体。"
+    },
+    {
+      "id": "Entity#computeModelMatrix",
+      "field": "description",
+      "sourceHash": "sha256:f3af22da34607d4cc8e4164f2fa583e4d8c6d892754fdf074dae211228ada380",
+      "text": "计算此实体在指定时间的变换模型矩阵。若 position 为 undefined，则返回 undefined。"
+    },
+    {
+      "id": "Entity#computeModelMatrix",
+      "field": "params/time/description",
+      "sourceHash": "sha256:d1aa1c3c4ad364fa499b9f704b4edc797263a206f29e1e1a8042c0f41253ebd7",
+      "text": "要获取模型矩阵的时间。"
+    },
+    {
+      "id": "Entity#computeModelMatrix",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:a752d8899e6af505f6d94a6fb4125e7200ace303af485b94f09a476d28407619",
+      "text": "修改后的 result 参数；未提供时返回新建的 Matrix4 实例。若 position 为 undefined，结果也为 undefined。"
+    },
+    {
+      "id": "Entity#corridor",
+      "field": "description",
+      "sourceHash": "sha256:26de7b207f02ebedbcc49f62137de6f0de694e4e2e31629089c5759aecc4d6a3",
+      "text": "获取或设置走廊。"
+    },
+    {
+      "id": "Entity#cylinder",
+      "field": "description",
+      "sourceHash": "sha256:d806946322b612b7bcec8e9bb0099d50e0a41284e8946939100fd1022f8b87fa",
+      "text": "获取或设置圆柱体。"
+    },
+    {
+      "id": "Entity#description",
+      "field": "description",
+      "sourceHash": "sha256:231a88afeb0099730b2cdf966ee5b153e5b4d2786caa249417da8d35db1ebcd5",
+      "text": "获取或设置说明。"
+    },
+    {
+      "id": "Entity#ellipse",
+      "field": "description",
+      "sourceHash": "sha256:dad1bdccda8c444ef41d34a7b3167586f8197ff47f25a29bccf15408547513c1",
+      "text": "获取或设置椭圆。"
+    },
+    {
+      "id": "Entity#ellipsoid",
+      "field": "description",
+      "sourceHash": "sha256:1743dc37cffdae40f4926cdf8337c2406510a319435cb3aa5229021fb2b4770a",
+      "text": "获取或设置椭球。"
+    },
+    {
+      "id": "Entity#entityCollection",
+      "field": "description",
+      "sourceHash": "sha256:58ef39b8cdc2482775b3704ce74c2f6101a8d9d24c99163f69ec501c70719a80",
+      "text": "获取或设置此实体所属的实体集合。"
+    },
+    {
+      "id": "Entity#id",
+      "field": "description",
+      "sourceHash": "sha256:401fd087ebeec8a50cb99c95b0afade587941fc08dc9d1f91bd19eefab1e591e",
+      "text": "获取此对象关联的唯一 ID。"
+    },
+    {
+      "id": "Entity#isAvailable",
+      "field": "description",
+      "sourceHash": "sha256:c707c0c316908ec33ff7a1402d63811b08061bb09f46b487fa98f789643d2089",
+      "text": "给定时间，返回此对象在该时间是否应具有数据。"
+    },
+    {
+      "id": "Entity#isAvailable",
+      "field": "params/time/description",
+      "sourceHash": "sha256:d31e766969a37cc0930d0193bd5782cdb9f63e2d84c4551dfe4079b8e03d6dd8",
+      "text": "要检查可用性的时间。"
+    },
+    {
+      "id": "Entity#isAvailable",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:9ee0c0ba330cee16b91210cbadf488c911b2ecfdc3e99483e14d3ca1d8db1c67",
+      "text": "若对象在给定时间应具有数据，则返回 true；否则返回 false。"
+    },
+    {
+      "id": "Entity#isShowing",
+      "field": "description",
+      "sourceHash": "sha256:cd2b8b7ef16196dd061b78ccb1a8156d0931ccd39ec7b6c4789d422ba48dc363",
+      "text": "获取此实体是否正在显示，同时考虑所有祖先实体的可见性。"
+    },
+    {
+      "id": "Entity#label",
+      "field": "description",
+      "sourceHash": "sha256:658e066e76182fc795833064e79c679d37595edbe55247873ea23351e5c5e6da",
+      "text": "获取或设置标签。"
+    },
+    {
+      "id": "Entity#model",
+      "field": "description",
+      "sourceHash": "sha256:6a9e65d418a7ffd058c48aabf67e68957b03eb58e3bd1a18660d3b0edafa0ed7",
+      "text": "获取或设置模型。"
+    },
+    {
+      "id": "Entity#name",
+      "field": "description",
+      "sourceHash": "sha256:cd5d14926b99cb8050a851de49c24de6b8bbbd368e4096ad4ef36c8819178fb8",
+      "text": "获取或设置对象名称。此名称面向最终用户，无需唯一。"
+    },
+    {
+      "id": "Entity#orientation",
+      "field": "description",
+      "sourceHash": "sha256:3ed1bfd8f1f72e217ad2c585bfb2a4d89d926b9af8256601ce01f09b8421436a",
+      "text": "获取或设置相对于地心地固坐标系（ECEF）的朝向。默认为实体位置处的东、北、天参考坐标系。"
+    },
+    {
+      "id": "Entity#parent",
+      "field": "description",
+      "sourceHash": "sha256:a1a675fe1b60724085ef1698e45e7a26c8ae14e31640e88878f2983938ebc398",
+      "text": "获取或设置父对象。"
+    },
+    {
+      "id": "Entity#path",
+      "field": "description",
+      "sourceHash": "sha256:1daa65f0c0c5aadd24272dc4be36503e9fe79c292425fbe329c200d72b707390",
+      "text": "获取或设置路径。"
+    },
+    {
+      "id": "Entity#plane",
+      "field": "description",
+      "sourceHash": "sha256:26c8ca6ec6ea689c943b3d5d541cd49efc6e3df3ccb8d8a6213922d818289d6b",
+      "text": "获取或设置平面。"
+    },
+    {
+      "id": "Entity#point",
+      "field": "description",
+      "sourceHash": "sha256:fa3262f7858a495f43a54eace039453bbee803ee4226ed183efa236f9fe3ac99",
+      "text": "获取或设置点图形。"
+    },
+    {
+      "id": "Entity#polygon",
+      "field": "description",
+      "sourceHash": "sha256:4ef4806ac4a8ddf55dcd5869dd4ba37b1ef9fa376be1a9db94e40e9f37f55840",
+      "text": "获取或设置多边形。"
+    },
+    {
+      "id": "Entity#polyline",
+      "field": "description",
+      "sourceHash": "sha256:8daa1c23de85cede89de4122b6e2b9f93bee685a55265a36ba5023cab37decfc",
+      "text": "获取或设置折线。"
+    },
+    {
+      "id": "Entity#polylineVolume",
+      "field": "description",
+      "sourceHash": "sha256:9627b39668cc9614e0c299e1e77e3461cb864508b62ff51ae3bb0b0100b7833a",
+      "text": "获取或设置折线体。"
+    },
+    {
+      "id": "Entity#position",
+      "field": "description",
+      "sourceHash": "sha256:9b1c700c0d32c69f1e5929d240da6ebd161fc56205cce11f61b54950b546ab54",
+      "text": "获取或设置位置。"
+    },
+    {
+      "id": "Entity#properties",
+      "field": "description",
+      "sourceHash": "sha256:b63f287d1f65011d8fcefe001a2b32f4d35502b9a481ce4652b2ec62488d5d5b",
+      "text": "获取或设置与此实体关联的任意属性集。"
+    },
+    {
+      "id": "Entity#propertyNames",
+      "field": "description",
+      "sourceHash": "sha256:b6567a0bd0cb8e14e90f1c2541aae86a91051254205b56fe69c194505c7fe7ca",
+      "text": "获取此实例上全部已注册属性的名称。"
+    },
+    {
+      "id": "Entity#rectangle",
+      "field": "description",
+      "sourceHash": "sha256:b3d6d07bc11967ffbce79dc02de18c8f3ca6b13ea26356fbb336c52c2c5790c3",
+      "text": "获取或设置矩形。"
+    },
+    {
+      "id": "Entity#removeProperty",
+      "field": "description",
+      "sourceHash": "sha256:0ca8c2246105a38f123955f47a8bf4829075fa5a38e36518bf3b72a132af8ef2",
+      "text": "移除先前通过 addProperty 添加的属性。"
+    },
+    {
+      "id": "Entity#removeProperty",
+      "field": "exceptions/0/description",
+      "sourceHash": "sha256:c0d145aef50d70b86b03224cf0989e6c316f2ff80fa9069232f8a9b790fa6aa3",
+      "text": "\"propertyName\" 是保留的属性名称。"
+    },
+    {
+      "id": "Entity#removeProperty",
+      "field": "exceptions/1/description",
+      "sourceHash": "sha256:14f5d058f494e778d04fa4e464aaee18986d2d3d98aed7572a6e100ae864384f",
+      "text": "\"propertyName\" 不是已注册属性。"
+    },
+    {
+      "id": "Entity#removeProperty",
+      "field": "params/propertyName/description",
+      "sourceHash": "sha256:53ac7d2e726afc2dd504315043b19e5d1e8df5d9dba448468682ad0f3b1c8b0b",
+      "text": "要移除的属性名称。"
+    },
+    {
+      "id": "Entity#show",
+      "field": "description",
+      "sourceHash": "sha256:67217b243fd247a858e295286f3ea7ef716ba52cb7642224074329483b2fd847",
+      "text": "获取或设置是否显示此实体。设为 true 时，只有父实体的 show 属性也为 true，实体才会显示。"
+    },
+    {
+      "id": "Entity#tileset",
+      "field": "description",
+      "sourceHash": "sha256:e3fc9515994a1990eb769b2fbad405dea241c364f0847f6f0ff5be2883de0a33",
+      "text": "获取或设置瓦片集。"
+    },
+    {
+      "id": "Entity#trackingReferenceFrame",
+      "field": "description",
+      "sourceHash": "sha256:ea7fdeb64ce4881eef18c063b4c663d2d08e948f3c8b09131f3b9dcbbfa42a42",
+      "text": "获取或设置实体跟踪所用的参考坐标系。"
+    },
+    {
+      "id": "Entity#viewFrom",
+      "field": "description",
+      "sourceHash": "sha256:6ff91e9703f227cd330519997f705cc2f6f0542523f6d19dcbfee6e31ee689de",
+      "text": "获取或设置跟踪此对象时建议的初始偏移。通常使用东、北、天参考坐标系定义，但也可能根据对象速度使用其他参考坐标系。"
+    },
+    {
+      "id": "Entity#wall",
+      "field": "description",
+      "sourceHash": "sha256:29c0dff412425ce1102e077460f277504fb3716c363f78f87f685e11c7972e89",
+      "text": "获取或设置墙体。"
+    },
+    {
+      "id": "EntityCollection.CollectionChangedEventCallback",
+      "field": "description",
+      "sourceHash": "sha256:75ad10d261ef74c83bb4e3cddaa9fd628c354780d2d16f5b4e50f2ef577eeb84",
+      "text": "{@link EntityCollection#collectionChanged} 所触发事件的回调签名。"
+    },
+    {
+      "id": "EntityCollection.CollectionChangedEventCallback",
+      "field": "params/added/description",
+      "sourceHash": "sha256:df0a7ed09b07d05b6b90900fca596b8565aa908f5524650d4a83ddcd952ca1fb",
+      "text": "已添加到集合中的 {@link Entity} 实例数组。"
+    },
+    {
+      "id": "EntityCollection.CollectionChangedEventCallback",
+      "field": "params/changed/description",
+      "sourceHash": "sha256:efa692f91d57bd700f85123414cd68d30613f65b87ae2e1bef512952f3002762",
+      "text": "已修改的 {@link Entity} 实例数组。"
+    },
+    {
+      "id": "EntityCollection.CollectionChangedEventCallback",
+      "field": "params/collection/description",
+      "sourceHash": "sha256:1bf9c6ba5b0268cac25998167dd9d9a517ccbcbefb1c935353c5ca4ea76a12fc",
+      "text": "触发事件的集合。"
+    },
+    {
+      "id": "EntityCollection.CollectionChangedEventCallback",
+      "field": "params/removed/description",
+      "sourceHash": "sha256:3300d1030ec271f47c800b61b22643cb638b800137eac36d5c6f2444c93aa649",
+      "text": "已从集合移除的 {@link Entity} 实例数组。"
+    },
+    {
+      "id": "EntityCollection",
+      "field": "params/owner/description",
+      "sourceHash": "sha256:5f143433725288a917167bd1b5892cd225a8cc5c9b7e4e67fbdfe6fe4af9813e",
+      "text": "创建此集合的数据源或复合实体集合。"
+    },
+    {
+      "id": "EntityCollection#add",
+      "field": "description",
+      "sourceHash": "sha256:f6372b73d953f118782fccf8038f838cc98ec233df5587b3338f921e52bcc6f6",
+      "text": "将实体添加到集合。"
+    },
+    {
+      "id": "EntityCollection#add",
+      "field": "exceptions/0/description",
+      "sourceHash": "sha256:6559562bff98a921efcd55fa983bd68ec4308b6ef029f90d6a76e2d24766fd1b",
+      "text": "此集合中已存在 <entity.id> 对应的实体。"
+    },
+    {
+      "id": "EntityCollection#add",
+      "field": "params/entity/description",
+      "sourceHash": "sha256:b0af8fda303a533a054da4bc911ec8ef321a56abaa433dd3c2d7c7142884f9ad",
+      "text": "要添加的实体。"
+    },
+    {
+      "id": "EntityCollection#add",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:bbb063120eda860750876ee6a6f53e227e9cf3139aa35aa058d3765222bbcd7d",
+      "text": "已添加的实体。"
+    },
+    {
+      "id": "EntityCollection#collectionChanged",
+      "field": "description",
+      "sourceHash": "sha256:8b9df3a126856d1235f1b050572e3f095e6c49549b0e12af332705c3d7d65577",
+      "text": "获取实体添加到集合或从集合移除时触发的事件。所触发事件为 {@link EntityCollection.CollectionChangedEventCallback}。"
+    },
+    {
+      "id": "EntityCollection#computeAvailability",
+      "field": "description",
+      "sourceHash": "sha256:f897a8b19c16ef277754ee63aa73a75dc7feef499f96b7456db1891b019a46fb",
+      "text": "计算集合中实体的最大可用时间范围。若同时包含无限可用数据和非无限可用数据，仅返回非无限数据的时间区间；若全部数据均为无限可用，则返回无限区间。"
+    },
+    {
+      "id": "EntityCollection#computeAvailability",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:643ddcad2a4a9268acf732678f797274c5b9e8866ac26e1d5c89e0fe2ebd33ec",
+      "text": "集合中实体的可用时间范围。"
+    },
+    {
+      "id": "EntityCollection#contains",
+      "field": "description",
+      "sourceHash": "sha256:45697aea4f805a7ff2a4ee0decda94119826654550a7becb9877d3d414069b6b",
+      "text": "若给定实体在此集合中，则返回 true；否则返回 false。"
+    },
+    {
+      "id": "EntityCollection#contains",
+      "field": "params/entity/description",
+      "sourceHash": "sha256:efc8e5328a51fbe4b0dbfa74e8176092a8a4bc7afd6e949be39207c2e12dfd34",
+      "text": "实体。"
+    },
+    {
+      "id": "EntityCollection#contains",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:e597222f97db6a31e66a37dfd38952ee1ca3fcdc451044714d7a3b107d7add26",
+      "text": "若给定实体在此集合中，则返回 true；否则返回 false。"
+    },
+    {
+      "id": "EntityCollection#getById",
+      "field": "description",
+      "sourceHash": "sha256:425df8be4b6d7d9ac83f9d44e5dc02da8c58e5071fc932d76927646fc8898feb",
+      "text": "获取指定 ID 的实体。"
+    },
+    {
+      "id": "EntityCollection#getById",
+      "field": "params/id/description",
+      "sourceHash": "sha256:f39daac4b43c32f4c7b5880c379a446c5f9e0f019de2333f80aa67a24f225317",
+      "text": "要获取的实体 ID。"
+    },
+    {
+      "id": "EntityCollection#getById",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:3c9d428b9435081d03e49eddbc8c8e1cf5fbbe1048873f552ce52dca4eed2963",
+      "text": "指定 ID 的实体；若集合中不存在此 ID，则返回 undefined。"
+    },
+    {
+      "id": "EntityCollection#getOrCreateEntity",
+      "field": "description",
+      "sourceHash": "sha256:dd269c4f81464d3252adcb29dbf95586e808754597a788eec1ed43bf6946d2ea",
+      "text": "获取指定 ID 的实体；若不存在，则创建并添加到集合。"
+    },
+    {
+      "id": "EntityCollection#getOrCreateEntity",
+      "field": "params/id/description",
+      "sourceHash": "sha256:42db951e8ba7d031da37f2f03b09bd2f89907594c6c80226127c5a8c3aec2da9",
+      "text": "要获取或创建的实体 ID。"
+    },
+    {
+      "id": "EntityCollection#getOrCreateEntity",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:809fdd9998ca0e4ddef913cc4f012fd991063ecef8522e7df5363c11e561fca3",
+      "text": "新建或已存在的对象。"
+    },
+    {
+      "id": "EntityCollection#id",
+      "field": "description",
+      "sourceHash": "sha256:b11a6b3b5b178e3bd4040008244885fc4d88c673fea196af0681d6b939fcd975",
+      "text": "获取此集合的全局唯一标识符。"
+    },
+    {
+      "id": "EntityCollection#owner",
+      "field": "description",
+      "sourceHash": "sha256:619b5d51c7e57de1afaabaca5b71a45c2841ab6bc5fb005ef74443a359bb8fcc",
+      "text": "获取此实体集合的所有者，即创建它的数据源或复合实体集合。"
+    },
+    {
+      "id": "EntityCollection#remove",
+      "field": "description",
+      "sourceHash": "sha256:ddea8cf9e5cfb2c16567a56d3a511500a37a9a72844be75033080bf4fbb57f96",
+      "text": "从集合中移除实体。"
+    },
+    {
+      "id": "EntityCollection#remove",
+      "field": "params/entity/description",
+      "sourceHash": "sha256:6b3a42084a03701456586bb42a1b515ff0ac52d4296dcdae3a3d43a26f237a51",
+      "text": "要移除的实体。"
+    },
+    {
+      "id": "EntityCollection#remove",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:5376d0f2f669beb3ff187cc71154f6b1d93ab33f9ad56d879bb8981241fd2809",
+      "text": "若已移除，则返回 true；若集合中不存在此项，则返回 false。"
+    },
+    {
+      "id": "EntityCollection#removeAll",
+      "field": "description",
+      "sourceHash": "sha256:bbc687e8207c010976248db75b90f61ce41b16d1f007a58d135879c6304bcf8f",
+      "text": "移除集合中的全部实体。"
+    },
+    {
+      "id": "EntityCollection#removeById",
+      "field": "description",
+      "sourceHash": "sha256:f34c05f5a49254cc061fccc5dfbfeba9d01b999df660999e00bf876ba3b984b4",
+      "text": "从集合移除给定 ID 的实体。"
+    },
+    {
+      "id": "EntityCollection#removeById",
+      "field": "params/id/description",
+      "sourceHash": "sha256:2a9d339a889fbb95ce4a19b7b656593bc910e474f270c6e3c51a405575cf00a3",
+      "text": "要移除的实体 ID。"
+    },
+    {
+      "id": "EntityCollection#removeById",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:361406448ef3e747724fbffaeef8aa94911818409649b6701a55b76030bb1a30",
+      "text": "若已移除，则返回 true；若集合中不存在给定 ID 的实体，则返回 false。"
+    },
+    {
+      "id": "EntityCollection#resumeEvents",
+      "field": "description",
+      "sourceHash": "sha256:c30da436c7f02649591cf9b2433bda6fafb62c8ce48a342eabcd611861aa5db5",
+      "text": "恢复在添加或移除项目时立即触发 {@link EntityCollection#collectionChanged} 事件。事件暂停期间的全部修改，会在调用此函数时合并为一个事件触发。此函数使用引用计数，须与相应的事件挂起调用配对；通过 {@link EntityCollection#resumeEvents} 完成恢复。"
+    },
+    {
+      "id": "EntityCollection#resumeEvents",
+      "field": "exceptions/0/description",
+      "sourceHash": "sha256:6d117b25e0a3d0a4186563a34595f55ee309ef5534b52fcf5219f7d9a4082f30",
+      "text": "不能在 suspendEvents 之前调用 resumeEvents。"
+    },
+    {
+      "id": "EntityCollection#show",
+      "field": "description",
+      "sourceHash": "sha256:54125f703121d45c718509b27be7f2890c46ca04ed7d00e34c163e35b34380b8",
+      "text": "获取是否应显示此实体集合。为 true 时，每个实体仅在其自身 show 属性也为 true 时显示。"
+    },
+    {
+      "id": "EntityCollection#suspendEvents",
+      "field": "description",
+      "sourceHash": "sha256:8702efae1ec4f56aedb90fb08e3b76db9a4d0655e6ab8eec792cbc4dea477948",
+      "text": "阻止触发 {@link EntityCollection#collectionChanged} 事件，直到对应调用 {@link EntityCollection#resumeEvents}；届时以一个事件汇总全部暂停期间的操作。这可高效地批量添加或移除项目。只要具备对应的 {@link EntityCollection#resumeEvents} 调用，即可安全多次调用此函数。"
+    },
+    {
+      "id": "EntityCollection#values",
+      "field": "description",
+      "sourceHash": "sha256:74ddf4aca8cc8a4be83dddc184dff008492c3a17c4bc0294cc57317d12b63b48",
+      "text": "获取集合中 Entity 实例的数组。不要直接修改此数组。"
+    },
+    {
+      "id": "GeoJsonDataSource.clampToGround",
+      "field": "description",
+      "sourceHash": "sha256:46df1660f6b49071eaf6accc90932e390c055afc0653bbf39c38b895ddc29fbe",
+      "text": "获取或设置默认是否贴合地面。"
+    },
+    {
+      "id": "GeoJsonDataSource.crsLinkHrefs",
+      "field": "description",
+      "sourceHash": "sha256:f75545c6495a490633c15eb6b32c7efb7fbdf7d9c9ced963b9c9fc00eba210c0",
+      "text": "获取将 CRS 链接 href 属性映射到回调函数的对象。回调接收 CRS 属性对象，返回一个 Promise；其兑现结果为将 GeoJSON 坐标转换为 WGS84 地固笛卡尔坐标的函数。优先按 <code>crsLinkHrefs</code> 中的 href 匹配；若未匹配且提供了 type，再查询 crsLinkTypes。"
+    },
+    {
+      "id": "GeoJsonDataSource.crsLinkTypes",
+      "field": "description",
+      "sourceHash": "sha256:6ae509a2189d7c680a9d9078a8c481e2f07f75514f3a4ec5055bff790aac7ed0",
+      "text": "获取将 CRS 链接 type 属性映射到回调函数的对象。回调接收 CRS 属性对象，返回一个 Promise；其兑现结果为将 GeoJSON 坐标转换为 WGS84 地固笛卡尔坐标的函数。<code>crsLinkHrefs</code> 中的条目优先于此对象。"
+    },
+    {
+      "id": "GeoJsonDataSource.crsNames",
+      "field": "description",
+      "sourceHash": "sha256:fd9e5b38cb216133f6c92defa3e7672d2799d0a2bc7926d354f009c21ca77359",
+      "text": "获取将 CRS 名称映射到回调函数的对象；回调将 GeoJSON 坐标转换为 WGS84 地固笛卡尔坐标。旧版 GeoJSON 支持的 EPSG 类型也可通过完整 EPSG 名称加入，例如 'EPSG:4326'。"
+    },
+    {
+      "id": "GeoJsonDataSource.describe",
+      "field": "description",
+      "sourceHash": "sha256:e40e1e874142f867c9ac97f11947cd2890552e284a115c6acd02ca8a058354df",
+      "text": "此回调作为 GeoJsonDataSource 类的一部分显示。"
+    },
+    {
+      "id": "GeoJsonDataSource.describe",
+      "field": "params/nameProperty/description",
+      "sourceHash": "sha256:e281512ace3a8b4c6d2521e90cd14f145d9e763df7cd2b08849394a461e552e6",
+      "text": "Cesium 推测用于保存要素名称的属性键。"
+    },
+    {
+      "id": "GeoJsonDataSource.describe",
+      "field": "params/properties/description",
+      "sourceHash": "sha256:4735838d36d1da1ecd0c06c535902aa3612a1ffb29b60a94f3a0ff5a430c72e0",
+      "text": "要素属性。"
+    },
+    {
+      "id": "GeoJsonDataSource.fill",
+      "field": "description",
+      "sourceHash": "sha256:3da9147428dc996e53d79807dc97b60a9033b9e439b839a56add8a687f47ea96",
+      "text": "获取或设置多边形内部的默认颜色。"
+    },
+    {
+      "id": "GeoJsonDataSource.load",
+      "field": "description",
+      "sourceHash": "sha256:4a76ef7d0aa9513079e2052207797818e8612ae950b6d6dc3f979ff7ec27a29c",
+      "text": "根据提供的 GeoJSON 或 TopoJSON 数据加载新实例，并返回 Promise。"
+    },
+    {
+      "id": "GeoJsonDataSource.load",
+      "field": "params/data/description",
+      "sourceHash": "sha256:5e00f836258ba7447c294e407a4c3ea19ec0eeb7f53e440074047db52d578067",
+      "text": "要加载的 URL、GeoJSON 对象或 TopoJSON 对象。"
+    },
+    {
+      "id": "GeoJsonDataSource.load",
+      "field": "params/options/description",
+      "sourceHash": "sha256:6d3565bbafa26048e29e2a6fb6e5eca0fb1bcc394011fab179647bb04d7d4158",
+      "text": "指定配置选项的对象。"
+    },
+    {
+      "id": "GeoJsonDataSource.load",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:375493ad77d41d7c6779de54f48634d0daebc912cdaf2129d4296c9c19da472e",
+      "text": "数据加载完成时兑现的 Promise。"
+    },
+    {
+      "id": "GeoJsonDataSource.LoadOptions",
+      "field": "description",
+      "sourceHash": "sha256:82311a010ff93cf32b524facfa38f0db0e481225e51d22440370a7fd94c94d94",
+      "text": "<code>load</code> 方法的初始化选项。"
+    },
+    {
+      "id": "GeoJsonDataSource.LoadOptions",
+      "field": "properties/clampToGround/description",
+      "sourceHash": "sha256:dcaa473054246aabac3ba29787685863db24920f0792b56611dfad3db3b86ac2",
+      "text": "为 true 时，将几何要素（多边形或线串）贴合地面。"
+    },
+    {
+      "id": "GeoJsonDataSource.LoadOptions",
+      "field": "properties/describe/description",
+      "sourceHash": "sha256:c53c10fe519c823aa2f3bed18d797b104a0394a43789899a5a9ce321b78d8ed6",
+      "text": "返回 Property 对象或字符串的函数。"
+    },
+    {
+      "id": "GeoJsonDataSource.LoadOptions",
+      "field": "properties/fill/description",
+      "sourceHash": "sha256:0001f6ddd2946c27abc85836a781d7d71fd89bf43bd06e32ccbb84b1e3f36dd5",
+      "text": "多边形内部的默认颜色。"
+    },
+    {
+      "id": "GeoJsonDataSource.LoadOptions",
+      "field": "properties/markerColor/description",
+      "sourceHash": "sha256:bae203953499e8294c83c25e3d2faf105e90e1b2b43f2c048dc4c9fd213fd53f",
+      "text": "为每个点创建的地图图钉的默认颜色。"
+    },
+    {
+      "id": "GeoJsonDataSource.LoadOptions",
+      "field": "properties/markerSize/description",
+      "sourceHash": "sha256:893c2a3f8a908930276588145d8ce6d42fd952d36321adeb64f8fa87e198f181",
+      "text": "为每个点创建的地图图钉的默认像素尺寸。"
+    },
+    {
+      "id": "GeoJsonDataSource.LoadOptions",
+      "field": "properties/markerSymbol/description",
+      "sourceHash": "sha256:4ddf8cbdaf2a3c40d0004ac4754a8c7b6af707b313aed4ff2e81e089c9f44b7a",
+      "text": "为每个点创建的地图图钉的默认符号。"
+    },
+    {
+      "id": "GeoJsonDataSource.LoadOptions",
+      "field": "properties/planar/description",
+      "sourceHash": "sha256:0f50643b57343967bc2205b2d47cd5bb63ead94a7457261e6b95476055669398",
+      "text": "显式的平面坐标和目标世界。首次加载时省略此项，可保留原生球面坐标。"
+    },
+    {
+      "id": "GeoJsonDataSource.LoadOptions",
+      "field": "properties/sourceUri/description",
+      "sourceHash": "sha256:06640beed562f3b57ecefb0d4d37f3bf4b6bb145cbe76ef9b89a95458e9e8a31",
+      "text": "覆盖用于解析相对链接的 URL。"
+    },
+    {
+      "id": "GeoJsonDataSource.LoadOptions",
+      "field": "properties/stroke/description",
+      "sourceHash": "sha256:95f6ad8d52d5e02607d7802a9a534c86f59d6ff6feb6707d38f722609853e4ee",
+      "text": "折线和多边形轮廓的默认颜色。"
+    },
+    {
+      "id": "GeoJsonDataSource.LoadOptions",
+      "field": "properties/strokeWidth/description",
+      "sourceHash": "sha256:8d5ce38d4db96a197d4fca46e6344684a485d901250eb154bbbd47fe9def28d3",
+      "text": "折线和多边形轮廓的默认宽度。"
+    },
+    {
+      "id": "GeoJsonDataSource.markerColor",
+      "field": "description",
+      "sourceHash": "sha256:b9db34eddd755b578dc4037f952a6d9544a24de3ecdd91da4bc4f33400e4734b",
+      "text": "获取或设置为每个点创建的地图图钉的默认颜色。"
+    },
+    {
+      "id": "GeoJsonDataSource.markerSize",
+      "field": "description",
+      "sourceHash": "sha256:f261e307a49bd9c801addc4e1e95305b1827b17566ee4566053029b0f6ffc3b2",
+      "text": "获取或设置为每个点创建的地图图钉的默认像素尺寸。"
+    },
+    {
+      "id": "GeoJsonDataSource.markerSymbol",
+      "field": "description",
+      "sourceHash": "sha256:65501c5fbf53933c84701b4f140e7ea7d976aaf885964a8880c75a1d097767cc",
+      "text": "获取或设置为每个点创建的地图图钉的默认符号。可为任意有效的 {@link http://mapbox.com/maki/|Maki} 标识符、单个字符，或空白以不使用符号。"
+    },
+    {
+      "id": "GeoJsonDataSource.PlanarOptions",
+      "field": "description",
+      "sourceHash": "sha256:9f9c3ce074540595f5731ac2c06565d85708b485081ad3d5108b015395745ffb",
+      "text": "GeoJsonDataSource 的显式平面坐标绑定。首次 load 或 process 调用会固定坐标模式；后续调用省略此项时继承原绑定，不允许更改世界或投影回调。若要改变坐标域，请创建新数据源。数据源不拥有该世界。"
+    },
+    {
+      "id": "GeoJsonDataSource.PlanarOptions",
+      "field": "properties/projectCoordinates/description",
+      "sourceHash": "sha256:dffb9f4634525f76b76c565e3b7312c18d631bdcd9105f14c4c7bd586993b5e3",
+      "text": "将每个输入坐标转换为世界米制坐标。"
+    },
+    {
+      "id": "GeoJsonDataSource.PlanarOptions",
+      "field": "properties/world/description",
+      "sourceHash": "sha256:580104bc5e9e2917aa0fabc4c24bf761b47638ecfa2dfae8383dc51f223c5be1",
+      "text": "用于显示此数据源的活动平面世界。"
+    },
+    {
+      "id": "GeoJsonDataSource.ProjectCoordinates",
+      "field": "description",
+      "sourceHash": "sha256:1f653295afd1fd6aa37b2b416d291a5083d435f30da0185331a1a5214e2a1650",
+      "text": "将输入 GeoJSON 坐标投影到平面世界的米制坐标。结果会被复制，因此支持返回可复用的临时 Cartesian3。回调必须解释或拒绝传入的 CRS 元数据；不会根据世界推断 CRS。"
+    },
+    {
+      "id": "GeoJsonDataSource.ProjectCoordinates",
+      "field": "params/coordinates/description",
+      "sourceHash": "sha256:2f2a53f776c050e390da10938d0e28b4b4886f686dc4c011420f416369e7f976",
+      "text": "原始坐标，若为 TopoJSON，则在解码后传入。"
+    },
+    {
+      "id": "GeoJsonDataSource.ProjectCoordinates",
+      "field": "params/crs/description",
+      "sourceHash": "sha256:1dcbfc1c8772f1d144ded8c17231fa1a16685aa40c13e5e5bdfbc30b7ee109a6",
+      "text": "GeoJSON 根级 CRS 元数据；标准 WGS84 GeoJSON 为 undefined。"
+    },
+    {
+      "id": "GeoJsonDataSource.ProjectCoordinates",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:8bbbce97871ca99db27eb2c8c497548a58d7b12d2302d6922841538fa63bebdf",
+      "text": "目标世界中有限的 X 向东、Y 向北、Z 向上坐标位置。"
+    },
+    {
+      "id": "GeoJsonDataSource.stroke",
+      "field": "description",
+      "sourceHash": "sha256:f63578ba7c54fde876d241c20bbca272c11213cc92ed8b55e90e31d450a78502",
+      "text": "获取或设置折线和多边形轮廓的默认颜色。"
+    },
+    {
+      "id": "GeoJsonDataSource.strokeWidth",
+      "field": "description",
+      "sourceHash": "sha256:9d7cb1b967b55c9ecea7afe5a1ebc8e861fc2767bd3f57598ec9646a03a0d8e8",
+      "text": "获取或设置折线和多边形轮廓的默认宽度。"
+    },
+    {
+      "id": "GeoJsonDataSource",
+      "field": "params/name/description",
+      "sourceHash": "sha256:4b4f1fa904ca28cb0a0ab0fd67ca815019b0d60ff1b1849577f43b93d28844ec",
+      "text": "此数据源的名称。若为 undefined，则取 GeoJSON 文件名。"
+    },
+    {
+      "id": "GeoJsonDataSource#changedEvent",
+      "field": "description",
+      "sourceHash": "sha256:b94ff7939ceab7c88b90056e7db7bae1fdfa9de04248c03da5809a400b5399bc",
+      "text": "获取底层数据发生变化时触发的事件。"
+    },
+    {
+      "id": "GeoJsonDataSource#clock",
+      "field": "description",
+      "sourceHash": "sha256:75d9055b5f93e4ba2e3736761b0a9bf31d9fc5c27244c63606eafcd478a4a07b",
+      "text": "此 DataSource 仅定义静态数据，因此此属性始终为 undefined。"
+    },
+    {
+      "id": "GeoJsonDataSource#clustering",
+      "field": "description",
+      "sourceHash": "sha256:ccbf53f979b29ab36bf723f1ee1016f1ceb9246f68c2d4af95eb91b26fe56eeb",
+      "text": "获取或设置此数据源的聚合选项。此对象可由多个数据源共享。"
+    },
+    {
+      "id": "GeoJsonDataSource#credit",
+      "field": "description",
+      "sourceHash": "sha256:4b2913219f37c9058f57b4a2e330d28e8a372eac9ed782cf1eba2ace672fdd93",
+      "text": "获取为此数据源显示的版权信息。"
+    },
+    {
+      "id": "GeoJsonDataSource#entities",
+      "field": "description",
+      "sourceHash": "sha256:976b78e6c2b5f9a8351a5240d327e0812b07c6b42a809b150295d1df26821435",
+      "text": "获取 {@link Entity} 实例集合。"
+    },
+    {
+      "id": "GeoJsonDataSource#errorEvent",
+      "field": "description",
+      "sourceHash": "sha256:829f0851bfbe71a9601c4d0b1b13331625861008f3e81636dc2c24937b8110a5",
+      "text": "获取处理过程中发生错误时触发的事件。"
+    },
+    {
+      "id": "GeoJsonDataSource#isLoading",
+      "field": "description",
+      "sourceHash": "sha256:c8cccd6d79eb71061719faa92a252268a663761ddc5753ba0ae028ddc3997f7f",
+      "text": "获取指示数据源当前是否正在加载数据的值。"
+    },
+    {
+      "id": "GeoJsonDataSource#load",
+      "field": "description",
+      "sourceHash": "sha256:71e04e062f5e39a8b293c125b08fbc2e15ca0243d2c01eb2d858840724401ab3",
+      "text": "异步加载给定 GeoJSON 或 TopoJSON 数据，替换全部现有数据。"
+    },
+    {
+      "id": "GeoJsonDataSource#load",
+      "field": "params/data/description",
+      "sourceHash": "sha256:5e00f836258ba7447c294e407a4c3ea19ec0eeb7f53e440074047db52d578067",
+      "text": "要加载的 URL、GeoJSON 对象或 TopoJSON 对象。"
+    },
+    {
+      "id": "GeoJsonDataSource#load",
+      "field": "params/options/description",
+      "sourceHash": "sha256:6d3565bbafa26048e29e2a6fb6e5eca0fb1bcc394011fab179647bb04d7d4158",
+      "text": "指定配置选项的对象。"
+    },
+    {
+      "id": "GeoJsonDataSource#load",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:7932c431519efda43a5d3b363d6ec4feafbc8c6c4e7a40477d338cd945469946",
+      "text": "GeoJSON 加载完成时兑现的 Promise。"
+    },
+    {
+      "id": "GeoJsonDataSource#loadingEvent",
+      "field": "description",
+      "sourceHash": "sha256:755e0027e6456715daa06d4c30c338e4c40fe5f6c46e5ff5204d1b37923a35c7",
+      "text": "获取数据源开始或停止加载时触发的事件。"
+    },
+    {
+      "id": "GeoJsonDataSource#name",
+      "field": "description",
+      "sourceHash": "sha256:3000c359a7a8d3908ba4068a703c1cfa385ac33a750994bff61bc535c34a669a",
+      "text": "获取或设置此实例的可读名称。"
+    },
+    {
+      "id": "GeoJsonDataSource#process",
+      "field": "description",
+      "sourceHash": "sha256:3ada5c4ee31ca05ff66a2918f4c17e7797284972c5622e155d39877696583d7f",
+      "text": "异步加载给定 GeoJSON 或 TopoJSON 数据，不替换现有数据。"
+    },
+    {
+      "id": "GeoJsonDataSource#process",
+      "field": "params/data/description",
+      "sourceHash": "sha256:5e00f836258ba7447c294e407a4c3ea19ec0eeb7f53e440074047db52d578067",
+      "text": "要加载的 URL、GeoJSON 对象或 TopoJSON 对象。"
+    },
+    {
+      "id": "GeoJsonDataSource#process",
+      "field": "params/options/description",
+      "sourceHash": "sha256:6d3565bbafa26048e29e2a6fb6e5eca0fb1bcc394011fab179647bb04d7d4158",
+      "text": "指定配置选项的对象。"
+    },
+    {
+      "id": "GeoJsonDataSource#process",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:7932c431519efda43a5d3b363d6ec4feafbc8c6c4e7a40477d338cd945469946",
+      "text": "GeoJSON 加载完成时兑现的 Promise。"
+    },
+    {
+      "id": "GeoJsonDataSource#show",
+      "field": "description",
+      "sourceHash": "sha256:7438e871c41fb26d7b878ea3fa3e3e858a9c50539f22293dc33344d6e4d2de4c",
+      "text": "获取是否应显示此数据源。"
+    },
+    {
+      "id": "GeoJsonDataSource#update",
+      "field": "description",
+      "sourceHash": "sha256:1e0435ea19f0d20fefa920889b7b1616587fb32f18c1cce5fa8871ac0702120a",
+      "text": "将数据源更新到给定时间。此函数为可选实现，适用于根据当前动画时间或场景状态获取数据的数据源。若已实现，{@link DataSourceDisplay} 会每帧调用一次 update。"
+    },
+    {
+      "id": "GeoJsonDataSource#update",
+      "field": "params/time/description",
+      "sourceHash": "sha256:b97f4749b707cb6e854fe296c681cdbf68d422843d5bbbecef133d0d26261eea",
+      "text": "模拟时间。"
+    },
+    {
+      "id": "GeoJsonDataSource#update",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:2f15539ce01e1ceafc6d9cbeaddeef19b2c2193ce995e615e2b5d2d550433d2c",
+      "text": "若此数据源已准备好在给定时间显示，则为 true；否则为 false。"
+    },
+    {
+      "id": "GroundPrimitive.initializeTerrainHeights",
+      "field": "description",
+      "sourceHash": "sha256:74fe09c61bb19588eac437ca011b2a9ea3a64f777280bf403e09da2203e9d79b",
+      "text": "初始化地形最小和最大高度。仅在同步创建 GroundPrimitive 时需要调用。"
+    },
+    {
+      "id": "GroundPrimitive.initializeTerrainHeights",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:8ba356b9974d633a39487c4053e7b4dd94dee071c9bddbcf1ff2078000d619a5",
+      "text": "地形高度加载完成时兑现的 Promise。"
+    },
+    {
+      "id": "GroundPrimitive.isSupported",
+      "field": "description",
+      "sourceHash": "sha256:b7bb86b3ec0a3ebba3d8ed42e6c1625147eab3f0b29eb3dcf19fe04a9c77cb7c",
+      "text": "判断是否支持 GroundPrimitive 渲染。"
+    },
+    {
+      "id": "GroundPrimitive.isSupported",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:6b594dc80e44803311476cc231622ba8d62cc5ab40e178391454ea51262e1c29",
+      "text": "若支持 GroundPrimitive，则返回 <code>true</code>；否则返回 <code>false</code>。"
+    },
+    {
+      "id": "GroundPrimitive.supportsMaterials",
+      "field": "description",
+      "sourceHash": "sha256:b72fb422db3a32243005d98592701cf694d624de12cd42eda336d92cd2d0e69b",
+      "text": "检查给定 Scene 是否支持 GroundPrimitive 材质。此能力需要 WEBGL_depth_texture 扩展。"
+    },
+    {
+      "id": "GroundPrimitive.supportsMaterials",
+      "field": "params/scene/description",
+      "sourceHash": "sha256:2602abbd222a7a83c7faadfe2d9124ad21aebd00fb3fd5848f5ec168fcd99d7a",
+      "text": "当前场景。"
+    },
+    {
+      "id": "GroundPrimitive.supportsMaterials",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:ef659798654a48abda67f9ce45393a080daeeb4807eb9c7f346cca1d39a749ba",
+      "text": "当前场景是否支持 GroundPrimitive 材质。"
+    },
+    {
+      "id": "GroundPrimitive",
+      "field": "description",
+      "sourceHash": "sha256:37643087ae967809100e9f272ba881c5b0150e5314de4abb2dc4fa483e3c0bdc",
+      "text": "贴地图元表示在 {@link Scene} 中覆盖于地形或 3D Tiles 表面的几何体。<p>图元将几何实例与描述完整着色的 {@link Appearance} 组合，着色包括 {@link Material} 和 {@link RenderState}。大致而言，几何实例定义结构和位置，外观定义视觉特征。几何与外观解耦，使大多数两者可自由组合，并可独立添加新的几何或外观。</p><p>使用具有不同 PerInstanceColor 的 GeometryInstance，或使用 PerInstanceColorAppearance 以外的材质，需要 WEBGL_depth_texture 扩展。</p><p>纹理贴地图元适合表达示意性图案，并非为纹理精确映射到地形而设计；精确映射请使用 {@link SingleTileImageryProvider}。</p><p>正确渲染需要 EXT_frag_depth WebGL 扩展。不支持此扩展的硬件在某些观察角度下会产生渲染伪影。</p><p>有效几何类型包括 {@link CircleGeometry}、{@link CorridorGeometry}、{@link EllipseGeometry}、{@link PolygonGeometry} 和 {@link RectangleGeometry}。</p>"
+    },
+    {
+      "id": "GroundPrimitive",
+      "field": "params/options.allowPicking/description",
+      "sourceHash": "sha256:b837dd95cf40a996d999f635186f40b1d47db75b8a803c033d4433f40184720b",
+      "text": "为 <code>true</code> 时，每个几何实例仅可通过 {@link Scene#pick} 拾取。为 <code>false</code> 时，可节省 GPU 显存。"
+    },
+    {
+      "id": "GroundPrimitive",
+      "field": "params/options.appearance/description",
+      "sourceHash": "sha256:034aeb0c5171e0f67ce0bde97b2ed8e404f158dbcedac7623d0cd7c87042c53e",
+      "text": "用于渲染图元的外观。若 GeometryInstance 具有 color 属性，默认为平面着色的 PerInstanceColorAppearance。"
+    },
+    {
+      "id": "GroundPrimitive",
+      "field": "params/options.asynchronous/description",
+      "sourceHash": "sha256:7c7240a8b8457a684910035fdb1917ea290724baf9e8f9ff0c00f883b062cc81",
+      "text": "决定图元是异步创建，还是阻塞直到就绪。若为 false，必须先调用 initializeTerrainHeights()。"
+    },
+    {
+      "id": "GroundPrimitive",
+      "field": "params/options.classificationType/description",
+      "sourceHash": "sha256:5be2a34816f38066418068d6f7c8a868acc1622352077a9672e879bf3c1194a6",
+      "text": "决定对地形、3D Tiles 或两者进行分类。"
+    },
+    {
+      "id": "GroundPrimitive",
+      "field": "params/options.compressVertices/description",
+      "sourceHash": "sha256:bef45d2af1cd2ea3f26bc309b8edd1ab7c2f76f479d2829ca13ac54a27f6bee7",
+      "text": "为 <code>true</code> 时，压缩几何顶点以节省内存。"
+    },
+    {
+      "id": "GroundPrimitive",
+      "field": "params/options.debugShowBoundingVolume/description",
+      "sourceHash": "sha256:e994479c583ef7aab0de212c8ac6776e4d7c20d409ee8ee4300116517d5fe8d6",
+      "text": "仅供调试。决定是否显示此图元各命令的包围球。"
+    },
+    {
+      "id": "GroundPrimitive",
+      "field": "params/options.debugShowShadowVolume/description",
+      "sourceHash": "sha256:77cb9dba48b5ca64e769db499fb1dfd2e8c5d662be99fe062e209b600281a418",
+      "text": "仅供调试。决定是否绘制图元中每个几何体的阴影体积。必须在创建时为 <code>true</code>，以便在几何体释放前生成体积；或将 options.releaseGeometryInstance 设为 <code>false</code>。"
+    },
+    {
+      "id": "GroundPrimitive",
+      "field": "params/options.geometryInstances/description",
+      "sourceHash": "sha256:ebb5ffe8a6d09c2e351b43ed89db7f11fa68753f0dd32e419386f51bc593f0c1",
+      "text": "要渲染的几何实例。"
+    },
+    {
+      "id": "GroundPrimitive",
+      "field": "params/options.interleave/description",
+      "sourceHash": "sha256:967032bd3264749ac4dd951412bd46375eb14f4132631464d62d3ffdf134475f",
+      "text": "为 <code>true</code> 时，交错存储几何顶点属性，可略微提升渲染性能，但会增加加载时间。"
+    },
+    {
+      "id": "GroundPrimitive",
+      "field": "params/options.releaseGeometryInstances/description",
+      "sourceHash": "sha256:637d35ace6081ad06d856d383e5e46858923b9182e5035294ae23868fc6bb46a",
+      "text": "为 <code>true</code> 时，图元不保留对输入 <code>geometryInstances</code> 的引用，以节省内存。"
+    },
+    {
+      "id": "GroundPrimitive",
+      "field": "params/options.show/description",
+      "sourceHash": "sha256:b83bd9ba98171d041c1a967a7f3df81b98fed4b822e9f456856716a2cba0bf6b",
+      "text": "决定是否显示此图元。"
+    },
+    {
+      "id": "GroundPrimitive",
+      "field": "params/options.vertexCacheOptimize/description",
+      "sourceHash": "sha256:43c5015e156d22ab18a495033c7018ce1c69fa5a81ddb9f2de80070d2b727266",
+      "text": "为 <code>true</code> 时，为顶点着色器前后缓存优化几何顶点。"
+    },
+    {
+      "id": "GroundPrimitive#allowPicking",
+      "field": "description",
+      "sourceHash": "sha256:b837dd95cf40a996d999f635186f40b1d47db75b8a803c033d4433f40184720b",
+      "text": "为 <code>true</code> 时，每个几何实例仅可通过 {@link Scene#pick} 拾取。为 <code>false</code> 时，可节省 GPU 显存。"
+    },
+    {
+      "id": "GroundPrimitive#appearance",
+      "field": "description",
+      "sourceHash": "sha256:e3500562a5cf7567acaf31faaa66480ea889e99e4dd748ea36e71ee44034e7af",
+      "text": "用于此图元着色的 {@link Appearance}。每个几何实例使用相同外观着色；{@link PerInstanceColorAppearance} 等外观允许为每个实例指定独立属性。"
+    },
+    {
+      "id": "GroundPrimitive#asynchronous",
+      "field": "description",
+      "sourceHash": "sha256:917c469ca176ea56a1e7fde9f10b765813f3551944da349f3e4ed7e6858818f3",
+      "text": "决定是否在 Web Worker 中创建并合批几何实例。"
+    },
+    {
+      "id": "GroundPrimitive#classificationType",
+      "field": "description",
+      "sourceHash": "sha256:5be2a34816f38066418068d6f7c8a868acc1622352077a9672e879bf3c1194a6",
+      "text": "决定对地形、3D Tiles 或两者进行分类。"
+    },
+    {
+      "id": "GroundPrimitive#compressVertices",
+      "field": "description",
+      "sourceHash": "sha256:d1765a0f898c6eed419e848815bd457b0a5a47b0179f0c17c6a1bd14c03a25c2",
+      "text": "为 <code>true</code> 时，压缩几何顶点以节省内存。"
+    },
+    {
+      "id": "GroundPrimitive#debugShowBoundingVolume",
+      "field": "description",
+      "sourceHash": "sha256:aada12c696fc8726817165d04c2ff7f8bc646a5a40f35a419053259d53655a5a",
+      "text": "此属性仅供调试，不应在生产环境中使用，也未做性能优化。<p>绘制图元中每条绘制命令的包围球。</p>"
+    },
+    {
+      "id": "GroundPrimitive#debugShowShadowVolume",
+      "field": "description",
+      "sourceHash": "sha256:1290ef4e8e3903d9c1587e0e729d027288a65dc75483633339a651de43e9585e",
+      "text": "此属性仅供调试，不应在生产环境中使用，也未做性能优化。<p>绘制图元中每个几何体的阴影体积。</p>"
+    },
+    {
+      "id": "GroundPrimitive#destroy",
+      "field": "description",
+      "sourceHash": "sha256:754b790bbc590a83b107df65f4ba03313464d9514314d03e7fb307567d712e2b",
+      "text": "销毁此对象持有的 WebGL 资源。显式销毁可确定地释放 WebGL 资源，而不依赖垃圾回收器回收此对象。<p>对象销毁后不应再使用；调用除 <code>isDestroyed</code> 以外的任何函数都会抛出 {@link DeveloperError}。因此，应像示例中那样将返回值（<code>undefined</code>）赋给该对象变量。</p>"
+    },
+    {
+      "id": "GroundPrimitive#geometryInstances",
+      "field": "description",
+      "sourceHash": "sha256:f9bdbce084356b7590a07689173c12cf3861c86e9b2e0b436d9c0dbf8b8ecbfa",
+      "text": "由此图元渲染的几何实例。构造图元时若 <code>options.releaseGeometryInstances</code> 为 <code>true</code>，此属性可能为 <code>undefined</code>。<p>图元渲染后，更改此属性不会生效。</p>"
+    },
+    {
+      "id": "GroundPrimitive#getGeometryInstanceAttributes",
+      "field": "description",
+      "sourceHash": "sha256:8bc34f88f9782d1a0c9486cd015b48e2ca1856b4f843350e31ab12dafd386405",
+      "text": "返回 {@link GeometryInstance} 可修改的逐实例属性。"
+    },
+    {
+      "id": "GroundPrimitive#getGeometryInstanceAttributes",
+      "field": "exceptions/0/description",
+      "sourceHash": "sha256:0bc0299ebf8ad82ed18137b0e94428b7fcf055731bb7751e7496176c7c9c9a58",
+      "text": "调用 getGeometryInstanceAttributes 之前必须先调用 update。"
+    },
+    {
+      "id": "GroundPrimitive#getGeometryInstanceAttributes",
+      "field": "params/id/description",
+      "sourceHash": "sha256:3f4b707ce51845c9a3b37691c6446aada7839ca5edb50f96c372cca6a4fed6ba",
+      "text": "{@link GeometryInstance} 的 ID。"
+    },
+    {
+      "id": "GroundPrimitive#getGeometryInstanceAttributes",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:8d3018d452eac9303a50155682250116709cf0b7f25de303afa5ace9ffb33eba",
+      "text": "采用属性格式的类型化数组；若不存在此 ID 的实例，则返回 undefined。"
+    },
+    {
+      "id": "GroundPrimitive#interleave",
+      "field": "description",
+      "sourceHash": "sha256:b28b23744e80d17455be9ffe4581de19f4721fcaff2a210b35d67687709f59e5",
+      "text": "决定是否交错存储几何顶点属性，这可略微提升渲染性能。"
+    },
+    {
+      "id": "GroundPrimitive#isDestroyed",
+      "field": "description",
+      "sourceHash": "sha256:8e0063c3cea634f0d58d690ac4d7a4fb34a488a5a13452889ede3a1d69c680e1",
+      "text": "若此对象已销毁，返回 true；否则返回 false。<p>对象销毁后不应再使用；调用除 <code>isDestroyed</code> 以外的任何函数都会抛出 {@link DeveloperError}。</p>"
+    },
+    {
+      "id": "GroundPrimitive#ready",
+      "field": "description",
+      "sourceHash": "sha256:700caa5ca6a3095e732652fa94817aa1a1aff38449b1858cfa5b4c15ed27e0a5",
+      "text": "决定图元是否已完成创建并可供渲染。为 true 时，下次调用 {@link GroundPrimitive#update} 将渲染此图元。"
+    },
+    {
+      "id": "GroundPrimitive#releaseGeometryInstances",
+      "field": "description",
+      "sourceHash": "sha256:637d35ace6081ad06d856d383e5e46858923b9182e5035294ae23868fc6bb46a",
+      "text": "为 <code>true</code> 时，图元不保留对输入 <code>geometryInstances</code> 的引用，以节省内存。"
+    },
+    {
+      "id": "GroundPrimitive#show",
+      "field": "description",
+      "sourceHash": "sha256:cbc965b397c703b12633c4c63b2a29d9587a5159c0e8466102353200f2ee011b",
+      "text": "决定是否显示此图元，会影响图元内的全部几何实例。"
+    },
+    {
+      "id": "GroundPrimitive#update",
+      "field": "description",
+      "sourceHash": "sha256:c5cc5fb756479265000e8f5e05ef6b5630397b1880c9ff3316fe45c545c6b022",
+      "text": "由 {@link Viewer} 或 {@link CesiumWidget} 在渲染场景时调用，以获取渲染此图元所需的绘制命令。<p>不要直接调用。此处记录此函数，仅为列出场景渲染期间可能向上传播的异常：</p>"
+    },
+    {
+      "id": "GroundPrimitive#update",
+      "field": "exceptions/0/description",
+      "sourceHash": "sha256:be7888ae4e98f7606cd226e519166ff39c97de0dcc1e373dd760571b709d8991",
+      "text": "同步创建 GroundPrimitive 时，必须先调用 GroundPrimitive.initializeTerrainHeights() 并等待返回的 Promise 兑现。"
+    },
+    {
+      "id": "GroundPrimitive#update",
+      "field": "exceptions/1/description",
+      "sourceHash": "sha256:a03fa23b3e88176fdcb99a354ad99f345ebac8709fcc4e2c516f5691866e711a",
+      "text": "所有实例几何体必须具有相同 primitiveType。"
+    },
+    {
+      "id": "GroundPrimitive#update",
+      "field": "exceptions/2/description",
+      "sourceHash": "sha256:d713d506e7aae9613deb054008cbd9108665873fe8a2e90efa0bd426e6064751",
+      "text": "外观与材质中存在同名 uniform。"
+    },
+    {
+      "id": "GroundPrimitive#vertexCacheOptimize",
+      "field": "description",
+      "sourceHash": "sha256:43c5015e156d22ab18a495033c7018ce1c69fa5a81ddb9f2de80070d2b727266",
+      "text": "为 <code>true</code> 时，为顶点着色器前后缓存优化几何顶点。"
+    },
+    {
+      "id": "Primitive",
+      "field": "description",
+      "sourceHash": "sha256:8f41384503cdf5819ee88af725ab82c627e9b4fa6bb25bf90edcc0091d060f36",
+      "text": "图元表示 {@link Scene} 中的几何体。几何体可来自单个 {@link GeometryInstance}，如下方示例 1；也可来自实例数组，即使实例属于不同几何类型，例如代码示例 2 中的 {@link RectangleGeometry} 和 {@link EllipsoidGeometry}。<p>图元将几何实例与描述完整着色的 {@link Appearance} 组合，着色包括 {@link Material} 和 {@link RenderState}。大致而言，几何实例定义结构和位置，外观定义视觉特征。几何与外观解耦，使大多数两者可自由组合，并可独立添加新的几何或外观。</p><p>将多个实例合并为一个图元称为合批，可显著提高静态数据性能。实例仍可单独拾取；{@link Scene#pick} 会返回其 {@link GeometryInstance#id}。使用 {@link PerInstanceColorAppearance} 等逐实例外观时，每个实例还可拥有独立颜色。</p><p>{@link Geometry} 可在 Web Worker 或主线程中创建和合批。前两个示例通过几何描述在 Web Worker 中创建几何体；第三个示例显式调用 <code>createGeometry</code>，在主线程创建几何体。</p>"
+    },
+    {
+      "id": "Primitive",
+      "field": "params/options.allowPicking/description",
+      "sourceHash": "sha256:b837dd95cf40a996d999f635186f40b1d47db75b8a803c033d4433f40184720b",
+      "text": "为 <code>true</code> 时，每个几何实例仅可通过 {@link Scene#pick} 拾取。为 <code>false</code> 时，可节省 GPU 显存。"
+    },
+    {
+      "id": "Primitive",
+      "field": "params/options.appearance/description",
+      "sourceHash": "sha256:959c6c0c5a2f5f6e571a799a0125f3a0aff9c00b82d87699060bbac1c3db7d3a",
+      "text": "用于渲染图元的外观。"
+    },
+    {
+      "id": "Primitive",
+      "field": "params/options.asynchronous/description",
+      "sourceHash": "sha256:2bec591eff8ad83ab1edf6a36650460f705a1ac486f2778fcf5bbe766f5037bc",
+      "text": "决定图元是异步创建，还是阻塞直到就绪。"
+    },
+    {
+      "id": "Primitive",
+      "field": "params/options.compressVertices/description",
+      "sourceHash": "sha256:bef45d2af1cd2ea3f26bc309b8edd1ab7c2f76f479d2829ca13ac54a27f6bee7",
+      "text": "为 <code>true</code> 时，压缩几何顶点以节省内存。"
+    },
+    {
+      "id": "Primitive",
+      "field": "params/options.cull/description",
+      "sourceHash": "sha256:9aea9e9c1e36dab18046f11d9bebbee523bf779ac4b055ac6da85d16d0e87cdd",
+      "text": "为 <code>true</code> 时，渲染器根据包围体，对图元命令执行视锥剔除和地平线剔除。若自行剔除图元，可设为 <code>false</code> 以略微提升性能。"
+    },
+    {
+      "id": "Primitive",
+      "field": "params/options.debugShowBoundingVolume/description",
+      "sourceHash": "sha256:e994479c583ef7aab0de212c8ac6776e4d7c20d409ee8ee4300116517d5fe8d6",
+      "text": "仅供调试。决定是否显示此图元各命令的包围球。"
+    },
+    {
+      "id": "Primitive",
+      "field": "params/options.depthFailAppearance/description",
+      "sourceHash": "sha256:f78cd51453c2b1b5cb7a20363dd7e939aef7d60aa31787c61fdc305fcfd5f791",
+      "text": "此图元未通过深度测试时使用的着色外观。"
+    },
+    {
+      "id": "Primitive",
+      "field": "params/options.geometryInstances/description",
+      "sourceHash": "sha256:a094d23809221659b253b2211e0283ad1e677a777e9fb9a7efcf71dfbdc06b92",
+      "text": "要渲染的几何实例数组或单个几何实例。"
+    },
+    {
+      "id": "Primitive",
+      "field": "params/options.interleave/description",
+      "sourceHash": "sha256:967032bd3264749ac4dd951412bd46375eb14f4132631464d62d3ffdf134475f",
+      "text": "为 <code>true</code> 时，交错存储几何顶点属性，可略微提升渲染性能，但会增加加载时间。"
+    },
+    {
+      "id": "Primitive",
+      "field": "params/options.modelMatrix/description",
+      "sourceHash": "sha256:c3eade6fc36d17fd088317fffcd0cea04ae9ebf04e4bb1fea76d9426553e032f",
+      "text": "将图元（全部几何实例）从模型坐标变换到世界坐标的 4x4 变换矩阵。"
+    },
+    {
+      "id": "Primitive",
+      "field": "params/options.releaseGeometryInstances/description",
+      "sourceHash": "sha256:637d35ace6081ad06d856d383e5e46858923b9182e5035294ae23868fc6bb46a",
+      "text": "为 <code>true</code> 时，图元不保留对输入 <code>geometryInstances</code> 的引用，以节省内存。"
+    },
+    {
+      "id": "Primitive",
+      "field": "params/options.shadows/description",
+      "sourceHash": "sha256:fd201e417f2f4ac37e34f6428bc294b00a2c39f0da4d76b41c954c5422cd4894",
+      "text": "决定此图元是否投射或接收光源产生的阴影。"
+    },
+    {
+      "id": "Primitive",
+      "field": "params/options.show/description",
+      "sourceHash": "sha256:b83bd9ba98171d041c1a967a7f3df81b98fed4b822e9f456856716a2cba0bf6b",
+      "text": "决定是否显示此图元。"
+    },
+    {
+      "id": "Primitive",
+      "field": "params/options.vertexCacheOptimize/description",
+      "sourceHash": "sha256:43c5015e156d22ab18a495033c7018ce1c69fa5a81ddb9f2de80070d2b727266",
+      "text": "为 <code>true</code> 时，为顶点着色器前后缓存优化几何顶点。"
+    },
+    {
+      "id": "Primitive#allowPicking",
+      "field": "description",
+      "sourceHash": "sha256:78aeedbe18d65ed99a2c3522ba21fa6ad0f08cca40fa4f4d5d169f93b9e7eefe",
+      "text": "为 <code>true</code> 时，每个几何实例仅可通过 {@link Scene#pick} 拾取。为 <code>false</code> 时，可节省 GPU 显存。         *"
+    },
+    {
+      "id": "Primitive#appearance",
+      "field": "description",
+      "sourceHash": "sha256:e3500562a5cf7567acaf31faaa66480ea889e99e4dd748ea36e71ee44034e7af",
+      "text": "用于此图元着色的 {@link Appearance}。每个几何实例使用相同外观着色；{@link PerInstanceColorAppearance} 等外观允许为每个实例指定独立属性。"
+    },
+    {
+      "id": "Primitive#asynchronous",
+      "field": "description",
+      "sourceHash": "sha256:917c469ca176ea56a1e7fde9f10b765813f3551944da349f3e4ed7e6858818f3",
+      "text": "决定是否在 Web Worker 中创建并合批几何实例。"
+    },
+    {
+      "id": "Primitive#compressVertices",
+      "field": "description",
+      "sourceHash": "sha256:d1765a0f898c6eed419e848815bd457b0a5a47b0179f0c17c6a1bd14c03a25c2",
+      "text": "为 <code>true</code> 时，压缩几何顶点以节省内存。"
+    },
+    {
+      "id": "Primitive#cull",
+      "field": "description",
+      "sourceHash": "sha256:fc865e0966ba094098350fcbf43bc8d9a43ec1a1d5d5cf2d6812f0a0b4b25eb7",
+      "text": "为 <code>true</code> 时，渲染器根据包围体，对图元命令执行视锥剔除和地平线剔除。若自行剔除图元，可设为 <code>false</code> 以略微提升性能。"
+    },
+    {
+      "id": "Primitive#debugShowBoundingVolume",
+      "field": "description",
+      "sourceHash": "sha256:aada12c696fc8726817165d04c2ff7f8bc646a5a40f35a419053259d53655a5a",
+      "text": "此属性仅供调试，不应在生产环境中使用，也未做性能优化。<p>绘制图元中每条绘制命令的包围球。</p>"
+    },
+    {
+      "id": "Primitive#depthFailAppearance",
+      "field": "description",
+      "sourceHash": "sha256:f4b5bcc0bb51199337cb6408e0f235349004015b4335c67cbe54df988938d2e8",
+      "text": "此图元未通过深度测试时使用的 {@link Appearance}。每个几何实例使用相同外观着色；{@link PerInstanceColorAppearance} 等外观允许为每个实例指定独立属性。<p>使用 PerInstanceColorAppearance 等需要颜色属性的外观时，请改为添加逐实例 depthFailColor 属性。</p><p>正确渲染需要 EXT_frag_depth WebGL 扩展；若不支持，可能出现伪影。</p>"
+    },
+    {
+      "id": "Primitive#destroy",
+      "field": "description",
+      "sourceHash": "sha256:754b790bbc590a83b107df65f4ba03313464d9514314d03e7fb307567d712e2b",
+      "text": "销毁此对象持有的 WebGL 资源。显式销毁可确定地释放 WebGL 资源，而不依赖垃圾回收器回收此对象。<p>对象销毁后不应再使用；调用除 <code>isDestroyed</code> 以外的任何函数都会抛出 {@link DeveloperError}。因此，应像示例中那样将返回值（<code>undefined</code>）赋给该对象变量。</p>"
+    },
+    {
+      "id": "Primitive#geometryInstances",
+      "field": "description",
+      "sourceHash": "sha256:f9bdbce084356b7590a07689173c12cf3861c86e9b2e0b436d9c0dbf8b8ecbfa",
+      "text": "由此图元渲染的几何实例。构造图元时若 <code>options.releaseGeometryInstances</code> 为 <code>true</code>，此属性可能为 <code>undefined</code>。<p>图元渲染后，更改此属性不会生效。</p>"
+    },
+    {
+      "id": "Primitive#getGeometryInstanceAttributes",
+      "field": "description",
+      "sourceHash": "sha256:8bc34f88f9782d1a0c9486cd015b48e2ca1856b4f843350e31ab12dafd386405",
+      "text": "返回 {@link GeometryInstance} 可修改的逐实例属性。"
+    },
+    {
+      "id": "Primitive#getGeometryInstanceAttributes",
+      "field": "exceptions/0/description",
+      "sourceHash": "sha256:0bc0299ebf8ad82ed18137b0e94428b7fcf055731bb7751e7496176c7c9c9a58",
+      "text": "调用 getGeometryInstanceAttributes 之前必须先调用 update。"
+    },
+    {
+      "id": "Primitive#getGeometryInstanceAttributes",
+      "field": "params/id/description",
+      "sourceHash": "sha256:3f4b707ce51845c9a3b37691c6446aada7839ca5edb50f96c372cca6a4fed6ba",
+      "text": "{@link GeometryInstance} 的 ID。"
+    },
+    {
+      "id": "Primitive#getGeometryInstanceAttributes",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:8d3018d452eac9303a50155682250116709cf0b7f25de303afa5ace9ffb33eba",
+      "text": "采用属性格式的类型化数组；若不存在此 ID 的实例，则返回 undefined。"
+    },
+    {
+      "id": "Primitive#interleave",
+      "field": "description",
+      "sourceHash": "sha256:b28b23744e80d17455be9ffe4581de19f4721fcaff2a210b35d67687709f59e5",
+      "text": "决定是否交错存储几何顶点属性，这可略微提升渲染性能。"
+    },
+    {
+      "id": "Primitive#isDestroyed",
+      "field": "description",
+      "sourceHash": "sha256:8e0063c3cea634f0d58d690ac4d7a4fb34a488a5a13452889ede3a1d69c680e1",
+      "text": "若此对象已销毁，返回 true；否则返回 false。<p>对象销毁后不应再使用；调用除 <code>isDestroyed</code> 以外的任何函数都会抛出 {@link DeveloperError}。</p>"
+    },
+    {
+      "id": "Primitive#modelMatrix",
+      "field": "description",
+      "sourceHash": "sha256:2e996059fd9bc5874dad1ed42e6af5d6816c637e267daa45c67f26dfc35d0521",
+      "text": "将图元（全部几何实例）从模型坐标变换到世界坐标的 4x4 变换矩阵。为单位矩阵时，直接使用世界坐标，即地球的 WGS84 坐标绘制图元。提供其他变换矩阵，例如 {@link Transforms.eastNorthUpToFixedFrame} 的返回值，可使用局部参考坐标系。<p>此属性仅支持三维模式。</p>"
+    },
+    {
+      "id": "Primitive#ready",
+      "field": "description",
+      "sourceHash": "sha256:f330528a851de33bd8589a3a872ea239b4720b176815911c98219defb3a77f76",
+      "text": "决定图元是否已完成创建并可供渲染。为 true 时，下次调用 {@link Primitive#update} 将渲染此图元。"
+    },
+    {
+      "id": "Primitive#releaseGeometryInstances",
+      "field": "description",
+      "sourceHash": "sha256:637d35ace6081ad06d856d383e5e46858923b9182e5035294ae23868fc6bb46a",
+      "text": "为 <code>true</code> 时，图元不保留对输入 <code>geometryInstances</code> 的引用，以节省内存。"
+    },
+    {
+      "id": "Primitive#shadows",
+      "field": "description",
+      "sourceHash": "sha256:fd201e417f2f4ac37e34f6428bc294b00a2c39f0da4d76b41c954c5422cd4894",
+      "text": "决定此图元是否投射或接收光源产生的阴影。"
+    },
+    {
+      "id": "Primitive#show",
+      "field": "description",
+      "sourceHash": "sha256:cbc965b397c703b12633c4c63b2a29d9587a5159c0e8466102353200f2ee011b",
+      "text": "决定是否显示此图元，会影响图元内的全部几何实例。"
+    },
+    {
+      "id": "Primitive#update",
+      "field": "description",
+      "sourceHash": "sha256:c5cc5fb756479265000e8f5e05ef6b5630397b1880c9ff3316fe45c545c6b022",
+      "text": "由 {@link Viewer} 或 {@link CesiumWidget} 在渲染场景时调用，以获取渲染此图元所需的绘制命令。<p>不要直接调用。此处记录此函数，仅为列出场景渲染期间可能向上传播的异常：</p>"
+    },
+    {
+      "id": "Primitive#update",
+      "field": "exceptions/0/description",
+      "sourceHash": "sha256:a03fa23b3e88176fdcb99a354ad99f345ebac8709fcc4e2c516f5691866e711a",
+      "text": "所有实例几何体必须具有相同 primitiveType。"
+    },
+    {
+      "id": "Primitive#update",
+      "field": "exceptions/1/description",
+      "sourceHash": "sha256:d713d506e7aae9613deb054008cbd9108665873fe8a2e90efa0bd426e6064751",
+      "text": "外观与材质中存在同名 uniform。"
+    },
+    {
+      "id": "Primitive#update",
+      "field": "exceptions/2/description",
+      "sourceHash": "sha256:3ceae4d1f2389845524be0cffc0ebe031b2ee0f891d7ce058c6aca721e474fe4",
+      "text": "Primitive.modelMatrix 仅支持三维模式。"
+    },
+    {
+      "id": "Primitive#update",
+      "field": "exceptions/3/description",
+      "sourceHash": "sha256:8d081372a509f91bce1438d73fb9818fc156a619911cdf6b741f486e8b049868",
+      "text": "渲染具有逐实例属性的图元需要支持顶点纹理读取。顶点纹理图像单元的最大数量必须大于零。"
+    },
+    {
+      "id": "Primitive#vertexCacheOptimize",
+      "field": "description",
+      "sourceHash": "sha256:43c5015e156d22ab18a495033c7018ce1c69fa5a81ddb9f2de80070d2b727266",
+      "text": "为 <code>true</code> 时，为顶点着色器前后缓存优化几何顶点。"
+    },
+    {
+      "id": "PrimitiveCollection",
+      "field": "params/options.destroyPrimitives/description",
+      "sourceHash": "sha256:e76b566adb08f573607cbd765f7fb552fb46c53d0b98d4819d4c71fb25595221",
+      "text": "决定从集合移除图元时是否销毁它们。"
+    },
+    {
+      "id": "PrimitiveCollection",
+      "field": "params/options.show/description",
+      "sourceHash": "sha256:fbdbc6a0f03f1b521fe82d1c9ffea90536768933c2ac938993b66b563ba3c69d",
+      "text": "决定是否显示集合中的图元。"
+    },
+    {
+      "id": "PrimitiveCollection#add",
+      "field": "description",
+      "sourceHash": "sha256:28d2323178e01e835b976eb0689ca128b7f8a2f3b18b1b46b51aa6070a7eff09",
+      "text": "将图元添加到集合。"
+    },
+    {
+      "id": "PrimitiveCollection#add",
+      "field": "params/index/description",
+      "sourceHash": "sha256:41909a517b63bc7780902850017843ba56ff1245af692bee907bd7ceb3333617",
+      "text": "添加位置的索引。若省略，则将图元添加到全部现有图元的底部。"
+    },
+    {
+      "id": "PrimitiveCollection#add",
+      "field": "params/primitive/description",
+      "sourceHash": "sha256:8b0d71023cd9430964a98289bbfcf551880e9258eea081152c2cca482e6fec74",
+      "text": "要添加的图元。"
+    },
+    {
+      "id": "PrimitiveCollection#add",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:7d9afb8de9d0b03b2cce63f3dcfcb280eb124c780ce60f688e6f9adc1b7dcbda",
+      "text": "添加到集合的图元。"
+    },
+    {
+      "id": "PrimitiveCollection#contains",
+      "field": "description",
+      "sourceHash": "sha256:07ff14b676957bf64f6a3ae8e037b98deacb9fdbf74aed3d0d76d31b7d17f9f5",
+      "text": "判断此集合是否包含某个图元。"
+    },
+    {
+      "id": "PrimitiveCollection#contains",
+      "field": "params/primitive/description",
+      "sourceHash": "sha256:e82d400d77215a3cc49fffdeafc2605c39080932a17d3879af9a6631fa69360b",
+      "text": "要检查的图元。"
+    },
+    {
+      "id": "PrimitiveCollection#contains",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:308738ffab81f6d4b80d519beeaaabcab4f6214c0fa30a649f89620be6c3295d",
+      "text": "图元在集合中时为 <code>true</code>；图元为 <code>undefined</code> 或集合中未找到时为 <code>false</code>。"
+    },
+    {
+      "id": "PrimitiveCollection#destroy",
+      "field": "description",
+      "sourceHash": "sha256:9b3498f3b119a23ed5029f3644ff7d7e1eda64e9ec0149950898d524cea68d6d",
+      "text": "销毁此集合中每个图元持有的 WebGL 资源。显式销毁此集合，可确定地释放 WebGL 资源，而不依赖垃圾回收器。<br /><br />销毁集合也会销毁其中全部图元，因此仅在确认其他代码不再使用任何所含图元时，才应销毁集合。<br /><br />集合销毁后不应再使用；调用除 <code>isDestroyed</code> 以外的任何函数都会抛出 {@link DeveloperError}。因此，应像示例中那样将返回值（<code>undefined</code>）赋给该集合变量。"
+    },
+    {
+      "id": "PrimitiveCollection#destroyPrimitives",
+      "field": "description",
+      "sourceHash": "sha256:4c33d790f5625d5aa3bc58cbc3b381dd0b7b91d008dad2e48bf7937057a0da9a",
+      "text": "决定通过 {@link PrimitiveCollection#destroy}、{@link PrimitiveCollection#remove} 或由 {@link PrimitiveCollection#removeAll} 隐式移除图元时，是否销毁这些图元。"
+    },
+    {
+      "id": "PrimitiveCollection#get",
+      "field": "description",
+      "sourceHash": "sha256:2cc78cae7b72b7fa82146e1a5f79a2209d6563ba51c7853ef6495aea686e5fc8",
+      "text": "返回集合中指定索引处的图元。"
+    },
+    {
+      "id": "PrimitiveCollection#get",
+      "field": "params/index/description",
+      "sourceHash": "sha256:99f63aaf0a71a7c8bfcde13f9796bc486987537af82a5dc30499794033dfa952",
+      "text": "要返回图元的索引，从零开始。"
+    },
+    {
+      "id": "PrimitiveCollection#get",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:ef59a1b29a3f5e9aa9b27814e61f2a27be69de1d0a77a3f295991c37a3302028",
+      "text": "<code>index</code> 处的图元。"
+    },
+    {
+      "id": "PrimitiveCollection#isDestroyed",
+      "field": "description",
+      "sourceHash": "sha256:aea7b697937631c90ae3fc0ec55b81ba0ddc7abe4d6045848b2031f9bed60091",
+      "text": "若此对象已销毁，返回 true；否则返回 false。<br /><br />对象销毁后不应再使用；调用除 <code>isDestroyed</code> 以外的任何函数都会抛出 {@link DeveloperError}。"
+    },
+    {
+      "id": "PrimitiveCollection#length",
+      "field": "description",
+      "sourceHash": "sha256:09fb1f10b51f42825fa3dd1089ed3c0b99d93891e88ac2983e7343926a9cb1f8",
+      "text": "获取集合中的图元数量。"
+    },
+    {
+      "id": "PrimitiveCollection#lower",
+      "field": "description",
+      "sourceHash": "sha256:e842844d417dda556d611a5fae3434386cd5c89ade3080632997fca147cdd249",
+      "text": "将图元在集合中下移一个位置。若集合中的全部图元都绘制在地球表面，这也会在视觉上将图元下移一层。"
+    },
+    {
+      "id": "PrimitiveCollection#lower",
+      "field": "exceptions/0/description",
+      "sourceHash": "sha256:8ac7b1c42c1f2f1a4083b8391fecb8a3a10025344907d3f307a27f450df2d032",
+      "text": "primitive 不在此集合中。"
+    },
+    {
+      "id": "PrimitiveCollection#lower",
+      "field": "params/primitive/description",
+      "sourceHash": "sha256:6c1bba7f5c611cd3aacea097f853f48ced556e8670e4181505474bc5dbe50a72",
+      "text": "要下移的图元。"
+    },
+    {
+      "id": "PrimitiveCollection#lowerToBottom",
+      "field": "description",
+      "sourceHash": "sha256:4e78ed499fa4bebcf9de5f9f3a5743aff0cb976c89dc016188f0e92bad9f23a3",
+      "text": "将图元移到集合底部。若集合中的全部图元都绘制在地球表面，这也会在视觉上将图元移到最下层。"
+    },
+    {
+      "id": "PrimitiveCollection#lowerToBottom",
+      "field": "exceptions/0/description",
+      "sourceHash": "sha256:8ac7b1c42c1f2f1a4083b8391fecb8a3a10025344907d3f307a27f450df2d032",
+      "text": "primitive 不在此集合中。"
+    },
+    {
+      "id": "PrimitiveCollection#lowerToBottom",
+      "field": "params/primitive/description",
+      "sourceHash": "sha256:ad2f49b2e9715367fb99462524565042a6ee9ed20aa5621b14bcbacd9625fc94",
+      "text": "要移到底部的图元。"
+    },
+    {
+      "id": "PrimitiveCollection#primitiveAdded",
+      "field": "description",
+      "sourceHash": "sha256:dc5fb08caf6251eb6fda9d80181d09fcc1d20f79529b11fe7d3472953f5e1a39",
+      "text": "图元添加到集合时触发的事件。处理器接收新增图元。"
+    },
+    {
+      "id": "PrimitiveCollection#primitiveRemoved",
+      "field": "description",
+      "sourceHash": "sha256:5d6c1ae1c9700f0664d4316a162a7f861fc0dde16c3a8e1436855cb454bc00ab",
+      "text": "图元从集合移除时触发的事件。处理器接收被移除的图元。<p>注意：根据构造时的 destroyPrimitives 选项，图元可能已被销毁。</p>"
+    },
+    {
+      "id": "PrimitiveCollection#raise",
+      "field": "description",
+      "sourceHash": "sha256:678c80eb3bf7effd47d6d7446ad8afe2d5083c9e55b402c047ac91478f5b8039",
+      "text": "将图元在集合中上移一个位置。若集合中的全部图元都绘制在地球表面，这也会在视觉上将图元上移一层。"
+    },
+    {
+      "id": "PrimitiveCollection#raise",
+      "field": "exceptions/0/description",
+      "sourceHash": "sha256:8ac7b1c42c1f2f1a4083b8391fecb8a3a10025344907d3f307a27f450df2d032",
+      "text": "primitive 不在此集合中。"
+    },
+    {
+      "id": "PrimitiveCollection#raise",
+      "field": "params/primitive/description",
+      "sourceHash": "sha256:32ddec28485b376ae72c7d91d8529b5f15a93740b0240c2eca8ca2237905e06b",
+      "text": "要上移的图元。"
+    },
+    {
+      "id": "PrimitiveCollection#raiseToTop",
+      "field": "description",
+      "sourceHash": "sha256:fb4305059c725a9c48d19dfe94c4015bb5817520df69839620120b9508bbd923",
+      "text": "将图元移到集合顶部。若集合中的全部图元都绘制在地球表面，这也会在视觉上将图元移到最上层。"
+    },
+    {
+      "id": "PrimitiveCollection#raiseToTop",
+      "field": "exceptions/0/description",
+      "sourceHash": "sha256:8ac7b1c42c1f2f1a4083b8391fecb8a3a10025344907d3f307a27f450df2d032",
+      "text": "primitive 不在此集合中。"
+    },
+    {
+      "id": "PrimitiveCollection#raiseToTop",
+      "field": "params/primitive/description",
+      "sourceHash": "sha256:3f1e78ed65af8baa26da7d508ee4a2198be875b9179fdf82090510114b52cd50",
+      "text": "要移到顶部的图元。"
+    },
+    {
+      "id": "PrimitiveCollection#remove",
+      "field": "description",
+      "sourceHash": "sha256:461f02bdba8eba8252ffaa4adef6aa689c17854ff0b97a75bafad43315e60fcf",
+      "text": "从集合中移除图元。"
+    },
+    {
+      "id": "PrimitiveCollection#remove",
+      "field": "params/primitive/description",
+      "sourceHash": "sha256:aed894090363f5409ef81d63078e8d6df1460e18653b33ae188087eebba61960",
+      "text": "要移除的图元。"
+    },
+    {
+      "id": "PrimitiveCollection#remove",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:efeb5b123eee27599c12f47327f38e4b9f5df6cc4a601b4fadddc195c98e5c61",
+      "text": "图元被移除时为 <code>true</code>；图元为 <code>undefined</code> 或集合中未找到时为 <code>false</code>。"
+    },
+    {
+      "id": "PrimitiveCollection#removeAll",
+      "field": "description",
+      "sourceHash": "sha256:d5b365bc0dd57bbc7755181122e74ea883d8019607ab5aa8b20842fd6352fa9b",
+      "text": "移除集合中的全部图元。"
+    },
+    {
+      "id": "PrimitiveCollection#show",
+      "field": "description",
+      "sourceHash": "sha256:3647cf81e0e7096802170b04c1c8b4ad40bbb866adbb8fbb807d55ce8dee17aa",
+      "text": "决定是否显示此集合中的图元。"
+    }
+  ]
+}

@@ -228,3 +228,41 @@ test("single Chinese documentation shows owned source, native translations and s
   await expect(page.locator("#main")).toContainText("三维图形对象与状态的容器");
   expect(errors).toEqual([]);
 });
+
+test("translated native documentation retains camera units, ownership and tile limits", async ({
+  page,
+}, info) => {
+  const errors = [];
+  page.on("pageerror", (error) => errors.push(error.message));
+  page.on("response", (response) => {
+    if (response.status() >= 400) {
+      errors.push(`${response.status()} ${response.url()}`);
+    }
+  });
+  await page.route(/^https?:\/\/(?!127\.0\.0\.1:8104)/, (route) =>
+    route.abort(),
+  );
+  const prefix = "/deep/site/vendor/engine/Documentation/";
+  await page.goto(`${prefix}Viewer.html`);
+  await expect(page.locator("#main")).toContainText(
+    "Viewer 销毁时不会销毁此集合",
+  );
+  await page.goto(`${prefix}Cesium3DTileset.html#cacheBytes`);
+  await expect(page.locator("#main")).toContainText("最多额外使用");
+  await expect(page.locator("#main")).toContainText(
+    "不要在事件监听器中创建或修改",
+  );
+  await page.goto(`${prefix}Camera.html#flyTo`);
+  await expect(page.locator("#main")).toContainText("飞行持续时间，单位为秒");
+  await expect(page.locator("#main")).toContainText(
+    "正值位于平面下方，负值位于平面上方",
+  );
+  await expect(page.locator('[id="flyTo"]')).toBeVisible();
+  await info.attach("native-api-translation", {
+    body: await page.screenshot({
+      path: info.outputPath("native-api-translation.png"),
+    }),
+    contentType: "image/png",
+  });
+  expect(errors).toEqual([]);
+});

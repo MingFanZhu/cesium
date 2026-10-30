@@ -21,6 +21,9 @@ SceneGIS 自有公开 API 的自然语言直接维护在源码中文 JSDoc 中�
 ## 词条格式
 
 每个 `zh-CN/api/*.json` 是同一语言的一个维护分组，不要求与源码模块一一对应。
+目前分组包括通用词条、基础入口说明，以及场景/相机、影像/3D Tiles、图元/实体的完整说明。
+常用 18 个类的字段覆盖由 `scripts/scenegis/documentation-translations.test.mjs` 检查；
+上游为这些类增加或更改说明后，需要同步补齐词条。其余原生 API 的缺口继续以报告为准。
 
 ```json
 {
