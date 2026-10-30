@@ -1,0 +1,1920 @@
+{
+  "schemaVersion": 1,
+  "locale": "zh-CN",
+  "entries": [
+    {
+      "id": "Clock",
+      "field": "exceptions/0/description",
+      "sourceHash": "sha256:4a5d686003745386b3047235e55e863eff72ff8b2f95fd3b324cff295ded20d0",
+      "text": "startTime 必须早于 stopTime。"
+    },
+    {
+      "id": "Clock",
+      "field": "params/options.canAnimate/description",
+      "sourceHash": "sha256:199d0834ac9d7f6f8c74eac837f3d575573037677a29432ba3b53bef3478821c",
+      "text": "指示 {@link Clock#tick} 是否允许推进时间，例如数据缓冲期间可能为 false。仅当 {@link Clock#canAnimate} 与 {@link Clock#shouldAnimate} 均为 true 时，时钟才推进。"
+    },
+    {
+      "id": "Clock",
+      "field": "params/options.clockRange/description",
+      "sourceHash": "sha256:33eb0d1eefc2cd6edbd1446b5ff9f28691dd1681ce26426d7f49447b158c7b7f",
+      "text": "决定到达 {@link Clock#startTime} 或 {@link Clock#stopTime} 时的时钟行为。"
+    },
+    {
+      "id": "Clock",
+      "field": "params/options.clockStep/description",
+      "sourceHash": "sha256:dd9291f36f8ea1ac827ef0df32d7efc54ff21fb9d2b7eae638e2bfa974f7b330",
+      "text": "决定 {@link Clock#tick} 调用是依赖帧次数还是依赖系统时钟。"
+    },
+    {
+      "id": "Clock",
+      "field": "params/options.currentTime/description",
+      "sourceHash": "sha256:4c7ca9307450b976a8aa1baaa29ba4182fcd64dc4b056c86266efd5104d46ffb",
+      "text": "当前时间。"
+    },
+    {
+      "id": "Clock",
+      "field": "params/options.multiplier/description",
+      "sourceHash": "sha256:345824a501e6d3d108de52685a811be78c79409545cbb1bd03869503e8251461",
+      "text": "决定调用 {@link Clock#tick} 时推进的时间量，负值允许时间倒退。"
+    },
+    {
+      "id": "Clock",
+      "field": "params/options.shouldAnimate/description",
+      "sourceHash": "sha256:4d87f5a60a6fcd421b2c31b272429d981e09c1dc9d6dfa56390ce5b2f3f6dbfc",
+      "text": "指示 {@link Clock#tick} 是否应尝试推进时间。仅当 {@link Clock#canAnimate} 与 {@link Clock#shouldAnimate} 均为 true 时，时钟才推进。"
+    },
+    {
+      "id": "Clock",
+      "field": "params/options.startTime/description",
+      "sourceHash": "sha256:d9ae4a69557eb4f852b296c24ba177c710400975666ca92874be3d4955392ee7",
+      "text": "时钟开始时间。"
+    },
+    {
+      "id": "Clock",
+      "field": "params/options.stopTime/description",
+      "sourceHash": "sha256:2aa9c4645acab95c9c5c0ffa979f2debff5a417cf516cedde6a1266a0e64df80",
+      "text": "时钟结束时间。"
+    },
+    {
+      "id": "Clock#canAnimate",
+      "field": "description",
+      "sourceHash": "sha256:bdbba5216f29b8863b719738a81d623b090aace505bee054fb625b8db8ed4eb8",
+      "text": "指示 {@link Clock#tick} 是否允许推进时间，例如数据缓冲期间可能为 false。仅当 {@link Clock#canAnimate} 与 {@link Clock#shouldAnimate} 均为 true 时，才推进时间。"
+    },
+    {
+      "id": "Clock#clockRange",
+      "field": "description",
+      "sourceHash": "sha256:dd667496cbe06aa6116a1b6861199af1b504a60e6dbdf8dde9b6547a7dec6d11",
+      "text": "决定到达 {@link Clock#startTime} 或 {@link Clock#stopTime} 时的时钟行为。"
+    },
+    {
+      "id": "Clock#clockStep",
+      "field": "description",
+      "sourceHash": "sha256:92b1fdd015326f495444ab209319f944e92ec6791d824c8a3ed6398147ef3c5e",
+      "text": "决定 {@link Clock#tick} 调用是依赖帧次数还是依赖系统时钟。更改为 {@link ClockStep.SYSTEM_CLOCK} 时，会将 {@link Clock#multiplier} 设为 1.0、{@link Clock#shouldAnimate} 设为 true，并将 {@link Clock#currentTime} 设为当前系统时间。"
+    },
+    {
+      "id": "Clock#currentTime",
+      "field": "description",
+      "sourceHash": "sha256:d9dfe2a1f749e621458dfeeb76e27c45dc8638736dafac7dbf01e6dacd4a12ef",
+      "text": "当前时间。修改此属性会将 {@link Clock#clockStep} 从 {@link ClockStep.SYSTEM_CLOCK} 改为 {@link ClockStep.SYSTEM_CLOCK_MULTIPLIER}。"
+    },
+    {
+      "id": "Clock#multiplier",
+      "field": "description",
+      "sourceHash": "sha256:d11a5a27886c55dd0a53cff8e1e159a6aff573dcd77631f85f46305da512873c",
+      "text": "获取或设置调用 {@link Clock#tick} 时推进的时间量，负值允许时间倒退。若 {@link Clock#clockStep} 为 {@link ClockStep.TICK_DEPENDENT}，此值为推进的秒数；若 {@link Clock#clockStep} 为 {@link ClockStep.SYSTEM_CLOCK_MULTIPLIER}，则用此值乘以上次调用 {@link Clock#tick} 后经过的系统时间。修改此属性会将 {@link Clock#clockStep} 从 {@link ClockStep.SYSTEM_CLOCK} 改为 {@link ClockStep.SYSTEM_CLOCK_MULTIPLIER}。"
+    },
+    {
+      "id": "Clock#onStop",
+      "field": "description",
+      "sourceHash": "sha256:c6c47ad23fca97fc883e3800ee74209f2e8c977f5e5502e5d0c8733305cfa72f",
+      "text": "每当到达 {@link Clock#stopTime} 时触发的 {@link Event}。"
+    },
+    {
+      "id": "Clock#onTick",
+      "field": "description",
+      "sourceHash": "sha256:514a4e3c243694a46eee97d2fb4faf0b4846789db4bc038e6c0d1ccaa6f9c76a",
+      "text": "每次调用 {@link Clock#tick} 时触发的 {@link Event}。"
+    },
+    {
+      "id": "Clock#shouldAnimate",
+      "field": "description",
+      "sourceHash": "sha256:f465f00ea70bd683009d94bedff3e1eaeabf93e9dea8df41c1676c5f49a37369",
+      "text": "指示 {@link Clock#tick} 是否应尝试推进时间。仅当 {@link Clock#canAnimate} 与 {@link Clock#shouldAnimate} 均为 true 时，才推进时间。修改此属性会将 {@link Clock#clockStep} 从 {@link ClockStep.SYSTEM_CLOCK} 改为 {@link ClockStep.SYSTEM_CLOCK_MULTIPLIER}。"
+    },
+    {
+      "id": "Clock#startTime",
+      "field": "description",
+      "sourceHash": "sha256:d9ae4a69557eb4f852b296c24ba177c710400975666ca92874be3d4955392ee7",
+      "text": "时钟开始时间。"
+    },
+    {
+      "id": "Clock#stopTime",
+      "field": "description",
+      "sourceHash": "sha256:2aa9c4645acab95c9c5c0ffa979f2debff5a417cf516cedde6a1266a0e64df80",
+      "text": "时钟结束时间。"
+    },
+    {
+      "id": "Clock#tick",
+      "field": "description",
+      "sourceHash": "sha256:d17b5ddec487d3ee813c10017a94bb8b9130288f710787d4475465440202d148",
+      "text": "根据当前配置从当前时间推进时钟。无论是否正在播放动画，每帧都应调用 tick。请使用 {@link Clock#shouldAnimate} 控制动画。"
+    },
+    {
+      "id": "Clock#tick",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:cb82259536b6ac9da3dfa024831eb5e65c28a5b9826df2ccc9e1314c8007f5dc",
+      "text": "{@link Clock#currentTime} 属性的新值。"
+    },
+    {
+      "id": "ClockRange.CLAMPED",
+      "field": "description",
+      "sourceHash": "sha256:45659f0e1e54c171a3ecd2091e65315348502eff61fe817b38fa8438f36c3f7f",
+      "text": "到达 {@link Clock#startTime} 或 {@link Clock#stopTime} 时，{@link Clock#tick} 不再继续推进 {@link Clock#currentTime}。"
+    },
+    {
+      "id": "ClockRange.LOOP_STOP",
+      "field": "description",
+      "sourceHash": "sha256:9f859c7bc68638c70a66afce0373f6ec466909448fba0056776daa80634a9ed9",
+      "text": "到达 {@link Clock#stopTime} 时，{@link Clock#tick} 将 {@link Clock#currentTime} 推进到区间另一端。时间倒退时，{@link Clock#tick} 不会越过 {@link Clock#startTime}。"
+    },
+    {
+      "id": "ClockRange.UNBOUNDED",
+      "field": "description",
+      "sourceHash": "sha256:25357459ac46ecdd20a1c716bf94c717f7e1bc19e5f4169eeeb46fbd7f3d35f5",
+      "text": "{@link Clock#tick} 始终沿当前方向推进时钟。"
+    },
+    {
+      "id": "ClockRange",
+      "field": "description",
+      "sourceHash": "sha256:10ac28f1bc77b54e9d5fdb1bf652520267d895426e2611822aa6bda987487ef0",
+      "text": "{@link Clock#tick} 用于决定到达 {@link Clock#startTime} 或 {@link Clock#stopTime} 时行为的常量。"
+    },
+    {
+      "id": "ClockRange",
+      "field": "properties/CLAMPED/description",
+      "sourceHash": "sha256:45659f0e1e54c171a3ecd2091e65315348502eff61fe817b38fa8438f36c3f7f",
+      "text": "到达 {@link Clock#startTime} 或 {@link Clock#stopTime} 时，{@link Clock#tick} 不再继续推进 {@link Clock#currentTime}。"
+    },
+    {
+      "id": "ClockRange",
+      "field": "properties/LOOP_STOP/description",
+      "sourceHash": "sha256:9f859c7bc68638c70a66afce0373f6ec466909448fba0056776daa80634a9ed9",
+      "text": "到达 {@link Clock#stopTime} 时，{@link Clock#tick} 将 {@link Clock#currentTime} 推进到区间另一端。时间倒退时，{@link Clock#tick} 不会越过 {@link Clock#startTime}。"
+    },
+    {
+      "id": "ClockRange",
+      "field": "properties/UNBOUNDED/description",
+      "sourceHash": "sha256:25357459ac46ecdd20a1c716bf94c717f7e1bc19e5f4169eeeb46fbd7f3d35f5",
+      "text": "{@link Clock#tick} 始终沿当前方向推进时钟。"
+    },
+    {
+      "id": "ClockStep.SYSTEM_CLOCK_MULTIPLIER",
+      "field": "description",
+      "sourceHash": "sha256:e10cc5ff005cf086f577c1c15e29bd60919bf21e53e8879f2a4398eb90d484be",
+      "text": "{@link Clock#tick} 按上次调用后经过的系统时间乘以 {@link Clock#multiplier} 来推进当前时间。"
+    },
+    {
+      "id": "ClockStep.SYSTEM_CLOCK",
+      "field": "description",
+      "sourceHash": "sha256:cdb4bd94d270cfecf38ad4e8dc9dc4525181fc0eb432ce908f4505f4da4f0091",
+      "text": "{@link Clock#tick} 将时钟设为当前系统时间，忽略全部其他设置。"
+    },
+    {
+      "id": "ClockStep.TICK_DEPENDENT",
+      "field": "description",
+      "sourceHash": "sha256:b994e1d9afad99b811c5b5f62a1b5d5904f79f63d7a784c8d41a192a074062f0",
+      "text": "{@link Clock#tick} 按固定步长推进当前时间，步长秒数由 {@link Clock#multiplier} 指定。"
+    },
+    {
+      "id": "ClockStep",
+      "field": "description",
+      "sourceHash": "sha256:8857d489142d603f3d85c96243eb586431721c56b906199ecd5832e243429808",
+      "text": "决定每次调用 {@link Clock#tick} 时推进时间量的常量。"
+    },
+    {
+      "id": "ClockStep",
+      "field": "properties/SYSTEM_CLOCK_MULTIPLIER/description",
+      "sourceHash": "sha256:e10cc5ff005cf086f577c1c15e29bd60919bf21e53e8879f2a4398eb90d484be",
+      "text": "{@link Clock#tick} 按上次调用后经过的系统时间乘以 {@link Clock#multiplier} 来推进当前时间。"
+    },
+    {
+      "id": "ClockStep",
+      "field": "properties/SYSTEM_CLOCK/description",
+      "sourceHash": "sha256:cdb4bd94d270cfecf38ad4e8dc9dc4525181fc0eb432ce908f4505f4da4f0091",
+      "text": "{@link Clock#tick} 将时钟设为当前系统时间，忽略全部其他设置。"
+    },
+    {
+      "id": "ClockStep",
+      "field": "properties/TICK_DEPENDENT/description",
+      "sourceHash": "sha256:b994e1d9afad99b811c5b5f62a1b5d5904f79f63d7a784c8d41a192a074062f0",
+      "text": "{@link Clock#tick} 按固定步长推进当前时间，步长秒数由 {@link Clock#multiplier} 指定。"
+    },
+    {
+      "id": "ClockViewModel",
+      "field": "description",
+      "sourceHash": "sha256:c1c86ee250e8e4b6323b1b4f898b2bd2960ad9a0b9cae4cefae45277b942d83d",
+      "text": "为用户界面公开 {@link Clock} 的视图模型。"
+    },
+    {
+      "id": "ClockViewModel",
+      "field": "params/clock/description",
+      "sourceHash": "sha256:5f85b13a2901fe2b17943844dea5c2864d96514913490c5291ec2d7dcc011f65",
+      "text": "此视图模型包装的时钟对象；若为 undefined，则创建新实例。"
+    },
+    {
+      "id": "ClockViewModel#canAnimate",
+      "field": "description",
+      "sourceHash": "sha256:f169e1235c3973afb70a981152f972ddc55d73eef49c6393fe9dcadaa66faf59",
+      "text": "获取或设置时钟是否可以播放动画。参见 {@link Clock#canAnimate}。此属性可观察。"
+    },
+    {
+      "id": "ClockViewModel#clock",
+      "field": "description",
+      "sourceHash": "sha256:3af17b2614fc3f6873991fdbadc2583c92914330c199f77215c00343df1ad41b",
+      "text": "获取底层 Clock。"
+    },
+    {
+      "id": "ClockViewModel#clockRange",
+      "field": "description",
+      "sourceHash": "sha256:1a37a3bdd59552621db7d75dd861626b8dc37233119a12811826e7b6050a6fec",
+      "text": "获取或设置时钟范围设置。参见 {@link Clock#clockRange}。此属性可观察。"
+    },
+    {
+      "id": "ClockViewModel#clockStep",
+      "field": "description",
+      "sourceHash": "sha256:1bd3e28ebc16545921f444b8fc0ce2fa41498f9bf00ed6d7d97ea997cc6bbe78",
+      "text": "获取或设置时钟步进设置。参见 {@link Clock#clockStep}。此属性可观察。"
+    },
+    {
+      "id": "ClockViewModel#currentTime",
+      "field": "description",
+      "sourceHash": "sha256:bc6b4559984f5392da59f98a2d4ba9752d43cf3fac020dee1894459537899db6",
+      "text": "获取或设置当前时间。参见 {@link Clock#currentTime}。此属性可观察。"
+    },
+    {
+      "id": "ClockViewModel#destroy",
+      "field": "description",
+      "sourceHash": "sha256:017717985b95790039d72f3dd9a385b389d90406ac0eb6a78fadcc364723536c",
+      "text": "销毁视图模型。不再需要时应调用，以正确清理视图模型。"
+    },
+    {
+      "id": "ClockViewModel#multiplier",
+      "field": "description",
+      "sourceHash": "sha256:2b34f445854fa405e7dabd430ed81fd610deb30078bf1dcabbafa9f1650911c0",
+      "text": "获取或设置时钟倍速。参见 {@link Clock#multiplier}。此属性可观察。"
+    },
+    {
+      "id": "ClockViewModel#shouldAnimate",
+      "field": "description",
+      "sourceHash": "sha256:131469596cef8ed36cb7d0211849c46834c6ddbd373a1bba7da7db3d50bbc70e",
+      "text": "获取或设置时钟是否应播放动画。参见 {@link Clock#shouldAnimate}。此属性可观察。"
+    },
+    {
+      "id": "ClockViewModel#startTime",
+      "field": "description",
+      "sourceHash": "sha256:d8d86671e4421cdc8b197227738ccf94ca478d8d25292e826545a431077a3d64",
+      "text": "获取或设置时钟开始时间。参见 {@link Clock#startTime}。此属性可观察。"
+    },
+    {
+      "id": "ClockViewModel#stopTime",
+      "field": "description",
+      "sourceHash": "sha256:8a7ab924eec193d595b6e844f1b45c3d333807136701ffe679694bb156893415",
+      "text": "获取或设置时钟结束时间。参见 {@link Clock#stopTime}。此属性可观察。"
+    },
+    {
+      "id": "ClockViewModel#synchronize",
+      "field": "description",
+      "sourceHash": "sha256:23bd0d458297cb50d51b60fd4f60990af8cb1f3e2f0e063bf9a85d4ac0bba169",
+      "text": "根据底层时钟内容更新视图模型。当底层时钟已变更，但尚未调用 <code>Clock.tick</code> 时，可强制更新视图模型。"
+    },
+    {
+      "id": "ClockViewModel#systemTime",
+      "field": "description",
+      "sourceHash": "sha256:45cde5af2d7298e7dbcd905b090a0a579c385074f7a0e1e7b08a4337671a6bb7",
+      "text": "获取当前系统时间。此属性可观察。"
+    },
+    {
+      "id": "GregorianDate",
+      "field": "description",
+      "sourceHash": "sha256:cd9bea46fbced78e4b1d55725038fed3531a5df2a82c8e287787393951fbde9b",
+      "text": "以比 JavaScript Date 更高精度的格式表示公历日期。除亚毫秒精度外，也能表示闰秒。"
+    },
+    {
+      "id": "GregorianDate",
+      "field": "params/day/description",
+      "sourceHash": "sha256:cf4d5619fea084de4dcadc2f8f6e4964714dd1b74122b21015edb464d96fd48a",
+      "text": "月份内的日期，取从 1 开始的整数。"
+    },
+    {
+      "id": "GregorianDate",
+      "field": "params/hour/description",
+      "sourceHash": "sha256:82f0bc437edf9376d9b9d8e2de78bc58ecc24f7626adffaeacb7359539e43145",
+      "text": "小时，取 [0, 23] 范围内的整数。"
+    },
+    {
+      "id": "GregorianDate",
+      "field": "params/isLeapSecond/description",
+      "sourceHash": "sha256:2dc49a4b315fea27fcf1ed69ca4359569d38aec4580b2233887a98bad81115f4",
+      "text": "此时间是否处于闰秒期间。"
+    },
+    {
+      "id": "GregorianDate",
+      "field": "params/millisecond/description",
+      "sourceHash": "sha256:73bf939c723cf91492f8ba092489c8a1de15cad6db7a2b1944dcb820f1001b56",
+      "text": "秒内的毫秒数，取 [0.0, 1000.0) 范围内的浮点数。"
+    },
+    {
+      "id": "GregorianDate",
+      "field": "params/minute/description",
+      "sourceHash": "sha256:87aa69eb900bae23ad56adc361bdcaa275d472b4f7b5216cfe9ccb93ab69e1f5",
+      "text": "小时内的分钟数，取 [0, 59] 范围内的整数。"
+    },
+    {
+      "id": "GregorianDate",
+      "field": "params/month/description",
+      "sourceHash": "sha256:c9f1846d019850d7c55588fbca2f5a91204cf5f2bfad6138cb2d53ee124272a8",
+      "text": "月份，取 [1, 12] 范围内的整数。"
+    },
+    {
+      "id": "GregorianDate",
+      "field": "params/second/description",
+      "sourceHash": "sha256:dbfad86d2eb0c2756323c9a0e74126b66479f9975921776875a80cdb7d7f3fb6",
+      "text": "分钟内的秒数，取 [0, 60] 范围内的整数，其中 60 表示闰秒。"
+    },
+    {
+      "id": "GregorianDate",
+      "field": "params/year/description",
+      "sourceHash": "sha256:8a0fcf4a8cd357c7389c9d5cba81fc36fe17acae59fe1ea561cbb66a9ea9c734",
+      "text": "年份，取整数。"
+    },
+    {
+      "id": "GregorianDate#day",
+      "field": "description",
+      "sourceHash": "sha256:2c622e3c0ea82ab9daf9eae08eb041bbc3125569d2094499fc7d887cbf19cd8e",
+      "text": "获取或设置月份内的日期，取从 1 开始的整数。"
+    },
+    {
+      "id": "GregorianDate#hour",
+      "field": "description",
+      "sourceHash": "sha256:24f48007ac3c5cf716f7e429c5cf83b7e4977016a26ccffdc0e072f7a0a37f24",
+      "text": "获取或设置小时，取 [0, 23] 范围内的整数。"
+    },
+    {
+      "id": "GregorianDate#isLeapSecond",
+      "field": "description",
+      "sourceHash": "sha256:304e128f72d782d846105dc8c6ef16555cd05976d275dd6272ecfbac086076b2",
+      "text": "获取或设置此时间是否处于闰秒期间。"
+    },
+    {
+      "id": "GregorianDate#millisecond",
+      "field": "description",
+      "sourceHash": "sha256:b6dc9d1fbbea5dc3ebe4ca78bb77bae7d47270ae8193928516879705558886f9",
+      "text": "获取或设置秒内的毫秒数，取 [0.0, 1000.0) 范围内的浮点数。"
+    },
+    {
+      "id": "GregorianDate#minute",
+      "field": "description",
+      "sourceHash": "sha256:8aec9aafcdadd6cb3013a04e9d6dfe8f586f1f0bbcd7c882aef537e947bb7895",
+      "text": "获取或设置小时内的分钟数，取 [0, 59] 范围内的整数。"
+    },
+    {
+      "id": "GregorianDate#month",
+      "field": "description",
+      "sourceHash": "sha256:c3b5b37264df4001eba921221de2565e3919e7fbab5b761a7eea219392914551",
+      "text": "获取或设置月份，取 [1, 12] 范围内的整数。"
+    },
+    {
+      "id": "GregorianDate#second",
+      "field": "description",
+      "sourceHash": "sha256:3753806151739e585c1ba992e240c6388fe6c4d1a6e65b9c48846df0428df73d",
+      "text": "获取或设置分钟内的秒数，取 [0, 60] 范围内的整数，其中 60 表示闰秒。"
+    },
+    {
+      "id": "GregorianDate#year",
+      "field": "description",
+      "sourceHash": "sha256:e57eaabea3f01e278bb2178665135893f8e4e881e242d2d672ed30855afeb2f6",
+      "text": "获取或设置整数年份。"
+    },
+    {
+      "id": "JulianDate.addDays",
+      "field": "description",
+      "sourceHash": "sha256:48325d21d59c8e77868cb9ab1e2aae86c1895eecca693f45efab064c3147bc70",
+      "text": "向给定日期实例增加指定天数。"
+    },
+    {
+      "id": "JulianDate.addDays",
+      "field": "params/days/description",
+      "sourceHash": "sha256:74b3ccf5c899a55d5b2e2385e27544dd2c094c8dd3009625e0871bdfb331a2b6",
+      "text": "要增加或减去的天数。"
+    },
+    {
+      "id": "JulianDate.addDays",
+      "field": "params/julianDate/description",
+      "sourceHash": "sha256:74dbece94612cae7509e7244491fb5e111d8a8af5439f5910d22b5bea2852c60",
+      "text": "日期。"
+    },
+    {
+      "id": "JulianDate.addHours",
+      "field": "description",
+      "sourceHash": "sha256:637686bd00a5fe74214bf52b9be277add92e171862d3b468fb1e7c2cbf04650d",
+      "text": "向给定日期实例增加指定小时数。"
+    },
+    {
+      "id": "JulianDate.addHours",
+      "field": "params/hours/description",
+      "sourceHash": "sha256:868289a545a674cd40d8290a1bb6755e40f7c3bf42adb69d75d8cebd59fff202",
+      "text": "要增加或减去的小时数。"
+    },
+    {
+      "id": "JulianDate.addHours",
+      "field": "params/julianDate/description",
+      "sourceHash": "sha256:74dbece94612cae7509e7244491fb5e111d8a8af5439f5910d22b5bea2852c60",
+      "text": "日期。"
+    },
+    {
+      "id": "JulianDate.addMinutes",
+      "field": "description",
+      "sourceHash": "sha256:1a2d87ecd10f3037cca8cd0375123d3d5f2673493c54efddc76daaa15a29842b",
+      "text": "向给定日期实例增加指定分钟数。"
+    },
+    {
+      "id": "JulianDate.addMinutes",
+      "field": "params/julianDate/description",
+      "sourceHash": "sha256:74dbece94612cae7509e7244491fb5e111d8a8af5439f5910d22b5bea2852c60",
+      "text": "日期。"
+    },
+    {
+      "id": "JulianDate.addMinutes",
+      "field": "params/minutes/description",
+      "sourceHash": "sha256:1c1ff5707e80a78d24c998395bb6744e27f95699dbb09e281814ba5523c8c6e6",
+      "text": "要增加或减去的分钟数。"
+    },
+    {
+      "id": "JulianDate.addSeconds",
+      "field": "description",
+      "sourceHash": "sha256:1bce9cec3d1f7361849f68fffd8b28132b031301adc8026515c53aff292192f1",
+      "text": "向给定日期实例增加指定秒数。"
+    },
+    {
+      "id": "JulianDate.addSeconds",
+      "field": "params/julianDate/description",
+      "sourceHash": "sha256:74dbece94612cae7509e7244491fb5e111d8a8af5439f5910d22b5bea2852c60",
+      "text": "日期。"
+    },
+    {
+      "id": "JulianDate.addSeconds",
+      "field": "params/seconds/description",
+      "sourceHash": "sha256:1acde9b1034d953c5d23953f4cb63bed68fbc9c1da2721ad857218e0d1fd3a1e",
+      "text": "要增加或减去的秒数。"
+    },
+    {
+      "id": "JulianDate.clone",
+      "field": "description",
+      "sourceHash": "sha256:67c157f8209822c9a0791df87a39275c0e7cc4e5acb1c2cfea753194546da1c9",
+      "text": "复制 JulianDate 实例。"
+    },
+    {
+      "id": "JulianDate.clone",
+      "field": "params/julianDate/description",
+      "sourceHash": "sha256:e41b00017ade173fcef6a31069cee3109ecc90e175db9c2a9dad724ed6b91968",
+      "text": "要复制的日期。"
+    },
+    {
+      "id": "JulianDate.clone",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:c5d7eef4c41fe0a53a5a91d7366027f563fe968a16cee77d466ce05956e8b0f1",
+      "text": "修改后的 result 参数；未提供时返回新实例。若 julianDate 为 undefined，则返回 undefined。"
+    },
+    {
+      "id": "JulianDate.compare",
+      "field": "description",
+      "sourceHash": "sha256:b8dab5c5733bb9f435f46c99935e35d8a82a12a2a9510862b3038648d9d2661d",
+      "text": "比较两个实例。"
+    },
+    {
+      "id": "JulianDate.compare",
+      "field": "params/left/description",
+      "sourceHash": "sha256:65d5e660b8709cd25b224e79ffafd276c63b94ee0e4a5c99d2352d65723e27f7",
+      "text": "第一个实例。"
+    },
+    {
+      "id": "JulianDate.compare",
+      "field": "params/right/description",
+      "sourceHash": "sha256:628c70a3bb095fa999fe75b3e3e9e24393c5ae6b194bdb2c512cc52b0f0766fb",
+      "text": "第二个实例。"
+    },
+    {
+      "id": "JulianDate.compare",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:1b76b0dba5bf15bb4317239105c61aeb23eeb349df69e946151dfd5e67f1380a",
+      "text": "left 小于 right 时返回负值，大于 right 时返回正值，相等时返回零。"
+    },
+    {
+      "id": "JulianDate.computeTaiMinusUtc",
+      "field": "description",
+      "sourceHash": "sha256:a6bb7ecf5165958b662dcb520deb72172b70c13e1896fd709c3187060e0f31c9",
+      "text": "计算给定实例相对于 UTC 超前的秒数。"
+    },
+    {
+      "id": "JulianDate.computeTaiMinusUtc",
+      "field": "params/julianDate/description",
+      "sourceHash": "sha256:74dbece94612cae7509e7244491fb5e111d8a8af5439f5910d22b5bea2852c60",
+      "text": "日期。"
+    },
+    {
+      "id": "JulianDate.computeTaiMinusUtc",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:2d4177c5e8b4b81b40b2b2451e707aa999ba1134e5acba8cd0ed3bd53e2ba33d",
+      "text": "给定实例相对于 UTC 超前的秒数。"
+    },
+    {
+      "id": "JulianDate.daysDifference",
+      "field": "description",
+      "sourceHash": "sha256:a368a386bf4335225a3d722956f8c6aee521c459363d68a1a39ce30417ae3d56",
+      "text": "计算给定日期实例之间相差的天数。"
+    },
+    {
+      "id": "JulianDate.daysDifference",
+      "field": "params/left/description",
+      "sourceHash": "sha256:65d5e660b8709cd25b224e79ffafd276c63b94ee0e4a5c99d2352d65723e27f7",
+      "text": "第一个实例。"
+    },
+    {
+      "id": "JulianDate.daysDifference",
+      "field": "params/right/description",
+      "sourceHash": "sha256:628c70a3bb095fa999fe75b3e3e9e24393c5ae6b194bdb2c512cc52b0f0766fb",
+      "text": "第二个实例。"
+    },
+    {
+      "id": "JulianDate.daysDifference",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:41f6640fc3bc15740571ddcab03073bd410e37cd1bd35c732d71de23496ad802",
+      "text": "用 <code>left</code> 减去 <code>right</code> 所得差值，单位为天。"
+    },
+    {
+      "id": "JulianDate.equals",
+      "field": "description",
+      "sourceHash": "sha256:9f2d2345a8fb9f3e5e5245a8700ddc9051411f48c9f8dc3abe15b0262833cc2c",
+      "text": "比较两个实例，相等时返回 <code>true</code>，否则返回 <code>false</code>。"
+    },
+    {
+      "id": "JulianDate.equals",
+      "field": "params/left/description",
+      "sourceHash": "sha256:65d5e660b8709cd25b224e79ffafd276c63b94ee0e4a5c99d2352d65723e27f7",
+      "text": "第一个实例。"
+    },
+    {
+      "id": "JulianDate.equals",
+      "field": "params/right/description",
+      "sourceHash": "sha256:628c70a3bb095fa999fe75b3e3e9e24393c5ae6b194bdb2c512cc52b0f0766fb",
+      "text": "第二个实例。"
+    },
+    {
+      "id": "JulianDate.equals",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:9721823f9a050802f92445696a210082bb7f670f7ab1a971458e2d5e01b6145b",
+      "text": "日期相等时返回 <code>true</code>，否则返回 <code>false</code>。"
+    },
+    {
+      "id": "JulianDate.equalsEpsilon",
+      "field": "description",
+      "sourceHash": "sha256:b262d1e4020fdd23ae3e182518c235db1d664195087b1459611b80e768413a00",
+      "text": "比较两个实例，若相差在 <code>epsilon</code> 秒以内则返回 <code>true</code>。也就是说，两日期要视为相等并使函数返回 <code>true</code>，其秒数差的绝对值必须小于等于 <code>epsilon</code>。"
+    },
+    {
+      "id": "JulianDate.equalsEpsilon",
+      "field": "params/epsilon/description",
+      "sourceHash": "sha256:a89d5ab4df986a6e1dfc4d6245a07603870f3bb4154e62967be2be38adbf6f22",
+      "text": "两个实例之间允许相差的最大秒数。"
+    },
+    {
+      "id": "JulianDate.equalsEpsilon",
+      "field": "params/left/description",
+      "sourceHash": "sha256:65d5e660b8709cd25b224e79ffafd276c63b94ee0e4a5c99d2352d65723e27f7",
+      "text": "第一个实例。"
+    },
+    {
+      "id": "JulianDate.equalsEpsilon",
+      "field": "params/right/description",
+      "sourceHash": "sha256:628c70a3bb095fa999fe75b3e3e9e24393c5ae6b194bdb2c512cc52b0f0766fb",
+      "text": "第二个实例。"
+    },
+    {
+      "id": "JulianDate.equalsEpsilon",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:ed2254c28008833e541805479b1716fa8e80c72b9ca0734bd8a11b3aa6bf1e6d",
+      "text": "两日期相差在 <code>epsilon</code> 秒以内时返回 <code>true</code>，否则返回 <code>false</code>。"
+    },
+    {
+      "id": "JulianDate.fromDate",
+      "field": "description",
+      "sourceHash": "sha256:b8b959033b162c6e81e42e8fc2a37fa493d5722aa244c8c9324eba9ec56707d5",
+      "text": "从 JavaScript Date 创建新实例。"
+    },
+    {
+      "id": "JulianDate.fromDate",
+      "field": "exceptions/0/description",
+      "sourceHash": "sha256:9d3d04f41ee07b6de374d3ba51d728b5651b1929ead68cc186cd433c655219aa",
+      "text": "date 必须为有效 JavaScript Date。"
+    },
+    {
+      "id": "JulianDate.fromDate",
+      "field": "params/date/description",
+      "sourceHash": "sha256:81c4a3e9dc72963b38bbff60a1445d7f86179cd53fdc429fefe69b3e3a7400c4",
+      "text": "JavaScript Date。"
+    },
+    {
+      "id": "JulianDate.fromDate",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:cf988b12169a1cc4ca849c5b40bf15dbc08d6274d7ffed7e00d92b97a2f4c5bc",
+      "text": "修改后的 result 参数；未提供时返回新实例。"
+    },
+    {
+      "id": "JulianDate.fromGregorianDate",
+      "field": "description",
+      "sourceHash": "sha256:1a1bb22a8ec437379e40f996bf7c1d2149c8223bd252e460a4843ef31c2fc09d",
+      "text": "从 GregorianDate 创建新实例。"
+    },
+    {
+      "id": "JulianDate.fromGregorianDate",
+      "field": "exceptions/0/description",
+      "sourceHash": "sha256:73d57b565386d0927484422b50d00bb36d4feaec6ac7f66bce5f1023b0ea604f",
+      "text": "date 必须为有效 GregorianDate。"
+    },
+    {
+      "id": "JulianDate.fromGregorianDate",
+      "field": "params/date/description",
+      "sourceHash": "sha256:dc602f0cf16419bc6e976e898a97b51ec2a21c1a80f751f76548fa07c41d12d4",
+      "text": "GregorianDate。"
+    },
+    {
+      "id": "JulianDate.fromGregorianDate",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:cf988b12169a1cc4ca849c5b40bf15dbc08d6274d7ffed7e00d92b97a2f4c5bc",
+      "text": "修改后的 result 参数；未提供时返回新实例。"
+    },
+    {
+      "id": "JulianDate.fromIso8601",
+      "field": "description",
+      "sourceHash": "sha256:055ebb716d1ffaafe20b044f45223c9fe072aad568106c394d76d94d9c82731c",
+      "text": "从 {@link http://en.wikipedia.org/wiki/ISO_8601|ISO 8601} 日期创建新实例。与 <code>Date.parse</code> 相比，此方法支持 ISO 8601 规范定义的全部有效格式，包括多数 JavaScript 实现会丢弃的闰秒和亚毫秒时间。"
+    },
+    {
+      "id": "JulianDate.fromIso8601",
+      "field": "exceptions/0/description",
+      "sourceHash": "sha256:2600392bef0b801174f408bf2bcd7ba7705325824d6e07b599a1405362bded12",
+      "text": "无效的 ISO 8601 日期。"
+    },
+    {
+      "id": "JulianDate.fromIso8601",
+      "field": "params/iso8601String/description",
+      "sourceHash": "sha256:1703593163c319f42dd95571e63fe7fd31370c8bc7ec5c2fc16124c47477203d",
+      "text": "ISO 8601 日期。"
+    },
+    {
+      "id": "JulianDate.fromIso8601",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:cf988b12169a1cc4ca849c5b40bf15dbc08d6274d7ffed7e00d92b97a2f4c5bc",
+      "text": "修改后的 result 参数；未提供时返回新实例。"
+    },
+    {
+      "id": "JulianDate.greaterThan",
+      "field": "description",
+      "sourceHash": "sha256:dc626febc0fbe10bc604a6ec0241a71a1ebc0574d542dc9535517f5b9bae02dd",
+      "text": "比较给定实例，若 <code>left</code> 晚于 <code>right</code> 则返回 <code>true</code>，否则返回 <code>false</code>。"
+    },
+    {
+      "id": "JulianDate.greaterThan",
+      "field": "params/left/description",
+      "sourceHash": "sha256:65d5e660b8709cd25b224e79ffafd276c63b94ee0e4a5c99d2352d65723e27f7",
+      "text": "第一个实例。"
+    },
+    {
+      "id": "JulianDate.greaterThan",
+      "field": "params/right/description",
+      "sourceHash": "sha256:628c70a3bb095fa999fe75b3e3e9e24393c5ae6b194bdb2c512cc52b0f0766fb",
+      "text": "第二个实例。"
+    },
+    {
+      "id": "JulianDate.greaterThan",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:81a6f600891053efc36fd8abddb3358ac2e8354c0e7588f712c642910092d16e",
+      "text": "若 <code>left</code> 晚于 <code>right</code>，则返回 <code>true</code>；否则返回 <code>false</code>。"
+    },
+    {
+      "id": "JulianDate.greaterThanOrEquals",
+      "field": "description",
+      "sourceHash": "sha256:dacfa7a936d9058c42268ea43e987a77932f27da3982faf464d9909b47801409",
+      "text": "比较给定实例，若 <code>left</code> 晚于或等于 <code>right</code> 则返回 <code>true</code>，否则返回 <code>false</code>。"
+    },
+    {
+      "id": "JulianDate.greaterThanOrEquals",
+      "field": "params/left/description",
+      "sourceHash": "sha256:65d5e660b8709cd25b224e79ffafd276c63b94ee0e4a5c99d2352d65723e27f7",
+      "text": "第一个实例。"
+    },
+    {
+      "id": "JulianDate.greaterThanOrEquals",
+      "field": "params/right/description",
+      "sourceHash": "sha256:628c70a3bb095fa999fe75b3e3e9e24393c5ae6b194bdb2c512cc52b0f0766fb",
+      "text": "第二个实例。"
+    },
+    {
+      "id": "JulianDate.greaterThanOrEquals",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:368733eb90e7525a1c02fd515d91586a1c3814a2ea89935714eda79c56432747",
+      "text": "若 <code>left</code> 晚于或等于 <code>right</code>，则返回 <code>true</code>；否则返回 <code>false</code>。"
+    },
+    {
+      "id": "JulianDate.leapSeconds",
+      "field": "description",
+      "sourceHash": "sha256:1c66c928fd2d81de6db91044597df501c08fa9b90ddc94fe895b1e21c3cb41d2",
+      "text": "获取或设置 Cesium 全局使用的闰秒列表。"
+    },
+    {
+      "id": "JulianDate.lessThan",
+      "field": "description",
+      "sourceHash": "sha256:b166f57a04c151ffcd03d5a25520b693fdf59f4e75a131d15843be996087a3d5",
+      "text": "比较给定实例，若 <code>left</code> 早于 <code>right</code> 则返回 <code>true</code>，否则返回 <code>false</code>。"
+    },
+    {
+      "id": "JulianDate.lessThan",
+      "field": "params/left/description",
+      "sourceHash": "sha256:65d5e660b8709cd25b224e79ffafd276c63b94ee0e4a5c99d2352d65723e27f7",
+      "text": "第一个实例。"
+    },
+    {
+      "id": "JulianDate.lessThan",
+      "field": "params/right/description",
+      "sourceHash": "sha256:628c70a3bb095fa999fe75b3e3e9e24393c5ae6b194bdb2c512cc52b0f0766fb",
+      "text": "第二个实例。"
+    },
+    {
+      "id": "JulianDate.lessThan",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:912c06e504553d2f6e002966835413276d5b07a1c053d2c1460ab3cac8d2959d",
+      "text": "若 <code>left</code> 早于 <code>right</code>，则返回 <code>true</code>；否则返回 <code>false</code>。"
+    },
+    {
+      "id": "JulianDate.lessThanOrEquals",
+      "field": "description",
+      "sourceHash": "sha256:701e30eb72391793e2e6908adf29c4f342d5ddd4d6998b84c1c2b59a23054a71",
+      "text": "比较给定实例，若 <code>left</code> 早于或等于 <code>right</code> 则返回 <code>true</code>，否则返回 <code>false</code>。"
+    },
+    {
+      "id": "JulianDate.lessThanOrEquals",
+      "field": "params/left/description",
+      "sourceHash": "sha256:65d5e660b8709cd25b224e79ffafd276c63b94ee0e4a5c99d2352d65723e27f7",
+      "text": "第一个实例。"
+    },
+    {
+      "id": "JulianDate.lessThanOrEquals",
+      "field": "params/right/description",
+      "sourceHash": "sha256:628c70a3bb095fa999fe75b3e3e9e24393c5ae6b194bdb2c512cc52b0f0766fb",
+      "text": "第二个实例。"
+    },
+    {
+      "id": "JulianDate.lessThanOrEquals",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:0bcb72be26a5f46621be284b895f42a1b8b130039d72f1ba8858a6be315135a2",
+      "text": "若 <code>left</code> 早于或等于 <code>right</code>，则返回 <code>true</code>；否则返回 <code>false</code>。"
+    },
+    {
+      "id": "JulianDate.now",
+      "field": "description",
+      "sourceHash": "sha256:3cb60fb0f96fb2e607d4875d930d4a1220f7e85b04abde230bcb4aca219fce8e",
+      "text": "创建表示当前系统时间的新实例，等价于调用 <code>JulianDate.fromDate(new Date());</code>。"
+    },
+    {
+      "id": "JulianDate.now",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:cf988b12169a1cc4ca849c5b40bf15dbc08d6274d7ffed7e00d92b97a2f4c5bc",
+      "text": "修改后的 result 参数；未提供时返回新实例。"
+    },
+    {
+      "id": "JulianDate.secondsDifference",
+      "field": "description",
+      "sourceHash": "sha256:b43b0c5d99763558ec14d6a01e52ffbc199251f01e55dee5e5b9553c30a18842",
+      "text": "计算给定日期实例之间相差的秒数。"
+    },
+    {
+      "id": "JulianDate.secondsDifference",
+      "field": "params/left/description",
+      "sourceHash": "sha256:65d5e660b8709cd25b224e79ffafd276c63b94ee0e4a5c99d2352d65723e27f7",
+      "text": "第一个实例。"
+    },
+    {
+      "id": "JulianDate.secondsDifference",
+      "field": "params/right/description",
+      "sourceHash": "sha256:628c70a3bb095fa999fe75b3e3e9e24393c5ae6b194bdb2c512cc52b0f0766fb",
+      "text": "第二个实例。"
+    },
+    {
+      "id": "JulianDate.secondsDifference",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:2590df76bd7f827d2ad4344164dd00c193761f79446b6a27dd2ff74494ae99fa",
+      "text": "用 <code>left</code> 减去 <code>right</code> 所得差值，单位为秒。"
+    },
+    {
+      "id": "JulianDate.toDate",
+      "field": "description",
+      "sourceHash": "sha256:5e06c5b2a4f5c39997e0d134bed7a324c486086434cf3b0b61b20bf6884b2a41",
+      "text": "从给定实例创建 JavaScript Date。JavaScript 日期仅精确到毫秒，且不能表示闰秒，因此可考虑使用 {@link JulianDate.toGregorianDate}。若给定 JulianDate 位于闰秒期间，则使用前一秒。"
+    },
+    {
+      "id": "JulianDate.toDate",
+      "field": "params/julianDate/description",
+      "sourceHash": "sha256:3238a9d7e55c3c416cacecf0ad01dca2cb34bc890744d0240b9761b9d100ec90",
+      "text": "要转换的日期。"
+    },
+    {
+      "id": "JulianDate.toDate",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:ed848860aad582cafc604d12c0ab449e1aa8b0760211f9805785bfa8042ac326",
+      "text": "表示给定日期的新实例。"
+    },
+    {
+      "id": "JulianDate.toGregorianDate",
+      "field": "description",
+      "sourceHash": "sha256:810116879ae316b21e2bf3c8d6dd055cf740e1682aec134a1db03bec46e0d40f",
+      "text": "从给定实例创建 {@link GregorianDate}。"
+    },
+    {
+      "id": "JulianDate.toGregorianDate",
+      "field": "params/julianDate/description",
+      "sourceHash": "sha256:3238a9d7e55c3c416cacecf0ad01dca2cb34bc890744d0240b9761b9d100ec90",
+      "text": "要转换的日期。"
+    },
+    {
+      "id": "JulianDate.toGregorianDate",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:cf988b12169a1cc4ca849c5b40bf15dbc08d6274d7ffed7e00d92b97a2f4c5bc",
+      "text": "修改后的 result 参数；未提供时返回新实例。"
+    },
+    {
+      "id": "JulianDate.toIso8601",
+      "field": "description",
+      "sourceHash": "sha256:e4b662047335e196a77f968089e49f4580784b0f66798acdb63ac1fc94816c66",
+      "text": "创建给定日期的 ISO8601 表示。"
+    },
+    {
+      "id": "JulianDate.toIso8601",
+      "field": "params/julianDate/description",
+      "sourceHash": "sha256:3238a9d7e55c3c416cacecf0ad01dca2cb34bc890744d0240b9761b9d100ec90",
+      "text": "要转换的日期。"
+    },
+    {
+      "id": "JulianDate.toIso8601",
+      "field": "params/precision/description",
+      "sourceHash": "sha256:35b0d748c287148dba80522c3314c947191b412dc34e37e66fcf9bb5d68e3877",
+      "text": "秒分量的小数位数。默认使用最精确的表示。"
+    },
+    {
+      "id": "JulianDate.toIso8601",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:0e4afd8910f81ac4ffcfc9dc97fe7a19ed1913b22ce832530bc037fe86acd99f",
+      "text": "给定日期的 ISO8601 表示。"
+    },
+    {
+      "id": "JulianDate.totalDays",
+      "field": "description",
+      "sourceHash": "sha256:091d75aef9f3c028aca39aafbfd5a4eee91a584a1592aa8b52ce840bc039f410",
+      "text": "计算给定实例表示的完整天数与小数天数之和。"
+    },
+    {
+      "id": "JulianDate.totalDays",
+      "field": "params/julianDate/description",
+      "sourceHash": "sha256:74dbece94612cae7509e7244491fb5e111d8a8af5439f5910d22b5bea2852c60",
+      "text": "日期。"
+    },
+    {
+      "id": "JulianDate.totalDays",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:a7a3983d5a46224e920efd5f00d8dd32da59e0d5434254b6db6232d70c82b047",
+      "text": "以单个浮点数表示的儒略日。"
+    },
+    {
+      "id": "JulianDate",
+      "field": "classdesc",
+      "sourceHash": "sha256:2ac1aafa817593bf77fcbde55061dffb722d7661f79b9c04a861235d7355e156",
+      "text": "表示天文学儒略日，即从 -4712 年（公元前 4713 年）1 月 1 日正午起经过的天数。为提高精度，此类将日期整数部分与秒部分分开存储。为保证日期运算并能表示闰秒，内部始终采用国际原子时标准 {@link TimeStandard.TAI}。"
+    },
+    {
+      "id": "JulianDate",
+      "field": "params/julianDayNumber/description",
+      "sourceHash": "sha256:f5b7bb9dedcd2c8f818e540200dd9e0a59d72fff25825a841a67acf1118223b0",
+      "text": "表示完整天数的儒略日数，也能正确处理小数天数。"
+    },
+    {
+      "id": "JulianDate",
+      "field": "params/secondsOfDay/description",
+      "sourceHash": "sha256:3aa0d3464e982fc24708440398cd635ab10b759c12c0a4150a39489c48794aa0",
+      "text": "当前儒略日内的秒数，也能正确处理小数秒、负秒数和超过一天的秒数。"
+    },
+    {
+      "id": "JulianDate",
+      "field": "params/timeStandard/description",
+      "sourceHash": "sha256:4f604e4c48033e4d5beefa01e91bd7a36cb4021e8dface15bb7a00c165560036",
+      "text": "定义前两个参数所使用的时间标准。"
+    },
+    {
+      "id": "JulianDate#clone",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:cf988b12169a1cc4ca849c5b40bf15dbc08d6274d7ffed7e00d92b97a2f4c5bc",
+      "text": "修改后的 result 参数；未提供时返回新实例。"
+    },
+    {
+      "id": "JulianDate#dayNumber",
+      "field": "description",
+      "sourceHash": "sha256:850ecf9ec8740a8101521b6c925f67b04797f93b33f97f08ce8d80ec0087a9ec",
+      "text": "获取或设置完整天数。"
+    },
+    {
+      "id": "JulianDate#equals",
+      "field": "description",
+      "sourceHash": "sha256:19165e44f95dd6771a16b8841f81a94966a5cfd1479f3de7b826c6d89c655592",
+      "text": "比较此实例与给定实例，相等时返回 <code>true</code>，否则返回 <code>false</code>。"
+    },
+    {
+      "id": "JulianDate#equals",
+      "field": "params/right/description",
+      "sourceHash": "sha256:628c70a3bb095fa999fe75b3e3e9e24393c5ae6b194bdb2c512cc52b0f0766fb",
+      "text": "第二个实例。"
+    },
+    {
+      "id": "JulianDate#equals",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:9721823f9a050802f92445696a210082bb7f670f7ab1a971458e2d5e01b6145b",
+      "text": "日期相等时返回 <code>true</code>，否则返回 <code>false</code>。"
+    },
+    {
+      "id": "JulianDate#equalsEpsilon",
+      "field": "description",
+      "sourceHash": "sha256:b89933ac8ac16c304959edaa168eaf0bcb3f01b23cc59c64eca19afa27e5ed51",
+      "text": "比较此实例与给定实例，若相差在 <code>epsilon</code> 秒以内则返回 <code>true</code>。也就是说，两日期要视为相等并使函数返回 <code>true</code>，其秒数差的绝对值必须小于等于 <code>epsilon</code>。"
+    },
+    {
+      "id": "JulianDate#equalsEpsilon",
+      "field": "params/epsilon/description",
+      "sourceHash": "sha256:a89d5ab4df986a6e1dfc4d6245a07603870f3bb4154e62967be2be38adbf6f22",
+      "text": "两个实例之间允许相差的最大秒数。"
+    },
+    {
+      "id": "JulianDate#equalsEpsilon",
+      "field": "params/right/description",
+      "sourceHash": "sha256:628c70a3bb095fa999fe75b3e3e9e24393c5ae6b194bdb2c512cc52b0f0766fb",
+      "text": "第二个实例。"
+    },
+    {
+      "id": "JulianDate#equalsEpsilon",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:ed2254c28008833e541805479b1716fa8e80c72b9ca0734bd8a11b3aa6bf1e6d",
+      "text": "两日期相差在 <code>epsilon</code> 秒以内时返回 <code>true</code>，否则返回 <code>false</code>。"
+    },
+    {
+      "id": "JulianDate#secondsOfDay",
+      "field": "description",
+      "sourceHash": "sha256:65a45fbb61b348c3793e6927d56cb69a96c5abe768c81fe387dbcae5a67451d1",
+      "text": "获取或设置当前日内的秒数。"
+    },
+    {
+      "id": "JulianDate#toString",
+      "field": "description",
+      "sourceHash": "sha256:72ee1e53275b5111bef2f695e4df7e2c03da304b53c5fe7b8fca06e21801ba42",
+      "text": "创建以 ISO8601 格式表示此日期的字符串。"
+    },
+    {
+      "id": "JulianDate#toString",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:71c501c0bd47ea174677e8a32353301fa451e5c50a68d704937f3b2c5748b60e",
+      "text": "以 ISO8601 格式表示此日期的字符串。"
+    },
+    {
+      "id": "LeapSecond",
+      "field": "description",
+      "sourceHash": "sha256:dc681617845cfa5f12ec736606eb63d2b8fe2e22acc8e570f2e089b68e8d2ec4",
+      "text": "描述单个闰秒，由 {@link JulianDate} 和表示 TAI 相对于 UTC 超前秒数的数值偏移构成。"
+    },
+    {
+      "id": "LeapSecond",
+      "field": "params/date/description",
+      "sourceHash": "sha256:0cf708484fc7e1b8ac8d79c6be72a5d400923c570fb8cd3005f27d619532b0a3",
+      "text": "表示此闰秒时间的儒略日。"
+    },
+    {
+      "id": "LeapSecond",
+      "field": "params/offset/description",
+      "sourceHash": "sha256:392f341ce58832ab871694c2ad4a9eef90c8d35e1fefc21c82ba46abcb7d62e6",
+      "text": "在给定日期，TAI 相对于 UTC 超前的累计秒数。"
+    },
+    {
+      "id": "LeapSecond#julianDate",
+      "field": "description",
+      "sourceHash": "sha256:afea7886aadb80b3df00bcaa63a3a700d2ec70c45002184bb7ef495a6cb09c20",
+      "text": "获取或设置此闰秒发生的日期。"
+    },
+    {
+      "id": "LeapSecond#offset",
+      "field": "description",
+      "sourceHash": "sha256:0f9259a93639c8ed4380cdd23b4425d958fd53774d36a944b6605846b5919bfa",
+      "text": "获取或设置此闰秒发生时 UTC 与 TAI 之间的累计秒数差。"
+    },
+    {
+      "id": "TimeInterval.clone",
+      "field": "description",
+      "sourceHash": "sha256:c9039bf5876dba844f284fdf48ed66ea764a8f024c1dbb31d965ae22c9ed11a2",
+      "text": "复制给定实例。"
+    },
+    {
+      "id": "TimeInterval.clone",
+      "field": "params/timeInterval/description",
+      "sourceHash": "sha256:4c5885f5e52e8aed62e3c288a16d94a12bbc6c3455553b6effcfb9d1460c1feb",
+      "text": "要复制的实例。"
+    },
+    {
+      "id": "TimeInterval.clone",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:cf988b12169a1cc4ca849c5b40bf15dbc08d6274d7ffed7e00d92b97a2f4c5bc",
+      "text": "修改后的 result 参数；未提供时返回新实例。"
+    },
+    {
+      "id": "TimeInterval.contains",
+      "field": "description",
+      "sourceHash": "sha256:dff086140755b9b81cd344c844de7abde6a3ad184f869fb325c1da9b13a7edd8",
+      "text": "检查指定日期是否在给定区间内。"
+    },
+    {
+      "id": "TimeInterval.contains",
+      "field": "params/julianDate/description",
+      "sourceHash": "sha256:0204ff90b2c70bd55845d14430f0dfa19861cf2a8458435aa1053ac42e02a92d",
+      "text": "要检查的日期。"
+    },
+    {
+      "id": "TimeInterval.contains",
+      "field": "params/timeInterval/description",
+      "sourceHash": "sha256:6caad14e83bd8d73289fe5a184d665d14869a2b2f9c82907e9a9252b72615b16",
+      "text": "区间。"
+    },
+    {
+      "id": "TimeInterval.contains",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:90d858ec1dea8165499c59664b53f7be161753605d53168c8c98e0da9626df53",
+      "text": "区间包含指定日期时返回 <code>true</code>，否则返回 <code>false</code>。"
+    },
+    {
+      "id": "TimeInterval.DataComparer",
+      "field": "description",
+      "sourceHash": "sha256:72d8836572a806d35e9659572bd9515252bfdc55ae1894e449882d06d635f40a",
+      "text": "比较区间数据的函数接口。"
+    },
+    {
+      "id": "TimeInterval.DataComparer",
+      "field": "params/leftData/description",
+      "sourceHash": "sha256:e8df3dd5157568052985e74d3e562d0a5c86fad9228ae5199a1f2200452c4070",
+      "text": "第一个数据实例。"
+    },
+    {
+      "id": "TimeInterval.DataComparer",
+      "field": "params/rightData/description",
+      "sourceHash": "sha256:c6c849d076d0cc32c606de10dd95ea9f45403f162d00f093c5e0493ebfb45ab0",
+      "text": "第二个数据实例。"
+    },
+    {
+      "id": "TimeInterval.DataComparer",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:017e80700c68701d7d6034f5ffcd6d2a0dafec78e5959803b33874f618f4ba6e",
+      "text": "给定实例相等时返回 <code>true</code>，否则返回 <code>false</code>。"
+    },
+    {
+      "id": "TimeInterval.EMPTY",
+      "field": "description",
+      "sourceHash": "sha256:4be19e547a42a36fa73fc9d6b16acd5eea532ec2c966b90447ea2fbb5143ef53",
+      "text": "不可变的空区间。"
+    },
+    {
+      "id": "TimeInterval.equals",
+      "field": "description",
+      "sourceHash": "sha256:9f2d2345a8fb9f3e5e5245a8700ddc9051411f48c9f8dc3abe15b0262833cc2c",
+      "text": "比较两个实例，相等时返回 <code>true</code>，否则返回 <code>false</code>。"
+    },
+    {
+      "id": "TimeInterval.equals",
+      "field": "params/dataComparer/description",
+      "sourceHash": "sha256:7ce2ec3279109ec9ceac27f103b4c557ca0917996c73c4423effeadd7d5eb8c7",
+      "text": "比较两个区间数据的函数。若省略，则使用引用相等比较。"
+    },
+    {
+      "id": "TimeInterval.equals",
+      "field": "params/left/description",
+      "sourceHash": "sha256:65d5e660b8709cd25b224e79ffafd276c63b94ee0e4a5c99d2352d65723e27f7",
+      "text": "第一个实例。"
+    },
+    {
+      "id": "TimeInterval.equals",
+      "field": "params/right/description",
+      "sourceHash": "sha256:628c70a3bb095fa999fe75b3e3e9e24393c5ae6b194bdb2c512cc52b0f0766fb",
+      "text": "第二个实例。"
+    },
+    {
+      "id": "TimeInterval.equals",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:9721823f9a050802f92445696a210082bb7f670f7ab1a971458e2d5e01b6145b",
+      "text": "日期相等时返回 <code>true</code>，否则返回 <code>false</code>。"
+    },
+    {
+      "id": "TimeInterval.equalsEpsilon",
+      "field": "description",
+      "sourceHash": "sha256:b262d1e4020fdd23ae3e182518c235db1d664195087b1459611b80e768413a00",
+      "text": "比较两个时间区间，符合相等条件时返回 <code>true</code>。起止时间分别以 <code>epsilon</code> 秒为容差，端点包含标志必须一致，data 按引用或 dataComparer 比较；两个空区间也视为相等。时间比较返回 <code>true</code> 时，对应端点的秒数差绝对值小于等于 <code>epsilon</code>。"
+    },
+    {
+      "id": "TimeInterval.equalsEpsilon",
+      "field": "params/dataComparer/description",
+      "sourceHash": "sha256:7ce2ec3279109ec9ceac27f103b4c557ca0917996c73c4423effeadd7d5eb8c7",
+      "text": "比较两个区间数据的函数。若省略，则使用引用相等比较。"
+    },
+    {
+      "id": "TimeInterval.equalsEpsilon",
+      "field": "params/epsilon/description",
+      "sourceHash": "sha256:a89d5ab4df986a6e1dfc4d6245a07603870f3bb4154e62967be2be38adbf6f22",
+      "text": "两个实例之间允许相差的最大秒数。"
+    },
+    {
+      "id": "TimeInterval.equalsEpsilon",
+      "field": "params/left/description",
+      "sourceHash": "sha256:65d5e660b8709cd25b224e79ffafd276c63b94ee0e4a5c99d2352d65723e27f7",
+      "text": "第一个实例。"
+    },
+    {
+      "id": "TimeInterval.equalsEpsilon",
+      "field": "params/right/description",
+      "sourceHash": "sha256:628c70a3bb095fa999fe75b3e3e9e24393c5ae6b194bdb2c512cc52b0f0766fb",
+      "text": "第二个实例。"
+    },
+    {
+      "id": "TimeInterval.equalsEpsilon",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:ed2254c28008833e541805479b1716fa8e80c72b9ca0734bd8a11b3aa6bf1e6d",
+      "text": "两日期相差在 <code>epsilon</code> 秒以内时返回 <code>true</code>，否则返回 <code>false</code>。"
+    },
+    {
+      "id": "TimeInterval.fromIso8601",
+      "field": "description",
+      "sourceHash": "sha256:2201a35b6f43fe2d591e55d6f6e18982a2b1a3a3cf9eb34c1f7a8e052280f666",
+      "text": "从 {@link http://en.wikipedia.org/wiki/ISO_8601|ISO 8601} 区间创建新实例。"
+    },
+    {
+      "id": "TimeInterval.fromIso8601",
+      "field": "exceptions/0/description",
+      "sourceHash": "sha256:e9b17355c3d3a12af31779156e055ebcfc4609a2e0dbf7fc45b7021f515bae82",
+      "text": "options.iso8601 格式不正确时抛出 DeveloperError。"
+    },
+    {
+      "id": "TimeInterval.fromIso8601",
+      "field": "params/options.data/description",
+      "sourceHash": "sha256:55e1475bc22d15e171caac3b70d204b9734adf3f43bfd1573553758cc960d887",
+      "text": "与此区间关联的任意数据。"
+    },
+    {
+      "id": "TimeInterval.fromIso8601",
+      "field": "params/options.iso8601/description",
+      "sourceHash": "sha256:fcbc39b98e235144387fcfcac971e53e295db539d3f2b1c8973c289e2ed02210",
+      "text": "ISO 8601 区间。"
+    },
+    {
+      "id": "TimeInterval.fromIso8601",
+      "field": "params/options.isStartIncluded/description",
+      "sourceHash": "sha256:c9d31cf41b8b21ca46f0d54039bfe9f90b5fe4975d41e9c13318e821430b8895",
+      "text": "区间包含 <code>options.start</code> 时为 <code>true</code>，否则为 <code>false</code>。"
+    },
+    {
+      "id": "TimeInterval.fromIso8601",
+      "field": "params/options.isStopIncluded/description",
+      "sourceHash": "sha256:5da80b553f72af045cc1f73014ddf747282d624e16ba0c4f9e977d7ac724da62",
+      "text": "区间包含 <code>options.stop</code> 时为 <code>true</code>，否则为 <code>false</code>。"
+    },
+    {
+      "id": "TimeInterval.fromIso8601",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:cf988b12169a1cc4ca849c5b40bf15dbc08d6274d7ffed7e00d92b97a2f4c5bc",
+      "text": "修改后的 result 参数；未提供时返回新实例。"
+    },
+    {
+      "id": "TimeInterval.intersect",
+      "field": "description",
+      "sourceHash": "sha256:1aeda2022f0ceb42e0ca4998e18c13236e582b989c7a5c85073c6a8e3ecfe837",
+      "text": "计算两个区间的交集，并可选合并其数据。"
+    },
+    {
+      "id": "TimeInterval.intersect",
+      "field": "params/left/description",
+      "sourceHash": "sha256:17b9a9ba5f185adfdbb3c0601ff92454e66445a36791473d6f40d7604135bb38",
+      "text": "第一个区间。"
+    },
+    {
+      "id": "TimeInterval.intersect",
+      "field": "params/mergeCallback/description",
+      "sourceHash": "sha256:491ca7466e1defdec8bf179144cf73f9f052e1f1c2d3feb44ac6320157dc0962",
+      "text": "合并两个区间数据的函数。若省略，则使用左侧区间的数据。"
+    },
+    {
+      "id": "TimeInterval.intersect",
+      "field": "params/right/description",
+      "sourceHash": "sha256:ed777399d83be50fed1a64850ded34f02ef54bdc40db2cfa862af8d8fd4964a9",
+      "text": "第二个区间。"
+    },
+    {
+      "id": "TimeInterval.MergeCallback",
+      "field": "description",
+      "sourceHash": "sha256:f8c29187756a5f88e068b8b0cb3ed104d23191ad135ab57dcbd0536901bdd7e9",
+      "text": "合并区间数据的函数接口。"
+    },
+    {
+      "id": "TimeInterval.MergeCallback",
+      "field": "params/leftData/description",
+      "sourceHash": "sha256:e8df3dd5157568052985e74d3e562d0a5c86fad9228ae5199a1f2200452c4070",
+      "text": "第一个数据实例。"
+    },
+    {
+      "id": "TimeInterval.MergeCallback",
+      "field": "params/rightData/description",
+      "sourceHash": "sha256:c6c849d076d0cc32c606de10dd95ea9f45403f162d00f093c5e0493ebfb45ab0",
+      "text": "第二个数据实例。"
+    },
+    {
+      "id": "TimeInterval.MergeCallback",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:aa5e8cd295768b76ff1b0ae452debaa4b36b40eedb4073190181cf6485d2caaf",
+      "text": "两个数据实例合并后的结果。"
+    },
+    {
+      "id": "TimeInterval.toIso8601",
+      "field": "description",
+      "sourceHash": "sha256:7e0ab2a94d3bab298af6134abd01743dfa930b24225f157e29db512cf29e3dc4",
+      "text": "创建给定区间的 ISO8601 表示。"
+    },
+    {
+      "id": "TimeInterval.toIso8601",
+      "field": "params/precision/description",
+      "sourceHash": "sha256:35b0d748c287148dba80522c3314c947191b412dc34e37e66fcf9bb5d68e3877",
+      "text": "秒分量的小数位数。默认使用最精确的表示。"
+    },
+    {
+      "id": "TimeInterval.toIso8601",
+      "field": "params/timeInterval/description",
+      "sourceHash": "sha256:1263a73ea657e4e72672d86b959623302da7fd0718f9c41459daddbbce0a95da",
+      "text": "要转换的区间。"
+    },
+    {
+      "id": "TimeInterval.toIso8601",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:af3276a4a51fb11934f618ec9773a798f23234e20913ec32ea85d383cd376bbb",
+      "text": "给定区间的 ISO8601 表示。"
+    },
+    {
+      "id": "TimeInterval",
+      "field": "description",
+      "sourceHash": "sha256:4c2ad03c6ee9010fe0341b07465b059402851a203a7875fe8802c88821df69c9",
+      "text": "由开始和结束时间定义的区间，可选择是否包含两个端点。每个实例可关联任意数据，供 {@link TimeIntervalCollection} 使用。"
+    },
+    {
+      "id": "TimeInterval",
+      "field": "params/options.data/description",
+      "sourceHash": "sha256:55e1475bc22d15e171caac3b70d204b9734adf3f43bfd1573553758cc960d887",
+      "text": "与此区间关联的任意数据。"
+    },
+    {
+      "id": "TimeInterval",
+      "field": "params/options.isStartIncluded/description",
+      "sourceHash": "sha256:c9d31cf41b8b21ca46f0d54039bfe9f90b5fe4975d41e9c13318e821430b8895",
+      "text": "区间包含 <code>options.start</code> 时为 <code>true</code>，否则为 <code>false</code>。"
+    },
+    {
+      "id": "TimeInterval",
+      "field": "params/options.isStopIncluded/description",
+      "sourceHash": "sha256:5da80b553f72af045cc1f73014ddf747282d624e16ba0c4f9e977d7ac724da62",
+      "text": "区间包含 <code>options.stop</code> 时为 <code>true</code>，否则为 <code>false</code>。"
+    },
+    {
+      "id": "TimeInterval",
+      "field": "params/options.start/description",
+      "sourceHash": "sha256:5732722f3b2c8d087e2d47ccaa9049ac4332568e64030131df893e280580b9ff",
+      "text": "区间开始时间。"
+    },
+    {
+      "id": "TimeInterval",
+      "field": "params/options.stop/description",
+      "sourceHash": "sha256:cb99d843ff93f9851ec02d95293c94eaa4256d985a7b45433d6f792b564ee891",
+      "text": "区间结束时间。"
+    },
+    {
+      "id": "TimeInterval#clone",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:cf988b12169a1cc4ca849c5b40bf15dbc08d6274d7ffed7e00d92b97a2f4c5bc",
+      "text": "修改后的 result 参数；未提供时返回新实例。"
+    },
+    {
+      "id": "TimeInterval#data",
+      "field": "description",
+      "sourceHash": "sha256:310facdf1124ef679c3d70dec27d6e641eaddc0975522613ce048f3dec325dff",
+      "text": "获取或设置与此区间关联的数据。"
+    },
+    {
+      "id": "TimeInterval#equals",
+      "field": "description",
+      "sourceHash": "sha256:f5f16b2e2ab5533eac0a490262dcd46d77734b2179d059469fbcb0c25c663c52",
+      "text": "将此实例与给定实例逐分量比较，相等时返回 <code>true</code>，否则返回 <code>false</code>。"
+    },
+    {
+      "id": "TimeInterval#equals",
+      "field": "params/dataComparer/description",
+      "sourceHash": "sha256:7ce2ec3279109ec9ceac27f103b4c557ca0917996c73c4423effeadd7d5eb8c7",
+      "text": "比较两个区间数据的函数。若省略，则使用引用相等比较。"
+    },
+    {
+      "id": "TimeInterval#equals",
+      "field": "params/right/description",
+      "sourceHash": "sha256:eb4f0c30462385ef812d42693f85fd6a46cc622888ef031778c8f28f932a6554",
+      "text": "右侧区间。"
+    },
+    {
+      "id": "TimeInterval#equalsEpsilon",
+      "field": "description",
+      "sourceHash": "sha256:ef0557eac2561413f016f594d2904df1fbf7222ab76e1a409d616b586477adfe",
+      "text": "将此实例与给定实例逐分量比较，差异在给定 epsilon 范围内时返回 <code>true</code>，否则返回 <code>false</code>。"
+    },
+    {
+      "id": "TimeInterval#equalsEpsilon",
+      "field": "params/dataComparer/description",
+      "sourceHash": "sha256:7ce2ec3279109ec9ceac27f103b4c557ca0917996c73c4423effeadd7d5eb8c7",
+      "text": "比较两个区间数据的函数。若省略，则使用引用相等比较。"
+    },
+    {
+      "id": "TimeInterval#equalsEpsilon",
+      "field": "params/epsilon/description",
+      "sourceHash": "sha256:1ab4d3a4f4ca315af12f39b1b4e64b7ec35e58ae52588c40ff36843a8836cb4b",
+      "text": "相等测试使用的 epsilon 容差。"
+    },
+    {
+      "id": "TimeInterval#equalsEpsilon",
+      "field": "params/right/description",
+      "sourceHash": "sha256:eb4f0c30462385ef812d42693f85fd6a46cc622888ef031778c8f28f932a6554",
+      "text": "右侧区间。"
+    },
+    {
+      "id": "TimeInterval#equalsEpsilon",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:10dbf4a7ddfcc7153660dfa7cfbd4cdcdcb39e498b54dcf418df578bc90f40df",
+      "text": "若差异在给定 epsilon 范围内，则返回 <code>true</code>；否则返回 <code>false</code>。"
+    },
+    {
+      "id": "TimeInterval#isEmpty",
+      "field": "description",
+      "sourceHash": "sha256:db16da85e5e7eea8fde715c17791dea800b942a91a72a11da1f1c08db9971025",
+      "text": "获取此区间是否为空。"
+    },
+    {
+      "id": "TimeInterval#isStartIncluded",
+      "field": "description",
+      "sourceHash": "sha256:872b35e49b2c2244c353925a795331f48c77239487b2bba879200242ada8b0d4",
+      "text": "获取或设置此区间是否包含开始时间。"
+    },
+    {
+      "id": "TimeInterval#isStopIncluded",
+      "field": "description",
+      "sourceHash": "sha256:bcf8e36b3e1fe2fa283c8576c7aea011864c9c6b8b3918f606617add75ab52ca",
+      "text": "获取或设置此区间是否包含结束时间。"
+    },
+    {
+      "id": "TimeInterval#start",
+      "field": "description",
+      "sourceHash": "sha256:7ba29ff1a02f13f1cb839a5c1c35d4efc645539f433ec53188877be44aa1df83",
+      "text": "获取或设置此区间的开始时间。"
+    },
+    {
+      "id": "TimeInterval#stop",
+      "field": "description",
+      "sourceHash": "sha256:cb90ad27839dc166c7cee93ec4ab92fdc48733823016beffb927368f8c3f7353",
+      "text": "获取或设置此区间的结束时间。"
+    },
+    {
+      "id": "TimeInterval#toString",
+      "field": "description",
+      "sourceHash": "sha256:c6741f8d619067e570ce13a383f38138c4d869ec4581427fb5b8ab21f0257503",
+      "text": "创建以 ISO8601 格式表示此 TimeInterval 的字符串。"
+    },
+    {
+      "id": "TimeInterval#toString",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:69b1c2106e9fb88ff59b71e9e7371475dc2a5174c35312cbf84c14a03d2e79d0",
+      "text": "以 ISO8601 格式表示此 TimeInterval 的字符串。"
+    },
+    {
+      "id": "TimeIntervalCollection.fromIso8601",
+      "field": "description",
+      "sourceHash": "sha256:9affa3284dc1d1ab6b3ac4899e299ff39c8a47b3cf739f4d43102e4980aea088",
+      "text": "从 {@link http://en.wikipedia.org/wiki/ISO_8601|ISO 8601} 时间区间（开始/结束/持续时间）创建新实例。"
+    },
+    {
+      "id": "TimeIntervalCollection.fromIso8601",
+      "field": "params/options.dataCallback/description",
+      "sourceHash": "sha256:e32f36e25bba12cde59c4702e9c522e7b5a4adba854aa96e2569114d3904ac27",
+      "text": "每个区间加入集合前调用的函数，用于返回该区间的数据。若未指定，则使用区间在集合中的索引作为数据。"
+    },
+    {
+      "id": "TimeIntervalCollection.fromIso8601",
+      "field": "params/options.iso8601/description",
+      "sourceHash": "sha256:fcbc39b98e235144387fcfcac971e53e295db539d3f2b1c8973c289e2ed02210",
+      "text": "ISO 8601 区间。"
+    },
+    {
+      "id": "TimeIntervalCollection.fromIso8601",
+      "field": "params/options.isStartIncluded/description",
+      "sourceHash": "sha256:5811ec73f4575547bd60f6c89745d14a7aa8dfc9a9b39fcfb86ee01773ad775b",
+      "text": "区间包含开始时间时为 <code>true</code>，否则为 <code>false</code>。"
+    },
+    {
+      "id": "TimeIntervalCollection.fromIso8601",
+      "field": "params/options.isStopIncluded/description",
+      "sourceHash": "sha256:a3c5ea5923ade965123966a8f45876405998f5fb012a259dfb725c2f8fe65a4c",
+      "text": "区间包含结束时间时为 <code>true</code>，否则为 <code>false</code>。"
+    },
+    {
+      "id": "TimeIntervalCollection.fromIso8601",
+      "field": "params/options.leadingInterval/description",
+      "sourceHash": "sha256:52fd3c0a41a6f628d09bf0eae56f288665125174e0348951bd4bdcf6f4f5814c",
+      "text": "需要添加从 Iso8601.MINIMUM_VALUE 到开始时间的区间时为 <code>true</code>，否则为 <code>false</code>。"
+    },
+    {
+      "id": "TimeIntervalCollection.fromIso8601",
+      "field": "params/options.trailingInterval/description",
+      "sourceHash": "sha256:53775195c919b90471145b264fc61e9e5547019eb6a9789c6f078b7fbe4b54f7",
+      "text": "需要添加从结束时间到 Iso8601.MAXIMUM_VALUE 的区间时为 <code>true</code>，否则为 <code>false</code>。"
+    },
+    {
+      "id": "TimeIntervalCollection.fromIso8601",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:cf988b12169a1cc4ca849c5b40bf15dbc08d6274d7ffed7e00d92b97a2f4c5bc",
+      "text": "修改后的 result 参数；未提供时返回新实例。"
+    },
+    {
+      "id": "TimeIntervalCollection.fromIso8601DateArray",
+      "field": "description",
+      "sourceHash": "sha256:1f160623bec6f96ec366e564f0c7ebb915bc60a9d9d26449196d6e17b2d2ecd7",
+      "text": "从 {@link http://en.wikipedia.org/wiki/ISO_8601|ISO 8601} 日期数组创建新实例。"
+    },
+    {
+      "id": "TimeIntervalCollection.fromIso8601DateArray",
+      "field": "params/options.dataCallback/description",
+      "sourceHash": "sha256:e32f36e25bba12cde59c4702e9c522e7b5a4adba854aa96e2569114d3904ac27",
+      "text": "每个区间加入集合前调用的函数，用于返回该区间的数据。若未指定，则使用区间在集合中的索引作为数据。"
+    },
+    {
+      "id": "TimeIntervalCollection.fromIso8601DateArray",
+      "field": "params/options.iso8601Dates/description",
+      "sourceHash": "sha256:e3cad8c8e1cf70acbddd2efae6e1ccd7d983d393eadc6410e5a4ddd38dde6d46",
+      "text": "ISO 8601 日期数组。"
+    },
+    {
+      "id": "TimeIntervalCollection.fromIso8601DateArray",
+      "field": "params/options.isStartIncluded/description",
+      "sourceHash": "sha256:5811ec73f4575547bd60f6c89745d14a7aa8dfc9a9b39fcfb86ee01773ad775b",
+      "text": "区间包含开始时间时为 <code>true</code>，否则为 <code>false</code>。"
+    },
+    {
+      "id": "TimeIntervalCollection.fromIso8601DateArray",
+      "field": "params/options.isStopIncluded/description",
+      "sourceHash": "sha256:a3c5ea5923ade965123966a8f45876405998f5fb012a259dfb725c2f8fe65a4c",
+      "text": "区间包含结束时间时为 <code>true</code>，否则为 <code>false</code>。"
+    },
+    {
+      "id": "TimeIntervalCollection.fromIso8601DateArray",
+      "field": "params/options.leadingInterval/description",
+      "sourceHash": "sha256:52fd3c0a41a6f628d09bf0eae56f288665125174e0348951bd4bdcf6f4f5814c",
+      "text": "需要添加从 Iso8601.MINIMUM_VALUE 到开始时间的区间时为 <code>true</code>，否则为 <code>false</code>。"
+    },
+    {
+      "id": "TimeIntervalCollection.fromIso8601DateArray",
+      "field": "params/options.trailingInterval/description",
+      "sourceHash": "sha256:53775195c919b90471145b264fc61e9e5547019eb6a9789c6f078b7fbe4b54f7",
+      "text": "需要添加从结束时间到 Iso8601.MAXIMUM_VALUE 的区间时为 <code>true</code>，否则为 <code>false</code>。"
+    },
+    {
+      "id": "TimeIntervalCollection.fromIso8601DateArray",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:cf988b12169a1cc4ca849c5b40bf15dbc08d6274d7ffed7e00d92b97a2f4c5bc",
+      "text": "修改后的 result 参数；未提供时返回新实例。"
+    },
+    {
+      "id": "TimeIntervalCollection.fromIso8601DurationArray",
+      "field": "description",
+      "sourceHash": "sha256:e0a411352d4b47549ecbef1a2b0cfbbf4f23e99a1d7ec3844d38237b64de2681",
+      "text": "从 {@link http://en.wikipedia.org/wiki/ISO_8601|ISO 8601} 持续时间数组创建新实例。"
+    },
+    {
+      "id": "TimeIntervalCollection.fromIso8601DurationArray",
+      "field": "params/options.dataCallback/description",
+      "sourceHash": "sha256:e32f36e25bba12cde59c4702e9c522e7b5a4adba854aa96e2569114d3904ac27",
+      "text": "每个区间加入集合前调用的函数，用于返回该区间的数据。若未指定，则使用区间在集合中的索引作为数据。"
+    },
+    {
+      "id": "TimeIntervalCollection.fromIso8601DurationArray",
+      "field": "params/options.epoch/description",
+      "sourceHash": "sha256:1fc8c05d816be2dc8b8ab3b29eecb1c4b54e97134d14b497f849100801c23c70",
+      "text": "这些持续时间所相对的基准日期。"
+    },
+    {
+      "id": "TimeIntervalCollection.fromIso8601DurationArray",
+      "field": "params/options.iso8601Durations/description",
+      "sourceHash": "sha256:0c756bf463be92b6dda783ef69a354a64b4b275f63894768bdf26c223dd051f7",
+      "text": "ISO 8601 持续时间数组。"
+    },
+    {
+      "id": "TimeIntervalCollection.fromIso8601DurationArray",
+      "field": "params/options.isStartIncluded/description",
+      "sourceHash": "sha256:5811ec73f4575547bd60f6c89745d14a7aa8dfc9a9b39fcfb86ee01773ad775b",
+      "text": "区间包含开始时间时为 <code>true</code>，否则为 <code>false</code>。"
+    },
+    {
+      "id": "TimeIntervalCollection.fromIso8601DurationArray",
+      "field": "params/options.isStopIncluded/description",
+      "sourceHash": "sha256:a3c5ea5923ade965123966a8f45876405998f5fb012a259dfb725c2f8fe65a4c",
+      "text": "区间包含结束时间时为 <code>true</code>，否则为 <code>false</code>。"
+    },
+    {
+      "id": "TimeIntervalCollection.fromIso8601DurationArray",
+      "field": "params/options.leadingInterval/description",
+      "sourceHash": "sha256:52fd3c0a41a6f628d09bf0eae56f288665125174e0348951bd4bdcf6f4f5814c",
+      "text": "需要添加从 Iso8601.MINIMUM_VALUE 到开始时间的区间时为 <code>true</code>，否则为 <code>false</code>。"
+    },
+    {
+      "id": "TimeIntervalCollection.fromIso8601DurationArray",
+      "field": "params/options.relativeToPrevious/description",
+      "sourceHash": "sha256:c9d7a54610ed24e7845847b85f3bd9cb1c52859807fd5fbfd540448585480589",
+      "text": "持续时间相对于前一个日期时为 <code>true</code>；始终相对于基准日期时为 <code>false</code>。"
+    },
+    {
+      "id": "TimeIntervalCollection.fromIso8601DurationArray",
+      "field": "params/options.trailingInterval/description",
+      "sourceHash": "sha256:53775195c919b90471145b264fc61e9e5547019eb6a9789c6f078b7fbe4b54f7",
+      "text": "需要添加从结束时间到 Iso8601.MAXIMUM_VALUE 的区间时为 <code>true</code>，否则为 <code>false</code>。"
+    },
+    {
+      "id": "TimeIntervalCollection.fromIso8601DurationArray",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:cf988b12169a1cc4ca849c5b40bf15dbc08d6274d7ffed7e00d92b97a2f4c5bc",
+      "text": "修改后的 result 参数；未提供时返回新实例。"
+    },
+    {
+      "id": "TimeIntervalCollection.fromJulianDateArray",
+      "field": "description",
+      "sourceHash": "sha256:e47868dc75d5a2335b1ff5f787f4ecd4985bff886107fc76d4b531cbd2820f1b",
+      "text": "从 JulianDate 数组创建新实例。"
+    },
+    {
+      "id": "TimeIntervalCollection.fromJulianDateArray",
+      "field": "params/options.dataCallback/description",
+      "sourceHash": "sha256:e32f36e25bba12cde59c4702e9c522e7b5a4adba854aa96e2569114d3904ac27",
+      "text": "每个区间加入集合前调用的函数，用于返回该区间的数据。若未指定，则使用区间在集合中的索引作为数据。"
+    },
+    {
+      "id": "TimeIntervalCollection.fromJulianDateArray",
+      "field": "params/options.isStartIncluded/description",
+      "sourceHash": "sha256:5811ec73f4575547bd60f6c89745d14a7aa8dfc9a9b39fcfb86ee01773ad775b",
+      "text": "区间包含开始时间时为 <code>true</code>，否则为 <code>false</code>。"
+    },
+    {
+      "id": "TimeIntervalCollection.fromJulianDateArray",
+      "field": "params/options.isStopIncluded/description",
+      "sourceHash": "sha256:a3c5ea5923ade965123966a8f45876405998f5fb012a259dfb725c2f8fe65a4c",
+      "text": "区间包含结束时间时为 <code>true</code>，否则为 <code>false</code>。"
+    },
+    {
+      "id": "TimeIntervalCollection.fromJulianDateArray",
+      "field": "params/options.julianDates/description",
+      "sourceHash": "sha256:e3cad8c8e1cf70acbddd2efae6e1ccd7d983d393eadc6410e5a4ddd38dde6d46",
+      "text": "ISO 8601 日期数组。"
+    },
+    {
+      "id": "TimeIntervalCollection.fromJulianDateArray",
+      "field": "params/options.leadingInterval/description",
+      "sourceHash": "sha256:52fd3c0a41a6f628d09bf0eae56f288665125174e0348951bd4bdcf6f4f5814c",
+      "text": "需要添加从 Iso8601.MINIMUM_VALUE 到开始时间的区间时为 <code>true</code>，否则为 <code>false</code>。"
+    },
+    {
+      "id": "TimeIntervalCollection.fromJulianDateArray",
+      "field": "params/options.trailingInterval/description",
+      "sourceHash": "sha256:53775195c919b90471145b264fc61e9e5547019eb6a9789c6f078b7fbe4b54f7",
+      "text": "需要添加从结束时间到 Iso8601.MAXIMUM_VALUE 的区间时为 <code>true</code>，否则为 <code>false</code>。"
+    },
+    {
+      "id": "TimeIntervalCollection.fromJulianDateArray",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:cf988b12169a1cc4ca849c5b40bf15dbc08d6274d7ffed7e00d92b97a2f4c5bc",
+      "text": "修改后的 result 参数；未提供时返回新实例。"
+    },
+    {
+      "id": "TimeIntervalCollection",
+      "field": "description",
+      "sourceHash": "sha256:7c78792250e1617b768aee2c47fdcfb9dde6f14b4a61e4ee23b6faff92b72b00",
+      "text": "按开始时间排序、互不重叠的 {@link TimeInterval} 实例集合。"
+    },
+    {
+      "id": "TimeIntervalCollection",
+      "field": "params/intervals/description",
+      "sourceHash": "sha256:674551a7c87ac049ac5d45c421077e60587c66a275f9d38ea6ed98d9cba9b7dc",
+      "text": "要添加到集合的区间数组。"
+    },
+    {
+      "id": "TimeIntervalCollection#addInterval",
+      "field": "description",
+      "sourceHash": "sha256:6db362e6b12ed3fe391b651ea02c3f05c767678e06191937e6047d85c291ce91",
+      "text": "向集合添加区间，合并数据相同的区间，并按需拆分数据不同的区间，以保持集合互不重叠。新区间的数据优先于集合中现有区间的数据。"
+    },
+    {
+      "id": "TimeIntervalCollection#addInterval",
+      "field": "params/dataComparer/description",
+      "sourceHash": "sha256:7ce2ec3279109ec9ceac27f103b4c557ca0917996c73c4423effeadd7d5eb8c7",
+      "text": "比较两个区间数据的函数。若省略，则使用引用相等比较。"
+    },
+    {
+      "id": "TimeIntervalCollection#addInterval",
+      "field": "params/interval/description",
+      "sourceHash": "sha256:9f3bae2ffc11c48c33c2f94bc258e6e9e2871e1767a4016e17dd3a2385decac9",
+      "text": "要添加的区间。"
+    },
+    {
+      "id": "TimeIntervalCollection#changedEvent",
+      "field": "description",
+      "sourceHash": "sha256:d5bd1f18cf3ad11e7a2162664a26c90f22770ef48bc667596b6884aa30d3a498",
+      "text": "获取区间集合变化时触发的事件。"
+    },
+    {
+      "id": "TimeIntervalCollection#contains",
+      "field": "description",
+      "sourceHash": "sha256:d48afce151a74152b91b19b4a45d13de76e4e0460aff60979fb92607b19fd469",
+      "text": "检查指定日期是否位于此集合覆盖范围内。"
+    },
+    {
+      "id": "TimeIntervalCollection#contains",
+      "field": "params/julianDate/description",
+      "sourceHash": "sha256:0204ff90b2c70bd55845d14430f0dfa19861cf2a8458435aa1053ac42e02a92d",
+      "text": "要检查的日期。"
+    },
+    {
+      "id": "TimeIntervalCollection#contains",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:450eaa98d868a024c495cdf11cc4b360adbed422a0170482d1a71199f9c06a72",
+      "text": "集合包含指定日期时返回 <code>true</code>，否则返回 <code>false</code>。"
+    },
+    {
+      "id": "TimeIntervalCollection#equals",
+      "field": "description",
+      "sourceHash": "sha256:f5f16b2e2ab5533eac0a490262dcd46d77734b2179d059469fbcb0c25c663c52",
+      "text": "将此实例与给定实例逐分量比较，相等时返回 <code>true</code>，否则返回 <code>false</code>。"
+    },
+    {
+      "id": "TimeIntervalCollection#equals",
+      "field": "params/dataComparer/description",
+      "sourceHash": "sha256:7ce2ec3279109ec9ceac27f103b4c557ca0917996c73c4423effeadd7d5eb8c7",
+      "text": "比较两个区间数据的函数。若省略，则使用引用相等比较。"
+    },
+    {
+      "id": "TimeIntervalCollection#equals",
+      "field": "params/right/description",
+      "sourceHash": "sha256:fd1ea7c207b1b74007309c987f2c1ca3054a9f3b535c0b39314655de2d82c912",
+      "text": "右侧集合。"
+    },
+    {
+      "id": "TimeIntervalCollection#findDataForIntervalContainingDate",
+      "field": "description",
+      "sourceHash": "sha256:56c6c882717463c05e81c41453cd7a416fea57064bb641ae9f33b06ec0df609a",
+      "text": "查找并返回包含指定日期的区间数据。"
+    },
+    {
+      "id": "TimeIntervalCollection#findDataForIntervalContainingDate",
+      "field": "params/date/description",
+      "sourceHash": "sha256:a594f4e7038738d2f635297719e6eb5b0951788fdac8dadb47840f6eb912548f",
+      "text": "要查找的日期。"
+    },
+    {
+      "id": "TimeIntervalCollection#findDataForIntervalContainingDate",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:69de4753d6bd9595a82b1ccde167db8b8ac8edf1fa894934b24a82e3aaa6deb2",
+      "text": "包含指定日期的区间数据；若不存在该区间，则返回 <code>undefined</code>。"
+    },
+    {
+      "id": "TimeIntervalCollection#findInterval",
+      "field": "description",
+      "sourceHash": "sha256:c7434ff7988550f29885723aa248f0f240d03481be9f1eb6d2eeda6fb4f785cc",
+      "text": "返回集合中首个匹配指定参数的区间。所有参数均可选，<code>undefined</code> 参数表示不限定该条件。"
+    },
+    {
+      "id": "TimeIntervalCollection#findInterval",
+      "field": "params/options.isStartIncluded/description",
+      "sourceHash": "sha256:c9d31cf41b8b21ca46f0d54039bfe9f90b5fe4975d41e9c13318e821430b8895",
+      "text": "区间包含 <code>options.start</code> 时为 <code>true</code>，否则为 <code>false</code>。"
+    },
+    {
+      "id": "TimeIntervalCollection#findInterval",
+      "field": "params/options.isStopIncluded/description",
+      "sourceHash": "sha256:5da80b553f72af045cc1f73014ddf747282d624e16ba0c4f9e977d7ac724da62",
+      "text": "区间包含 <code>options.stop</code> 时为 <code>true</code>，否则为 <code>false</code>。"
+    },
+    {
+      "id": "TimeIntervalCollection#findInterval",
+      "field": "params/options.start/description",
+      "sourceHash": "sha256:5732722f3b2c8d087e2d47ccaa9049ac4332568e64030131df893e280580b9ff",
+      "text": "区间开始时间。"
+    },
+    {
+      "id": "TimeIntervalCollection#findInterval",
+      "field": "params/options.stop/description",
+      "sourceHash": "sha256:cb99d843ff93f9851ec02d95293c94eaa4256d985a7b45433d6f792b564ee891",
+      "text": "区间结束时间。"
+    },
+    {
+      "id": "TimeIntervalCollection#findInterval",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:20c1d3c4c9026a7241a61a64b141ff06ae43551b510fa1b841b80df822991769",
+      "text": "集合中首个匹配指定参数的区间。"
+    },
+    {
+      "id": "TimeIntervalCollection#findIntervalContainingDate",
+      "field": "description",
+      "sourceHash": "sha256:efb99650bbc8c337ea5b5d02236e191e65d040000c0f912e82e6a550c6e56eb6",
+      "text": "查找并返回包含指定日期的区间。"
+    },
+    {
+      "id": "TimeIntervalCollection#findIntervalContainingDate",
+      "field": "params/date/description",
+      "sourceHash": "sha256:a594f4e7038738d2f635297719e6eb5b0951788fdac8dadb47840f6eb912548f",
+      "text": "要查找的日期。"
+    },
+    {
+      "id": "TimeIntervalCollection#findIntervalContainingDate",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:68f6da7501bba082eeb2a00fb64ecb1c81d143a5bc2d73c0c0dae64a0aa6fa91",
+      "text": "包含指定日期的区间；若不存在，则返回 <code>undefined</code>。"
+    },
+    {
+      "id": "TimeIntervalCollection#get",
+      "field": "description",
+      "sourceHash": "sha256:3b1c227021944c2e88364816d642ce10e25f81a8830954f8236c68be3d736d6c",
+      "text": "获取指定索引处的区间。"
+    },
+    {
+      "id": "TimeIntervalCollection#get",
+      "field": "params/index/description",
+      "sourceHash": "sha256:f222930188bcf6dd5bc80ac0f45415ca5d9f6801bb4ae3aa678fea7baf4d8a6d",
+      "text": "要获取的区间索引。"
+    },
+    {
+      "id": "TimeIntervalCollection#get",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:20ee778318af8ad7eba48d7e75efe5498dbde86667774d1ee9c27f6a244fc504",
+      "text": "指定索引处的区间；若该索引不存在区间，则返回 <code>undefined</code>。"
+    },
+    {
+      "id": "TimeIntervalCollection#indexOf",
+      "field": "description",
+      "sourceHash": "sha256:53b66ad95eda94eabd4c9c0738e1c1fd1717f618efb58b539b76d9a0a16b48d1",
+      "text": "查找并返回集合中包含指定日期的区间索引。"
+    },
+    {
+      "id": "TimeIntervalCollection#indexOf",
+      "field": "params/date/description",
+      "sourceHash": "sha256:a594f4e7038738d2f635297719e6eb5b0951788fdac8dadb47840f6eb912548f",
+      "text": "要查找的日期。"
+    },
+    {
+      "id": "TimeIntervalCollection#indexOf",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:78b488e671270aafeb58a4852a13cfcd43449990951037af24b172900b3bf69b",
+      "text": "包含指定日期的区间索引。若不存在该区间，则返回负数：日期之后下一个区间索引的按位取反；若其后没有区间，则返回集合长度的按位取反。"
+    },
+    {
+      "id": "TimeIntervalCollection#intersect",
+      "field": "description",
+      "sourceHash": "sha256:9f668bd68bb0548ad3f73c324bf18e1e4cb3f4ab015713e79d3c0876c9b447ec",
+      "text": "创建此集合与给定集合交集的新实例。"
+    },
+    {
+      "id": "TimeIntervalCollection#intersect",
+      "field": "params/dataComparer/description",
+      "sourceHash": "sha256:7ce2ec3279109ec9ceac27f103b4c557ca0917996c73c4423effeadd7d5eb8c7",
+      "text": "比较两个区间数据的函数。若省略，则使用引用相等比较。"
+    },
+    {
+      "id": "TimeIntervalCollection#intersect",
+      "field": "params/mergeCallback/description",
+      "sourceHash": "sha256:491ca7466e1defdec8bf179144cf73f9f052e1f1c2d3feb44ac6320157dc0962",
+      "text": "合并两个区间数据的函数。若省略，则使用左侧区间的数据。"
+    },
+    {
+      "id": "TimeIntervalCollection#intersect",
+      "field": "params/other/description",
+      "sourceHash": "sha256:159412b1237da5cc4cb7ed45391b3bd618bbef5c85dc07ac7bd69c0b5a78c5c6",
+      "text": "参与求交的集合。"
+    },
+    {
+      "id": "TimeIntervalCollection#intersect",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:f84134623782bdc1fd402b5bdb399b4e656b514ebdd3b15634213167c943d13b",
+      "text": "表示此集合与给定集合交集的新 TimeIntervalCollection。"
+    },
+    {
+      "id": "TimeIntervalCollection#isEmpty",
+      "field": "description",
+      "sourceHash": "sha256:15317edabd95ca98e1e4e6a817a513a5fcecebb2ac399f05a450e578c29eac12",
+      "text": "获取集合是否为空。"
+    },
+    {
+      "id": "TimeIntervalCollection#isStartIncluded",
+      "field": "description",
+      "sourceHash": "sha256:6714ae97ed730514dfcf0763e2aeaeba6a6883cb959a3dee4e09397f39b55048",
+      "text": "获取集合是否包含开始时间。"
+    },
+    {
+      "id": "TimeIntervalCollection#isStopIncluded",
+      "field": "description",
+      "sourceHash": "sha256:cbf04710a5cd71c59e8340b8da76d67d7bca0b7e21773faf0663d9f486445825",
+      "text": "获取集合是否包含结束时间。"
+    },
+    {
+      "id": "TimeIntervalCollection#length",
+      "field": "description",
+      "sourceHash": "sha256:f2490d56efae393d48d500685f26a1d29255e105261c912a6dc8c0edfcebc93e",
+      "text": "获取集合中的区间数量。"
+    },
+    {
+      "id": "TimeIntervalCollection#removeAll",
+      "field": "description",
+      "sourceHash": "sha256:163bd4684843d05e25f17288a7c6a33d9441eef65ba86b3493c81ce76411e681",
+      "text": "移除集合中的全部区间。"
+    },
+    {
+      "id": "TimeIntervalCollection#removeInterval",
+      "field": "description",
+      "sourceHash": "sha256:022fb439c419eadeb983b0dabaf302b444b6cb3b72e5d5df91914b2ba1080800",
+      "text": "从此集合移除指定区间，在该时间范围形成空缺。忽略输入区间的 data 属性。"
+    },
+    {
+      "id": "TimeIntervalCollection#removeInterval",
+      "field": "params/interval/description",
+      "sourceHash": "sha256:caa923efd7266ef28c94cc545094889e06c6634cd28dbb6062927af8dd20ae00",
+      "text": "要移除的区间。"
+    },
+    {
+      "id": "TimeIntervalCollection#removeInterval",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:6ba09d3ea9f384b1ce76cdd79236091f0dbc8b2ea6e36f4404dac605fb6d3750",
+      "text": "区间被移除时返回 <code>true</code>；若该区间没有任何部分位于集合中，则返回 <code>false</code>。"
+    },
+    {
+      "id": "TimeIntervalCollection#start",
+      "field": "description",
+      "sourceHash": "sha256:5feabbe5811c77655577dea8d6cbb605b783800fe71fc98434e2a054111b12e3",
+      "text": "获取集合的开始时间。"
+    },
+    {
+      "id": "TimeIntervalCollection#stop",
+      "field": "description",
+      "sourceHash": "sha256:b8c27d9f14daf652ff719d8f275db32c838c256b06eeae8c181bc00a6441ce59",
+      "text": "获取集合的结束时间。"
+    },
+    {
+      "id": "TimeStandard.TAI",
+      "field": "description",
+      "sourceHash": "sha256:20240fe346c3fecce02f83444438ce18d9985db5464a8ceded12360d046ed542",
+      "text": "表示国际原子时（TAI）标准，其他时间标准以其为主要参照。"
+    },
+    {
+      "id": "TimeStandard.UTC",
+      "field": "description",
+      "sourceHash": "sha256:8a313d9a0649690535602ea47220a994249c9f4950882ac4559fdd061767039b",
+      "text": "表示协调世界时（UTC）标准。UTC 与 TAI 的关系为 <code>UTC = TAI - deltaT</code>，其中 <code>deltaT</code> 为截至该 TAI 时刻已引入的闰秒数。"
+    },
+    {
+      "id": "TimeStandard",
+      "field": "description",
+      "sourceHash": "sha256:bc694cc080713c9c25da6a9223ded653559523c2dc6f685a6118616a6b6db687",
+      "text": "提供 JulianDate 可以接受的输入时间标准类型。"
+    },
+    {
+      "id": "TimeStandard",
+      "field": "properties/TAI/description",
+      "sourceHash": "sha256:20240fe346c3fecce02f83444438ce18d9985db5464a8ceded12360d046ed542",
+      "text": "表示国际原子时（TAI）标准，其他时间标准以其为主要参照。"
+    },
+    {
+      "id": "TimeStandard",
+      "field": "properties/UTC/description",
+      "sourceHash": "sha256:8a313d9a0649690535602ea47220a994249c9f4950882ac4559fdd061767039b",
+      "text": "表示协调世界时（UTC）标准。UTC 与 TAI 的关系为 <code>UTC = TAI - deltaT</code>，其中 <code>deltaT</code> 为截至该 TAI 时刻已引入的闰秒数。"
+    }
+  ]
+}

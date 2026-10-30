@@ -1,0 +1,852 @@
+{
+  "schemaVersion": 1,
+  "locale": "zh-CN",
+  "entries": [
+    {
+      "id": "GeographicProjection",
+      "field": "classdesc",
+      "sourceHash": "sha256:90cefd8a27c0f02d549c804929426e3c1a15e5043a6b8eda66b79ee662352294",
+      "text": "将经度和纬度分别乘以 {@link Ellipsoid#maximumRadius}，线性映射为 X、Y 的简单地图投影。通常称为地理投影、等距圆柱投影或 plate carrée；使用 WGS84 椭球时，也称为 EPSG:4326。"
+    },
+    {
+      "id": "GeographicProjection",
+      "field": "params/ellipsoid/description",
+      "sourceHash": "sha256:d4987f5b4d3b55df0ddb3f54009edf4bc5f1decfcd20d213883232e3abcc7dd4",
+      "text": "椭球。"
+    },
+    {
+      "id": "GeographicProjection#ellipsoid",
+      "field": "description",
+      "sourceHash": "sha256:c2cf9f852d326a8bb4f4372ffbb6add3d5d86466688be99f3beaaf020501e57a",
+      "text": "获取 {@link Ellipsoid}。"
+    },
+    {
+      "id": "GeographicProjection#project",
+      "field": "description",
+      "sourceHash": "sha256:d711f4cfce9c3e3df88c310c705f98d144aa29fb974af0b1b0eac89cc2d0a33c",
+      "text": "将以弧度为单位的 {@link Cartographic} 坐标投影为米制地图坐标。X、Y 分别为经度和纬度乘以椭球最大半径，Z 保持原高度不变。"
+    },
+    {
+      "id": "GeographicProjection#project",
+      "field": "params/cartographic/description",
+      "sourceHash": "sha256:236d6c8caeca91869e2e116bfd73994dfce44de9de680e77cd0426da3b5d346c",
+      "text": "要投影的坐标。"
+    },
+    {
+      "id": "GeographicProjection#project",
+      "field": "params/result/description",
+      "sourceHash": "sha256:ad9837379d3b79d17796625f0c3c55eb2da4a56be968d8eda1c639636f7b6e32",
+      "text": "用于接收结果的实例；若为 undefined，则创建并返回新实例。"
+    },
+    {
+      "id": "GeographicProjection#project",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:cf7375b4d831ef73c0e9f45e87d6273978d625359fe5e2d756477e2535c6817c",
+      "text": "投影后的坐标。若 result 不为 undefined，则复制到该实例并返回；否则创建并返回新实例。"
+    },
+    {
+      "id": "GeographicProjection#unproject",
+      "field": "description",
+      "sourceHash": "sha256:8676b32d1b0576b54b6ee436db0ebc2e73f0d1ccd7b2e4dc195d7e0a9062ccf4",
+      "text": "将以米为单位的投影 {@link Cartesian3} 坐标反投影为以弧度为单位的 {@link Cartographic} 坐标。经度和纬度分别为 X、Y 除以椭球最大半径，高度保持原 Z 不变。"
+    },
+    {
+      "id": "GeographicProjection#unproject",
+      "field": "params/cartesian/description",
+      "sourceHash": "sha256:1f8f1b4049dc058a87b8fb8faca28ac3a946efe03c7416f58db21b8e67785818",
+      "text": "要反投影的笛卡尔位置，其高度 z 使用米。"
+    },
+    {
+      "id": "GeographicProjection#unproject",
+      "field": "params/result/description",
+      "sourceHash": "sha256:ad9837379d3b79d17796625f0c3c55eb2da4a56be968d8eda1c639636f7b6e32",
+      "text": "用于接收结果的实例；若为 undefined，则创建并返回新实例。"
+    },
+    {
+      "id": "GeographicProjection#unproject",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:0c1e1429832522ea4570a478bd63e0fd9a3f01a59bed4a20ad16fc1d98494ed1",
+      "text": "反投影后的坐标。若 result 不为 undefined，则复制到该实例并返回；否则创建并返回新实例。"
+    },
+    {
+      "id": "GeographicTilingScheme",
+      "field": "classdesc",
+      "sourceHash": "sha256:dd38bbb8126097439dc8aeeb88611749c74f78adfade54caf9f5103a3e8ab512",
+      "text": "用于基于简单 {@link GeographicProjection} 的几何分块方案，经纬度直接映射到 X、Y。此投影通常称为地理投影、等距圆柱投影或 plate carrée。"
+    },
+    {
+      "id": "GeographicTilingScheme",
+      "field": "params/options.ellipsoid/description",
+      "sourceHash": "sha256:79e52d6021ba8b931dbf646b3ea1ad14602565ff52118e9d37313eec8720ad10",
+      "text": "表面参与分块的椭球，默认使用默认椭球。"
+    },
+    {
+      "id": "GeographicTilingScheme",
+      "field": "params/options.numberOfLevelZeroTilesX/description",
+      "sourceHash": "sha256:d01095f01ac33289df3cbe09727d8be61a85b0e104d8e9e0986d9bcca6006722",
+      "text": "瓦片树零级中 X 方向的瓦片数量。"
+    },
+    {
+      "id": "GeographicTilingScheme",
+      "field": "params/options.numberOfLevelZeroTilesY/description",
+      "sourceHash": "sha256:5804c7469f355c9496b8d19056740c8c51b1d1148e1a11991e716bcb4e53295a",
+      "text": "瓦片树零级中 Y 方向的瓦片数量。"
+    },
+    {
+      "id": "GeographicTilingScheme",
+      "field": "params/options.rectangle/description",
+      "sourceHash": "sha256:4667a13ed21a98f14b10c2f15bc7b2d8081c7fef53b8a4fb91adad970b6d8c41",
+      "text": "此分块方案覆盖的弧度矩形范围。"
+    },
+    {
+      "id": "GeographicTilingScheme#ellipsoid",
+      "field": "description",
+      "sourceHash": "sha256:14c0cedb5f0318799ae9490dad850c9cc7fce190db571e006d0f4bf0e3471267",
+      "text": "获取此分块方案所覆盖的椭球。"
+    },
+    {
+      "id": "GeographicTilingScheme#getNumberOfXTilesAtLevel",
+      "field": "description",
+      "sourceHash": "sha256:35e977d1bc85bb9f0c819804753963eacf50ff52b9eeda6cb0494fdc37b14cad",
+      "text": "获取指定细节级别下 X 方向的瓦片总数。"
+    },
+    {
+      "id": "GeographicTilingScheme#getNumberOfXTilesAtLevel",
+      "field": "params/level/description",
+      "sourceHash": "sha256:9384acda2bed3e4b004f3c3896675497249961a73371797e70e258951127e538",
+      "text": "细节级别。"
+    },
+    {
+      "id": "GeographicTilingScheme#getNumberOfXTilesAtLevel",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:192b1931cb657567ddf9ceda97e9c8e2dc1a938c869fa39eca44a99dd4d5f885",
+      "text": "给定级别下 X 方向的瓦片数量。"
+    },
+    {
+      "id": "GeographicTilingScheme#getNumberOfYTilesAtLevel",
+      "field": "description",
+      "sourceHash": "sha256:9165edc00b9c3cb0c295cd6f7a603203f4ffbe07776c67f26bae2b526d1b25b7",
+      "text": "获取指定细节级别下 Y 方向的瓦片总数。"
+    },
+    {
+      "id": "GeographicTilingScheme#getNumberOfYTilesAtLevel",
+      "field": "params/level/description",
+      "sourceHash": "sha256:9384acda2bed3e4b004f3c3896675497249961a73371797e70e258951127e538",
+      "text": "细节级别。"
+    },
+    {
+      "id": "GeographicTilingScheme#getNumberOfYTilesAtLevel",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:fe4c5866da9a78198320fe0d640f1a4ab54d12a6750fecad2cef5cc8f29a0c5a",
+      "text": "给定级别下 Y 方向的瓦片数量。"
+    },
+    {
+      "id": "GeographicTilingScheme#positionToTileXY",
+      "field": "description",
+      "sourceHash": "sha256:5d9d118b8e8ff9505ad7dba0b888d8cf43775de08748100c086d155c6f20467f",
+      "text": "计算包含给定地理坐标位置的瓦片 x、y 坐标。"
+    },
+    {
+      "id": "GeographicTilingScheme#positionToTileXY",
+      "field": "params/level/description",
+      "sourceHash": "sha256:ae6e9925c89f7a02e397590fee4a7cdfe6e5240c747a46e3c52439305100649b",
+      "text": "瓦片细节级别，零级的细节最少。"
+    },
+    {
+      "id": "GeographicTilingScheme#positionToTileXY",
+      "field": "params/position/description",
+      "sourceHash": "sha256:bad28dcee1c004808ef1af8bc1f8b5abbd385fbb6680b409aa1c9680a506d23a",
+      "text": "位置。"
+    },
+    {
+      "id": "GeographicTilingScheme#positionToTileXY",
+      "field": "params/result/description",
+      "sourceHash": "sha256:a18d0816f8295703fd455be3f45bb9566188db21c39ba1495baef58022484f1c",
+      "text": "用于接收结果的实例；为 undefined 时创建新实例。"
+    },
+    {
+      "id": "GeographicTilingScheme#positionToTileXY",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:834a73677ed16059b3d6d2cc148aa1e940b33220966aa2c9ce58530134cd725e",
+      "text": "给定 result；若其为 undefined，则返回包含瓦片 x、y 坐标的新对象。"
+    },
+    {
+      "id": "GeographicTilingScheme#projection",
+      "field": "description",
+      "sourceHash": "sha256:b5e0c56e3ebb77e76551517abe23c73e8271d809a01ad37822cb8ccc9a2116f8",
+      "text": "获取此分块方案使用的地图投影。"
+    },
+    {
+      "id": "GeographicTilingScheme#rectangle",
+      "field": "description",
+      "sourceHash": "sha256:738ea528a18d6a232c28dfb2a8a43359fd06e290a62cc328b24a1548cccd707d",
+      "text": "获取此分块方案覆盖的弧度矩形范围。"
+    },
+    {
+      "id": "GeographicTilingScheme#rectangleToNativeRectangle",
+      "field": "description",
+      "sourceHash": "sha256:cf85d7e01f9018262d5bd63ae382452274bd0baed13ba57d6d3826ab9ee6f6f1",
+      "text": "将以大地弧度坐标指定的矩形转换为此分块方案的原生坐标系。"
+    },
+    {
+      "id": "GeographicTilingScheme#rectangleToNativeRectangle",
+      "field": "params/rectangle/description",
+      "sourceHash": "sha256:aa4ee9d4936d1994ed538bf7e15316973a77a7f5c732e717b1f79550172ae7b1",
+      "text": "要变换的矩形。"
+    },
+    {
+      "id": "GeographicTilingScheme#rectangleToNativeRectangle",
+      "field": "params/result/description",
+      "sourceHash": "sha256:a18d0816f8295703fd455be3f45bb9566188db21c39ba1495baef58022484f1c",
+      "text": "用于接收结果的实例；为 undefined 时创建新实例。"
+    },
+    {
+      "id": "GeographicTilingScheme#rectangleToNativeRectangle",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:6b66d905eef5145127297945c879cf4a6875b457f432caf4dfc23f0bcfb51d84",
+      "text": "给定 result；若其为 undefined，则返回包含原生矩形的新对象。"
+    },
+    {
+      "id": "GeographicTilingScheme#tileXYToNativeRectangle",
+      "field": "description",
+      "sourceHash": "sha256:29ed4ff52981264cd1799a252717c8696d0ebab3158ecf21fb6e330a467b2562",
+      "text": "将瓦片 x、y 坐标和层级转换为以此分块方案原生坐标表示的矩形。"
+    },
+    {
+      "id": "GeographicTilingScheme#tileXYToNativeRectangle",
+      "field": "params/level/description",
+      "sourceHash": "sha256:ae6e9925c89f7a02e397590fee4a7cdfe6e5240c747a46e3c52439305100649b",
+      "text": "瓦片细节级别，零级的细节最少。"
+    },
+    {
+      "id": "GeographicTilingScheme#tileXYToNativeRectangle",
+      "field": "params/result/description",
+      "sourceHash": "sha256:a18d0816f8295703fd455be3f45bb9566188db21c39ba1495baef58022484f1c",
+      "text": "用于接收结果的实例；为 undefined 时创建新实例。"
+    },
+    {
+      "id": "GeographicTilingScheme#tileXYToNativeRectangle",
+      "field": "params/x/description",
+      "sourceHash": "sha256:828af63f403213af1aa15988ea18b09a87693071adaa12026c826facd67eccad",
+      "text": "瓦片的整数 x 坐标。"
+    },
+    {
+      "id": "GeographicTilingScheme#tileXYToNativeRectangle",
+      "field": "params/y/description",
+      "sourceHash": "sha256:2946efd19ff197ce0e36dffb105f453be9ea52074d4e7935a06bdc2f327cf546",
+      "text": "瓦片的整数 y 坐标。"
+    },
+    {
+      "id": "GeographicTilingScheme#tileXYToNativeRectangle",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:e531e90f550187f2bb40f5b1d6f068f82248be9108128113af951a5f2f411bbc",
+      "text": "给定 result；若其为 undefined，则返回包含矩形的新对象。"
+    },
+    {
+      "id": "GeographicTilingScheme#tileXYToRectangle",
+      "field": "description",
+      "sourceHash": "sha256:f8ac353771eb3a3fddd120a7a56a3ff2b6d30e6c97e001f9f95ebcf1f98d0af3",
+      "text": "将瓦片 x、y 坐标和层级转换为弧度地理坐标矩形。"
+    },
+    {
+      "id": "GeographicTilingScheme#tileXYToRectangle",
+      "field": "params/level/description",
+      "sourceHash": "sha256:ae6e9925c89f7a02e397590fee4a7cdfe6e5240c747a46e3c52439305100649b",
+      "text": "瓦片细节级别，零级的细节最少。"
+    },
+    {
+      "id": "GeographicTilingScheme#tileXYToRectangle",
+      "field": "params/result/description",
+      "sourceHash": "sha256:a18d0816f8295703fd455be3f45bb9566188db21c39ba1495baef58022484f1c",
+      "text": "用于接收结果的实例；为 undefined 时创建新实例。"
+    },
+    {
+      "id": "GeographicTilingScheme#tileXYToRectangle",
+      "field": "params/x/description",
+      "sourceHash": "sha256:828af63f403213af1aa15988ea18b09a87693071adaa12026c826facd67eccad",
+      "text": "瓦片的整数 x 坐标。"
+    },
+    {
+      "id": "GeographicTilingScheme#tileXYToRectangle",
+      "field": "params/y/description",
+      "sourceHash": "sha256:2946efd19ff197ce0e36dffb105f453be9ea52074d4e7935a06bdc2f327cf546",
+      "text": "瓦片的整数 y 坐标。"
+    },
+    {
+      "id": "GeographicTilingScheme#tileXYToRectangle",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:e531e90f550187f2bb40f5b1d6f068f82248be9108128113af951a5f2f411bbc",
+      "text": "给定 result；若其为 undefined，则返回包含矩形的新对象。"
+    },
+    {
+      "id": "MapProjection",
+      "field": "classdesc",
+      "sourceHash": "sha256:c39113aeb76943ac54c20fd326cdd507d9c18cbaeb41e4699ba7b2b00cc93a80",
+      "text": "定义如何将大地椭球坐标（{@link Cartographic}）投影到平面地图，例如 Cesium 的二维和哥伦布视图模式。"
+    },
+    {
+      "id": "MapProjection#ellipsoid",
+      "field": "description",
+      "sourceHash": "sha256:c2cf9f852d326a8bb4f4372ffbb6add3d5d86466688be99f3beaaf020501e57a",
+      "text": "获取 {@link Ellipsoid}。"
+    },
+    {
+      "id": "MapProjection#project",
+      "field": "description",
+      "sourceHash": "sha256:ab1e41bcf157881a74682ff69ac8f045403e1ad143dd9f459b0819e7d2e10aef",
+      "text": "将以弧度为单位的 {@link Cartographic} 坐标投影为对应投影的米制地图坐标。"
+    },
+    {
+      "id": "MapProjection#project",
+      "field": "params/cartographic/description",
+      "sourceHash": "sha256:236d6c8caeca91869e2e116bfd73994dfce44de9de680e77cd0426da3b5d346c",
+      "text": "要投影的坐标。"
+    },
+    {
+      "id": "MapProjection#project",
+      "field": "params/result/description",
+      "sourceHash": "sha256:ad9837379d3b79d17796625f0c3c55eb2da4a56be968d8eda1c639636f7b6e32",
+      "text": "用于接收结果的实例；若为 undefined，则创建并返回新实例。"
+    },
+    {
+      "id": "MapProjection#project",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:cf7375b4d831ef73c0e9f45e87d6273978d625359fe5e2d756477e2535c6817c",
+      "text": "投影后的坐标。若 result 不为 undefined，则复制到该实例并返回；否则创建并返回新实例。"
+    },
+    {
+      "id": "MapProjection#unproject",
+      "field": "description",
+      "sourceHash": "sha256:d73349dc06603d2631fbcece1126e2c76396c131b6722a7c8edb66f32679e73b",
+      "text": "将以米为单位、对应具体投影的地图 {@link Cartesian3} 坐标反投影为以弧度为单位的 {@link Cartographic} 坐标。"
+    },
+    {
+      "id": "MapProjection#unproject",
+      "field": "params/cartesian/description",
+      "sourceHash": "sha256:1f8f1b4049dc058a87b8fb8faca28ac3a946efe03c7416f58db21b8e67785818",
+      "text": "要反投影的笛卡尔位置，其高度 z 使用米。"
+    },
+    {
+      "id": "MapProjection#unproject",
+      "field": "params/result/description",
+      "sourceHash": "sha256:ad9837379d3b79d17796625f0c3c55eb2da4a56be968d8eda1c639636f7b6e32",
+      "text": "用于接收结果的实例；若为 undefined，则创建并返回新实例。"
+    },
+    {
+      "id": "MapProjection#unproject",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:0c1e1429832522ea4570a478bd63e0fd9a3f01a59bed4a20ad16fc1d98494ed1",
+      "text": "反投影后的坐标。若 result 不为 undefined，则复制到该实例并返回；否则创建并返回新实例。"
+    },
+    {
+      "id": "TilingScheme",
+      "field": "classdesc",
+      "sourceHash": "sha256:2f7caf6f9452215c5a72cbfb7debfd72eb9f0f03fffb1816f9228af0c784b177",
+      "text": "用于椭球表面几何或影像的分块方案。零级是最粗糙、细节最少的层级，瓦片数量可配置。一级中，每个零级瓦片具有四个子瓦片，每个方向各分为二；二级中，每个一级瓦片同样具有四个子瓦片，如此递归至几何或影像源所提供的所有层级。"
+    },
+    {
+      "id": "TilingScheme#ellipsoid",
+      "field": "description",
+      "sourceHash": "sha256:4e729e386283f66b332d25acd58657c4ad50c8f6416ff90b07ed1d55c7261dce",
+      "text": "获取此分块方案所覆盖的椭球。"
+    },
+    {
+      "id": "TilingScheme#getNumberOfXTilesAtLevel",
+      "field": "description",
+      "sourceHash": "sha256:35e977d1bc85bb9f0c819804753963eacf50ff52b9eeda6cb0494fdc37b14cad",
+      "text": "获取指定细节级别下 X 方向的瓦片总数。"
+    },
+    {
+      "id": "TilingScheme#getNumberOfXTilesAtLevel",
+      "field": "params/level/description",
+      "sourceHash": "sha256:9384acda2bed3e4b004f3c3896675497249961a73371797e70e258951127e538",
+      "text": "细节级别。"
+    },
+    {
+      "id": "TilingScheme#getNumberOfXTilesAtLevel",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:192b1931cb657567ddf9ceda97e9c8e2dc1a938c869fa39eca44a99dd4d5f885",
+      "text": "给定级别下 X 方向的瓦片数量。"
+    },
+    {
+      "id": "TilingScheme#getNumberOfYTilesAtLevel",
+      "field": "description",
+      "sourceHash": "sha256:9165edc00b9c3cb0c295cd6f7a603203f4ffbe07776c67f26bae2b526d1b25b7",
+      "text": "获取指定细节级别下 Y 方向的瓦片总数。"
+    },
+    {
+      "id": "TilingScheme#getNumberOfYTilesAtLevel",
+      "field": "params/level/description",
+      "sourceHash": "sha256:9384acda2bed3e4b004f3c3896675497249961a73371797e70e258951127e538",
+      "text": "细节级别。"
+    },
+    {
+      "id": "TilingScheme#getNumberOfYTilesAtLevel",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:fe4c5866da9a78198320fe0d640f1a4ab54d12a6750fecad2cef5cc8f29a0c5a",
+      "text": "给定级别下 Y 方向的瓦片数量。"
+    },
+    {
+      "id": "TilingScheme#positionToTileXY",
+      "field": "description",
+      "sourceHash": "sha256:5d9d118b8e8ff9505ad7dba0b888d8cf43775de08748100c086d155c6f20467f",
+      "text": "计算包含给定地理坐标位置的瓦片 x、y 坐标。"
+    },
+    {
+      "id": "TilingScheme#positionToTileXY",
+      "field": "params/level/description",
+      "sourceHash": "sha256:ae6e9925c89f7a02e397590fee4a7cdfe6e5240c747a46e3c52439305100649b",
+      "text": "瓦片细节级别，零级的细节最少。"
+    },
+    {
+      "id": "TilingScheme#positionToTileXY",
+      "field": "params/position/description",
+      "sourceHash": "sha256:bad28dcee1c004808ef1af8bc1f8b5abbd385fbb6680b409aa1c9680a506d23a",
+      "text": "位置。"
+    },
+    {
+      "id": "TilingScheme#positionToTileXY",
+      "field": "params/result/description",
+      "sourceHash": "sha256:a18d0816f8295703fd455be3f45bb9566188db21c39ba1495baef58022484f1c",
+      "text": "用于接收结果的实例；为 undefined 时创建新实例。"
+    },
+    {
+      "id": "TilingScheme#positionToTileXY",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:834a73677ed16059b3d6d2cc148aa1e940b33220966aa2c9ce58530134cd725e",
+      "text": "给定 result；若其为 undefined，则返回包含瓦片 x、y 坐标的新对象。"
+    },
+    {
+      "id": "TilingScheme#projection",
+      "field": "description",
+      "sourceHash": "sha256:392617c3e4f9b8582d19af576e3ecd151c7c05261ed06f7f5274508f9e07736c",
+      "text": "获取此分块方案使用的地图投影。"
+    },
+    {
+      "id": "TilingScheme#rectangle",
+      "field": "description",
+      "sourceHash": "sha256:738ea528a18d6a232c28dfb2a8a43359fd06e290a62cc328b24a1548cccd707d",
+      "text": "获取此分块方案覆盖的弧度矩形范围。"
+    },
+    {
+      "id": "TilingScheme#rectangleToNativeRectangle",
+      "field": "description",
+      "sourceHash": "sha256:cf85d7e01f9018262d5bd63ae382452274bd0baed13ba57d6d3826ab9ee6f6f1",
+      "text": "将以大地弧度坐标指定的矩形转换为此分块方案的原生坐标系。"
+    },
+    {
+      "id": "TilingScheme#rectangleToNativeRectangle",
+      "field": "params/rectangle/description",
+      "sourceHash": "sha256:aa4ee9d4936d1994ed538bf7e15316973a77a7f5c732e717b1f79550172ae7b1",
+      "text": "要变换的矩形。"
+    },
+    {
+      "id": "TilingScheme#rectangleToNativeRectangle",
+      "field": "params/result/description",
+      "sourceHash": "sha256:a18d0816f8295703fd455be3f45bb9566188db21c39ba1495baef58022484f1c",
+      "text": "用于接收结果的实例；为 undefined 时创建新实例。"
+    },
+    {
+      "id": "TilingScheme#rectangleToNativeRectangle",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:6b66d905eef5145127297945c879cf4a6875b457f432caf4dfc23f0bcfb51d84",
+      "text": "给定 result；若其为 undefined，则返回包含原生矩形的新对象。"
+    },
+    {
+      "id": "TilingScheme#tileXYToNativeRectangle",
+      "field": "description",
+      "sourceHash": "sha256:29ed4ff52981264cd1799a252717c8696d0ebab3158ecf21fb6e330a467b2562",
+      "text": "将瓦片 x、y 坐标和层级转换为以此分块方案原生坐标表示的矩形。"
+    },
+    {
+      "id": "TilingScheme#tileXYToNativeRectangle",
+      "field": "params/level/description",
+      "sourceHash": "sha256:ae6e9925c89f7a02e397590fee4a7cdfe6e5240c747a46e3c52439305100649b",
+      "text": "瓦片细节级别，零级的细节最少。"
+    },
+    {
+      "id": "TilingScheme#tileXYToNativeRectangle",
+      "field": "params/result/description",
+      "sourceHash": "sha256:a18d0816f8295703fd455be3f45bb9566188db21c39ba1495baef58022484f1c",
+      "text": "用于接收结果的实例；为 undefined 时创建新实例。"
+    },
+    {
+      "id": "TilingScheme#tileXYToNativeRectangle",
+      "field": "params/x/description",
+      "sourceHash": "sha256:828af63f403213af1aa15988ea18b09a87693071adaa12026c826facd67eccad",
+      "text": "瓦片的整数 x 坐标。"
+    },
+    {
+      "id": "TilingScheme#tileXYToNativeRectangle",
+      "field": "params/y/description",
+      "sourceHash": "sha256:2946efd19ff197ce0e36dffb105f453be9ea52074d4e7935a06bdc2f327cf546",
+      "text": "瓦片的整数 y 坐标。"
+    },
+    {
+      "id": "TilingScheme#tileXYToNativeRectangle",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:e531e90f550187f2bb40f5b1d6f068f82248be9108128113af951a5f2f411bbc",
+      "text": "给定 result；若其为 undefined，则返回包含矩形的新对象。"
+    },
+    {
+      "id": "TilingScheme#tileXYToRectangle",
+      "field": "description",
+      "sourceHash": "sha256:f8ac353771eb3a3fddd120a7a56a3ff2b6d30e6c97e001f9f95ebcf1f98d0af3",
+      "text": "将瓦片 x、y 坐标和层级转换为弧度地理坐标矩形。"
+    },
+    {
+      "id": "TilingScheme#tileXYToRectangle",
+      "field": "params/level/description",
+      "sourceHash": "sha256:ae6e9925c89f7a02e397590fee4a7cdfe6e5240c747a46e3c52439305100649b",
+      "text": "瓦片细节级别，零级的细节最少。"
+    },
+    {
+      "id": "TilingScheme#tileXYToRectangle",
+      "field": "params/result/description",
+      "sourceHash": "sha256:a18d0816f8295703fd455be3f45bb9566188db21c39ba1495baef58022484f1c",
+      "text": "用于接收结果的实例；为 undefined 时创建新实例。"
+    },
+    {
+      "id": "TilingScheme#tileXYToRectangle",
+      "field": "params/x/description",
+      "sourceHash": "sha256:828af63f403213af1aa15988ea18b09a87693071adaa12026c826facd67eccad",
+      "text": "瓦片的整数 x 坐标。"
+    },
+    {
+      "id": "TilingScheme#tileXYToRectangle",
+      "field": "params/y/description",
+      "sourceHash": "sha256:2946efd19ff197ce0e36dffb105f453be9ea52074d4e7935a06bdc2f327cf546",
+      "text": "瓦片的整数 y 坐标。"
+    },
+    {
+      "id": "TilingScheme#tileXYToRectangle",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:e531e90f550187f2bb40f5b1d6f068f82248be9108128113af951a5f2f411bbc",
+      "text": "给定 result；若其为 undefined，则返回包含矩形的新对象。"
+    },
+    {
+      "id": "WebMercatorProjection.geodeticLatitudeToMercatorAngle",
+      "field": "description",
+      "sourceHash": "sha256:9b31195beba7b5a6e375368c1bedb3a18341eea7a7ead808c13f6cfdba31cc81",
+      "text": "将 -PI/2 至 PI/2 范围内的弧度大地纬度转换为 -PI 至 PI 范围内的墨卡托角。"
+    },
+    {
+      "id": "WebMercatorProjection.geodeticLatitudeToMercatorAngle",
+      "field": "params/latitude/description",
+      "sourceHash": "sha256:7552184d1a3bd5a6f50cecdbe6173feaa30c3dceb91bf11e40066f6a7051aa10",
+      "text": "大地纬度，单位为弧度。"
+    },
+    {
+      "id": "WebMercatorProjection.geodeticLatitudeToMercatorAngle",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:ea0ccb583d183a9d79b9c8ae57e4dcc8feb8524738689f25a1251fb923be788b",
+      "text": "墨卡托角。"
+    },
+    {
+      "id": "WebMercatorProjection.MaximumLatitude",
+      "field": "description",
+      "sourceHash": "sha256:8d30bbf293f82721beca7b843b83e380ada64493b7e66cad4ff0544a4d865535",
+      "text": "Web 墨卡托投影（EPSG:3857）支持的最大纬度，南北对称。理论上墨卡托投影定义到但不包括 90 度；由于随纬度增大而急剧增长，通常更早截断。Google Maps、Bing Maps 和 Esri 使用此截断值，是为了使投影在 X、Y 方向具有相等范围，形成正方形。该常量通过调用 WebMercatorProjection.mercatorAngleToGeodeticLatitude(Math.PI) 计算。"
+    },
+    {
+      "id": "WebMercatorProjection.mercatorAngleToGeodeticLatitude",
+      "field": "description",
+      "sourceHash": "sha256:c847774440719777fe2b30d08dcf1f0c26c18a719aac981089f87648427dfc35",
+      "text": "将 -PI 至 PI 范围内的墨卡托角转换为 -PI/2 至 PI/2 范围内的大地纬度。"
+    },
+    {
+      "id": "WebMercatorProjection.mercatorAngleToGeodeticLatitude",
+      "field": "params/mercatorAngle/description",
+      "sourceHash": "sha256:4b4836b18c9f1c2486058a580e583a42c36f20f6c2a365dec3a0563112bbb931",
+      "text": "要转换的角度。"
+    },
+    {
+      "id": "WebMercatorProjection.mercatorAngleToGeodeticLatitude",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:7552184d1a3bd5a6f50cecdbe6173feaa30c3dceb91bf11e40066f6a7051aa10",
+      "text": "大地纬度，单位为弧度。"
+    },
+    {
+      "id": "WebMercatorProjection",
+      "field": "classdesc",
+      "sourceHash": "sha256:5cbafe62cc6bca2d905917312aad73808fd4e5f44779f80a4757354bed6d294e",
+      "text": "Google Maps、Bing Maps 和大多数 ArcGIS Online 服务使用的 EPSG:3857 地图投影。将 WGS84 经纬度通过球面而非椭球方程转换为墨卡托坐标。"
+    },
+    {
+      "id": "WebMercatorProjection",
+      "field": "params/ellipsoid/description",
+      "sourceHash": "sha256:d4987f5b4d3b55df0ddb3f54009edf4bc5f1decfcd20d213883232e3abcc7dd4",
+      "text": "椭球。"
+    },
+    {
+      "id": "WebMercatorProjection#ellipsoid",
+      "field": "description",
+      "sourceHash": "sha256:c2cf9f852d326a8bb4f4372ffbb6add3d5d86466688be99f3beaaf020501e57a",
+      "text": "获取 {@link Ellipsoid}。"
+    },
+    {
+      "id": "WebMercatorProjection#project",
+      "field": "description",
+      "sourceHash": "sha256:14001d1897e8b6c842b9ca3282a554bb0f2df761ff8c316946213b369b2dc077",
+      "text": "将弧度大地椭球坐标转换为等价的 Web 墨卡托 X、Y、Z 米制坐标，以 {@link Cartesian3} 返回。高度原样复制为 Z。"
+    },
+    {
+      "id": "WebMercatorProjection#project",
+      "field": "params/cartographic/description",
+      "sourceHash": "sha256:de1560a97ec37852bf1fe3422654f3b8d1ce180e34a50d04938c285b16a45f13",
+      "text": "地理坐标，角度使用弧度。"
+    },
+    {
+      "id": "WebMercatorProjection#project",
+      "field": "params/result/description",
+      "sourceHash": "sha256:67f9a0485964ed1d4a54e260def19e82d98c0ef1d8df552c803392bcb930498e",
+      "text": "用于接收结果的实例；为 undefined 时创建新实例。"
+    },
+    {
+      "id": "WebMercatorProjection#project",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:e5816a653044a46cf2fdb411ead9f1605c691e693497fcf384eee35e84cef299",
+      "text": "等价的 Web 墨卡托 X、Y、Z 坐标，单位为米。"
+    },
+    {
+      "id": "WebMercatorProjection#unproject",
+      "field": "description",
+      "sourceHash": "sha256:6df4d9f809cb22d5f3ce4d6061e82e568d78a158fd99dbd5bb87a524587c8bc0",
+      "text": "将以米为单位的 Web 墨卡托 X、Y 坐标转换为包含大地椭球坐标的 {@link Cartographic}。Z 坐标原样复制为高度。"
+    },
+    {
+      "id": "WebMercatorProjection#unproject",
+      "field": "params/cartesian/description",
+      "sourceHash": "sha256:f914e8e1bcf16e068aa9b8f5381370a1df2aa9c9c592df092edc5e64ac6313c5",
+      "text": "要反投影的 Web 墨卡托笛卡尔位置，其高度 z 使用米。"
+    },
+    {
+      "id": "WebMercatorProjection#unproject",
+      "field": "params/result/description",
+      "sourceHash": "sha256:67f9a0485964ed1d4a54e260def19e82d98c0ef1d8df552c803392bcb930498e",
+      "text": "用于接收结果的实例；为 undefined 时创建新实例。"
+    },
+    {
+      "id": "WebMercatorProjection#unproject",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:b48de937acef55b2aea734657078eee44e951b6e8cb9936e5193208689363e92",
+      "text": "等价的地理坐标。"
+    },
+    {
+      "id": "WebMercatorTilingScheme",
+      "field": "classdesc",
+      "sourceHash": "sha256:6d561e0b4ac288337bd9aee6b65c76719868124a3881bf56587f2471b407fd52",
+      "text": "基于 {@link WebMercatorProjection}（EPSG:3857）的几何分块方案。Google Maps、Microsoft Bing Maps 和大多数 ESRI ArcGIS Online 服务使用此方案。"
+    },
+    {
+      "id": "WebMercatorTilingScheme",
+      "field": "params/options.ellipsoid/description",
+      "sourceHash": "sha256:79e52d6021ba8b931dbf646b3ea1ad14602565ff52118e9d37313eec8720ad10",
+      "text": "表面参与分块的椭球，默认使用默认椭球。"
+    },
+    {
+      "id": "WebMercatorTilingScheme",
+      "field": "params/options.numberOfLevelZeroTilesX/description",
+      "sourceHash": "sha256:930cc80115439c5f05edbcebc72411826e7930369a3e35ebcb0b829c4767a2de",
+      "text": "瓦片树零级中 X 方向的瓦片数量。"
+    },
+    {
+      "id": "WebMercatorTilingScheme",
+      "field": "params/options.numberOfLevelZeroTilesY/description",
+      "sourceHash": "sha256:752fbedb9705a3be61a2457d8f5647a786d3bb6456633b257ca1a1ba9234bebb",
+      "text": "瓦片树零级中 Y 方向的瓦片数量。"
+    },
+    {
+      "id": "WebMercatorTilingScheme",
+      "field": "params/options.rectangleNortheastInMeters/description",
+      "sourceHash": "sha256:b7b10e2bc86e703da3fef13bf0ee78c35d12a3d9d06e39113221062bf4266852",
+      "text": "分块方案覆盖矩形的东北角，单位为米。若未指定此参数或 rectangleSouthwestInMeters，则经度方向覆盖全球，纬度方向覆盖相同距离，形成正方形投影。"
+    },
+    {
+      "id": "WebMercatorTilingScheme",
+      "field": "params/options.rectangleSouthwestInMeters/description",
+      "sourceHash": "sha256:183ec6d303a4a0a5bfe243100c38eec5c25240cb5b797653dc51bdb6541bb0c3",
+      "text": "分块方案覆盖矩形的西南角，单位为米。若未指定此参数或 rectangleNortheastInMeters，则经度方向覆盖全球，纬度方向覆盖相同距离，形成正方形投影。"
+    },
+    {
+      "id": "WebMercatorTilingScheme#ellipsoid",
+      "field": "description",
+      "sourceHash": "sha256:14c0cedb5f0318799ae9490dad850c9cc7fce190db571e006d0f4bf0e3471267",
+      "text": "获取此分块方案所覆盖的椭球。"
+    },
+    {
+      "id": "WebMercatorTilingScheme#getNumberOfXTilesAtLevel",
+      "field": "description",
+      "sourceHash": "sha256:35e977d1bc85bb9f0c819804753963eacf50ff52b9eeda6cb0494fdc37b14cad",
+      "text": "获取指定细节级别下 X 方向的瓦片总数。"
+    },
+    {
+      "id": "WebMercatorTilingScheme#getNumberOfXTilesAtLevel",
+      "field": "params/level/description",
+      "sourceHash": "sha256:9384acda2bed3e4b004f3c3896675497249961a73371797e70e258951127e538",
+      "text": "细节级别。"
+    },
+    {
+      "id": "WebMercatorTilingScheme#getNumberOfXTilesAtLevel",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:192b1931cb657567ddf9ceda97e9c8e2dc1a938c869fa39eca44a99dd4d5f885",
+      "text": "给定级别下 X 方向的瓦片数量。"
+    },
+    {
+      "id": "WebMercatorTilingScheme#getNumberOfYTilesAtLevel",
+      "field": "description",
+      "sourceHash": "sha256:9165edc00b9c3cb0c295cd6f7a603203f4ffbe07776c67f26bae2b526d1b25b7",
+      "text": "获取指定细节级别下 Y 方向的瓦片总数。"
+    },
+    {
+      "id": "WebMercatorTilingScheme#getNumberOfYTilesAtLevel",
+      "field": "params/level/description",
+      "sourceHash": "sha256:9384acda2bed3e4b004f3c3896675497249961a73371797e70e258951127e538",
+      "text": "细节级别。"
+    },
+    {
+      "id": "WebMercatorTilingScheme#getNumberOfYTilesAtLevel",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:fe4c5866da9a78198320fe0d640f1a4ab54d12a6750fecad2cef5cc8f29a0c5a",
+      "text": "给定级别下 Y 方向的瓦片数量。"
+    },
+    {
+      "id": "WebMercatorTilingScheme#positionToTileXY",
+      "field": "description",
+      "sourceHash": "sha256:5d9d118b8e8ff9505ad7dba0b888d8cf43775de08748100c086d155c6f20467f",
+      "text": "计算包含给定地理坐标位置的瓦片 x、y 坐标。"
+    },
+    {
+      "id": "WebMercatorTilingScheme#positionToTileXY",
+      "field": "params/level/description",
+      "sourceHash": "sha256:ae6e9925c89f7a02e397590fee4a7cdfe6e5240c747a46e3c52439305100649b",
+      "text": "瓦片细节级别，零级的细节最少。"
+    },
+    {
+      "id": "WebMercatorTilingScheme#positionToTileXY",
+      "field": "params/position/description",
+      "sourceHash": "sha256:bad28dcee1c004808ef1af8bc1f8b5abbd385fbb6680b409aa1c9680a506d23a",
+      "text": "位置。"
+    },
+    {
+      "id": "WebMercatorTilingScheme#positionToTileXY",
+      "field": "params/result/description",
+      "sourceHash": "sha256:a18d0816f8295703fd455be3f45bb9566188db21c39ba1495baef58022484f1c",
+      "text": "用于接收结果的实例；为 undefined 时创建新实例。"
+    },
+    {
+      "id": "WebMercatorTilingScheme#positionToTileXY",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:834a73677ed16059b3d6d2cc148aa1e940b33220966aa2c9ce58530134cd725e",
+      "text": "给定 result；若其为 undefined，则返回包含瓦片 x、y 坐标的新对象。"
+    },
+    {
+      "id": "WebMercatorTilingScheme#projection",
+      "field": "description",
+      "sourceHash": "sha256:b5e0c56e3ebb77e76551517abe23c73e8271d809a01ad37822cb8ccc9a2116f8",
+      "text": "获取此分块方案使用的地图投影。"
+    },
+    {
+      "id": "WebMercatorTilingScheme#rectangle",
+      "field": "description",
+      "sourceHash": "sha256:738ea528a18d6a232c28dfb2a8a43359fd06e290a62cc328b24a1548cccd707d",
+      "text": "获取此分块方案覆盖的弧度矩形范围。"
+    },
+    {
+      "id": "WebMercatorTilingScheme#rectangleToNativeRectangle",
+      "field": "description",
+      "sourceHash": "sha256:cf85d7e01f9018262d5bd63ae382452274bd0baed13ba57d6d3826ab9ee6f6f1",
+      "text": "将以大地弧度坐标指定的矩形转换为此分块方案的原生坐标系。"
+    },
+    {
+      "id": "WebMercatorTilingScheme#rectangleToNativeRectangle",
+      "field": "params/rectangle/description",
+      "sourceHash": "sha256:aa4ee9d4936d1994ed538bf7e15316973a77a7f5c732e717b1f79550172ae7b1",
+      "text": "要变换的矩形。"
+    },
+    {
+      "id": "WebMercatorTilingScheme#rectangleToNativeRectangle",
+      "field": "params/result/description",
+      "sourceHash": "sha256:a18d0816f8295703fd455be3f45bb9566188db21c39ba1495baef58022484f1c",
+      "text": "用于接收结果的实例；为 undefined 时创建新实例。"
+    },
+    {
+      "id": "WebMercatorTilingScheme#rectangleToNativeRectangle",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:6b66d905eef5145127297945c879cf4a6875b457f432caf4dfc23f0bcfb51d84",
+      "text": "给定 result；若其为 undefined，则返回包含原生矩形的新对象。"
+    },
+    {
+      "id": "WebMercatorTilingScheme#tileXYToNativeRectangle",
+      "field": "description",
+      "sourceHash": "sha256:29ed4ff52981264cd1799a252717c8696d0ebab3158ecf21fb6e330a467b2562",
+      "text": "将瓦片 x、y 坐标和层级转换为以此分块方案原生坐标表示的矩形。"
+    },
+    {
+      "id": "WebMercatorTilingScheme#tileXYToNativeRectangle",
+      "field": "params/level/description",
+      "sourceHash": "sha256:ae6e9925c89f7a02e397590fee4a7cdfe6e5240c747a46e3c52439305100649b",
+      "text": "瓦片细节级别，零级的细节最少。"
+    },
+    {
+      "id": "WebMercatorTilingScheme#tileXYToNativeRectangle",
+      "field": "params/result/description",
+      "sourceHash": "sha256:a18d0816f8295703fd455be3f45bb9566188db21c39ba1495baef58022484f1c",
+      "text": "用于接收结果的实例；为 undefined 时创建新实例。"
+    },
+    {
+      "id": "WebMercatorTilingScheme#tileXYToNativeRectangle",
+      "field": "params/x/description",
+      "sourceHash": "sha256:828af63f403213af1aa15988ea18b09a87693071adaa12026c826facd67eccad",
+      "text": "瓦片的整数 x 坐标。"
+    },
+    {
+      "id": "WebMercatorTilingScheme#tileXYToNativeRectangle",
+      "field": "params/y/description",
+      "sourceHash": "sha256:2946efd19ff197ce0e36dffb105f453be9ea52074d4e7935a06bdc2f327cf546",
+      "text": "瓦片的整数 y 坐标。"
+    },
+    {
+      "id": "WebMercatorTilingScheme#tileXYToNativeRectangle",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:e531e90f550187f2bb40f5b1d6f068f82248be9108128113af951a5f2f411bbc",
+      "text": "给定 result；若其为 undefined，则返回包含矩形的新对象。"
+    },
+    {
+      "id": "WebMercatorTilingScheme#tileXYToRectangle",
+      "field": "description",
+      "sourceHash": "sha256:f8ac353771eb3a3fddd120a7a56a3ff2b6d30e6c97e001f9f95ebcf1f98d0af3",
+      "text": "将瓦片 x、y 坐标和层级转换为弧度地理坐标矩形。"
+    },
+    {
+      "id": "WebMercatorTilingScheme#tileXYToRectangle",
+      "field": "params/level/description",
+      "sourceHash": "sha256:ae6e9925c89f7a02e397590fee4a7cdfe6e5240c747a46e3c52439305100649b",
+      "text": "瓦片细节级别，零级的细节最少。"
+    },
+    {
+      "id": "WebMercatorTilingScheme#tileXYToRectangle",
+      "field": "params/result/description",
+      "sourceHash": "sha256:a18d0816f8295703fd455be3f45bb9566188db21c39ba1495baef58022484f1c",
+      "text": "用于接收结果的实例；为 undefined 时创建新实例。"
+    },
+    {
+      "id": "WebMercatorTilingScheme#tileXYToRectangle",
+      "field": "params/x/description",
+      "sourceHash": "sha256:828af63f403213af1aa15988ea18b09a87693071adaa12026c826facd67eccad",
+      "text": "瓦片的整数 x 坐标。"
+    },
+    {
+      "id": "WebMercatorTilingScheme#tileXYToRectangle",
+      "field": "params/y/description",
+      "sourceHash": "sha256:2946efd19ff197ce0e36dffb105f453be9ea52074d4e7935a06bdc2f327cf546",
+      "text": "瓦片的整数 y 坐标。"
+    },
+    {
+      "id": "WebMercatorTilingScheme#tileXYToRectangle",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:e531e90f550187f2bb40f5b1d6f068f82248be9108128113af951a5f2f411bbc",
+      "text": "给定 result；若其为 undefined，则返回包含矩形的新对象。"
+    }
+  ]
+}

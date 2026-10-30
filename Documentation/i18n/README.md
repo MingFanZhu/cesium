@@ -21,8 +21,9 @@ SceneGIS 自有公开 API 的自然语言直接维护在源码中文 JSDoc 中�
 ## 词条格式
 
 每个 `zh-CN/api/*.json` 是同一语言的一个维护分组，不要求与源码模块一一对应。
-目前分组包括通用词条、基础入口说明，以及场景/相机、影像/3D Tiles、图元/实体的完整说明。
-常用 18 个类的字段覆盖由 `scripts/scenegis/documentation-translations.test.mjs` 检查；
+目前分组包括通用词条、场景/相机、影像/3D Tiles、图元/实体、向量/矩阵/空间求交，
+以及资源请求、日期/时钟/区间、地图投影、影像和地形提供者的完整说明。
+已完成的 98 个根符号的字段覆盖由 `scripts/scenegis/documentation-translations.test.mjs` 检查；
 上游为这些类增加或更改说明后，需要同步补齐词条。其余原生 API 的缺口继续以报告为准。
 
 ```json
@@ -70,7 +71,8 @@ node scripts/docs-i18n/catalog.mjs --source Build/SceneGIS/Documentation/transla
 
 翻译时参考 [术语表](zh-CN/glossary.json)。完整保留原文的坐标系、单位、取值范围、默认值、
 限制和所有权语义。HTML 标签及属性、inline link 目标、code/pre 内容和反引号代码必须原样保留；
-允许翻译链接显示文字。示例仅翻译 caption，代码及代码中的注释都不在翻译单元内。
+允许翻译链接显示文字。相同英文也必须结合所属 API 校对；上游复制粘贴错误可能让
+相同句子指向不同类型，不能仅凭原文相同就自动复用译文。示例仅翻译 caption，代码及代码中的注释都不在翻译单元内。
 UI 文案位于对应语言的 ui.json，只在复制到 Build 的模板中进行有界替换。
 
 ## SDK 消费

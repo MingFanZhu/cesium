@@ -1,0 +1,2532 @@
+{
+  "schemaVersion": 1,
+  "locale": "zh-CN",
+  "entries": [
+    {
+      "id": "ArcGISTiledElevationTerrainProvider.ConstructorOptions",
+      "field": "description",
+      "sourceHash": "sha256:96e82303013a13f8c2926eedd1a280bc38efcf00951b5a1f995c6ba26f203840",
+      "text": "ArcGISTiledElevationTerrainProvider 构造函数的初始化选项。"
+    },
+    {
+      "id": "ArcGISTiledElevationTerrainProvider.ConstructorOptions",
+      "field": "properties/ellipsoid/description",
+      "sourceHash": "sha256:1af3a7dfda5ca12164625c5edf6502c34b770b200796f8e384ab90548b2ee4b8",
+      "text": "椭球。若指定 tilingScheme，则忽略此参数，改用分块方案的椭球。两者均未指定时使用默认椭球。"
+    },
+    {
+      "id": "ArcGISTiledElevationTerrainProvider.ConstructorOptions",
+      "field": "properties/token/description",
+      "sourceHash": "sha256:aec141bb04cf1f0bc964b2ff0b5d34ef92f6571368687b64b9fb7d43eec36b7a",
+      "text": "连接服务所使用的授权令牌。"
+    },
+    {
+      "id": "ArcGISTiledElevationTerrainProvider.fromUrl",
+      "field": "description",
+      "sourceHash": "sha256:3da040e716d676c4fb1d456df548ad4894783a9e46310b26c5728d8e8c490e8d",
+      "text": "创建 {@link TerrainProvider}，通过对 ArcGIS ImageService 高程瓦片取得的高度图进行镶嵌，生成地形几何体。"
+    },
+    {
+      "id": "ArcGISTiledElevationTerrainProvider.fromUrl",
+      "field": "exceptions/0/description",
+      "sourceHash": "sha256:6369045a328e97e82999feb9aa763108f69340135a2257b5aefe2ca5bb8ba0a4",
+      "text": "元数据指定了无效空间参考。"
+    },
+    {
+      "id": "ArcGISTiledElevationTerrainProvider.fromUrl",
+      "field": "exceptions/1/description",
+      "sourceHash": "sha256:f9fbafb813409d33d78398fce738797e4760a2aa614e662c5a8feef629c4f541",
+      "text": "元数据未指定 tileInfo。"
+    },
+    {
+      "id": "ArcGISTiledElevationTerrainProvider.fromUrl",
+      "field": "params/options/description",
+      "sourceHash": "sha256:d9ec15fb0f37c4eae05997e0652776c216835c0e73a9d75aa7ff846c91f02a28",
+      "text": "URL 或描述初始化选项的对象。"
+    },
+    {
+      "id": "ArcGISTiledElevationTerrainProvider.fromUrl",
+      "field": "params/url/description",
+      "sourceHash": "sha256:5be63ea858bc910789454f610af1313eaa36379dc82c49a043cf782c4f52bc6d",
+      "text": "ArcGIS ImageServer 服务的 URL。"
+    },
+    {
+      "id": "ArcGISTiledElevationTerrainProvider",
+      "field": "description",
+      "sourceHash": "sha256:24a2b5beeaa2929beabf3abfaf769dbccd6194b7adf5e872eaf8f60ba1b2e8f4",
+      "text": "<div class=\"notice\">请调用 {@link ArcGISTiledElevationTerrainProvider.fromUrl} 创建此提供者，不要直接调用构造函数。</div>此 {@link TerrainProvider} 通过对 ArcGIS ImageService 高程瓦片取得的高度图进行镶嵌，生成地形几何体。"
+    },
+    {
+      "id": "ArcGISTiledElevationTerrainProvider#availability",
+      "field": "description",
+      "sourceHash": "sha256:918c02c1a26888db9525a835e53858406b7ae93b407d5a2cb60d44d9d1140395",
+      "text": "获取可用于查询点、矩形等位置处地形可用性的对象。若没有可用性信息，此属性可能为 undefined。"
+    },
+    {
+      "id": "ArcGISTiledElevationTerrainProvider#credit",
+      "field": "description",
+      "sourceHash": "sha256:a10cbf8ce42f725d7a91883361547aa9fc646e3f8676e4f7892d97f5015418b8",
+      "text": "获取地形提供者活动时显示的版权信息，通常用于注明地形来源。"
+    },
+    {
+      "id": "ArcGISTiledElevationTerrainProvider#errorEvent",
+      "field": "description",
+      "sourceHash": "sha256:20599df7d9af09c18f19c3dedb8a28d697e848d6cfcf800d25c8be18b0ff9daf",
+      "text": "获取地形提供者发生异步错误时触发的事件。订阅者可收到错误通知并尝试恢复。事件监听器接收 {@link TileProviderError} 实例。"
+    },
+    {
+      "id": "ArcGISTiledElevationTerrainProvider#getLevelMaximumGeometricError",
+      "field": "description",
+      "sourceHash": "sha256:16493e83c2b411e969eb0bb84957d83fa8b790f189e6998f1e158f0c7d066d55",
+      "text": "获取给定层级瓦片允许的最大几何误差。"
+    },
+    {
+      "id": "ArcGISTiledElevationTerrainProvider#getLevelMaximumGeometricError",
+      "field": "params/level/description",
+      "sourceHash": "sha256:2158f46da843486bdc37028e4478405a094e1f4a009ee6ee934ef1b93d130594",
+      "text": "要获取最大几何误差的瓦片层级。"
+    },
+    {
+      "id": "ArcGISTiledElevationTerrainProvider#getLevelMaximumGeometricError",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:269aa9bca56e8987258839baa4900e4a37e1e5f518f2e89f08c84b4db69cc44f",
+      "text": "最大几何误差。"
+    },
+    {
+      "id": "ArcGISTiledElevationTerrainProvider#getTileDataAvailable",
+      "field": "description",
+      "sourceHash": "sha256:a0739c45fd85b8442b0d90556a11b184f2c4b5fe48bd1d24be252c906c1cd787",
+      "text": "确定某瓦片的数据是否可供加载。"
+    },
+    {
+      "id": "ArcGISTiledElevationTerrainProvider#getTileDataAvailable",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:a2c94c84e5c9906a9aea353d897bfbd187466e35fd75dec5a2d915793e06fc0e",
+      "text": "不支持时返回 undefined，否则返回 true 或 false。"
+    },
+    {
+      "id": "ArcGISTiledElevationTerrainProvider#hasVertexNormals",
+      "field": "description",
+      "sourceHash": "sha256:67a48f700e35b798865b8df56c91870320f54d5bb41d66642fef70823d62158a",
+      "text": "获取所请求瓦片是否包含顶点法线。"
+    },
+    {
+      "id": "ArcGISTiledElevationTerrainProvider#hasWaterMask",
+      "field": "description",
+      "sourceHash": "sha256:3d4b90be88ad21cd066d73a6198eb4bd31775344fbcfa5db5adaf9b7d3ad98cc",
+      "text": "获取提供者是否包含水体掩码。掩码区分水域与陆地，以便将水域渲染为具有动态波浪的反射表面。"
+    },
+    {
+      "id": "ArcGISTiledElevationTerrainProvider#loadTileDataAvailability",
+      "field": "description",
+      "sourceHash": "sha256:788bf4766e010ffafbe52b2acf69391ab9530eb3e4cccd4d306a2e7603c91fe3",
+      "text": "确保加载某瓦片的可用性数据。"
+    },
+    {
+      "id": "ArcGISTiledElevationTerrainProvider#loadTileDataAvailability",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:da750ca74b0af4ed18dab161e2ef5b54748046872e10e43a53ac223228028c3c",
+      "text": "此提供者不支持加载可用性数据。"
+    },
+    {
+      "id": "ArcGISTiledElevationTerrainProvider#requestTileGeometry",
+      "field": "description",
+      "sourceHash": "sha256:256425c1675ad2d2c90401790879b53c12f7e4058049bdb09e377c2f8618c394",
+      "text": "请求给定瓦片的几何体。结果包含地形数据，并指示全部子瓦片均可用。"
+    },
+    {
+      "id": "ArcGISTiledElevationTerrainProvider#requestTileGeometry",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:e7b6ed4db3582973863fa99b060691f2f9b446984cbb15803952cb57f2886dec",
+      "text": "所请求几何体的 Promise。若返回 undefined 而非 Promise，表示已有过多待处理请求，将稍后重试。"
+    },
+    {
+      "id": "Cesium3DTilesTerrainData",
+      "field": "description",
+      "sourceHash": "sha256:0f5e838934db9ccb384802d179b27b9f564889e663d366df61cfcddef07cf10e",
+      "text": "单个瓦片的地形数据，以 glb（二进制 glTF）表示。"
+    },
+    {
+      "id": "Cesium3DTilesTerrainData",
+      "field": "params/options.boundingSphere/description",
+      "sourceHash": "sha256:407953287104186dce4414410013000e87de0bdd30ba1086abdf2bed3d990c27",
+      "text": "包围网格全部顶点的球体。"
+    },
+    {
+      "id": "Cesium3DTilesTerrainData",
+      "field": "params/options.childTileMask/description",
+      "sourceHash": "sha256:045e2a0dddf3b6ba0cf73c6545de2416646cb406250c0d912f0618eb169f1147",
+      "text": "指示当前瓦片四个子瓦片是否存在的位掩码。某位已设置时，会在需要时请求对应子瓦片几何体；未设置时，不请求该子瓦片，而从父瓦片上采样几何体。位值如下：<table><tr><th>位位置</th><th>位值</th><th>子瓦片</th></tr><tr><td>0</td><td>1</td><td>西南</td></tr><tr><td>1</td><td>2</td><td>东南</td></tr><tr><td>2</td><td>4</td><td>西北</td></tr><tr><td>3</td><td>8</td><td>东北</td></tr></table>"
+    },
+    {
+      "id": "Cesium3DTilesTerrainData",
+      "field": "params/options.credits/description",
+      "sourceHash": "sha256:e80223eb5fe628b45b9816f5e46a5c92bc3b56c5e7b2033526ea924e45a5e1c5",
+      "text": "此瓦片的版权信息数组。"
+    },
+    {
+      "id": "Cesium3DTilesTerrainData",
+      "field": "params/options.gltf/description",
+      "sourceHash": "sha256:bee8c29d7c2ca4126bc676c12d9dc3392ec7cc67966c0441f3e6fe4d49e0dc22",
+      "text": "解析后的 glTF JSON。"
+    },
+    {
+      "id": "Cesium3DTilesTerrainData",
+      "field": "params/options.horizonOcclusionPoint/description",
+      "sourceHash": "sha256:ea5ea3279d168dce404b822756163d3d18675fd248f7df3a9292d031e97f5b33",
+      "text": "网格的地平线遮挡点。若此点位于地平线以下，则假定整个瓦片也位于地平线以下。此点使用椭球缩放坐标。"
+    },
+    {
+      "id": "Cesium3DTilesTerrainData",
+      "field": "params/options.maximumHeight/description",
+      "sourceHash": "sha256:0d710ba5feb622b6a9d8bdf0ea02e60da8bce9669827137ce296377d437e095c",
+      "text": "瓦片内的最大地形高度，单位为相对于椭球的米数。"
+    },
+    {
+      "id": "Cesium3DTilesTerrainData",
+      "field": "params/options.minimumHeight/description",
+      "sourceHash": "sha256:cb893602eb17ad8c3faf93958e343365d45629a4f73eab59883388a6f7a30733",
+      "text": "瓦片内的最小地形高度，单位为相对于椭球的米数。"
+    },
+    {
+      "id": "Cesium3DTilesTerrainData",
+      "field": "params/options.orientedBoundingBox/description",
+      "sourceHash": "sha256:c622eba068f96e0af4decf280bd57661c018b68ca8052bbe2f225b69de1b6d47",
+      "text": "包含网格全部顶点的定向包围盒。"
+    },
+    {
+      "id": "Cesium3DTilesTerrainData",
+      "field": "params/options.requestVertexNormals/description",
+      "sourceHash": "sha256:f75b2942069a53e3c06277fde5eefdf1b3f4744efffbd5c56dca2639bc567658",
+      "text": "指示是否加载法线。"
+    },
+    {
+      "id": "Cesium3DTilesTerrainData",
+      "field": "params/options.requestWaterMask/description",
+      "sourceHash": "sha256:bf7f6dd28c5aead639096932d508b550a726c39cce7be1badc3d1f1b1a475c87",
+      "text": "指示是否加载水体掩码数据。"
+    },
+    {
+      "id": "Cesium3DTilesTerrainData",
+      "field": "params/options.skirtHeight/description",
+      "sourceHash": "sha256:b8f9c84c095bc9daf58e9638a1d24e3174cb08bd6dfac67f0d1113b8463cc1ed",
+      "text": "要在瓦片边缘添加的裙边高度。"
+    },
+    {
+      "id": "Cesium3DTilesTerrainData",
+      "field": "params/options.waterMask/description",
+      "sourceHash": "sha256:7e50a20f7a3955ccba70fd6377832d9ac8c0efba0175f67b49a1152bd18d1467",
+      "text": "包含水体掩码的缓冲区。"
+    },
+    {
+      "id": "Cesium3DTilesTerrainData#credits",
+      "field": "description",
+      "sourceHash": "sha256:c628e6ddb6a80e7510dcb1a6fddadcb6f5455da2daec3546625d195102f9a5da",
+      "text": "此瓦片的版权信息数组。"
+    },
+    {
+      "id": "Cesium3DTilesTerrainData#interpolateHeight",
+      "field": "description",
+      "sourceHash": "sha256:82888e358b08959e203ee6a1e76d74b76f704428e518a4c6e6e43fbd40d4bde3",
+      "text": "返回指定经纬度处的地形高度；若网格为 undefined，则返回 undefined。"
+    },
+    {
+      "id": "Cesium3DTilesTerrainData#interpolateHeight",
+      "field": "params/latitude/description",
+      "sourceHash": "sha256:00a0b93eec52b3ee3f7703575f38a6d01a4d15e6aae5f541418e8609a70a78ea",
+      "text": "纬度，单位为弧度。"
+    },
+    {
+      "id": "Cesium3DTilesTerrainData#interpolateHeight",
+      "field": "params/longitude/description",
+      "sourceHash": "sha256:bb151626940efec431decc1ce4a304d9cdd8e318fdceb82885eb6f8ffcfeca4c",
+      "text": "经度，单位为弧度。"
+    },
+    {
+      "id": "Cesium3DTilesTerrainData#interpolateHeight",
+      "field": "params/rectangle/description",
+      "sourceHash": "sha256:b07353b5f3c7ba72e882a9aa05c04c7ad4584a45edd625d6e30070ecb5069385",
+      "text": "此地形数据覆盖的矩形。"
+    },
+    {
+      "id": "Cesium3DTilesTerrainData#interpolateHeight",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:b059a7d1454f37bf70e9abff614cd87ef74fae99f7969df751a380fe6b300251",
+      "text": "指定位置的地形高度；若网格为 undefined，则返回 undefined。位置在矩形外时进行高度外推，远离矩形时结果可能严重不准确。"
+    },
+    {
+      "id": "Cesium3DTilesTerrainData#isChildAvailable",
+      "field": "description",
+      "sourceHash": "sha256:1513abbe464da4d2ce7b10347dce25c56ab16285eb3dc9cf916a105b6befc034",
+      "text": "根据 {@link TerrainData#childTileMask} 判断给定子瓦片是否可用。假定坐标属于当前瓦片的四个子瓦片之一；若传入非子瓦片坐标，则返回东南子瓦片的可用性。"
+    },
+    {
+      "id": "Cesium3DTilesTerrainData#isChildAvailable",
+      "field": "params/childX/description",
+      "sourceHash": "sha256:79368b1d51be32e4770b8fee08dbe3d0ac647de88d32d5b7dcab49a2630b7e68",
+      "text": "要检查可用性的子瓦片 X 坐标。"
+    },
+    {
+      "id": "Cesium3DTilesTerrainData#isChildAvailable",
+      "field": "params/childY/description",
+      "sourceHash": "sha256:4c9ec3e91c268936ba70d99001f3ad3572cc0f634934febd211dd1a27863dff1",
+      "text": "要检查可用性的子瓦片 Y 坐标。"
+    },
+    {
+      "id": "Cesium3DTilesTerrainData#isChildAvailable",
+      "field": "params/thisX/description",
+      "sourceHash": "sha256:702f3cb8a08ed3df14038d36563ad8fb38a5fa3d52cc7070cf9e0e3c44257759",
+      "text": "当前父瓦片的 X 坐标。"
+    },
+    {
+      "id": "Cesium3DTilesTerrainData#isChildAvailable",
+      "field": "params/thisY/description",
+      "sourceHash": "sha256:d8d8c3471ba78a37f34ba161b991b25a9b4f73907cb75c338f63d05c922c90cb",
+      "text": "当前父瓦片的 Y 坐标。"
+    },
+    {
+      "id": "Cesium3DTilesTerrainData#isChildAvailable",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:0dfcee8e13025de607fbb8f8b114eeda2c4e3ce906cb18f0b49c423ec3d08abd",
+      "text": "子瓦片可用时返回 true，否则返回 false。"
+    },
+    {
+      "id": "Cesium3DTilesTerrainData#upsample",
+      "field": "description",
+      "sourceHash": "sha256:aac0bcde455d1e9882141f38b53fc4ab7be713ca5f9fdbc567bc08b5cf2adc08",
+      "text": "对此地形数据上采样，供后代瓦片使用。"
+    },
+    {
+      "id": "Cesium3DTilesTerrainData#upsample",
+      "field": "params/descendantLevel/description",
+      "sourceHash": "sha256:a110dbd679ab0910fba08b0c0fe520f7fb74739b0e7bf2b9f7b740a3fbf804ac",
+      "text": "上采样目标后代瓦片在分块方案中的层级。"
+    },
+    {
+      "id": "Cesium3DTilesTerrainData#upsample",
+      "field": "params/descendantX/description",
+      "sourceHash": "sha256:35f06e07b86e64f7812a0e09a30d334457e7fe3b123dd1a5a6ce160d5706dfe4",
+      "text": "上采样目标后代瓦片在分块方案中的 X 坐标。"
+    },
+    {
+      "id": "Cesium3DTilesTerrainData#upsample",
+      "field": "params/descendantY/description",
+      "sourceHash": "sha256:99a65e3a7b31dececcbab9e70e88bb3e822d67df86bf91030a7b22306dfa9cbd",
+      "text": "上采样目标后代瓦片在分块方案中的 Y 坐标。"
+    },
+    {
+      "id": "Cesium3DTilesTerrainData#upsample",
+      "field": "params/thisLevel/description",
+      "sourceHash": "sha256:721cc633438d55bb13c0cca6fa2ca56f7d8fb71c3d12fdf3b7e063ab6c4c24ba",
+      "text": "当前瓦片在分块方案中的层级。"
+    },
+    {
+      "id": "Cesium3DTilesTerrainData#upsample",
+      "field": "params/thisX/description",
+      "sourceHash": "sha256:e073b08287120e1524e44fe8005c3006127deb69e36125d8aaebd018446ca467",
+      "text": "当前瓦片在分块方案中的 X 坐标。"
+    },
+    {
+      "id": "Cesium3DTilesTerrainData#upsample",
+      "field": "params/thisY/description",
+      "sourceHash": "sha256:40bc42a2d7f2ebacca2ab69dee7d5029b7df988a578ef05255c6ca5e697d649c",
+      "text": "当前瓦片在分块方案中的 Y 坐标。"
+    },
+    {
+      "id": "Cesium3DTilesTerrainData#upsample",
+      "field": "params/tilingScheme/description",
+      "sourceHash": "sha256:83e98590a1bd2e9e43c2a74d6cb2a13967b8838b4f44e208c05661e37b5c0288",
+      "text": "此地形数据的分块方案。"
+    },
+    {
+      "id": "Cesium3DTilesTerrainData#upsample",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:3acc5879e2f96f73456e40aa6f04799581d62b03db57d94db474338985bf2ab0",
+      "text": "兑现为后代瓦片上采样地形数据的 Promise；若尚未调用 createMesh，或异步上采样操作过多导致请求延后，则返回 undefined。"
+    },
+    {
+      "id": "Cesium3DTilesTerrainData#wasCreatedByUpsampling",
+      "field": "description",
+      "sourceHash": "sha256:b99be4c07ed188c308188952b8b1f8b1593006f6e603e623f45dc177b10d74fd",
+      "text": "获取此地形数据是否由较低分辨率地形数据上采样生成。为 false 时，表示来自其他来源，例如远程服务器下载。通过 {@link Cesium3DTilesTerrainData#upsample} 返回的实例应为 true。"
+    },
+    {
+      "id": "Cesium3DTilesTerrainData#wasCreatedByUpsampling",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:2258154f2fdd9897a78865fb339781e1c4e948d85070309baeeb0ec7849781b5",
+      "text": "此实例由上采样生成时返回 true，否则返回 false。"
+    },
+    {
+      "id": "Cesium3DTilesTerrainData#waterMask",
+      "field": "description",
+      "sourceHash": "sha256:074c4a094735334d54e7d12e5c69eec4b00a80bcf97637cc6bcaa114c0560e5a",
+      "text": "此地形数据包含的水体掩码，若有。掩码为矩形 Uint8Array 或图像，255 表示水域，0 表示陆地，也允许中间值以平滑混合水陆交界。"
+    },
+    {
+      "id": "Cesium3DTilesTerrainProvider.ConstructorOptions",
+      "field": "description",
+      "sourceHash": "sha256:709936f5b32d80b6d59d1f6f9542dc0f31a077b07278db816f5d088d3e477ba8",
+      "text": "Cesium3DTilesTerrainProvider 构造函数的初始化选项。"
+    },
+    {
+      "id": "Cesium3DTilesTerrainProvider.ConstructorOptions",
+      "field": "properties/ellipsoid/description",
+      "sourceHash": "sha256:f68c467c4351c3294b803bfec4083ca2e3dd9b3597bced00dcab1ddf8d5e4556",
+      "text": "椭球。若未指定，则使用 WGS84 椭球。"
+    },
+    {
+      "id": "Cesium3DTilesTerrainProvider.ConstructorOptions",
+      "field": "properties/requestVertexNormals/description",
+      "sourceHash": "sha256:9ccb4f40ffbec4f94899f43bf2ca7005fbba191e3af360e2aeb56e5b8304f8bc",
+      "text": "指示客户端是否应向服务器请求可用的附加光照信息，即逐顶点法线。"
+    },
+    {
+      "id": "Cesium3DTilesTerrainProvider.ConstructorOptions",
+      "field": "properties/requestWaterMask/description",
+      "sourceHash": "sha256:ae2819303b6f6c0be827d8edcd467bb4f60bae027a26a9bd21b44ace7762b2d4",
+      "text": "指示客户端是否应向服务器请求可用的逐瓦片水体掩码。"
+    },
+    {
+      "id": "Cesium3DTilesTerrainProvider.fromIonAssetId",
+      "field": "description",
+      "sourceHash": "sha256:4248c0c6fc102bec804d811b1a8e76e8379bebf40e3749fa08a9a89902adb626",
+      "text": "根据 Cesium ion 资源 ID 创建访问 Cesium 3D Tiles 格式地形数据的 {@link TerrainProvider}。"
+    },
+    {
+      "id": "Cesium3DTilesTerrainProvider.fromIonAssetId",
+      "field": "exceptions/0/description",
+      "sourceHash": "sha256:c145bdecaa3280f246ba886ac968a1809deea862feccebb286b25ff53b6e99ad",
+      "text": "layer.json 未指定 format。"
+    },
+    {
+      "id": "Cesium3DTilesTerrainProvider.fromIonAssetId",
+      "field": "exceptions/1/description",
+      "sourceHash": "sha256:403851ba5aaf29c8420b670dc3a109521f840e6046c06c5a428f9169e2776dee",
+      "text": "layer.json 指定了未知格式。"
+    },
+    {
+      "id": "Cesium3DTilesTerrainProvider.fromIonAssetId",
+      "field": "exceptions/2/description",
+      "sourceHash": "sha256:ff6422c23a509c4c5ef6b154e9904374411f1a9c1e4b6758fab9f4d25b572b07",
+      "text": "layer.json 指定了不支持的 quantized-mesh 版本。"
+    },
+    {
+      "id": "Cesium3DTilesTerrainProvider.fromIonAssetId",
+      "field": "exceptions/3/description",
+      "sourceHash": "sha256:c7da03836a9ed7ace397cb6d3259ab01a58e7666be5289e251cfd6d2464c2785",
+      "text": "layer.json 未指定 tiles 属性，或该数组为空。"
+    },
+    {
+      "id": "Cesium3DTilesTerrainProvider.fromIonAssetId",
+      "field": "exceptions/4/description",
+      "sourceHash": "sha256:cec1ab2762bb594d355c8c464519de3b71940191e6e86b169dddf9b98f71735e",
+      "text": "layer.json 未指定任何瓦片 URL 模板。"
+    },
+    {
+      "id": "Cesium3DTilesTerrainProvider.fromIonAssetId",
+      "field": "params/assetId/description",
+      "sourceHash": "sha256:e37d482d7aed7f418435371895cc23ed69bf576cabad8041c4fa9b3a575577db",
+      "text": "Cesium ion 资源 ID。"
+    },
+    {
+      "id": "Cesium3DTilesTerrainProvider.fromIonAssetId",
+      "field": "params/options/description",
+      "sourceHash": "sha256:7fd5e48c805a1ec2c19032658555e50e0c3ed2802396c9dafaafc8eb754198ee",
+      "text": "描述初始化选项的对象。"
+    },
+    {
+      "id": "Cesium3DTilesTerrainProvider.fromUrl",
+      "field": "description",
+      "sourceHash": "sha256:f79f5e4f84c04607db44e6c762450a671b1d19342d7a1ab7df5c14634ccbc049",
+      "text": "创建访问 Cesium 3D Tiles 格式地形数据的 {@link TerrainProvider}。"
+    },
+    {
+      "id": "Cesium3DTilesTerrainProvider.fromUrl",
+      "field": "params/options/description",
+      "sourceHash": "sha256:7fd5e48c805a1ec2c19032658555e50e0c3ed2802396c9dafaafc8eb754198ee",
+      "text": "描述初始化选项的对象。"
+    },
+    {
+      "id": "Cesium3DTilesTerrainProvider.fromUrl",
+      "field": "params/url/description",
+      "sourceHash": "sha256:6b1baaf6f680f061bb2d6e2ee31bde19d02e72213692ec91e616d58f46bda55b",
+      "text": "Cesium 地形服务器 URL。"
+    },
+    {
+      "id": "Cesium3DTilesTerrainProvider.fromUrl",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:a5a6b56446d6d4e1949c77d12ae142f5be60c0dc79d0f6cebe1c5703c00f6162",
+      "text": "兑现为地形提供者的 Promise。"
+    },
+    {
+      "id": "Cesium3DTilesTerrainProvider",
+      "field": "description",
+      "sourceHash": "sha256:700cd4440331d558c74adcf158bbfc026df7e5b8be5f08088f1de3ed12befef3",
+      "text": "<div class=\"notice\">请调用 {@link Cesium3DTilesTerrainProvider.fromIonAssetId} 或 {@link Cesium3DTilesTerrainProvider.fromUrl} 创建 Cesium3DTilesTerrainProvider，不要直接调用构造函数。</div>此 {@link TerrainProvider} 用于访问 3D Tiles 格式的地形数据。"
+    },
+    {
+      "id": "Cesium3DTilesTerrainProvider#availability",
+      "field": "description",
+      "sourceHash": "sha256:dc657358ac1d78ddcc48f0e8b1d96688a419e4b6d4f9dff541a4bf39ca384296",
+      "text": "获取可用于查询点、矩形等位置处地形可用性的对象。"
+    },
+    {
+      "id": "Cesium3DTilesTerrainProvider#credit",
+      "field": "description",
+      "sourceHash": "sha256:b48797b2934c4fdf9a8ecfd1a443076c940ca6c2624ffa2613f2454408cb27e9",
+      "text": "获取地形提供者活动时显示的版权信息，通常用于注明地形来源。"
+    },
+    {
+      "id": "Cesium3DTilesTerrainProvider#errorEvent",
+      "field": "description",
+      "sourceHash": "sha256:64801760fc528a317cde5824e5bf9c3f6b557a93d39f4bffe810ba32164c2be2",
+      "text": "获取地形提供者发生异步错误时触发的事件。订阅者可收到错误通知并尝试恢复。事件监听器接收 {@link TileProviderError} 实例。"
+    },
+    {
+      "id": "Cesium3DTilesTerrainProvider#getLevelMaximumGeometricError",
+      "field": "description",
+      "sourceHash": "sha256:cf6743e168571263f48a7874c7191209fa767e8d56f45d106789865abe34cb67",
+      "text": "获取给定层级瓦片允许的最大几何误差。"
+    },
+    {
+      "id": "Cesium3DTilesTerrainProvider#getLevelMaximumGeometricError",
+      "field": "params/level/description",
+      "sourceHash": "sha256:2158f46da843486bdc37028e4478405a094e1f4a009ee6ee934ef1b93d130594",
+      "text": "要获取最大几何误差的瓦片层级。"
+    },
+    {
+      "id": "Cesium3DTilesTerrainProvider#getLevelMaximumGeometricError",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:269aa9bca56e8987258839baa4900e4a37e1e5f518f2e89f08c84b4db69cc44f",
+      "text": "最大几何误差。"
+    },
+    {
+      "id": "Cesium3DTilesTerrainProvider#getTileDataAvailable",
+      "field": "description",
+      "sourceHash": "sha256:a0739c45fd85b8442b0d90556a11b184f2c4b5fe48bd1d24be252c906c1cd787",
+      "text": "确定某瓦片的数据是否可供加载。"
+    },
+    {
+      "id": "Cesium3DTilesTerrainProvider#getTileDataAvailable",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:837bd83726cb8d03a7f782782b59266a6309e6d25b47e9fadf4e962ac937a90c",
+      "text": "不支持或可用性未知时返回 undefined，否则返回 true 或 false。"
+    },
+    {
+      "id": "Cesium3DTilesTerrainProvider#hasVertexNormals",
+      "field": "description",
+      "sourceHash": "sha256:67a48f700e35b798865b8df56c91870320f54d5bb41d66642fef70823d62158a",
+      "text": "获取所请求瓦片是否包含顶点法线。"
+    },
+    {
+      "id": "Cesium3DTilesTerrainProvider#hasWaterMask",
+      "field": "description",
+      "sourceHash": "sha256:6a118d9affc1b95e82e2ec4ad4ada452544849241ab2415537e12ad0dc798994",
+      "text": "获取提供者是否包含水体掩码。掩码区分水域与陆地，以便将水域渲染为具有动态波浪的反射表面。"
+    },
+    {
+      "id": "Cesium3DTilesTerrainProvider#loadTileDataAvailability",
+      "field": "description",
+      "sourceHash": "sha256:95f78c68d2bb8595a1a895cb0e3cf710f85e915f55ccb4e57a797073b50a3da1",
+      "text": "确保加载某瓦片的可用性数据。"
+    },
+    {
+      "id": "Cesium3DTilesTerrainProvider#loadTileDataAvailability",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:c5e9704ceaab793f8aeb8de76e28a4a764d7ebe292b3f2b0c9530be7bd4d5967",
+      "text": "无需加载时返回 undefined；否则返回在所需瓦片全部加载完成后兑现的 Promise。"
+    },
+    {
+      "id": "Cesium3DTilesTerrainProvider#requestTileGeometry",
+      "field": "description",
+      "sourceHash": "sha256:fbabef2dd1c11d8f23488b298f3d282fc99aaaafc09541f49b6324d8448ab341",
+      "text": "请求给定瓦片的几何体。在 {@link Cesium3DTilesTerrainProvider#ready} 返回 true 前不要调用。结果必须包含地形数据，并可选包含水体掩码和子瓦片可用性信息。"
+    },
+    {
+      "id": "Cesium3DTilesTerrainProvider#requestTileGeometry",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:11f8b44b66d6c72440556fe588eee1f75e13e71cfdad7fc60a34156b594bedba",
+      "text": "所请求几何体的 Promise。若返回 undefined 而非 Promise，表示已有过多待处理请求，将稍后重试。"
+    },
+    {
+      "id": "Cesium3DTilesTerrainProvider#tilingScheme",
+      "field": "description",
+      "sourceHash": "sha256:478090a2802d321f1cc659465d24707d2d3534e2ba2c7af34d4f754e7f36de24",
+      "text": "获取提供者使用的分块方案。"
+    },
+    {
+      "id": "CesiumTerrainProvider.ConstructorOptions",
+      "field": "description",
+      "sourceHash": "sha256:4f449cc143bea88d5886514edc8527dc63b5e1ea2bd8478299364cfeee8ca352",
+      "text": "CesiumTerrainProvider 构造函数的初始化选项。"
+    },
+    {
+      "id": "CesiumTerrainProvider.ConstructorOptions",
+      "field": "properties/ellipsoid/description",
+      "sourceHash": "sha256:64ad4e5f7e94b06bc611c8429591da991fa88bdb2f4886136ea1dbbdb1d0b372",
+      "text": "椭球。若未指定，则使用默认椭球。"
+    },
+    {
+      "id": "CesiumTerrainProvider.ConstructorOptions",
+      "field": "properties/requestMetadata/description",
+      "sourceHash": "sha256:a1fe7badeeef64cd290979b30e3b82c0c4fbdbad921445f2cd116c708faeeeec",
+      "text": "指示客户端是否应向服务器请求可用的逐瓦片元数据。"
+    },
+    {
+      "id": "CesiumTerrainProvider.ConstructorOptions",
+      "field": "properties/requestVertexNormals/description",
+      "sourceHash": "sha256:9ccb4f40ffbec4f94899f43bf2ca7005fbba191e3af360e2aeb56e5b8304f8bc",
+      "text": "指示客户端是否应向服务器请求可用的附加光照信息，即逐顶点法线。"
+    },
+    {
+      "id": "CesiumTerrainProvider.ConstructorOptions",
+      "field": "properties/requestWaterMask/description",
+      "sourceHash": "sha256:ae2819303b6f6c0be827d8edcd467bb4f60bae027a26a9bd21b44ace7762b2d4",
+      "text": "指示客户端是否应向服务器请求可用的逐瓦片水体掩码。"
+    },
+    {
+      "id": "CesiumTerrainProvider.fromIonAssetId",
+      "field": "description",
+      "sourceHash": "sha256:d1235586ed0e4240303e8b75df9cf468e664b6708027176c2e72de0676cfee87",
+      "text": "根据 Cesium ion 资源 ID 创建访问 Cesium 地形格式数据的 {@link TerrainProvider}。支持以下地形格式：<ul><li> {@link https://github.com/AnalyticalGraphicsInc/quantized-mesh Quantized Mesh} </li><li> {@link https://github.com/AnalyticalGraphicsInc/cesium/wiki/heightmap-1.0 Height Map} </li></ul>"
+    },
+    {
+      "id": "CesiumTerrainProvider.fromIonAssetId",
+      "field": "exceptions/0/description",
+      "sourceHash": "sha256:c145bdecaa3280f246ba886ac968a1809deea862feccebb286b25ff53b6e99ad",
+      "text": "layer.json 未指定 format。"
+    },
+    {
+      "id": "CesiumTerrainProvider.fromIonAssetId",
+      "field": "exceptions/1/description",
+      "sourceHash": "sha256:403851ba5aaf29c8420b670dc3a109521f840e6046c06c5a428f9169e2776dee",
+      "text": "layer.json 指定了未知格式。"
+    },
+    {
+      "id": "CesiumTerrainProvider.fromIonAssetId",
+      "field": "exceptions/2/description",
+      "sourceHash": "sha256:ff6422c23a509c4c5ef6b154e9904374411f1a9c1e4b6758fab9f4d25b572b07",
+      "text": "layer.json 指定了不支持的 quantized-mesh 版本。"
+    },
+    {
+      "id": "CesiumTerrainProvider.fromIonAssetId",
+      "field": "exceptions/3/description",
+      "sourceHash": "sha256:c7da03836a9ed7ace397cb6d3259ab01a58e7666be5289e251cfd6d2464c2785",
+      "text": "layer.json 未指定 tiles 属性，或该数组为空。"
+    },
+    {
+      "id": "CesiumTerrainProvider.fromIonAssetId",
+      "field": "exceptions/4/description",
+      "sourceHash": "sha256:cec1ab2762bb594d355c8c464519de3b71940191e6e86b169dddf9b98f71735e",
+      "text": "layer.json 未指定任何瓦片 URL 模板。"
+    },
+    {
+      "id": "CesiumTerrainProvider.fromIonAssetId",
+      "field": "params/assetId/description",
+      "sourceHash": "sha256:e37d482d7aed7f418435371895cc23ed69bf576cabad8041c4fa9b3a575577db",
+      "text": "Cesium ion 资源 ID。"
+    },
+    {
+      "id": "CesiumTerrainProvider.fromIonAssetId",
+      "field": "params/options/description",
+      "sourceHash": "sha256:7fd5e48c805a1ec2c19032658555e50e0c3ed2802396c9dafaafc8eb754198ee",
+      "text": "描述初始化选项的对象。"
+    },
+    {
+      "id": "CesiumTerrainProvider.fromUrl",
+      "field": "description",
+      "sourceHash": "sha256:542cdf8df42865bbbeb0387d6ef71d82f8cfbb5753537445d5172d476ea9d886",
+      "text": "创建访问 Cesium 地形格式数据的 {@link TerrainProvider}。支持以下地形格式：<ul><li> {@link https://github.com/AnalyticalGraphicsInc/quantized-mesh Quantized Mesh} </li><li> {@link https://github.com/AnalyticalGraphicsInc/cesium/wiki/heightmap-1.0 Height Map} </li></ul>"
+    },
+    {
+      "id": "CesiumTerrainProvider.fromUrl",
+      "field": "exceptions/0/description",
+      "sourceHash": "sha256:c145bdecaa3280f246ba886ac968a1809deea862feccebb286b25ff53b6e99ad",
+      "text": "layer.json 未指定 format。"
+    },
+    {
+      "id": "CesiumTerrainProvider.fromUrl",
+      "field": "exceptions/1/description",
+      "sourceHash": "sha256:403851ba5aaf29c8420b670dc3a109521f840e6046c06c5a428f9169e2776dee",
+      "text": "layer.json 指定了未知格式。"
+    },
+    {
+      "id": "CesiumTerrainProvider.fromUrl",
+      "field": "exceptions/2/description",
+      "sourceHash": "sha256:ff6422c23a509c4c5ef6b154e9904374411f1a9c1e4b6758fab9f4d25b572b07",
+      "text": "layer.json 指定了不支持的 quantized-mesh 版本。"
+    },
+    {
+      "id": "CesiumTerrainProvider.fromUrl",
+      "field": "exceptions/3/description",
+      "sourceHash": "sha256:c7da03836a9ed7ace397cb6d3259ab01a58e7666be5289e251cfd6d2464c2785",
+      "text": "layer.json 未指定 tiles 属性，或该数组为空。"
+    },
+    {
+      "id": "CesiumTerrainProvider.fromUrl",
+      "field": "exceptions/4/description",
+      "sourceHash": "sha256:cec1ab2762bb594d355c8c464519de3b71940191e6e86b169dddf9b98f71735e",
+      "text": "layer.json 未指定任何瓦片 URL 模板。"
+    },
+    {
+      "id": "CesiumTerrainProvider.fromUrl",
+      "field": "params/options/description",
+      "sourceHash": "sha256:7fd5e48c805a1ec2c19032658555e50e0c3ed2802396c9dafaafc8eb754198ee",
+      "text": "描述初始化选项的对象。"
+    },
+    {
+      "id": "CesiumTerrainProvider.fromUrl",
+      "field": "params/url/description",
+      "sourceHash": "sha256:6b1baaf6f680f061bb2d6e2ee31bde19d02e72213692ec91e616d58f46bda55b",
+      "text": "Cesium 地形服务器 URL。"
+    },
+    {
+      "id": "CesiumTerrainProvider",
+      "field": "description",
+      "sourceHash": "sha256:a83c5379dc0d878469e82449891fb94c157525aa807acbbd2dfecccc782727dd",
+      "text": "<div class=\"notice\">请调用 {@link CesiumTerrainProvider.fromIonAssetId} 或 {@link CesiumTerrainProvider.fromUrl} 创建 CesiumTerrainProvider，不要直接调用构造函数。</div>此 {@link TerrainProvider} 访问 Cesium 地形格式的数据。支持以下格式：<ul><li> {@link https://github.com/AnalyticalGraphicsInc/quantized-mesh Quantized Mesh} </li><li> {@link https://github.com/AnalyticalGraphicsInc/cesium/wiki/heightmap-1.0 Height Map} </li></ul>"
+    },
+    {
+      "id": "CesiumTerrainProvider#availability",
+      "field": "description",
+      "sourceHash": "sha256:1c3ac435948e42a2ca421001e7e588950661c76d5e1a6e71d4fb0438d50877c1",
+      "text": "获取可用于查询点、矩形等位置处地形可用性的对象。若没有可用性信息，此属性可能为 undefined。它反映当前已知的可用瓦片；之后可能发现更多可用瓦片，例如可用性信息存在于更深层级，而非全部能从根级发现。但当前可用的瓦片之后不会变为不可用。"
+    },
+    {
+      "id": "CesiumTerrainProvider#credit",
+      "field": "description",
+      "sourceHash": "sha256:a10cbf8ce42f725d7a91883361547aa9fc646e3f8676e4f7892d97f5015418b8",
+      "text": "获取地形提供者活动时显示的版权信息，通常用于注明地形来源。"
+    },
+    {
+      "id": "CesiumTerrainProvider#errorEvent",
+      "field": "description",
+      "sourceHash": "sha256:20599df7d9af09c18f19c3dedb8a28d697e848d6cfcf800d25c8be18b0ff9daf",
+      "text": "获取地形提供者发生异步错误时触发的事件。订阅者可收到错误通知并尝试恢复。事件监听器接收 {@link TileProviderError} 实例。"
+    },
+    {
+      "id": "CesiumTerrainProvider#getLevelMaximumGeometricError",
+      "field": "description",
+      "sourceHash": "sha256:16493e83c2b411e969eb0bb84957d83fa8b790f189e6998f1e158f0c7d066d55",
+      "text": "获取给定层级瓦片允许的最大几何误差。"
+    },
+    {
+      "id": "CesiumTerrainProvider#getLevelMaximumGeometricError",
+      "field": "params/level/description",
+      "sourceHash": "sha256:2158f46da843486bdc37028e4478405a094e1f4a009ee6ee934ef1b93d130594",
+      "text": "要获取最大几何误差的瓦片层级。"
+    },
+    {
+      "id": "CesiumTerrainProvider#getLevelMaximumGeometricError",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:269aa9bca56e8987258839baa4900e4a37e1e5f518f2e89f08c84b4db69cc44f",
+      "text": "最大几何误差。"
+    },
+    {
+      "id": "CesiumTerrainProvider#getTileDataAvailable",
+      "field": "description",
+      "sourceHash": "sha256:a0739c45fd85b8442b0d90556a11b184f2c4b5fe48bd1d24be252c906c1cd787",
+      "text": "确定某瓦片的数据是否可供加载。"
+    },
+    {
+      "id": "CesiumTerrainProvider#getTileDataAvailable",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:837bd83726cb8d03a7f782782b59266a6309e6d25b47e9fadf4e962ac937a90c",
+      "text": "不支持或可用性未知时返回 undefined，否则返回 true 或 false。"
+    },
+    {
+      "id": "CesiumTerrainProvider#hasMetadata",
+      "field": "description",
+      "sourceHash": "sha256:a475ab50069a7cbbd311f409ced6699359577625ae5292658d68540e18b4f7a8",
+      "text": "获取所请求瓦片是否包含元数据。"
+    },
+    {
+      "id": "CesiumTerrainProvider#hasVertexNormals",
+      "field": "description",
+      "sourceHash": "sha256:67a48f700e35b798865b8df56c91870320f54d5bb41d66642fef70823d62158a",
+      "text": "获取所请求瓦片是否包含顶点法线。"
+    },
+    {
+      "id": "CesiumTerrainProvider#hasWaterMask",
+      "field": "description",
+      "sourceHash": "sha256:3d4b90be88ad21cd066d73a6198eb4bd31775344fbcfa5db5adaf9b7d3ad98cc",
+      "text": "获取提供者是否包含水体掩码。掩码区分水域与陆地，以便将水域渲染为具有动态波浪的反射表面。"
+    },
+    {
+      "id": "CesiumTerrainProvider#loadTileDataAvailability",
+      "field": "description",
+      "sourceHash": "sha256:788bf4766e010ffafbe52b2acf69391ab9530eb3e4cccd4d306a2e7603c91fe3",
+      "text": "确保加载某瓦片的可用性数据。"
+    },
+    {
+      "id": "CesiumTerrainProvider#loadTileDataAvailability",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:c5e9704ceaab793f8aeb8de76e28a4a764d7ebe292b3f2b0c9530be7bd4d5967",
+      "text": "无需加载时返回 undefined；否则返回在所需瓦片全部加载完成后兑现的 Promise。"
+    },
+    {
+      "id": "CesiumTerrainProvider#requestMetadata",
+      "field": "description",
+      "sourceHash": "sha256:647ec6b9308704989371460d177c5e8a13187e30d09aeaac3dbbaac789bc120c",
+      "text": "指示客户端是否应向服务器请求元数据的布尔标志。仅在客户端请求且服务器提供元数据时，才追加到标准瓦片网格数据中。"
+    },
+    {
+      "id": "CesiumTerrainProvider#requestTileGeometry",
+      "field": "description",
+      "sourceHash": "sha256:756aa8bee2a3018874009a88b5c3c7272693fd5ef7463806f43ff07272b1def2",
+      "text": "请求给定瓦片的几何体。结果必须包含地形数据，并可选包含水体掩码和子瓦片可用性信息。"
+    },
+    {
+      "id": "CesiumTerrainProvider#requestTileGeometry",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:e7b6ed4db3582973863fa99b060691f2f9b446984cbb15803952cb57f2886dec",
+      "text": "所请求几何体的 Promise。若返回 undefined 而非 Promise，表示已有过多待处理请求，将稍后重试。"
+    },
+    {
+      "id": "CesiumTerrainProvider#requestVertexNormals",
+      "field": "description",
+      "sourceHash": "sha256:acb461791080c18f28deadb006e6d2e71c6fe5ceb54ead2ebb09368dd8d00683",
+      "text": "指示客户端是否应向服务器请求顶点法线的布尔标志。仅在客户端请求且服务器提供顶点法线时，才追加到标准瓦片网格数据中。"
+    },
+    {
+      "id": "CesiumTerrainProvider#requestWaterMask",
+      "field": "description",
+      "sourceHash": "sha256:78ad6163fe2f42ec77fd328450f4476caabda261eb6c6a60a56f805105b22eee",
+      "text": "指示客户端是否应向服务器请求水体掩码的布尔标志。仅在客户端请求且服务器提供水体掩码时，才追加到标准瓦片网格数据中。"
+    },
+    {
+      "id": "createWorldTerrainAsync",
+      "field": "description",
+      "sourceHash": "sha256:8449a37999dd61aca669e566fef7cd19eac3714850f14c244e71796e2f5b65c1",
+      "text": "为 {@link https://cesium.com/content/#cesium-world-terrain|Cesium 全球地形} 创建 {@link CesiumTerrainProvider} 实例。"
+    },
+    {
+      "id": "createWorldTerrainAsync",
+      "field": "params/options.requestVertexNormals/description",
+      "sourceHash": "sha256:53c92dec8ae14bf3c8a2d1addf7fe56a3555f6501d801cb15480d65adb6fcda5",
+      "text": "指示客户端是否应向服务器请求可用的附加光照信息。"
+    },
+    {
+      "id": "createWorldTerrainAsync",
+      "field": "params/options.requestWaterMask/description",
+      "sourceHash": "sha256:4f0341c4b00236e3e6fb372e8ced3145e8e59d68785da6dc2e7fbd4af55b7cc7",
+      "text": "指示客户端是否应向服务器请求可用的逐瓦片水体掩码。"
+    },
+    {
+      "id": "createWorldTerrainAsync",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:6b72d8c2051bfd1a07a1a0a7b45ef64bd2848416e079a98832f5009720c7c1a7",
+      "text": "兑现为所创建 CesiumTerrainProvider 的 Promise。"
+    },
+    {
+      "id": "CustomHeightmapTerrainProvider.GeometryCallback",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:83bf45d204cf4238b2286a6b94439d95922bc6f894cd94e5507546b938b3a9cc",
+      "text": "按行主序排列的高度数组，或兑现为此数组的 Promise。若为 undefined，则地球渲染父瓦片。"
+    },
+    {
+      "id": "CustomHeightmapTerrainProvider",
+      "field": "description",
+      "sourceHash": "sha256:dde7692a8bc121fdcab77cca95e46117ce2b66a402621c889724d9ff4424f73b",
+      "text": "通过回调函数获取高度值的简单 {@link TerrainProvider}。可用于程序化生成地形，或无需继承 {@link TerrainProvider} 就加载自定义高度图。此提供者不支持水体掩码、顶点法线和可用性信息等能力；更复杂的场景宜实现完整的 {@link TerrainProvider} 子类。"
+    },
+    {
+      "id": "CustomHeightmapTerrainProvider",
+      "field": "params/options.callback/description",
+      "sourceHash": "sha256:adfd7eaa7a5963d084caab0ba7619febb971bc7021b6d04a32a0c69fa2ca8f53",
+      "text": "请求瓦片几何体的回调函数。"
+    },
+    {
+      "id": "CustomHeightmapTerrainProvider",
+      "field": "params/options.ellipsoid/description",
+      "sourceHash": "sha256:114956388cfc4c04aa73172615f19506392b7d858e769942aaa547bf336bcc15",
+      "text": "椭球。若指定 tilingScheme，则忽略此参数，改用分块方案的椭球。两者均未指定时使用默认椭球。"
+    },
+    {
+      "id": "CustomHeightmapTerrainProvider",
+      "field": "params/options.height/description",
+      "sourceHash": "sha256:91fbbbf3b31c7df7fbd1a9e9f661350122760081c7942d34d2f216221dbfe560",
+      "text": "每个高度图瓦片的行数。"
+    },
+    {
+      "id": "CustomHeightmapTerrainProvider",
+      "field": "params/options.tilingScheme/description",
+      "sourceHash": "sha256:87fddd33d0d822c16411327d3d939829279c83a08ee5733e74fc997bad6a7413",
+      "text": "定义椭球表面如何划分为瓦片的分块方案。若未提供，使用 {@link GeographicTilingScheme}。"
+    },
+    {
+      "id": "CustomHeightmapTerrainProvider",
+      "field": "params/options.width/description",
+      "sourceHash": "sha256:0c3885459f7dd4d56bd0978a04b8e55e5c7ed5dfffc98148d55368a87ae83735",
+      "text": "每个高度图瓦片的列数。"
+    },
+    {
+      "id": "CustomHeightmapTerrainProvider#availability",
+      "field": "description",
+      "sourceHash": "sha256:918c02c1a26888db9525a835e53858406b7ae93b407d5a2cb60d44d9d1140395",
+      "text": "获取可用于查询点、矩形等位置处地形可用性的对象。若没有可用性信息，此属性可能为 undefined。"
+    },
+    {
+      "id": "CustomHeightmapTerrainProvider#credit",
+      "field": "description",
+      "sourceHash": "sha256:b48797b2934c4fdf9a8ecfd1a443076c940ca6c2624ffa2613f2454408cb27e9",
+      "text": "获取地形提供者活动时显示的版权信息，通常用于注明地形来源。"
+    },
+    {
+      "id": "CustomHeightmapTerrainProvider#errorEvent",
+      "field": "description",
+      "sourceHash": "sha256:64801760fc528a317cde5824e5bf9c3f6b557a93d39f4bffe810ba32164c2be2",
+      "text": "获取地形提供者发生异步错误时触发的事件。订阅者可收到错误通知并尝试恢复。事件监听器接收 {@link TileProviderError} 实例。"
+    },
+    {
+      "id": "CustomHeightmapTerrainProvider#getLevelMaximumGeometricError",
+      "field": "description",
+      "sourceHash": "sha256:16493e83c2b411e969eb0bb84957d83fa8b790f189e6998f1e158f0c7d066d55",
+      "text": "获取给定层级瓦片允许的最大几何误差。"
+    },
+    {
+      "id": "CustomHeightmapTerrainProvider#getLevelMaximumGeometricError",
+      "field": "params/level/description",
+      "sourceHash": "sha256:2158f46da843486bdc37028e4478405a094e1f4a009ee6ee934ef1b93d130594",
+      "text": "要获取最大几何误差的瓦片层级。"
+    },
+    {
+      "id": "CustomHeightmapTerrainProvider#getLevelMaximumGeometricError",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:269aa9bca56e8987258839baa4900e4a37e1e5f518f2e89f08c84b4db69cc44f",
+      "text": "最大几何误差。"
+    },
+    {
+      "id": "CustomHeightmapTerrainProvider#getTileDataAvailable",
+      "field": "description",
+      "sourceHash": "sha256:a0739c45fd85b8442b0d90556a11b184f2c4b5fe48bd1d24be252c906c1cd787",
+      "text": "确定某瓦片的数据是否可供加载。"
+    },
+    {
+      "id": "CustomHeightmapTerrainProvider#getTileDataAvailable",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:a2c94c84e5c9906a9aea353d897bfbd187466e35fd75dec5a2d915793e06fc0e",
+      "text": "不支持时返回 undefined，否则返回 true 或 false。"
+    },
+    {
+      "id": "CustomHeightmapTerrainProvider#hasVertexNormals",
+      "field": "description",
+      "sourceHash": "sha256:91a989ed39535bc3112882663d959b5ef35987218b3145bf2bb5c685afb3e2f7",
+      "text": "获取所请求瓦片是否包含顶点法线。{@link CustomHeightmapTerrainProvider} 不支持顶点法线，因此始终返回 false。"
+    },
+    {
+      "id": "CustomHeightmapTerrainProvider#hasWaterMask",
+      "field": "description",
+      "sourceHash": "sha256:c9e10a8d706f9a7db41eb297c574b25c6daa8ed9be9eee72f7f460ae71c181d8",
+      "text": "获取提供者是否包含水体掩码。掩码区分水域与陆地，以便将水域渲染为具有动态波浪的反射表面。{@link CustomHeightmapTerrainProvider} 不支持水体掩码，因此始终返回 false。"
+    },
+    {
+      "id": "CustomHeightmapTerrainProvider#height",
+      "field": "description",
+      "sourceHash": "sha256:6928d899b69cf1d34c9bc773ff674dd81c60b635325c320b45b77b66cadda28f",
+      "text": "获取每个高度图瓦片的行数。"
+    },
+    {
+      "id": "CustomHeightmapTerrainProvider#loadTileDataAvailability",
+      "field": "description",
+      "sourceHash": "sha256:788bf4766e010ffafbe52b2acf69391ab9530eb3e4cccd4d306a2e7603c91fe3",
+      "text": "确保加载某瓦片的可用性数据。"
+    },
+    {
+      "id": "CustomHeightmapTerrainProvider#loadTileDataAvailability",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:c5e9704ceaab793f8aeb8de76e28a4a764d7ebe292b3f2b0c9530be7bd4d5967",
+      "text": "无需加载时返回 undefined；否则返回在所需瓦片全部加载完成后兑现的 Promise。"
+    },
+    {
+      "id": "CustomHeightmapTerrainProvider#requestTileGeometry",
+      "field": "description",
+      "sourceHash": "sha256:256425c1675ad2d2c90401790879b53c12f7e4058049bdb09e377c2f8618c394",
+      "text": "请求给定瓦片的几何体。结果包含地形数据，并指示全部子瓦片均可用。"
+    },
+    {
+      "id": "CustomHeightmapTerrainProvider#requestTileGeometry",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:11f8b44b66d6c72440556fe588eee1f75e13e71cfdad7fc60a34156b594bedba",
+      "text": "所请求几何体的 Promise。若返回 undefined 而非 Promise，表示已有过多待处理请求，将稍后重试。"
+    },
+    {
+      "id": "CustomHeightmapTerrainProvider#width",
+      "field": "description",
+      "sourceHash": "sha256:90811166550b1666b83e920c05608f42bf4073ba531daeb67bf3c58917b5be27",
+      "text": "获取每个高度图瓦片的列数。"
+    },
+    {
+      "id": "EllipsoidTerrainProvider",
+      "field": "description",
+      "sourceHash": "sha256:cd88591d13373dc937354d6027fe81889c8e91ca8953b48f90b6964f237b6e2b",
+      "text": "通过对椭球表面镶嵌生成几何体的简单 {@link TerrainProvider}。"
+    },
+    {
+      "id": "EllipsoidTerrainProvider",
+      "field": "params/options.ellipsoid/description",
+      "sourceHash": "sha256:114956388cfc4c04aa73172615f19506392b7d858e769942aaa547bf336bcc15",
+      "text": "椭球。若指定 tilingScheme，则忽略此参数，改用分块方案的椭球。两者均未指定时使用默认椭球。"
+    },
+    {
+      "id": "EllipsoidTerrainProvider",
+      "field": "params/options.tilingScheme/description",
+      "sourceHash": "sha256:e44053fd162d787c08bee759ef2fd614a50ab046c42f52ed14527414a1216290",
+      "text": "定义椭球表面如何划分为瓦片的分块方案。若未提供，使用 {@link GeographicTilingScheme}。"
+    },
+    {
+      "id": "EllipsoidTerrainProvider#availability",
+      "field": "description",
+      "sourceHash": "sha256:918c02c1a26888db9525a835e53858406b7ae93b407d5a2cb60d44d9d1140395",
+      "text": "获取可用于查询点、矩形等位置处地形可用性的对象。若没有可用性信息，此属性可能为 undefined。"
+    },
+    {
+      "id": "EllipsoidTerrainProvider#credit",
+      "field": "description",
+      "sourceHash": "sha256:a10cbf8ce42f725d7a91883361547aa9fc646e3f8676e4f7892d97f5015418b8",
+      "text": "获取地形提供者活动时显示的版权信息，通常用于注明地形来源。"
+    },
+    {
+      "id": "EllipsoidTerrainProvider#errorEvent",
+      "field": "description",
+      "sourceHash": "sha256:20599df7d9af09c18f19c3dedb8a28d697e848d6cfcf800d25c8be18b0ff9daf",
+      "text": "获取地形提供者发生异步错误时触发的事件。订阅者可收到错误通知并尝试恢复。事件监听器接收 {@link TileProviderError} 实例。"
+    },
+    {
+      "id": "EllipsoidTerrainProvider#getLevelMaximumGeometricError",
+      "field": "description",
+      "sourceHash": "sha256:16493e83c2b411e969eb0bb84957d83fa8b790f189e6998f1e158f0c7d066d55",
+      "text": "获取给定层级瓦片允许的最大几何误差。"
+    },
+    {
+      "id": "EllipsoidTerrainProvider#getLevelMaximumGeometricError",
+      "field": "params/level/description",
+      "sourceHash": "sha256:2158f46da843486bdc37028e4478405a094e1f4a009ee6ee934ef1b93d130594",
+      "text": "要获取最大几何误差的瓦片层级。"
+    },
+    {
+      "id": "EllipsoidTerrainProvider#getLevelMaximumGeometricError",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:269aa9bca56e8987258839baa4900e4a37e1e5f518f2e89f08c84b4db69cc44f",
+      "text": "最大几何误差。"
+    },
+    {
+      "id": "EllipsoidTerrainProvider#getTileDataAvailable",
+      "field": "description",
+      "sourceHash": "sha256:a0739c45fd85b8442b0d90556a11b184f2c4b5fe48bd1d24be252c906c1cd787",
+      "text": "确定某瓦片的数据是否可供加载。"
+    },
+    {
+      "id": "EllipsoidTerrainProvider#getTileDataAvailable",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:a2c94c84e5c9906a9aea353d897bfbd187466e35fd75dec5a2d915793e06fc0e",
+      "text": "不支持时返回 undefined，否则返回 true 或 false。"
+    },
+    {
+      "id": "EllipsoidTerrainProvider#hasVertexNormals",
+      "field": "description",
+      "sourceHash": "sha256:67a48f700e35b798865b8df56c91870320f54d5bb41d66642fef70823d62158a",
+      "text": "获取所请求瓦片是否包含顶点法线。"
+    },
+    {
+      "id": "EllipsoidTerrainProvider#hasWaterMask",
+      "field": "description",
+      "sourceHash": "sha256:3d4b90be88ad21cd066d73a6198eb4bd31775344fbcfa5db5adaf9b7d3ad98cc",
+      "text": "获取提供者是否包含水体掩码。掩码区分水域与陆地，以便将水域渲染为具有动态波浪的反射表面。"
+    },
+    {
+      "id": "EllipsoidTerrainProvider#loadTileDataAvailability",
+      "field": "description",
+      "sourceHash": "sha256:788bf4766e010ffafbe52b2acf69391ab9530eb3e4cccd4d306a2e7603c91fe3",
+      "text": "确保加载某瓦片的可用性数据。"
+    },
+    {
+      "id": "EllipsoidTerrainProvider#loadTileDataAvailability",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:da750ca74b0af4ed18dab161e2ef5b54748046872e10e43a53ac223228028c3c",
+      "text": "此提供者不支持加载可用性数据。"
+    },
+    {
+      "id": "EllipsoidTerrainProvider#requestTileGeometry",
+      "field": "description",
+      "sourceHash": "sha256:256425c1675ad2d2c90401790879b53c12f7e4058049bdb09e377c2f8618c394",
+      "text": "请求给定瓦片的几何体。结果包含地形数据，并指示全部子瓦片均可用。"
+    },
+    {
+      "id": "EllipsoidTerrainProvider#requestTileGeometry",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:e7b6ed4db3582973863fa99b060691f2f9b446984cbb15803952cb57f2886dec",
+      "text": "所请求几何体的 Promise。若返回 undefined 而非 Promise，表示已有过多待处理请求，将稍后重试。"
+    },
+    {
+      "id": "GoogleEarthEnterpriseTerrainData",
+      "field": "description",
+      "sourceHash": "sha256:f335f88ff739c59ef95a1a2b2df0eac0a79d35a28debbd408902d5247da6a7be",
+      "text": "来自 Google Earth Enterprise 服务器的单瓦片地形数据。"
+    },
+    {
+      "id": "GoogleEarthEnterpriseTerrainData",
+      "field": "params/options.buffer/description",
+      "sourceHash": "sha256:a8a4c366250b7f257b1905778ece09e3486744cc62908124fcc75bc067c39cc4",
+      "text": "包含地形数据的缓冲区。"
+    },
+    {
+      "id": "GoogleEarthEnterpriseTerrainData",
+      "field": "params/options.childTileMask/description",
+      "sourceHash": "sha256:394aee5321a5fe52b1487ab55a1df7ebd91155346951dfdb2266644bb8d8f22c",
+      "text": "指示当前瓦片四个子瓦片是否存在的位掩码。某位已设置时，会在需要时请求对应子瓦片几何体；未设置时，不请求该子瓦片，而从父瓦片上采样几何体。位值如下：<table><tr><th>位位置</th><th>位值</th><th>子瓦片</th></tr><tr><td>0</td><td>1</td><td>西南</td></tr><tr><td>1</td><td>2</td><td>东南</td></tr><tr><td>2</td><td>4</td><td>东北</td></tr><tr><td>3</td><td>8</td><td>西北</td></tr></table>"
+    },
+    {
+      "id": "GoogleEarthEnterpriseTerrainData",
+      "field": "params/options.createdByUpsampling/description",
+      "sourceHash": "sha256:a450ff153cde4b8b764c7978713e22655e34049e88e81c66c12db356f5541106",
+      "text": "此实例由另一个实例上采样生成时为 true，否则为 false。"
+    },
+    {
+      "id": "GoogleEarthEnterpriseTerrainData",
+      "field": "params/options.credits/description",
+      "sourceHash": "sha256:e80223eb5fe628b45b9816f5e46a5c92bc3b56c5e7b2033526ea924e45a5e1c5",
+      "text": "此瓦片的版权信息数组。"
+    },
+    {
+      "id": "GoogleEarthEnterpriseTerrainData",
+      "field": "params/options.negativeAltitudeExponentBias/description",
+      "sourceHash": "sha256:c8101f74a8dda9f3bb922cbb21f7991a0b87473e7185559a4197f25580b8a850",
+      "text": "负地形高度编码为极小正值时所使用的乘数。"
+    },
+    {
+      "id": "GoogleEarthEnterpriseTerrainData",
+      "field": "params/options.negativeElevationThreshold/description",
+      "sourceHash": "sha256:245198a220e4edd6f3ea484632dd366bcfa03076954e55a51691637c435b6551",
+      "text": "负值阈值。"
+    },
+    {
+      "id": "GoogleEarthEnterpriseTerrainData#credits",
+      "field": "description",
+      "sourceHash": "sha256:b90c3a8964e51c209c432b726954a1005a6619d865027fe03a3fa671887ec74e",
+      "text": "此瓦片的版权信息数组。"
+    },
+    {
+      "id": "GoogleEarthEnterpriseTerrainData#interpolateHeight",
+      "field": "description",
+      "sourceHash": "sha256:88144b03eb60fd4e8864f0892d24501c6120591b73bcced524c10e5f7426446c",
+      "text": "计算指定经纬度处的地形高度。"
+    },
+    {
+      "id": "GoogleEarthEnterpriseTerrainData#interpolateHeight",
+      "field": "params/latitude/description",
+      "sourceHash": "sha256:00a0b93eec52b3ee3f7703575f38a6d01a4d15e6aae5f541418e8609a70a78ea",
+      "text": "纬度，单位为弧度。"
+    },
+    {
+      "id": "GoogleEarthEnterpriseTerrainData#interpolateHeight",
+      "field": "params/longitude/description",
+      "sourceHash": "sha256:bb151626940efec431decc1ce4a304d9cdd8e318fdceb82885eb6f8ffcfeca4c",
+      "text": "经度，单位为弧度。"
+    },
+    {
+      "id": "GoogleEarthEnterpriseTerrainData#interpolateHeight",
+      "field": "params/rectangle/description",
+      "sourceHash": "sha256:b07353b5f3c7ba72e882a9aa05c04c7ad4584a45edd625d6e30070ecb5069385",
+      "text": "此地形数据覆盖的矩形。"
+    },
+    {
+      "id": "GoogleEarthEnterpriseTerrainData#interpolateHeight",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:0ca8b73b32ae578113e9b3b12ae8c15d9737418404400ba4cf61591dbfc098fc",
+      "text": "指定位置的地形高度。若位置在矩形外，此方法会进行高度外推；远离矩形时，结果可能严重不准确。"
+    },
+    {
+      "id": "GoogleEarthEnterpriseTerrainData#isChildAvailable",
+      "field": "description",
+      "sourceHash": "sha256:08cdfc10497e761816a927d24ad06da62b0d803551dfeb2c8dfe3071d57a134d",
+      "text": "根据 {@link GoogleEarthEnterpriseTerrainData.childTileMask} 判断给定子瓦片是否可用。假定坐标属于当前瓦片的四个子瓦片之一；若传入非子瓦片坐标，则返回东南子瓦片的可用性。"
+    },
+    {
+      "id": "GoogleEarthEnterpriseTerrainData#isChildAvailable",
+      "field": "params/childX/description",
+      "sourceHash": "sha256:79368b1d51be32e4770b8fee08dbe3d0ac647de88d32d5b7dcab49a2630b7e68",
+      "text": "要检查可用性的子瓦片 X 坐标。"
+    },
+    {
+      "id": "GoogleEarthEnterpriseTerrainData#isChildAvailable",
+      "field": "params/childY/description",
+      "sourceHash": "sha256:4c9ec3e91c268936ba70d99001f3ad3572cc0f634934febd211dd1a27863dff1",
+      "text": "要检查可用性的子瓦片 Y 坐标。"
+    },
+    {
+      "id": "GoogleEarthEnterpriseTerrainData#isChildAvailable",
+      "field": "params/thisX/description",
+      "sourceHash": "sha256:702f3cb8a08ed3df14038d36563ad8fb38a5fa3d52cc7070cf9e0e3c44257759",
+      "text": "当前父瓦片的 X 坐标。"
+    },
+    {
+      "id": "GoogleEarthEnterpriseTerrainData#isChildAvailable",
+      "field": "params/thisY/description",
+      "sourceHash": "sha256:d8d8c3471ba78a37f34ba161b991b25a9b4f73907cb75c338f63d05c922c90cb",
+      "text": "当前父瓦片的 Y 坐标。"
+    },
+    {
+      "id": "GoogleEarthEnterpriseTerrainData#isChildAvailable",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:0dfcee8e13025de607fbb8f8b114eeda2c4e3ce906cb18f0b49c423ec3d08abd",
+      "text": "子瓦片可用时返回 true，否则返回 false。"
+    },
+    {
+      "id": "GoogleEarthEnterpriseTerrainData#upsample",
+      "field": "description",
+      "sourceHash": "sha256:4b85cf78c4fc80b16dbfe7e49f4730bd33c79d315ad264daf633239812752fd8",
+      "text": "对此地形数据上采样，供后代瓦片使用。结果实例包含当前高度样本的子集，必要时进行插值。"
+    },
+    {
+      "id": "GoogleEarthEnterpriseTerrainData#upsample",
+      "field": "params/descendantLevel/description",
+      "sourceHash": "sha256:a110dbd679ab0910fba08b0c0fe520f7fb74739b0e7bf2b9f7b740a3fbf804ac",
+      "text": "上采样目标后代瓦片在分块方案中的层级。"
+    },
+    {
+      "id": "GoogleEarthEnterpriseTerrainData#upsample",
+      "field": "params/descendantX/description",
+      "sourceHash": "sha256:35f06e07b86e64f7812a0e09a30d334457e7fe3b123dd1a5a6ce160d5706dfe4",
+      "text": "上采样目标后代瓦片在分块方案中的 X 坐标。"
+    },
+    {
+      "id": "GoogleEarthEnterpriseTerrainData#upsample",
+      "field": "params/descendantY/description",
+      "sourceHash": "sha256:99a65e3a7b31dececcbab9e70e88bb3e822d67df86bf91030a7b22306dfa9cbd",
+      "text": "上采样目标后代瓦片在分块方案中的 Y 坐标。"
+    },
+    {
+      "id": "GoogleEarthEnterpriseTerrainData#upsample",
+      "field": "params/thisLevel/description",
+      "sourceHash": "sha256:721cc633438d55bb13c0cca6fa2ca56f7d8fb71c3d12fdf3b7e063ab6c4c24ba",
+      "text": "当前瓦片在分块方案中的层级。"
+    },
+    {
+      "id": "GoogleEarthEnterpriseTerrainData#upsample",
+      "field": "params/thisX/description",
+      "sourceHash": "sha256:e073b08287120e1524e44fe8005c3006127deb69e36125d8aaebd018446ca467",
+      "text": "当前瓦片在分块方案中的 X 坐标。"
+    },
+    {
+      "id": "GoogleEarthEnterpriseTerrainData#upsample",
+      "field": "params/thisY/description",
+      "sourceHash": "sha256:40bc42a2d7f2ebacca2ab69dee7d5029b7df988a578ef05255c6ca5e697d649c",
+      "text": "当前瓦片在分块方案中的 Y 坐标。"
+    },
+    {
+      "id": "GoogleEarthEnterpriseTerrainData#upsample",
+      "field": "params/tilingScheme/description",
+      "sourceHash": "sha256:83e98590a1bd2e9e43c2a74d6cb2a13967b8838b4f44e208c05661e37b5c0288",
+      "text": "此地形数据的分块方案。"
+    },
+    {
+      "id": "GoogleEarthEnterpriseTerrainData#upsample",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:18c97d62b0a91495575e4ddf0d7f69d7edb10dbc83e4bf4588a221495962fcda",
+      "text": "兑现为后代瓦片上采样高度图地形数据的 Promise；若异步上采样操作过多导致请求延后，则返回 undefined。"
+    },
+    {
+      "id": "GoogleEarthEnterpriseTerrainData#wasCreatedByUpsampling",
+      "field": "description",
+      "sourceHash": "sha256:c8bf9b53abeca61b8b4ac3ad1cc51905b59337469db12c22d940dde8f0934b0e",
+      "text": "获取此地形数据是否由较低分辨率地形数据上采样生成。为 false 时，表示来自其他来源，例如远程服务器下载。通过 {@link HeightmapTerrainData#upsample} 返回的实例应为 true。"
+    },
+    {
+      "id": "GoogleEarthEnterpriseTerrainData#wasCreatedByUpsampling",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:2258154f2fdd9897a78865fb339781e1c4e948d85070309baeeb0ec7849781b5",
+      "text": "此实例由上采样生成时返回 true，否则返回 false。"
+    },
+    {
+      "id": "GoogleEarthEnterpriseTerrainData#waterMask",
+      "field": "description",
+      "sourceHash": "sha256:ee31c0eeb2be6f311725661a647f460ea5350984094d6d16dc7976da161ad52d",
+      "text": "此地形数据包含的水体掩码，若有。掩码为矩形 Uint8Array 或图像，255 表示水域，0 表示陆地，也允许中间值以平滑混合水陆交界。"
+    },
+    {
+      "id": "GoogleEarthEnterpriseTerrainProvider.ConstructorOptions",
+      "field": "description",
+      "sourceHash": "sha256:3f008968e13e6305c53027483e845ac50afcbecd61d03a3a663b9a86c2fc70ff",
+      "text": "GoogleEarthEnterpriseTerrainProvider 构造函数的初始化选项。"
+    },
+    {
+      "id": "GoogleEarthEnterpriseTerrainProvider.ConstructorOptions",
+      "field": "properties/ellipsoid/description",
+      "sourceHash": "sha256:64ad4e5f7e94b06bc611c8429591da991fa88bdb2f4886136ea1dbbdb1d0b372",
+      "text": "椭球。若未指定，则使用默认椭球。"
+    },
+    {
+      "id": "GoogleEarthEnterpriseTerrainProvider.fromMetadata",
+      "field": "description",
+      "sourceHash": "sha256:280d95db0b7563a05715eb2702f10531595c539325295e7663467a40347885a7",
+      "text": "从 GoogleEarthEnterpriseMetadata 创建 GoogleEarthEnterpriseTerrainProvider。"
+    },
+    {
+      "id": "GoogleEarthEnterpriseTerrainProvider.fromMetadata",
+      "field": "exceptions/0/description",
+      "sourceHash": "sha256:6541b8b14b290926235b352bebbda6751b9a9d290ca3a8487f9089bb065f14f1",
+      "text": "元数据未指定地形。"
+    },
+    {
+      "id": "GoogleEarthEnterpriseTerrainProvider.fromMetadata",
+      "field": "params/metadata/description",
+      "sourceHash": "sha256:252ee17bf767c9cf7733d1255e78f19eec1078e89d0bd5a38e3e629bf8a61794",
+      "text": "可与 GoogleEarthEnterpriseImageryProvider 共享元数据请求的元数据对象。"
+    },
+    {
+      "id": "GoogleEarthEnterpriseTerrainProvider",
+      "field": "description",
+      "sourceHash": "sha256:74f1133fcada928e00f971e5cf1589cf40d9a73c70ac70b74cae4d146f5fa02c",
+      "text": "<div class=\"notice\">请调用 {@link  GoogleEarthEnterpriseTerrainProvider.fromMetadata} 创建 GoogleEarthEnterpriseTerrainProvider，不要直接调用构造函数。</div>使用 Google Earth Enterprise REST API 提供瓦片地形。"
+    },
+    {
+      "id": "GoogleEarthEnterpriseTerrainProvider#availability",
+      "field": "description",
+      "sourceHash": "sha256:918c02c1a26888db9525a835e53858406b7ae93b407d5a2cb60d44d9d1140395",
+      "text": "获取可用于查询点、矩形等位置处地形可用性的对象。若没有可用性信息，此属性可能为 undefined。"
+    },
+    {
+      "id": "GoogleEarthEnterpriseTerrainProvider#credit",
+      "field": "description",
+      "sourceHash": "sha256:a10cbf8ce42f725d7a91883361547aa9fc646e3f8676e4f7892d97f5015418b8",
+      "text": "获取地形提供者活动时显示的版权信息，通常用于注明地形来源。"
+    },
+    {
+      "id": "GoogleEarthEnterpriseTerrainProvider#errorEvent",
+      "field": "description",
+      "sourceHash": "sha256:168588b191e452d1f54f99328d58f42f85709ab2e2ea5a765f7e9008a2a3e6b7",
+      "text": "获取影像提供者发生异步错误时触发的事件。订阅者可收到错误通知并尝试恢复。事件监听器接收 {@link TileProviderError} 实例。"
+    },
+    {
+      "id": "GoogleEarthEnterpriseTerrainProvider#getLevelMaximumGeometricError",
+      "field": "description",
+      "sourceHash": "sha256:16493e83c2b411e969eb0bb84957d83fa8b790f189e6998f1e158f0c7d066d55",
+      "text": "获取给定层级瓦片允许的最大几何误差。"
+    },
+    {
+      "id": "GoogleEarthEnterpriseTerrainProvider#getLevelMaximumGeometricError",
+      "field": "params/level/description",
+      "sourceHash": "sha256:2158f46da843486bdc37028e4478405a094e1f4a009ee6ee934ef1b93d130594",
+      "text": "要获取最大几何误差的瓦片层级。"
+    },
+    {
+      "id": "GoogleEarthEnterpriseTerrainProvider#getLevelMaximumGeometricError",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:269aa9bca56e8987258839baa4900e4a37e1e5f518f2e89f08c84b4db69cc44f",
+      "text": "最大几何误差。"
+    },
+    {
+      "id": "GoogleEarthEnterpriseTerrainProvider#getTileDataAvailable",
+      "field": "description",
+      "sourceHash": "sha256:a0739c45fd85b8442b0d90556a11b184f2c4b5fe48bd1d24be252c906c1cd787",
+      "text": "确定某瓦片的数据是否可供加载。"
+    },
+    {
+      "id": "GoogleEarthEnterpriseTerrainProvider#getTileDataAvailable",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:a2c94c84e5c9906a9aea353d897bfbd187466e35fd75dec5a2d915793e06fc0e",
+      "text": "不支持时返回 undefined，否则返回 true 或 false。"
+    },
+    {
+      "id": "GoogleEarthEnterpriseTerrainProvider#hasVertexNormals",
+      "field": "description",
+      "sourceHash": "sha256:67a48f700e35b798865b8df56c91870320f54d5bb41d66642fef70823d62158a",
+      "text": "获取所请求瓦片是否包含顶点法线。"
+    },
+    {
+      "id": "GoogleEarthEnterpriseTerrainProvider#hasWaterMask",
+      "field": "description",
+      "sourceHash": "sha256:3d4b90be88ad21cd066d73a6198eb4bd31775344fbcfa5db5adaf9b7d3ad98cc",
+      "text": "获取提供者是否包含水体掩码。掩码区分水域与陆地，以便将水域渲染为具有动态波浪的反射表面。"
+    },
+    {
+      "id": "GoogleEarthEnterpriseTerrainProvider#loadTileDataAvailability",
+      "field": "description",
+      "sourceHash": "sha256:788bf4766e010ffafbe52b2acf69391ab9530eb3e4cccd4d306a2e7603c91fe3",
+      "text": "确保加载某瓦片的可用性数据。"
+    },
+    {
+      "id": "GoogleEarthEnterpriseTerrainProvider#requestTileGeometry",
+      "field": "description",
+      "sourceHash": "sha256:77567381440eaed3e84202a38bde9bf51fd80267a3f1f6cd845ffe400ad6008f",
+      "text": "请求给定瓦片的几何体。结果必须包含地形数据，并可选包含水体掩码和子瓦片可用性信息。"
+    },
+    {
+      "id": "GoogleEarthEnterpriseTerrainProvider#requestTileGeometry",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:e7b6ed4db3582973863fa99b060691f2f9b446984cbb15803952cb57f2886dec",
+      "text": "所请求几何体的 Promise。若返回 undefined 而非 Promise，表示已有过多待处理请求，将稍后重试。"
+    },
+    {
+      "id": "GoogleEarthEnterpriseTerrainProvider#url",
+      "field": "description",
+      "sourceHash": "sha256:67db8a9c257be74fdab69a77dc7cffddb4d7db1ce45e642d435b7161b013a827",
+      "text": "获取托管影像的 Google Earth Enterprise 服务器 URL。"
+    },
+    {
+      "id": "HeightmapEncoding.LERC",
+      "field": "description",
+      "sourceHash": "sha256:0d43ac4420e229d814cef76bc61828c01bf5c65e1ba5dc5b0aa5af400c7e189d",
+      "text": "LERC 编码。"
+    },
+    {
+      "id": "HeightmapEncoding.NONE",
+      "field": "description",
+      "sourceHash": "sha256:d91452c0e8a0fbc6cb194ddf0f5021ce13046480bf6ba67f53bf0570b86aeed6",
+      "text": "不编码。"
+    },
+    {
+      "id": "HeightmapEncoding",
+      "field": "description",
+      "sourceHash": "sha256:18c1615b98f8f4cf9bdd2d32ccadaee430bac60e497248a027ddfc9c3770a1d4",
+      "text": "高度图使用的编码。"
+    },
+    {
+      "id": "HeightmapEncoding",
+      "field": "properties/LERC/description",
+      "sourceHash": "sha256:0d43ac4420e229d814cef76bc61828c01bf5c65e1ba5dc5b0aa5af400c7e189d",
+      "text": "LERC 编码。"
+    },
+    {
+      "id": "HeightmapEncoding",
+      "field": "properties/NONE/description",
+      "sourceHash": "sha256:d91452c0e8a0fbc6cb194ddf0f5021ce13046480bf6ba67f53bf0570b86aeed6",
+      "text": "不编码。"
+    },
+    {
+      "id": "HeightmapTerrainData",
+      "field": "description",
+      "sourceHash": "sha256:9c5366e5f10124530ab7b3835c603e5a71e773dbfd0ddc8d29c5455ee014189a",
+      "text": "单个瓦片的高度图地形数据。高度图是按行主序排列的矩形高度数组，行从北向南，列从西向东。"
+    },
+    {
+      "id": "HeightmapTerrainData",
+      "field": "params/options.buffer/description",
+      "sourceHash": "sha256:922143a6b68f99794c6111cf38f20143c8fc285b3fb85e7706b767c5bf4e5f2c",
+      "text": "包含高度数据的缓冲区。"
+    },
+    {
+      "id": "HeightmapTerrainData",
+      "field": "params/options.childTileMask/description",
+      "sourceHash": "sha256:045e2a0dddf3b6ba0cf73c6545de2416646cb406250c0d912f0618eb169f1147",
+      "text": "指示当前瓦片四个子瓦片是否存在的位掩码。某位已设置时，会在需要时请求对应子瓦片几何体；未设置时，不请求该子瓦片，而从父瓦片上采样几何体。位值如下：<table><tr><th>位位置</th><th>位值</th><th>子瓦片</th></tr><tr><td>0</td><td>1</td><td>西南</td></tr><tr><td>1</td><td>2</td><td>东南</td></tr><tr><td>2</td><td>4</td><td>西北</td></tr><tr><td>3</td><td>8</td><td>东北</td></tr></table>"
+    },
+    {
+      "id": "HeightmapTerrainData",
+      "field": "params/options.createdByUpsampling/description",
+      "sourceHash": "sha256:a450ff153cde4b8b764c7978713e22655e34049e88e81c66c12db356f5541106",
+      "text": "此实例由另一个实例上采样生成时为 true，否则为 false。"
+    },
+    {
+      "id": "HeightmapTerrainData",
+      "field": "params/options.encoding/description",
+      "sourceHash": "sha256:0d592b3c07dae8c00cae8391282753684bda6d8cf486a08fe6fe688c865d2fc8",
+      "text": "缓冲区使用的编码。"
+    },
+    {
+      "id": "HeightmapTerrainData",
+      "field": "params/options.height/description",
+      "sourceHash": "sha256:424208e895ec181fefb69aae6be8065f99c740d49b8f1056483d1de22a45cfaf",
+      "text": "高度图纬度方向的高度，以样本数计。"
+    },
+    {
+      "id": "HeightmapTerrainData",
+      "field": "params/options.structure.elementMultiplier/description",
+      "sourceHash": "sha256:f22470809af9fbc140b28b4184910d5cbc0e34129bc34ab3e6f41665f03b485d",
+      "text": "当一个高度由多个缓冲元素表示时，用于重建高度的乘数。例如每个高度使用 4 个元素、乘数为 256 且 isBigEndian 为 false 时，计算为：`height = buffer[index] + buffer[index + 1] * 256 + buffer[index + 2] * 256 * 256 + buffer[index + 3] * 256 * 256 * 256`。若 isBigEndian 为 true，则元素顺序相反。"
+    },
+    {
+      "id": "HeightmapTerrainData",
+      "field": "params/options.structure.elementsPerHeight/description",
+      "sourceHash": "sha256:feb1275dadbc2bc87981e9449ff98fc0f80ef80eebc866f6acac89d009f58de0",
+      "text": "组成一个高度样本的缓冲元素数量。通常为 1，即每个元素是独立高度样本；大于 1 时，多个元素依据 structure.elementMultiplier 和 structure.isBigEndian 共同组成高度样本。"
+    },
+    {
+      "id": "HeightmapTerrainData",
+      "field": "params/options.structure.heightOffset/description",
+      "sourceHash": "sha256:e5cc18407681ef07a65c3f09ae7390e74deff5d215ec6cf485cf9c4f652eccbc",
+      "text": "将缩放后高度转换为最终米制高度时所加的偏移。在高度样本乘以 heightScale 之后添加。"
+    },
+    {
+      "id": "HeightmapTerrainData",
+      "field": "params/options.structure.heightScale/description",
+      "sourceHash": "sha256:8b90a3f8f7c37d507f139f9672eabe2000402baf9a5f8ef93032667741a839fa",
+      "text": "将高度样本转换为相对于 heightOffset 的米制高度所使用的乘数。先乘以此缩放系数，再添加 heightOffset。"
+    },
+    {
+      "id": "HeightmapTerrainData",
+      "field": "params/options.structure.highestEncodedHeight/description",
+      "sourceHash": "sha256:b2c80025f8bcd8c215ab348097d87419a4cf876ff4102c2245eb2bbadca74927",
+      "text": "高度缓冲可存储的最大值。经 `heightScale` 和 `heightOffset` 编码后超过此值的高度会被限制到该值。例如缓冲为 `Uint16Array` 时，应为 `256 * 256 - 1`，即 65535，因为 `Uint16Array` 无法存储更大的数。若未指定，则不强制最大值。"
+    },
+    {
+      "id": "HeightmapTerrainData",
+      "field": "params/options.structure.isBigEndian/description",
+      "sourceHash": "sha256:47203f9920d1fb42c9d375e5bc93694e6b21018888ab77180d4bd05f4e38b9b1",
+      "text": "当 stride 大于 1 时，指示缓冲元素的字节序。为 false 时，第一个元素为低位；为 true 时，第一个元素为高位。"
+    },
+    {
+      "id": "HeightmapTerrainData",
+      "field": "params/options.structure.lowestEncodedHeight/description",
+      "sourceHash": "sha256:d438806e40256196aff79e7de0a32adc156b0ec06be7372b8abd7679668f05e1",
+      "text": "高度缓冲可存储的最小值。经 `heightScale` 和 `heightOffset` 编码后低于此值的高度会被限制到该值。例如缓冲为 `Uint16Array` 时，应为 0，因为 `Uint16Array` 无法存储负数。若未指定，则不强制最小值。"
+    },
+    {
+      "id": "HeightmapTerrainData",
+      "field": "params/options.structure.stride/description",
+      "sourceHash": "sha256:69c3ac58d6b43fbe0dbeedc3ea015c02824886a53f3931a165d19f6a31cf1494",
+      "text": "从一个高度的首元素移动到下一个高度首元素所跨过的元素数量。"
+    },
+    {
+      "id": "HeightmapTerrainData",
+      "field": "params/options.structure/description",
+      "sourceHash": "sha256:8ee471bf3724959dcdf11e0c26c4d98ad67ad26d7e861b0295ef55648a2f64a0",
+      "text": "描述高度数据结构的对象。"
+    },
+    {
+      "id": "HeightmapTerrainData",
+      "field": "params/options.waterMask/description",
+      "sourceHash": "sha256:af9e177ad698e184e6b54c308d51ff25d984e819a4f7bd42492b60a1162ade02",
+      "text": "此地形数据包含的水体掩码，若有。掩码为正方形 Uint8Array 或图像，255 表示水域，0 表示陆地，也允许中间值以平滑混合水陆交界。"
+    },
+    {
+      "id": "HeightmapTerrainData",
+      "field": "params/options.width/description",
+      "sourceHash": "sha256:b79a6465529636cb36b81c495c348184b04d770ece4dd87d8edf31a13d415f58",
+      "text": "高度图经度方向的宽度，以样本数计。"
+    },
+    {
+      "id": "HeightmapTerrainData#credits",
+      "field": "description",
+      "sourceHash": "sha256:c628e6ddb6a80e7510dcb1a6fddadcb6f5455da2daec3546625d195102f9a5da",
+      "text": "此瓦片的版权信息数组。"
+    },
+    {
+      "id": "HeightmapTerrainData#interpolateHeight",
+      "field": "description",
+      "sourceHash": "sha256:88144b03eb60fd4e8864f0892d24501c6120591b73bcced524c10e5f7426446c",
+      "text": "计算指定经纬度处的地形高度。"
+    },
+    {
+      "id": "HeightmapTerrainData#interpolateHeight",
+      "field": "params/latitude/description",
+      "sourceHash": "sha256:00a0b93eec52b3ee3f7703575f38a6d01a4d15e6aae5f541418e8609a70a78ea",
+      "text": "纬度，单位为弧度。"
+    },
+    {
+      "id": "HeightmapTerrainData#interpolateHeight",
+      "field": "params/longitude/description",
+      "sourceHash": "sha256:bb151626940efec431decc1ce4a304d9cdd8e318fdceb82885eb6f8ffcfeca4c",
+      "text": "经度，单位为弧度。"
+    },
+    {
+      "id": "HeightmapTerrainData#interpolateHeight",
+      "field": "params/rectangle/description",
+      "sourceHash": "sha256:b07353b5f3c7ba72e882a9aa05c04c7ad4584a45edd625d6e30070ecb5069385",
+      "text": "此地形数据覆盖的矩形。"
+    },
+    {
+      "id": "HeightmapTerrainData#interpolateHeight",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:0ca8b73b32ae578113e9b3b12ae8c15d9737418404400ba4cf61591dbfc098fc",
+      "text": "指定位置的地形高度。位置在矩形外时进行高度外推，远离矩形时结果可能严重不准确。"
+    },
+    {
+      "id": "HeightmapTerrainData#isChildAvailable",
+      "field": "description",
+      "sourceHash": "sha256:3df2a588739040ab5bac50a341074c55b705123b36984f7a1a8a6cc5d5894307",
+      "text": "根据 {@link HeightmapTerrainData.childTileMask} 判断给定子瓦片是否可用。假定坐标属于当前瓦片的四个子瓦片之一；若传入非子瓦片坐标，则返回东南子瓦片的可用性。"
+    },
+    {
+      "id": "HeightmapTerrainData#isChildAvailable",
+      "field": "params/childX/description",
+      "sourceHash": "sha256:79368b1d51be32e4770b8fee08dbe3d0ac647de88d32d5b7dcab49a2630b7e68",
+      "text": "要检查可用性的子瓦片 X 坐标。"
+    },
+    {
+      "id": "HeightmapTerrainData#isChildAvailable",
+      "field": "params/childY/description",
+      "sourceHash": "sha256:4c9ec3e91c268936ba70d99001f3ad3572cc0f634934febd211dd1a27863dff1",
+      "text": "要检查可用性的子瓦片 Y 坐标。"
+    },
+    {
+      "id": "HeightmapTerrainData#isChildAvailable",
+      "field": "params/thisX/description",
+      "sourceHash": "sha256:702f3cb8a08ed3df14038d36563ad8fb38a5fa3d52cc7070cf9e0e3c44257759",
+      "text": "当前父瓦片的 X 坐标。"
+    },
+    {
+      "id": "HeightmapTerrainData#isChildAvailable",
+      "field": "params/thisY/description",
+      "sourceHash": "sha256:d8d8c3471ba78a37f34ba161b991b25a9b4f73907cb75c338f63d05c922c90cb",
+      "text": "当前父瓦片的 Y 坐标。"
+    },
+    {
+      "id": "HeightmapTerrainData#isChildAvailable",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:0dfcee8e13025de607fbb8f8b114eeda2c4e3ce906cb18f0b49c423ec3d08abd",
+      "text": "子瓦片可用时返回 true，否则返回 false。"
+    },
+    {
+      "id": "HeightmapTerrainData#upsample",
+      "field": "description",
+      "sourceHash": "sha256:4b85cf78c4fc80b16dbfe7e49f4730bd33c79d315ad264daf633239812752fd8",
+      "text": "对此地形数据上采样，供后代瓦片使用。结果实例包含当前高度样本的子集，必要时进行插值。"
+    },
+    {
+      "id": "HeightmapTerrainData#upsample",
+      "field": "params/descendantLevel/description",
+      "sourceHash": "sha256:a110dbd679ab0910fba08b0c0fe520f7fb74739b0e7bf2b9f7b740a3fbf804ac",
+      "text": "上采样目标后代瓦片在分块方案中的层级。"
+    },
+    {
+      "id": "HeightmapTerrainData#upsample",
+      "field": "params/descendantX/description",
+      "sourceHash": "sha256:35f06e07b86e64f7812a0e09a30d334457e7fe3b123dd1a5a6ce160d5706dfe4",
+      "text": "上采样目标后代瓦片在分块方案中的 X 坐标。"
+    },
+    {
+      "id": "HeightmapTerrainData#upsample",
+      "field": "params/descendantY/description",
+      "sourceHash": "sha256:99a65e3a7b31dececcbab9e70e88bb3e822d67df86bf91030a7b22306dfa9cbd",
+      "text": "上采样目标后代瓦片在分块方案中的 Y 坐标。"
+    },
+    {
+      "id": "HeightmapTerrainData#upsample",
+      "field": "params/thisLevel/description",
+      "sourceHash": "sha256:721cc633438d55bb13c0cca6fa2ca56f7d8fb71c3d12fdf3b7e063ab6c4c24ba",
+      "text": "当前瓦片在分块方案中的层级。"
+    },
+    {
+      "id": "HeightmapTerrainData#upsample",
+      "field": "params/thisX/description",
+      "sourceHash": "sha256:e073b08287120e1524e44fe8005c3006127deb69e36125d8aaebd018446ca467",
+      "text": "当前瓦片在分块方案中的 X 坐标。"
+    },
+    {
+      "id": "HeightmapTerrainData#upsample",
+      "field": "params/thisY/description",
+      "sourceHash": "sha256:40bc42a2d7f2ebacca2ab69dee7d5029b7df988a578ef05255c6ca5e697d649c",
+      "text": "当前瓦片在分块方案中的 Y 坐标。"
+    },
+    {
+      "id": "HeightmapTerrainData#upsample",
+      "field": "params/tilingScheme/description",
+      "sourceHash": "sha256:83e98590a1bd2e9e43c2a74d6cb2a13967b8838b4f44e208c05661e37b5c0288",
+      "text": "此地形数据的分块方案。"
+    },
+    {
+      "id": "HeightmapTerrainData#upsample",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:47fc61c49bb48cc1dcd7cd9becad23c3d46e4cb30bb6902555ee44978099a889",
+      "text": "兑现为后代瓦片上采样高度图地形数据的 Promise；若网格不可用，则返回 undefined。"
+    },
+    {
+      "id": "HeightmapTerrainData#wasCreatedByUpsampling",
+      "field": "description",
+      "sourceHash": "sha256:c8bf9b53abeca61b8b4ac3ad1cc51905b59337469db12c22d940dde8f0934b0e",
+      "text": "获取此地形数据是否由较低分辨率地形数据上采样生成。为 false 时，表示来自其他来源，例如远程服务器下载。通过 {@link HeightmapTerrainData#upsample} 返回的实例应为 true。"
+    },
+    {
+      "id": "HeightmapTerrainData#wasCreatedByUpsampling",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:2258154f2fdd9897a78865fb339781e1c4e948d85070309baeeb0ec7849781b5",
+      "text": "此实例由上采样生成时返回 true，否则返回 false。"
+    },
+    {
+      "id": "HeightmapTerrainData#waterMask",
+      "field": "description",
+      "sourceHash": "sha256:955cd2bfe9b2d1b1d51006556d9d7157d063aad4659fac1bd1325c67eb1ea47f",
+      "text": "此地形数据包含的水体掩码，若有。掩码为正方形 Uint8Array 或图像，255 表示水域，0 表示陆地，也允许中间值以平滑混合水陆交界。"
+    },
+    {
+      "id": "QuantizedMeshTerrainData",
+      "field": "description",
+      "sourceHash": "sha256:377d9d0e7d3b47df1c556af15c09f53be3ecee7d86440d22d1920f38d3a99787",
+      "text": "以量化网格表示的单张瓦片地形数据。量化网格包含经度、纬度和高度三个顶点属性，均使用 0 到 32767 范围内的 16 位值表示。经度和纬度在瓦片西南角为 0，在东北角为 32767；高度在瓦片最低处为 0，在最高处为 32767。"
+    },
+    {
+      "id": "QuantizedMeshTerrainData",
+      "field": "params/options.boundingSphere/description",
+      "sourceHash": "sha256:407953287104186dce4414410013000e87de0bdd30ba1086abdf2bed3d990c27",
+      "text": "包围网格全部顶点的球体。"
+    },
+    {
+      "id": "QuantizedMeshTerrainData",
+      "field": "params/options.childTileMask/description",
+      "sourceHash": "sha256:045e2a0dddf3b6ba0cf73c6545de2416646cb406250c0d912f0618eb169f1147",
+      "text": "指示当前瓦片四个子瓦片是否存在的位掩码。某位已设置时，会在需要时请求对应子瓦片几何体；未设置时，不请求该子瓦片，而从父瓦片上采样几何体。位值如下：<table><tr><th>位位置</th><th>位值</th><th>子瓦片</th></tr><tr><td>0</td><td>1</td><td>西南</td></tr><tr><td>1</td><td>2</td><td>东南</td></tr><tr><td>2</td><td>4</td><td>西北</td></tr><tr><td>3</td><td>8</td><td>东北</td></tr></table>"
+    },
+    {
+      "id": "QuantizedMeshTerrainData",
+      "field": "params/options.createdByUpsampling/description",
+      "sourceHash": "sha256:a450ff153cde4b8b764c7978713e22655e34049e88e81c66c12db356f5541106",
+      "text": "此实例由另一个实例上采样生成时为 true，否则为 false。"
+    },
+    {
+      "id": "QuantizedMeshTerrainData",
+      "field": "params/options.credits/description",
+      "sourceHash": "sha256:e80223eb5fe628b45b9816f5e46a5c92bc3b56c5e7b2033526ea924e45a5e1c5",
+      "text": "此瓦片的版权信息数组。"
+    },
+    {
+      "id": "QuantizedMeshTerrainData",
+      "field": "params/options.eastIndices/description",
+      "sourceHash": "sha256:babd64f94f56809eae926e88c17727175a2e7d6f864eeb66bd730864fcc76a90",
+      "text": "瓦片东边界上的顶点索引。"
+    },
+    {
+      "id": "QuantizedMeshTerrainData",
+      "field": "params/options.eastSkirtHeight/description",
+      "sourceHash": "sha256:1ea96dfc63b6d903f836ef3faa0094d0623b72c6b4f312d79964fe7ee0f2e7de",
+      "text": "在瓦片东边界添加的裙边高度。"
+    },
+    {
+      "id": "QuantizedMeshTerrainData",
+      "field": "params/options.encodedNormals/description",
+      "sourceHash": "sha256:f47053d4d658947792f4ced3280b0d0c0435d6e4e6f09268adf3fd86be505634",
+      "text": "包含逐顶点法线的缓冲区，法线采用八面体（oct）编码。"
+    },
+    {
+      "id": "QuantizedMeshTerrainData",
+      "field": "params/options.horizonOcclusionPoint/description",
+      "sourceHash": "sha256:3f5e64a2b4cd20f7929173e972020652ad197b74fef9fe2a26aea3562db814b4",
+      "text": "网格的地平线遮挡点。如果此点位于地平线以下，则认为整张瓦片都在地平线以下。该点使用椭球缩放坐标表示。"
+    },
+    {
+      "id": "QuantizedMeshTerrainData",
+      "field": "params/options.indices/description",
+      "sourceHash": "sha256:7ee6aa95fafe0a67689844874f1d979d948b615719a7230140f37ab7ff076211",
+      "text": "指定量化顶点如何连接成三角形的索引，每三个索引定义一个三角形。"
+    },
+    {
+      "id": "QuantizedMeshTerrainData",
+      "field": "params/options.maximumHeight/description",
+      "sourceHash": "sha256:0d710ba5feb622b6a9d8bdf0ea02e60da8bce9669827137ce296377d437e095c",
+      "text": "瓦片内的最大地形高度，单位为相对于椭球的米数。"
+    },
+    {
+      "id": "QuantizedMeshTerrainData",
+      "field": "params/options.minimumHeight/description",
+      "sourceHash": "sha256:cb893602eb17ad8c3faf93958e343365d45629a4f73eab59883388a6f7a30733",
+      "text": "瓦片内的最小地形高度，单位为相对于椭球的米数。"
+    },
+    {
+      "id": "QuantizedMeshTerrainData",
+      "field": "params/options.northIndices/description",
+      "sourceHash": "sha256:c5a69fdc2c45c494baebdcced682c6637b4e98f2dc70ac442ae73780a66ed2a4",
+      "text": "瓦片北边界上的顶点索引。"
+    },
+    {
+      "id": "QuantizedMeshTerrainData",
+      "field": "params/options.northSkirtHeight/description",
+      "sourceHash": "sha256:f53cefe0f9cddeef932143d1aa097c7ae217667ec7cae81e160b8121ab37c06f",
+      "text": "在瓦片北边界添加的裙边高度。"
+    },
+    {
+      "id": "QuantizedMeshTerrainData",
+      "field": "params/options.orientedBoundingBox/description",
+      "sourceHash": "sha256:aaab41711cfe7422c318ad5657c27ac5844ff4d80846d1660e1bce1a3ef05d8a",
+      "text": "包围网格全部顶点的 OrientedBoundingBox。"
+    },
+    {
+      "id": "QuantizedMeshTerrainData",
+      "field": "params/options.quantizedVertices/description",
+      "sourceHash": "sha256:10f306782c46c0e8804ce9568b517afd9d52aa9773737bae9d286bc833f6232a",
+      "text": "包含量化网格的缓冲区。"
+    },
+    {
+      "id": "QuantizedMeshTerrainData",
+      "field": "params/options.southIndices/description",
+      "sourceHash": "sha256:9f2f8059b8ab104be6baf948fda35e6f8e9c7c0927851dac0bed35bcacfd8d91",
+      "text": "瓦片南边界上的顶点索引。"
+    },
+    {
+      "id": "QuantizedMeshTerrainData",
+      "field": "params/options.southSkirtHeight/description",
+      "sourceHash": "sha256:aa21c247c413f8490c6bfc7765596c6a91755fd6b085e40a7467123502392eb1",
+      "text": "在瓦片南边界添加的裙边高度。"
+    },
+    {
+      "id": "QuantizedMeshTerrainData",
+      "field": "params/options.waterMask/description",
+      "sourceHash": "sha256:361d4eb3bd18fa3f59cfcf19f77ff82e8dcec6843e0b9715f89fc978e444f04c",
+      "text": "包含水体掩码的缓冲区。"
+    },
+    {
+      "id": "QuantizedMeshTerrainData",
+      "field": "params/options.westIndices/description",
+      "sourceHash": "sha256:e4ee14af8e9eecabfab8052f08b93fb7611762a7431179f9fb64bf65e0cca076",
+      "text": "瓦片西边界上的顶点索引。"
+    },
+    {
+      "id": "QuantizedMeshTerrainData",
+      "field": "params/options.westSkirtHeight/description",
+      "sourceHash": "sha256:faad50ccab6b57e79c4111d5e7c1e168f1ce9158c605ce15e299284dd94de54e",
+      "text": "在瓦片西边界添加的裙边高度。"
+    },
+    {
+      "id": "QuantizedMeshTerrainData#credits",
+      "field": "description",
+      "sourceHash": "sha256:c628e6ddb6a80e7510dcb1a6fddadcb6f5455da2daec3546625d195102f9a5da",
+      "text": "此瓦片的版权信息数组。"
+    },
+    {
+      "id": "QuantizedMeshTerrainData#interpolateHeight",
+      "field": "description",
+      "sourceHash": "sha256:88144b03eb60fd4e8864f0892d24501c6120591b73bcced524c10e5f7426446c",
+      "text": "计算指定经纬度处的地形高度。"
+    },
+    {
+      "id": "QuantizedMeshTerrainData#interpolateHeight",
+      "field": "params/latitude/description",
+      "sourceHash": "sha256:00a0b93eec52b3ee3f7703575f38a6d01a4d15e6aae5f541418e8609a70a78ea",
+      "text": "纬度，单位为弧度。"
+    },
+    {
+      "id": "QuantizedMeshTerrainData#interpolateHeight",
+      "field": "params/longitude/description",
+      "sourceHash": "sha256:bb151626940efec431decc1ce4a304d9cdd8e318fdceb82885eb6f8ffcfeca4c",
+      "text": "经度，单位为弧度。"
+    },
+    {
+      "id": "QuantizedMeshTerrainData#interpolateHeight",
+      "field": "params/rectangle/description",
+      "sourceHash": "sha256:b07353b5f3c7ba72e882a9aa05c04c7ad4584a45edd625d6e30070ecb5069385",
+      "text": "此地形数据覆盖的矩形。"
+    },
+    {
+      "id": "QuantizedMeshTerrainData#interpolateHeight",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:8544a4d5068084e6f66f0152b71e7705c61e516564340af613ce8c30f9fdb86e",
+      "text": "指定位置的地形高度。位置会被限制在矩形范围内，因此对远离矩形的位置，结果可能不正确。"
+    },
+    {
+      "id": "QuantizedMeshTerrainData#isChildAvailable",
+      "field": "description",
+      "sourceHash": "sha256:54dececb3f01e1566eaf6dc6e8b890e4fe841fae7b2894f8a3e21b0ed88ec3c6",
+      "text": "根据 {@link QuantizedMeshTerrainData.childTileMask} 判断指定子瓦片是否可用。给定的子瓦片坐标应对应本瓦片的四个子瓦片之一；若传入非子瓦片坐标，则返回东南子瓦片的可用性。"
+    },
+    {
+      "id": "QuantizedMeshTerrainData#isChildAvailable",
+      "field": "params/childX/description",
+      "sourceHash": "sha256:79368b1d51be32e4770b8fee08dbe3d0ac647de88d32d5b7dcab49a2630b7e68",
+      "text": "要检查可用性的子瓦片 X 坐标。"
+    },
+    {
+      "id": "QuantizedMeshTerrainData#isChildAvailable",
+      "field": "params/childY/description",
+      "sourceHash": "sha256:4c9ec3e91c268936ba70d99001f3ad3572cc0f634934febd211dd1a27863dff1",
+      "text": "要检查可用性的子瓦片 Y 坐标。"
+    },
+    {
+      "id": "QuantizedMeshTerrainData#isChildAvailable",
+      "field": "params/thisX/description",
+      "sourceHash": "sha256:702f3cb8a08ed3df14038d36563ad8fb38a5fa3d52cc7070cf9e0e3c44257759",
+      "text": "当前父瓦片的 X 坐标。"
+    },
+    {
+      "id": "QuantizedMeshTerrainData#isChildAvailable",
+      "field": "params/thisY/description",
+      "sourceHash": "sha256:d8d8c3471ba78a37f34ba161b991b25a9b4f73907cb75c338f63d05c922c90cb",
+      "text": "当前父瓦片的 Y 坐标。"
+    },
+    {
+      "id": "QuantizedMeshTerrainData#isChildAvailable",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:0dfcee8e13025de607fbb8f8b114eeda2c4e3ce906cb18f0b49c423ec3d08abd",
+      "text": "子瓦片可用时返回 true，否则返回 false。"
+    },
+    {
+      "id": "QuantizedMeshTerrainData#upsample",
+      "field": "description",
+      "sourceHash": "sha256:ebebb9ad2990b944e1562af46b2f366d9824595852f6341278e7d6ee5722e94b",
+      "text": "对本地形数据进行上采样，供后代瓦片使用。结果实例包含本实例的部分顶点，并在必要时进行插值。"
+    },
+    {
+      "id": "QuantizedMeshTerrainData#upsample",
+      "field": "params/descendantLevel/description",
+      "sourceHash": "sha256:a110dbd679ab0910fba08b0c0fe520f7fb74739b0e7bf2b9f7b740a3fbf804ac",
+      "text": "上采样目标后代瓦片在分块方案中的层级。"
+    },
+    {
+      "id": "QuantizedMeshTerrainData#upsample",
+      "field": "params/descendantX/description",
+      "sourceHash": "sha256:35f06e07b86e64f7812a0e09a30d334457e7fe3b123dd1a5a6ce160d5706dfe4",
+      "text": "上采样目标后代瓦片在分块方案中的 X 坐标。"
+    },
+    {
+      "id": "QuantizedMeshTerrainData#upsample",
+      "field": "params/descendantY/description",
+      "sourceHash": "sha256:99a65e3a7b31dececcbab9e70e88bb3e822d67df86bf91030a7b22306dfa9cbd",
+      "text": "上采样目标后代瓦片在分块方案中的 Y 坐标。"
+    },
+    {
+      "id": "QuantizedMeshTerrainData#upsample",
+      "field": "params/thisLevel/description",
+      "sourceHash": "sha256:721cc633438d55bb13c0cca6fa2ca56f7d8fb71c3d12fdf3b7e063ab6c4c24ba",
+      "text": "当前瓦片在分块方案中的层级。"
+    },
+    {
+      "id": "QuantizedMeshTerrainData#upsample",
+      "field": "params/thisX/description",
+      "sourceHash": "sha256:e073b08287120e1524e44fe8005c3006127deb69e36125d8aaebd018446ca467",
+      "text": "当前瓦片在分块方案中的 X 坐标。"
+    },
+    {
+      "id": "QuantizedMeshTerrainData#upsample",
+      "field": "params/thisY/description",
+      "sourceHash": "sha256:40bc42a2d7f2ebacca2ab69dee7d5029b7df988a578ef05255c6ca5e697d649c",
+      "text": "当前瓦片在分块方案中的 Y 坐标。"
+    },
+    {
+      "id": "QuantizedMeshTerrainData#upsample",
+      "field": "params/tilingScheme/description",
+      "sourceHash": "sha256:83e98590a1bd2e9e43c2a74d6cb2a13967b8838b4f44e208c05661e37b5c0288",
+      "text": "此地形数据的分块方案。"
+    },
+    {
+      "id": "QuantizedMeshTerrainData#upsample",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:18c97d62b0a91495575e4ddf0d7f69d7edb10dbc83e4bf4588a221495962fcda",
+      "text": "兑现为后代瓦片上采样高度图地形数据的 Promise；若异步上采样操作过多导致请求延后，则返回 undefined。"
+    },
+    {
+      "id": "QuantizedMeshTerrainData#wasCreatedByUpsampling",
+      "field": "description",
+      "sourceHash": "sha256:c8bf9b53abeca61b8b4ac3ad1cc51905b59337469db12c22d940dde8f0934b0e",
+      "text": "获取此地形数据是否由较低分辨率地形数据上采样生成。为 false 时，表示来自其他来源，例如远程服务器下载。通过 {@link HeightmapTerrainData#upsample} 返回的实例应为 true。"
+    },
+    {
+      "id": "QuantizedMeshTerrainData#wasCreatedByUpsampling",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:2258154f2fdd9897a78865fb339781e1c4e948d85070309baeeb0ec7849781b5",
+      "text": "此实例由上采样生成时返回 true，否则返回 false。"
+    },
+    {
+      "id": "QuantizedMeshTerrainData#waterMask",
+      "field": "description",
+      "sourceHash": "sha256:ee31c0eeb2be6f311725661a647f460ea5350984094d6d16dc7976da161ad52d",
+      "text": "此地形数据包含的水体掩码，若有。掩码为矩形 Uint8Array 或图像，255 表示水域，0 表示陆地，也允许中间值以平滑混合水陆交界。"
+    },
+    {
+      "id": "sampleTerrain",
+      "field": "description",
+      "sourceHash": "sha256:6817cba2846105b28e2d8dc34a340816249f6a3bfd6ddf025133c35a6748415e",
+      "text": "通过向地形提供者请求瓦片、采样和插值，查询一组 {@link Cartographic} 位置的地形高度。插值方式与指定层级渲染地形所用的三角形一致。查询异步执行，返回的 Promise 在查询完成后兑现。每个位置的 height 会被原地修改。如果指定层级在该位置没有地形数据，或发生其他错误而无法确定高度，则将 height 设为 undefined。与 {@link Cartographic} 类型的通常约定一致，这里的高度是相对于参考椭球（如 {@link Ellipsoid.WGS84}）的高度，而非相对于平均海平面的海拔；因此在海洋中采样时，结果不一定为 0.0。此函数需要指定地形细节层级；如需尽可能精确的高度（使用可用的最高细节层级），请使用 {@link sampleTerrainMostDetailed}。"
+    },
+    {
+      "id": "sampleTerrain",
+      "field": "params/level/description",
+      "sourceHash": "sha256:76081a7d846d3408b1070905c0c593cafe60bf7da7cac8eb32dad97d316db6f2",
+      "text": "查询地形高度所用的地形细节层级。"
+    },
+    {
+      "id": "sampleTerrain",
+      "field": "params/positions/description",
+      "sourceHash": "sha256:2f6fd658ff4e78a7d5b4f28dbec8ca617670ec29cc27194edcdc4de91080d3b1",
+      "text": "需要更新地形高度的位置数组。"
+    },
+    {
+      "id": "sampleTerrain",
+      "field": "params/rejectOnTileFail/description",
+      "sourceHash": "sha256:df75a506da7a3e6ae81331b2e8588c6b0b740ba3027256e53c7a4a8ae440460c",
+      "text": "为 true 时，任意地形瓦片请求失败都会使 Promise 拒绝；为 false 时，相应的返回高度为 undefined。"
+    },
+    {
+      "id": "sampleTerrain",
+      "field": "params/terrainProvider/description",
+      "sourceHash": "sha256:5e3f5ae3f9ed62445e89e2f4bcaa36f14ba05044bcd585268177ee3ac2c3e02a",
+      "text": "用于查询高度的地形提供者。"
+    },
+    {
+      "id": "sampleTerrain",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:5e6cc302847b6dc3800bc96ddb3fae350fc9e1344c2568ecc20a4ee7f4bd70d1",
+      "text": "查询完成后兑现为所传入位置数组的 Promise。"
+    },
+    {
+      "id": "sampleTerrainMostDetailed",
+      "field": "description",
+      "sourceHash": "sha256:98b2d502d5f25d08af3abed9d44a3d7e06f0e366af30e5b366622711d01c5510",
+      "text": "针对地形数据集的最高可用瓦片层级发起 sampleTerrain() 请求。"
+    },
+    {
+      "id": "sampleTerrainMostDetailed",
+      "field": "params/positions/description",
+      "sourceHash": "sha256:2f6fd658ff4e78a7d5b4f28dbec8ca617670ec29cc27194edcdc4de91080d3b1",
+      "text": "需要更新地形高度的位置数组。"
+    },
+    {
+      "id": "sampleTerrainMostDetailed",
+      "field": "params/rejectOnTileFail/description",
+      "sourceHash": "sha256:2fcd986b03a5ef9bf5a379c05a9b2037699b4a78b07068872e0d766a796e6430",
+      "text": "为 true 时，地形瓦片请求失败会使 Promise 拒绝；为 false 时，相应的返回高度为 undefined。"
+    },
+    {
+      "id": "sampleTerrainMostDetailed",
+      "field": "params/terrainProvider/description",
+      "sourceHash": "sha256:5e3f5ae3f9ed62445e89e2f4bcaa36f14ba05044bcd585268177ee3ac2c3e02a",
+      "text": "用于查询高度的地形提供者。"
+    },
+    {
+      "id": "sampleTerrainMostDetailed",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:cc6bacc59a181f697c09c98156ca3684c77488f77d2708ff7d02809cd1c911d6",
+      "text": "查询完成后兑现为所传入位置数组的 Promise。如果地形提供者的 `availability` 属性为 undefined，则该 Promise 会拒绝。"
+    },
+    {
+      "id": "Terrain.ErrorEventCallback",
+      "field": "description",
+      "sourceHash": "sha256:15086e4f00b387a9cbe19a71924d8e97373cd654d3e5919a5d954785bed21fa6",
+      "text": "发生错误时调用的函数。"
+    },
+    {
+      "id": "Terrain.ErrorEventCallback",
+      "field": "params/err/description",
+      "sourceHash": "sha256:b761f1134645ff39729f055b3c8a97d4ac9324b3831b2894630b48370362e628",
+      "text": "包含所发生错误详细信息的对象。"
+    },
+    {
+      "id": "Terrain.fromWorldBathymetry",
+      "field": "description",
+      "sourceHash": "sha256:200095f09854cee0dbabf37c8839ac02437550a0632f88f16afcae04a56e3907",
+      "text": "为 {@link https://cesium.com/content/#cesium-world-bathymetry|Cesium 全球海底地形} 创建 {@link Terrain} 实例。"
+    },
+    {
+      "id": "Terrain.fromWorldBathymetry",
+      "field": "params/options.requestVertexNormals/description",
+      "sourceHash": "sha256:53c92dec8ae14bf3c8a2d1addf7fe56a3555f6501d801cb15480d65adb6fcda5",
+      "text": "指示客户端是否应向服务器请求可用的附加光照信息。"
+    },
+    {
+      "id": "Terrain.fromWorldBathymetry",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:99169bf49e98dd27848190f18b9adf08ddd90225cedaaf5d7fd0637f02f7af03",
+      "text": "CesiumTerrainProvider 的异步辅助对象。"
+    },
+    {
+      "id": "Terrain.fromWorldTerrain",
+      "field": "description",
+      "sourceHash": "sha256:8d1d9955b71650b9215edb8b7a8cb9a89f6f8f2b4451ac118e37aa378a5d9353",
+      "text": "为 {@link https://cesium.com/content/#cesium-world-terrain|Cesium 全球地形} 创建 {@link Terrain} 实例。"
+    },
+    {
+      "id": "Terrain.fromWorldTerrain",
+      "field": "params/options.requestVertexNormals/description",
+      "sourceHash": "sha256:53c92dec8ae14bf3c8a2d1addf7fe56a3555f6501d801cb15480d65adb6fcda5",
+      "text": "指示客户端是否应向服务器请求可用的附加光照信息。"
+    },
+    {
+      "id": "Terrain.fromWorldTerrain",
+      "field": "params/options.requestWaterMask/description",
+      "sourceHash": "sha256:4f0341c4b00236e3e6fb372e8ced3145e8e59d68785da6dc2e7fbd4af55b7cc7",
+      "text": "指示客户端是否应向服务器请求可用的逐瓦片水体掩码。"
+    },
+    {
+      "id": "Terrain.fromWorldTerrain",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:99169bf49e98dd27848190f18b9adf08ddd90225cedaaf5d7fd0637f02f7af03",
+      "text": "CesiumTerrainProvider 的异步辅助对象。"
+    },
+    {
+      "id": "Terrain.ReadyEventCallback",
+      "field": "description",
+      "sourceHash": "sha256:ed5f3f30d854565a79bb44ed8e2a6a09f6c9bdcc1bca9bdbb40545e34d4c8ca4",
+      "text": "提供者创建完成时调用的函数。"
+    },
+    {
+      "id": "Terrain.ReadyEventCallback",
+      "field": "params/provider/description",
+      "sourceHash": "sha256:b13a1a29d1cb8900f21f90d312a84573a2ab05985304d8e6df148829991c5f00",
+      "text": "创建的地形提供者。"
+    },
+    {
+      "id": "Terrain",
+      "field": "description",
+      "sourceHash": "sha256:560a5e5e331151f18e56a6ee411a113959e09ab4971044082f760bcf5f08dfc1",
+      "text": "管理地形提供者异步操作的辅助对象。"
+    },
+    {
+      "id": "Terrain",
+      "field": "params/terrainProviderPromise/description",
+      "sourceHash": "sha256:48cacc7544846a06d97e5cd497fbfa453367a6ef636b5ca255916beb62794ef8",
+      "text": "兑现为地形提供者的 Promise。"
+    },
+    {
+      "id": "Terrain#errorEvent",
+      "field": "description",
+      "sourceHash": "sha256:207e48e3b8b7edc2f6528e2237e515ba0b54188bf2e276082cf7106d5813fbef",
+      "text": "获取地形提供者发生异步错误时触发的事件。订阅者可收到错误通知并尝试恢复，事件监听器接收所抛出的错误实例。"
+    },
+    {
+      "id": "Terrain#provider",
+      "field": "description",
+      "sourceHash": "sha256:16c7a99bb712c31e9a5de705074689059c071bbb2110d8cd9ded670500c46bf8",
+      "text": "为地球提供表面几何体的地形提供者。在触发 {@link Terrain.readyEvent} 之前不要使用。"
+    },
+    {
+      "id": "Terrain#ready",
+      "field": "description",
+      "sourceHash": "sha256:216021cbdb463987be228679cb7af35f513e5cc37bd6dbdd74a4826066f3b15b",
+      "text": "地形提供者成功创建后返回 true，否则返回 false。"
+    },
+    {
+      "id": "Terrain#readyEvent",
+      "field": "description",
+      "sourceHash": "sha256:634f453192084adca2d81fbfc5bca994c5174a1f113b897c49341d2a8f2a2f23",
+      "text": "获取地形提供者成功创建后触发的事件。监听器接收创建的 {@link TerrainProvider} 实例。"
+    },
+    {
+      "id": "TerrainData",
+      "field": "description",
+      "sourceHash": "sha256:6d11328e667ac9ba3f1d55f2c7a5c33ebef9aca10279d55cb674441e2d71c8ff",
+      "text": "单个瓦片的地形数据。此类型描述接口，不应直接实例化。"
+    },
+    {
+      "id": "TerrainData#credits",
+      "field": "description",
+      "sourceHash": "sha256:c628e6ddb6a80e7510dcb1a6fddadcb6f5455da2daec3546625d195102f9a5da",
+      "text": "此瓦片的版权信息数组。"
+    },
+    {
+      "id": "TerrainData#interpolateHeight",
+      "field": "description",
+      "sourceHash": "sha256:88144b03eb60fd4e8864f0892d24501c6120591b73bcced524c10e5f7426446c",
+      "text": "计算指定经纬度处的地形高度。"
+    },
+    {
+      "id": "TerrainData#interpolateHeight",
+      "field": "params/latitude/description",
+      "sourceHash": "sha256:00a0b93eec52b3ee3f7703575f38a6d01a4d15e6aae5f541418e8609a70a78ea",
+      "text": "纬度，单位为弧度。"
+    },
+    {
+      "id": "TerrainData#interpolateHeight",
+      "field": "params/longitude/description",
+      "sourceHash": "sha256:bb151626940efec431decc1ce4a304d9cdd8e318fdceb82885eb6f8ffcfeca4c",
+      "text": "经度，单位为弧度。"
+    },
+    {
+      "id": "TerrainData#interpolateHeight",
+      "field": "params/rectangle/description",
+      "sourceHash": "sha256:b07353b5f3c7ba72e882a9aa05c04c7ad4584a45edd625d6e30070ecb5069385",
+      "text": "此地形数据覆盖的矩形。"
+    },
+    {
+      "id": "TerrainData#interpolateHeight",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:0ca8b73b32ae578113e9b3b12ae8c15d9737418404400ba4cf61591dbfc098fc",
+      "text": "指定位置的地形高度。若位置在矩形外，此方法会进行高度外推；远离矩形时，结果可能严重不准确。"
+    },
+    {
+      "id": "TerrainData#isChildAvailable",
+      "field": "description",
+      "sourceHash": "sha256:980d59b01ef0d888917119f051d60083a29ff33b1d36204eb8532b7e4ea9ca01",
+      "text": "根据 {@link TerrainData#childTileMask} 判断给定子瓦片是否可用。假定给定坐标属于当前瓦片的四个子瓦片之一；若传入非子瓦片坐标，则返回东南子瓦片的可用性。"
+    },
+    {
+      "id": "TerrainData#isChildAvailable",
+      "field": "params/childX/description",
+      "sourceHash": "sha256:79368b1d51be32e4770b8fee08dbe3d0ac647de88d32d5b7dcab49a2630b7e68",
+      "text": "要检查可用性的子瓦片 X 坐标。"
+    },
+    {
+      "id": "TerrainData#isChildAvailable",
+      "field": "params/childY/description",
+      "sourceHash": "sha256:4c9ec3e91c268936ba70d99001f3ad3572cc0f634934febd211dd1a27863dff1",
+      "text": "要检查可用性的子瓦片 Y 坐标。"
+    },
+    {
+      "id": "TerrainData#isChildAvailable",
+      "field": "params/thisX/description",
+      "sourceHash": "sha256:702f3cb8a08ed3df14038d36563ad8fb38a5fa3d52cc7070cf9e0e3c44257759",
+      "text": "当前父瓦片的 X 坐标。"
+    },
+    {
+      "id": "TerrainData#isChildAvailable",
+      "field": "params/thisY/description",
+      "sourceHash": "sha256:d8d8c3471ba78a37f34ba161b991b25a9b4f73907cb75c338f63d05c922c90cb",
+      "text": "当前父瓦片的 Y 坐标。"
+    },
+    {
+      "id": "TerrainData#isChildAvailable",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:0dfcee8e13025de607fbb8f8b114eeda2c4e3ce906cb18f0b49c423ec3d08abd",
+      "text": "子瓦片可用时返回 true，否则返回 false。"
+    },
+    {
+      "id": "TerrainData#upsample",
+      "field": "description",
+      "sourceHash": "sha256:aac0bcde455d1e9882141f38b53fc4ab7be713ca5f9fdbc567bc08b5cf2adc08",
+      "text": "对此地形数据上采样，供后代瓦片使用。"
+    },
+    {
+      "id": "TerrainData#upsample",
+      "field": "params/descendantLevel/description",
+      "sourceHash": "sha256:a110dbd679ab0910fba08b0c0fe520f7fb74739b0e7bf2b9f7b740a3fbf804ac",
+      "text": "上采样目标后代瓦片在分块方案中的层级。"
+    },
+    {
+      "id": "TerrainData#upsample",
+      "field": "params/descendantX/description",
+      "sourceHash": "sha256:35f06e07b86e64f7812a0e09a30d334457e7fe3b123dd1a5a6ce160d5706dfe4",
+      "text": "上采样目标后代瓦片在分块方案中的 X 坐标。"
+    },
+    {
+      "id": "TerrainData#upsample",
+      "field": "params/descendantY/description",
+      "sourceHash": "sha256:99a65e3a7b31dececcbab9e70e88bb3e822d67df86bf91030a7b22306dfa9cbd",
+      "text": "上采样目标后代瓦片在分块方案中的 Y 坐标。"
+    },
+    {
+      "id": "TerrainData#upsample",
+      "field": "params/thisLevel/description",
+      "sourceHash": "sha256:721cc633438d55bb13c0cca6fa2ca56f7d8fb71c3d12fdf3b7e063ab6c4c24ba",
+      "text": "当前瓦片在分块方案中的层级。"
+    },
+    {
+      "id": "TerrainData#upsample",
+      "field": "params/thisX/description",
+      "sourceHash": "sha256:e073b08287120e1524e44fe8005c3006127deb69e36125d8aaebd018446ca467",
+      "text": "当前瓦片在分块方案中的 X 坐标。"
+    },
+    {
+      "id": "TerrainData#upsample",
+      "field": "params/thisY/description",
+      "sourceHash": "sha256:40bc42a2d7f2ebacca2ab69dee7d5029b7df988a578ef05255c6ca5e697d649c",
+      "text": "当前瓦片在分块方案中的 Y 坐标。"
+    },
+    {
+      "id": "TerrainData#upsample",
+      "field": "params/tilingScheme/description",
+      "sourceHash": "sha256:83e98590a1bd2e9e43c2a74d6cb2a13967b8838b4f44e208c05661e37b5c0288",
+      "text": "此地形数据的分块方案。"
+    },
+    {
+      "id": "TerrainData#upsample",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:ae3606a3bc8396a18bec1a7bc52021f255d46535d2e59dc816b485134f1d69c7",
+      "text": "兑现为后代瓦片上采样地形数据的 Promise；若正在进行的异步上采样操作过多，导致请求延后，则返回 undefined。"
+    },
+    {
+      "id": "TerrainData#wasCreatedByUpsampling",
+      "field": "description",
+      "sourceHash": "sha256:665e6b7c8b3a30ec1333a15be970223c7cf56cdbf44af3953fd6c291b3e85b00",
+      "text": "获取此地形数据是否由较低分辨率地形数据上采样生成。为 false 时，表示来自其他来源，例如远程服务器下载。通过 {@link TerrainData#upsample} 返回的实例应为 true。"
+    },
+    {
+      "id": "TerrainData#wasCreatedByUpsampling",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:2258154f2fdd9897a78865fb339781e1c4e948d85070309baeeb0ec7849781b5",
+      "text": "此实例由上采样生成时返回 true，否则返回 false。"
+    },
+    {
+      "id": "TerrainData#waterMask",
+      "field": "description",
+      "sourceHash": "sha256:ee31c0eeb2be6f311725661a647f460ea5350984094d6d16dc7976da161ad52d",
+      "text": "此地形数据包含的水体掩码，若有。掩码为矩形 Uint8Array 或图像，255 表示水域，0 表示陆地，也允许中间值以平滑混合水陆交界。"
+    },
+    {
+      "id": "TerrainProvider.ErrorEvent",
+      "field": "description",
+      "sourceHash": "sha256:15086e4f00b387a9cbe19a71924d8e97373cd654d3e5919a5d954785bed21fa6",
+      "text": "发生错误时调用的函数。"
+    },
+    {
+      "id": "TerrainProvider.ErrorEvent",
+      "field": "params/err/description",
+      "sourceHash": "sha256:b761f1134645ff39729f055b3c8a97d4ac9324b3831b2894630b48370362e628",
+      "text": "包含所发生错误详细信息的对象。"
+    },
+    {
+      "id": "TerrainProvider.getEstimatedLevelZeroGeometricErrorForAHeightmap",
+      "field": "description",
+      "sourceHash": "sha256:b6a3a0a66fade9cf8c792be8a9c714e949a5ee67431649ee5ba1ab0f2de4a93b",
+      "text": "在几何体来自高度图时，确定合适的几何误差估计。"
+    },
+    {
+      "id": "TerrainProvider.getEstimatedLevelZeroGeometricErrorForAHeightmap",
+      "field": "params/ellipsoid/description",
+      "sourceHash": "sha256:62172553c82a43a6a2063e17b1aae22d4b88ed95c955d057525f073d2ccb84b6",
+      "text": "地形所附着的椭球。"
+    },
+    {
+      "id": "TerrainProvider.getEstimatedLevelZeroGeometricErrorForAHeightmap",
+      "field": "params/numberOfTilesAtLevelZero/description",
+      "sourceHash": "sha256:c01f6b23920a3da1db583282ce309c2b399507b9b8da5d7905c262684620c36f",
+      "text": "零级瓦片在水平方向上的数量。"
+    },
+    {
+      "id": "TerrainProvider.getEstimatedLevelZeroGeometricErrorForAHeightmap",
+      "field": "params/tileImageWidth/description",
+      "sourceHash": "sha256:ea02b7d2476862db0c9b5d4b4c4753ec7c922a7e7dd7dc8ce16da38207e8b3a7",
+      "text": "单个瓦片关联高度图的宽度，单位为像素。"
+    },
+    {
+      "id": "TerrainProvider.getEstimatedLevelZeroGeometricErrorForAHeightmap",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:a1c8441ecaa2961edf128ef3925d0334c996be4102570d67a79be5f9b919c675",
+      "text": "估算的几何误差。"
+    },
+    {
+      "id": "TerrainProvider.getRegularGridIndices",
+      "field": "description",
+      "sourceHash": "sha256:249919eda28727a2c2d0805e4f12d9c183e10d3fec37a7044abad616af1ef80f",
+      "text": "获取表示规则网格的三角网格索引列表。对相同宽高多次调用会返回同一索引列表。顶点总数 width * height 必须小于 4,294,967,296。"
+    },
+    {
+      "id": "TerrainProvider.getRegularGridIndices",
+      "field": "params/height/description",
+      "sourceHash": "sha256:fab20245972b357bba935fc41fa1326661adbe8281a08aaf09864add76064cba",
+      "text": "规则网格垂直方向的顶点数量。"
+    },
+    {
+      "id": "TerrainProvider.getRegularGridIndices",
+      "field": "params/width/description",
+      "sourceHash": "sha256:9da339611f095dcdc1996b5196dafe040ab07b399428a423be99f7e162b43bc8",
+      "text": "规则网格水平方向的顶点数量。"
+    },
+    {
+      "id": "TerrainProvider.getRegularGridIndices",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:cf4eabf671d019b1ad62a1f3eb6b4f0449c0dc361be23272a4a738f0d878a95d",
+      "text": "索引列表。顶点总数小于 65,536 时返回 Uint16Array，否则返回 Uint32Array；顶点总数必须小于 4,294,967,296。这些阈值是顶点数量，而非缓冲区字节数。"
+    },
+    {
+      "id": "TerrainProvider.heightmapTerrainQuality",
+      "field": "description",
+      "sourceHash": "sha256:fbf701c13769cdc06b747d42af5c08f645d5f1bac6f72299a72ee78118e3b35f",
+      "text": "指定由高度图生成的地形质量。1.0 可确保相邻高度图顶点的屏幕间距不超过 {@link Globe.maximumScreenSpaceError} 像素，但速度可能很慢。0.5 会将零级几何误差估计减半，允许相邻顶点的屏幕像素间距加倍，从而更快渲染。"
+    },
+    {
+      "id": "TerrainProvider",
+      "field": "description",
+      "sourceHash": "sha256:efaca4f41206599886f030691cdf27f334527de63d3854b628c90aa02076d0d3",
+      "text": "提供椭球表面的地形或其他几何体，表面几何按 {@link TilingScheme} 组织为瓦片金字塔。此类型描述接口，不应直接实例化。"
+    },
+    {
+      "id": "TerrainProvider#availability",
+      "field": "description",
+      "sourceHash": "sha256:918c02c1a26888db9525a835e53858406b7ae93b407d5a2cb60d44d9d1140395",
+      "text": "获取可用于查询点、矩形等位置处地形可用性的对象。若没有可用性信息，此属性可能为 undefined。"
+    },
+    {
+      "id": "TerrainProvider#credit",
+      "field": "description",
+      "sourceHash": "sha256:a10cbf8ce42f725d7a91883361547aa9fc646e3f8676e4f7892d97f5015418b8",
+      "text": "获取地形提供者活动时显示的版权信息，通常用于注明地形来源。"
+    },
+    {
+      "id": "TerrainProvider#errorEvent",
+      "field": "description",
+      "sourceHash": "sha256:20599df7d9af09c18f19c3dedb8a28d697e848d6cfcf800d25c8be18b0ff9daf",
+      "text": "获取地形提供者发生异步错误时触发的事件。订阅者可收到错误通知并尝试恢复。事件监听器接收 {@link TileProviderError} 实例。"
+    },
+    {
+      "id": "TerrainProvider#getLevelMaximumGeometricError",
+      "field": "description",
+      "sourceHash": "sha256:16493e83c2b411e969eb0bb84957d83fa8b790f189e6998f1e158f0c7d066d55",
+      "text": "获取给定层级瓦片允许的最大几何误差。"
+    },
+    {
+      "id": "TerrainProvider#getLevelMaximumGeometricError",
+      "field": "params/level/description",
+      "sourceHash": "sha256:2158f46da843486bdc37028e4478405a094e1f4a009ee6ee934ef1b93d130594",
+      "text": "要获取最大几何误差的瓦片层级。"
+    },
+    {
+      "id": "TerrainProvider#getLevelMaximumGeometricError",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:269aa9bca56e8987258839baa4900e4a37e1e5f518f2e89f08c84b4db69cc44f",
+      "text": "最大几何误差。"
+    },
+    {
+      "id": "TerrainProvider#getTileDataAvailable",
+      "field": "description",
+      "sourceHash": "sha256:a0739c45fd85b8442b0d90556a11b184f2c4b5fe48bd1d24be252c906c1cd787",
+      "text": "确定某瓦片的数据是否可供加载。"
+    },
+    {
+      "id": "TerrainProvider#getTileDataAvailable",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:b8af1ba4180ca59cce32a1e0bcc5077cea884ef7676d0110aa4d728b1605bf22",
+      "text": "地形提供者不支持时返回 undefined，否则返回 true 或 false。"
+    },
+    {
+      "id": "TerrainProvider#hasVertexNormals",
+      "field": "description",
+      "sourceHash": "sha256:67a48f700e35b798865b8df56c91870320f54d5bb41d66642fef70823d62158a",
+      "text": "获取所请求瓦片是否包含顶点法线。"
+    },
+    {
+      "id": "TerrainProvider#hasWaterMask",
+      "field": "description",
+      "sourceHash": "sha256:3d4b90be88ad21cd066d73a6198eb4bd31775344fbcfa5db5adaf9b7d3ad98cc",
+      "text": "获取提供者是否包含水体掩码。掩码区分水域与陆地，以便将水域渲染为具有动态波浪的反射表面。"
+    },
+    {
+      "id": "TerrainProvider#loadTileDataAvailability",
+      "field": "description",
+      "sourceHash": "sha256:788bf4766e010ffafbe52b2acf69391ab9530eb3e4cccd4d306a2e7603c91fe3",
+      "text": "确保加载某瓦片的可用性数据。"
+    },
+    {
+      "id": "TerrainProvider#loadTileDataAvailability",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:c5e9704ceaab793f8aeb8de76e28a4a764d7ebe292b3f2b0c9530be7bd4d5967",
+      "text": "无需加载时返回 undefined；否则返回在所需瓦片全部加载完成后兑现的 Promise。"
+    },
+    {
+      "id": "TerrainProvider#requestTileGeometry",
+      "field": "description",
+      "sourceHash": "sha256:756aa8bee2a3018874009a88b5c3c7272693fd5ef7463806f43ff07272b1def2",
+      "text": "请求给定瓦片的几何体。结果必须包含地形数据，并可选包含水体掩码和子瓦片可用性信息。"
+    },
+    {
+      "id": "TerrainProvider#requestTileGeometry",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:e7b6ed4db3582973863fa99b060691f2f9b446984cbb15803952cb57f2886dec",
+      "text": "所请求几何体的 Promise。若返回 undefined 而非 Promise，表示已有过多待处理请求，将稍后重试。"
+    },
+    {
+      "id": "TerrainProvider#tilingScheme",
+      "field": "description",
+      "sourceHash": "sha256:478090a2802d321f1cc659465d24707d2d3534e2ba2c7af34d4f754e7f36de24",
+      "text": "获取提供者使用的分块方案。"
+    },
+    {
+      "id": "VRTheWorldTerrainProvider.ConstructorOptions",
+      "field": "description",
+      "sourceHash": "sha256:fe3a9dd662b40708e18ba201487a8fab7a280062a2e17bfe475452f65152aa11",
+      "text": "VRTheWorldTerrainProvider 构造函数的初始化选项。"
+    },
+    {
+      "id": "VRTheWorldTerrainProvider.ConstructorOptions",
+      "field": "properties/ellipsoid/description",
+      "sourceHash": "sha256:64ad4e5f7e94b06bc611c8429591da991fa88bdb2f4886136ea1dbbdb1d0b372",
+      "text": "椭球。若未指定，则使用默认椭球。"
+    },
+    {
+      "id": "VRTheWorldTerrainProvider.fromUrl",
+      "field": "description",
+      "sourceHash": "sha256:8ca4559fbed54fef9a1445c29d145dc9ac8416a0fad210dee11bc30617fbdd44",
+      "text": "创建一个 {@link TerrainProvider}，对从 {@link http://vr-theworld.com/|VT MÄK VR-TheWorld 服务器}获取的高度图进行细分，以生成地形几何。"
+    },
+    {
+      "id": "VRTheWorldTerrainProvider.fromUrl",
+      "field": "exceptions/0/description",
+      "sourceHash": "sha256:8fdf62542b000604e1d78001406bc2164e7e1c9e0aafff72c03d5c2b9f58d026",
+      "text": "元数据指定了未知的 SRS。"
+    },
+    {
+      "id": "VRTheWorldTerrainProvider.fromUrl",
+      "field": "params/options/description",
+      "sourceHash": "sha256:7fd5e48c805a1ec2c19032658555e50e0c3ed2802396c9dafaafc8eb754198ee",
+      "text": "描述初始化选项的对象。"
+    },
+    {
+      "id": "VRTheWorldTerrainProvider.fromUrl",
+      "field": "params/url/description",
+      "sourceHash": "sha256:93ee10aed67c86f0c6eaa3d8ea2b93ff4ca48a5d759c3e45cfaafa4e2cc8e2d7",
+      "text": "VR-TheWorld TileMap 的 URL。"
+    },
+    {
+      "id": "VRTheWorldTerrainProvider",
+      "field": "description",
+      "sourceHash": "sha256:a18e8f4ffee0a19601a6d4885866a735976f04f17adfb1ee3022bb05798828c5",
+      "text": "<div class=\"notice\">\n请调用 {@link VRTheWorldTerrainProvider.fromUrl} 创建 VRTheWorldTerrainProvider，不要直接调用构造函数。\n</div>\n\n对从 {@link http://vr-theworld.com/|VT MÄK VR-TheWorld 服务器}获取的高度图进行细分以生成地形几何的 {@link TerrainProvider}。"
+    },
+    {
+      "id": "VRTheWorldTerrainProvider",
+      "field": "params/options/description",
+      "sourceHash": "sha256:7fd5e48c805a1ec2c19032658555e50e0c3ed2802396c9dafaafc8eb754198ee",
+      "text": "描述初始化选项的对象。"
+    },
+    {
+      "id": "VRTheWorldTerrainProvider#availability",
+      "field": "description",
+      "sourceHash": "sha256:918c02c1a26888db9525a835e53858406b7ae93b407d5a2cb60d44d9d1140395",
+      "text": "获取可用于查询点、矩形等位置处地形可用性的对象。若没有可用性信息，此属性可能为 undefined。"
+    },
+    {
+      "id": "VRTheWorldTerrainProvider#credit",
+      "field": "description",
+      "sourceHash": "sha256:a10cbf8ce42f725d7a91883361547aa9fc646e3f8676e4f7892d97f5015418b8",
+      "text": "获取地形提供者活动时显示的版权信息，通常用于注明地形来源。"
+    },
+    {
+      "id": "VRTheWorldTerrainProvider#errorEvent",
+      "field": "description",
+      "sourceHash": "sha256:20599df7d9af09c18f19c3dedb8a28d697e848d6cfcf800d25c8be18b0ff9daf",
+      "text": "获取地形提供者发生异步错误时触发的事件。订阅者可收到错误通知并尝试恢复。事件监听器接收 {@link TileProviderError} 实例。"
+    },
+    {
+      "id": "VRTheWorldTerrainProvider#getLevelMaximumGeometricError",
+      "field": "description",
+      "sourceHash": "sha256:16493e83c2b411e969eb0bb84957d83fa8b790f189e6998f1e158f0c7d066d55",
+      "text": "获取给定层级瓦片允许的最大几何误差。"
+    },
+    {
+      "id": "VRTheWorldTerrainProvider#getLevelMaximumGeometricError",
+      "field": "params/level/description",
+      "sourceHash": "sha256:2158f46da843486bdc37028e4478405a094e1f4a009ee6ee934ef1b93d130594",
+      "text": "要获取最大几何误差的瓦片层级。"
+    },
+    {
+      "id": "VRTheWorldTerrainProvider#getLevelMaximumGeometricError",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:269aa9bca56e8987258839baa4900e4a37e1e5f518f2e89f08c84b4db69cc44f",
+      "text": "最大几何误差。"
+    },
+    {
+      "id": "VRTheWorldTerrainProvider#getTileDataAvailable",
+      "field": "description",
+      "sourceHash": "sha256:a0739c45fd85b8442b0d90556a11b184f2c4b5fe48bd1d24be252c906c1cd787",
+      "text": "确定某瓦片的数据是否可供加载。"
+    },
+    {
+      "id": "VRTheWorldTerrainProvider#getTileDataAvailable",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:a2c94c84e5c9906a9aea353d897bfbd187466e35fd75dec5a2d915793e06fc0e",
+      "text": "不支持时返回 undefined，否则返回 true 或 false。"
+    },
+    {
+      "id": "VRTheWorldTerrainProvider#hasVertexNormals",
+      "field": "description",
+      "sourceHash": "sha256:67a48f700e35b798865b8df56c91870320f54d5bb41d66642fef70823d62158a",
+      "text": "获取所请求瓦片是否包含顶点法线。"
+    },
+    {
+      "id": "VRTheWorldTerrainProvider#hasWaterMask",
+      "field": "description",
+      "sourceHash": "sha256:3d4b90be88ad21cd066d73a6198eb4bd31775344fbcfa5db5adaf9b7d3ad98cc",
+      "text": "获取提供者是否包含水体掩码。掩码区分水域与陆地，以便将水域渲染为具有动态波浪的反射表面。"
+    },
+    {
+      "id": "VRTheWorldTerrainProvider#loadTileDataAvailability",
+      "field": "description",
+      "sourceHash": "sha256:788bf4766e010ffafbe52b2acf69391ab9530eb3e4cccd4d306a2e7603c91fe3",
+      "text": "确保加载某瓦片的可用性数据。"
+    },
+    {
+      "id": "VRTheWorldTerrainProvider#loadTileDataAvailability",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:c5e9704ceaab793f8aeb8de76e28a4a764d7ebe292b3f2b0c9530be7bd4d5967",
+      "text": "无需加载时返回 undefined；否则返回在所需瓦片全部加载完成后兑现的 Promise。"
+    },
+    {
+      "id": "VRTheWorldTerrainProvider#requestTileGeometry",
+      "field": "description",
+      "sourceHash": "sha256:256425c1675ad2d2c90401790879b53c12f7e4058049bdb09e377c2f8618c394",
+      "text": "请求给定瓦片的几何体。结果包含地形数据，并指示全部子瓦片均可用。"
+    },
+    {
+      "id": "VRTheWorldTerrainProvider#requestTileGeometry",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:e7b6ed4db3582973863fa99b060691f2f9b446984cbb15803952cb57f2886dec",
+      "text": "所请求几何体的 Promise。若返回 undefined 而非 Promise，表示已有过多待处理请求，将稍后重试。"
+    }
+  ]
+}

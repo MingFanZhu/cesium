@@ -60,8 +60,8 @@ phases, each reviewed and committed before the next begins. No new runtime or ge
 
 - [T1 foundation](2026-10-30-t1-foundation-translation.md): completed and reviewed;
   coordinate/vector/matrix/color/bounds/math APIs add 2,107 fields, reaching 41.8% native coverage.
-- T2 loading and time: resources, time, terrain and provider APIs; inspect the remaining report
-  after T1 before choosing concrete roots and files.
+- [T2 loading and time](2026-10-30-t2-loading-time-translation.md): active after T1 checkpoint
+  `7141d62015`; 60 resource/time/terrain/provider roots with 1,699 missing fields.
 - T3 rendering and data: models, rendering options, data/property/geometry APIs; elaborate only
   when entered using the then-current inventory.
 - T4 remainder and final gate: cover every remaining native field, resolve changed/unused

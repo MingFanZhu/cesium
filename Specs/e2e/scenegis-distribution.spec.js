@@ -300,3 +300,34 @@ test("foundation documentation displays matrix semantics and corrected random ra
   });
   expect(errors).toEqual([]);
 });
+
+test("loading and time documentation displays source-specific Chinese contracts", async ({
+  page,
+}, info) => {
+  const errors = [];
+  page.on("pageerror", (error) => errors.push(error.message));
+  page.on("response", (response) => {
+    if (response.status() >= 400) {
+      errors.push(`${response.status()} ${response.url()}`);
+    }
+  });
+  await page.route(/^https?:\/\/(?!127\.0\.0\.1:8104)/, (route) =>
+    route.abort(),
+  );
+  const prefix = "/deep/site/vendor/engine/Documentation/";
+  await page.goto(`${prefix}Resource.html#setTemplateValues`);
+  await expect(page.locator('[id="setTemplateValues"]')).toBeVisible();
+  await expect(page.locator("#main")).toContainText("新值覆盖已有同名值");
+  await expect(page.locator("#main")).toContainText("返回 undefined");
+  await page.goto(`${prefix}JulianDate.html#.equalsEpsilon`);
+  await expect(page.locator('[id=".equalsEpsilon"]')).toBeVisible();
+  await expect(page.locator("#main")).toContainText("国际原子时");
+  await expect(page.locator("#main")).toContainText("小于等于");
+  await info.attach("loading-time-documentation", {
+    body: await page.screenshot({
+      path: info.outputPath("loading-time-documentation.png"),
+    }),
+    contentType: "image/png",
+  });
+  expect(errors).toEqual([]);
+});

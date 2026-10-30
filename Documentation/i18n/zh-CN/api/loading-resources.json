@@ -1,0 +1,2220 @@
+{
+  "schemaVersion": 1,
+  "locale": "zh-CN",
+  "entries": [
+    {
+      "id": "Event.RemoveCallback",
+      "field": "description",
+      "sourceHash": "sha256:ae8f93d3aea0b041516496de28cb84ede64c325954cfb2f82a1c841ca781f852",
+      "text": "移除监听器的函数。"
+    },
+    {
+      "id": "Event#addEventListener",
+      "field": "description",
+      "sourceHash": "sha256:0d93aa94cef3c1f68bd063e787980f36052482f0112b7786cc8f0f564ec2a770",
+      "text": "注册回调，在每次事件触发时执行。可提供可选 scope，作为函数执行时的 <code>this</code>。"
+    },
+    {
+      "id": "Event#addEventListener",
+      "field": "params/listener/description",
+      "sourceHash": "sha256:e2643d083a2b84aeee2b3254ca8b06b9868d81b9c310001b3bc55cacf53942d7",
+      "text": "事件触发时执行的函数。"
+    },
+    {
+      "id": "Event#addEventListener",
+      "field": "params/scope/description",
+      "sourceHash": "sha256:a3b776023d3638a933d27a68cff1d01f07477d81436aef4762c5184b374fc316",
+      "text": "可选的作用域对象，作为监听函数执行时的 <code>this</code>。"
+    },
+    {
+      "id": "Event#addEventListener",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:dedd5bfabcfce7f568db11c69eb30e20b4e277e9a78826d761e83cbc738dc079",
+      "text": "调用后移除此事件监听器的函数。"
+    },
+    {
+      "id": "Event#numberOfListeners",
+      "field": "description",
+      "sourceHash": "sha256:4de3a1fe193d50a9e9a6a2a7b2593db572f2fd5f3589f685d31dcff467ad792a",
+      "text": "当前订阅此事件的监听器数量。"
+    },
+    {
+      "id": "Event#raiseEvent",
+      "field": "description",
+      "sourceHash": "sha256:4b8e69cb3ccaab28d47d44560d5c0df01a5cf0d589a09272e5c7d4dcfba4d2dc",
+      "text": "调用每个已注册监听器并传入全部给定参数，以触发事件。"
+    },
+    {
+      "id": "Event#raiseEvent",
+      "field": "params/arguments/description",
+      "sourceHash": "sha256:5ca2082baa5cbbb828a57f0b84b486bd39c173047dfde8d9f36105455ffe5fbd",
+      "text": "此方法接收任意数量的参数，并原样传给监听函数。"
+    },
+    {
+      "id": "Event#removeEventListener",
+      "field": "description",
+      "sourceHash": "sha256:dbdb957c5d6f641131507ab5f87f648f6a667e273b9bf6bd232c088965b8e03c",
+      "text": "注销先前注册的回调。"
+    },
+    {
+      "id": "Event#removeEventListener",
+      "field": "params/listener/description",
+      "sourceHash": "sha256:6112551f1f38c90590d70e77d5870b153ee0587018522e0ae32c2eec006151c7",
+      "text": "要注销的函数。"
+    },
+    {
+      "id": "Event#removeEventListener",
+      "field": "params/scope/description",
+      "sourceHash": "sha256:6639af5a0ff066f2fa023c4fe0cf6b3326926cbc311655d3ad7360efe7abe0bd",
+      "text": "最初传给 addEventListener 的作用域对象。"
+    },
+    {
+      "id": "Event#removeEventListener",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:7bf494bc964dbfa9ff1fcfb6436e97d2b40e61c45ef8c57193cec761cdc9e044",
+      "text": "监听器成功移除时返回 <code>true</code>；若该监听器与作用域组合未注册到此事件，则返回 <code>false</code>。"
+    },
+    {
+      "id": "EventHelper.RemoveCallback",
+      "field": "description",
+      "sourceHash": "sha256:ae8f93d3aea0b041516496de28cb84ede64c325954cfb2f82a1c841ca781f852",
+      "text": "移除监听器的函数。"
+    },
+    {
+      "id": "EventHelper",
+      "field": "description",
+      "sourceHash": "sha256:60a0499ab9b17ae29952664b0c84375509521c0688d3346199f602e96b2f652b",
+      "text": "简化常见事件管理模式的辅助对象：向多个事件添加监听器，之后在销毁等操作中一次性移除。"
+    },
+    {
+      "id": "EventHelper#add",
+      "field": "description",
+      "sourceHash": "sha256:21f38a01323f9fc6c8dbbec0f915706ece7a0cb6f90355620fda3a15e1a2dd66",
+      "text": "向事件添加监听器，并记录此注册以便稍后清理。"
+    },
+    {
+      "id": "EventHelper#add",
+      "field": "params/event/description",
+      "sourceHash": "sha256:98f40ebd4337be4396a020d61c1aca65f81075b9519e1e040da96b3fb409a62f",
+      "text": "要订阅的事件。"
+    },
+    {
+      "id": "EventHelper#add",
+      "field": "params/listener/description",
+      "sourceHash": "sha256:e2643d083a2b84aeee2b3254ca8b06b9868d81b9c310001b3bc55cacf53942d7",
+      "text": "事件触发时执行的函数。"
+    },
+    {
+      "id": "EventHelper#add",
+      "field": "params/scope/description",
+      "sourceHash": "sha256:a3b776023d3638a933d27a68cff1d01f07477d81436aef4762c5184b374fc316",
+      "text": "可选的作用域对象，作为监听函数执行时的 <code>this</code>。"
+    },
+    {
+      "id": "EventHelper#add",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:dedd5bfabcfce7f568db11c69eb30e20b4e277e9a78826d761e83cbc738dc079",
+      "text": "调用后移除此事件监听器的函数。"
+    },
+    {
+      "id": "EventHelper#removeAll",
+      "field": "description",
+      "sourceHash": "sha256:7361af8321adecacf8c5354fdf02eb525012d18dfb0e0579514ef69a0ff9f426",
+      "text": "注销先前添加的全部监听器。"
+    },
+    {
+      "id": "IonResource.fromAssetId",
+      "field": "description",
+      "sourceHash": "sha256:73943724bcfb6bafcb18a1f3c863eaa232d575675ad64bef3af930832fd45636",
+      "text": "异步创建实例。"
+    },
+    {
+      "id": "IonResource.fromAssetId",
+      "field": "params/assetId/description",
+      "sourceHash": "sha256:e37d482d7aed7f418435371895cc23ed69bf576cabad8041c4fa9b3a575577db",
+      "text": "Cesium ion 资源 ID。"
+    },
+    {
+      "id": "IonResource.fromAssetId",
+      "field": "params/options.accessToken/description",
+      "sourceHash": "sha256:70f79ad889a0d369c87cb0e042a4ea48c8e07670236d8e58766bae0336523115",
+      "text": "要使用的访问令牌。"
+    },
+    {
+      "id": "IonResource.fromAssetId",
+      "field": "params/options.server/description",
+      "sourceHash": "sha256:f125ba6fa6e717bb5b80f2ac31eb4213154827378322f1f49277af972f88c32c",
+      "text": "指向 Cesium ion API 服务器的资源。"
+    },
+    {
+      "id": "IonResource.fromAssetId",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:46c5e02cc27fedc3cb3cfca3ad43544b9112aa2b6ff1b71550c6294809c80f11",
+      "text": "兑现为代表 Cesium ion 资源之实例的 Promise。"
+    },
+    {
+      "id": "IonResource",
+      "field": "description",
+      "sourceHash": "sha256:ff50131e205ae2968521b315a58eb8ac40d38b836bb6a6a0c240362ceb2867e9",
+      "text": "封装 Cesium ion 资源访问的 {@link Resource} 实例。通常不直接实例化，请使用 {@link IonResource.fromAssetId}。"
+    },
+    {
+      "id": "IonResource",
+      "field": "params/endpoint/description",
+      "sourceHash": "sha256:0788c82c1030fbf0ced9f9d317cd57efcce542279498bca6c6cc2202fe1a9708",
+      "text": "Cesium ion 资源端点服务返回的结果。"
+    },
+    {
+      "id": "IonResource",
+      "field": "params/endpointResource/description",
+      "sourceHash": "sha256:c5d98e3cd3876f677306e03d5640369891e8ab4e9e96b97a8e7ceaeea279cb3e",
+      "text": "最初用于获取端点的资源。"
+    },
+    {
+      "id": "IonResource#appendForwardSlash",
+      "field": "description",
+      "sourceHash": "sha256:4fae67576a9e131fd53d74bc3400d186279fe2a89cd9627012faabbfb6ae9393",
+      "text": "在 URL 末尾追加正斜杠。"
+    },
+    {
+      "id": "IonResource#appendQueryParameters",
+      "field": "description",
+      "sourceHash": "sha256:b27c834251cfd146fc25fd87f7822a70004cc52f046288e1d5565ef23c1635bf",
+      "text": "合并给定对象与现有查询参数，可一次添加多个参数，而不必逐项修改 queryParameters 属性。"
+    },
+    {
+      "id": "IonResource#appendQueryParameters",
+      "field": "params/params/description",
+      "sourceHash": "sha256:5953039aa921473874c41aa4ce1c29c54a0368261f0251cdd4f4275027cbcc72",
+      "text": "查询参数。"
+    },
+    {
+      "id": "IonResource#clone",
+      "field": "description",
+      "sourceHash": "sha256:3758378a1885a04fa367e7884b5a96989d79561bacf1ac4b7b484d6e6429adf7",
+      "text": "复制 Resource 实例。"
+    },
+    {
+      "id": "IonResource#clone",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:c2b2abb93f9f5c17784ea1f72ff25d8a36fd8dc3ad05e7d039ab67f62c1863bd",
+      "text": "修改后的 result 参数；未提供时返回新建的 Resource 实例。"
+    },
+    {
+      "id": "IonResource#credits",
+      "field": "description",
+      "sourceHash": "sha256:463f72ffc3b2f95eabe565739eb0a7a904747a5b0ef9bc06b9dcd69fbbf27b5f",
+      "text": "获取此资源所要求的署名版权信息。"
+    },
+    {
+      "id": "IonResource#delete",
+      "field": "description",
+      "sourceHash": "sha256:7f902ef1d64d9a7d42cd7c4c590ba143ff5b2328846e54cfd52e45a59e0f5956",
+      "text": "异步删除给定资源。返回 Promise，加载完成后兑现为结果，加载失败时拒绝。使用 XMLHttpRequest 加载数据，因此跨源请求要求服务器启用跨源资源共享（CORS）响应头。"
+    },
+    {
+      "id": "IonResource#delete",
+      "field": "params/options.headers/description",
+      "sourceHash": "sha256:9a4610b25cefc38b14b1b625378b9b4e4dd05658600a035bba5ffd6690fb84ef",
+      "text": "随请求发送的附加 HTTP 头，若有。"
+    },
+    {
+      "id": "IonResource#delete",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:3a82bf5df636d104deccba63082d7329c5c2875d76eaec68fbe3a96b41d5266a",
+      "text": "加载完成后兑现为所请求数据的 Promise。若 <code>request.throttle</code> 为 true 且请求优先级不足，则返回 undefined。"
+    },
+    {
+      "id": "IonResource#extension",
+      "field": "description",
+      "sourceHash": "sha256:3a2b2d50e766267a6d9c6b7df1ee2246c3aa18d0edc1a926af1bf755599eb43d",
+      "text": "资源文件扩展名。"
+    },
+    {
+      "id": "IonResource#fetch",
+      "field": "description",
+      "sourceHash": "sha256:8f4aacf8900105ad322d68a6cd943cb5a8bc2fd0e3719eb7552e97c197aa6905",
+      "text": "异步加载给定资源。返回 Promise，加载完成后兑现为结果，加载失败时拒绝。使用 XMLHttpRequest 加载数据，因此跨源请求要求服务器启用跨源资源共享（CORS）响应头。建议优先使用 fetchJson、fetchBlob 等更具体的方法。"
+    },
+    {
+      "id": "IonResource#fetch",
+      "field": "params/options.headers/description",
+      "sourceHash": "sha256:9a4610b25cefc38b14b1b625378b9b4e4dd05658600a035bba5ffd6690fb84ef",
+      "text": "随请求发送的附加 HTTP 头，若有。"
+    },
+    {
+      "id": "IonResource#fetch",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:3a82bf5df636d104deccba63082d7329c5c2875d76eaec68fbe3a96b41d5266a",
+      "text": "加载完成后兑现为所请求数据的 Promise。若 <code>request.throttle</code> 为 true 且请求优先级不足，则返回 undefined。"
+    },
+    {
+      "id": "IonResource#fetchArrayBuffer",
+      "field": "description",
+      "sourceHash": "sha256:d38d1ba9e8b2aa03f50e5663d8963323810da0b5203d6150131fdfa94ab2bab0",
+      "text": "异步将资源作为原始二进制数据加载。返回 Promise，加载完成后兑现为 ArrayBuffer，加载失败时拒绝。使用 XMLHttpRequest 加载数据，因此跨源请求要求服务器启用跨源资源共享（CORS）响应头。"
+    },
+    {
+      "id": "IonResource#fetchArrayBuffer",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:3a82bf5df636d104deccba63082d7329c5c2875d76eaec68fbe3a96b41d5266a",
+      "text": "加载完成后兑现为所请求数据的 Promise。若 <code>request.throttle</code> 为 true 且请求优先级不足，则返回 undefined。"
+    },
+    {
+      "id": "IonResource#fetchBlob",
+      "field": "description",
+      "sourceHash": "sha256:b732558134cdcdb5ce9014ea7b1e4ac8518921df0f22cad21f7a300431215a6b",
+      "text": "异步将给定资源作为 Blob 加载。返回 Promise，加载完成后兑现为 Blob，加载失败时拒绝。使用 XMLHttpRequest 加载数据，因此跨源请求要求服务器启用跨源资源共享（CORS）响应头。"
+    },
+    {
+      "id": "IonResource#fetchBlob",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:3a82bf5df636d104deccba63082d7329c5c2875d76eaec68fbe3a96b41d5266a",
+      "text": "加载完成后兑现为所请求数据的 Promise。若 <code>request.throttle</code> 为 true 且请求优先级不足，则返回 undefined。"
+    },
+    {
+      "id": "IonResource#fetchImage",
+      "field": "description",
+      "sourceHash": "sha256:63c5064663fa81a5395c4e472ba712cda732a7853924597d576a9ef730cad40f",
+      "text": "异步加载给定图像资源。若 <code>preferImageBitmap</code> 为 true 且浏览器支持 <code>createImageBitmap</code>，则 Promise 在加载完成后兑现为 {@link https://developer.mozilla.org/en-US/docs/Web/API/ImageBitmap|ImageBitmap}；否则兑现为 {@link https://developer.mozilla.org/en-US/docs/Web/API/HTMLImageElement|Image}。图像加载失败时，Promise 被拒绝。"
+    },
+    {
+      "id": "IonResource#fetchImage",
+      "field": "params/options.flipY/description",
+      "sourceHash": "sha256:6f4c9e4353940cf4b7a97576d6698a93e9617020feb011fde0bf805790fe96a8",
+      "text": "为 true 时，解码期间垂直翻转图像。仅在浏览器支持 <code>createImageBitmap</code> 时适用。"
+    },
+    {
+      "id": "IonResource#fetchImage",
+      "field": "params/options.preferBlob/description",
+      "sourceHash": "sha256:83240ea2601c3e14651b3a42b5de1840d5f8c7e0f1fafc93de08255865660c82",
+      "text": "为 true 时，通过 Blob 加载图像。"
+    },
+    {
+      "id": "IonResource#fetchImage",
+      "field": "params/options.preferImageBitmap/description",
+      "sourceHash": "sha256:4c85d254be6ec7687c5fd8a1d7aa56e56b659a500adbeceb4752fd4f9f894e8c",
+      "text": "为 true 时，在获取过程中解码图像，并返回 <code>ImageBitmap</code>。"
+    },
+    {
+      "id": "IonResource#fetchImage",
+      "field": "params/options.skipColorSpaceConversion/description",
+      "sourceHash": "sha256:f43561a1d0ecf2154474832fab49f53141bb80c3fc113a23ac6cf1ab40b7284b",
+      "text": "为 true 时，忽略图像中的自定义伽马或颜色配置。仅在浏览器支持 <code>createImageBitmap</code> 时适用。"
+    },
+    {
+      "id": "IonResource#fetchImage",
+      "field": "params/options/description",
+      "sourceHash": "sha256:26106f848ec24dea984d8c9330a7243a30a37beb5af67a4b4de928ef37b43a17",
+      "text": "具有以下属性的对象。"
+    },
+    {
+      "id": "IonResource#fetchImage",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:3a82bf5df636d104deccba63082d7329c5c2875d76eaec68fbe3a96b41d5266a",
+      "text": "加载完成后兑现为所请求数据的 Promise。若 <code>request.throttle</code> 为 true 且请求优先级不足，则返回 undefined。"
+    },
+    {
+      "id": "IonResource#fetchJson",
+      "field": "description",
+      "sourceHash": "sha256:e0470d80f3437c59601c63e1e552d7cd303fab0289c4bd81cea704eb0a919ce2",
+      "text": "异步将给定资源作为 JSON 加载。返回 Promise，加载完成后兑现为 JSON 对象，加载失败时拒绝。使用 XMLHttpRequest 加载数据，因此跨源请求要求服务器启用跨源资源共享（CORS）响应头。若未指定，此函数会添加请求头 'Accept: application/json,&#42;&#47;&#42;;q=0.01'。"
+    },
+    {
+      "id": "IonResource#fetchJson",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:3a82bf5df636d104deccba63082d7329c5c2875d76eaec68fbe3a96b41d5266a",
+      "text": "加载完成后兑现为所请求数据的 Promise。若 <code>request.throttle</code> 为 true 且请求优先级不足，则返回 undefined。"
+    },
+    {
+      "id": "IonResource#fetchJsonp",
+      "field": "description",
+      "sourceHash": "sha256:6053be45c191b257a21d9c2c908e773e8eec7a824dad0f559f89e58a5733ddd7",
+      "text": "使用 JSONP 请求资源。"
+    },
+    {
+      "id": "IonResource#fetchJsonp",
+      "field": "params/callbackParameterName/description",
+      "sourceHash": "sha256:6022cfd116f495ccce09b597df6d8f56a6ed878bee74c4ecdb3fbcd596db3a21",
+      "text": "服务器所要求的回调参数名称。"
+    },
+    {
+      "id": "IonResource#fetchJsonp",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:3a82bf5df636d104deccba63082d7329c5c2875d76eaec68fbe3a96b41d5266a",
+      "text": "加载完成后兑现为所请求数据的 Promise。若 <code>request.throttle</code> 为 true 且请求优先级不足，则返回 undefined。"
+    },
+    {
+      "id": "IonResource#fetchText",
+      "field": "description",
+      "sourceHash": "sha256:e0c52b08f1b3746870cbce773b926a42eaf04bfe609d1d2d3e84c70200d6211a",
+      "text": "异步将给定资源作为文本加载。返回 Promise，加载完成后兑现为 String，加载失败时拒绝。使用 XMLHttpRequest 加载数据，因此跨源请求要求服务器启用跨源资源共享（CORS）响应头。"
+    },
+    {
+      "id": "IonResource#fetchText",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:3a82bf5df636d104deccba63082d7329c5c2875d76eaec68fbe3a96b41d5266a",
+      "text": "加载完成后兑现为所请求数据的 Promise。若 <code>request.throttle</code> 为 true 且请求优先级不足，则返回 undefined。"
+    },
+    {
+      "id": "IonResource#fetchXML",
+      "field": "description",
+      "sourceHash": "sha256:1956c174a14eb3de3f2adc19d7048fd94c316bbf8e1a1d821914bead96253a10",
+      "text": "异步将给定资源作为 XML 加载。返回 Promise，加载完成后兑现为 XML Document，加载失败时拒绝。使用 XMLHttpRequest 加载数据，因此跨源请求要求服务器启用跨源资源共享（CORS）响应头。"
+    },
+    {
+      "id": "IonResource#fetchXML",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:3a82bf5df636d104deccba63082d7329c5c2875d76eaec68fbe3a96b41d5266a",
+      "text": "加载完成后兑现为所请求数据的 Promise。若 <code>request.throttle</code> 为 true 且请求优先级不足，则返回 undefined。"
+    },
+    {
+      "id": "IonResource#getBaseUri",
+      "field": "description",
+      "sourceHash": "sha256:94165eca38e11f5e4dcb10c3f9acfff6e899fbf8d96f470c06099f6a204b7a44",
+      "text": "返回 Resource 的基础路径。"
+    },
+    {
+      "id": "IonResource#getBaseUri",
+      "field": "params/includeQuery/description",
+      "sourceHash": "sha256:e011a2e4a71a4430260f101c14793ad8365e6bfedb39c2c3e683528e7695ce41",
+      "text": "是否包含 URI 的查询字符串和片段。"
+    },
+    {
+      "id": "IonResource#getBaseUri",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:21217db4c27545b82dee0fec7b7229b2cf8e6bb6bd025f5128749e86d8936d3f",
+      "text": "资源的基础 URI。"
+    },
+    {
+      "id": "IonResource#getDerivedResource",
+      "field": "description",
+      "sourceHash": "sha256:1dbdcdf2b9f81eff28fe64b1bbc680ede09d92dcee911ca6fdec99028c8135e5",
+      "text": "返回相对于当前实例的资源。除 options 中覆盖的属性外，其余属性与当前实例相同。"
+    },
+    {
+      "id": "IonResource#getDerivedResource",
+      "field": "params/options.preserveQueryParameters/description",
+      "sourceHash": "sha256:0a67238f4fe83f2f7037cd36204b01ea39e7014f1a6e4cdb3dc9bc23d5080fc1",
+      "text": "为 true 时，保留当前资源和派生资源的全部查询参数；为 false 时，派生参数替换当前资源的同名参数。"
+    },
+    {
+      "id": "IonResource#getDerivedResource",
+      "field": "params/options.queryParameters/description",
+      "sourceHash": "sha256:242608bd859ad6afdcf1d0588a91154c086eaf4c63c6c2d28d7f203d2bcdc744",
+      "text": "包含查询参数的对象，将与当前实例的查询参数合并。"
+    },
+    {
+      "id": "IonResource#getDerivedResource",
+      "field": "params/options.retryCallback/description",
+      "sourceHash": "sha256:86d55928fac8eb5c410f7fd7917044f9426dc0e2773968469f239415d82f9c46",
+      "text": "资源加载失败时调用的函数。"
+    },
+    {
+      "id": "IonResource#getDerivedResource",
+      "field": "params/options.templateValues/description",
+      "sourceHash": "sha256:6c2df705ec473924dfb2db5d3641093398be53cb740c82217127eee4d85177d0",
+      "text": "用于替换模板值（例如 {x}）的键值对，将与当前实例的模板值合并。"
+    },
+    {
+      "id": "IonResource#getDerivedResource",
+      "field": "params/options.url/description",
+      "sourceHash": "sha256:4e2f5bbfc00682d3a90924b0521b33f7dbd94260d5b75514a0b9eccb14626b1f",
+      "text": "相对于当前实例 URL 解析的 URL。"
+    },
+    {
+      "id": "IonResource#getDerivedResource",
+      "field": "params/options/description",
+      "sourceHash": "sha256:fdf0ca364eea1ff7f8f4ea078d97e4fd6cf54ab0a8a3f8362f9bc5c940eddc79",
+      "text": "具有以下属性的对象。"
+    },
+    {
+      "id": "IonResource#getDerivedResource",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:247fc96e2440d8dbe706bba83ccca57c5333f9e1271e02302d9b48e08d2bff0c",
+      "text": "从当前资源派生的资源。"
+    },
+    {
+      "id": "IonResource#getUrlComponent",
+      "field": "description",
+      "sourceHash": "sha256:d5b9729e8fa815262b36c33e962bb85f62620f87722656a2b9d6510e1565bfcd",
+      "text": "返回 URL，可选包含查询字符串并经代理处理。"
+    },
+    {
+      "id": "IonResource#getUrlComponent",
+      "field": "params/proxy/description",
+      "sourceHash": "sha256:c55c78f84250c91b93f6f645817520abd0801e4feaba5dd4c649884e8371b661",
+      "text": "为 true 且已定义代理对象时，通过该代理处理 URL。"
+    },
+    {
+      "id": "IonResource#getUrlComponent",
+      "field": "params/query/description",
+      "sourceHash": "sha256:c1b0077fded8ef866e4d12238849022d8847217c9f5923f12be2d5b5defad115",
+      "text": "为 true 时包含查询字符串。"
+    },
+    {
+      "id": "IonResource#getUrlComponent",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:0e525267aae8f11ff53d5994d1a8681a7fd498e97111c6bd6b220458116d6fe5",
+      "text": "包含全部所需组成部分的 URL。"
+    },
+    {
+      "id": "IonResource#hasHeaders",
+      "field": "description",
+      "sourceHash": "sha256:2fd1d218d9d9ea3729b63190fd7951043723a3d54986048036b5ad7def2fa82b",
+      "text": "Resource 具有请求头时为 true，等价于检查 headers 属性是否包含键。"
+    },
+    {
+      "id": "IonResource#head",
+      "field": "description",
+      "sourceHash": "sha256:b0afec362782b1a7e1fd3706ba0d730e7be6c6aba87a0db2bb205face519b72e",
+      "text": "异步获取给定资源的响应头。返回 Promise，加载完成后兑现为结果，加载失败时拒绝。使用 XMLHttpRequest 加载数据，因此跨源请求要求服务器启用跨源资源共享（CORS）响应头。"
+    },
+    {
+      "id": "IonResource#head",
+      "field": "params/options.headers/description",
+      "sourceHash": "sha256:9a4610b25cefc38b14b1b625378b9b4e4dd05658600a035bba5ffd6690fb84ef",
+      "text": "随请求发送的附加 HTTP 头，若有。"
+    },
+    {
+      "id": "IonResource#head",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:3a82bf5df636d104deccba63082d7329c5c2875d76eaec68fbe3a96b41d5266a",
+      "text": "加载完成后兑现为所请求数据的 Promise。若 <code>request.throttle</code> 为 true 且请求优先级不足，则返回 undefined。"
+    },
+    {
+      "id": "IonResource#headers",
+      "field": "description",
+      "sourceHash": "sha256:f71b6be8f9b9de8156c90b858401dea14be02fefe05ce129bc1a067540c867e7",
+      "text": "随请求发送的附加 HTTP 头。"
+    },
+    {
+      "id": "IonResource#isBlobUri",
+      "field": "description",
+      "sourceHash": "sha256:2a6e1719aaf347ff6d925d73389a2a4f114dce20dd9f0fe98b331235399abf4e",
+      "text": "Resource 指向 Blob URI 时为 true。"
+    },
+    {
+      "id": "IonResource#isCrossOriginUrl",
+      "field": "description",
+      "sourceHash": "sha256:78fb281ff621137a810f44a0b58fc9252d7710684e3bac9332ec76db0e9ae360",
+      "text": "Resource 指向跨源 URL 时为 true。"
+    },
+    {
+      "id": "IonResource#isDataUri",
+      "field": "description",
+      "sourceHash": "sha256:d92114d48807aa57fbb4670b35ba8cd9c4fa3eb3fe3fcf63d9008e0e90479ce2",
+      "text": "Resource 指向 data URI 时为 true。"
+    },
+    {
+      "id": "IonResource#options",
+      "field": "description",
+      "sourceHash": "sha256:68cbe1e2eb86b4c17a8604886f2bcb3c9bc8f210f79b6b80c24c8a6afc6b07c0",
+      "text": "异步获取给定资源支持的请求选项。返回 Promise，加载完成后兑现为结果，加载失败时拒绝。使用 XMLHttpRequest 加载数据，因此跨源请求要求服务器启用跨源资源共享（CORS）响应头。"
+    },
+    {
+      "id": "IonResource#options",
+      "field": "params/options.headers/description",
+      "sourceHash": "sha256:9a4610b25cefc38b14b1b625378b9b4e4dd05658600a035bba5ffd6690fb84ef",
+      "text": "随请求发送的附加 HTTP 头，若有。"
+    },
+    {
+      "id": "IonResource#options",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:3a82bf5df636d104deccba63082d7329c5c2875d76eaec68fbe3a96b41d5266a",
+      "text": "加载完成后兑现为所请求数据的 Promise。若 <code>request.throttle</code> 为 true 且请求优先级不足，则返回 undefined。"
+    },
+    {
+      "id": "IonResource#patch",
+      "field": "description",
+      "sourceHash": "sha256:51b07afa970fd7b28d10d71a9677d15407c38c33e4406d36cae7a7e8ac8ffc58",
+      "text": "异步向给定资源发送 PATCH 数据。返回 Promise，加载完成后兑现为结果，加载失败时拒绝。使用 XMLHttpRequest 加载数据，因此跨源请求要求服务器启用跨源资源共享（CORS）响应头。"
+    },
+    {
+      "id": "IonResource#patch",
+      "field": "params/data/description",
+      "sourceHash": "sha256:0c58333d6a1128d701b74f22f62aef50ed2ae649a643d8ec74c9fa77f89aa4b8",
+      "text": "随资源一同发送的数据。"
+    },
+    {
+      "id": "IonResource#patch",
+      "field": "params/options.headers/description",
+      "sourceHash": "sha256:9a4610b25cefc38b14b1b625378b9b4e4dd05658600a035bba5ffd6690fb84ef",
+      "text": "随请求发送的附加 HTTP 头，若有。"
+    },
+    {
+      "id": "IonResource#patch",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:3a82bf5df636d104deccba63082d7329c5c2875d76eaec68fbe3a96b41d5266a",
+      "text": "加载完成后兑现为所请求数据的 Promise。若 <code>request.throttle</code> 为 true 且请求优先级不足，则返回 undefined。"
+    },
+    {
+      "id": "IonResource#post",
+      "field": "description",
+      "sourceHash": "sha256:fd5ced69c8e6b5c996d92db312e429ae29b5b83ef39faff9d52f6467a7915300",
+      "text": "异步向给定资源发送 POST 数据。返回 Promise，加载完成后兑现为结果，加载失败时拒绝。使用 XMLHttpRequest 加载数据，因此跨源请求要求服务器启用跨源资源共享（CORS）响应头。"
+    },
+    {
+      "id": "IonResource#post",
+      "field": "params/data/description",
+      "sourceHash": "sha256:0c58333d6a1128d701b74f22f62aef50ed2ae649a643d8ec74c9fa77f89aa4b8",
+      "text": "随资源一同发送的数据。"
+    },
+    {
+      "id": "IonResource#post",
+      "field": "params/options.data/description",
+      "sourceHash": "sha256:0c58333d6a1128d701b74f22f62aef50ed2ae649a643d8ec74c9fa77f89aa4b8",
+      "text": "随资源一同发送的数据。"
+    },
+    {
+      "id": "IonResource#post",
+      "field": "params/options.headers/description",
+      "sourceHash": "sha256:9a4610b25cefc38b14b1b625378b9b4e4dd05658600a035bba5ffd6690fb84ef",
+      "text": "随请求发送的附加 HTTP 头，若有。"
+    },
+    {
+      "id": "IonResource#post",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:3a82bf5df636d104deccba63082d7329c5c2875d76eaec68fbe3a96b41d5266a",
+      "text": "加载完成后兑现为所请求数据的 Promise。若 <code>request.throttle</code> 为 true 且请求优先级不足，则返回 undefined。"
+    },
+    {
+      "id": "IonResource#put",
+      "field": "description",
+      "sourceHash": "sha256:5cea574621cf3ec6bbb36586465370344b98fdbc2b5c305a87aa9426d6c6bd47",
+      "text": "异步向给定资源发送 PUT 数据。返回 Promise，加载完成后兑现为结果，加载失败时拒绝。使用 XMLHttpRequest 加载数据，因此跨源请求要求服务器启用跨源资源共享（CORS）响应头。"
+    },
+    {
+      "id": "IonResource#put",
+      "field": "params/data/description",
+      "sourceHash": "sha256:0c58333d6a1128d701b74f22f62aef50ed2ae649a643d8ec74c9fa77f89aa4b8",
+      "text": "随资源一同发送的数据。"
+    },
+    {
+      "id": "IonResource#put",
+      "field": "params/options.headers/description",
+      "sourceHash": "sha256:9a4610b25cefc38b14b1b625378b9b4e4dd05658600a035bba5ffd6690fb84ef",
+      "text": "随请求发送的附加 HTTP 头，若有。"
+    },
+    {
+      "id": "IonResource#put",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:3a82bf5df636d104deccba63082d7329c5c2875d76eaec68fbe3a96b41d5266a",
+      "text": "加载完成后兑现为所请求数据的 Promise。若 <code>request.throttle</code> 为 true 且请求优先级不足，则返回 undefined。"
+    },
+    {
+      "id": "IonResource#queryParameters",
+      "field": "description",
+      "sourceHash": "sha256:a3a7398abc93f5188c6677513f5968e350e086a80deee6aee1024d1090ff4e2a",
+      "text": "追加到 URL 的查询参数。"
+    },
+    {
+      "id": "IonResource#retryCallback",
+      "field": "description",
+      "sourceHash": "sha256:99967938a1ca0a33b6d27fab97d7550a42fac8b8349bedd3353db4713d261c3e",
+      "text": "资源请求失败时调用的函数。返回 true 或兑现为 true 的 Promise 时，重试请求。"
+    },
+    {
+      "id": "IonResource#setQueryParameters",
+      "field": "description",
+      "sourceHash": "sha256:e8d33593c28c2fc8a499c90fcde0e2f32f33a5463c95310c9b7c10be8a833aa9",
+      "text": "合并给定对象与现有查询参数，可一次添加多个参数，而不必逐项修改 queryParameters。已有的值会被新值替换。"
+    },
+    {
+      "id": "IonResource#setQueryParameters",
+      "field": "params/params/description",
+      "sourceHash": "sha256:5953039aa921473874c41aa4ce1c29c54a0368261f0251cdd4f4275027cbcc72",
+      "text": "查询参数。"
+    },
+    {
+      "id": "IonResource#setQueryParameters",
+      "field": "params/useAsDefault/description",
+      "sourceHash": "sha256:efe204de9f677a82e145c0c39b07a7ae00242f3e0ccad6b8203e1a458eb45f74",
+      "text": "为 true 时，将 params 用作默认值，仅在原值为 undefined 时设置。"
+    },
+    {
+      "id": "IonResource#setTemplateValues",
+      "field": "description",
+      "sourceHash": "sha256:0e431c5e9ca740599557f3b8c52ba389448d387e1b16271f8bffc24d2ea3c60e",
+      "text": "合并给定对象与现有模板值，可一次添加多个值，而不必逐项修改 templateValues。默认由新值覆盖已有同名值；useAsDefault 为 true 时保留已有值，仅补入未定义的值。"
+    },
+    {
+      "id": "IonResource#setTemplateValues",
+      "field": "params/template/description",
+      "sourceHash": "sha256:0f350fb15e00aab431ec445819b7e89a0f13adac0b4284278653bf3e9b59fbba",
+      "text": "模板值。"
+    },
+    {
+      "id": "IonResource#setTemplateValues",
+      "field": "params/useAsDefault/description",
+      "sourceHash": "sha256:f6b7be207e2cc291d2f22fe567869d7c1c21fe3b5321c5aa7a18651ef80b9e43",
+      "text": "为 true 时，将这些值用作默认值，仅在原值为 undefined 时设置。"
+    },
+    {
+      "id": "IonResource#templateValues",
+      "field": "description",
+      "sourceHash": "sha256:6f840c035c9112b4cccfb44bd3ee74ec0a223dcacf7d056db2e2d844232c8690",
+      "text": "用于替换 URL 模板参数的键值对。"
+    },
+    {
+      "id": "IonResource#toString",
+      "field": "description",
+      "sourceHash": "sha256:df6e48732701f350d644ee49035cfedfd6d84faed1c80f20517e3417be53b923",
+      "text": "覆盖 Object#toString，使隐式字符串转换得到此 Resource 表示的完整 URL。"
+    },
+    {
+      "id": "IonResource#toString",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:53ff0a1d4ad06fee1266f57be36e2a01e32369dad539130e31443d915e02c8b5",
+      "text": "此 Resource 表示的 URL。"
+    },
+    {
+      "id": "IonResource#url",
+      "field": "description",
+      "sourceHash": "sha256:2087cd0824989a5d37abd8a926a0e0bcaae12c70c30aad39263721a6356c605c",
+      "text": "资源 URL，已替换模板值、追加查询字符串，并在设置代理时经代理编码。"
+    },
+    {
+      "id": "Request.CancelCallback",
+      "field": "description",
+      "sourceHash": "sha256:a2c99e48c57f5ea0f4a9df453461ceda913b2c819223f973f345ceb58ae9dd83",
+      "text": "请求取消时调用的函数。"
+    },
+    {
+      "id": "Request.PriorityCallback",
+      "field": "description",
+      "sourceHash": "sha256:6f9f309080134e18f232ed8f19aa41606013fc584aafc5e371bcafbd491175f9",
+      "text": "用于更新请求优先级的函数，每帧调用一次。"
+    },
+    {
+      "id": "Request.PriorityCallback",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:f7a2d11e6fa40ba3794ff1630ecd6fd95ff91608e055d196ca9758f3d245d1ce",
+      "text": "更新后的优先级值。"
+    },
+    {
+      "id": "Request.RequestCallback",
+      "field": "description",
+      "sourceHash": "sha256:963240afab61687f24aa2641cbb9ec2a34d2441289e08ba0d5c523b8c758fe64",
+      "text": "执行实际数据请求的函数。"
+    },
+    {
+      "id": "Request.RequestCallback",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:a1460dcf7d6536b61b0a80562110f6f9ee64e5b89f3c7d13c19c69b6a7bcb44f",
+      "text": "所请求数据的 Promise。"
+    },
+    {
+      "id": "Request",
+      "field": "description",
+      "sourceHash": "sha256:1dd74ba72e6880b12f0f54fc59881098fe074702f9cf95dd787ac10529d88500",
+      "text": "保存发起请求所需的信息，通常无需直接构造。"
+    },
+    {
+      "id": "Request",
+      "field": "params/options.cancelFunction/description",
+      "sourceHash": "sha256:a2c99e48c57f5ea0f4a9df453461ceda913b2c819223f973f345ceb58ae9dd83",
+      "text": "请求取消时调用的函数。"
+    },
+    {
+      "id": "Request",
+      "field": "params/options.priority/description",
+      "sourceHash": "sha256:93ff305e1eacaab97f0cce551e7bb9d965c8fa23911f06b6d14116f286c45a1a",
+      "text": "请求的初始优先级。"
+    },
+    {
+      "id": "Request",
+      "field": "params/options.priorityFunction/description",
+      "sourceHash": "sha256:6f9f309080134e18f232ed8f19aa41606013fc584aafc5e371bcafbd491175f9",
+      "text": "用于更新请求优先级的函数，每帧调用一次。"
+    },
+    {
+      "id": "Request",
+      "field": "params/options.requestFunction/description",
+      "sourceHash": "sha256:963240afab61687f24aa2641cbb9ec2a34d2441289e08ba0d5c523b8c758fe64",
+      "text": "执行实际数据请求的函数。"
+    },
+    {
+      "id": "Request",
+      "field": "params/options.serverKey/description",
+      "sourceHash": "sha256:34d652c3193a1308096f246eb5d53cb229671d3e886889e7e61f1aaf4db33e3d",
+      "text": "用于标识请求目标服务器的键。"
+    },
+    {
+      "id": "Request",
+      "field": "params/options.throttle/description",
+      "sourceHash": "sha256:9d54de0064ea5004c239fd7206815bca1754b0bb9a625f5fb9ff883f61470dd6",
+      "text": "是否对请求限流并按优先级调度。为 false 时立即发送；为 true 时，受限流控制并按优先级发送。"
+    },
+    {
+      "id": "Request",
+      "field": "params/options.throttleByServer/description",
+      "sourceHash": "sha256:5fccc229e62b96068fbe2c390132ddead373f4bb75c53ea448bc180aa16530ce",
+      "text": "是否按服务器对请求限流。"
+    },
+    {
+      "id": "Request",
+      "field": "params/options.type/description",
+      "sourceHash": "sha256:47f6b8e8bede1e1e4ef4602a856c0f3982f8e818e66972abe6057f0425d0afd5",
+      "text": "请求类型。"
+    },
+    {
+      "id": "Request",
+      "field": "params/options.url/description",
+      "sourceHash": "sha256:2d18a143f2e5ca7c55ca979e160eebf7af7e5d42e7c2c1764124d03cc21b4e17",
+      "text": "要请求的 URL。"
+    },
+    {
+      "id": "Request#cancelFunction",
+      "field": "description",
+      "sourceHash": "sha256:a2c99e48c57f5ea0f4a9df453461ceda913b2c819223f973f345ceb58ae9dd83",
+      "text": "请求取消时调用的函数。"
+    },
+    {
+      "id": "Request#clone",
+      "field": "description",
+      "sourceHash": "sha256:3e157403bc1d033f8892b29ad8eba51de7b9367130d37e616236e131a633101c",
+      "text": "复制 Request 实例。"
+    },
+    {
+      "id": "Request#clone",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:c2b2abb93f9f5c17784ea1f72ff25d8a36fd8dc3ad05e7d039ab67f62c1863bd",
+      "text": "修改后的 result 参数；未提供时返回新建的 Resource 实例。"
+    },
+    {
+      "id": "Request#priority",
+      "field": "description",
+      "sourceHash": "sha256:47594735a21d4079fab6a4e2aecbead7379f6453d61ed3b2a2586308e2ca5262",
+      "text": "优先级是无量纲数值，值越小优先级越高。对世界中的对象，通常使用到相机的距离。没有优先级函数的请求默认优先级为 0。若定义了 priorityFunction，则每帧使用其调用结果更新此值。"
+    },
+    {
+      "id": "Request#priorityFunction",
+      "field": "description",
+      "sourceHash": "sha256:6f9f309080134e18f232ed8f19aa41606013fc584aafc5e371bcafbd491175f9",
+      "text": "用于更新请求优先级的函数，每帧调用一次。"
+    },
+    {
+      "id": "Request#requestFunction",
+      "field": "description",
+      "sourceHash": "sha256:963240afab61687f24aa2641cbb9ec2a34d2441289e08ba0d5c523b8c758fe64",
+      "text": "执行实际数据请求的函数。"
+    },
+    {
+      "id": "Request#state",
+      "field": "description",
+      "sourceHash": "sha256:ee78a48d428e7f37b7a62228ca7d21937653c5b9b8fd7a742addf5d6c2ef0902",
+      "text": "请求当前状态。"
+    },
+    {
+      "id": "Request#throttle",
+      "field": "description",
+      "sourceHash": "sha256:2baceb167d569c8430ce15943e782d07f3ce533ecc364a76e747c86f5fa1dc01",
+      "text": "是否对请求限流并按优先级调度。为 false 时立即发送；为 true 时，受限流控制并按优先级发送。"
+    },
+    {
+      "id": "Request#throttleByServer",
+      "field": "description",
+      "sourceHash": "sha256:4817fcf9c018d9833d7519d1b44ded882429202133e8235246644e12b245448f",
+      "text": "是否按服务器对请求限流。浏览器对 HTTP/1 服务器通常支持约 6～8 个并行连接，而对 HTTP/2 服务器不限制连接数量。对经 HTTP/1 服务器发送的请求，宜设为 <code>true</code>。"
+    },
+    {
+      "id": "Request#type",
+      "field": "description",
+      "sourceHash": "sha256:5ab83cf4e4e9ebfe2973253dab5f7d51aed97e22356d1c52ddee7ea4a41b61f6",
+      "text": "请求类型。"
+    },
+    {
+      "id": "Request#url",
+      "field": "description",
+      "sourceHash": "sha256:f46852392220dca7d10be90bb2757d630dce4dd94f33107861146da13f48213e",
+      "text": "要请求的 URL。"
+    },
+    {
+      "id": "RequestScheduler.maximumRequests",
+      "field": "description",
+      "sourceHash": "sha256:5b4cc0809fc6a2fe358d3f4aacf182e5e7817b4ea1c7841e16301faa7cd0b334",
+      "text": "同时活动请求的最大数量。不受限流控制的请求不遵守此限制。"
+    },
+    {
+      "id": "RequestScheduler.maximumRequestsPerServer",
+      "field": "description",
+      "sourceHash": "sha256:ee8893bf70774f3c96d7b9bf1530227d3f4dad1ae27d51799c568318a3916a9b",
+      "text": "每台服务器同时活动请求的最大数量。不受限流控制的请求，以及在 {@link requestsByServer} 中单独列出的服务器，不遵守此限制。"
+    },
+    {
+      "id": "RequestScheduler.requestsByServer",
+      "field": "description",
+      "sourceHash": "sha256:080a6d874e4d00a337623362ecafcc715b47d8530c82033c9cd41306f15600cd",
+      "text": "按服务器键配置的限流覆盖列表，用于替代 <code>maximumRequestsPerServer</code>。适用于从已知 HTTP/2 或 HTTP/3 服务器流式加载数据。"
+    },
+    {
+      "id": "RequestScheduler.throttleRequests",
+      "field": "description",
+      "sourceHash": "sha256:ef063f625cadeecddc0c546ac49b7031215cbc8ea18285492c0e4d8a53dff207",
+      "text": "指定由请求调度器对传入请求限流，还是交给浏览器自行排队。"
+    },
+    {
+      "id": "RequestScheduler",
+      "field": "description",
+      "sourceHash": "sha256:0991f2ead6e382e9f6fe6db58e68e9aac4ed1a211d7a275d0669d0f900c7869d",
+      "text": "请求调度器通过跟踪和限制活动请求数量，对传入请求按优先级调度。保持 CesiumJS 对请求数量的控制很重要，因为相机位置变化等事件可能产生大量新请求，同时使许多在途请求不再需要。调度器手动限制请求数量，使新请求进入较短队列，并避免与已过时请求争用带宽。"
+    },
+    {
+      "id": "RequestState.ACTIVE",
+      "field": "description",
+      "sourceHash": "sha256:dce2a9ca8d500bdffa3f38ae7f17a8d44d0bde37e5fb61e69001b498a8626b93",
+      "text": "实际 HTTP 请求已发送。"
+    },
+    {
+      "id": "RequestState.CANCELLED",
+      "field": "description",
+      "sourceHash": "sha256:bbaa42ab412271ef00908f12a477f414c0b761127db5f72f4f130a4dddf78237",
+      "text": "请求已取消，可能是显式取消，也可能因低优先级而自动取消。"
+    },
+    {
+      "id": "RequestState.FAILED",
+      "field": "description",
+      "sourceHash": "sha256:e6c5c7ec5c6b7b66424f8fd5da2bf5308dd7d205f534a02acef8f4478c401f77",
+      "text": "请求失败。"
+    },
+    {
+      "id": "RequestState.ISSUED",
+      "field": "description",
+      "sourceHash": "sha256:9142ba842f6cd7f5797a86493165828570e9d794f365002af698b5d30675ece4",
+      "text": "请求已发出但尚未活动，有可用名额时进入活动状态。"
+    },
+    {
+      "id": "RequestState.RECEIVED",
+      "field": "description",
+      "sourceHash": "sha256:e95fb44cd2a394b92aa387d8e5cc95ad5d5ba6adf44f478ad8b9d30f6066b689",
+      "text": "请求成功完成。"
+    },
+    {
+      "id": "RequestState.UNISSUED",
+      "field": "description",
+      "sourceHash": "sha256:f8e99831e904e0e3a60a92d6d4ae271e5d9cb3b807955aebd8f63acca1710562",
+      "text": "初始未发出状态。"
+    },
+    {
+      "id": "RequestState",
+      "field": "description",
+      "sourceHash": "sha256:1a4454dd54ece69ead247faba8bbe10a2e59455b8b56d4af0bf88d58e934c0c2",
+      "text": "请求状态。"
+    },
+    {
+      "id": "RequestState",
+      "field": "properties/ACTIVE/description",
+      "sourceHash": "sha256:dce2a9ca8d500bdffa3f38ae7f17a8d44d0bde37e5fb61e69001b498a8626b93",
+      "text": "实际 HTTP 请求已发送。"
+    },
+    {
+      "id": "RequestState",
+      "field": "properties/CANCELLED/description",
+      "sourceHash": "sha256:bbaa42ab412271ef00908f12a477f414c0b761127db5f72f4f130a4dddf78237",
+      "text": "请求已取消，可能是显式取消，也可能因低优先级而自动取消。"
+    },
+    {
+      "id": "RequestState",
+      "field": "properties/FAILED/description",
+      "sourceHash": "sha256:e6c5c7ec5c6b7b66424f8fd5da2bf5308dd7d205f534a02acef8f4478c401f77",
+      "text": "请求失败。"
+    },
+    {
+      "id": "RequestState",
+      "field": "properties/ISSUED/description",
+      "sourceHash": "sha256:9142ba842f6cd7f5797a86493165828570e9d794f365002af698b5d30675ece4",
+      "text": "请求已发出但尚未活动，有可用名额时进入活动状态。"
+    },
+    {
+      "id": "RequestState",
+      "field": "properties/RECEIVED/description",
+      "sourceHash": "sha256:e95fb44cd2a394b92aa387d8e5cc95ad5d5ba6adf44f478ad8b9d30f6066b689",
+      "text": "请求成功完成。"
+    },
+    {
+      "id": "RequestState",
+      "field": "properties/UNISSUED/description",
+      "sourceHash": "sha256:f8e99831e904e0e3a60a92d6d4ae271e5d9cb3b807955aebd8f63acca1710562",
+      "text": "初始未发出状态。"
+    },
+    {
+      "id": "RequestType.IMAGERY",
+      "field": "description",
+      "sourceHash": "sha256:a99dc290e300cdd87bf80fd05449775834d6151d85c2fda394c257169e1d1fbc",
+      "text": "影像请求。"
+    },
+    {
+      "id": "RequestType.OTHER",
+      "field": "description",
+      "sourceHash": "sha256:8d788c2d819d4979c0f280a263783f1f1918fa9ee3c8d3e1cbeeb9c247339864",
+      "text": "其他请求。"
+    },
+    {
+      "id": "RequestType.TERRAIN",
+      "field": "description",
+      "sourceHash": "sha256:ae5b00f5b8920f436ea4f0b9a1f70afac3726e2ad2e9e6d507adaff854eb5e5d",
+      "text": "地形请求。"
+    },
+    {
+      "id": "RequestType.TILES3D",
+      "field": "description",
+      "sourceHash": "sha256:9915dd76fa9da333913c7d9a17a91976650d987ebae1b407406e93add3a875a1",
+      "text": "3D Tiles 请求。"
+    },
+    {
+      "id": "RequestType",
+      "field": "description",
+      "sourceHash": "sha256:2a876568427947776e2594f66bdc8903a1575e1c410324e29cf5159802937d15",
+      "text": "标识请求类型的枚举，用于更细粒度的日志记录和优先级排序。"
+    },
+    {
+      "id": "RequestType",
+      "field": "properties/IMAGERY/description",
+      "sourceHash": "sha256:a99dc290e300cdd87bf80fd05449775834d6151d85c2fda394c257169e1d1fbc",
+      "text": "影像请求。"
+    },
+    {
+      "id": "RequestType",
+      "field": "properties/OTHER/description",
+      "sourceHash": "sha256:8d788c2d819d4979c0f280a263783f1f1918fa9ee3c8d3e1cbeeb9c247339864",
+      "text": "其他请求。"
+    },
+    {
+      "id": "RequestType",
+      "field": "properties/TERRAIN/description",
+      "sourceHash": "sha256:ae5b00f5b8920f436ea4f0b9a1f70afac3726e2ad2e9e6d507adaff854eb5e5d",
+      "text": "地形请求。"
+    },
+    {
+      "id": "RequestType",
+      "field": "properties/TILES3D/description",
+      "sourceHash": "sha256:9915dd76fa9da333913c7d9a17a91976650d987ebae1b407406e93add3a875a1",
+      "text": "3D Tiles 请求。"
+    },
+    {
+      "id": "Resource.ConstructorOptions",
+      "field": "description",
+      "sourceHash": "sha256:26cc7e429b24052b806833befc71294456b753aeffd2f4bd2587e47f6b98cf66",
+      "text": "Resource 构造函数的初始化选项。"
+    },
+    {
+      "id": "Resource.ConstructorOptions",
+      "field": "properties/parseUrl/description",
+      "sourceHash": "sha256:b71aeb2ea932ab7b17634985284d8bac1046a7aebe9b2368a992d61d4ec205f7",
+      "text": "为 true 时，解析 URL 中的查询参数；否则原样保存 URL。"
+    },
+    {
+      "id": "Resource.ConstructorOptions",
+      "field": "properties/queryParameters/description",
+      "sourceHash": "sha256:1293128eddee610eb13118a642d7c54af1ad348a4785567cb6e21f03763526d5",
+      "text": "包含获取资源时发送的查询参数的对象。"
+    },
+    {
+      "id": "Resource.ConstructorOptions",
+      "field": "properties/retryCallback/description",
+      "sourceHash": "sha256:6314fe29cbbab69117c1046f45641aae781d090b549211bfcf5bb55d21ec41be",
+      "text": "资源请求失败时调用的函数。若返回 true，则重试请求。"
+    },
+    {
+      "id": "Resource.ConstructorOptions",
+      "field": "properties/templateValues/description",
+      "sourceHash": "sha256:393e2f4d7a22b83b70ebf42ea61f943315eb7426189d673caaae49172c2ec8fc",
+      "text": "用于替换模板值（例如 {x}）的键值对。"
+    },
+    {
+      "id": "Resource.ConstructorOptions",
+      "field": "properties/url/description",
+      "sourceHash": "sha256:da534f84820f464ddcfc2def95a5d15e033fe1f43dabf125f72cc32b89f9020a",
+      "text": "资源 URL。"
+    },
+    {
+      "id": "Resource.DEFAULT",
+      "field": "description",
+      "sourceHash": "sha256:7943a1fe66e693ccebbebf6def5277ba31cf2b0497433745afc0c1e468b8b279",
+      "text": "以浏览器当前位置初始化的资源实例。"
+    },
+    {
+      "id": "Resource.delete",
+      "field": "description",
+      "sourceHash": "sha256:ce91b753e991be6bf5f8247a705aeb7705caa28713ff63789c723ca4e9836894",
+      "text": "从 URL 创建 Resource，并调用其 delete()。"
+    },
+    {
+      "id": "Resource.delete",
+      "field": "params/options.data/description",
+      "sourceHash": "sha256:0c58333d6a1128d701b74f22f62aef50ed2ae649a643d8ec74c9fa77f89aa4b8",
+      "text": "随资源一同发送的数据。"
+    },
+    {
+      "id": "Resource.delete",
+      "field": "params/options.queryParameters/description",
+      "sourceHash": "sha256:1293128eddee610eb13118a642d7c54af1ad348a4785567cb6e21f03763526d5",
+      "text": "包含获取资源时发送的查询参数的对象。"
+    },
+    {
+      "id": "Resource.delete",
+      "field": "params/options.retryCallback/description",
+      "sourceHash": "sha256:6314fe29cbbab69117c1046f45641aae781d090b549211bfcf5bb55d21ec41be",
+      "text": "资源请求失败时调用的函数。若返回 true，则重试请求。"
+    },
+    {
+      "id": "Resource.delete",
+      "field": "params/options.templateValues/description",
+      "sourceHash": "sha256:393e2f4d7a22b83b70ebf42ea61f943315eb7426189d673caaae49172c2ec8fc",
+      "text": "用于替换模板值（例如 {x}）的键值对。"
+    },
+    {
+      "id": "Resource.delete",
+      "field": "params/options.url/description",
+      "sourceHash": "sha256:da534f84820f464ddcfc2def95a5d15e033fe1f43dabf125f72cc32b89f9020a",
+      "text": "资源 URL。"
+    },
+    {
+      "id": "Resource.delete",
+      "field": "params/options/description",
+      "sourceHash": "sha256:e8d0fcac2c0564c14ae852fa0da44ee878d713c90df0d7418d518af8adc9801a",
+      "text": "URL 或具有以下属性的对象。"
+    },
+    {
+      "id": "Resource.delete",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:3a82bf5df636d104deccba63082d7329c5c2875d76eaec68fbe3a96b41d5266a",
+      "text": "加载完成后兑现为所请求数据的 Promise。若 <code>request.throttle</code> 为 true 且请求优先级不足，则返回 undefined。"
+    },
+    {
+      "id": "Resource.fetch",
+      "field": "description",
+      "sourceHash": "sha256:887a399143451ec850c98bfd2088b7bf4d22be2ea88c14cb5615fa76426f13de",
+      "text": "从 URL 创建 Resource，并调用其 fetch()。"
+    },
+    {
+      "id": "Resource.fetch",
+      "field": "params/options.queryParameters/description",
+      "sourceHash": "sha256:1293128eddee610eb13118a642d7c54af1ad348a4785567cb6e21f03763526d5",
+      "text": "包含获取资源时发送的查询参数的对象。"
+    },
+    {
+      "id": "Resource.fetch",
+      "field": "params/options.retryCallback/description",
+      "sourceHash": "sha256:6314fe29cbbab69117c1046f45641aae781d090b549211bfcf5bb55d21ec41be",
+      "text": "资源请求失败时调用的函数。若返回 true，则重试请求。"
+    },
+    {
+      "id": "Resource.fetch",
+      "field": "params/options.templateValues/description",
+      "sourceHash": "sha256:393e2f4d7a22b83b70ebf42ea61f943315eb7426189d673caaae49172c2ec8fc",
+      "text": "用于替换模板值（例如 {x}）的键值对。"
+    },
+    {
+      "id": "Resource.fetch",
+      "field": "params/options.url/description",
+      "sourceHash": "sha256:da534f84820f464ddcfc2def95a5d15e033fe1f43dabf125f72cc32b89f9020a",
+      "text": "资源 URL。"
+    },
+    {
+      "id": "Resource.fetch",
+      "field": "params/options/description",
+      "sourceHash": "sha256:e8d0fcac2c0564c14ae852fa0da44ee878d713c90df0d7418d518af8adc9801a",
+      "text": "URL 或具有以下属性的对象。"
+    },
+    {
+      "id": "Resource.fetch",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:3a82bf5df636d104deccba63082d7329c5c2875d76eaec68fbe3a96b41d5266a",
+      "text": "加载完成后兑现为所请求数据的 Promise。若 <code>request.throttle</code> 为 true 且请求优先级不足，则返回 undefined。"
+    },
+    {
+      "id": "Resource.fetchArrayBuffer",
+      "field": "description",
+      "sourceHash": "sha256:6df2c1e16b8436de13781e977713e3f66496982b992c254f0bf8ceb94c3ad09b",
+      "text": "创建 Resource，并调用其 fetchArrayBuffer()。"
+    },
+    {
+      "id": "Resource.fetchArrayBuffer",
+      "field": "params/options.queryParameters/description",
+      "sourceHash": "sha256:1293128eddee610eb13118a642d7c54af1ad348a4785567cb6e21f03763526d5",
+      "text": "包含获取资源时发送的查询参数的对象。"
+    },
+    {
+      "id": "Resource.fetchArrayBuffer",
+      "field": "params/options.retryCallback/description",
+      "sourceHash": "sha256:6314fe29cbbab69117c1046f45641aae781d090b549211bfcf5bb55d21ec41be",
+      "text": "资源请求失败时调用的函数。若返回 true，则重试请求。"
+    },
+    {
+      "id": "Resource.fetchArrayBuffer",
+      "field": "params/options.templateValues/description",
+      "sourceHash": "sha256:393e2f4d7a22b83b70ebf42ea61f943315eb7426189d673caaae49172c2ec8fc",
+      "text": "用于替换模板值（例如 {x}）的键值对。"
+    },
+    {
+      "id": "Resource.fetchArrayBuffer",
+      "field": "params/options.url/description",
+      "sourceHash": "sha256:da534f84820f464ddcfc2def95a5d15e033fe1f43dabf125f72cc32b89f9020a",
+      "text": "资源 URL。"
+    },
+    {
+      "id": "Resource.fetchArrayBuffer",
+      "field": "params/options/description",
+      "sourceHash": "sha256:e8d0fcac2c0564c14ae852fa0da44ee878d713c90df0d7418d518af8adc9801a",
+      "text": "URL 或具有以下属性的对象。"
+    },
+    {
+      "id": "Resource.fetchArrayBuffer",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:3a82bf5df636d104deccba63082d7329c5c2875d76eaec68fbe3a96b41d5266a",
+      "text": "加载完成后兑现为所请求数据的 Promise。若 <code>request.throttle</code> 为 true 且请求优先级不足，则返回 undefined。"
+    },
+    {
+      "id": "Resource.fetchBlob",
+      "field": "description",
+      "sourceHash": "sha256:ed6eedbcff68f881c5891391ab4e82d18e7eb545cf048f2a2afe25b730fecb6e",
+      "text": "创建 Resource，并调用其 fetchBlob()。"
+    },
+    {
+      "id": "Resource.fetchBlob",
+      "field": "params/options.queryParameters/description",
+      "sourceHash": "sha256:1293128eddee610eb13118a642d7c54af1ad348a4785567cb6e21f03763526d5",
+      "text": "包含获取资源时发送的查询参数的对象。"
+    },
+    {
+      "id": "Resource.fetchBlob",
+      "field": "params/options.retryCallback/description",
+      "sourceHash": "sha256:6314fe29cbbab69117c1046f45641aae781d090b549211bfcf5bb55d21ec41be",
+      "text": "资源请求失败时调用的函数。若返回 true，则重试请求。"
+    },
+    {
+      "id": "Resource.fetchBlob",
+      "field": "params/options.templateValues/description",
+      "sourceHash": "sha256:393e2f4d7a22b83b70ebf42ea61f943315eb7426189d673caaae49172c2ec8fc",
+      "text": "用于替换模板值（例如 {x}）的键值对。"
+    },
+    {
+      "id": "Resource.fetchBlob",
+      "field": "params/options.url/description",
+      "sourceHash": "sha256:da534f84820f464ddcfc2def95a5d15e033fe1f43dabf125f72cc32b89f9020a",
+      "text": "资源 URL。"
+    },
+    {
+      "id": "Resource.fetchBlob",
+      "field": "params/options/description",
+      "sourceHash": "sha256:e8d0fcac2c0564c14ae852fa0da44ee878d713c90df0d7418d518af8adc9801a",
+      "text": "URL 或具有以下属性的对象。"
+    },
+    {
+      "id": "Resource.fetchBlob",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:3a82bf5df636d104deccba63082d7329c5c2875d76eaec68fbe3a96b41d5266a",
+      "text": "加载完成后兑现为所请求数据的 Promise。若 <code>request.throttle</code> 为 true 且请求优先级不足，则返回 undefined。"
+    },
+    {
+      "id": "Resource.fetchImage",
+      "field": "description",
+      "sourceHash": "sha256:9271c303f8c40f05bbc490922798af5dc7ee6968e07836ebe23f78ba073de8ac",
+      "text": "创建 Resource，并调用其 fetchImage()。"
+    },
+    {
+      "id": "Resource.fetchImage",
+      "field": "params/options.flipY/description",
+      "sourceHash": "sha256:0af545f1e8839a37299251f8a7590861025702d54d444d9154630d1135cb1310",
+      "text": "获取和解码图像时是否垂直翻转。仅在请求图像且浏览器支持 <code>createImageBitmap</code> 时适用。"
+    },
+    {
+      "id": "Resource.fetchImage",
+      "field": "params/options.preferBlob/description",
+      "sourceHash": "sha256:83240ea2601c3e14651b3a42b5de1840d5f8c7e0f1fafc93de08255865660c82",
+      "text": "为 true 时，通过 Blob 加载图像。"
+    },
+    {
+      "id": "Resource.fetchImage",
+      "field": "params/options.preferImageBitmap/description",
+      "sourceHash": "sha256:4c85d254be6ec7687c5fd8a1d7aa56e56b659a500adbeceb4752fd4f9f894e8c",
+      "text": "为 true 时，在获取过程中解码图像，并返回 <code>ImageBitmap</code>。"
+    },
+    {
+      "id": "Resource.fetchImage",
+      "field": "params/options.queryParameters/description",
+      "sourceHash": "sha256:1293128eddee610eb13118a642d7c54af1ad348a4785567cb6e21f03763526d5",
+      "text": "包含获取资源时发送的查询参数的对象。"
+    },
+    {
+      "id": "Resource.fetchImage",
+      "field": "params/options.retryCallback/description",
+      "sourceHash": "sha256:6314fe29cbbab69117c1046f45641aae781d090b549211bfcf5bb55d21ec41be",
+      "text": "资源请求失败时调用的函数。若返回 true，则重试请求。"
+    },
+    {
+      "id": "Resource.fetchImage",
+      "field": "params/options.skipColorSpaceConversion/description",
+      "sourceHash": "sha256:c4becb676c26753e2c901885df047e43af7cef86c81d27cc15f28cc2dffc5941",
+      "text": "为 true 时，忽略图像中的自定义伽马或颜色配置。仅在请求图像且浏览器支持 <code>createImageBitmap</code> 时适用。"
+    },
+    {
+      "id": "Resource.fetchImage",
+      "field": "params/options.templateValues/description",
+      "sourceHash": "sha256:393e2f4d7a22b83b70ebf42ea61f943315eb7426189d673caaae49172c2ec8fc",
+      "text": "用于替换模板值（例如 {x}）的键值对。"
+    },
+    {
+      "id": "Resource.fetchImage",
+      "field": "params/options.url/description",
+      "sourceHash": "sha256:da534f84820f464ddcfc2def95a5d15e033fe1f43dabf125f72cc32b89f9020a",
+      "text": "资源 URL。"
+    },
+    {
+      "id": "Resource.fetchImage",
+      "field": "params/options/description",
+      "sourceHash": "sha256:e8d0fcac2c0564c14ae852fa0da44ee878d713c90df0d7418d518af8adc9801a",
+      "text": "URL 或具有以下属性的对象。"
+    },
+    {
+      "id": "Resource.fetchImage",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:3a82bf5df636d104deccba63082d7329c5c2875d76eaec68fbe3a96b41d5266a",
+      "text": "加载完成后兑现为所请求数据的 Promise。若 <code>request.throttle</code> 为 true 且请求优先级不足，则返回 undefined。"
+    },
+    {
+      "id": "Resource.fetchJson",
+      "field": "description",
+      "sourceHash": "sha256:41125bdbfd27238f9d10751658df028c532c202452c5673b1eee54f2d21c0a3d",
+      "text": "创建 Resource，并调用其 fetchJson()。"
+    },
+    {
+      "id": "Resource.fetchJson",
+      "field": "params/options.queryParameters/description",
+      "sourceHash": "sha256:1293128eddee610eb13118a642d7c54af1ad348a4785567cb6e21f03763526d5",
+      "text": "包含获取资源时发送的查询参数的对象。"
+    },
+    {
+      "id": "Resource.fetchJson",
+      "field": "params/options.retryCallback/description",
+      "sourceHash": "sha256:6314fe29cbbab69117c1046f45641aae781d090b549211bfcf5bb55d21ec41be",
+      "text": "资源请求失败时调用的函数。若返回 true，则重试请求。"
+    },
+    {
+      "id": "Resource.fetchJson",
+      "field": "params/options.templateValues/description",
+      "sourceHash": "sha256:393e2f4d7a22b83b70ebf42ea61f943315eb7426189d673caaae49172c2ec8fc",
+      "text": "用于替换模板值（例如 {x}）的键值对。"
+    },
+    {
+      "id": "Resource.fetchJson",
+      "field": "params/options.url/description",
+      "sourceHash": "sha256:da534f84820f464ddcfc2def95a5d15e033fe1f43dabf125f72cc32b89f9020a",
+      "text": "资源 URL。"
+    },
+    {
+      "id": "Resource.fetchJson",
+      "field": "params/options/description",
+      "sourceHash": "sha256:e8d0fcac2c0564c14ae852fa0da44ee878d713c90df0d7418d518af8adc9801a",
+      "text": "URL 或具有以下属性的对象。"
+    },
+    {
+      "id": "Resource.fetchJson",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:3a82bf5df636d104deccba63082d7329c5c2875d76eaec68fbe3a96b41d5266a",
+      "text": "加载完成后兑现为所请求数据的 Promise。若 <code>request.throttle</code> 为 true 且请求优先级不足，则返回 undefined。"
+    },
+    {
+      "id": "Resource.fetchJsonp",
+      "field": "description",
+      "sourceHash": "sha256:179e7a1d7d7aaa215455ffb65c38cbb48992e4896344cebe21a8041631995095",
+      "text": "从 URL 创建 Resource，并调用其 fetchJsonp()。"
+    },
+    {
+      "id": "Resource.fetchJsonp",
+      "field": "params/options.callbackParameterName/description",
+      "sourceHash": "sha256:6022cfd116f495ccce09b597df6d8f56a6ed878bee74c4ecdb3fbcd596db3a21",
+      "text": "服务器所要求的回调参数名称。"
+    },
+    {
+      "id": "Resource.fetchJsonp",
+      "field": "params/options.queryParameters/description",
+      "sourceHash": "sha256:1293128eddee610eb13118a642d7c54af1ad348a4785567cb6e21f03763526d5",
+      "text": "包含获取资源时发送的查询参数的对象。"
+    },
+    {
+      "id": "Resource.fetchJsonp",
+      "field": "params/options.retryCallback/description",
+      "sourceHash": "sha256:6314fe29cbbab69117c1046f45641aae781d090b549211bfcf5bb55d21ec41be",
+      "text": "资源请求失败时调用的函数。若返回 true，则重试请求。"
+    },
+    {
+      "id": "Resource.fetchJsonp",
+      "field": "params/options.templateValues/description",
+      "sourceHash": "sha256:393e2f4d7a22b83b70ebf42ea61f943315eb7426189d673caaae49172c2ec8fc",
+      "text": "用于替换模板值（例如 {x}）的键值对。"
+    },
+    {
+      "id": "Resource.fetchJsonp",
+      "field": "params/options.url/description",
+      "sourceHash": "sha256:da534f84820f464ddcfc2def95a5d15e033fe1f43dabf125f72cc32b89f9020a",
+      "text": "资源 URL。"
+    },
+    {
+      "id": "Resource.fetchJsonp",
+      "field": "params/options/description",
+      "sourceHash": "sha256:e8d0fcac2c0564c14ae852fa0da44ee878d713c90df0d7418d518af8adc9801a",
+      "text": "URL 或具有以下属性的对象。"
+    },
+    {
+      "id": "Resource.fetchJsonp",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:3a82bf5df636d104deccba63082d7329c5c2875d76eaec68fbe3a96b41d5266a",
+      "text": "加载完成后兑现为所请求数据的 Promise。若 <code>request.throttle</code> 为 true 且请求优先级不足，则返回 undefined。"
+    },
+    {
+      "id": "Resource.fetchText",
+      "field": "description",
+      "sourceHash": "sha256:814cd387bb3c20c021948a0f126cb2496fea5d3fef0200811b940f0d8a330f21",
+      "text": "创建 Resource，并调用其 fetchText()。"
+    },
+    {
+      "id": "Resource.fetchText",
+      "field": "params/options.queryParameters/description",
+      "sourceHash": "sha256:1293128eddee610eb13118a642d7c54af1ad348a4785567cb6e21f03763526d5",
+      "text": "包含获取资源时发送的查询参数的对象。"
+    },
+    {
+      "id": "Resource.fetchText",
+      "field": "params/options.retryCallback/description",
+      "sourceHash": "sha256:6314fe29cbbab69117c1046f45641aae781d090b549211bfcf5bb55d21ec41be",
+      "text": "资源请求失败时调用的函数。若返回 true，则重试请求。"
+    },
+    {
+      "id": "Resource.fetchText",
+      "field": "params/options.templateValues/description",
+      "sourceHash": "sha256:393e2f4d7a22b83b70ebf42ea61f943315eb7426189d673caaae49172c2ec8fc",
+      "text": "用于替换模板值（例如 {x}）的键值对。"
+    },
+    {
+      "id": "Resource.fetchText",
+      "field": "params/options.url/description",
+      "sourceHash": "sha256:da534f84820f464ddcfc2def95a5d15e033fe1f43dabf125f72cc32b89f9020a",
+      "text": "资源 URL。"
+    },
+    {
+      "id": "Resource.fetchText",
+      "field": "params/options/description",
+      "sourceHash": "sha256:e8d0fcac2c0564c14ae852fa0da44ee878d713c90df0d7418d518af8adc9801a",
+      "text": "URL 或具有以下属性的对象。"
+    },
+    {
+      "id": "Resource.fetchText",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:3a82bf5df636d104deccba63082d7329c5c2875d76eaec68fbe3a96b41d5266a",
+      "text": "加载完成后兑现为所请求数据的 Promise。若 <code>request.throttle</code> 为 true 且请求优先级不足，则返回 undefined。"
+    },
+    {
+      "id": "Resource.fetchXML",
+      "field": "description",
+      "sourceHash": "sha256:2c4335c0505a32720f578709c751a084bcf989a3132bb331b2443a959fceb577",
+      "text": "创建 Resource，并调用其 fetchXML()。"
+    },
+    {
+      "id": "Resource.fetchXML",
+      "field": "params/options.queryParameters/description",
+      "sourceHash": "sha256:1293128eddee610eb13118a642d7c54af1ad348a4785567cb6e21f03763526d5",
+      "text": "包含获取资源时发送的查询参数的对象。"
+    },
+    {
+      "id": "Resource.fetchXML",
+      "field": "params/options.retryCallback/description",
+      "sourceHash": "sha256:6314fe29cbbab69117c1046f45641aae781d090b549211bfcf5bb55d21ec41be",
+      "text": "资源请求失败时调用的函数。若返回 true，则重试请求。"
+    },
+    {
+      "id": "Resource.fetchXML",
+      "field": "params/options.templateValues/description",
+      "sourceHash": "sha256:393e2f4d7a22b83b70ebf42ea61f943315eb7426189d673caaae49172c2ec8fc",
+      "text": "用于替换模板值（例如 {x}）的键值对。"
+    },
+    {
+      "id": "Resource.fetchXML",
+      "field": "params/options.url/description",
+      "sourceHash": "sha256:da534f84820f464ddcfc2def95a5d15e033fe1f43dabf125f72cc32b89f9020a",
+      "text": "资源 URL。"
+    },
+    {
+      "id": "Resource.fetchXML",
+      "field": "params/options/description",
+      "sourceHash": "sha256:e8d0fcac2c0564c14ae852fa0da44ee878d713c90df0d7418d518af8adc9801a",
+      "text": "URL 或具有以下属性的对象。"
+    },
+    {
+      "id": "Resource.fetchXML",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:3a82bf5df636d104deccba63082d7329c5c2875d76eaec68fbe3a96b41d5266a",
+      "text": "加载完成后兑现为所请求数据的 Promise。若 <code>request.throttle</code> 为 true 且请求优先级不足，则返回 undefined。"
+    },
+    {
+      "id": "Resource.head",
+      "field": "description",
+      "sourceHash": "sha256:339e62f18fe38c6e45001f058abe2f3042cc07da5c38e3fa039441ab4fbc731a",
+      "text": "从 URL 创建 Resource，并调用其 head()。"
+    },
+    {
+      "id": "Resource.head",
+      "field": "params/options.queryParameters/description",
+      "sourceHash": "sha256:1293128eddee610eb13118a642d7c54af1ad348a4785567cb6e21f03763526d5",
+      "text": "包含获取资源时发送的查询参数的对象。"
+    },
+    {
+      "id": "Resource.head",
+      "field": "params/options.retryCallback/description",
+      "sourceHash": "sha256:6314fe29cbbab69117c1046f45641aae781d090b549211bfcf5bb55d21ec41be",
+      "text": "资源请求失败时调用的函数。若返回 true，则重试请求。"
+    },
+    {
+      "id": "Resource.head",
+      "field": "params/options.templateValues/description",
+      "sourceHash": "sha256:393e2f4d7a22b83b70ebf42ea61f943315eb7426189d673caaae49172c2ec8fc",
+      "text": "用于替换模板值（例如 {x}）的键值对。"
+    },
+    {
+      "id": "Resource.head",
+      "field": "params/options.url/description",
+      "sourceHash": "sha256:da534f84820f464ddcfc2def95a5d15e033fe1f43dabf125f72cc32b89f9020a",
+      "text": "资源 URL。"
+    },
+    {
+      "id": "Resource.head",
+      "field": "params/options/description",
+      "sourceHash": "sha256:e8d0fcac2c0564c14ae852fa0da44ee878d713c90df0d7418d518af8adc9801a",
+      "text": "URL 或具有以下属性的对象。"
+    },
+    {
+      "id": "Resource.head",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:3a82bf5df636d104deccba63082d7329c5c2875d76eaec68fbe3a96b41d5266a",
+      "text": "加载完成后兑现为所请求数据的 Promise。若 <code>request.throttle</code> 为 true 且请求优先级不足，则返回 undefined。"
+    },
+    {
+      "id": "Resource.isBlobSupported",
+      "field": "description",
+      "sourceHash": "sha256:99a05ba4dd178a0fe52e792badb31659c2709734e23eab8638c11a7fbc77ef38",
+      "text": "支持 Blob 时返回 true。"
+    },
+    {
+      "id": "Resource.options",
+      "field": "description",
+      "sourceHash": "sha256:2861cd7d0346270b13789edb912222265f7a308589ca10c7b473ca731faf89da",
+      "text": "从 URL 创建 Resource，并调用其 options()。"
+    },
+    {
+      "id": "Resource.options",
+      "field": "params/options.queryParameters/description",
+      "sourceHash": "sha256:1293128eddee610eb13118a642d7c54af1ad348a4785567cb6e21f03763526d5",
+      "text": "包含获取资源时发送的查询参数的对象。"
+    },
+    {
+      "id": "Resource.options",
+      "field": "params/options.retryCallback/description",
+      "sourceHash": "sha256:6314fe29cbbab69117c1046f45641aae781d090b549211bfcf5bb55d21ec41be",
+      "text": "资源请求失败时调用的函数。若返回 true，则重试请求。"
+    },
+    {
+      "id": "Resource.options",
+      "field": "params/options.templateValues/description",
+      "sourceHash": "sha256:393e2f4d7a22b83b70ebf42ea61f943315eb7426189d673caaae49172c2ec8fc",
+      "text": "用于替换模板值（例如 {x}）的键值对。"
+    },
+    {
+      "id": "Resource.options",
+      "field": "params/options.url/description",
+      "sourceHash": "sha256:da534f84820f464ddcfc2def95a5d15e033fe1f43dabf125f72cc32b89f9020a",
+      "text": "资源 URL。"
+    },
+    {
+      "id": "Resource.options",
+      "field": "params/options/description",
+      "sourceHash": "sha256:e8d0fcac2c0564c14ae852fa0da44ee878d713c90df0d7418d518af8adc9801a",
+      "text": "URL 或具有以下属性的对象。"
+    },
+    {
+      "id": "Resource.options",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:3a82bf5df636d104deccba63082d7329c5c2875d76eaec68fbe3a96b41d5266a",
+      "text": "加载完成后兑现为所请求数据的 Promise。若 <code>request.throttle</code> 为 true 且请求优先级不足，则返回 undefined。"
+    },
+    {
+      "id": "Resource.patch",
+      "field": "description",
+      "sourceHash": "sha256:e58c74f46bf5723ccb1d55097ca25864681339ae0ebd44555028d0ba71c4ba38",
+      "text": "从 URL 创建 Resource，并调用其 patch()。"
+    },
+    {
+      "id": "Resource.patch",
+      "field": "params/options.data/description",
+      "sourceHash": "sha256:0c58333d6a1128d701b74f22f62aef50ed2ae649a643d8ec74c9fa77f89aa4b8",
+      "text": "随资源一同发送的数据。"
+    },
+    {
+      "id": "Resource.patch",
+      "field": "params/options.queryParameters/description",
+      "sourceHash": "sha256:1293128eddee610eb13118a642d7c54af1ad348a4785567cb6e21f03763526d5",
+      "text": "包含获取资源时发送的查询参数的对象。"
+    },
+    {
+      "id": "Resource.patch",
+      "field": "params/options.retryCallback/description",
+      "sourceHash": "sha256:6314fe29cbbab69117c1046f45641aae781d090b549211bfcf5bb55d21ec41be",
+      "text": "资源请求失败时调用的函数。若返回 true，则重试请求。"
+    },
+    {
+      "id": "Resource.patch",
+      "field": "params/options.templateValues/description",
+      "sourceHash": "sha256:393e2f4d7a22b83b70ebf42ea61f943315eb7426189d673caaae49172c2ec8fc",
+      "text": "用于替换模板值（例如 {x}）的键值对。"
+    },
+    {
+      "id": "Resource.patch",
+      "field": "params/options.url/description",
+      "sourceHash": "sha256:da534f84820f464ddcfc2def95a5d15e033fe1f43dabf125f72cc32b89f9020a",
+      "text": "资源 URL。"
+    },
+    {
+      "id": "Resource.patch",
+      "field": "params/options/description",
+      "sourceHash": "sha256:e8d0fcac2c0564c14ae852fa0da44ee878d713c90df0d7418d518af8adc9801a",
+      "text": "URL 或具有以下属性的对象。"
+    },
+    {
+      "id": "Resource.patch",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:3a82bf5df636d104deccba63082d7329c5c2875d76eaec68fbe3a96b41d5266a",
+      "text": "加载完成后兑现为所请求数据的 Promise。若 <code>request.throttle</code> 为 true 且请求优先级不足，则返回 undefined。"
+    },
+    {
+      "id": "Resource.post",
+      "field": "description",
+      "sourceHash": "sha256:21bb4fec3b59f24b335689bc4a26b62c7242104c953330f143b0b6e13ba47552",
+      "text": "从 URL 创建 Resource，并调用其 post()。"
+    },
+    {
+      "id": "Resource.post",
+      "field": "params/options.data/description",
+      "sourceHash": "sha256:0c58333d6a1128d701b74f22f62aef50ed2ae649a643d8ec74c9fa77f89aa4b8",
+      "text": "随资源一同发送的数据。"
+    },
+    {
+      "id": "Resource.post",
+      "field": "params/options.queryParameters/description",
+      "sourceHash": "sha256:1293128eddee610eb13118a642d7c54af1ad348a4785567cb6e21f03763526d5",
+      "text": "包含获取资源时发送的查询参数的对象。"
+    },
+    {
+      "id": "Resource.post",
+      "field": "params/options.retryCallback/description",
+      "sourceHash": "sha256:6314fe29cbbab69117c1046f45641aae781d090b549211bfcf5bb55d21ec41be",
+      "text": "资源请求失败时调用的函数。若返回 true，则重试请求。"
+    },
+    {
+      "id": "Resource.post",
+      "field": "params/options.templateValues/description",
+      "sourceHash": "sha256:393e2f4d7a22b83b70ebf42ea61f943315eb7426189d673caaae49172c2ec8fc",
+      "text": "用于替换模板值（例如 {x}）的键值对。"
+    },
+    {
+      "id": "Resource.post",
+      "field": "params/options.url/description",
+      "sourceHash": "sha256:da534f84820f464ddcfc2def95a5d15e033fe1f43dabf125f72cc32b89f9020a",
+      "text": "资源 URL。"
+    },
+    {
+      "id": "Resource.post",
+      "field": "params/options/description",
+      "sourceHash": "sha256:e8d0fcac2c0564c14ae852fa0da44ee878d713c90df0d7418d518af8adc9801a",
+      "text": "URL 或具有以下属性的对象。"
+    },
+    {
+      "id": "Resource.post",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:3a82bf5df636d104deccba63082d7329c5c2875d76eaec68fbe3a96b41d5266a",
+      "text": "加载完成后兑现为所请求数据的 Promise。若 <code>request.throttle</code> 为 true 且请求优先级不足，则返回 undefined。"
+    },
+    {
+      "id": "Resource.put",
+      "field": "description",
+      "sourceHash": "sha256:5fc01f2fdfe49209560edc8a0f2a01c22227357881b4860bd111aa420b8f3039",
+      "text": "从 URL 创建 Resource，并调用其 put()。"
+    },
+    {
+      "id": "Resource.put",
+      "field": "params/options.data/description",
+      "sourceHash": "sha256:0c58333d6a1128d701b74f22f62aef50ed2ae649a643d8ec74c9fa77f89aa4b8",
+      "text": "随资源一同发送的数据。"
+    },
+    {
+      "id": "Resource.put",
+      "field": "params/options.queryParameters/description",
+      "sourceHash": "sha256:1293128eddee610eb13118a642d7c54af1ad348a4785567cb6e21f03763526d5",
+      "text": "包含获取资源时发送的查询参数的对象。"
+    },
+    {
+      "id": "Resource.put",
+      "field": "params/options.retryCallback/description",
+      "sourceHash": "sha256:6314fe29cbbab69117c1046f45641aae781d090b549211bfcf5bb55d21ec41be",
+      "text": "资源请求失败时调用的函数。若返回 true，则重试请求。"
+    },
+    {
+      "id": "Resource.put",
+      "field": "params/options.templateValues/description",
+      "sourceHash": "sha256:393e2f4d7a22b83b70ebf42ea61f943315eb7426189d673caaae49172c2ec8fc",
+      "text": "用于替换模板值（例如 {x}）的键值对。"
+    },
+    {
+      "id": "Resource.put",
+      "field": "params/options.url/description",
+      "sourceHash": "sha256:da534f84820f464ddcfc2def95a5d15e033fe1f43dabf125f72cc32b89f9020a",
+      "text": "资源 URL。"
+    },
+    {
+      "id": "Resource.put",
+      "field": "params/options/description",
+      "sourceHash": "sha256:e8d0fcac2c0564c14ae852fa0da44ee878d713c90df0d7418d518af8adc9801a",
+      "text": "URL 或具有以下属性的对象。"
+    },
+    {
+      "id": "Resource.put",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:3a82bf5df636d104deccba63082d7329c5c2875d76eaec68fbe3a96b41d5266a",
+      "text": "加载完成后兑现为所请求数据的 Promise。若 <code>request.throttle</code> 为 true 且请求优先级不足，则返回 undefined。"
+    },
+    {
+      "id": "Resource.RetryCallback",
+      "field": "description",
+      "sourceHash": "sha256:527c76da95ccf990110f7c4757fdbff5ff4c5e731d40b440071178d3b1162d94",
+      "text": "资源加载失败时调用、用于决定是否重试的函数。"
+    },
+    {
+      "id": "Resource.RetryCallback",
+      "field": "params/error/description",
+      "sourceHash": "sha256:da559c562bf91f65660c3e8c9b0c8be48d6b344921e8e934489cdeda449de938",
+      "text": "资源加载期间发生的错误。"
+    },
+    {
+      "id": "Resource.RetryCallback",
+      "field": "params/resource/description",
+      "sourceHash": "sha256:33ec15c6ed2cb79ac7a04fbf12b4c51250a0d0592a5b86b6970d1631b53145c7",
+      "text": "加载失败的资源。"
+    },
+    {
+      "id": "Resource.RetryCallback",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:b4f00b818bc40be4023323efd6b90c87604154c270060321375683e365691dc3",
+      "text": "返回 true 或兑现为 true 的 Promise 时，重试资源请求；否则返回失败结果。"
+    },
+    {
+      "id": "Resource",
+      "field": "description",
+      "sourceHash": "sha256:dfb7b875690515db56739af034af858bc35925f1fc2ce4aff42865140b4b750c",
+      "text": "包含资源位置和获取或创建派生资源所需其他参数的资源对象，同时提供请求重试能力。"
+    },
+    {
+      "id": "Resource",
+      "field": "params/options/description",
+      "sourceHash": "sha256:7a8d033ade849f5f1a53fca9a3dbd69fe9328940909232cdce4c849bf9e03b82",
+      "text": "URL 或描述初始化选项的对象。"
+    },
+    {
+      "id": "Resource#appendForwardSlash",
+      "field": "description",
+      "sourceHash": "sha256:4fae67576a9e131fd53d74bc3400d186279fe2a89cd9627012faabbfb6ae9393",
+      "text": "在 URL 末尾追加正斜杠。"
+    },
+    {
+      "id": "Resource#appendQueryParameters",
+      "field": "description",
+      "sourceHash": "sha256:b27c834251cfd146fc25fd87f7822a70004cc52f046288e1d5565ef23c1635bf",
+      "text": "合并给定对象与现有查询参数，可一次添加多个参数，而不必逐项修改 queryParameters 属性。"
+    },
+    {
+      "id": "Resource#appendQueryParameters",
+      "field": "params/params/description",
+      "sourceHash": "sha256:5953039aa921473874c41aa4ce1c29c54a0368261f0251cdd4f4275027cbcc72",
+      "text": "查询参数。"
+    },
+    {
+      "id": "Resource#clone",
+      "field": "description",
+      "sourceHash": "sha256:3758378a1885a04fa367e7884b5a96989d79561bacf1ac4b7b484d6e6429adf7",
+      "text": "复制 Resource 实例。"
+    },
+    {
+      "id": "Resource#clone",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:c2b2abb93f9f5c17784ea1f72ff25d8a36fd8dc3ad05e7d039ab67f62c1863bd",
+      "text": "修改后的 result 参数；未提供时返回新建的 Resource 实例。"
+    },
+    {
+      "id": "Resource#delete",
+      "field": "description",
+      "sourceHash": "sha256:7f902ef1d64d9a7d42cd7c4c590ba143ff5b2328846e54cfd52e45a59e0f5956",
+      "text": "异步删除给定资源。返回 Promise，加载完成后兑现为结果，加载失败时拒绝。使用 XMLHttpRequest 加载数据，因此跨源请求要求服务器启用跨源资源共享（CORS）响应头。"
+    },
+    {
+      "id": "Resource#delete",
+      "field": "params/options.headers/description",
+      "sourceHash": "sha256:9a4610b25cefc38b14b1b625378b9b4e4dd05658600a035bba5ffd6690fb84ef",
+      "text": "随请求发送的附加 HTTP 头，若有。"
+    },
+    {
+      "id": "Resource#delete",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:3a82bf5df636d104deccba63082d7329c5c2875d76eaec68fbe3a96b41d5266a",
+      "text": "加载完成后兑现为所请求数据的 Promise。若 <code>request.throttle</code> 为 true 且请求优先级不足，则返回 undefined。"
+    },
+    {
+      "id": "Resource#extension",
+      "field": "description",
+      "sourceHash": "sha256:3a2b2d50e766267a6d9c6b7df1ee2246c3aa18d0edc1a926af1bf755599eb43d",
+      "text": "资源文件扩展名。"
+    },
+    {
+      "id": "Resource#fetch",
+      "field": "description",
+      "sourceHash": "sha256:8f4aacf8900105ad322d68a6cd943cb5a8bc2fd0e3719eb7552e97c197aa6905",
+      "text": "异步加载给定资源。返回 Promise，加载完成后兑现为结果，加载失败时拒绝。使用 XMLHttpRequest 加载数据，因此跨源请求要求服务器启用跨源资源共享（CORS）响应头。建议优先使用 fetchJson、fetchBlob 等更具体的方法。"
+    },
+    {
+      "id": "Resource#fetch",
+      "field": "params/options.headers/description",
+      "sourceHash": "sha256:9a4610b25cefc38b14b1b625378b9b4e4dd05658600a035bba5ffd6690fb84ef",
+      "text": "随请求发送的附加 HTTP 头，若有。"
+    },
+    {
+      "id": "Resource#fetch",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:3a82bf5df636d104deccba63082d7329c5c2875d76eaec68fbe3a96b41d5266a",
+      "text": "加载完成后兑现为所请求数据的 Promise。若 <code>request.throttle</code> 为 true 且请求优先级不足，则返回 undefined。"
+    },
+    {
+      "id": "Resource#fetchArrayBuffer",
+      "field": "description",
+      "sourceHash": "sha256:d38d1ba9e8b2aa03f50e5663d8963323810da0b5203d6150131fdfa94ab2bab0",
+      "text": "异步将资源作为原始二进制数据加载。返回 Promise，加载完成后兑现为 ArrayBuffer，加载失败时拒绝。使用 XMLHttpRequest 加载数据，因此跨源请求要求服务器启用跨源资源共享（CORS）响应头。"
+    },
+    {
+      "id": "Resource#fetchArrayBuffer",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:3a82bf5df636d104deccba63082d7329c5c2875d76eaec68fbe3a96b41d5266a",
+      "text": "加载完成后兑现为所请求数据的 Promise。若 <code>request.throttle</code> 为 true 且请求优先级不足，则返回 undefined。"
+    },
+    {
+      "id": "Resource#fetchBlob",
+      "field": "description",
+      "sourceHash": "sha256:b732558134cdcdb5ce9014ea7b1e4ac8518921df0f22cad21f7a300431215a6b",
+      "text": "异步将给定资源作为 Blob 加载。返回 Promise，加载完成后兑现为 Blob，加载失败时拒绝。使用 XMLHttpRequest 加载数据，因此跨源请求要求服务器启用跨源资源共享（CORS）响应头。"
+    },
+    {
+      "id": "Resource#fetchBlob",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:3a82bf5df636d104deccba63082d7329c5c2875d76eaec68fbe3a96b41d5266a",
+      "text": "加载完成后兑现为所请求数据的 Promise。若 <code>request.throttle</code> 为 true 且请求优先级不足，则返回 undefined。"
+    },
+    {
+      "id": "Resource#fetchImage",
+      "field": "description",
+      "sourceHash": "sha256:63c5064663fa81a5395c4e472ba712cda732a7853924597d576a9ef730cad40f",
+      "text": "异步加载给定图像资源。若 <code>preferImageBitmap</code> 为 true 且浏览器支持 <code>createImageBitmap</code>，则 Promise 在加载完成后兑现为 {@link https://developer.mozilla.org/en-US/docs/Web/API/ImageBitmap|ImageBitmap}；否则兑现为 {@link https://developer.mozilla.org/en-US/docs/Web/API/HTMLImageElement|Image}。图像加载失败时，Promise 被拒绝。"
+    },
+    {
+      "id": "Resource#fetchImage",
+      "field": "params/options.flipY/description",
+      "sourceHash": "sha256:6f4c9e4353940cf4b7a97576d6698a93e9617020feb011fde0bf805790fe96a8",
+      "text": "为 true 时，解码期间垂直翻转图像。仅在浏览器支持 <code>createImageBitmap</code> 时适用。"
+    },
+    {
+      "id": "Resource#fetchImage",
+      "field": "params/options.preferBlob/description",
+      "sourceHash": "sha256:83240ea2601c3e14651b3a42b5de1840d5f8c7e0f1fafc93de08255865660c82",
+      "text": "为 true 时，通过 Blob 加载图像。"
+    },
+    {
+      "id": "Resource#fetchImage",
+      "field": "params/options.preferImageBitmap/description",
+      "sourceHash": "sha256:4c85d254be6ec7687c5fd8a1d7aa56e56b659a500adbeceb4752fd4f9f894e8c",
+      "text": "为 true 时，在获取过程中解码图像，并返回 <code>ImageBitmap</code>。"
+    },
+    {
+      "id": "Resource#fetchImage",
+      "field": "params/options.skipColorSpaceConversion/description",
+      "sourceHash": "sha256:f43561a1d0ecf2154474832fab49f53141bb80c3fc113a23ac6cf1ab40b7284b",
+      "text": "为 true 时，忽略图像中的自定义伽马或颜色配置。仅在浏览器支持 <code>createImageBitmap</code> 时适用。"
+    },
+    {
+      "id": "Resource#fetchImage",
+      "field": "params/options/description",
+      "sourceHash": "sha256:26106f848ec24dea984d8c9330a7243a30a37beb5af67a4b4de928ef37b43a17",
+      "text": "具有以下属性的对象。"
+    },
+    {
+      "id": "Resource#fetchImage",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:3a82bf5df636d104deccba63082d7329c5c2875d76eaec68fbe3a96b41d5266a",
+      "text": "加载完成后兑现为所请求数据的 Promise。若 <code>request.throttle</code> 为 true 且请求优先级不足，则返回 undefined。"
+    },
+    {
+      "id": "Resource#fetchJson",
+      "field": "description",
+      "sourceHash": "sha256:e0470d80f3437c59601c63e1e552d7cd303fab0289c4bd81cea704eb0a919ce2",
+      "text": "异步将给定资源作为 JSON 加载。返回 Promise，加载完成后兑现为 JSON 对象，加载失败时拒绝。使用 XMLHttpRequest 加载数据，因此跨源请求要求服务器启用跨源资源共享（CORS）响应头。若未指定，此函数会添加请求头 'Accept: application/json,&#42;&#47;&#42;;q=0.01'。"
+    },
+    {
+      "id": "Resource#fetchJson",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:3a82bf5df636d104deccba63082d7329c5c2875d76eaec68fbe3a96b41d5266a",
+      "text": "加载完成后兑现为所请求数据的 Promise。若 <code>request.throttle</code> 为 true 且请求优先级不足，则返回 undefined。"
+    },
+    {
+      "id": "Resource#fetchJsonp",
+      "field": "description",
+      "sourceHash": "sha256:6053be45c191b257a21d9c2c908e773e8eec7a824dad0f559f89e58a5733ddd7",
+      "text": "使用 JSONP 请求资源。"
+    },
+    {
+      "id": "Resource#fetchJsonp",
+      "field": "params/callbackParameterName/description",
+      "sourceHash": "sha256:6022cfd116f495ccce09b597df6d8f56a6ed878bee74c4ecdb3fbcd596db3a21",
+      "text": "服务器所要求的回调参数名称。"
+    },
+    {
+      "id": "Resource#fetchJsonp",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:3a82bf5df636d104deccba63082d7329c5c2875d76eaec68fbe3a96b41d5266a",
+      "text": "加载完成后兑现为所请求数据的 Promise。若 <code>request.throttle</code> 为 true 且请求优先级不足，则返回 undefined。"
+    },
+    {
+      "id": "Resource#fetchText",
+      "field": "description",
+      "sourceHash": "sha256:e0c52b08f1b3746870cbce773b926a42eaf04bfe609d1d2d3e84c70200d6211a",
+      "text": "异步将给定资源作为文本加载。返回 Promise，加载完成后兑现为 String，加载失败时拒绝。使用 XMLHttpRequest 加载数据，因此跨源请求要求服务器启用跨源资源共享（CORS）响应头。"
+    },
+    {
+      "id": "Resource#fetchText",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:3a82bf5df636d104deccba63082d7329c5c2875d76eaec68fbe3a96b41d5266a",
+      "text": "加载完成后兑现为所请求数据的 Promise。若 <code>request.throttle</code> 为 true 且请求优先级不足，则返回 undefined。"
+    },
+    {
+      "id": "Resource#fetchXML",
+      "field": "description",
+      "sourceHash": "sha256:1956c174a14eb3de3f2adc19d7048fd94c316bbf8e1a1d821914bead96253a10",
+      "text": "异步将给定资源作为 XML 加载。返回 Promise，加载完成后兑现为 XML Document，加载失败时拒绝。使用 XMLHttpRequest 加载数据，因此跨源请求要求服务器启用跨源资源共享（CORS）响应头。"
+    },
+    {
+      "id": "Resource#fetchXML",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:3a82bf5df636d104deccba63082d7329c5c2875d76eaec68fbe3a96b41d5266a",
+      "text": "加载完成后兑现为所请求数据的 Promise。若 <code>request.throttle</code> 为 true 且请求优先级不足，则返回 undefined。"
+    },
+    {
+      "id": "Resource#getBaseUri",
+      "field": "description",
+      "sourceHash": "sha256:94165eca38e11f5e4dcb10c3f9acfff6e899fbf8d96f470c06099f6a204b7a44",
+      "text": "返回 Resource 的基础路径。"
+    },
+    {
+      "id": "Resource#getBaseUri",
+      "field": "params/includeQuery/description",
+      "sourceHash": "sha256:e011a2e4a71a4430260f101c14793ad8365e6bfedb39c2c3e683528e7695ce41",
+      "text": "是否包含 URI 的查询字符串和片段。"
+    },
+    {
+      "id": "Resource#getBaseUri",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:21217db4c27545b82dee0fec7b7229b2cf8e6bb6bd025f5128749e86d8936d3f",
+      "text": "资源的基础 URI。"
+    },
+    {
+      "id": "Resource#getDerivedResource",
+      "field": "description",
+      "sourceHash": "sha256:1dbdcdf2b9f81eff28fe64b1bbc680ede09d92dcee911ca6fdec99028c8135e5",
+      "text": "返回相对于当前实例的资源。除 options 中覆盖的属性外，其余属性与当前实例相同。"
+    },
+    {
+      "id": "Resource#getDerivedResource",
+      "field": "params/options.preserveQueryParameters/description",
+      "sourceHash": "sha256:0a67238f4fe83f2f7037cd36204b01ea39e7014f1a6e4cdb3dc9bc23d5080fc1",
+      "text": "为 true 时，保留当前资源和派生资源的全部查询参数；为 false 时，派生参数替换当前资源的同名参数。"
+    },
+    {
+      "id": "Resource#getDerivedResource",
+      "field": "params/options.queryParameters/description",
+      "sourceHash": "sha256:242608bd859ad6afdcf1d0588a91154c086eaf4c63c6c2d28d7f203d2bcdc744",
+      "text": "包含查询参数的对象，将与当前实例的查询参数合并。"
+    },
+    {
+      "id": "Resource#getDerivedResource",
+      "field": "params/options.retryCallback/description",
+      "sourceHash": "sha256:86d55928fac8eb5c410f7fd7917044f9426dc0e2773968469f239415d82f9c46",
+      "text": "资源加载失败时调用的函数。"
+    },
+    {
+      "id": "Resource#getDerivedResource",
+      "field": "params/options.templateValues/description",
+      "sourceHash": "sha256:6c2df705ec473924dfb2db5d3641093398be53cb740c82217127eee4d85177d0",
+      "text": "用于替换模板值（例如 {x}）的键值对，将与当前实例的模板值合并。"
+    },
+    {
+      "id": "Resource#getDerivedResource",
+      "field": "params/options.url/description",
+      "sourceHash": "sha256:4e2f5bbfc00682d3a90924b0521b33f7dbd94260d5b75514a0b9eccb14626b1f",
+      "text": "相对于当前实例 URL 解析的 URL。"
+    },
+    {
+      "id": "Resource#getDerivedResource",
+      "field": "params/options/description",
+      "sourceHash": "sha256:fdf0ca364eea1ff7f8f4ea078d97e4fd6cf54ab0a8a3f8362f9bc5c940eddc79",
+      "text": "具有以下属性的对象。"
+    },
+    {
+      "id": "Resource#getDerivedResource",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:247fc96e2440d8dbe706bba83ccca57c5333f9e1271e02302d9b48e08d2bff0c",
+      "text": "从当前资源派生的资源。"
+    },
+    {
+      "id": "Resource#getUrlComponent",
+      "field": "description",
+      "sourceHash": "sha256:d5b9729e8fa815262b36c33e962bb85f62620f87722656a2b9d6510e1565bfcd",
+      "text": "返回 URL，可选包含查询字符串并经代理处理。"
+    },
+    {
+      "id": "Resource#getUrlComponent",
+      "field": "params/proxy/description",
+      "sourceHash": "sha256:c55c78f84250c91b93f6f645817520abd0801e4feaba5dd4c649884e8371b661",
+      "text": "为 true 且已定义代理对象时，通过该代理处理 URL。"
+    },
+    {
+      "id": "Resource#getUrlComponent",
+      "field": "params/query/description",
+      "sourceHash": "sha256:c1b0077fded8ef866e4d12238849022d8847217c9f5923f12be2d5b5defad115",
+      "text": "为 true 时包含查询字符串。"
+    },
+    {
+      "id": "Resource#getUrlComponent",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:0e525267aae8f11ff53d5994d1a8681a7fd498e97111c6bd6b220458116d6fe5",
+      "text": "包含全部所需组成部分的 URL。"
+    },
+    {
+      "id": "Resource#hasHeaders",
+      "field": "description",
+      "sourceHash": "sha256:2fd1d218d9d9ea3729b63190fd7951043723a3d54986048036b5ad7def2fa82b",
+      "text": "Resource 具有请求头时为 true，等价于检查 headers 属性是否包含键。"
+    },
+    {
+      "id": "Resource#head",
+      "field": "description",
+      "sourceHash": "sha256:b0afec362782b1a7e1fd3706ba0d730e7be6c6aba87a0db2bb205face519b72e",
+      "text": "异步获取给定资源的响应头。返回 Promise，加载完成后兑现为结果，加载失败时拒绝。使用 XMLHttpRequest 加载数据，因此跨源请求要求服务器启用跨源资源共享（CORS）响应头。"
+    },
+    {
+      "id": "Resource#head",
+      "field": "params/options.headers/description",
+      "sourceHash": "sha256:9a4610b25cefc38b14b1b625378b9b4e4dd05658600a035bba5ffd6690fb84ef",
+      "text": "随请求发送的附加 HTTP 头，若有。"
+    },
+    {
+      "id": "Resource#head",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:3a82bf5df636d104deccba63082d7329c5c2875d76eaec68fbe3a96b41d5266a",
+      "text": "加载完成后兑现为所请求数据的 Promise。若 <code>request.throttle</code> 为 true 且请求优先级不足，则返回 undefined。"
+    },
+    {
+      "id": "Resource#headers",
+      "field": "description",
+      "sourceHash": "sha256:f71b6be8f9b9de8156c90b858401dea14be02fefe05ce129bc1a067540c867e7",
+      "text": "随请求发送的附加 HTTP 头。"
+    },
+    {
+      "id": "Resource#isBlobUri",
+      "field": "description",
+      "sourceHash": "sha256:2a6e1719aaf347ff6d925d73389a2a4f114dce20dd9f0fe98b331235399abf4e",
+      "text": "Resource 指向 Blob URI 时为 true。"
+    },
+    {
+      "id": "Resource#isCrossOriginUrl",
+      "field": "description",
+      "sourceHash": "sha256:78fb281ff621137a810f44a0b58fc9252d7710684e3bac9332ec76db0e9ae360",
+      "text": "Resource 指向跨源 URL 时为 true。"
+    },
+    {
+      "id": "Resource#isDataUri",
+      "field": "description",
+      "sourceHash": "sha256:d92114d48807aa57fbb4670b35ba8cd9c4fa3eb3fe3fcf63d9008e0e90479ce2",
+      "text": "Resource 指向 data URI 时为 true。"
+    },
+    {
+      "id": "Resource#options",
+      "field": "description",
+      "sourceHash": "sha256:68cbe1e2eb86b4c17a8604886f2bcb3c9bc8f210f79b6b80c24c8a6afc6b07c0",
+      "text": "异步获取给定资源支持的请求选项。返回 Promise，加载完成后兑现为结果，加载失败时拒绝。使用 XMLHttpRequest 加载数据，因此跨源请求要求服务器启用跨源资源共享（CORS）响应头。"
+    },
+    {
+      "id": "Resource#options",
+      "field": "params/options.headers/description",
+      "sourceHash": "sha256:9a4610b25cefc38b14b1b625378b9b4e4dd05658600a035bba5ffd6690fb84ef",
+      "text": "随请求发送的附加 HTTP 头，若有。"
+    },
+    {
+      "id": "Resource#options",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:3a82bf5df636d104deccba63082d7329c5c2875d76eaec68fbe3a96b41d5266a",
+      "text": "加载完成后兑现为所请求数据的 Promise。若 <code>request.throttle</code> 为 true 且请求优先级不足，则返回 undefined。"
+    },
+    {
+      "id": "Resource#patch",
+      "field": "description",
+      "sourceHash": "sha256:51b07afa970fd7b28d10d71a9677d15407c38c33e4406d36cae7a7e8ac8ffc58",
+      "text": "异步向给定资源发送 PATCH 数据。返回 Promise，加载完成后兑现为结果，加载失败时拒绝。使用 XMLHttpRequest 加载数据，因此跨源请求要求服务器启用跨源资源共享（CORS）响应头。"
+    },
+    {
+      "id": "Resource#patch",
+      "field": "params/data/description",
+      "sourceHash": "sha256:0c58333d6a1128d701b74f22f62aef50ed2ae649a643d8ec74c9fa77f89aa4b8",
+      "text": "随资源一同发送的数据。"
+    },
+    {
+      "id": "Resource#patch",
+      "field": "params/options.headers/description",
+      "sourceHash": "sha256:9a4610b25cefc38b14b1b625378b9b4e4dd05658600a035bba5ffd6690fb84ef",
+      "text": "随请求发送的附加 HTTP 头，若有。"
+    },
+    {
+      "id": "Resource#patch",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:3a82bf5df636d104deccba63082d7329c5c2875d76eaec68fbe3a96b41d5266a",
+      "text": "加载完成后兑现为所请求数据的 Promise。若 <code>request.throttle</code> 为 true 且请求优先级不足，则返回 undefined。"
+    },
+    {
+      "id": "Resource#post",
+      "field": "description",
+      "sourceHash": "sha256:fd5ced69c8e6b5c996d92db312e429ae29b5b83ef39faff9d52f6467a7915300",
+      "text": "异步向给定资源发送 POST 数据。返回 Promise，加载完成后兑现为结果，加载失败时拒绝。使用 XMLHttpRequest 加载数据，因此跨源请求要求服务器启用跨源资源共享（CORS）响应头。"
+    },
+    {
+      "id": "Resource#post",
+      "field": "params/data/description",
+      "sourceHash": "sha256:0c58333d6a1128d701b74f22f62aef50ed2ae649a643d8ec74c9fa77f89aa4b8",
+      "text": "随资源一同发送的数据。"
+    },
+    {
+      "id": "Resource#post",
+      "field": "params/options.data/description",
+      "sourceHash": "sha256:0c58333d6a1128d701b74f22f62aef50ed2ae649a643d8ec74c9fa77f89aa4b8",
+      "text": "随资源一同发送的数据。"
+    },
+    {
+      "id": "Resource#post",
+      "field": "params/options.headers/description",
+      "sourceHash": "sha256:9a4610b25cefc38b14b1b625378b9b4e4dd05658600a035bba5ffd6690fb84ef",
+      "text": "随请求发送的附加 HTTP 头，若有。"
+    },
+    {
+      "id": "Resource#post",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:3a82bf5df636d104deccba63082d7329c5c2875d76eaec68fbe3a96b41d5266a",
+      "text": "加载完成后兑现为所请求数据的 Promise。若 <code>request.throttle</code> 为 true 且请求优先级不足，则返回 undefined。"
+    },
+    {
+      "id": "Resource#put",
+      "field": "description",
+      "sourceHash": "sha256:5cea574621cf3ec6bbb36586465370344b98fdbc2b5c305a87aa9426d6c6bd47",
+      "text": "异步向给定资源发送 PUT 数据。返回 Promise，加载完成后兑现为结果，加载失败时拒绝。使用 XMLHttpRequest 加载数据，因此跨源请求要求服务器启用跨源资源共享（CORS）响应头。"
+    },
+    {
+      "id": "Resource#put",
+      "field": "params/data/description",
+      "sourceHash": "sha256:0c58333d6a1128d701b74f22f62aef50ed2ae649a643d8ec74c9fa77f89aa4b8",
+      "text": "随资源一同发送的数据。"
+    },
+    {
+      "id": "Resource#put",
+      "field": "params/options.headers/description",
+      "sourceHash": "sha256:9a4610b25cefc38b14b1b625378b9b4e4dd05658600a035bba5ffd6690fb84ef",
+      "text": "随请求发送的附加 HTTP 头，若有。"
+    },
+    {
+      "id": "Resource#put",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:3a82bf5df636d104deccba63082d7329c5c2875d76eaec68fbe3a96b41d5266a",
+      "text": "加载完成后兑现为所请求数据的 Promise。若 <code>request.throttle</code> 为 true 且请求优先级不足，则返回 undefined。"
+    },
+    {
+      "id": "Resource#queryParameters",
+      "field": "description",
+      "sourceHash": "sha256:a3a7398abc93f5188c6677513f5968e350e086a80deee6aee1024d1090ff4e2a",
+      "text": "追加到 URL 的查询参数。"
+    },
+    {
+      "id": "Resource#retryCallback",
+      "field": "description",
+      "sourceHash": "sha256:99967938a1ca0a33b6d27fab97d7550a42fac8b8349bedd3353db4713d261c3e",
+      "text": "资源请求失败时调用的函数。返回 true 或兑现为 true 的 Promise 时，重试请求。"
+    },
+    {
+      "id": "Resource#setQueryParameters",
+      "field": "description",
+      "sourceHash": "sha256:e8d33593c28c2fc8a499c90fcde0e2f32f33a5463c95310c9b7c10be8a833aa9",
+      "text": "合并给定对象与现有查询参数，可一次添加多个参数，而不必逐项修改 queryParameters。已有的值会被新值替换。"
+    },
+    {
+      "id": "Resource#setQueryParameters",
+      "field": "params/params/description",
+      "sourceHash": "sha256:5953039aa921473874c41aa4ce1c29c54a0368261f0251cdd4f4275027cbcc72",
+      "text": "查询参数。"
+    },
+    {
+      "id": "Resource#setQueryParameters",
+      "field": "params/useAsDefault/description",
+      "sourceHash": "sha256:efe204de9f677a82e145c0c39b07a7ae00242f3e0ccad6b8203e1a458eb45f74",
+      "text": "为 true 时，将 params 用作默认值，仅在原值为 undefined 时设置。"
+    },
+    {
+      "id": "Resource#setTemplateValues",
+      "field": "description",
+      "sourceHash": "sha256:0e431c5e9ca740599557f3b8c52ba389448d387e1b16271f8bffc24d2ea3c60e",
+      "text": "合并给定对象与现有模板值，可一次添加多个值，而不必逐项修改 templateValues。默认由新值覆盖已有同名值；useAsDefault 为 true 时保留已有值，仅补入未定义的值。"
+    },
+    {
+      "id": "Resource#setTemplateValues",
+      "field": "params/template/description",
+      "sourceHash": "sha256:0f350fb15e00aab431ec445819b7e89a0f13adac0b4284278653bf3e9b59fbba",
+      "text": "模板值。"
+    },
+    {
+      "id": "Resource#setTemplateValues",
+      "field": "params/useAsDefault/description",
+      "sourceHash": "sha256:f6b7be207e2cc291d2f22fe567869d7c1c21fe3b5321c5aa7a18651ef80b9e43",
+      "text": "为 true 时，将这些值用作默认值，仅在原值为 undefined 时设置。"
+    },
+    {
+      "id": "Resource#templateValues",
+      "field": "description",
+      "sourceHash": "sha256:6f840c035c9112b4cccfb44bd3ee74ec0a223dcacf7d056db2e2d844232c8690",
+      "text": "用于替换 URL 模板参数的键值对。"
+    },
+    {
+      "id": "Resource#toString",
+      "field": "description",
+      "sourceHash": "sha256:df6e48732701f350d644ee49035cfedfd6d84faed1c80f20517e3417be53b923",
+      "text": "覆盖 Object#toString，使隐式字符串转换得到此 Resource 表示的完整 URL。"
+    },
+    {
+      "id": "Resource#toString",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:53ff0a1d4ad06fee1266f57be36e2a01e32369dad539130e31443d915e02c8b5",
+      "text": "此 Resource 表示的 URL。"
+    },
+    {
+      "id": "Resource#url",
+      "field": "description",
+      "sourceHash": "sha256:2087cd0824989a5d37abd8a926a0e0bcaae12c70c30aad39263721a6356c605c",
+      "text": "资源 URL，已替换模板值、追加查询字符串，并在设置代理时经代理编码。"
+    }
+  ]
+}

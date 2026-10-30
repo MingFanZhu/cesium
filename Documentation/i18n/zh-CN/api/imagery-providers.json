@@ -1,0 +1,2700 @@
+{
+  "schemaVersion": 1,
+  "locale": "zh-CN",
+  "entries": [
+    {
+      "id": "ArcGisMapServerImageryProvider.ConstructorOptions",
+      "field": "description",
+      "sourceHash": "sha256:2977a3a91501642e6e8b02a89ddfa7e01b3b9589aa21ad951ce635b8480cabe8",
+      "text": "ArcGisMapServerImageryProvider 构造函数的初始化选项。"
+    },
+    {
+      "id": "ArcGisMapServerImageryProvider.ConstructorOptions",
+      "field": "properties/credit/description",
+      "sourceHash": "sha256:73466ab0e1082b63b6d157b190bb8e3192e3150fa6b4e003a8f701f8b4f20d11",
+      "text": "在 canvas 上显示的数据源版权信息。访问瓦片缓存服务器时忽略此参数。"
+    },
+    {
+      "id": "ArcGisMapServerImageryProvider.ConstructorOptions",
+      "field": "properties/ellipsoid/description",
+      "sourceHash": "sha256:72d5fb7f3d6176c762627d14493fe69f0a20fc5b0ca3f89ccbdd91d067c8cf5e",
+      "text": "椭球。若指定并使用 tilingScheme，则忽略此参数，改用分块方案的椭球。两者均未指定时使用默认椭球。"
+    },
+    {
+      "id": "ArcGisMapServerImageryProvider.ConstructorOptions",
+      "field": "properties/enablePickFeatures/description",
+      "sourceHash": "sha256:cc54b14e967092f0c4a34b28569d0345325e5f4724ce90dbc5618196aee04f2b",
+      "text": "为 true 时，{@link ArcGisMapServerImageryProvider#pickFeatures} 调用 MapServer 的 Identify 服务，返回响应中的要素；为 false 时，{@link ArcGisMapServerImageryProvider#pickFeatures} 立即返回 undefined，表示没有可拾取要素，且不与服务器通信。不希望拾取此提供者的要素时可设为 false。可通过对象的 {@link ArcGisMapServerImageryProvider#enablePickFeatures} 属性覆盖。"
+    },
+    {
+      "id": "ArcGisMapServerImageryProvider.ConstructorOptions",
+      "field": "properties/layers/description",
+      "sourceHash": "sha256:f26cafac9537ab0be047711a865378cd96869569411f93e67aa46bab2e3873a8",
+      "text": "要显示的图层列表，以逗号分隔；为 undefined 时显示全部图层。"
+    },
+    {
+      "id": "ArcGisMapServerImageryProvider.ConstructorOptions",
+      "field": "properties/maximumLevel/description",
+      "sourceHash": "sha256:6e3a9740c517c4750a9aa91e5bb8ce6b44700b1b1f1b9c00a5cf0b1d35c958d4",
+      "text": "请求的最大瓦片层级；为 undefined 时不设上限。访问瓦片缓存服务器时忽略此参数。"
+    },
+    {
+      "id": "ArcGisMapServerImageryProvider.ConstructorOptions",
+      "field": "properties/rectangle/description",
+      "sourceHash": "sha256:49faf6dc4b76160181e0c168fd5936dd6ee6d7906a13426a749bc0dcd8907431",
+      "text": "图层矩形范围。访问瓦片图层时忽略此参数。"
+    },
+    {
+      "id": "ArcGisMapServerImageryProvider.ConstructorOptions",
+      "field": "properties/tileDiscardPolicy/description",
+      "sourceHash": "sha256:19887eea74c32ba9e177a6bcf594589a19d29e38ff4dd13fd1b5193485ac9213",
+      "text": "判断瓦片是否无效并应丢弃的策略。若未指定，瓦片缓存地图服务器默认使用 {@link DiscardMissingTileImagePolicy}，非瓦片服务器使用 {@link NeverTileDiscardPolicy}。前一种情况会请求最高层级的 0,0 瓦片，检查像素 (0,0)、(200,20)、(20,200)、(80,110) 和 (160, 130)。若这些像素全部透明，则禁用丢弃检查；若存在非透明颜色，则丢弃在这些位置具有相同像素值的其他瓦片。此默认策略应能正确处理标准 ArcGIS Server。若要确保不丢弃任何瓦片，请传入 {@link NeverTileDiscardPolicy}。"
+    },
+    {
+      "id": "ArcGisMapServerImageryProvider.ConstructorOptions",
+      "field": "properties/tileHeight/description",
+      "sourceHash": "sha256:7041c66eb3fd5fd59da69fc5a9f8f8521786e267a985dcb523dfa33ad51e96d5",
+      "text": "各瓦片的像素高度。访问瓦片缓存服务器时忽略此参数。"
+    },
+    {
+      "id": "ArcGisMapServerImageryProvider.ConstructorOptions",
+      "field": "properties/tileWidth/description",
+      "sourceHash": "sha256:5c672743121dbe7e4048ca4bcf7008aab86bed40bc73a472b513647a1e1a45ad",
+      "text": "各瓦片的像素宽度。访问瓦片缓存服务器时忽略此参数。"
+    },
+    {
+      "id": "ArcGisMapServerImageryProvider.ConstructorOptions",
+      "field": "properties/tilingScheme/description",
+      "sourceHash": "sha256:896a328a727836924ff0b754498f0ca3aca9fc98a25f0d4bca47d9a99c7090f5",
+      "text": "用于将世界划分为瓦片的分块方案。访问瓦片缓存服务器时忽略此参数。"
+    },
+    {
+      "id": "ArcGisMapServerImageryProvider.ConstructorOptions",
+      "field": "properties/usePreCachedTilesIfAvailable/description",
+      "sourceHash": "sha256:2c4fdea1fd731190076db80608d4fbb1f02ed9731d6c38d08569b036e8614b52",
+      "text": "为 true 时，优先使用服务器可用的预缓存瓦片。导出瓦片仅支持已弃用的 API。"
+    },
+    {
+      "id": "ArcGisMapServerImageryProvider.fromBasemapType",
+      "field": "description",
+      "sourceHash": "sha256:ab2deb7690350ac5acbebf96c3ede0faa4954570d4fb13ee7d43f86945894991",
+      "text": "创建从 ArcGIS 底图提供瓦片影像的 {@link ImageryProvider}。"
+    },
+    {
+      "id": "ArcGisMapServerImageryProvider.fromBasemapType",
+      "field": "params/options/description",
+      "sourceHash": "sha256:32f19863f3b9054802f9fba977d292b8cf2e9561ed976c004e7c09eb0d09a794",
+      "text": "描述初始化选项的对象。"
+    },
+    {
+      "id": "ArcGisMapServerImageryProvider.fromBasemapType",
+      "field": "params/style/description",
+      "sourceHash": "sha256:305cd63a32e95ea7669a1de7b13043f538eaad14182e3b41dc344fe13961eae5",
+      "text": "ArcGIS 底图影像样式。有效值为 {@link ArcGisBaseMapType.SATELLITE}、{@link ArcGisBaseMapType.OCEANS} 和 {@link ArcGisBaseMapType.HILLSHADE}。"
+    },
+    {
+      "id": "ArcGisMapServerImageryProvider.fromBasemapType",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:5f3049241186df95ceb1071235fc3b73ee008f6cf2880a4dbd35658b113e72b8",
+      "text": "兑现为所创建 ArcGisMapServerImageryProvider 的 Promise。"
+    },
+    {
+      "id": "ArcGisMapServerImageryProvider.fromUrl",
+      "field": "description",
+      "sourceHash": "sha256:31030592ac4d5b4fa1d6765a6e517f5984fcd4172a65c5863fd867034da8fca6",
+      "text": "创建提供 ArcGIS MapServer 瓦片影像的 {@link ImageryProvider}。默认在可用时使用服务器预缓存瓦片。"
+    },
+    {
+      "id": "ArcGisMapServerImageryProvider.fromUrl",
+      "field": "exceptions/0/description",
+      "sourceHash": "sha256:474d789da19f5067266da142848904e8e2cc74de1d4e5032baa208679c68f4bc",
+      "text": "元数据的空间参考指定了未知 WKID。"
+    },
+    {
+      "id": "ArcGisMapServerImageryProvider.fromUrl",
+      "field": "exceptions/1/description",
+      "sourceHash": "sha256:89a64b9876478d2c2b7d5ab109d2bb21da206ecb6ccf003344e8fd9016260d00",
+      "text": "元数据 fullExtent.spatialReference 指定了未知 WKID。"
+    },
+    {
+      "id": "ArcGisMapServerImageryProvider.fromUrl",
+      "field": "params/options/description",
+      "sourceHash": "sha256:32f19863f3b9054802f9fba977d292b8cf2e9561ed976c004e7c09eb0d09a794",
+      "text": "描述初始化选项的对象。"
+    },
+    {
+      "id": "ArcGisMapServerImageryProvider.fromUrl",
+      "field": "params/url/description",
+      "sourceHash": "sha256:f03da2eb590c5f1173c185051b89909ab16ff54c2e7e3f66e7e63bc21917e531",
+      "text": "ArcGIS MapServer 服务的 URL。"
+    },
+    {
+      "id": "ArcGisMapServerImageryProvider.fromUrl",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:5f3049241186df95ceb1071235fc3b73ee008f6cf2880a4dbd35658b113e72b8",
+      "text": "兑现为所创建 ArcGisMapServerImageryProvider 的 Promise。"
+    },
+    {
+      "id": "ArcGisMapServerImageryProvider",
+      "field": "description",
+      "sourceHash": "sha256:a7f028c1a87ad0e1869701d102f57164fc384b2918f70bb9f7ab0485d7813520",
+      "text": "<div class=\"notice\">通常不直接实例化，请使用 {@link ArcGisMapServerImageryProvider.fromBasemapType} 或 {@link ArcGisMapServerImageryProvider.fromUrl}。</div>提供 ArcGIS MapServer 托管的瓦片影像，默认在可用时使用服务器预缓存瓦片。<br/>对 ArcGIS Image Tile 服务请求进行认证需要 {@link https://developers.arcgis.com/documentation/mapping-apis-and-services/security|ArcGIS 访问令牌}。访问受保护 ArcGIS 资源，需要创建 ArcGIS 开发者或 ArcGIS Online 账户，并实现认证方式以取得访问令牌。"
+    },
+    {
+      "id": "ArcGisMapServerImageryProvider#enablePickFeatures",
+      "field": "description",
+      "sourceHash": "sha256:2eb01d9ea5ed689b016ec165e1232defda2f4aa92143f44070cc115bfe762586",
+      "text": "获取或设置是否启用要素拾取。为 true 时，{@link ArcGisMapServerImageryProvider#pickFeatures} 调用 ArcGIS 服务器的 identify 操作并返回响应要素；为 false 时，{@link ArcGisMapServerImageryProvider#pickFeatures} 立即返回 undefined，表示没有可拾取要素，且不与服务器通信。"
+    },
+    {
+      "id": "ArcGisMapServerImageryProvider#errorEvent",
+      "field": "description",
+      "sourceHash": "sha256:168588b191e452d1f54f99328d58f42f85709ab2e2ea5a765f7e9008a2a3e6b7",
+      "text": "获取影像提供者发生异步错误时触发的事件。订阅者可收到错误通知并尝试恢复。事件监听器接收 {@link TileProviderError} 实例。"
+    },
+    {
+      "id": "ArcGisMapServerImageryProvider#hasAlphaChannel",
+      "field": "description",
+      "sourceHash": "sha256:e3870c86bd94659a564595da867428a487ceb32cd34fc169bfbea2d25a4f6705",
+      "text": "获取影像提供者所提供图像是否包含 alpha 通道。为 false 时，即使存在 alpha 也会忽略；为 true 时，无 alpha 通道的图像按所有位置 alpha 为 1.0 处理。设为 false 可降低内存占用及纹理上传时间。"
+    },
+    {
+      "id": "ArcGisMapServerImageryProvider#layers",
+      "field": "description",
+      "sourceHash": "sha256:a9466f1a780e22532819119054071b53f4fba830a761104bfd72c8255beae133",
+      "text": "获取要显示的图层 ID 列表，以逗号分隔。"
+    },
+    {
+      "id": "ArcGisMapServerImageryProvider#minimumLevel",
+      "field": "description",
+      "sourceHash": "sha256:4a78868596bc8fe408c9db7aa6d4d98dc6f3a23b133abcecdfc614421b205ae5",
+      "text": "获取可请求的最小细节级别。"
+    },
+    {
+      "id": "ArcGisMapServerImageryProvider#pickFeatures",
+      "field": "description",
+      "sourceHash": "sha256:da67fd9bbb11458f73105a08bf9854250258cb8469492cc3f2c8c9c325c9e9d2",
+      "text": "/**\r异步确定瓦片内给定经纬度处存在的要素。"
+    },
+    {
+      "id": "ArcGisMapServerImageryProvider#pickFeatures",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:45cb2fc46acf812a6444f6e38d5e207f45a3b173b644278d56947186d36db733",
+      "text": "异步拾取完成后兑现的 Promise，兑现结果为 {@link ImageryLayerFeatureInfo} 实例数组。指定位置未找到要素时，数组可为空。"
+    },
+    {
+      "id": "ArcGisMapServerImageryProvider#rectangle",
+      "field": "description",
+      "sourceHash": "sha256:091c1a3d4f13ed7dc2a0b0675f7a3e3779d275be1d9f6684f9a2183da9f0e36a",
+      "text": "获取此实例所提供影像的弧度矩形范围。"
+    },
+    {
+      "id": "ArcGisMapServerImageryProvider#requestImage",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:1da8470d5e3428259b91d645dce869c8bd335c2d0e84dcfc487ba2dfc65f0d26",
+      "text": "图像可用时兑现的 Promise；若服务器活动请求过多，则返回 undefined，表示应稍后重试。"
+    },
+    {
+      "id": "ArcGisMapServerImageryProvider#tileDiscardPolicy",
+      "field": "description",
+      "sourceHash": "sha256:d436e40b3239a33f8c07780a55528e392ee49f037f05a65c09722f8cbb51f7be",
+      "text": "获取瓦片丢弃策略。若不为 undefined，策略通过 shouldDiscardImage 过滤“缺失”瓦片；若此属性为 undefined，则不过滤任何瓦片。"
+    },
+    {
+      "id": "ArcGisMapServerImageryProvider#token",
+      "field": "description",
+      "sourceHash": "sha256:737379fc9dae2a1e80a0c4ae0ef9cf3367687f72bc654dc319f39d701e1b68ef",
+      "text": "获取用于向 ArcGIS MapServer 服务认证的 ArcGIS 令牌。"
+    },
+    {
+      "id": "ArcGisMapServerImageryProvider#url",
+      "field": "description",
+      "sourceHash": "sha256:cd7d334d8161e0deebff6630b8c91d611bc68649586cb7fa9f598041cced86f1",
+      "text": "获取 ArcGIS MapServer 的 URL。"
+    },
+    {
+      "id": "ArcGisMapServerImageryProvider#usingPrecachedTiles",
+      "field": "description",
+      "sourceHash": "sha256:6d5c1e7b4703dcefda6631ac5bad0cdc8ed18398c651330728b1f01d9429280c",
+      "text": "获取此影像提供者是否正在使用 ArcGIS MapServer 的预缓存瓦片。"
+    },
+    {
+      "id": "Azure2DImageryProvider.ConstructorOptions",
+      "field": "description",
+      "sourceHash": "sha256:11ba3633177c9c5ef7aa54eeeceb5c8c8df6940427adc5a5a9c32ea8c93315e3",
+      "text": "Azure2DImageryProvider 构造函数的初始化选项。"
+    },
+    {
+      "id": "Azure2DImageryProvider.ConstructorOptions",
+      "field": "properties/ellipsoid/description",
+      "sourceHash": "sha256:64ad4e5f7e94b06bc611c8429591da991fa88bdb2f4886136ea1dbbdb1d0b372",
+      "text": "椭球。若未指定，则使用默认椭球。"
+    },
+    {
+      "id": "Azure2DImageryProvider.ConstructorOptions",
+      "field": "properties/maximumLevel/description",
+      "sourceHash": "sha256:217b9d32f9e924c1501e1c1cb8eac64bf293ad45292f72407d3c392d41a72bc5",
+      "text": "影像提供者支持的最大细节级别。"
+    },
+    {
+      "id": "Azure2DImageryProvider.ConstructorOptions",
+      "field": "properties/minimumLevel/description",
+      "sourceHash": "sha256:8122090b1cd89db20a13c4173a13184f1f79d7648cf19166d4be8c61116e727e",
+      "text": "影像提供者支持的最小细节级别。请确保该级别的瓦片数量很少，例如不超过四个；数量较多可能导致渲染问题。"
+    },
+    {
+      "id": "Azure2DImageryProvider.ConstructorOptions",
+      "field": "properties/rectangle/description",
+      "sourceHash": "sha256:413ac09ba872eb63a1e378635760be206710bd5622d3c858630cb6645c167c36",
+      "text": "图像覆盖的弧度矩形范围。"
+    },
+    {
+      "id": "Azure2DImageryProvider.ConstructorOptions",
+      "field": "properties/subscriptionKey/description",
+      "sourceHash": "sha256:637da08b71a3011118b26a8c1f09b461056010cf78d39eb264df2b14b7aed377",
+      "text": "影像的公开订阅密钥。"
+    },
+    {
+      "id": "Azure2DImageryProvider.ConstructorOptions",
+      "field": "properties/tilesetId/description",
+      "sourceHash": "sha256:d084c1c2dd6050e34bd4d779612094c0fe373aa70f2f231ad767c97012470434",
+      "text": "Azure 瓦片集 ID。有效值为 {@link microsoft.imagery}、{@link microsoft.base.road} 和 {@link microsoft.base.labels.road}。"
+    },
+    {
+      "id": "Azure2DImageryProvider.ConstructorOptions",
+      "field": "properties/url/description",
+      "sourceHash": "sha256:72ce4695bdbf23b2bf2768e982ce70c2250b8e97ce1107abc3d4a4f4277495b0",
+      "text": "Azure 服务器 URL。"
+    },
+    {
+      "id": "Azure2DImageryProvider",
+      "field": "description",
+      "sourceHash": "sha256:0ceefa57b550a068eb25d805c1b4ac88243bdc2a09d215ca9269ad3382c0fc18",
+      "text": "提供 Azure 的二维影像瓦片。"
+    },
+    {
+      "id": "Azure2DImageryProvider#errorEvent",
+      "field": "description",
+      "sourceHash": "sha256:2e71cc15108b0bcf5e115da4de496670fcfcfc2dcef83b4e7ddfd90846ab3a3f",
+      "text": "获取影像提供者发生异步错误时触发的事件。订阅者可收到错误通知并尝试恢复。事件监听器接收 {@link TileProviderError} 实例。"
+    },
+    {
+      "id": "Azure2DImageryProvider#hasAlphaChannel",
+      "field": "description",
+      "sourceHash": "sha256:e3870c86bd94659a564595da867428a487ceb32cd34fc169bfbea2d25a4f6705",
+      "text": "获取影像提供者所提供图像是否包含 alpha 通道。为 false 时，即使存在 alpha 也会忽略；为 true 时，无 alpha 通道的图像按所有位置 alpha 为 1.0 处理。设为 false 可降低内存占用及纹理上传时间。"
+    },
+    {
+      "id": "Azure2DImageryProvider#minimumLevel",
+      "field": "description",
+      "sourceHash": "sha256:e24d15e30accd06678ddf6ce16962b9cc33f063bc0411423fd1199ca782d0190",
+      "text": "获取可请求的最小细节级别。通常仅在影像范围足够小、该最小级别下瓦片很少时才应设置最小级别。若最小级别包含过多瓦片，会导致渲染问题。"
+    },
+    {
+      "id": "Azure2DImageryProvider#pickFeatures",
+      "field": "description",
+      "sourceHash": "sha256:2b97a73af512b27c778c361f7936f6752e2a990dc0bc2684fa4b6476c3ed878b",
+      "text": "此影像提供者目前不支持要素拾取，因此此函数直接返回 undefined。"
+    },
+    {
+      "id": "Azure2DImageryProvider#pickFeatures",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:215a8128a425c275bcb666e4547b27e7f19e68eab3dd5c3798f1a29c96eed73f",
+      "text": "不支持拾取，因此返回 undefined。"
+    },
+    {
+      "id": "Azure2DImageryProvider#rectangle",
+      "field": "description",
+      "sourceHash": "sha256:14fb786b52425b3e35ec1adfc9d1f1650095196806e093137e67f038ce9a00cb",
+      "text": "获取此实例所提供影像的弧度矩形范围。"
+    },
+    {
+      "id": "Azure2DImageryProvider#requestImage",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:1da8470d5e3428259b91d645dce869c8bd335c2d0e84dcfc487ba2dfc65f0d26",
+      "text": "图像可用时兑现的 Promise；若服务器活动请求过多，则返回 undefined，表示应稍后重试。"
+    },
+    {
+      "id": "Azure2DImageryProvider#tileDiscardPolicy",
+      "field": "description",
+      "sourceHash": "sha256:d436e40b3239a33f8c07780a55528e392ee49f037f05a65c09722f8cbb51f7be",
+      "text": "获取瓦片丢弃策略。若不为 undefined，策略通过 shouldDiscardImage 过滤“缺失”瓦片；若此属性为 undefined，则不过滤任何瓦片。"
+    },
+    {
+      "id": "Azure2DImageryProvider#tilingScheme",
+      "field": "description",
+      "sourceHash": "sha256:478090a2802d321f1cc659465d24707d2d3534e2ba2c7af34d4f754e7f36de24",
+      "text": "获取提供者使用的分块方案。"
+    },
+    {
+      "id": "Azure2DImageryProvider#url",
+      "field": "description",
+      "sourceHash": "sha256:448316abbf20eef80ad1ead665636fca9915a28bed18aefe433ef07c27d6bdfd",
+      "text": "获取 Azure 二维影像服务器的 URL。"
+    },
+    {
+      "id": "BingMapsImageryProvider.ConstructorOptions",
+      "field": "description",
+      "sourceHash": "sha256:7dab4739365c5ad4b90f0a98665901adf3842e949ed991182f124433f9fce63e",
+      "text": "BingMapsImageryProvider 构造函数的初始化选项。"
+    },
+    {
+      "id": "BingMapsImageryProvider.ConstructorOptions",
+      "field": "properties/culture/description",
+      "sourceHash": "sha256:361cdfd930855b27b74f39951213c6915951bb1f320ba559d09d376c9ff17d19",
+      "text": "请求 Bing Maps 影像所使用的区域文化设置，并非全部区域文化均受支持。支持列表参见 {@link http://msdn.microsoft.com/en-us/library/hh441729.aspx}。"
+    },
+    {
+      "id": "BingMapsImageryProvider.ConstructorOptions",
+      "field": "properties/ellipsoid/description",
+      "sourceHash": "sha256:64ad4e5f7e94b06bc611c8429591da991fa88bdb2f4886136ea1dbbdb1d0b372",
+      "text": "椭球。若未指定，则使用默认椭球。"
+    },
+    {
+      "id": "BingMapsImageryProvider.ConstructorOptions",
+      "field": "properties/key/description",
+      "sourceHash": "sha256:7a76de23b8082ff0623ee93d6e82a67da6b4c7c32dd191251f959e66a19a49e7",
+      "text": "应用的 Bing Maps 密钥，可在 {@link https://www.bingmapsportal.com/} 创建。"
+    },
+    {
+      "id": "BingMapsImageryProvider.ConstructorOptions",
+      "field": "properties/mapLayer/description",
+      "sourceHash": "sha256:bf7c13377bd584fb9d20c73090917c44f9bd7c201d04c26b556d65801de4cf4f",
+      "text": "附加显示图层选项，定义见 {@link https://learn.microsoft.com/en-us/bingmaps/rest-services/imagery/get-imagery-metadata#template-parameters}。"
+    },
+    {
+      "id": "BingMapsImageryProvider.ConstructorOptions",
+      "field": "properties/mapStyle/description",
+      "sourceHash": "sha256:d62b1197d7d6a221ea54a1ac9a6e56c2c088932b89a0ece2944db59a9e29b262",
+      "text": "要加载的 Bing Maps 影像类型。"
+    },
+    {
+      "id": "BingMapsImageryProvider.ConstructorOptions",
+      "field": "properties/tileDiscardPolicy/description",
+      "sourceHash": "sha256:30683232163f1bbb472bc5c16e77daff71ca677eb46b92b54db91e7a5b6d25e1",
+      "text": "判断瓦片是否无效并应丢弃的策略。默认使用 {@link DiscardEmptyTileImagePolicy}，预期 Bing Maps 服务器对缺失瓦片返回空响应。若要确保不丢弃任何瓦片，请传入 {@link NeverTileDiscardPolicy}。"
+    },
+    {
+      "id": "BingMapsImageryProvider.ConstructorOptions",
+      "field": "properties/tileProtocol/description",
+      "sourceHash": "sha256:d32e0a3a38a03cc4d9f8dc45eca6413e5a628ddbab37105f26c29f04b39789d5",
+      "text": "加载瓦片的协议，例如 'http' 或 'https'。默认与页面使用相同协议。"
+    },
+    {
+      "id": "BingMapsImageryProvider.fromUrl",
+      "field": "description",
+      "sourceHash": "sha256:3f805f589fa4b1676e5dbcfa67b207fefc5f1af5b691a93d3f59990dee2bc7c6",
+      "text": "创建使用 Bing Maps 影像 REST API 提供瓦片影像的 {@link ImageryProvider}。"
+    },
+    {
+      "id": "BingMapsImageryProvider.fromUrl",
+      "field": "exceptions/0/description",
+      "sourceHash": "sha256:1483300d8a9a6116172d60a5861cf66583c33876142033c56ede3de353c12576",
+      "text": "元数据未在 resourceSets 中指定一个资源。"
+    },
+    {
+      "id": "BingMapsImageryProvider.fromUrl",
+      "field": "params/url/description",
+      "sourceHash": "sha256:8d14f1b5fd3c9af9d9ef4358506a14417f0514a79aacb1af9c6b8fdac5c6b493",
+      "text": "托管影像的 Bing Maps 服务器 URL。"
+    },
+    {
+      "id": "BingMapsImageryProvider.fromUrl",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:efbd1272b2ee0888e6ac7e4dbe0d4924ed4743c20bf01ba3888f269ab0daa3a3",
+      "text": "兑现为所创建 BingMapsImageryProvider 的 Promise。"
+    },
+    {
+      "id": "BingMapsImageryProvider.logoUrl",
+      "field": "description",
+      "sourceHash": "sha256:d6842e8c3705231e5109d9af70da24076ab56c2c357372583ebcc2074f4f7d03",
+      "text": "获取或设置版权信息中显示的 Bing 标志 URL。"
+    },
+    {
+      "id": "BingMapsImageryProvider.quadKeyToTileXY",
+      "field": "description",
+      "sourceHash": "sha256:58b8de973121beeb744e064c9e1383769961e0c30399becc4c3c5ef7a5014bd4",
+      "text": "将用于请求 Bing Maps 图像的瓦片 quadkey 转换为 (x, y, level)。"
+    },
+    {
+      "id": "BingMapsImageryProvider.quadKeyToTileXY",
+      "field": "params/quadkey/description",
+      "sourceHash": "sha256:2e21906af1b4c9347fc5e14473866d809c9cea073e66eddb379c22dcfc9a60e0",
+      "text": "瓦片的四叉树键 quadkey。"
+    },
+    {
+      "id": "BingMapsImageryProvider.tileXYToQuadKey",
+      "field": "description",
+      "sourceHash": "sha256:e6d95345484597cb9ce76f457c1e494505c58f1a9612456279bce22fc6b5c30e",
+      "text": "将瓦片 (x, y, level) 转换为用于请求 Bing Maps 图像的 quadkey。"
+    },
+    {
+      "id": "BingMapsImageryProvider.tileXYToQuadKey",
+      "field": "params/level/description",
+      "sourceHash": "sha256:98c2ad81b03d51887a8cd239f226b7f67d5843efce8c58d59c5eb029f9c1cf14",
+      "text": "瓦片缩放层级。"
+    },
+    {
+      "id": "BingMapsImageryProvider.tileXYToQuadKey",
+      "field": "params/x/description",
+      "sourceHash": "sha256:8092c681deba31ecbff9c63ed04fc2c5ba5833bc32f16fb4a2eccc6c80e340f4",
+      "text": "瓦片 x 坐标。"
+    },
+    {
+      "id": "BingMapsImageryProvider.tileXYToQuadKey",
+      "field": "params/y/description",
+      "sourceHash": "sha256:652fa744070e015d2a01e48fb3301532b7f93019c6d52571eb3f887354663d54",
+      "text": "瓦片 y 坐标。"
+    },
+    {
+      "id": "BingMapsImageryProvider",
+      "field": "description",
+      "sourceHash": "sha256:4232334c0b13980e198c33dfea7c47ecd6a53c028f842e5691106ba3c476810e",
+      "text": "<div class=\"notice\">请调用 {@link BingMapsImageryProvider.fromUrl} 创建 BingMapsImageryProvider，不要直接调用构造函数。</div>使用 Bing Maps 影像 REST API 提供瓦片影像。"
+    },
+    {
+      "id": "BingMapsImageryProvider#culture",
+      "field": "description",
+      "sourceHash": "sha256:8fdbfa3065f6e7d7febf784cbf6ddde745062bb2e4ca10422cb18e44b77989d4",
+      "text": "请求 Bing Maps 影像所使用的区域文化设置，并非全部区域文化均受支持。支持列表参见 {@link http://msdn.microsoft.com/en-us/library/hh441729.aspx}。"
+    },
+    {
+      "id": "BingMapsImageryProvider#errorEvent",
+      "field": "description",
+      "sourceHash": "sha256:168588b191e452d1f54f99328d58f42f85709ab2e2ea5a765f7e9008a2a3e6b7",
+      "text": "获取影像提供者发生异步错误时触发的事件。订阅者可收到错误通知并尝试恢复。事件监听器接收 {@link TileProviderError} 实例。"
+    },
+    {
+      "id": "BingMapsImageryProvider#hasAlphaChannel",
+      "field": "description",
+      "sourceHash": "sha256:c7fb45fdd1f16f39aa438762c77f0cd61e5323c18af8c09de5200fcb77154ddd",
+      "text": "获取所提供图像是否包含 alpha 通道。为 false 时，即使存在 alpha 也会忽略；为 true 时，无 alpha 通道图像按所有位置 alpha 为 1.0 处理。设为 false 可降低内存占用及纹理上传时间。"
+    },
+    {
+      "id": "BingMapsImageryProvider#key",
+      "field": "description",
+      "sourceHash": "sha256:9e5250a3760f9219ed775df23d5b5ca8e8a86a2dc9652d72943a5f46212df8f9",
+      "text": "获取 Bing Maps 密钥。"
+    },
+    {
+      "id": "BingMapsImageryProvider#mapLayer",
+      "field": "description",
+      "sourceHash": "sha256:a300a3943fd42cf3d5929eeb6f742c69b3600ab44c0b9d3a5bd9a450748c5bdf",
+      "text": "获取附加地图图层选项，定义见 {@link https://learn.microsoft.com/en-us/bingmaps/rest-services/imagery/get-imagery-metadata#template-parameters}/"
+    },
+    {
+      "id": "BingMapsImageryProvider#mapStyle",
+      "field": "description",
+      "sourceHash": "sha256:011e568054e48df0bd21f83182593def9e3f380729b017efdfdd866ebd591ad1",
+      "text": "获取要加载的 Bing Maps 影像类型。"
+    },
+    {
+      "id": "BingMapsImageryProvider#minimumLevel",
+      "field": "description",
+      "sourceHash": "sha256:4a78868596bc8fe408c9db7aa6d4d98dc6f3a23b133abcecdfc614421b205ae5",
+      "text": "获取可请求的最小细节级别。"
+    },
+    {
+      "id": "BingMapsImageryProvider#pickFeatures",
+      "field": "description",
+      "sourceHash": "sha256:2b97a73af512b27c778c361f7936f6752e2a990dc0bc2684fa4b6476c3ed878b",
+      "text": "此影像提供者目前不支持要素拾取，因此此函数直接返回 undefined。"
+    },
+    {
+      "id": "BingMapsImageryProvider#pickFeatures",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:215a8128a425c275bcb666e4547b27e7f19e68eab3dd5c3798f1a29c96eed73f",
+      "text": "不支持拾取，因此返回 undefined。"
+    },
+    {
+      "id": "BingMapsImageryProvider#rectangle",
+      "field": "description",
+      "sourceHash": "sha256:091c1a3d4f13ed7dc2a0b0675f7a3e3779d275be1d9f6684f9a2183da9f0e36a",
+      "text": "获取此实例所提供影像的弧度矩形范围。"
+    },
+    {
+      "id": "BingMapsImageryProvider#requestImage",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:1da8470d5e3428259b91d645dce869c8bd335c2d0e84dcfc487ba2dfc65f0d26",
+      "text": "图像可用时兑现的 Promise；若服务器活动请求过多，则返回 undefined，表示应稍后重试。"
+    },
+    {
+      "id": "BingMapsImageryProvider#tileDiscardPolicy",
+      "field": "description",
+      "sourceHash": "sha256:d436e40b3239a33f8c07780a55528e392ee49f037f05a65c09722f8cbb51f7be",
+      "text": "获取瓦片丢弃策略。若不为 undefined，策略通过 shouldDiscardImage 过滤“缺失”瓦片；若此属性为 undefined，则不过滤任何瓦片。"
+    },
+    {
+      "id": "BingMapsImageryProvider#url",
+      "field": "description",
+      "sourceHash": "sha256:4d2d5ac5ad07e7e316e34f4e9682fe5b5c8a66e29a5b25df69e80ffc07d842ef",
+      "text": "获取托管影像的 BingMaps 服务器 URL。"
+    },
+    {
+      "id": "createWorldImageryAsync",
+      "field": "description",
+      "sourceHash": "sha256:8f935b89d37aca45359f2461cb049cffed691515fa7dc2bb9f9c47293ada85d3",
+      "text": "为 ion 默认全球底图创建 {@link IonImageryProvider} 实例，当前底图为 Bing Maps。"
+    },
+    {
+      "id": "createWorldImageryAsync",
+      "field": "params/options.style/description",
+      "sourceHash": "sha256:eab41e99074d369d3b75f073ff6484299b3e678e5ac4ed4dd689bd8311307a6a",
+      "text": "底图影像样式，目前仅支持 AERIAL、AERIAL_WITH_LABELS 和 ROAD。"
+    },
+    {
+      "id": "Google2DImageryProvider.ConstructorOptions",
+      "field": "description",
+      "sourceHash": "sha256:da0b73a7bb084b90c0a3bb7b19ac5a3fbb755f8a5c76cb294dca7a000e676be2",
+      "text": "Google2DImageryProvider 构造函数的初始化选项。"
+    },
+    {
+      "id": "Google2DImageryProvider.ConstructorOptions",
+      "field": "properties/ellipsoid/description",
+      "sourceHash": "sha256:64ad4e5f7e94b06bc611c8429591da991fa88bdb2f4886136ea1dbbdb1d0b372",
+      "text": "椭球。若未指定，则使用默认椭球。"
+    },
+    {
+      "id": "Google2DImageryProvider.ConstructorOptions",
+      "field": "properties/key/description",
+      "sourceHash": "sha256:710b73c182623c6cff7e87db438f3e9ca8bcd3480e378e641758cabd38b82b60",
+      "text": "随瓦片请求发送的 Google API 密钥。"
+    },
+    {
+      "id": "Google2DImageryProvider.ConstructorOptions",
+      "field": "properties/maximumLevel/description",
+      "sourceHash": "sha256:217b9d32f9e924c1501e1c1cb8eac64bf293ad45292f72407d3c392d41a72bc5",
+      "text": "影像提供者支持的最大细节级别。"
+    },
+    {
+      "id": "Google2DImageryProvider.ConstructorOptions",
+      "field": "properties/minimumLevel/description",
+      "sourceHash": "sha256:8122090b1cd89db20a13c4173a13184f1f79d7648cf19166d4be8c61116e727e",
+      "text": "影像提供者支持的最小细节级别。请确保该级别的瓦片数量很少，例如不超过四个；数量较多可能导致渲染问题。"
+    },
+    {
+      "id": "Google2DImageryProvider.ConstructorOptions",
+      "field": "properties/rectangle/description",
+      "sourceHash": "sha256:413ac09ba872eb63a1e378635760be206710bd5622d3c858630cb6645c167c36",
+      "text": "图像覆盖的弧度矩形范围。"
+    },
+    {
+      "id": "Google2DImageryProvider.ConstructorOptions",
+      "field": "properties/session/description",
+      "sourceHash": "sha256:ca757db703386802693b3944377a15ca3f1281c312b92aeb4bad3df94acc4e5d",
+      "text": "用于跟踪地图和视口当前状态的 Google 会话令牌。"
+    },
+    {
+      "id": "Google2DImageryProvider.ConstructorOptions",
+      "field": "properties/tileHeight/description",
+      "sourceHash": "sha256:46645d38093c2ea67588e65a4b50834b874b8493ccbe2a775f1e05731395f19d",
+      "text": "各瓦片的像素高度。"
+    },
+    {
+      "id": "Google2DImageryProvider.ConstructorOptions",
+      "field": "properties/tileWidth/description",
+      "sourceHash": "sha256:5ebafdd128715416a89bdd3a1fcb268f22f7c9143d7a4db34a6a42cdaaa266a6",
+      "text": "各瓦片的像素宽度。"
+    },
+    {
+      "id": "Google2DImageryProvider.ConstructorOptions",
+      "field": "properties/url/description",
+      "sourceHash": "sha256:fd70eb9c39172bffcafe475ea54442be4f577675bab0efccc103cde7ef3ae002",
+      "text": "Google 二维地图端点。"
+    },
+    {
+      "id": "Google2DImageryProvider.fromIonAssetId",
+      "field": "description",
+      "sourceHash": "sha256:80506ea00d0c73280b90d67fa15333498526edd3a799ce5fd3cf13e6fba28869",
+      "text": "创建 {@link ImageryProvider}，通过 Cesium ion REST API 流式提供 {@link https://developers.google.com/maps/documentation/tile/2d-tiles-overview|Google 二维瓦片} 的全球二维瓦片影像。"
+    },
+    {
+      "id": "Google2DImageryProvider.fromIonAssetId",
+      "field": "params/options.assetId/description",
+      "sourceHash": "sha256:e37d482d7aed7f418435371895cc23ed69bf576cabad8041c4fa9b3a575577db",
+      "text": "Cesium ion 资源 ID。"
+    },
+    {
+      "id": "Google2DImageryProvider.fromIonAssetId",
+      "field": "params/options.ellipsoid/description",
+      "sourceHash": "sha256:64ad4e5f7e94b06bc611c8429591da991fa88bdb2f4886136ea1dbbdb1d0b372",
+      "text": "椭球。若未指定，则使用默认椭球。"
+    },
+    {
+      "id": "Google2DImageryProvider.fromIonAssetId",
+      "field": "params/options.language/description",
+      "sourceHash": "sha256:f74b792ae70d959cb940e0a560b529108266002dbcf4d34ccc44d941c1bd1e43",
+      "text": "指定瓦片信息显示语言的 IETF 语言标签。"
+    },
+    {
+      "id": "Google2DImageryProvider.fromIonAssetId",
+      "field": "params/options.mapType/description",
+      "sourceHash": "sha256:89bb62a970c4a67e7bdb914bf7ffbe7f6fc7ddc0b123e8ef1394aa6d33b05cdf",
+      "text": "Google 地图影像类型，可选 satellite、terrain 和 roadmap。若设置 overlayLayerType，则忽略 mapType 并返回透明叠加图；未设置 overlayLayerType 时，返回 mapType 底图。terrain 和 roadmap 类型已包含 layerRoadmap 叠加层。"
+    },
+    {
+      "id": "Google2DImageryProvider.fromIonAssetId",
+      "field": "params/options.maximumLevel/description",
+      "sourceHash": "sha256:217b9d32f9e924c1501e1c1cb8eac64bf293ad45292f72407d3c392d41a72bc5",
+      "text": "影像提供者支持的最大细节级别。"
+    },
+    {
+      "id": "Google2DImageryProvider.fromIonAssetId",
+      "field": "params/options.minimumLevel/description",
+      "sourceHash": "sha256:8122090b1cd89db20a13c4173a13184f1f79d7648cf19166d4be8c61116e727e",
+      "text": "影像提供者支持的最小细节级别。请确保该级别的瓦片数量很少，例如不超过四个；数量较多可能导致渲染问题。"
+    },
+    {
+      "id": "Google2DImageryProvider.fromIonAssetId",
+      "field": "params/options.overlayLayerType/description",
+      "sourceHash": "sha256:fe66adf563fb813fc4a3934609c85134e8e033bd91e9ee5490d76c5cb37e57e7",
+      "text": "返回指定 layerType 的透明叠加地图。若未提供，返回 mapType 底图。可使用多个 Google2DImageryProvider 实例为场景添加多个 Google Maps 叠加层。terrain 和 roadmap 类型已包含 layerRoadmap，因此再添加此叠加层无效果。"
+    },
+    {
+      "id": "Google2DImageryProvider.fromIonAssetId",
+      "field": "params/options.rectangle/description",
+      "sourceHash": "sha256:413ac09ba872eb63a1e378635760be206710bd5622d3c858630cb6645c167c36",
+      "text": "图像覆盖的弧度矩形范围。"
+    },
+    {
+      "id": "Google2DImageryProvider.fromIonAssetId",
+      "field": "params/options.region/description",
+      "sourceHash": "sha256:77368084a4ec95b4c09c480a9b5befdc2d81bdde0230832407ffabd6bb89fe3a",
+      "text": "表示用户实际位置的 Common Locale Data Repository 区域标识符，由两个大写字母组成。"
+    },
+    {
+      "id": "Google2DImageryProvider.fromIonAssetId",
+      "field": "params/options.styles/description",
+      "sourceHash": "sha256:f2208927bfdb748773d204027f659fb258eb738cd67342cfa07c98fc0a6e7f71",
+      "text": "JSON 样式对象数组，用于指定道路、公园和建成区等地图要素的外观与细节级别，可自定义标准 Google 底图。仅在 mapType 为 roadmap 时有效。完整语法参见（{@link https://developers.google.com/maps/documentation/tile/style-reference|Google 样式参考}）。"
+    },
+    {
+      "id": "Google2DImageryProvider.fromIonAssetId",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:2a4e18b0bc60ece35f9fd5aa85534d8133233d156e56b26565481e5ec058b8e5",
+      "text": "兑现为所创建 Google2DImageryProvider 的 Promise。"
+    },
+    {
+      "id": "Google2DImageryProvider.fromUrl",
+      "field": "description",
+      "sourceHash": "sha256:e24d5ad6e9bc0c518b5bc06e95dbc11d383a0f17103a2c5e2e271baf4d38826a",
+      "text": "创建提供 {@link https://developers.google.com/maps/documentation/tile/2d-tiles-overview|Google 二维瓦片} 全球二维影像的 {@link ImageryProvider}。"
+    },
+    {
+      "id": "Google2DImageryProvider.fromUrl",
+      "field": "params/options.ellipsoid/description",
+      "sourceHash": "sha256:64ad4e5f7e94b06bc611c8429591da991fa88bdb2f4886136ea1dbbdb1d0b372",
+      "text": "椭球。若未指定，则使用默认椭球。"
+    },
+    {
+      "id": "Google2DImageryProvider.fromUrl",
+      "field": "params/options.key/description",
+      "sourceHash": "sha256:182de539b41ca136c75efdcd1151e6170b02cad38403ae9f85ca0728e458bc35",
+      "text": "访问 Google 二维瓦片的 API 密钥。创建方法参见 {@link https://developers.google.com/maps/documentation/javascript/get-api-key}。"
+    },
+    {
+      "id": "Google2DImageryProvider.fromUrl",
+      "field": "params/options.language/description",
+      "sourceHash": "sha256:f74b792ae70d959cb940e0a560b529108266002dbcf4d34ccc44d941c1bd1e43",
+      "text": "指定瓦片信息显示语言的 IETF 语言标签。"
+    },
+    {
+      "id": "Google2DImageryProvider.fromUrl",
+      "field": "params/options.mapType/description",
+      "sourceHash": "sha256:89bb62a970c4a67e7bdb914bf7ffbe7f6fc7ddc0b123e8ef1394aa6d33b05cdf",
+      "text": "Google 地图影像类型，可选 satellite、terrain 和 roadmap。若设置 overlayLayerType，则忽略 mapType 并返回透明叠加图；未设置 overlayLayerType 时，返回 mapType 底图。terrain 和 roadmap 类型已包含 layerRoadmap 叠加层。"
+    },
+    {
+      "id": "Google2DImageryProvider.fromUrl",
+      "field": "params/options.maximumLevel/description",
+      "sourceHash": "sha256:217b9d32f9e924c1501e1c1cb8eac64bf293ad45292f72407d3c392d41a72bc5",
+      "text": "影像提供者支持的最大细节级别。"
+    },
+    {
+      "id": "Google2DImageryProvider.fromUrl",
+      "field": "params/options.minimumLevel/description",
+      "sourceHash": "sha256:8122090b1cd89db20a13c4173a13184f1f79d7648cf19166d4be8c61116e727e",
+      "text": "影像提供者支持的最小细节级别。请确保该级别的瓦片数量很少，例如不超过四个；数量较多可能导致渲染问题。"
+    },
+    {
+      "id": "Google2DImageryProvider.fromUrl",
+      "field": "params/options.overlayLayerType/description",
+      "sourceHash": "sha256:fe66adf563fb813fc4a3934609c85134e8e033bd91e9ee5490d76c5cb37e57e7",
+      "text": "返回指定 layerType 的透明叠加地图。若未提供，返回 mapType 底图。可使用多个 Google2DImageryProvider 实例为场景添加多个 Google Maps 叠加层。terrain 和 roadmap 类型已包含 layerRoadmap，因此再添加此叠加层无效果。"
+    },
+    {
+      "id": "Google2DImageryProvider.fromUrl",
+      "field": "params/options.rectangle/description",
+      "sourceHash": "sha256:413ac09ba872eb63a1e378635760be206710bd5622d3c858630cb6645c167c36",
+      "text": "图像覆盖的弧度矩形范围。"
+    },
+    {
+      "id": "Google2DImageryProvider.fromUrl",
+      "field": "params/options.region/description",
+      "sourceHash": "sha256:77368084a4ec95b4c09c480a9b5befdc2d81bdde0230832407ffabd6bb89fe3a",
+      "text": "表示用户实际位置的 Common Locale Data Repository 区域标识符，由两个大写字母组成。"
+    },
+    {
+      "id": "Google2DImageryProvider.fromUrl",
+      "field": "params/options.styles/description",
+      "sourceHash": "sha256:f2208927bfdb748773d204027f659fb258eb738cd67342cfa07c98fc0a6e7f71",
+      "text": "JSON 样式对象数组，用于指定道路、公园和建成区等地图要素的外观与细节级别，可自定义标准 Google 底图。仅在 mapType 为 roadmap 时有效。完整语法参见（{@link https://developers.google.com/maps/documentation/tile/style-reference|Google 样式参考}）。"
+    },
+    {
+      "id": "Google2DImageryProvider.fromUrl",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:2a4e18b0bc60ece35f9fd5aa85534d8133233d156e56b26565481e5ec058b8e5",
+      "text": "兑现为所创建 Google2DImageryProvider 的 Promise。"
+    },
+    {
+      "id": "Google2DImageryProvider",
+      "field": "description",
+      "sourceHash": "sha256:12a2ed77c29475b89609434174d99c432e879ad92c9326ea2535eca0229b954e",
+      "text": "<div class=\"notice\">通常不直接实例化，请使用 {@link Google2DImageryProvider.fromIonAssetId} 或 {@link Google2DImageryProvider.fromUrl}。</div>提供 {@link https://developers.google.com/maps/documentation/tile/2d-tiles-overview|Google 二维瓦片} 的二维图像瓦片。Google 二维瓦片只能配合 Google 地理编码器使用。"
+    },
+    {
+      "id": "Google2DImageryProvider#errorEvent",
+      "field": "description",
+      "sourceHash": "sha256:168588b191e452d1f54f99328d58f42f85709ab2e2ea5a765f7e9008a2a3e6b7",
+      "text": "获取影像提供者发生异步错误时触发的事件。订阅者可收到错误通知并尝试恢复。事件监听器接收 {@link TileProviderError} 实例。"
+    },
+    {
+      "id": "Google2DImageryProvider#hasAlphaChannel",
+      "field": "description",
+      "sourceHash": "sha256:e3870c86bd94659a564595da867428a487ceb32cd34fc169bfbea2d25a4f6705",
+      "text": "获取影像提供者所提供图像是否包含 alpha 通道。为 false 时，即使存在 alpha 也会忽略；为 true 时，无 alpha 通道的图像按所有位置 alpha 为 1.0 处理。设为 false 可降低内存占用及纹理上传时间。"
+    },
+    {
+      "id": "Google2DImageryProvider#minimumLevel",
+      "field": "description",
+      "sourceHash": "sha256:e24d15e30accd06678ddf6ce16962b9cc33f063bc0411423fd1199ca782d0190",
+      "text": "获取可请求的最小细节级别。通常仅在影像范围足够小、该最小级别下瓦片很少时才应设置最小级别。若最小级别包含过多瓦片，会导致渲染问题。"
+    },
+    {
+      "id": "Google2DImageryProvider#pickFeatures",
+      "field": "description",
+      "sourceHash": "sha256:2b97a73af512b27c778c361f7936f6752e2a990dc0bc2684fa4b6476c3ed878b",
+      "text": "此影像提供者目前不支持要素拾取，因此此函数直接返回 undefined。"
+    },
+    {
+      "id": "Google2DImageryProvider#pickFeatures",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:215a8128a425c275bcb666e4547b27e7f19e68eab3dd5c3798f1a29c96eed73f",
+      "text": "不支持拾取，因此返回 undefined。"
+    },
+    {
+      "id": "Google2DImageryProvider#rectangle",
+      "field": "description",
+      "sourceHash": "sha256:14fb786b52425b3e35ec1adfc9d1f1650095196806e093137e67f038ce9a00cb",
+      "text": "获取此实例所提供影像的弧度矩形范围。"
+    },
+    {
+      "id": "Google2DImageryProvider#requestImage",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:1da8470d5e3428259b91d645dce869c8bd335c2d0e84dcfc487ba2dfc65f0d26",
+      "text": "图像可用时兑现的 Promise；若服务器活动请求过多，则返回 undefined，表示应稍后重试。"
+    },
+    {
+      "id": "Google2DImageryProvider#tileDiscardPolicy",
+      "field": "description",
+      "sourceHash": "sha256:d436e40b3239a33f8c07780a55528e392ee49f037f05a65c09722f8cbb51f7be",
+      "text": "获取瓦片丢弃策略。若不为 undefined，策略通过 shouldDiscardImage 过滤“缺失”瓦片；若此属性为 undefined，则不过滤任何瓦片。"
+    },
+    {
+      "id": "Google2DImageryProvider#tilingScheme",
+      "field": "description",
+      "sourceHash": "sha256:478090a2802d321f1cc659465d24707d2d3534e2ba2c7af34d4f754e7f36de24",
+      "text": "获取提供者使用的分块方案。"
+    },
+    {
+      "id": "Google2DImageryProvider#url",
+      "field": "description",
+      "sourceHash": "sha256:748037ecc5fcbf0cdc8966bf0e88ef49410a021f3f47126f824ab3aaa2a88523",
+      "text": "获取 Google 二维影像服务器的 URL。"
+    },
+    {
+      "id": "GoogleEarthEnterpriseImageryProvider.ConstructorOptions",
+      "field": "description",
+      "sourceHash": "sha256:e18fa4463303afa35716247be1515089fc8e4d45fd756d925485b7ea520a12c9",
+      "text": "GoogleEarthEnterpriseImageryProvider 构造函数的初始化选项。"
+    },
+    {
+      "id": "GoogleEarthEnterpriseImageryProvider.ConstructorOptions",
+      "field": "properties/ellipsoid/description",
+      "sourceHash": "sha256:64ad4e5f7e94b06bc611c8429591da991fa88bdb2f4886136ea1dbbdb1d0b372",
+      "text": "椭球。若未指定，则使用默认椭球。"
+    },
+    {
+      "id": "GoogleEarthEnterpriseImageryProvider.ConstructorOptions",
+      "field": "properties/tileDiscardPolicy/description",
+      "sourceHash": "sha256:30f0e71fa8a1df2d00102bd367d003fbe9e01d903e8fe20063a83c1a2d504467",
+      "text": "判断瓦片是否无效并应丢弃的策略。若未指定，默认丢弃下载失败的瓦片。"
+    },
+    {
+      "id": "GoogleEarthEnterpriseImageryProvider.fromMetadata",
+      "field": "description",
+      "sourceHash": "sha256:95bc4c746436d6d6a9e3980c030de4d11b069d6507e6021a6525e40266fcaea6",
+      "text": "使用 Google Earth Enterprise REST API 创建瓦片影像提供者。"
+    },
+    {
+      "id": "GoogleEarthEnterpriseImageryProvider.fromMetadata",
+      "field": "exceptions/0/description",
+      "sourceHash": "sha256:405caa084d4950a69aab271cf6e6cde7fcaecf7a4016ebde40f2010f63fca462",
+      "text": "元数据 URL 不包含影像。"
+    },
+    {
+      "id": "GoogleEarthEnterpriseImageryProvider.fromMetadata",
+      "field": "params/metadata/description",
+      "sourceHash": "sha256:ed4c782fd6c9b5a4a155d5bac1f7ecd10f1a1f090aaf6d4691cc85f88a3df5b0",
+      "text": "可与 GoogleEarthEnterpriseTerrainProvider 共享元数据请求的元数据对象。"
+    },
+    {
+      "id": "GoogleEarthEnterpriseImageryProvider.fromMetadata",
+      "field": "params/options/description",
+      "sourceHash": "sha256:32f19863f3b9054802f9fba977d292b8cf2e9561ed976c004e7c09eb0d09a794",
+      "text": "描述初始化选项的对象。"
+    },
+    {
+      "id": "GoogleEarthEnterpriseImageryProvider",
+      "field": "description",
+      "sourceHash": "sha256:5860ac3a7406c8f9e9966240b433c4dc5a016c8256db2b4f26d84a868fc0b4e2",
+      "text": "<div class=\"notice\">请调用 {@link GoogleEarthEnterpriseImageryProvider.fromMetadata} 创建 GoogleEarthEnterpriseImageryProvider，不要直接调用构造函数。</div>使用 Google Earth Enterprise REST API 提供瓦片影像。此提供者用于 Google Earth Enterprise 的三维地球 API；二维地图 API 应使用 {@link GoogleEarthEnterpriseMapsProvider}。"
+    },
+    {
+      "id": "GoogleEarthEnterpriseImageryProvider#errorEvent",
+      "field": "description",
+      "sourceHash": "sha256:168588b191e452d1f54f99328d58f42f85709ab2e2ea5a765f7e9008a2a3e6b7",
+      "text": "获取影像提供者发生异步错误时触发的事件。订阅者可收到错误通知并尝试恢复。事件监听器接收 {@link TileProviderError} 实例。"
+    },
+    {
+      "id": "GoogleEarthEnterpriseImageryProvider#hasAlphaChannel",
+      "field": "description",
+      "sourceHash": "sha256:c7fb45fdd1f16f39aa438762c77f0cd61e5323c18af8c09de5200fcb77154ddd",
+      "text": "获取所提供图像是否包含 alpha 通道。为 false 时，即使存在 alpha 也会忽略；为 true 时，无 alpha 通道图像按所有位置 alpha 为 1.0 处理。设为 false 可降低内存占用及纹理上传时间。"
+    },
+    {
+      "id": "GoogleEarthEnterpriseImageryProvider#minimumLevel",
+      "field": "description",
+      "sourceHash": "sha256:4a78868596bc8fe408c9db7aa6d4d98dc6f3a23b133abcecdfc614421b205ae5",
+      "text": "获取可请求的最小细节级别。"
+    },
+    {
+      "id": "GoogleEarthEnterpriseImageryProvider#pickFeatures",
+      "field": "description",
+      "sourceHash": "sha256:2b97a73af512b27c778c361f7936f6752e2a990dc0bc2684fa4b6476c3ed878b",
+      "text": "此影像提供者目前不支持要素拾取，因此此函数直接返回 undefined。"
+    },
+    {
+      "id": "GoogleEarthEnterpriseImageryProvider#pickFeatures",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:215a8128a425c275bcb666e4547b27e7f19e68eab3dd5c3798f1a29c96eed73f",
+      "text": "不支持拾取，因此返回 undefined。"
+    },
+    {
+      "id": "GoogleEarthEnterpriseImageryProvider#rectangle",
+      "field": "description",
+      "sourceHash": "sha256:091c1a3d4f13ed7dc2a0b0675f7a3e3779d275be1d9f6684f9a2183da9f0e36a",
+      "text": "获取此实例所提供影像的弧度矩形范围。"
+    },
+    {
+      "id": "GoogleEarthEnterpriseImageryProvider#requestImage",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:1da8470d5e3428259b91d645dce869c8bd335c2d0e84dcfc487ba2dfc65f0d26",
+      "text": "图像可用时兑现的 Promise；若服务器活动请求过多，则返回 undefined，表示应稍后重试。"
+    },
+    {
+      "id": "GoogleEarthEnterpriseImageryProvider#tileDiscardPolicy",
+      "field": "description",
+      "sourceHash": "sha256:d436e40b3239a33f8c07780a55528e392ee49f037f05a65c09722f8cbb51f7be",
+      "text": "获取瓦片丢弃策略。若不为 undefined，策略通过 shouldDiscardImage 过滤“缺失”瓦片；若此属性为 undefined，则不过滤任何瓦片。"
+    },
+    {
+      "id": "GoogleEarthEnterpriseImageryProvider#url",
+      "field": "description",
+      "sourceHash": "sha256:67db8a9c257be74fdab69a77dc7cffddb4d7db1ce45e642d435b7161b013a827",
+      "text": "获取托管影像的 Google Earth Enterprise 服务器 URL。"
+    },
+    {
+      "id": "GridImageryProvider.ConstructorOptions",
+      "field": "description",
+      "sourceHash": "sha256:d5f86f0fbb36388c4100ad2623de2d85cea6e328a131a3d87fd1538e823e23d4",
+      "text": "GridImageryProvider 构造函数的初始化选项。"
+    },
+    {
+      "id": "GridImageryProvider.ConstructorOptions",
+      "field": "properties/backgroundColor/description",
+      "sourceHash": "sha256:f5858405d78a6ee70e7cfb2879aa76f5e42f21149c298b9a09aec29f5b781743",
+      "text": "背景填充颜色。"
+    },
+    {
+      "id": "GridImageryProvider.ConstructorOptions",
+      "field": "properties/canvasSize/description",
+      "sourceHash": "sha256:8f97606ed6966c5c2ccbfcfe78e229687fd08313339299424164986f5104aa63",
+      "text": "用于渲染的 canvas 尺寸。"
+    },
+    {
+      "id": "GridImageryProvider.ConstructorOptions",
+      "field": "properties/cells/description",
+      "sourceHash": "sha256:4d43a331cd05921c460e29272f45de6cad891192c94a9d9a712b4dc701f3a062",
+      "text": "网格单元数量。"
+    },
+    {
+      "id": "GridImageryProvider.ConstructorOptions",
+      "field": "properties/color/description",
+      "sourceHash": "sha256:bc6523c72e5334fc96e0d6a90ed44d47e302dc9135f7948b58800bb39ce868c6",
+      "text": "绘制网格线的颜色。"
+    },
+    {
+      "id": "GridImageryProvider.ConstructorOptions",
+      "field": "properties/ellipsoid/description",
+      "sourceHash": "sha256:44df09bdd817fe174f114a93b78ef5e362892a81d2bd0aaf9546b6be3a742360",
+      "text": "椭球。若指定 tilingScheme，则忽略此参数，改用分块方案的椭球。两者均未指定时使用默认椭球。"
+    },
+    {
+      "id": "GridImageryProvider.ConstructorOptions",
+      "field": "properties/glowColor/description",
+      "sourceHash": "sha256:ea52d1cd3e0511a8e4d0d8358334301684905b50f8b4f7dbf9c0c982565e749d",
+      "text": "绘制网格线辉光的颜色。"
+    },
+    {
+      "id": "GridImageryProvider.ConstructorOptions",
+      "field": "properties/glowWidth/description",
+      "sourceHash": "sha256:26f8eab8e454b2fed22877da72a194190696a68ffea8faa56f13626d24e9aca4",
+      "text": "渲染线条辉光效果所使用的线宽。"
+    },
+    {
+      "id": "GridImageryProvider.ConstructorOptions",
+      "field": "properties/tileHeight/description",
+      "sourceHash": "sha256:e797a9a3e22ef142af3a0a63f690d7842f1995bf19409270e3b93cd6d2bb699e",
+      "text": "用于选择细节级别的瓦片高度。"
+    },
+    {
+      "id": "GridImageryProvider.ConstructorOptions",
+      "field": "properties/tileWidth/description",
+      "sourceHash": "sha256:4f96516df02db77e8a37dacb4f24eb95f0527bcba706e935092c502acc71cef2",
+      "text": "用于选择细节级别的瓦片宽度。"
+    },
+    {
+      "id": "GridImageryProvider.ConstructorOptions",
+      "field": "properties/tilingScheme/description",
+      "sourceHash": "sha256:927810865a9018b1a55cb4ea0218a25b67cf7dfa21a32d52db903ae0dbebfbd5",
+      "text": "要绘制瓦片的分块方案。"
+    },
+    {
+      "id": "GridImageryProvider",
+      "field": "description",
+      "sourceHash": "sha256:c8a429f24b995bf9cfe224d04df6f55aad4cbc33bc3457ff991e501cc7329077",
+      "text": "在每个瓦片上绘制线框网格的 {@link ImageryProvider}，背景和辉光可配置。可用于自定义渲染效果或地形调试。"
+    },
+    {
+      "id": "GridImageryProvider#_createGridCanvas",
+      "field": "description",
+      "sourceHash": "sha256:6f21ec98bb438e7795e0a11a88482f68c49ba3526fd87010264dea51a7aa454a",
+      "text": "向 canvas 绘制带背景和辉光的网格。"
+    },
+    {
+      "id": "GridImageryProvider#_drawGrid",
+      "field": "description",
+      "sourceHash": "sha256:fa96c0d61c3057958d847857c77bc07dfdda05d558c31275294690ea3f100f14",
+      "text": "向 canvas 绘制线条网格。"
+    },
+    {
+      "id": "GridImageryProvider#errorEvent",
+      "field": "description",
+      "sourceHash": "sha256:168588b191e452d1f54f99328d58f42f85709ab2e2ea5a765f7e9008a2a3e6b7",
+      "text": "获取影像提供者发生异步错误时触发的事件。订阅者可收到错误通知并尝试恢复。事件监听器接收 {@link TileProviderError} 实例。"
+    },
+    {
+      "id": "GridImageryProvider#hasAlphaChannel",
+      "field": "description",
+      "sourceHash": "sha256:e3870c86bd94659a564595da867428a487ceb32cd34fc169bfbea2d25a4f6705",
+      "text": "获取影像提供者所提供图像是否包含 alpha 通道。为 false 时，即使存在 alpha 也会忽略；为 true 时，无 alpha 通道的图像按所有位置 alpha 为 1.0 处理。设为 false 可降低内存占用及纹理上传时间。"
+    },
+    {
+      "id": "GridImageryProvider#minimumLevel",
+      "field": "description",
+      "sourceHash": "sha256:4a78868596bc8fe408c9db7aa6d4d98dc6f3a23b133abcecdfc614421b205ae5",
+      "text": "获取可请求的最小细节级别。"
+    },
+    {
+      "id": "GridImageryProvider#pickFeatures",
+      "field": "description",
+      "sourceHash": "sha256:2b97a73af512b27c778c361f7936f6752e2a990dc0bc2684fa4b6476c3ed878b",
+      "text": "此影像提供者目前不支持要素拾取，因此此函数直接返回 undefined。"
+    },
+    {
+      "id": "GridImageryProvider#pickFeatures",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:215a8128a425c275bcb666e4547b27e7f19e68eab3dd5c3798f1a29c96eed73f",
+      "text": "不支持拾取，因此返回 undefined。"
+    },
+    {
+      "id": "GridImageryProvider#rectangle",
+      "field": "description",
+      "sourceHash": "sha256:091c1a3d4f13ed7dc2a0b0675f7a3e3779d275be1d9f6684f9a2183da9f0e36a",
+      "text": "获取此实例所提供影像的弧度矩形范围。"
+    },
+    {
+      "id": "GridImageryProvider#requestImage",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:5531e54f31175d3788ce5e86d6e5bf25f1954e7c50816b24b22d36d67720c71a",
+      "text": "以 Canvas DOM 对象形式返回的图像。"
+    },
+    {
+      "id": "GridImageryProvider#tileDiscardPolicy",
+      "field": "description",
+      "sourceHash": "sha256:d436e40b3239a33f8c07780a55528e392ee49f037f05a65c09722f8cbb51f7be",
+      "text": "获取瓦片丢弃策略。若不为 undefined，策略通过 shouldDiscardImage 过滤“缺失”瓦片；若此属性为 undefined，则不过滤任何瓦片。"
+    },
+    {
+      "id": "ImageryProvider.loadImage",
+      "field": "description",
+      "sourceHash": "sha256:f589e66a0cd7720dfc55c8168e0274310ab3a432cf97e009ac4df921d12a47fa",
+      "text": "从给定 URL 加载图像。若该服务器已有过多待处理请求，则返回 undefined，表示应稍后重试。"
+    },
+    {
+      "id": "ImageryProvider.loadImage",
+      "field": "params/imageryProvider/description",
+      "sourceHash": "sha256:740e04afaec24468458b3d2e29f90b582d6e001dd02315d9a7b2a9ee00a53cbf",
+      "text": "此 URL 对应的影像提供者。"
+    },
+    {
+      "id": "ImageryProvider.loadImage",
+      "field": "params/url/description",
+      "sourceHash": "sha256:704aee7364f234f41970d9b7cdc0c61ade5db785193c1757e8cda1e56d9e553f",
+      "text": "图像 URL。"
+    },
+    {
+      "id": "ImageryProvider.loadImage",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:1da8470d5e3428259b91d645dce869c8bd335c2d0e84dcfc487ba2dfc65f0d26",
+      "text": "图像可用时兑现的 Promise；若服务器活动请求过多，则返回 undefined，表示应稍后重试。"
+    },
+    {
+      "id": "ImageryProvider",
+      "field": "description",
+      "sourceHash": "sha256:258c968785cc5e851f2a18a5b84890c4fc151d2b9e976bd85fd89a18c00576e1",
+      "text": "提供显示在椭球表面的影像。此类型描述接口，不应直接实例化。"
+    },
+    {
+      "id": "ImageryProvider#errorEvent",
+      "field": "description",
+      "sourceHash": "sha256:168588b191e452d1f54f99328d58f42f85709ab2e2ea5a765f7e9008a2a3e6b7",
+      "text": "获取影像提供者发生异步错误时触发的事件。订阅者可收到错误通知并尝试恢复。事件监听器接收 {@link TileProviderError} 实例。"
+    },
+    {
+      "id": "ImageryProvider#hasAlphaChannel",
+      "field": "description",
+      "sourceHash": "sha256:e3870c86bd94659a564595da867428a487ceb32cd34fc169bfbea2d25a4f6705",
+      "text": "获取影像提供者所提供图像是否包含 alpha 通道。为 false 时，即使存在 alpha 也会忽略；为 true 时，无 alpha 通道的图像按所有位置 alpha 为 1.0 处理。设为 false 可降低内存占用及纹理上传时间。"
+    },
+    {
+      "id": "ImageryProvider#minimumLevel",
+      "field": "description",
+      "sourceHash": "sha256:d34160c0ebc427715ee22f9a086b59cbc19628ed9fc070b98031d44a247c2ba1",
+      "text": "获取可请求的最小细节级别。通常仅在影像范围足够小、该最小级别下瓦片很少时才应设置最小级别。若最小级别包含过多瓦片，会导致渲染问题。"
+    },
+    {
+      "id": "ImageryProvider#pickFeatures",
+      "field": "description",
+      "sourceHash": "sha256:ac576b39b3af0b259327be181d8e1d7b7a03314ed292bf70edc52b28f41e8804",
+      "text": "异步确定瓦片内给定经纬度处存在的要素。此函数可选，并非所有 ImageryProvider 都实现。"
+    },
+    {
+      "id": "ImageryProvider#pickFeatures",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:e0555bae727942fed5fe3bcabdaa6099e9e3b98b842656ef0051c9197f39a340",
+      "text": "异步拾取完成后兑现的 Promise，兑现结果为 {@link ImageryLayerFeatureInfo} 实例数组。指定位置未找到要素时，数组可为空。若不支持拾取，也可能返回 undefined。"
+    },
+    {
+      "id": "ImageryProvider#rectangle",
+      "field": "description",
+      "sourceHash": "sha256:14fb786b52425b3e35ec1adfc9d1f1650095196806e093137e67f038ce9a00cb",
+      "text": "获取此实例所提供影像的弧度矩形范围。"
+    },
+    {
+      "id": "ImageryProvider#requestImage",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:aea196aff775fa3220b29a534b6a440041e4df3b09690a71d6e46e8360d85c7c",
+      "text": "图像可用时兑现的 Promise；若服务器活动请求过多，则返回 undefined，表示应稍后重试。"
+    },
+    {
+      "id": "ImageryProvider#tileDiscardPolicy",
+      "field": "description",
+      "sourceHash": "sha256:d436e40b3239a33f8c07780a55528e392ee49f037f05a65c09722f8cbb51f7be",
+      "text": "获取瓦片丢弃策略。若不为 undefined，策略通过 shouldDiscardImage 过滤“缺失”瓦片；若此属性为 undefined，则不过滤任何瓦片。"
+    },
+    {
+      "id": "ImageryProvider#tilingScheme",
+      "field": "description",
+      "sourceHash": "sha256:478090a2802d321f1cc659465d24707d2d3534e2ba2c7af34d4f754e7f36de24",
+      "text": "获取提供者使用的分块方案。"
+    },
+    {
+      "id": "IonImageryProvider.ConstructorOptions",
+      "field": "description",
+      "sourceHash": "sha256:c06fe8e3c37428ec91ce2e1776669d3a24b553c2edad3ceadf037b4b5b368b2c",
+      "text": "IonImageryProvider 构造函数的初始化选项。"
+    },
+    {
+      "id": "IonImageryProvider.ConstructorOptions",
+      "field": "properties/accessToken/description",
+      "sourceHash": "sha256:70f79ad889a0d369c87cb0e042a4ea48c8e07670236d8e58766bae0336523115",
+      "text": "要使用的访问令牌。"
+    },
+    {
+      "id": "IonImageryProvider.ConstructorOptions",
+      "field": "properties/server/description",
+      "sourceHash": "sha256:f125ba6fa6e717bb5b80f2ac31eb4213154827378322f1f49277af972f88c32c",
+      "text": "指向 Cesium ion API 服务器的资源。"
+    },
+    {
+      "id": "IonImageryProvider.fromAssetId",
+      "field": "description",
+      "sourceHash": "sha256:ae24a9758747a6b704a20b019b24c236bb31d210a275d9c8687ad8f2318de5b8",
+      "text": "使用 Cesium ion REST API 创建瓦片影像提供者。"
+    },
+    {
+      "id": "IonImageryProvider.fromAssetId",
+      "field": "exceptions/0/description",
+      "sourceHash": "sha256:cdd18330e8e1cf2da949fb71bc11a292cf65276fe542c701fa837238da3917b8",
+      "text": "Cesium ion assetId 不是影像资源。"
+    },
+    {
+      "id": "IonImageryProvider.fromAssetId",
+      "field": "exceptions/1/description",
+      "sourceHash": "sha256:3b150047192f56893427243776455623c04d0c964bb7e007b43b0511096fc0ea",
+      "text": "无法识别的 Cesium ion 影像类型。"
+    },
+    {
+      "id": "IonImageryProvider.fromAssetId",
+      "field": "params/assetId/description",
+      "sourceHash": "sha256:a2760ef201ed7f90d0c74fceb2e5f78ccc85903c9db3e348d5d3f20802a1967a",
+      "text": "ion 影像资源 ID。"
+    },
+    {
+      "id": "IonImageryProvider.fromAssetId",
+      "field": "params/options/description",
+      "sourceHash": "sha256:32f19863f3b9054802f9fba977d292b8cf2e9561ed976c004e7c09eb0d09a794",
+      "text": "描述初始化选项的对象。"
+    },
+    {
+      "id": "IonImageryProvider.fromAssetId",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:8480b6c9c646074cae3e672235dfe68c20087eae521812876d18022e3b20bb86",
+      "text": "兑现为所创建 IonImageryProvider 的 Promise。"
+    },
+    {
+      "id": "IonImageryProvider",
+      "field": "description",
+      "sourceHash": "sha256:d34aa5169df310a383bafed16c1f8e8737c91cb5092ec452903eb015e6246f01",
+      "text": "<div class=\"notice\">请调用 {@link IonImageryProvider.fromAssetId} 创建 IonImageryProvider，不要直接调用构造函数。</div>使用 Cesium ion REST API 提供瓦片影像。"
+    },
+    {
+      "id": "IonImageryProvider#errorEvent",
+      "field": "description",
+      "sourceHash": "sha256:168588b191e452d1f54f99328d58f42f85709ab2e2ea5a765f7e9008a2a3e6b7",
+      "text": "获取影像提供者发生异步错误时触发的事件。订阅者可收到错误通知并尝试恢复。事件监听器接收 {@link TileProviderError} 实例。"
+    },
+    {
+      "id": "IonImageryProvider#hasAlphaChannel",
+      "field": "description",
+      "sourceHash": "sha256:e3870c86bd94659a564595da867428a487ceb32cd34fc169bfbea2d25a4f6705",
+      "text": "获取影像提供者所提供图像是否包含 alpha 通道。为 false 时，即使存在 alpha 也会忽略；为 true 时，无 alpha 通道的图像按所有位置 alpha 为 1.0 处理。设为 false 可降低内存占用及纹理上传时间。"
+    },
+    {
+      "id": "IonImageryProvider#minimumLevel",
+      "field": "description",
+      "sourceHash": "sha256:e24d15e30accd06678ddf6ce16962b9cc33f063bc0411423fd1199ca782d0190",
+      "text": "获取可请求的最小细节级别。通常仅在影像范围足够小、该最小级别下瓦片很少时才应设置最小级别。若最小级别包含过多瓦片，会导致渲染问题。"
+    },
+    {
+      "id": "IonImageryProvider#pickFeatures",
+      "field": "description",
+      "sourceHash": "sha256:16a416dddca88e52055a54aba0624d181afda46badc6e15db59720ae488adad9",
+      "text": "异步确定瓦片内给定经纬度处存在的要素。此函数可选，并非所有 ImageryProvider 都实现。"
+    },
+    {
+      "id": "IonImageryProvider#pickFeatures",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:e0555bae727942fed5fe3bcabdaa6099e9e3b98b842656ef0051c9197f39a340",
+      "text": "异步拾取完成后兑现的 Promise，兑现结果为 {@link ImageryLayerFeatureInfo} 实例数组。指定位置未找到要素时，数组可为空。若不支持拾取，也可能返回 undefined。"
+    },
+    {
+      "id": "IonImageryProvider#rectangle",
+      "field": "description",
+      "sourceHash": "sha256:14fb786b52425b3e35ec1adfc9d1f1650095196806e093137e67f038ce9a00cb",
+      "text": "获取此实例所提供影像的弧度矩形范围。"
+    },
+    {
+      "id": "IonImageryProvider#requestImage",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:1da8470d5e3428259b91d645dce869c8bd335c2d0e84dcfc487ba2dfc65f0d26",
+      "text": "图像可用时兑现的 Promise；若服务器活动请求过多，则返回 undefined，表示应稍后重试。"
+    },
+    {
+      "id": "IonImageryProvider#tileDiscardPolicy",
+      "field": "description",
+      "sourceHash": "sha256:d436e40b3239a33f8c07780a55528e392ee49f037f05a65c09722f8cbb51f7be",
+      "text": "获取瓦片丢弃策略。若不为 undefined，策略通过 shouldDiscardImage 过滤“缺失”瓦片；若此属性为 undefined，则不过滤任何瓦片。"
+    },
+    {
+      "id": "IonImageryProvider#tilingScheme",
+      "field": "description",
+      "sourceHash": "sha256:478090a2802d321f1cc659465d24707d2d3534e2ba2c7af34d4f754e7f36de24",
+      "text": "获取提供者使用的分块方案。"
+    },
+    {
+      "id": "MapboxImageryProvider.ConstructorOptions",
+      "field": "description",
+      "sourceHash": "sha256:3eed3a9623e6a6363c3c8e4b74b47f5a6ca16d6e7fc990d6eb0e450802d2ee61",
+      "text": "MapboxImageryProvider 构造函数的初始化选项。"
+    },
+    {
+      "id": "MapboxImageryProvider.ConstructorOptions",
+      "field": "properties/accessToken/description",
+      "sourceHash": "sha256:a5cd02872c74af662949fb2fed8d614a4073a8633b50cbb230607e9c3ec64e87",
+      "text": "影像的公开访问令牌。"
+    },
+    {
+      "id": "MapboxImageryProvider.ConstructorOptions",
+      "field": "properties/ellipsoid/description",
+      "sourceHash": "sha256:64ad4e5f7e94b06bc611c8429591da991fa88bdb2f4886136ea1dbbdb1d0b372",
+      "text": "椭球。若未指定，则使用默认椭球。"
+    },
+    {
+      "id": "MapboxImageryProvider.ConstructorOptions",
+      "field": "properties/format/description",
+      "sourceHash": "sha256:4becbc27ae2892758240dfe1863311a2b8c6f193de1e8eb5c5389d7f7d76f19a",
+      "text": "影像请求格式。"
+    },
+    {
+      "id": "MapboxImageryProvider.ConstructorOptions",
+      "field": "properties/mapId/description",
+      "sourceHash": "sha256:dc7896feaa96f5510bebbe99c0f093f87af867e1ba1affedf403ef87885a7c2a",
+      "text": "Mapbox 地图 ID。"
+    },
+    {
+      "id": "MapboxImageryProvider.ConstructorOptions",
+      "field": "properties/maximumLevel/description",
+      "sourceHash": "sha256:b6a477b331cdd9f15653425957c3152328dcffd314767385499790f0d956dda6",
+      "text": "影像提供者支持的最大细节级别；为 undefined 时不设上限。"
+    },
+    {
+      "id": "MapboxImageryProvider.ConstructorOptions",
+      "field": "properties/minimumLevel/description",
+      "sourceHash": "sha256:8122090b1cd89db20a13c4173a13184f1f79d7648cf19166d4be8c61116e727e",
+      "text": "影像提供者支持的最小细节级别。请确保该级别的瓦片数量很少，例如不超过四个；数量较多可能导致渲染问题。"
+    },
+    {
+      "id": "MapboxImageryProvider.ConstructorOptions",
+      "field": "properties/rectangle/description",
+      "sourceHash": "sha256:413ac09ba872eb63a1e378635760be206710bd5622d3c858630cb6645c167c36",
+      "text": "图像覆盖的弧度矩形范围。"
+    },
+    {
+      "id": "MapboxImageryProvider.ConstructorOptions",
+      "field": "properties/url/description",
+      "sourceHash": "sha256:ecac03708787df5fafcf0d1ce71b822d4d15b9140496f8d7758ee52cf6ba77d2",
+      "text": "Mapbox 服务器 URL。"
+    },
+    {
+      "id": "MapboxImageryProvider",
+      "field": "description",
+      "sourceHash": "sha256:3f3d71cb732f739e884bd183fd137e1da7e5a8b9a2e7429546a45e0bd462dc5e",
+      "text": "提供由 Mapbox 托管的瓦片影像。"
+    },
+    {
+      "id": "MapboxImageryProvider#errorEvent",
+      "field": "description",
+      "sourceHash": "sha256:2e71cc15108b0bcf5e115da4de496670fcfcfc2dcef83b4e7ddfd90846ab3a3f",
+      "text": "获取影像提供者发生异步错误时触发的事件。订阅者可收到错误通知并尝试恢复。事件监听器接收 {@link TileProviderError} 实例。"
+    },
+    {
+      "id": "MapboxImageryProvider#hasAlphaChannel",
+      "field": "description",
+      "sourceHash": "sha256:e3870c86bd94659a564595da867428a487ceb32cd34fc169bfbea2d25a4f6705",
+      "text": "获取影像提供者所提供图像是否包含 alpha 通道。为 false 时，即使存在 alpha 也会忽略；为 true 时，无 alpha 通道的图像按所有位置 alpha 为 1.0 处理。设为 false 可降低内存占用及纹理上传时间。"
+    },
+    {
+      "id": "MapboxImageryProvider#minimumLevel",
+      "field": "description",
+      "sourceHash": "sha256:e24d15e30accd06678ddf6ce16962b9cc33f063bc0411423fd1199ca782d0190",
+      "text": "获取可请求的最小细节级别。通常仅在影像范围足够小、该最小级别下瓦片很少时才应设置最小级别。若最小级别包含过多瓦片，会导致渲染问题。"
+    },
+    {
+      "id": "MapboxImageryProvider#pickFeatures",
+      "field": "description",
+      "sourceHash": "sha256:16a416dddca88e52055a54aba0624d181afda46badc6e15db59720ae488adad9",
+      "text": "异步确定瓦片内给定经纬度处存在的要素。此函数可选，并非所有 ImageryProvider 都实现。"
+    },
+    {
+      "id": "MapboxImageryProvider#pickFeatures",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:e0555bae727942fed5fe3bcabdaa6099e9e3b98b842656ef0051c9197f39a340",
+      "text": "异步拾取完成后兑现的 Promise，兑现结果为 {@link ImageryLayerFeatureInfo} 实例数组。指定位置未找到要素时，数组可为空。若不支持拾取，也可能返回 undefined。"
+    },
+    {
+      "id": "MapboxImageryProvider#rectangle",
+      "field": "description",
+      "sourceHash": "sha256:14fb786b52425b3e35ec1adfc9d1f1650095196806e093137e67f038ce9a00cb",
+      "text": "获取此实例所提供影像的弧度矩形范围。"
+    },
+    {
+      "id": "MapboxImageryProvider#requestImage",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:1da8470d5e3428259b91d645dce869c8bd335c2d0e84dcfc487ba2dfc65f0d26",
+      "text": "图像可用时兑现的 Promise；若服务器活动请求过多，则返回 undefined，表示应稍后重试。"
+    },
+    {
+      "id": "MapboxImageryProvider#tileDiscardPolicy",
+      "field": "description",
+      "sourceHash": "sha256:d436e40b3239a33f8c07780a55528e392ee49f037f05a65c09722f8cbb51f7be",
+      "text": "获取瓦片丢弃策略。若不为 undefined，策略通过 shouldDiscardImage 过滤“缺失”瓦片；若此属性为 undefined，则不过滤任何瓦片。"
+    },
+    {
+      "id": "MapboxImageryProvider#tilingScheme",
+      "field": "description",
+      "sourceHash": "sha256:478090a2802d321f1cc659465d24707d2d3534e2ba2c7af34d4f754e7f36de24",
+      "text": "获取提供者使用的分块方案。"
+    },
+    {
+      "id": "MapboxImageryProvider#url",
+      "field": "description",
+      "sourceHash": "sha256:da8f7fc42872c5ff5102d6a8a748dc24af584f606d5f020b609827936234e020",
+      "text": "获取 Mapbox 服务器的 URL。"
+    },
+    {
+      "id": "MapboxStyleImageryProvider.ConstructorOptions",
+      "field": "description",
+      "sourceHash": "sha256:ea0e4cb29256b1b3f9f669835e444c5b8fb0ba6a05d0a4dd611fe058336d72ff",
+      "text": "MapboxStyleImageryProvider 构造函数的初始化选项。"
+    },
+    {
+      "id": "MapboxStyleImageryProvider.ConstructorOptions",
+      "field": "properties/accessToken/description",
+      "sourceHash": "sha256:a5cd02872c74af662949fb2fed8d614a4073a8633b50cbb230607e9c3ec64e87",
+      "text": "影像的公开访问令牌。"
+    },
+    {
+      "id": "MapboxStyleImageryProvider.ConstructorOptions",
+      "field": "properties/ellipsoid/description",
+      "sourceHash": "sha256:64ad4e5f7e94b06bc611c8429591da991fa88bdb2f4886136ea1dbbdb1d0b372",
+      "text": "椭球。若未指定，则使用默认椭球。"
+    },
+    {
+      "id": "MapboxStyleImageryProvider.ConstructorOptions",
+      "field": "properties/maximumLevel/description",
+      "sourceHash": "sha256:b6a477b331cdd9f15653425957c3152328dcffd314767385499790f0d956dda6",
+      "text": "影像提供者支持的最大细节级别；为 undefined 时不设上限。"
+    },
+    {
+      "id": "MapboxStyleImageryProvider.ConstructorOptions",
+      "field": "properties/minimumLevel/description",
+      "sourceHash": "sha256:8122090b1cd89db20a13c4173a13184f1f79d7648cf19166d4be8c61116e727e",
+      "text": "影像提供者支持的最小细节级别。请确保该级别的瓦片数量很少，例如不超过四个；数量较多可能导致渲染问题。"
+    },
+    {
+      "id": "MapboxStyleImageryProvider.ConstructorOptions",
+      "field": "properties/rectangle/description",
+      "sourceHash": "sha256:413ac09ba872eb63a1e378635760be206710bd5622d3c858630cb6645c167c36",
+      "text": "图像覆盖的弧度矩形范围。"
+    },
+    {
+      "id": "MapboxStyleImageryProvider.ConstructorOptions",
+      "field": "properties/scaleFactor/description",
+      "sourceHash": "sha256:ec31e86c8d7639a2b67107306e78322ff07460e315844728dc9f32a098470a59",
+      "text": "决定是否以 @2x 倍率渲染瓦片。"
+    },
+    {
+      "id": "MapboxStyleImageryProvider.ConstructorOptions",
+      "field": "properties/styleId/description",
+      "sourceHash": "sha256:567bd0b5838edd9a2b4b04e49c669e13504d0e0f3ffe2d6e1a08c3701b1aaf8a",
+      "text": "Mapbox 样式 ID。"
+    },
+    {
+      "id": "MapboxStyleImageryProvider.ConstructorOptions",
+      "field": "properties/tilesize/description",
+      "sourceHash": "sha256:d532049897db6200ad005013d944589f9a191bb0735debf71126be3bad6ef148",
+      "text": "影像瓦片的尺寸。"
+    },
+    {
+      "id": "MapboxStyleImageryProvider.ConstructorOptions",
+      "field": "properties/url/description",
+      "sourceHash": "sha256:ecac03708787df5fafcf0d1ce71b822d4d15b9140496f8d7758ee52cf6ba77d2",
+      "text": "Mapbox 服务器 URL。"
+    },
+    {
+      "id": "MapboxStyleImageryProvider.ConstructorOptions",
+      "field": "properties/username/description",
+      "sourceHash": "sha256:9e66a804b1b8b2f904c1d02978b48766a72ee99f083d92919b8b91ee4fc7f621",
+      "text": "地图账户的用户名。"
+    },
+    {
+      "id": "MapboxStyleImageryProvider",
+      "field": "description",
+      "sourceHash": "sha256:3f3d71cb732f739e884bd183fd137e1da7e5a8b9a2e7429546a45e0bd462dc5e",
+      "text": "提供由 Mapbox 托管的瓦片影像。"
+    },
+    {
+      "id": "MapboxStyleImageryProvider#errorEvent",
+      "field": "description",
+      "sourceHash": "sha256:2e71cc15108b0bcf5e115da4de496670fcfcfc2dcef83b4e7ddfd90846ab3a3f",
+      "text": "获取影像提供者发生异步错误时触发的事件。订阅者可收到错误通知并尝试恢复。事件监听器接收 {@link TileProviderError} 实例。"
+    },
+    {
+      "id": "MapboxStyleImageryProvider#hasAlphaChannel",
+      "field": "description",
+      "sourceHash": "sha256:e3870c86bd94659a564595da867428a487ceb32cd34fc169bfbea2d25a4f6705",
+      "text": "获取影像提供者所提供图像是否包含 alpha 通道。为 false 时，即使存在 alpha 也会忽略；为 true 时，无 alpha 通道的图像按所有位置 alpha 为 1.0 处理。设为 false 可降低内存占用及纹理上传时间。"
+    },
+    {
+      "id": "MapboxStyleImageryProvider#minimumLevel",
+      "field": "description",
+      "sourceHash": "sha256:e24d15e30accd06678ddf6ce16962b9cc33f063bc0411423fd1199ca782d0190",
+      "text": "获取可请求的最小细节级别。通常仅在影像范围足够小、该最小级别下瓦片很少时才应设置最小级别。若最小级别包含过多瓦片，会导致渲染问题。"
+    },
+    {
+      "id": "MapboxStyleImageryProvider#pickFeatures",
+      "field": "description",
+      "sourceHash": "sha256:16a416dddca88e52055a54aba0624d181afda46badc6e15db59720ae488adad9",
+      "text": "异步确定瓦片内给定经纬度处存在的要素。此函数可选，并非所有 ImageryProvider 都实现。"
+    },
+    {
+      "id": "MapboxStyleImageryProvider#pickFeatures",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:e0555bae727942fed5fe3bcabdaa6099e9e3b98b842656ef0051c9197f39a340",
+      "text": "异步拾取完成后兑现的 Promise，兑现结果为 {@link ImageryLayerFeatureInfo} 实例数组。指定位置未找到要素时，数组可为空。若不支持拾取，也可能返回 undefined。"
+    },
+    {
+      "id": "MapboxStyleImageryProvider#rectangle",
+      "field": "description",
+      "sourceHash": "sha256:14fb786b52425b3e35ec1adfc9d1f1650095196806e093137e67f038ce9a00cb",
+      "text": "获取此实例所提供影像的弧度矩形范围。"
+    },
+    {
+      "id": "MapboxStyleImageryProvider#requestImage",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:1da8470d5e3428259b91d645dce869c8bd335c2d0e84dcfc487ba2dfc65f0d26",
+      "text": "图像可用时兑现的 Promise；若服务器活动请求过多，则返回 undefined，表示应稍后重试。"
+    },
+    {
+      "id": "MapboxStyleImageryProvider#tileDiscardPolicy",
+      "field": "description",
+      "sourceHash": "sha256:d436e40b3239a33f8c07780a55528e392ee49f037f05a65c09722f8cbb51f7be",
+      "text": "获取瓦片丢弃策略。若不为 undefined，策略通过 shouldDiscardImage 过滤“缺失”瓦片；若此属性为 undefined，则不过滤任何瓦片。"
+    },
+    {
+      "id": "MapboxStyleImageryProvider#tilingScheme",
+      "field": "description",
+      "sourceHash": "sha256:478090a2802d321f1cc659465d24707d2d3534e2ba2c7af34d4f754e7f36de24",
+      "text": "获取提供者使用的分块方案。"
+    },
+    {
+      "id": "MapboxStyleImageryProvider#url",
+      "field": "description",
+      "sourceHash": "sha256:da8f7fc42872c5ff5102d6a8a748dc24af584f606d5f020b609827936234e020",
+      "text": "获取 Mapbox 服务器的 URL。"
+    },
+    {
+      "id": "OpenStreetMapImageryProvider.ConstructorOptions",
+      "field": "description",
+      "sourceHash": "sha256:7ff762bc83ed811546ba9f4c709f42456c593175798a2117ec9c1f2085f0f71e",
+      "text": "OpenStreetMapImageryProvider 构造函数的初始化选项。"
+    },
+    {
+      "id": "OpenStreetMapImageryProvider.ConstructorOptions",
+      "field": "properties/ellipsoid/description",
+      "sourceHash": "sha256:f68c467c4351c3294b803bfec4083ca2e3dd9b3597bced00dcab1ddf8d5e4556",
+      "text": "椭球。若未指定，则使用 WGS84 椭球。"
+    },
+    {
+      "id": "OpenStreetMapImageryProvider.ConstructorOptions",
+      "field": "properties/fileExtension/description",
+      "sourceHash": "sha256:83e8eaa5e5212c8e1e60e4b1a00c9ce82623cb4d417abc6217e24c775fed2d01",
+      "text": "服务器上影像文件的扩展名。"
+    },
+    {
+      "id": "OpenStreetMapImageryProvider.ConstructorOptions",
+      "field": "properties/maximumLevel/description",
+      "sourceHash": "sha256:b6a477b331cdd9f15653425957c3152328dcffd314767385499790f0d956dda6",
+      "text": "影像提供者支持的最大细节级别；为 undefined 时不设上限。"
+    },
+    {
+      "id": "OpenStreetMapImageryProvider.ConstructorOptions",
+      "field": "properties/minimumLevel/description",
+      "sourceHash": "sha256:f04718a0a7e55be4c132ca71c16c6ca107b3b5e35477ce2e02add44be7dfd29a",
+      "text": "影像提供者支持的最低细节层级。"
+    },
+    {
+      "id": "OpenStreetMapImageryProvider.ConstructorOptions",
+      "field": "properties/rectangle/description",
+      "sourceHash": "sha256:0650c3c5fcbe0ae03f0009e2a7e77dd236eac71d5e02777baf7f57b75b7a1009",
+      "text": "图层覆盖的矩形范围。"
+    },
+    {
+      "id": "OpenStreetMapImageryProvider.ConstructorOptions",
+      "field": "properties/retinaTiles/description",
+      "sourceHash": "sha256:a90bfa6fc8e4ddd760b754b4ff251735271b86a814507aef188edbedcd0758f3",
+      "text": "为 true 时，请求两倍分辨率的瓦片，以适配高像素密度显示屏。"
+    },
+    {
+      "id": "OpenStreetMapImageryProvider.ConstructorOptions",
+      "field": "properties/url/description",
+      "sourceHash": "sha256:2ac9e40d349c5f4ca0978ba3eb4dd79335c4c6ae92d5cb64db948020c8b1aec0",
+      "text": "OpenStreetMap 服务器的 URL。"
+    },
+    {
+      "id": "OpenStreetMapImageryProvider",
+      "field": "description",
+      "sourceHash": "sha256:4523428ad7157e05c920ee107a473a52c3079204f2829457c42b272126fca417",
+      "text": "提供由 OpenStreetMap 或其他 Slippy 瓦片服务托管的瓦片影像。默认 URL 连接到由志愿者维护的 OpenStreetMap 服务器，因此必须遵守其{@link http://wiki.openstreetmap.org/wiki/Tile_usage_policy|瓦片使用政策}。"
+    },
+    {
+      "id": "OpenStreetMapImageryProvider",
+      "field": "exceptions/0/description",
+      "sourceHash": "sha256:c0f9f4534b8fc0805ffe4a0c104a71c725bf94c14caa10bee414b86978aad324",
+      "text": "rectangle 和 minimumLevel 指定的范围在最低层级包含超过四张瓦片。不支持最低层级包含超过四张瓦片的影像提供者。"
+    },
+    {
+      "id": "OpenStreetMapImageryProvider#enablePickFeatures",
+      "field": "description",
+      "sourceHash": "sha256:60f36d64ad52faad7b017fe3f0191ca4178b73c2f199cb141e6eebf93a5b6479",
+      "text": "获取或设置是否启用要素拾取。为 true 时，{@link UrlTemplateImageryProvider#pickFeatures} 会请求 <code>options.pickFeaturesUrl</code>，并尝试解析响应中的要素。为 false 时，{@link UrlTemplateImageryProvider#pickFeatures} 会立即返回 undefined，表示没有可拾取的要素，且不会与服务器通信。如果已知数据源不支持要素拾取，或不希望此提供者的要素可被拾取，可将该属性设为 false。"
+    },
+    {
+      "id": "OpenStreetMapImageryProvider#errorEvent",
+      "field": "description",
+      "sourceHash": "sha256:168588b191e452d1f54f99328d58f42f85709ab2e2ea5a765f7e9008a2a3e6b7",
+      "text": "获取影像提供者发生异步错误时触发的事件。订阅者可收到错误通知并尝试恢复。事件监听器接收 {@link TileProviderError} 实例。"
+    },
+    {
+      "id": "OpenStreetMapImageryProvider#hasAlphaChannel",
+      "field": "description",
+      "sourceHash": "sha256:e3870c86bd94659a564595da867428a487ceb32cd34fc169bfbea2d25a4f6705",
+      "text": "获取影像提供者所提供图像是否包含 alpha 通道。为 false 时，即使存在 alpha 也会忽略；为 true 时，无 alpha 通道的图像按所有位置 alpha 为 1.0 处理。设为 false 可降低内存占用及纹理上传时间。"
+    },
+    {
+      "id": "OpenStreetMapImageryProvider#maximumLevel",
+      "field": "description",
+      "sourceHash": "sha256:b600b375ed4d9b3a39f2ddf0bea464b0ce750ea8a2e5e8fa0193aa0dd8d4a1f0",
+      "text": "获取可请求的最高细节层级；若没有限制，则为 undefined。"
+    },
+    {
+      "id": "OpenStreetMapImageryProvider#minimumLevel",
+      "field": "description",
+      "sourceHash": "sha256:4a78868596bc8fe408c9db7aa6d4d98dc6f3a23b133abcecdfc614421b205ae5",
+      "text": "获取可请求的最小细节级别。"
+    },
+    {
+      "id": "OpenStreetMapImageryProvider#pickFeatures",
+      "field": "description",
+      "sourceHash": "sha256:1cd4682517e270ce652e7f513886fcd501a8789ec5bf3fa936cbc04650a28229",
+      "text": "异步确定瓦片内指定经纬度处是否存在要素，以及存在哪些要素。"
+    },
+    {
+      "id": "OpenStreetMapImageryProvider#pickFeatures",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:e0555bae727942fed5fe3bcabdaa6099e9e3b98b842656ef0051c9197f39a340",
+      "text": "异步拾取完成后兑现的 Promise，兑现结果为 {@link ImageryLayerFeatureInfo} 实例数组。指定位置未找到要素时，数组可为空。若不支持拾取，也可能返回 undefined。"
+    },
+    {
+      "id": "OpenStreetMapImageryProvider#pickFeaturesUrl",
+      "field": "description",
+      "sourceHash": "sha256:e57fc3e6a087924e380198c396b0002477ee51eab79b061a617bb21d1bd08a10",
+      "text": "获取用于拾取要素的 URL 模板。未指定此属性时，{@link UrlTemplateImageryProvider#pickFeatures} 会立即返回 undefined，表示未拾取到要素。该 URL 模板支持 {@link UrlTemplateImageryProvider#url} 属性支持的所有关键字，以及以下关键字：\n<ul>\n    <li><code>{i}</code>：拾取位置的像素列（水平坐标），最西侧像素为 0。</li>\n    <li><code>{j}</code>：拾取位置的像素行（垂直坐标），最北侧像素为 0。</li>\n    <li><code>{reverseI}</code>：拾取位置的像素列（水平坐标），最东侧像素为 0。</li>\n    <li><code>{reverseJ}</code>：拾取位置的像素行（垂直坐标），最南侧像素为 0。</li>\n    <li><code>{longitudeDegrees}</code>：拾取位置的经度，单位为度。</li>\n    <li><code>{latitudeDegrees}</code>：拾取位置的纬度，单位为度。</li>\n    <li><code>{longitudeProjected}</code>：拾取位置在瓦片划分方案投影坐标系中的经度坐标。</li>\n    <li><code>{latitudeProjected}</code>：拾取位置在瓦片划分方案投影坐标系中的纬度坐标。</li>\n    <li><code>{format}</code>：获取要素信息所用的格式，由 {@link GetFeatureInfoFormat} 指定。</li>\n</ul>"
+    },
+    {
+      "id": "OpenStreetMapImageryProvider#rectangle",
+      "field": "description",
+      "sourceHash": "sha256:091c1a3d4f13ed7dc2a0b0675f7a3e3779d275be1d9f6684f9a2183da9f0e36a",
+      "text": "获取此实例所提供影像的弧度矩形范围。"
+    },
+    {
+      "id": "OpenStreetMapImageryProvider#requestImage",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:1da8470d5e3428259b91d645dce869c8bd335c2d0e84dcfc487ba2dfc65f0d26",
+      "text": "图像可用时兑现的 Promise；若服务器活动请求过多，则返回 undefined，表示应稍后重试。"
+    },
+    {
+      "id": "OpenStreetMapImageryProvider#tileDiscardPolicy",
+      "field": "description",
+      "sourceHash": "sha256:d436e40b3239a33f8c07780a55528e392ee49f037f05a65c09722f8cbb51f7be",
+      "text": "获取瓦片丢弃策略。若不为 undefined，策略通过 shouldDiscardImage 过滤“缺失”瓦片；若此属性为 undefined，则不过滤任何瓦片。"
+    },
+    {
+      "id": "OpenStreetMapImageryProvider#url",
+      "field": "description",
+      "sourceHash": "sha256:bd8c64b440b56573706171d2fc5909fdbde97332f3911381f6b50577809233ae",
+      "text": "获取用于请求瓦片的 URL 模板。支持以下关键字：\n<ul>\n <li> <code>{z}</code>：瓦片在划分方案中的层级。第 0 级是四叉树金字塔的根。</li>\n <li> <code>{x}</code>：瓦片在划分方案中的 X 坐标，最西侧瓦片为 0。</li>\n <li> <code>{y}</code>：瓦片在划分方案中的 Y 坐标，最北侧瓦片为 0。</li>\n <li> <code>{s}</code>：可用子域名之一，用于绕过浏览器对每个主机并发请求数量的限制。</li>\n <li> <code>{reverseX}</code>：瓦片在划分方案中的 X 坐标，最东侧瓦片为 0。</li>\n <li> <code>{reverseY}</code>：瓦片在划分方案中的 Y 坐标，最南侧瓦片为 0。</li>\n <li> <code>{reverseZ}</code>：瓦片在划分方案中的反向层级，第 0 级对应四叉树金字塔的最高层级。使用 reverseZ 时，必须定义 maximumLevel。</li>\n <li> <code>{westDegrees}</code>：瓦片西边界的大地经度，单位为度。</li>\n <li> <code>{southDegrees}</code>：瓦片南边界的大地纬度，单位为度。</li>\n <li> <code>{eastDegrees}</code>：瓦片东边界的大地经度，单位为度。</li>\n <li> <code>{northDegrees}</code>：瓦片北边界的大地纬度，单位为度。</li>\n <li> <code>{westProjected}</code>：瓦片西边界在划分方案投影坐标系中的坐标。</li>\n <li> <code>{southProjected}</code>：瓦片南边界在划分方案投影坐标系中的坐标。</li>\n <li> <code>{eastProjected}</code>：瓦片东边界在划分方案投影坐标系中的坐标。</li>\n <li> <code>{northProjected}</code>：瓦片北边界在划分方案投影坐标系中的坐标。</li>\n <li> <code>{width}</code>：每张瓦片的宽度，单位为像素。</li>\n <li> <code>{height}</code>：每张瓦片的高度，单位为像素。</li>\n</ul>"
+    },
+    {
+      "id": "OpenStreetMapImageryProvider#urlSchemeZeroPadding",
+      "field": "description",
+      "sourceHash": "sha256:5127c796c9d6dd5ee387647422c32a1b2081dea382a0434a8ad1a32f3e383ca8",
+      "text": "获取瓦片各坐标在 URL 模板中的左侧补零配置。格式为 '000'，每个坐标都会在左侧补零，直至达到指定零字符串的长度。例如设置 urlSchemeZeroPadding : { '{x}' : '0000'} 后，x 为 12 时，生成的 URL 会将 {x} 替换为 '0012'。支持以下关键字：\n<ul>\n <li> <code>{z}</code>：瓦片层级的补零配置。</li>\n <li> <code>{x}</code>：瓦片 X 坐标的补零配置。</li>\n <li> <code>{y}</code>：瓦片 Y 坐标的补零配置。</li>\n <li> <code>{reverseX}</code>：瓦片反向 X 坐标的补零配置。</li>\n <li> <code>{reverseY}</code>：瓦片反向 Y 坐标的补零配置。</li>\n <li> <code>{reverseZ}</code>：瓦片反向层级的补零配置。</li>\n</ul>"
+    },
+    {
+      "id": "SingleTileImageryProvider.ConstructorOptions",
+      "field": "description",
+      "sourceHash": "sha256:1ad70d996cabe48002514a3d04a9cc0f4f8ab934a282ec21c5df751b1065c89a",
+      "text": "SingleTileImageryProvider 构造函数的初始化选项。"
+    },
+    {
+      "id": "SingleTileImageryProvider.ConstructorOptions",
+      "field": "properties/ellipsoid/description",
+      "sourceHash": "sha256:f68c467c4351c3294b803bfec4083ca2e3dd9b3597bced00dcab1ddf8d5e4556",
+      "text": "椭球。若未指定，则使用 WGS84 椭球。"
+    },
+    {
+      "id": "SingleTileImageryProvider.ConstructorOptions",
+      "field": "properties/rectangle/description",
+      "sourceHash": "sha256:413ac09ba872eb63a1e378635760be206710bd5622d3c858630cb6645c167c36",
+      "text": "图像覆盖的弧度矩形范围。"
+    },
+    {
+      "id": "SingleTileImageryProvider.ConstructorOptions",
+      "field": "properties/tileHeight/description",
+      "sourceHash": "sha256:c76856ca2f7d2791ee87e877568b6f69a47d2af9858243ae039d0a43703a3817",
+      "text": "瓦片的高度，单位为像素。"
+    },
+    {
+      "id": "SingleTileImageryProvider.ConstructorOptions",
+      "field": "properties/tileWidth/description",
+      "sourceHash": "sha256:eb8464edb6a8bba8b1bf3aa1e70c7cbaf1ede19c7a02e218023e4070fb49b525",
+      "text": "瓦片的宽度，单位为像素。"
+    },
+    {
+      "id": "SingleTileImageryProvider.ConstructorOptions",
+      "field": "properties/url/description",
+      "sourceHash": "sha256:18587d7efbea569e5523829ac43916c5913ffeb7184f01ad112ed0be5ccf63d1",
+      "text": "瓦片的 URL。"
+    },
+    {
+      "id": "SingleTileImageryProvider.fromUrl",
+      "field": "description",
+      "sourceHash": "sha256:e58ed2cf12e0b28b01eb2965b76c1dd405d07dc821f964439c09e0a5d40aa326",
+      "text": "创建仅提供一张顶层影像瓦片的提供者。该影像应采用地理投影（WGS84 / EPSG:4326）。"
+    },
+    {
+      "id": "SingleTileImageryProvider.fromUrl",
+      "field": "params/options/description",
+      "sourceHash": "sha256:32f19863f3b9054802f9fba977d292b8cf2e9561ed976c004e7c09eb0d09a794",
+      "text": "描述初始化选项的对象。"
+    },
+    {
+      "id": "SingleTileImageryProvider.fromUrl",
+      "field": "params/url/description",
+      "sourceHash": "sha256:85cbbaf63cf26026fad89a8759fcbfc9047c8fe5c49f26af0288dc6ec1e58704",
+      "text": "瓦片的 URL。"
+    },
+    {
+      "id": "SingleTileImageryProvider.fromUrl",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:049ac70521fafad7bdca83ca785abcfc6558509f8ea2beb5f546de8fc75947dd",
+      "text": "兑现后的 SingleTileImageryProvider。"
+    },
+    {
+      "id": "SingleTileImageryProvider.fromUrlOptions",
+      "field": "description",
+      "sourceHash": "sha256:b59123db6308f8fb8c4daa6af3d2a2ca01c256bcbbf655b54889a078cb8cff8b",
+      "text": "使用 SingleTileImageryProvider.fromUrl 时的 SingleTileImageryProvider 构造函数初始化选项。"
+    },
+    {
+      "id": "SingleTileImageryProvider.fromUrlOptions",
+      "field": "properties/ellipsoid/description",
+      "sourceHash": "sha256:f68c467c4351c3294b803bfec4083ca2e3dd9b3597bced00dcab1ddf8d5e4556",
+      "text": "椭球。若未指定，则使用 WGS84 椭球。"
+    },
+    {
+      "id": "SingleTileImageryProvider.fromUrlOptions",
+      "field": "properties/rectangle/description",
+      "sourceHash": "sha256:413ac09ba872eb63a1e378635760be206710bd5622d3c858630cb6645c167c36",
+      "text": "图像覆盖的弧度矩形范围。"
+    },
+    {
+      "id": "SingleTileImageryProvider",
+      "field": "description",
+      "sourceHash": "sha256:5188583f6d5b57524c308cb7dd458b25001f08be9434f0aec05393ad5a6ceffe",
+      "text": "提供一张顶层影像瓦片。该影像应采用地理投影（WGS84 / EPSG:4326），并使用 {@link GeographicTilingScheme} 渲染。"
+    },
+    {
+      "id": "SingleTileImageryProvider#errorEvent",
+      "field": "description",
+      "sourceHash": "sha256:168588b191e452d1f54f99328d58f42f85709ab2e2ea5a765f7e9008a2a3e6b7",
+      "text": "获取影像提供者发生异步错误时触发的事件。订阅者可收到错误通知并尝试恢复。事件监听器接收 {@link TileProviderError} 实例。"
+    },
+    {
+      "id": "SingleTileImageryProvider#hasAlphaChannel",
+      "field": "description",
+      "sourceHash": "sha256:e3870c86bd94659a564595da867428a487ceb32cd34fc169bfbea2d25a4f6705",
+      "text": "获取影像提供者所提供图像是否包含 alpha 通道。为 false 时，即使存在 alpha 也会忽略；为 true 时，无 alpha 通道的图像按所有位置 alpha 为 1.0 处理。设为 false 可降低内存占用及纹理上传时间。"
+    },
+    {
+      "id": "SingleTileImageryProvider#minimumLevel",
+      "field": "description",
+      "sourceHash": "sha256:4a78868596bc8fe408c9db7aa6d4d98dc6f3a23b133abcecdfc614421b205ae5",
+      "text": "获取可请求的最小细节级别。"
+    },
+    {
+      "id": "SingleTileImageryProvider#pickFeatures",
+      "field": "description",
+      "sourceHash": "sha256:2b97a73af512b27c778c361f7936f6752e2a990dc0bc2684fa4b6476c3ed878b",
+      "text": "此影像提供者目前不支持要素拾取，因此此函数直接返回 undefined。"
+    },
+    {
+      "id": "SingleTileImageryProvider#pickFeatures",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:215a8128a425c275bcb666e4547b27e7f19e68eab3dd5c3798f1a29c96eed73f",
+      "text": "不支持拾取，因此返回 undefined。"
+    },
+    {
+      "id": "SingleTileImageryProvider#rectangle",
+      "field": "description",
+      "sourceHash": "sha256:091c1a3d4f13ed7dc2a0b0675f7a3e3779d275be1d9f6684f9a2183da9f0e36a",
+      "text": "获取此实例所提供影像的弧度矩形范围。"
+    },
+    {
+      "id": "SingleTileImageryProvider#requestImage",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:e1a1c7283b0c1d4e1b25d062a9d7f174994fb71e3fc201b54bdc150004b7085d",
+      "text": "兑现后的影像。"
+    },
+    {
+      "id": "SingleTileImageryProvider#tileDiscardPolicy",
+      "field": "description",
+      "sourceHash": "sha256:d436e40b3239a33f8c07780a55528e392ee49f037f05a65c09722f8cbb51f7be",
+      "text": "获取瓦片丢弃策略。若不为 undefined，策略通过 shouldDiscardImage 过滤“缺失”瓦片；若此属性为 undefined，则不过滤任何瓦片。"
+    },
+    {
+      "id": "SingleTileImageryProvider#url",
+      "field": "description",
+      "sourceHash": "sha256:0fe3505c54606708a976eb92f0437cc92ab2b10438d95a709ff4b31606ee3e0b",
+      "text": "获取该单张顶层影像瓦片的 URL。"
+    },
+    {
+      "id": "TileCoordinatesImageryProvider.ConstructorOptions",
+      "field": "description",
+      "sourceHash": "sha256:5a8fbe8a1c7112c951b7d2df1553b65ed75c1e0ed2359715f96981eb270b037d",
+      "text": "TileCoordinatesImageryProvider 构造函数的初始化选项。"
+    },
+    {
+      "id": "TileCoordinatesImageryProvider.ConstructorOptions",
+      "field": "properties/color/description",
+      "sourceHash": "sha256:d5c78ffaa5d535715f461c671216826740457063d4ff2989c88cc50819bc7148",
+      "text": "绘制瓦片边框和标签所用的颜色。"
+    },
+    {
+      "id": "TileCoordinatesImageryProvider.ConstructorOptions",
+      "field": "properties/ellipsoid/description",
+      "sourceHash": "sha256:57543aa70ee5645323e837aae79b9d653bb470b3b432e1baf2c17e76541fc7a8",
+      "text": "椭球。如果指定了 tilingScheme，则忽略此参数，使用瓦片划分方案的椭球。如果两者均未指定，则使用 WGS84 椭球。"
+    },
+    {
+      "id": "TileCoordinatesImageryProvider.ConstructorOptions",
+      "field": "properties/tileHeight/description",
+      "sourceHash": "sha256:e797a9a3e22ef142af3a0a63f690d7842f1995bf19409270e3b93cd6d2bb699e",
+      "text": "用于选择细节级别的瓦片高度。"
+    },
+    {
+      "id": "TileCoordinatesImageryProvider.ConstructorOptions",
+      "field": "properties/tileWidth/description",
+      "sourceHash": "sha256:4f96516df02db77e8a37dacb4f24eb95f0527bcba706e935092c502acc71cef2",
+      "text": "用于选择细节级别的瓦片宽度。"
+    },
+    {
+      "id": "TileCoordinatesImageryProvider.ConstructorOptions",
+      "field": "properties/tilingScheme/description",
+      "sourceHash": "sha256:927810865a9018b1a55cb4ea0218a25b67cf7dfa21a32d52db903ae0dbebfbd5",
+      "text": "要绘制瓦片的分块方案。"
+    },
+    {
+      "id": "TileCoordinatesImageryProvider",
+      "field": "description",
+      "sourceHash": "sha256:70995f02182edc1c526f869dfb4413f54c243815b790f0b8515ee9a26bedbee7",
+      "text": "在瓦片划分方案中每张已渲染瓦片周围绘制边框，并在内部标注瓦片 X、Y 和 Level 坐标的 {@link ImageryProvider}。主要用于调试地形和影像渲染问题。"
+    },
+    {
+      "id": "TileCoordinatesImageryProvider#errorEvent",
+      "field": "description",
+      "sourceHash": "sha256:168588b191e452d1f54f99328d58f42f85709ab2e2ea5a765f7e9008a2a3e6b7",
+      "text": "获取影像提供者发生异步错误时触发的事件。订阅者可收到错误通知并尝试恢复。事件监听器接收 {@link TileProviderError} 实例。"
+    },
+    {
+      "id": "TileCoordinatesImageryProvider#hasAlphaChannel",
+      "field": "description",
+      "sourceHash": "sha256:c7fb45fdd1f16f39aa438762c77f0cd61e5323c18af8c09de5200fcb77154ddd",
+      "text": "获取所提供图像是否包含 alpha 通道。为 false 时，即使存在 alpha 也会忽略；为 true 时，无 alpha 通道图像按所有位置 alpha 为 1.0 处理。设为 false 可降低内存占用及纹理上传时间。"
+    },
+    {
+      "id": "TileCoordinatesImageryProvider#minimumLevel",
+      "field": "description",
+      "sourceHash": "sha256:4a78868596bc8fe408c9db7aa6d4d98dc6f3a23b133abcecdfc614421b205ae5",
+      "text": "获取可请求的最小细节级别。"
+    },
+    {
+      "id": "TileCoordinatesImageryProvider#pickFeatures",
+      "field": "description",
+      "sourceHash": "sha256:2b97a73af512b27c778c361f7936f6752e2a990dc0bc2684fa4b6476c3ed878b",
+      "text": "此影像提供者目前不支持要素拾取，因此此函数直接返回 undefined。"
+    },
+    {
+      "id": "TileCoordinatesImageryProvider#pickFeatures",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:215a8128a425c275bcb666e4547b27e7f19e68eab3dd5c3798f1a29c96eed73f",
+      "text": "不支持拾取，因此返回 undefined。"
+    },
+    {
+      "id": "TileCoordinatesImageryProvider#rectangle",
+      "field": "description",
+      "sourceHash": "sha256:091c1a3d4f13ed7dc2a0b0675f7a3e3779d275be1d9f6684f9a2183da9f0e36a",
+      "text": "获取此实例所提供影像的弧度矩形范围。"
+    },
+    {
+      "id": "TileCoordinatesImageryProvider#requestImage",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:5531e54f31175d3788ce5e86d6e5bf25f1954e7c50816b24b22d36d67720c71a",
+      "text": "以 Canvas DOM 对象形式返回的图像。"
+    },
+    {
+      "id": "TileCoordinatesImageryProvider#tileDiscardPolicy",
+      "field": "description",
+      "sourceHash": "sha256:d436e40b3239a33f8c07780a55528e392ee49f037f05a65c09722f8cbb51f7be",
+      "text": "获取瓦片丢弃策略。若不为 undefined，策略通过 shouldDiscardImage 过滤“缺失”瓦片；若此属性为 undefined，则不过滤任何瓦片。"
+    },
+    {
+      "id": "TileMapServiceImageryProvider.ConstructorOptions",
+      "field": "description",
+      "sourceHash": "sha256:c06fe8e3c37428ec91ce2e1776669d3a24b553c2edad3ceadf037b4b5b368b2c",
+      "text": "IonImageryProvider 构造函数的初始化选项。"
+    },
+    {
+      "id": "TileMapServiceImageryProvider.ConstructorOptions",
+      "field": "properties/ellipsoid/description",
+      "sourceHash": "sha256:57543aa70ee5645323e837aae79b9d653bb470b3b432e1baf2c17e76541fc7a8",
+      "text": "椭球。如果指定了 tilingScheme，则忽略此参数，使用瓦片划分方案的椭球。如果两者均未指定，则使用 WGS84 椭球。"
+    },
+    {
+      "id": "TileMapServiceImageryProvider.ConstructorOptions",
+      "field": "properties/fileExtension/description",
+      "sourceHash": "sha256:83e8eaa5e5212c8e1e60e4b1a00c9ce82623cb4d417abc6217e24c775fed2d01",
+      "text": "服务器上影像文件的扩展名。"
+    },
+    {
+      "id": "TileMapServiceImageryProvider.ConstructorOptions",
+      "field": "properties/flipXY/description",
+      "sourceHash": "sha256:b9bb2d7ae034a83c5162966bc070d9f2ab19025382bbc680f496a66528389134",
+      "text": "旧版 gdal2tiles.py 会在 tilemapresource.xml 中交换 X 和 Y 的值。"
+    },
+    {
+      "id": "TileMapServiceImageryProvider.ConstructorOptions",
+      "field": "properties/maximumLevel/description",
+      "sourceHash": "sha256:b6a477b331cdd9f15653425957c3152328dcffd314767385499790f0d956dda6",
+      "text": "影像提供者支持的最大细节级别；为 undefined 时不设上限。"
+    },
+    {
+      "id": "TileMapServiceImageryProvider.ConstructorOptions",
+      "field": "properties/minimumLevel/description",
+      "sourceHash": "sha256:8122090b1cd89db20a13c4173a13184f1f79d7648cf19166d4be8c61116e727e",
+      "text": "影像提供者支持的最小细节级别。请确保该级别的瓦片数量很少，例如不超过四个；数量较多可能导致渲染问题。"
+    },
+    {
+      "id": "TileMapServiceImageryProvider.ConstructorOptions",
+      "field": "properties/rectangle/description",
+      "sourceHash": "sha256:413ac09ba872eb63a1e378635760be206710bd5622d3c858630cb6645c167c36",
+      "text": "图像覆盖的弧度矩形范围。"
+    },
+    {
+      "id": "TileMapServiceImageryProvider.ConstructorOptions",
+      "field": "properties/tileDiscardPolicy/description",
+      "sourceHash": "sha256:9216e3d3c24894ac9001de7527e245f89c1903533c0d292ace8dafaa1c27d0de",
+      "text": "按特定条件丢弃瓦片影像的策略。可通过指定此选项加载这些格式不正确的瓦片集。"
+    },
+    {
+      "id": "TileMapServiceImageryProvider.ConstructorOptions",
+      "field": "properties/tileHeight/description",
+      "sourceHash": "sha256:bc60d435594b8783ca61101f3781b0260b5607e9b137e72ed67030bd1f62f422",
+      "text": "影像瓦片的高度，单位为像素。"
+    },
+    {
+      "id": "TileMapServiceImageryProvider.ConstructorOptions",
+      "field": "properties/tileWidth/description",
+      "sourceHash": "sha256:2c5e3d601dd2e9012ae5e51d50e7e0c8252144c7091460556a52188245ab9379",
+      "text": "影像瓦片的宽度，单位为像素。"
+    },
+    {
+      "id": "TileMapServiceImageryProvider.ConstructorOptions",
+      "field": "properties/tilingScheme/description",
+      "sourceHash": "sha256:931ded83daf5cce4312936efb189e54c48270b3a87d17d47186d736950151f66",
+      "text": "规定如何将椭球表面划分为瓦片的方案。未提供此参数时，使用 {@link WebMercatorTilingScheme}。"
+    },
+    {
+      "id": "TileMapServiceImageryProvider.fromUrl",
+      "field": "description",
+      "sourceHash": "sha256:42a0e445c389a1d7491128827341169aa4b9a864ab20cb22d1b3b8a20e5640f5",
+      "text": "从指定 URL 创建 TileMapServiceImageryProvider。"
+    },
+    {
+      "id": "TileMapServiceImageryProvider.fromUrl",
+      "field": "exceptions/0/description",
+      "sourceHash": "sha256:25636dffba8f052ed743812ae31579e1143112927586c67329fa0f5418a9fa10",
+      "text": "无法在 tilemapresource.xml 中找到预期的 tilesets 或 bbox 属性。"
+    },
+    {
+      "id": "TileMapServiceImageryProvider.fromUrl",
+      "field": "exceptions/1/description",
+      "sourceHash": "sha256:467bb4fb155841704d5813b13d91fe7d69869b4c79df8a781a069c81f2dc082b",
+      "text": "tilemapresource.xml 指定了不支持的 profile 属性。"
+    },
+    {
+      "id": "TileMapServiceImageryProvider.fromUrl",
+      "field": "params/options/description",
+      "sourceHash": "sha256:32f19863f3b9054802f9fba977d292b8cf2e9561ed976c004e7c09eb0d09a794",
+      "text": "描述初始化选项的对象。"
+    },
+    {
+      "id": "TileMapServiceImageryProvider.fromUrl",
+      "field": "params/url/description",
+      "sourceHash": "sha256:3c85b632e4f878855f60bc519142793c0ae4dc0cfa45e5985917e1ddd8198246",
+      "text": "服务器上影像瓦片的路径。"
+    },
+    {
+      "id": "TileMapServiceImageryProvider.fromUrl",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:ef377d4a84613959e94b88e8ce938a7552417f839a3608a390c4b6951c8a669f",
+      "text": "兑现为所创建 TileMapServiceImageryProvider 的 Promise。"
+    },
+    {
+      "id": "TileMapServiceImageryProvider",
+      "field": "description",
+      "sourceHash": "sha256:5e2a6e2d5259e5f422f23973c40819fc619dee0b9633511d1988e2c646a3bc93",
+      "text": "<div class=\"notice\">\n请调用 {@link TileMapServiceImageryProvider.fromUrl} 创建 TileMapServiceImageryProvider，不要直接调用构造函数。\n</div>\n\n提供由 {@link http://www.maptiler.org/|MapTiler}、{@link http://www.klokan.cz/projects/gdal2tiles/|GDAL2Tiles} 等工具生成的瓦片影像。"
+    },
+    {
+      "id": "TileMapServiceImageryProvider#enablePickFeatures",
+      "field": "description",
+      "sourceHash": "sha256:60f36d64ad52faad7b017fe3f0191ca4178b73c2f199cb141e6eebf93a5b6479",
+      "text": "获取或设置是否启用要素拾取。为 true 时，{@link UrlTemplateImageryProvider#pickFeatures} 会请求 <code>options.pickFeaturesUrl</code>，并尝试解析响应中的要素。为 false 时，{@link UrlTemplateImageryProvider#pickFeatures} 会立即返回 undefined，表示没有可拾取的要素，且不会与服务器通信。如果已知数据源不支持要素拾取，或不希望此提供者的要素可被拾取，可将该属性设为 false。"
+    },
+    {
+      "id": "TileMapServiceImageryProvider#errorEvent",
+      "field": "description",
+      "sourceHash": "sha256:168588b191e452d1f54f99328d58f42f85709ab2e2ea5a765f7e9008a2a3e6b7",
+      "text": "获取影像提供者发生异步错误时触发的事件。订阅者可收到错误通知并尝试恢复。事件监听器接收 {@link TileProviderError} 实例。"
+    },
+    {
+      "id": "TileMapServiceImageryProvider#hasAlphaChannel",
+      "field": "description",
+      "sourceHash": "sha256:e3870c86bd94659a564595da867428a487ceb32cd34fc169bfbea2d25a4f6705",
+      "text": "获取影像提供者所提供图像是否包含 alpha 通道。为 false 时，即使存在 alpha 也会忽略；为 true 时，无 alpha 通道的图像按所有位置 alpha 为 1.0 处理。设为 false 可降低内存占用及纹理上传时间。"
+    },
+    {
+      "id": "TileMapServiceImageryProvider#maximumLevel",
+      "field": "description",
+      "sourceHash": "sha256:b600b375ed4d9b3a39f2ddf0bea464b0ce750ea8a2e5e8fa0193aa0dd8d4a1f0",
+      "text": "获取可请求的最高细节层级；若没有限制，则为 undefined。"
+    },
+    {
+      "id": "TileMapServiceImageryProvider#minimumLevel",
+      "field": "description",
+      "sourceHash": "sha256:4a78868596bc8fe408c9db7aa6d4d98dc6f3a23b133abcecdfc614421b205ae5",
+      "text": "获取可请求的最小细节级别。"
+    },
+    {
+      "id": "TileMapServiceImageryProvider#pickFeatures",
+      "field": "description",
+      "sourceHash": "sha256:1cd4682517e270ce652e7f513886fcd501a8789ec5bf3fa936cbc04650a28229",
+      "text": "异步确定瓦片内指定经纬度处是否存在要素，以及存在哪些要素。"
+    },
+    {
+      "id": "TileMapServiceImageryProvider#pickFeatures",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:e0555bae727942fed5fe3bcabdaa6099e9e3b98b842656ef0051c9197f39a340",
+      "text": "异步拾取完成后兑现的 Promise，兑现结果为 {@link ImageryLayerFeatureInfo} 实例数组。指定位置未找到要素时，数组可为空。若不支持拾取，也可能返回 undefined。"
+    },
+    {
+      "id": "TileMapServiceImageryProvider#pickFeaturesUrl",
+      "field": "description",
+      "sourceHash": "sha256:e57fc3e6a087924e380198c396b0002477ee51eab79b061a617bb21d1bd08a10",
+      "text": "获取用于拾取要素的 URL 模板。未指定此属性时，{@link UrlTemplateImageryProvider#pickFeatures} 会立即返回 undefined，表示未拾取到要素。该 URL 模板支持 {@link UrlTemplateImageryProvider#url} 属性支持的所有关键字，以及以下关键字：\n<ul>\n    <li><code>{i}</code>：拾取位置的像素列（水平坐标），最西侧像素为 0。</li>\n    <li><code>{j}</code>：拾取位置的像素行（垂直坐标），最北侧像素为 0。</li>\n    <li><code>{reverseI}</code>：拾取位置的像素列（水平坐标），最东侧像素为 0。</li>\n    <li><code>{reverseJ}</code>：拾取位置的像素行（垂直坐标），最南侧像素为 0。</li>\n    <li><code>{longitudeDegrees}</code>：拾取位置的经度，单位为度。</li>\n    <li><code>{latitudeDegrees}</code>：拾取位置的纬度，单位为度。</li>\n    <li><code>{longitudeProjected}</code>：拾取位置在瓦片划分方案投影坐标系中的经度坐标。</li>\n    <li><code>{latitudeProjected}</code>：拾取位置在瓦片划分方案投影坐标系中的纬度坐标。</li>\n    <li><code>{format}</code>：获取要素信息所用的格式，由 {@link GetFeatureInfoFormat} 指定。</li>\n</ul>"
+    },
+    {
+      "id": "TileMapServiceImageryProvider#rectangle",
+      "field": "description",
+      "sourceHash": "sha256:091c1a3d4f13ed7dc2a0b0675f7a3e3779d275be1d9f6684f9a2183da9f0e36a",
+      "text": "获取此实例所提供影像的弧度矩形范围。"
+    },
+    {
+      "id": "TileMapServiceImageryProvider#requestImage",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:1da8470d5e3428259b91d645dce869c8bd335c2d0e84dcfc487ba2dfc65f0d26",
+      "text": "图像可用时兑现的 Promise；若服务器活动请求过多，则返回 undefined，表示应稍后重试。"
+    },
+    {
+      "id": "TileMapServiceImageryProvider#tileDiscardPolicy",
+      "field": "description",
+      "sourceHash": "sha256:d436e40b3239a33f8c07780a55528e392ee49f037f05a65c09722f8cbb51f7be",
+      "text": "获取瓦片丢弃策略。若不为 undefined，策略通过 shouldDiscardImage 过滤“缺失”瓦片；若此属性为 undefined，则不过滤任何瓦片。"
+    },
+    {
+      "id": "TileMapServiceImageryProvider#url",
+      "field": "description",
+      "sourceHash": "sha256:bd8c64b440b56573706171d2fc5909fdbde97332f3911381f6b50577809233ae",
+      "text": "获取用于请求瓦片的 URL 模板。支持以下关键字：\n<ul>\n <li> <code>{z}</code>：瓦片在划分方案中的层级。第 0 级是四叉树金字塔的根。</li>\n <li> <code>{x}</code>：瓦片在划分方案中的 X 坐标，最西侧瓦片为 0。</li>\n <li> <code>{y}</code>：瓦片在划分方案中的 Y 坐标，最北侧瓦片为 0。</li>\n <li> <code>{s}</code>：可用子域名之一，用于绕过浏览器对每个主机并发请求数量的限制。</li>\n <li> <code>{reverseX}</code>：瓦片在划分方案中的 X 坐标，最东侧瓦片为 0。</li>\n <li> <code>{reverseY}</code>：瓦片在划分方案中的 Y 坐标，最南侧瓦片为 0。</li>\n <li> <code>{reverseZ}</code>：瓦片在划分方案中的反向层级，第 0 级对应四叉树金字塔的最高层级。使用 reverseZ 时，必须定义 maximumLevel。</li>\n <li> <code>{westDegrees}</code>：瓦片西边界的大地经度，单位为度。</li>\n <li> <code>{southDegrees}</code>：瓦片南边界的大地纬度，单位为度。</li>\n <li> <code>{eastDegrees}</code>：瓦片东边界的大地经度，单位为度。</li>\n <li> <code>{northDegrees}</code>：瓦片北边界的大地纬度，单位为度。</li>\n <li> <code>{westProjected}</code>：瓦片西边界在划分方案投影坐标系中的坐标。</li>\n <li> <code>{southProjected}</code>：瓦片南边界在划分方案投影坐标系中的坐标。</li>\n <li> <code>{eastProjected}</code>：瓦片东边界在划分方案投影坐标系中的坐标。</li>\n <li> <code>{northProjected}</code>：瓦片北边界在划分方案投影坐标系中的坐标。</li>\n <li> <code>{width}</code>：每张瓦片的宽度，单位为像素。</li>\n <li> <code>{height}</code>：每张瓦片的高度，单位为像素。</li>\n</ul>"
+    },
+    {
+      "id": "TileMapServiceImageryProvider#urlSchemeZeroPadding",
+      "field": "description",
+      "sourceHash": "sha256:5127c796c9d6dd5ee387647422c32a1b2081dea382a0434a8ad1a32f3e383ca8",
+      "text": "获取瓦片各坐标在 URL 模板中的左侧补零配置。格式为 '000'，每个坐标都会在左侧补零，直至达到指定零字符串的长度。例如设置 urlSchemeZeroPadding : { '{x}' : '0000'} 后，x 为 12 时，生成的 URL 会将 {x} 替换为 '0012'。支持以下关键字：\n<ul>\n <li> <code>{z}</code>：瓦片层级的补零配置。</li>\n <li> <code>{x}</code>：瓦片 X 坐标的补零配置。</li>\n <li> <code>{y}</code>：瓦片 Y 坐标的补零配置。</li>\n <li> <code>{reverseX}</code>：瓦片反向 X 坐标的补零配置。</li>\n <li> <code>{reverseY}</code>：瓦片反向 Y 坐标的补零配置。</li>\n <li> <code>{reverseZ}</code>：瓦片反向层级的补零配置。</li>\n</ul>"
+    },
+    {
+      "id": "UrlTemplateImageryProvider.ConstructorOptions",
+      "field": "description",
+      "sourceHash": "sha256:4957b01e4af35fc09204bd272bc6ce17774d51e66cb063106b442214bc9df13d",
+      "text": "UrlTemplateImageryProvider 构造函数的初始化选项。"
+    },
+    {
+      "id": "UrlTemplateImageryProvider.ConstructorOptions",
+      "field": "properties/customTags/description",
+      "sourceHash": "sha256:15a6069dcfb5fdf319fc21ec776293161bb264b982bea3b82fce8a0aef0d50d2",
+      "text": "用于替换 URL 模板中的自定义关键字。此对象的键必须为字符串，值必须为函数。"
+    },
+    {
+      "id": "UrlTemplateImageryProvider.ConstructorOptions",
+      "field": "properties/ellipsoid/description",
+      "sourceHash": "sha256:57543aa70ee5645323e837aae79b9d653bb470b3b432e1baf2c17e76541fc7a8",
+      "text": "椭球。如果指定了 tilingScheme，则忽略此参数，使用瓦片划分方案的椭球。如果两者均未指定，则使用 WGS84 椭球。"
+    },
+    {
+      "id": "UrlTemplateImageryProvider.ConstructorOptions",
+      "field": "properties/enablePickFeatures/description",
+      "sourceHash": "sha256:8e3811a05b7799cc7b18d6da8fdd312dd91d39943b20b2e9252ee0b653fd11b7",
+      "text": "为 true 时，{@link UrlTemplateImageryProvider#pickFeatures} 会请求 <code>pickFeaturesUrl</code>，并尝试解析响应中的要素。为 false 时，{@link UrlTemplateImageryProvider#pickFeatures} 会立即返回 undefined，表示没有可拾取的要素，且不会与服务器通信。如果已知数据源不支持要素拾取，或不希望此提供者的要素可被拾取，可设为 false。该选项可以通过修改 {@link UriTemplateImageryProvider#enablePickFeatures} 属性动态覆盖。"
+    },
+    {
+      "id": "UrlTemplateImageryProvider.ConstructorOptions",
+      "field": "properties/getFeatureInfoFormats/description",
+      "sourceHash": "sha256:e5ae2a25503820572bf0ce675afd6568d5e5a1038d844d8c0f83a089e1f94a21",
+      "text": "调用 {@link UrlTemplateImageryProvider#pickFeatures} 时，用于获取指定位置要素信息的格式。未指定此参数时，将禁用要素拾取。"
+    },
+    {
+      "id": "UrlTemplateImageryProvider.ConstructorOptions",
+      "field": "properties/hasAlphaChannel/description",
+      "sourceHash": "sha256:01e8a9a42a2179a9a47e4ccf1c3d3125c82b2853012da5e69b7c09afc278c110",
+      "text": "影像提供者提供的图像包含 alpha 通道时为 true，否则为 false。为 false 时，即使图像包含 alpha 通道，也会忽略它；为 true 时，不含 alpha 通道的图像将被视为各处 alpha 均为 1.0。设为 false 可能减少内存占用和纹理上传时间。"
+    },
+    {
+      "id": "UrlTemplateImageryProvider.ConstructorOptions",
+      "field": "properties/maximumLevel/description",
+      "sourceHash": "sha256:b6a477b331cdd9f15653425957c3152328dcffd314767385499790f0d956dda6",
+      "text": "影像提供者支持的最大细节级别；为 undefined 时不设上限。"
+    },
+    {
+      "id": "UrlTemplateImageryProvider.ConstructorOptions",
+      "field": "properties/minimumLevel/description",
+      "sourceHash": "sha256:8122090b1cd89db20a13c4173a13184f1f79d7648cf19166d4be8c61116e727e",
+      "text": "影像提供者支持的最小细节级别。请确保该级别的瓦片数量很少，例如不超过四个；数量较多可能导致渲染问题。"
+    },
+    {
+      "id": "UrlTemplateImageryProvider.ConstructorOptions",
+      "field": "properties/pickFeaturesUrl/description",
+      "sourceHash": "sha256:51fe90fb83d66c3a306a3f3cdaaf779dc5314b00dfe976e181684f3940a79601",
+      "text": "用于拾取要素的 URL 模板。未指定此属性时，{@link UrlTemplateImageryProvider#pickFeatures} 会立即返回 undefined，表示未拾取到要素。该 URL 模板支持 <code>url</code> 参数支持的所有关键字，以及以下关键字：\n<ul>\n    <li><code>{i}</code>：拾取位置的像素列（水平坐标），最西侧像素为 0。</li>\n    <li><code>{j}</code>：拾取位置的像素行（垂直坐标），最北侧像素为 0。</li>\n    <li><code>{reverseI}</code>：拾取位置的像素列（水平坐标），最东侧像素为 0。</li>\n    <li><code>{reverseJ}</code>：拾取位置的像素行（垂直坐标），最南侧像素为 0。</li>\n    <li><code>{longitudeDegrees}</code>：拾取位置的经度，单位为度。</li>\n    <li><code>{latitudeDegrees}</code>：拾取位置的纬度，单位为度。</li>\n    <li><code>{longitudeProjected}</code>：拾取位置在瓦片划分方案投影坐标系中的经度坐标。</li>\n    <li><code>{latitudeProjected}</code>：拾取位置在瓦片划分方案投影坐标系中的纬度坐标。</li>\n    <li><code>{format}</code>：获取要素信息所用的格式，由 {@link GetFeatureInfoFormat} 指定。</li>\n</ul>"
+    },
+    {
+      "id": "UrlTemplateImageryProvider.ConstructorOptions",
+      "field": "properties/rectangle/description",
+      "sourceHash": "sha256:413ac09ba872eb63a1e378635760be206710bd5622d3c858630cb6645c167c36",
+      "text": "图像覆盖的弧度矩形范围。"
+    },
+    {
+      "id": "UrlTemplateImageryProvider.ConstructorOptions",
+      "field": "properties/subdomains/description",
+      "sourceHash": "sha256:00dbf5e8a9c146372624fee49fc58f3f703527d120f0350a1ed916f2adaf29a0",
+      "text": "URL 模板中 <code>{s}</code> 占位符所用的子域名。若此参数为字符串，则每个字符都是一个子域名；若为数组，则每个元素都是一个子域名。"
+    },
+    {
+      "id": "UrlTemplateImageryProvider.ConstructorOptions",
+      "field": "properties/tileDiscardPolicy/description",
+      "sourceHash": "sha256:dcc5a54c658bf2325e0a5ffcc4b2ac1685715b182161776a4d001d0a42cb2e92",
+      "text": "按特定条件丢弃瓦片影像的策略。"
+    },
+    {
+      "id": "UrlTemplateImageryProvider.ConstructorOptions",
+      "field": "properties/tileHeight/description",
+      "sourceHash": "sha256:bc60d435594b8783ca61101f3781b0260b5607e9b137e72ed67030bd1f62f422",
+      "text": "影像瓦片的高度，单位为像素。"
+    },
+    {
+      "id": "UrlTemplateImageryProvider.ConstructorOptions",
+      "field": "properties/tileWidth/description",
+      "sourceHash": "sha256:2c5e3d601dd2e9012ae5e51d50e7e0c8252144c7091460556a52188245ab9379",
+      "text": "影像瓦片的宽度，单位为像素。"
+    },
+    {
+      "id": "UrlTemplateImageryProvider.ConstructorOptions",
+      "field": "properties/tilingScheme/description",
+      "sourceHash": "sha256:931ded83daf5cce4312936efb189e54c48270b3a87d17d47186d736950151f66",
+      "text": "规定如何将椭球表面划分为瓦片的方案。未提供此参数时，使用 {@link WebMercatorTilingScheme}。"
+    },
+    {
+      "id": "UrlTemplateImageryProvider.ConstructorOptions",
+      "field": "properties/url/description",
+      "sourceHash": "sha256:2994bd2e2c248190caf42588de966d37bceca6e898eaff26240131d76dd3ecdf",
+      "text": "用于请求瓦片的 URL 模板。支持以下关键字：\n<ul>\n    <li><code>{z}</code>：瓦片在划分方案中的层级。第 0 级是四叉树金字塔的根。</li>\n    <li><code>{x}</code>：瓦片在划分方案中的 X 坐标，最西侧瓦片为 0。</li>\n    <li><code>{y}</code>：瓦片在划分方案中的 Y 坐标，最北侧瓦片为 0。</li>\n    <li><code>{s}</code>：可用子域名之一，用于绕过浏览器对每个主机并发请求数量的限制。</li>\n    <li><code>{reverseX}</code>：瓦片在划分方案中的 X 坐标，最东侧瓦片为 0。</li>\n    <li><code>{reverseY}</code>：瓦片在划分方案中的 Y 坐标，最南侧瓦片为 0。</li>\n    <li><code>{reverseZ}</code>：瓦片在划分方案中的反向层级，第 0 级对应四叉树金字塔的最高层级。使用 reverseZ 时，必须定义 maximumLevel。</li>\n    <li><code>{westDegrees}</code>：瓦片西边界的大地经度，单位为度。</li>\n    <li><code>{southDegrees}</code>：瓦片南边界的大地纬度，单位为度。</li>\n    <li><code>{eastDegrees}</code>：瓦片东边界的大地经度，单位为度。</li>\n    <li><code>{northDegrees}</code>：瓦片北边界的大地纬度，单位为度。</li>\n    <li><code>{westProjected}</code>：瓦片西边界在划分方案投影坐标系中的坐标。</li>\n    <li><code>{southProjected}</code>：瓦片南边界在划分方案投影坐标系中的坐标。</li>\n    <li><code>{eastProjected}</code>：瓦片东边界在划分方案投影坐标系中的坐标。</li>\n    <li><code>{northProjected}</code>：瓦片北边界在划分方案投影坐标系中的坐标。</li>\n    <li><code>{width}</code>：每张瓦片的宽度，单位为像素。</li>\n    <li><code>{height}</code>：每张瓦片的高度，单位为像素。</li>\n</ul>"
+    },
+    {
+      "id": "UrlTemplateImageryProvider.ConstructorOptions",
+      "field": "properties/urlSchemeZeroPadding/description",
+      "sourceHash": "sha256:c606c181bb38707b0ca93cec35f76844300e50abbeb543351a1cc4c67ccc1266",
+      "text": "获取瓦片各坐标在 URL 模板中的左侧补零配置。格式为 '000'，每个坐标都会在左侧补零，直至达到指定零字符串的长度。例如设置 urlSchemeZeroPadding : { '{x}' : '0000'} 后，x 为 12 时，生成的 URL 会将 {x} 替换为 '0012'。传入的对象支持以下关键字：\n<ul>\n <li> <code>{z}</code>：瓦片层级的补零配置。</li>\n <li> <code>{x}</code>：瓦片 X 坐标的补零配置。</li>\n <li> <code>{y}</code>：瓦片 Y 坐标的补零配置。</li>\n <li> <code>{reverseX}</code>：瓦片反向 X 坐标的补零配置。</li>\n <li> <code>{reverseY}</code>：瓦片反向 Y 坐标的补零配置。</li>\n <li> <code>{reverseZ}</code>：瓦片反向层级的补零配置。</li>\n</ul>"
+    },
+    {
+      "id": "UrlTemplateImageryProvider",
+      "field": "description",
+      "sourceHash": "sha256:51d9afcf9b4ce346a3e6e940745854d51170dab6be2face6c2128b49d2cab770",
+      "text": "通过指定的 URL 模板请求瓦片来提供影像。"
+    },
+    {
+      "id": "UrlTemplateImageryProvider#enablePickFeatures",
+      "field": "description",
+      "sourceHash": "sha256:60f36d64ad52faad7b017fe3f0191ca4178b73c2f199cb141e6eebf93a5b6479",
+      "text": "获取或设置是否启用要素拾取。为 true 时，{@link UrlTemplateImageryProvider#pickFeatures} 会请求 <code>options.pickFeaturesUrl</code>，并尝试解析响应中的要素。为 false 时，{@link UrlTemplateImageryProvider#pickFeatures} 会立即返回 undefined，表示没有可拾取的要素，且不会与服务器通信。如果已知数据源不支持要素拾取，或不希望此提供者的要素可被拾取，可将该属性设为 false。"
+    },
+    {
+      "id": "UrlTemplateImageryProvider#errorEvent",
+      "field": "description",
+      "sourceHash": "sha256:168588b191e452d1f54f99328d58f42f85709ab2e2ea5a765f7e9008a2a3e6b7",
+      "text": "获取影像提供者发生异步错误时触发的事件。订阅者可收到错误通知并尝试恢复。事件监听器接收 {@link TileProviderError} 实例。"
+    },
+    {
+      "id": "UrlTemplateImageryProvider#hasAlphaChannel",
+      "field": "description",
+      "sourceHash": "sha256:e3870c86bd94659a564595da867428a487ceb32cd34fc169bfbea2d25a4f6705",
+      "text": "获取影像提供者所提供图像是否包含 alpha 通道。为 false 时，即使存在 alpha 也会忽略；为 true 时，无 alpha 通道的图像按所有位置 alpha 为 1.0 处理。设为 false 可降低内存占用及纹理上传时间。"
+    },
+    {
+      "id": "UrlTemplateImageryProvider#maximumLevel",
+      "field": "description",
+      "sourceHash": "sha256:b600b375ed4d9b3a39f2ddf0bea464b0ce750ea8a2e5e8fa0193aa0dd8d4a1f0",
+      "text": "获取可请求的最高细节层级；若没有限制，则为 undefined。"
+    },
+    {
+      "id": "UrlTemplateImageryProvider#minimumLevel",
+      "field": "description",
+      "sourceHash": "sha256:4a78868596bc8fe408c9db7aa6d4d98dc6f3a23b133abcecdfc614421b205ae5",
+      "text": "获取可请求的最小细节级别。"
+    },
+    {
+      "id": "UrlTemplateImageryProvider#pickFeatures",
+      "field": "description",
+      "sourceHash": "sha256:1cd4682517e270ce652e7f513886fcd501a8789ec5bf3fa936cbc04650a28229",
+      "text": "异步确定瓦片内指定经纬度处是否存在要素，以及存在哪些要素。"
+    },
+    {
+      "id": "UrlTemplateImageryProvider#pickFeatures",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:e0555bae727942fed5fe3bcabdaa6099e9e3b98b842656ef0051c9197f39a340",
+      "text": "异步拾取完成后兑现的 Promise，兑现结果为 {@link ImageryLayerFeatureInfo} 实例数组。指定位置未找到要素时，数组可为空。若不支持拾取，也可能返回 undefined。"
+    },
+    {
+      "id": "UrlTemplateImageryProvider#pickFeaturesUrl",
+      "field": "description",
+      "sourceHash": "sha256:e57fc3e6a087924e380198c396b0002477ee51eab79b061a617bb21d1bd08a10",
+      "text": "获取用于拾取要素的 URL 模板。未指定此属性时，{@link UrlTemplateImageryProvider#pickFeatures} 会立即返回 undefined，表示未拾取到要素。该 URL 模板支持 {@link UrlTemplateImageryProvider#url} 属性支持的所有关键字，以及以下关键字：\n<ul>\n    <li><code>{i}</code>：拾取位置的像素列（水平坐标），最西侧像素为 0。</li>\n    <li><code>{j}</code>：拾取位置的像素行（垂直坐标），最北侧像素为 0。</li>\n    <li><code>{reverseI}</code>：拾取位置的像素列（水平坐标），最东侧像素为 0。</li>\n    <li><code>{reverseJ}</code>：拾取位置的像素行（垂直坐标），最南侧像素为 0。</li>\n    <li><code>{longitudeDegrees}</code>：拾取位置的经度，单位为度。</li>\n    <li><code>{latitudeDegrees}</code>：拾取位置的纬度，单位为度。</li>\n    <li><code>{longitudeProjected}</code>：拾取位置在瓦片划分方案投影坐标系中的经度坐标。</li>\n    <li><code>{latitudeProjected}</code>：拾取位置在瓦片划分方案投影坐标系中的纬度坐标。</li>\n    <li><code>{format}</code>：获取要素信息所用的格式，由 {@link GetFeatureInfoFormat} 指定。</li>\n</ul>"
+    },
+    {
+      "id": "UrlTemplateImageryProvider#rectangle",
+      "field": "description",
+      "sourceHash": "sha256:091c1a3d4f13ed7dc2a0b0675f7a3e3779d275be1d9f6684f9a2183da9f0e36a",
+      "text": "获取此实例所提供影像的弧度矩形范围。"
+    },
+    {
+      "id": "UrlTemplateImageryProvider#requestImage",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:1da8470d5e3428259b91d645dce869c8bd335c2d0e84dcfc487ba2dfc65f0d26",
+      "text": "图像可用时兑现的 Promise；若服务器活动请求过多，则返回 undefined，表示应稍后重试。"
+    },
+    {
+      "id": "UrlTemplateImageryProvider#tileDiscardPolicy",
+      "field": "description",
+      "sourceHash": "sha256:d436e40b3239a33f8c07780a55528e392ee49f037f05a65c09722f8cbb51f7be",
+      "text": "获取瓦片丢弃策略。若不为 undefined，策略通过 shouldDiscardImage 过滤“缺失”瓦片；若此属性为 undefined，则不过滤任何瓦片。"
+    },
+    {
+      "id": "UrlTemplateImageryProvider#url",
+      "field": "description",
+      "sourceHash": "sha256:bd8c64b440b56573706171d2fc5909fdbde97332f3911381f6b50577809233ae",
+      "text": "获取用于请求瓦片的 URL 模板。支持以下关键字：\n<ul>\n <li> <code>{z}</code>：瓦片在划分方案中的层级。第 0 级是四叉树金字塔的根。</li>\n <li> <code>{x}</code>：瓦片在划分方案中的 X 坐标，最西侧瓦片为 0。</li>\n <li> <code>{y}</code>：瓦片在划分方案中的 Y 坐标，最北侧瓦片为 0。</li>\n <li> <code>{s}</code>：可用子域名之一，用于绕过浏览器对每个主机并发请求数量的限制。</li>\n <li> <code>{reverseX}</code>：瓦片在划分方案中的 X 坐标，最东侧瓦片为 0。</li>\n <li> <code>{reverseY}</code>：瓦片在划分方案中的 Y 坐标，最南侧瓦片为 0。</li>\n <li> <code>{reverseZ}</code>：瓦片在划分方案中的反向层级，第 0 级对应四叉树金字塔的最高层级。使用 reverseZ 时，必须定义 maximumLevel。</li>\n <li> <code>{westDegrees}</code>：瓦片西边界的大地经度，单位为度。</li>\n <li> <code>{southDegrees}</code>：瓦片南边界的大地纬度，单位为度。</li>\n <li> <code>{eastDegrees}</code>：瓦片东边界的大地经度，单位为度。</li>\n <li> <code>{northDegrees}</code>：瓦片北边界的大地纬度，单位为度。</li>\n <li> <code>{westProjected}</code>：瓦片西边界在划分方案投影坐标系中的坐标。</li>\n <li> <code>{southProjected}</code>：瓦片南边界在划分方案投影坐标系中的坐标。</li>\n <li> <code>{eastProjected}</code>：瓦片东边界在划分方案投影坐标系中的坐标。</li>\n <li> <code>{northProjected}</code>：瓦片北边界在划分方案投影坐标系中的坐标。</li>\n <li> <code>{width}</code>：每张瓦片的宽度，单位为像素。</li>\n <li> <code>{height}</code>：每张瓦片的高度，单位为像素。</li>\n</ul>"
+    },
+    {
+      "id": "UrlTemplateImageryProvider#urlSchemeZeroPadding",
+      "field": "description",
+      "sourceHash": "sha256:5127c796c9d6dd5ee387647422c32a1b2081dea382a0434a8ad1a32f3e383ca8",
+      "text": "获取瓦片各坐标在 URL 模板中的左侧补零配置。格式为 '000'，每个坐标都会在左侧补零，直至达到指定零字符串的长度。例如设置 urlSchemeZeroPadding : { '{x}' : '0000'} 后，x 为 12 时，生成的 URL 会将 {x} 替换为 '0012'。支持以下关键字：\n<ul>\n <li> <code>{z}</code>：瓦片层级的补零配置。</li>\n <li> <code>{x}</code>：瓦片 X 坐标的补零配置。</li>\n <li> <code>{y}</code>：瓦片 Y 坐标的补零配置。</li>\n <li> <code>{reverseX}</code>：瓦片反向 X 坐标的补零配置。</li>\n <li> <code>{reverseY}</code>：瓦片反向 Y 坐标的补零配置。</li>\n <li> <code>{reverseZ}</code>：瓦片反向层级的补零配置。</li>\n</ul>"
+    },
+    {
+      "id": "WebMapServiceImageryProvider.ConstructorOptions",
+      "field": "description",
+      "sourceHash": "sha256:705e287ea23a823d69185dc8c5808c738bf0d62fe07452d813063c7478a5ad1f",
+      "text": "WebMapServiceImageryProvider 构造函数的初始化选项。"
+    },
+    {
+      "id": "WebMapServiceImageryProvider.ConstructorOptions",
+      "field": "properties/clock/description",
+      "sourceHash": "sha256:8ac202f251d0f7fa79537c832707a17d26c3b17e36e5410cc1d180073aac80bf",
+      "text": "确定时间维度取值所用的 Clock 实例。指定 `times` 时必填。"
+    },
+    {
+      "id": "WebMapServiceImageryProvider.ConstructorOptions",
+      "field": "properties/crs/description",
+      "sourceHash": "sha256:a21f486a153be143c597dc09bc20b3b0d680f0e5fe4be025b249671b16d769d6",
+      "text": "CRS 标识，适用于 WMS 1.3.0 及更高版本。"
+    },
+    {
+      "id": "WebMapServiceImageryProvider.ConstructorOptions",
+      "field": "properties/ellipsoid/description",
+      "sourceHash": "sha256:29612364f63a8ae99d91a55dc7bc2523e41674afedf47362857a64e82b6fcc20",
+      "text": "椭球。如果指定了 tilingScheme，则忽略此参数，使用瓦片划分方案的椭球。如果两者均未指定，则使用 WGS84 椭球。"
+    },
+    {
+      "id": "WebMapServiceImageryProvider.ConstructorOptions",
+      "field": "properties/enablePickFeatures/description",
+      "sourceHash": "sha256:c26e084c23670395ecf50562dd1a6eb054d79a4bc1c09ab0c666d4ddf8e2b0f2",
+      "text": "为 true 时，{@link WebMapServiceImageryProvider#pickFeatures} 会调用 WMS 服务器的 GetFeatureInfo 操作，并返回响应中的要素。为 false 时，{@link WebMapServiceImageryProvider#pickFeatures} 会立即返回 undefined，表示没有可拾取的要素，且不会与服务器通信。如果已知 WMS 服务器不支持 GetFeatureInfo，或不希望此提供者的要素可被拾取，可设为 false。可通过修改 WebMapServiceImageryProvider#enablePickFeatures 属性动态覆盖此选项。"
+    },
+    {
+      "id": "WebMapServiceImageryProvider.ConstructorOptions",
+      "field": "properties/getFeatureInfoFormats/description",
+      "sourceHash": "sha256:1e3e7c90dec8a3f0c167ce546c8fbd26cd76dd83142d6d62c3b05a4dbcb9fe4c",
+      "text": "尝试 WMS GetFeatureInfo 请求时所用的格式。"
+    },
+    {
+      "id": "WebMapServiceImageryProvider.ConstructorOptions",
+      "field": "properties/getFeatureInfoParameters/description",
+      "sourceHash": "sha256:47d4404988013d70d3e6ef5f4602ba7e72036dd418af1949ad8fc7992f0aebf1",
+      "text": "在 GetFeatureInfo URL 中传递给 WMS 服务器的附加参数。"
+    },
+    {
+      "id": "WebMapServiceImageryProvider.ConstructorOptions",
+      "field": "properties/getFeatureInfoUrl/description",
+      "sourceHash": "sha256:8902ba0e5e5b2eb16bdeba46bfd4c737ba0a51444a82b1838f2f2a54e425b7a1",
+      "text": "WMS 服务的 getFeatureInfo URL。未定义此属性时，使用 url 属性的值。"
+    },
+    {
+      "id": "WebMapServiceImageryProvider.ConstructorOptions",
+      "field": "properties/layers/description",
+      "sourceHash": "sha256:91958c7098bc3fb2d88d6773dc5a6d7b52aaf422df7bc6c97a719d64987d04a0",
+      "text": "需要包含的图层，以逗号分隔。"
+    },
+    {
+      "id": "WebMapServiceImageryProvider.ConstructorOptions",
+      "field": "properties/maximumLevel/description",
+      "sourceHash": "sha256:e1c559fddf501dd558b508f5c4730ba7ac2c847c00a7988061f96abb1bf974d5",
+      "text": "影像提供者支持的最高细节层级；若无限制，则为 undefined。未指定时不设上限。"
+    },
+    {
+      "id": "WebMapServiceImageryProvider.ConstructorOptions",
+      "field": "properties/minimumLevel/description",
+      "sourceHash": "sha256:f2c5d79a6cb5bb182bb9905a225ba5b213ec517155fe59a0ed6c8caa4a9444dd",
+      "text": "影像提供者支持的最低细节层级。指定时应确保该层级的瓦片数量较少，例如不超过四张；瓦片过多可能导致渲染问题。"
+    },
+    {
+      "id": "WebMapServiceImageryProvider.ConstructorOptions",
+      "field": "properties/parameters/description",
+      "sourceHash": "sha256:79247308313a25ec040dbaf6c3781aaeac148d1a8fb0fe3ea7247d0003c22a47",
+      "text": "在 GetMap URL 中传递给 WMS 服务器的附加参数。"
+    },
+    {
+      "id": "WebMapServiceImageryProvider.ConstructorOptions",
+      "field": "properties/rectangle/description",
+      "sourceHash": "sha256:0650c3c5fcbe0ae03f0009e2a7e77dd236eac71d5e02777baf7f57b75b7a1009",
+      "text": "图层覆盖的矩形范围。"
+    },
+    {
+      "id": "WebMapServiceImageryProvider.ConstructorOptions",
+      "field": "properties/srs/description",
+      "sourceHash": "sha256:b13800520e2b906d513a3a91dd9eaea39e067f3c30a7bc8e629e827972709f53",
+      "text": "SRS 标识，适用于 WMS 1.1.0 或 1.1.1。"
+    },
+    {
+      "id": "WebMapServiceImageryProvider.ConstructorOptions",
+      "field": "properties/subdomains/description",
+      "sourceHash": "sha256:00dbf5e8a9c146372624fee49fc58f3f703527d120f0350a1ed916f2adaf29a0",
+      "text": "URL 模板中 <code>{s}</code> 占位符所用的子域名。若此参数为字符串，则每个字符都是一个子域名；若为数组，则每个元素都是一个子域名。"
+    },
+    {
+      "id": "WebMapServiceImageryProvider.ConstructorOptions",
+      "field": "properties/tileHeight/description",
+      "sourceHash": "sha256:46645d38093c2ea67588e65a4b50834b874b8493ccbe2a775f1e05731395f19d",
+      "text": "各瓦片的像素高度。"
+    },
+    {
+      "id": "WebMapServiceImageryProvider.ConstructorOptions",
+      "field": "properties/tileWidth/description",
+      "sourceHash": "sha256:5ebafdd128715416a89bdd3a1fcb268f22f7c9143d7a4db34a6a42cdaaa266a6",
+      "text": "各瓦片的像素宽度。"
+    },
+    {
+      "id": "WebMapServiceImageryProvider.ConstructorOptions",
+      "field": "properties/tilingScheme/description",
+      "sourceHash": "sha256:c8c0400da496d1af7ba6daef32185332f1556b53c77b30fa864cbf7166b5ce4b",
+      "text": "用于将世界划分为瓦片的方案。"
+    },
+    {
+      "id": "WebMapServiceImageryProvider.ConstructorOptions",
+      "field": "properties/times/description",
+      "sourceHash": "sha256:9bf0a48c9b24fc52cf24ad9a5fa89c974746bcead0254bd3e1dd41858459e556",
+      "text": "TimeIntervalCollection，各时间区间的 data 属性为包含随时间变化的维度及其取值的对象。"
+    },
+    {
+      "id": "WebMapServiceImageryProvider.ConstructorOptions",
+      "field": "properties/url/description",
+      "sourceHash": "sha256:949dac26017df500167d64598cb40ecbd322e584456d934411ab560301b50a57",
+      "text": "WMS 服务的 URL，支持与 {@link UrlTemplateImageryProvider} 相同的关键字。"
+    },
+    {
+      "id": "WebMapServiceImageryProvider.DefaultParameters",
+      "field": "description",
+      "sourceHash": "sha256:f8ba148fc97f6693ac0bbb2a3d3afc2bca2a13274eff11272bf525aae4bcb5dc",
+      "text": "在 WMS URL 中用于获取影像的默认参数。取值如下：\n   service=WMS\n   version=1.1.1\n   request=GetMap\n   styles=\n   format=image/jpeg"
+    },
+    {
+      "id": "WebMapServiceImageryProvider.GetFeatureInfoDefaultParameters",
+      "field": "description",
+      "sourceHash": "sha256:0079ecd893f8616d7552fa8716f0df8fc6433b06ed296995e0164ed948726986",
+      "text": "在 WMS URL 中用于获取要素信息的默认参数。取值如下：\n    service=WMS\n    version=1.1.1\n    request=GetFeatureInfo"
+    },
+    {
+      "id": "WebMapServiceImageryProvider",
+      "field": "description",
+      "sourceHash": "sha256:bd7b323046d587efc1c4acf4230c4f4fd32991ab31a54795beb3c9277e357987",
+      "text": "提供由 Web Map Service（WMS）服务器托管的瓦片影像。"
+    },
+    {
+      "id": "WebMapServiceImageryProvider#clock",
+      "field": "description",
+      "sourceHash": "sha256:82dcc2e510eeca69c2160197f024d3f032b1415ade32fa59b8d8312ccef12c71",
+      "text": "获取或设置用于跟踪动态时间参数所用时间的时钟。"
+    },
+    {
+      "id": "WebMapServiceImageryProvider#enablePickFeatures",
+      "field": "description",
+      "sourceHash": "sha256:0b247bbe95089bcaf0e40aa6d364a67ba7ee9208b57cf231ed0dd0c9e9bdafab",
+      "text": "获取或设置是否启用要素拾取。为 true 时，{@link WebMapServiceImageryProvider#pickFeatures} 会调用 WMS 服务器的 <code>GetFeatureInfo</code> 服务，并尝试解析响应中的要素。为 false 时，{@link WebMapServiceImageryProvider#pickFeatures} 会立即返回 undefined，表示没有可拾取的要素，且不会与服务器通信。如果已知数据源不支持要素拾取，或不希望此提供者的要素可被拾取，可将该属性设为 false。"
+    },
+    {
+      "id": "WebMapServiceImageryProvider#errorEvent",
+      "field": "description",
+      "sourceHash": "sha256:168588b191e452d1f54f99328d58f42f85709ab2e2ea5a765f7e9008a2a3e6b7",
+      "text": "获取影像提供者发生异步错误时触发的事件。订阅者可收到错误通知并尝试恢复。事件监听器接收 {@link TileProviderError} 实例。"
+    },
+    {
+      "id": "WebMapServiceImageryProvider#getFeatureInfoUrl",
+      "field": "description",
+      "sourceHash": "sha256:056de9117712c24c783a7f41ceabc7349ff3f17480e405d1ac41902f86e72429",
+      "text": "获取 WMS 服务器的 getFeatureInfo URL。"
+    },
+    {
+      "id": "WebMapServiceImageryProvider#hasAlphaChannel",
+      "field": "description",
+      "sourceHash": "sha256:e3870c86bd94659a564595da867428a487ceb32cd34fc169bfbea2d25a4f6705",
+      "text": "获取影像提供者所提供图像是否包含 alpha 通道。为 false 时，即使存在 alpha 也会忽略；为 true 时，无 alpha 通道的图像按所有位置 alpha 为 1.0 处理。设为 false 可降低内存占用及纹理上传时间。"
+    },
+    {
+      "id": "WebMapServiceImageryProvider#layers",
+      "field": "description",
+      "sourceHash": "sha256:981cf41d2616b91b7a6f07d0b7bde43d49d623f1302ebef4322b4c7d0a8a91b2",
+      "text": "获取 WMS 图层名称，以逗号分隔。"
+    },
+    {
+      "id": "WebMapServiceImageryProvider#minimumLevel",
+      "field": "description",
+      "sourceHash": "sha256:4a78868596bc8fe408c9db7aa6d4d98dc6f3a23b133abcecdfc614421b205ae5",
+      "text": "获取可请求的最小细节级别。"
+    },
+    {
+      "id": "WebMapServiceImageryProvider#pickFeatures",
+      "field": "description",
+      "sourceHash": "sha256:1cd4682517e270ce652e7f513886fcd501a8789ec5bf3fa936cbc04650a28229",
+      "text": "异步确定瓦片内指定经纬度处是否存在要素，以及存在哪些要素。"
+    },
+    {
+      "id": "WebMapServiceImageryProvider#pickFeatures",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:45cb2fc46acf812a6444f6e38d5e207f45a3b173b644278d56947186d36db733",
+      "text": "异步拾取完成后兑现的 Promise，兑现结果为 {@link ImageryLayerFeatureInfo} 实例数组。指定位置未找到要素时，数组可为空。"
+    },
+    {
+      "id": "WebMapServiceImageryProvider#rectangle",
+      "field": "description",
+      "sourceHash": "sha256:091c1a3d4f13ed7dc2a0b0675f7a3e3779d275be1d9f6684f9a2183da9f0e36a",
+      "text": "获取此实例所提供影像的弧度矩形范围。"
+    },
+    {
+      "id": "WebMapServiceImageryProvider#requestImage",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:1da8470d5e3428259b91d645dce869c8bd335c2d0e84dcfc487ba2dfc65f0d26",
+      "text": "图像可用时兑现的 Promise；若服务器活动请求过多，则返回 undefined，表示应稍后重试。"
+    },
+    {
+      "id": "WebMapServiceImageryProvider#tileDiscardPolicy",
+      "field": "description",
+      "sourceHash": "sha256:d436e40b3239a33f8c07780a55528e392ee49f037f05a65c09722f8cbb51f7be",
+      "text": "获取瓦片丢弃策略。若不为 undefined，策略通过 shouldDiscardImage 过滤“缺失”瓦片；若此属性为 undefined，则不过滤任何瓦片。"
+    },
+    {
+      "id": "WebMapServiceImageryProvider#times",
+      "field": "description",
+      "sourceHash": "sha256:599344d9897e94dc1e6814c1c23d17e78f28a93560777d655b2b15fdd6fb2c6e",
+      "text": "获取或设置用于取得动态时间参数的时间区间集合。每个 TimeInterval 的 data 为一个对象，包含瓦片请求所用属性的键和值。"
+    },
+    {
+      "id": "WebMapServiceImageryProvider#url",
+      "field": "description",
+      "sourceHash": "sha256:a516b2b4f58791d716947fd7531a1e2c467e58201a518cac3933cd741ca738c0",
+      "text": "获取 WMS 服务器的 URL。"
+    },
+    {
+      "id": "WebMapTileServiceImageryProvider.ConstructorOptions",
+      "field": "description",
+      "sourceHash": "sha256:bd8283f61184a8a065d26c775e711d62ea49b6acabf93fbad05249c39efe29bf",
+      "text": "WebMapTileServiceImageryProvider 构造函数的初始化选项。"
+    },
+    {
+      "id": "WebMapTileServiceImageryProvider.ConstructorOptions",
+      "field": "properties/clock/description",
+      "sourceHash": "sha256:8ac202f251d0f7fa79537c832707a17d26c3b17e36e5410cc1d180073aac80bf",
+      "text": "确定时间维度取值所用的 Clock 实例。指定 `times` 时必填。"
+    },
+    {
+      "id": "WebMapTileServiceImageryProvider.ConstructorOptions",
+      "field": "properties/dimensions/description",
+      "sourceHash": "sha256:267efd3671a2a1b14990d10354f1bc80109d6e688bec070c6f34eb8ad3e7dc12",
+      "text": "包含静态维度及其取值的对象。"
+    },
+    {
+      "id": "WebMapTileServiceImageryProvider.ConstructorOptions",
+      "field": "properties/ellipsoid/description",
+      "sourceHash": "sha256:f68c467c4351c3294b803bfec4083ca2e3dd9b3597bced00dcab1ddf8d5e4556",
+      "text": "椭球。若未指定，则使用 WGS84 椭球。"
+    },
+    {
+      "id": "WebMapTileServiceImageryProvider.ConstructorOptions",
+      "field": "properties/enablePickFeatures/description",
+      "sourceHash": "sha256:0ac9a100ae0c92385a6acd6548ed8a6a7c50e8267f15c9cd533f2119519e3cb3",
+      "text": "为 true 时，{@link WebMapTileServiceImageryProvider#pickFeatures} 会调用 WMTS 服务器的 GetFeatureInfo 操作，并返回响应中的要素。为 false 时，{@link WebMapTileServiceImageryProvider#pickFeatures} 会立即返回 undefined，表示没有可拾取的要素，且不会与服务器通信。如果已知 WMTS 服务器不支持 GetFeatureInfo，或不希望此提供者的要素可被拾取，可设为 false。对于 KVP 编码，默认值为 true；对于 RESTful 编码，仅在指定 {@link WebMapTileServiceImageryProvider.ConstructorOptions#getFeatureInfoUrl} 时默认为 true，否则为 false。"
+    },
+    {
+      "id": "WebMapTileServiceImageryProvider.ConstructorOptions",
+      "field": "properties/format/description",
+      "sourceHash": "sha256:672fa7b1c11001a62b4f76703cf5f56e938e2c2d76e601346bd28e173dd89387",
+      "text": "从服务器获取的影像的 MIME 类型。"
+    },
+    {
+      "id": "WebMapTileServiceImageryProvider.ConstructorOptions",
+      "field": "properties/getFeatureInfoFormats/description",
+      "sourceHash": "sha256:e3d297cc3d66e9071abe730b5382fba696a4ee599f1ef3c4fde14986d436c78f",
+      "text": "尝试 WMTS GetFeatureInfo 请求时所用的格式。"
+    },
+    {
+      "id": "WebMapTileServiceImageryProvider.ConstructorOptions",
+      "field": "properties/getFeatureInfoParameters/description",
+      "sourceHash": "sha256:8c9a422c7ce725d298a583f85d380dc593c29cd2e47de94c1da16b901365569b",
+      "text": "GetFeatureInfo 请求的附加参数。键在内部会转换为小写。"
+    },
+    {
+      "id": "WebMapTileServiceImageryProvider.ConstructorOptions",
+      "field": "properties/getFeatureInfoUrl/description",
+      "sourceHash": "sha256:c06ae24ae4d0a29a2f4693bee53c5ddc63ab47e826405cd0a8e4b833f1ad057b",
+      "text": "WMTS 服务的 GetFeatureInfo URL。未指定时，使用 <code>url</code> 的值。"
+    },
+    {
+      "id": "WebMapTileServiceImageryProvider.ConstructorOptions",
+      "field": "properties/layer/description",
+      "sourceHash": "sha256:997e906e8111aa3df8d527bdc0148056742af8629cde0cf2fa03958830ee9248",
+      "text": "WMTS 请求的图层名称。"
+    },
+    {
+      "id": "WebMapTileServiceImageryProvider.ConstructorOptions",
+      "field": "properties/maximumLevel/description",
+      "sourceHash": "sha256:b6a477b331cdd9f15653425957c3152328dcffd314767385499790f0d956dda6",
+      "text": "影像提供者支持的最大细节级别；为 undefined 时不设上限。"
+    },
+    {
+      "id": "WebMapTileServiceImageryProvider.ConstructorOptions",
+      "field": "properties/minimumLevel/description",
+      "sourceHash": "sha256:f04718a0a7e55be4c132ca71c16c6ca107b3b5e35477ce2e02add44be7dfd29a",
+      "text": "影像提供者支持的最低细节层级。"
+    },
+    {
+      "id": "WebMapTileServiceImageryProvider.ConstructorOptions",
+      "field": "properties/rectangle/description",
+      "sourceHash": "sha256:496d481b812e029b0bf29e3da91de6674680712318899a3b609821c382552f67",
+      "text": "图层覆盖的矩形范围。"
+    },
+    {
+      "id": "WebMapTileServiceImageryProvider.ConstructorOptions",
+      "field": "properties/style/description",
+      "sourceHash": "sha256:e3e29507ead1c91d783ab889d0e7487cc541922a78c9672ae8bde9beb325cef9",
+      "text": "WMTS 请求的样式名称。"
+    },
+    {
+      "id": "WebMapTileServiceImageryProvider.ConstructorOptions",
+      "field": "properties/subdomains/description",
+      "sourceHash": "sha256:00dbf5e8a9c146372624fee49fc58f3f703527d120f0350a1ed916f2adaf29a0",
+      "text": "URL 模板中 <code>{s}</code> 占位符所用的子域名。若此参数为字符串，则每个字符都是一个子域名；若为数组，则每个元素都是一个子域名。"
+    },
+    {
+      "id": "WebMapTileServiceImageryProvider.ConstructorOptions",
+      "field": "properties/tileHeight/description",
+      "sourceHash": "sha256:9b9e7c98faf873e1ce4e764dc7d454bb8f8bdbc0196268639d1f746ba5d9013f",
+      "text": "瓦片高度，单位为像素。"
+    },
+    {
+      "id": "WebMapTileServiceImageryProvider.ConstructorOptions",
+      "field": "properties/tileMatrixLabels/description",
+      "sourceHash": "sha256:24ab4782c80ad9a8829778c2ebad840ff4b3fd05337e37799525aad9432b0604",
+      "text": "WMTS 请求使用的 TileMatrix 标识列表，每个 TileMatrix 层级对应一个标识。"
+    },
+    {
+      "id": "WebMapTileServiceImageryProvider.ConstructorOptions",
+      "field": "properties/tileMatrixSetID/description",
+      "sourceHash": "sha256:445d27ec045f6e97c2b3f1650c80f6ed9d12c5e53b12748b7c02134ad283ede5",
+      "text": "WMTS 请求使用的 TileMatrixSet 标识。"
+    },
+    {
+      "id": "WebMapTileServiceImageryProvider.ConstructorOptions",
+      "field": "properties/tileWidth/description",
+      "sourceHash": "sha256:da638e5293153aa7ebd2273c92b6c58abdeaa797a92dee7753cd3470a635d7cc",
+      "text": "瓦片宽度，单位为像素。"
+    },
+    {
+      "id": "WebMapTileServiceImageryProvider.ConstructorOptions",
+      "field": "properties/tilingScheme/description",
+      "sourceHash": "sha256:8bfb19c2af99626b210c2b4445fce3e89f6fa7909e8b56cd2d285e0dbc9644c0",
+      "text": "与 TileMatrixSet 中瓦片组织方式对应的划分方案。"
+    },
+    {
+      "id": "WebMapTileServiceImageryProvider.ConstructorOptions",
+      "field": "properties/times/description",
+      "sourceHash": "sha256:95c43590ca492795765d1db6804b653d4cedf2f917538a89d00a8948cbf20ccb",
+      "text": "TimeIntervalCollection，各时间区间的 <code>data</code> 属性为包含随时间变化的维度及其取值的对象。"
+    },
+    {
+      "id": "WebMapTileServiceImageryProvider.ConstructorOptions",
+      "field": "properties/url/description",
+      "sourceHash": "sha256:939122972001cef702da3b63eadfc5283fcc2e005e44d56a5212cae2b12c60b0",
+      "text": "WMTS GetTile 操作的基准 URL（用于 KVP 编码请求），或瓦片 URL 模板（用于 RESTful 请求）。瓦片 URL 模板应包含以下变量：&#123;style&#125;、&#123;TileMatrixSet&#125;、&#123;TileMatrix&#125;、&#123;TileRow&#125;、&#123;TileCol&#125;。若已将实际值写入 URL，或服务器不要求这些值，则前两个变量可省略。可使用 &#123;s&#125; 关键字指定子域名。"
+    },
+    {
+      "id": "WebMapTileServiceImageryProvider.DefaultParameters",
+      "field": "description",
+      "sourceHash": "sha256:d83913ee14b68f5f594a2c65115c0267ae29c9307fa7bd4dcf61f7b1449896df",
+      "text": "在 WMTS URL 中用于获取影像的默认参数。取值如下：\n   service=WMTS\n   version=1.0.0\n   request=GetTile"
+    },
+    {
+      "id": "WebMapTileServiceImageryProvider.GetFeatureInfoDefaultParameters",
+      "field": "description",
+      "sourceHash": "sha256:92ec5e7b82fc463a2e07f8f6fc6b682d9c1ae937ae78fbf027cfb2e6e783848b",
+      "text": "在 WMTS URL 中用于获取要素信息的默认参数。取值如下：\n    service=WMTS\n    version=1.0.0\n    request=GetFeatureInfo"
+    },
+    {
+      "id": "WebMapTileServiceImageryProvider",
+      "field": "description",
+      "sourceHash": "sha256:6d2cf7d2f34f77a95b45c8756766d79bf7ee97212cf9d89fb5dc8dff0a335dde",
+      "text": "提供符合 {@link http://www.opengeospatial.org/standards/wmts|WMTS 1.0.0} 的服务器所提供的瓦片影像。支持 HTTP KVP 编码和 RESTful GetTile 请求，尚不支持 SOAP 编码。"
+    },
+    {
+      "id": "WebMapTileServiceImageryProvider#clock",
+      "field": "description",
+      "sourceHash": "sha256:82dcc2e510eeca69c2160197f024d3f032b1415ade32fa59b8d8312ccef12c71",
+      "text": "获取或设置用于跟踪动态时间参数所用时间的时钟。"
+    },
+    {
+      "id": "WebMapTileServiceImageryProvider#dimensions",
+      "field": "description",
+      "sourceHash": "sha256:145308a7bdeb8fabe79a0e8130c3f492d96a9b2e770274f9613f244d16524c1d",
+      "text": "获取或设置包含静态维度及其取值的对象。"
+    },
+    {
+      "id": "WebMapTileServiceImageryProvider#enablePickFeatures",
+      "field": "description",
+      "sourceHash": "sha256:7208167de79ddf3561a3d5776e6fdeb0d412b1327174081cfa7d703da65df3b8",
+      "text": "获取或设置是否启用要素拾取。为 true 时，{@link WebMapTileServiceImageryProvider#pickFeatures} 会调用 WMTS 服务器的 <code>GetFeatureInfo</code> 服务，并尝试解析响应中的要素。为 false 时，{@link WebMapTileServiceImageryProvider#pickFeatures} 会立即返回 undefined，表示没有可拾取的要素，且不会与服务器通信。如果已知数据源不支持要素拾取，或不希望此提供者的要素可被拾取，可将该属性设为 false。对于 KVP 编码，默认值为 true；对于 RESTful 编码，仅在指定 {@link WebMapTileServiceImageryProvider.ConstructorOptions#getFeatureInfoUrl} 时默认为 true，否则为 false。"
+    },
+    {
+      "id": "WebMapTileServiceImageryProvider#errorEvent",
+      "field": "description",
+      "sourceHash": "sha256:168588b191e452d1f54f99328d58f42f85709ab2e2ea5a765f7e9008a2a3e6b7",
+      "text": "获取影像提供者发生异步错误时触发的事件。订阅者可收到错误通知并尝试恢复。事件监听器接收 {@link TileProviderError} 实例。"
+    },
+    {
+      "id": "WebMapTileServiceImageryProvider#format",
+      "field": "description",
+      "sourceHash": "sha256:9be5ced264d7c0510ab420844f7a8bc2c06eae4c738ac8ae860c1d0bb5c99444",
+      "text": "获取此影像提供者返回的图像的 MIME 类型。"
+    },
+    {
+      "id": "WebMapTileServiceImageryProvider#getFeatureInfoUrl",
+      "field": "description",
+      "sourceHash": "sha256:f18e56fd854bbc8c0c96313c28365b12d22c26fe4e8a720d44d419e49b2fa01b",
+      "text": "获取 WMTS 服务器的 getFeatureInfo URL。"
+    },
+    {
+      "id": "WebMapTileServiceImageryProvider#hasAlphaChannel",
+      "field": "description",
+      "sourceHash": "sha256:e3870c86bd94659a564595da867428a487ceb32cd34fc169bfbea2d25a4f6705",
+      "text": "获取影像提供者所提供图像是否包含 alpha 通道。为 false 时，即使存在 alpha 也会忽略；为 true 时，无 alpha 通道的图像按所有位置 alpha 为 1.0 处理。设为 false 可降低内存占用及纹理上传时间。"
+    },
+    {
+      "id": "WebMapTileServiceImageryProvider#minimumLevel",
+      "field": "description",
+      "sourceHash": "sha256:4a78868596bc8fe408c9db7aa6d4d98dc6f3a23b133abcecdfc614421b205ae5",
+      "text": "获取可请求的最小细节级别。"
+    },
+    {
+      "id": "WebMapTileServiceImageryProvider#pickFeatures",
+      "field": "description",
+      "sourceHash": "sha256:1cd4682517e270ce652e7f513886fcd501a8789ec5bf3fa936cbc04650a28229",
+      "text": "异步确定瓦片内指定经纬度处是否存在要素，以及存在哪些要素。"
+    },
+    {
+      "id": "WebMapTileServiceImageryProvider#pickFeatures",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:45cb2fc46acf812a6444f6e38d5e207f45a3b173b644278d56947186d36db733",
+      "text": "异步拾取完成后兑现的 Promise，兑现结果为 {@link ImageryLayerFeatureInfo} 实例数组。指定位置未找到要素时，数组可为空。"
+    },
+    {
+      "id": "WebMapTileServiceImageryProvider#rectangle",
+      "field": "description",
+      "sourceHash": "sha256:091c1a3d4f13ed7dc2a0b0675f7a3e3779d275be1d9f6684f9a2183da9f0e36a",
+      "text": "获取此实例所提供影像的弧度矩形范围。"
+    },
+    {
+      "id": "WebMapTileServiceImageryProvider#requestImage",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:1da8470d5e3428259b91d645dce869c8bd335c2d0e84dcfc487ba2dfc65f0d26",
+      "text": "图像可用时兑现的 Promise；若服务器活动请求过多，则返回 undefined，表示应稍后重试。"
+    },
+    {
+      "id": "WebMapTileServiceImageryProvider#tileDiscardPolicy",
+      "field": "description",
+      "sourceHash": "sha256:d436e40b3239a33f8c07780a55528e392ee49f037f05a65c09722f8cbb51f7be",
+      "text": "获取瓦片丢弃策略。若不为 undefined，策略通过 shouldDiscardImage 过滤“缺失”瓦片；若此属性为 undefined，则不过滤任何瓦片。"
+    },
+    {
+      "id": "WebMapTileServiceImageryProvider#times",
+      "field": "description",
+      "sourceHash": "sha256:599344d9897e94dc1e6814c1c23d17e78f28a93560777d655b2b15fdd6fb2c6e",
+      "text": "获取或设置用于取得动态时间参数的时间区间集合。每个 TimeInterval 的 data 为一个对象，包含瓦片请求所用属性的键和值。"
+    },
+    {
+      "id": "WebMapTileServiceImageryProvider#url",
+      "field": "description",
+      "sourceHash": "sha256:be7fe4337da9290bff0b220cba3ace9be877e146abc7b23e14718e257be268fc",
+      "text": "获取托管影像的服务 URL。"
+    }
+  ]
+}

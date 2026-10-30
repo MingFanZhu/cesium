@@ -50,6 +50,66 @@ const roots = new Set([
   "Plane",
   "IntersectionTests",
   "module:Math",
+  "Resource",
+  "IonResource",
+  "Request",
+  "RequestScheduler",
+  "RequestType",
+  "RequestState",
+  "Event",
+  "EventHelper",
+  "Clock",
+  "ClockViewModel",
+  "ClockRange",
+  "ClockStep",
+  "JulianDate",
+  "GregorianDate",
+  "LeapSecond",
+  "TimeStandard",
+  "TimeInterval",
+  "TimeIntervalCollection",
+  "MapProjection",
+  "GeographicProjection",
+  "WebMercatorProjection",
+  "TilingScheme",
+  "GeographicTilingScheme",
+  "WebMercatorTilingScheme",
+  "ImageryProvider",
+  "Terrain",
+  "TerrainProvider",
+  "TerrainData",
+  "HeightmapEncoding",
+  "ArcGisMapServerImageryProvider",
+  "ArcGISTiledElevationTerrainProvider",
+  "Azure2DImageryProvider",
+  "BingMapsImageryProvider",
+  "Cesium3DTilesTerrainData",
+  "Cesium3DTilesTerrainProvider",
+  "CesiumTerrainProvider",
+  "createWorldImageryAsync",
+  "createWorldTerrainAsync",
+  "CustomHeightmapTerrainProvider",
+  "EllipsoidTerrainProvider",
+  "Google2DImageryProvider",
+  "GoogleEarthEnterpriseImageryProvider",
+  "GoogleEarthEnterpriseTerrainData",
+  "GoogleEarthEnterpriseTerrainProvider",
+  "GridImageryProvider",
+  "HeightmapTerrainData",
+  "IonImageryProvider",
+  "MapboxImageryProvider",
+  "MapboxStyleImageryProvider",
+  "OpenStreetMapImageryProvider",
+  "QuantizedMeshTerrainData",
+  "sampleTerrain",
+  "sampleTerrainMostDetailed",
+  "SingleTileImageryProvider",
+  "TileCoordinatesImageryProvider",
+  "TileMapServiceImageryProvider",
+  "UrlTemplateImageryProvider",
+  "VRTheWorldTerrainProvider",
+  "WebMapServiceImageryProvider",
+  "WebMapTileServiceImageryProvider",
 ]);
 
 test("reviewed native API roots have complete source-bound prose translations", () => {
@@ -101,6 +161,54 @@ test("foundation prose preserves storage order, homogeneous coordinates and veri
   assert.match(
     lookup.get("Transforms.headingPitchRollToFixedFrame").description,
     /向上轴负向旋转/,
+  );
+});
+
+test("loading and time prose preserves scheduling, context, units and interval contracts", () => {
+  assert.match(
+    lookup.get("Resource#fetch").returns[0].description,
+    /返回 undefined/,
+  );
+  assert.match(lookup.get("Resource#fetch").description, /CORS/);
+  assert.match(
+    lookup.get("Resource#setTemplateValues").description,
+    /新值覆盖已有同名值/,
+  );
+  assert.match(
+    lookup.get("Resource#setTemplateValues").description,
+    /useAsDefault/,
+  );
+  assert.match(lookup.get("Terrain#ready").description, /地形提供者/);
+  assert.match(lookup.get("ImageryLayer#ready").description, /影像提供者/);
+  assert.match(
+    lookup.get("TerrainProvider.getRegularGridIndices").description,
+    /4,294,967,296/,
+  );
+  assert.match(
+    lookup.get("TerrainProvider.getRegularGridIndices").returns[0].description,
+    /顶点数量，而非缓冲区字节数/,
+  );
+  assert.match(lookup.get("JulianDate").classdesc, /国际原子时/);
+  assert.match(lookup.get("JulianDate.equalsEpsilon").description, /小于等于/);
+  assert.match(lookup.get("ClockStep.TICK_DEPENDENT").description, /固定步长/);
+  assert.match(
+    lookup.get("TimeIntervalCollection#addInterval").description,
+    /新区间的数据优先/,
+  );
+  assert.match(
+    lookup.get("sampleTerrainMostDetailed").returns[0].description,
+    /availability.*undefined.*拒绝/,
+  );
+  const childMask = (id) =>
+    lookup.get(id).params.find((p) => p.name === "options.childTileMask")
+      .description;
+  assert.match(
+    childMask("GoogleEarthEnterpriseTerrainData"),
+    /<td>2<\/td><td>4<\/td><td>东北<\/td>/,
+  );
+  assert.match(
+    childMask("QuantizedMeshTerrainData"),
+    /<td>2<\/td><td>4<\/td><td>西北<\/td>/,
   );
 });
 
