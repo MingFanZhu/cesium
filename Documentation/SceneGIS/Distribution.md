@@ -156,7 +156,8 @@ scripts/docs-i18n，不参与运行时打包。按原始符号 ID、字段与原
 每个 doclet.sourceLocale 标识原始语言：自有为 zh-CN，原生为 en-US。
 自有 doclet.i18n.sourceFields 列出直接维护的中文字段，不计入翻译缺失。
 原生 doclet.i18n.translatedFields/fallbackFields 列出翻译及保留英文的字段。
-原生翻译尚未全部完成：缺失及原文已变化的字段保留完整英文。
+当前源码对应的 15,294 个原生字段已全部覆盖，missing/stale/unused 均为零。
+其中纯数值和数学公式保持原文。以后新增或原文已变化的字段会保留英文，等待复核补齐。
 translation-source.json 与 translation-report.json 只含原生英文内容，每次构建覆盖生成，
 记录原文、覆盖、待复核和过期词条。翻译仅作用于自然语言和示例 caption，签名与代码不变。
 词条增补在引擎仓库执行，维护协议与候选提取命令记录在 `Documentation/i18n/README.md`；SDK 只消费发行物。
@@ -165,7 +166,7 @@ translation-source.json 与 translation-report.json 只含原生英文内容，�
 
 ```powershell
 npx gulp buildSceneGIS
-node --test scripts/docs-i18n/doclets.test.mjs scripts/scenegis/distribution.test.mjs scripts/scenegis/documentation.test.mjs scripts/scenegis/documentation-locales.test.mjs scripts/scenegis/documentation-source.test.mjs
+node --test scripts/docs-i18n/doclets.test.mjs scripts/scenegis/distribution.test.mjs scripts/scenegis/documentation.test.mjs scripts/scenegis/documentation-locales.test.mjs scripts/scenegis/documentation-source.test.mjs scripts/scenegis/documentation-translations.test.mjs
 npx playwright test -c scripts/scenegis/playwright.distribution.config.mjs
 ```
 

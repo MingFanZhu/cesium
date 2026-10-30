@@ -8,9 +8,9 @@
 | Status                 | `active`                                                                  |
 | Planning model         | `extension`                                                               |
 | Active extension plan  | [Distribution](plans/2026-10-29-extension.md)                             |
-| Current phase          | T9 completed; final delivery audit pending                                |
+| Current phase          | T10 audit found required reference/demo follow-up                         |
 | Active standalone plan | None; latest [Native batch](plans/2026-10-30-native-translation-batch.md) |
-| Active phase plan      | None; latest [T9](plans/2026-10-30-t9-specialized-translation.md)         |
+| Active phase plan      | None; latest [T10](plans/2026-10-30-t10-translation-delivery-audit.md)    |
 | Architecture contact   | Architecture Agent (current task)                                         |
 | Execution contact      | Execution Agent (current task)                                            |
 | Last updated           | 2026-10-30                                                                |
@@ -41,8 +41,8 @@ and committed as `05362428b6`; [C2](plans/2026-10-30-c2-chinese-edition.md) is
 
 All 73 owned API source files maintain Chinese prose directly. The 2,337 published owned
 fields include synthetic VERSION and bypass external translation. Native English comments
-remain intact; independent catalogs translate 14,584 of 15,294 native fields. The 710 remaining
-native fields retain English, with zero stale/unused entries. Each build overwrites source
+remain intact; independent catalogs cover all 15,294 native fields.
+Missing/stale/unused are all zero; pure numeric/formula descriptions remain literal. Each build overwrites source
 inventory/report without altering maintained catalogs. Historical bilingual delivery in
 [ADR-0206](../../Documentation/SceneGIS/Decisions/ADR-0206-documentation-localization.md) and
 [localization review](reviews/2026-10-30-localization.md) is superseded by C1/C2.
@@ -58,6 +58,14 @@ No upstream or runtime changes.
 [Asset directory correction](plans/2026-10-29-asset-directories.md): completed and
 [reviewed](reviews/2026-10-29-asset-directories.md). SGP-0074 filters directory entries in the
 shared asset stream. Rebuilt artifact has zero empty directories; 8 Node and 7 browser tests pass.
+
+## Delivery audit finding
+
+[T10](plans/2026-10-30-t10-translation-delivery-audit.md) completed the full artifact check:
+35 Node checks and 18 browser cases pass, including strict declarations, both Worlds and resources.
+Its [review](reviews/2026-10-30-t10-translation-delivery-audit.md) finds P1: see/demo prose is
+missing from the translation inventory. All 15,294 currently tracked fields are covered, but
+the continuous goal remains active pending T11 extraction/translation and final audit.
 
 ## Latest specialized phase
 
@@ -149,10 +157,9 @@ SDK consumes root api-doclets.json/api-index.json with output locale and per-sym
 sourceFields identify direct Chinese prose and translatedFields/fallbackFields identify native
 translation coverage. No locale discovery or duplicate English tree remains.
 
-Full build, strict declarations, 24 Node checks and eight browser cases pass, including root/nested
-resources, both Worlds, Chinese docs, name-only filtering, links and lifecycle. Native buildDocs
-also passes. [SDK guide](../../Documentation/SceneGIS/Distribution.md) and
+Full build, strict declarations, 35 Node checks and 18 browser cases pass, including root/nested
+resources, both Worlds, Chinese docs, name-only filtering, links and lifecycle.
+[SDK guide](../../Documentation/SceneGIS/Distribution.md) and
 [translation maintenance](../../Documentation/i18n/README.md) cover consumption and native updates.
-No SDK edits or upstream-owned files in C1/C2; inherited native JSDoc/lint warnings remain.
-The continuous native translation program is active. T1 is checkpointed as `7141d62015`; T2 is active and later phases
-will be elaborated after each reviewed local checkpoint. Final gate: zero missing/stale/unused.
+T1 through T9 are checkpointed. T10 found omitted see/demo prose; its open P1 requires T11.
+The continuous goal is active and must not close on the current tracked-field count alone.

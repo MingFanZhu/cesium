@@ -75,7 +75,10 @@ phases, each reviewed and committed before the next begins. No new runtime or ge
 - [T8 metadata/providers](2026-10-30-t8-metadata-provider-translation.md): completed and reviewed;
   572 new records complete 52 roots after T7 checkpoint. Checkpoint `1910049d45`.
 - [T9 specialized APIs](2026-10-30-t9-specialized-translation.md): completed and reviewed; 710 final
-  records complete 66 roots after T8 checkpoint. Final delivery audit follows its checkpoint.
+  records complete 66 roots after T8 checkpoint. Checkpoint `ffdb243c62`.
+- [T10 final audit](2026-10-30-t10-translation-delivery-audit.md): completed with required P1 follow-up; full branded
+  artifact, declaration/resource/browser checks pass. Inventory omits see/demo prose;
+  T11 will correct extraction/translation before the goal can close.
 - Remainder and final gate: cover every remaining native field, resolve changed/unused
   catalog records, and verify missing/stale/unused are all zero. Preserve semantic metadata,
   code, links and Chinese owned-source separation throughout.
