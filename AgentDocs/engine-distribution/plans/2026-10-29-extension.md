@@ -62,8 +62,9 @@ phases, each reviewed and committed before the next begins. No new runtime or ge
   coordinate/vector/matrix/color/bounds/math APIs add 2,107 fields, reaching 41.8% native coverage.
 - [T2 loading and time](2026-10-30-t2-loading-time-translation.md): active after T1 checkpoint
   `7141d62015`; 60 resource/time/terrain/provider roots with 1,699 missing fields.
-- T3 rendering and data: models, rendering options, data/property/geometry APIs; elaborate only
-  when entered using the then-current inventory.
+- [T3 rendering](2026-10-30-t3-rendering-translation.md): completed and reviewed; 1,560 new
+  records complete 80 roots and reach 63.1% coverage. Ready for its checkpoint.
+- Data/property/geometry follows in a separate phase, elaborated only after the T3 checkpoint.
 - T4 remainder and final gate: cover every remaining native field, resolve changed/unused
   catalog records, and verify missing/stale/unused are all zero. Preserve semantic metadata,
   code, links and Chinese owned-source separation throughout.

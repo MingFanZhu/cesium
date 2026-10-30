@@ -331,3 +331,34 @@ test("loading and time documentation displays source-specific Chinese contracts"
   });
   expect(errors).toEqual([]);
 });
+
+test("rendering documentation displays pixel sizing and shader resource ownership", async ({
+  page,
+}, info) => {
+  const errors = [];
+  page.on("pageerror", (error) => errors.push(error.message));
+  page.on("response", (response) => {
+    if (response.status() >= 400) {
+      errors.push(`${response.status()} ${response.url()}`);
+    }
+  });
+  await page.route(/^https?:\/\/(?!127\.0\.0\.1:8104)/, (route) =>
+    route.abort(),
+  );
+  const prefix = "/deep/site/vendor/engine/Documentation/";
+  await page.goto(`${prefix}Billboard.html#sizeInMeters`);
+  await expect(page.locator('[id="sizeInMeters"]')).toBeVisible();
+  await expect(page.locator("#main")).toContainText("使用米，否则使用像素");
+  await page.goto(`${prefix}CustomShader.html`);
+  await expect(page.locator("#main")).toContainText("应用程序负责调用此方法");
+  await expect(
+    page.locator('a[href="CustomShader.html#destroy"]').first(),
+  ).toBeVisible();
+  await info.attach("rendering-documentation", {
+    body: await page.screenshot({
+      path: info.outputPath("rendering-documentation.png"),
+    }),
+    contentType: "image/png",
+  });
+  expect(errors).toEqual([]);
+});

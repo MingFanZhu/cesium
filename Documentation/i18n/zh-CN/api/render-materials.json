@@ -1,0 +1,1782 @@
+{
+  "schemaVersion": 1,
+  "locale": "zh-CN",
+  "entries": [
+    {
+      "id": "Appearance",
+      "field": "description",
+      "sourceHash": "sha256:44ae25621895b8735c24c6b0bf7c7f10eca769dc11283ae3375a39ab521ff52d",
+      "text": "外观定义了绘制 {@link Primitive} 所需的完整 GLSL 顶点着色器、片元着色器及渲染状态。所有外观都实现此基础 <code>Appearance</code> 接口。"
+    },
+    {
+      "id": "Appearance",
+      "field": "params/options.closed/description",
+      "sourceHash": "sha256:906a063ade4a92fcf66c8eeab143fa8591b5b0a817aa42a65f6529a92faceef5",
+      "text": "为 <code>true</code> 时，预期几何体为封闭体，因此 {@link Appearance#renderState} 会启用背面剔除。"
+    },
+    {
+      "id": "Appearance",
+      "field": "params/options.fragmentShaderSource/description",
+      "sourceHash": "sha256:55a3a259077f32865c1f0022953c784fdd7a3b629d36aa7f367f55bf89b3da9a",
+      "text": "可选的 GLSL 片元着色器源码，用于覆盖默认片元着色器。"
+    },
+    {
+      "id": "Appearance",
+      "field": "params/options.material/description",
+      "sourceHash": "sha256:20549e477a67f1d6e5abf904a3884df4c004caa0732c6f35afcd60bf28c8f72e",
+      "text": "用于确定片元颜色的材质。"
+    },
+    {
+      "id": "Appearance",
+      "field": "params/options.renderState/description",
+      "sourceHash": "sha256:ac5cfe764ff1b3ff2e04730f089dba67f28c7b8a734356fce91700778abaf939",
+      "text": "可选的渲染状态，用于覆盖默认渲染状态。"
+    },
+    {
+      "id": "Appearance",
+      "field": "params/options.translucent/description",
+      "sourceHash": "sha256:0e61f7eaf65251ae6379ee6b3481fb49c8cd703dd2df8f24973d97dc491216e9",
+      "text": "为 <code>true</code> 时，预期几何体呈现半透明效果，因此 {@link Appearance#renderState} 会启用 alpha 混合。"
+    },
+    {
+      "id": "Appearance",
+      "field": "params/options.vertexShaderSource/description",
+      "sourceHash": "sha256:37f0e425161fe770c48d48412b0a9623d710dea59b2f27d08611790afcb081e4",
+      "text": "可选的 GLSL 顶点着色器源码，用于覆盖默认顶点着色器。"
+    },
+    {
+      "id": "Appearance#closed",
+      "field": "description",
+      "sourceHash": "sha256:ae19418655a00ea2bbc6b4b56276f606e6900f1ec26e415f27786b93cf505378",
+      "text": "为 <code>true</code> 时，预期几何体为封闭体。"
+    },
+    {
+      "id": "Appearance#fragmentShaderSource",
+      "field": "description",
+      "sourceHash": "sha256:48b612edad048ec948e19fb5fadb5a3a2b2943645d4b8e7c685fc2af8c3da01c",
+      "text": "片元着色器的 GLSL 源码。完整片元着色器源码会结合 {@link Appearance#material} 动态生成。使用 {@link Appearance#getFragmentShaderSource} 获取完整源码。"
+    },
+    {
+      "id": "Appearance#getFragmentShaderSource",
+      "field": "description",
+      "sourceHash": "sha256:40a4bc629f9af55f5ee74c038a5509cae5ca42335539d5b7498a4ecd7cff6eb7",
+      "text": "结合 {@link Appearance#fragmentShaderSource} 和 {@link Appearance#material} 动态生成此外观的完整 GLSL 片元着色器源码。"
+    },
+    {
+      "id": "Appearance#getFragmentShaderSource",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:406aeb78d2d174680e2ef69481a96a15d499d2330064cb0cf84aa60de1eadaa0",
+      "text": "完整的 GLSL 片元着色器源码。"
+    },
+    {
+      "id": "Appearance#getRenderState",
+      "field": "description",
+      "sourceHash": "sha256:0aa9078201e111f9d66bce2d36c8a4d56db538f620ebefb0e500528a81a0319d",
+      "text": "创建渲染状态。这不是最终的渲染状态实例，而是包含部分渲染状态属性的对象，其属性与在上下文中创建的渲染状态一致。"
+    },
+    {
+      "id": "Appearance#getRenderState",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:f11bd8a8ec07e4689cb642b3b8ab1f00cf291fc72f8f24dc14228f8b38c9d936",
+      "text": "渲染状态。"
+    },
+    {
+      "id": "Appearance#isTranslucent",
+      "field": "description",
+      "sourceHash": "sha256:707dcc63c964816b3c4e2251cdcd725e8f1c71bf7f7cf1b0a68f0bb47d5272f0",
+      "text": "根据 {@link Appearance#translucent} 和 {@link Material#isTranslucent} 判断几何体是否为半透明。"
+    },
+    {
+      "id": "Appearance#isTranslucent",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:e044a985554663d43031562acf6f203a43ca47453c336f308fdbd4cc5ecedca2",
+      "text": "外观为半透明时为 <code>true</code>。"
+    },
+    {
+      "id": "Appearance#material",
+      "field": "description",
+      "sourceHash": "sha256:d053aee8040e7243b2367219b1dde84f69b7a6c22638c366c7eb4a200ba49834",
+      "text": "用于确定片元颜色的材质。与其他 {@link Appearance} 属性不同，此属性并非只读，因此可动态更改外观材质。"
+    },
+    {
+      "id": "Appearance#renderState",
+      "field": "description",
+      "sourceHash": "sha256:1e39adf9cc47c87bc4d5197257cfeed49155c9278bcfacd8bc8fa1a052a02b5a",
+      "text": "渲染几何体时使用的 WebGL 固定功能状态。"
+    },
+    {
+      "id": "Appearance#translucent",
+      "field": "description",
+      "sourceHash": "sha256:b34a1faa2cea5525451c543d46d13a5077c4d476a6c1cfe4ac1df18aa82b9b86",
+      "text": "为 <code>true</code> 时，预期几何体呈现半透明效果。"
+    },
+    {
+      "id": "Appearance#vertexShaderSource",
+      "field": "description",
+      "sourceHash": "sha256:aee56bd18237d508be47a3d6bace66d73aac7f5a5a98af14e6b44040ad6315b0",
+      "text": "顶点着色器的 GLSL 源码。"
+    },
+    {
+      "id": "ClassificationPrimitive.isSupported",
+      "field": "description",
+      "sourceHash": "sha256:e3fb821861052fe19b035c302f28005adf3d11dff7543c9c00d122c3dc3f7227",
+      "text": "判断是否支持 ClassificationPrimitive 渲染。"
+    },
+    {
+      "id": "ClassificationPrimitive.isSupported",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:c6abf88fbe67e2a8666f17b0cd2962fed4f5973dbcfc3b17c90b6e2c9ff94106",
+      "text": "支持 ClassificationPrimitive 时为 <code>true</code>，否则为 <code>false</code>。"
+    },
+    {
+      "id": "ClassificationPrimitive",
+      "field": "description",
+      "sourceHash": "sha256:a21a5cac8a0d212d5f4a3e2a36d0f4cbb671c14996d952103dd0637c772f9665",
+      "text": "分类图元表示一个包围体，用于高亮 {@link Scene} 中位于其中的几何。\n<p>\n图元将几何实例与 {@link Appearance} 组合，外观描述完整着色行为，包括 {@link Material} 和 {@link RenderState}。几何实例主要定义结构和位置，外观定义视觉特征。两者解耦后，大部分几何与外观可自由组合，也可分别新增。直接使用 ClassificationPrimitive 时，目前仅支持全部实例颜色相同的 {@link PerInstanceColorAppearance}。如需对地形或 3D Tiles 分类并获得完整的 {@link Appearance} 支持，请改用 {@link GroundPrimitive}。\n</p>\n<p>\n正确渲染需要 EXT_frag_depth WebGL 扩展。不支持该扩展的硬件在部分视角下会出现显示瑕疵。\n</p>\n<p>\n支持的几何类型包括 {@link BoxGeometry}、{@link CylinderGeometry}、{@link EllipsoidGeometry}、{@link PolylineVolumeGeometry} 和 {@link SphereGeometry}。\n</p>\n<p>\n贴合椭球表面的几何（例如 {@link CircleGeometry}、{@link CorridorGeometry}、{@link EllipseGeometry}、{@link PolygonGeometry} 和 {@link RectangleGeometry}）仅在拉伸成体积后有效，否则不会渲染。\n</p>"
+    },
+    {
+      "id": "ClassificationPrimitive",
+      "field": "params/options.allowPicking/description",
+      "sourceHash": "sha256:b837dd95cf40a996d999f635186f40b1d47db75b8a803c033d4433f40184720b",
+      "text": "为 <code>true</code> 时，每个几何实例仅可通过 {@link Scene#pick} 拾取。为 <code>false</code> 时，可节省 GPU 显存。"
+    },
+    {
+      "id": "ClassificationPrimitive",
+      "field": "params/options.appearance/description",
+      "sourceHash": "sha256:a2a0d7ab25c132ec95c67cda4bdd96bbabbbbbf101e6dc9cce1a1f14159f8f6f",
+      "text": "渲染图元所用的外观。GeometryInstance 具有颜色属性时，默认为 PerInstanceColorAppearance。"
+    },
+    {
+      "id": "ClassificationPrimitive",
+      "field": "params/options.asynchronous/description",
+      "sourceHash": "sha256:7c7240a8b8457a684910035fdb1917ea290724baf9e8f9ff0c00f883b062cc81",
+      "text": "决定图元是异步创建，还是阻塞直到就绪。此类直接构建分类几何，不要求预先初始化地形高度。"
+    },
+    {
+      "id": "ClassificationPrimitive",
+      "field": "params/options.classificationType/description",
+      "sourceHash": "sha256:5be2a34816f38066418068d6f7c8a868acc1622352077a9672e879bf3c1194a6",
+      "text": "决定对地形、3D Tiles 或两者进行分类。"
+    },
+    {
+      "id": "ClassificationPrimitive",
+      "field": "params/options.compressVertices/description",
+      "sourceHash": "sha256:bef45d2af1cd2ea3f26bc309b8edd1ab7c2f76f479d2829ca13ac54a27f6bee7",
+      "text": "为 <code>true</code> 时，压缩几何顶点以节省内存。"
+    },
+    {
+      "id": "ClassificationPrimitive",
+      "field": "params/options.debugShowBoundingVolume/description",
+      "sourceHash": "sha256:e994479c583ef7aab0de212c8ac6776e4d7c20d409ee8ee4300116517d5fe8d6",
+      "text": "仅供调试。决定是否显示此图元各命令的包围球。"
+    },
+    {
+      "id": "ClassificationPrimitive",
+      "field": "params/options.debugShowShadowVolume/description",
+      "sourceHash": "sha256:77cb9dba48b5ca64e769db499fb1dfd2e8c5d662be99fe062e209b600281a418",
+      "text": "仅供调试。决定是否绘制图元中每个几何体的阴影体积。必须在创建时为 <code>true</code>，以便在几何体释放前生成体积；或将 options.releaseGeometryInstance 设为 <code>false</code>。"
+    },
+    {
+      "id": "ClassificationPrimitive",
+      "field": "params/options.geometryInstances/description",
+      "sourceHash": "sha256:8ee4147313e59090960395252963abe2c85dbcd87933bbf66645f48075e20a00",
+      "text": "待渲染的几何实例，可以是单个实例或长度为一的数组。"
+    },
+    {
+      "id": "ClassificationPrimitive",
+      "field": "params/options.interleave/description",
+      "sourceHash": "sha256:967032bd3264749ac4dd951412bd46375eb14f4132631464d62d3ffdf134475f",
+      "text": "为 <code>true</code> 时，交错存储几何顶点属性，可略微提升渲染性能，但会增加加载时间。"
+    },
+    {
+      "id": "ClassificationPrimitive",
+      "field": "params/options.releaseGeometryInstances/description",
+      "sourceHash": "sha256:637d35ace6081ad06d856d383e5e46858923b9182e5035294ae23868fc6bb46a",
+      "text": "为 <code>true</code> 时，图元不保留对输入 <code>geometryInstances</code> 的引用，以节省内存。"
+    },
+    {
+      "id": "ClassificationPrimitive",
+      "field": "params/options.show/description",
+      "sourceHash": "sha256:b83bd9ba98171d041c1a967a7f3df81b98fed4b822e9f456856716a2cba0bf6b",
+      "text": "决定是否显示此图元。"
+    },
+    {
+      "id": "ClassificationPrimitive",
+      "field": "params/options.vertexCacheOptimize/description",
+      "sourceHash": "sha256:43c5015e156d22ab18a495033c7018ce1c69fa5a81ddb9f2de80070d2b727266",
+      "text": "为 <code>true</code> 时，为顶点着色器前后缓存优化几何顶点。"
+    },
+    {
+      "id": "ClassificationPrimitive#allowPicking",
+      "field": "description",
+      "sourceHash": "sha256:b837dd95cf40a996d999f635186f40b1d47db75b8a803c033d4433f40184720b",
+      "text": "为 <code>true</code> 时，每个几何实例仅可通过 {@link Scene#pick} 拾取。为 <code>false</code> 时，可节省 GPU 显存。"
+    },
+    {
+      "id": "ClassificationPrimitive#asynchronous",
+      "field": "description",
+      "sourceHash": "sha256:917c469ca176ea56a1e7fde9f10b765813f3551944da349f3e4ed7e6858818f3",
+      "text": "决定是否在 Web Worker 中创建并合批几何实例。"
+    },
+    {
+      "id": "ClassificationPrimitive#classificationType",
+      "field": "description",
+      "sourceHash": "sha256:5be2a34816f38066418068d6f7c8a868acc1622352077a9672e879bf3c1194a6",
+      "text": "决定对地形、3D Tiles 或两者进行分类。"
+    },
+    {
+      "id": "ClassificationPrimitive#compressVertices",
+      "field": "description",
+      "sourceHash": "sha256:d1765a0f898c6eed419e848815bd457b0a5a47b0179f0c17c6a1bd14c03a25c2",
+      "text": "为 <code>true</code> 时，压缩几何顶点以节省内存。"
+    },
+    {
+      "id": "ClassificationPrimitive#debugShowBoundingVolume",
+      "field": "description",
+      "sourceHash": "sha256:aada12c696fc8726817165d04c2ff7f8bc646a5a40f35a419053259d53655a5a",
+      "text": "此属性仅供调试，不应在生产环境中使用，也未做性能优化。<p>绘制图元中每条绘制命令的包围球。</p>"
+    },
+    {
+      "id": "ClassificationPrimitive#debugShowShadowVolume",
+      "field": "description",
+      "sourceHash": "sha256:1290ef4e8e3903d9c1587e0e729d027288a65dc75483633339a651de43e9585e",
+      "text": "此属性仅供调试，不应在生产环境中使用，也未做性能优化。<p>绘制图元中每个几何体的阴影体积。</p>"
+    },
+    {
+      "id": "ClassificationPrimitive#destroy",
+      "field": "description",
+      "sourceHash": "sha256:754b790bbc590a83b107df65f4ba03313464d9514314d03e7fb307567d712e2b",
+      "text": "销毁此对象持有的 WebGL 资源。显式销毁可确定地释放 WebGL 资源，而不依赖垃圾回收器回收此对象。<p>对象销毁后不应再使用；调用除 <code>isDestroyed</code> 以外的任何函数都会抛出 {@link DeveloperError}。因此，应像示例中那样将返回值（<code>undefined</code>）赋给该对象变量。</p>"
+    },
+    {
+      "id": "ClassificationPrimitive#geometryInstances",
+      "field": "description",
+      "sourceHash": "sha256:8d93f9a71a8e37c9a1a2f05def9a36676ae0f2dee6c16bfd39094170ad86e68c",
+      "text": "由此图元渲染的几何实例。如果构造时 <code>options.releaseGeometryInstances</code> 为 <code>true</code>，此属性可能为 <code>undefined</code>。\n<p>\n图元渲染后再修改此属性不会生效。\n</p>\n<p>\n由于所用渲染技术的限制，全部几何实例的颜色必须相同。若存在不同颜色的实例，首次尝试渲染时会抛出 <code>DeveloperError</code>。\n</p>"
+    },
+    {
+      "id": "ClassificationPrimitive#getGeometryInstanceAttributes",
+      "field": "description",
+      "sourceHash": "sha256:8bc34f88f9782d1a0c9486cd015b48e2ca1856b4f843350e31ab12dafd386405",
+      "text": "返回 {@link GeometryInstance} 可修改的逐实例属性。"
+    },
+    {
+      "id": "ClassificationPrimitive#getGeometryInstanceAttributes",
+      "field": "exceptions/0/description",
+      "sourceHash": "sha256:0bc0299ebf8ad82ed18137b0e94428b7fcf055731bb7751e7496176c7c9c9a58",
+      "text": "调用 getGeometryInstanceAttributes 之前必须先调用 update。"
+    },
+    {
+      "id": "ClassificationPrimitive#getGeometryInstanceAttributes",
+      "field": "params/id/description",
+      "sourceHash": "sha256:3f4b707ce51845c9a3b37691c6446aada7839ca5edb50f96c372cca6a4fed6ba",
+      "text": "{@link GeometryInstance} 的 ID。"
+    },
+    {
+      "id": "ClassificationPrimitive#getGeometryInstanceAttributes",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:8d3018d452eac9303a50155682250116709cf0b7f25de303afa5ace9ffb33eba",
+      "text": "采用属性格式的类型化数组；若不存在此 ID 的实例，则返回 undefined。"
+    },
+    {
+      "id": "ClassificationPrimitive#interleave",
+      "field": "description",
+      "sourceHash": "sha256:b28b23744e80d17455be9ffe4581de19f4721fcaff2a210b35d67687709f59e5",
+      "text": "决定是否交错存储几何顶点属性，这可略微提升渲染性能。"
+    },
+    {
+      "id": "ClassificationPrimitive#isDestroyed",
+      "field": "description",
+      "sourceHash": "sha256:8e0063c3cea634f0d58d690ac4d7a4fb34a488a5a13452889ede3a1d69c680e1",
+      "text": "若此对象已销毁，返回 true；否则返回 false。<p>对象销毁后不应再使用；调用除 <code>isDestroyed</code> 以外的任何函数都会抛出 {@link DeveloperError}。</p>"
+    },
+    {
+      "id": "ClassificationPrimitive#ready",
+      "field": "description",
+      "sourceHash": "sha256:3b463cd47fae0611a7ef1e9ccda522c6fc7725073daef79dbb4ca50bed905739",
+      "text": "判断图元是否已完成创建并可供渲染。为 true 时，下一次调用 {@link ClassificationPrimitive#update} 就会渲染此图元。"
+    },
+    {
+      "id": "ClassificationPrimitive#releaseGeometryInstances",
+      "field": "description",
+      "sourceHash": "sha256:637d35ace6081ad06d856d383e5e46858923b9182e5035294ae23868fc6bb46a",
+      "text": "为 <code>true</code> 时，图元不保留对输入 <code>geometryInstances</code> 的引用，以节省内存。"
+    },
+    {
+      "id": "ClassificationPrimitive#show",
+      "field": "description",
+      "sourceHash": "sha256:cbc965b397c703b12633c4c63b2a29d9587a5159c0e8466102353200f2ee011b",
+      "text": "决定是否显示此图元，会影响图元内的全部几何实例。"
+    },
+    {
+      "id": "ClassificationPrimitive#update",
+      "field": "description",
+      "sourceHash": "sha256:c5cc5fb756479265000e8f5e05ef6b5630397b1880c9ff3316fe45c545c6b022",
+      "text": "由 {@link Viewer} 或 {@link CesiumWidget} 在渲染场景时调用，以获取渲染此图元所需的绘制命令。<p>不要直接调用。此处记录此函数，仅为列出场景渲染期间可能向上传播的异常：</p>"
+    },
+    {
+      "id": "ClassificationPrimitive#update",
+      "field": "exceptions/0/description",
+      "sourceHash": "sha256:a03fa23b3e88176fdcb99a354ad99f345ebac8709fcc4e2c516f5691866e711a",
+      "text": "所有实例几何体必须具有相同 primitiveType。"
+    },
+    {
+      "id": "ClassificationPrimitive#update",
+      "field": "exceptions/1/description",
+      "sourceHash": "sha256:d713d506e7aae9613deb054008cbd9108665873fe8a2e90efa0bd426e6064751",
+      "text": "外观与材质中存在同名 uniform。"
+    },
+    {
+      "id": "ClassificationPrimitive#update",
+      "field": "exceptions/2/description",
+      "sourceHash": "sha256:9b20b03f8f52af4b7e3cee1f86691dc19b472d71dc82d84684f36ad06ab95354",
+      "text": "并非全部几何实例都具有相同的颜色属性。"
+    },
+    {
+      "id": "ClassificationPrimitive#vertexCacheOptimize",
+      "field": "description",
+      "sourceHash": "sha256:43c5015e156d22ab18a495033c7018ce1c69fa5a81ddb9f2de80070d2b727266",
+      "text": "为 <code>true</code> 时，为顶点着色器前后缓存优化几何顶点。"
+    },
+    {
+      "id": "DebugAppearance",
+      "field": "description",
+      "sourceHash": "sha256:41845c8c7c20f42db707d38ffbf1c1288deaeb8c595fae2a701ab5ae8ff58f3e",
+      "text": "将顶点属性显示为颜色，以便调试。\n<p>\n对于常见的单位向量属性，即 <code>normal</code>、<code>tangent</code> 和 <code>bitangent</code>，通过缩放和平移将各分量从 [-1.0, 1.0] 映射到 [0.0, 1.0]。\n</p>"
+    },
+    {
+      "id": "DebugAppearance",
+      "field": "exceptions/0/description",
+      "sourceHash": "sha256:ca96c58011db273a73487e2bc2203d791168faf7c255b3915034f3e485bc608e",
+      "text": "options.glslDatatype 必须是 float、vec2、vec3 或 vec4。"
+    },
+    {
+      "id": "DebugAppearance",
+      "field": "params/options.attributeName/description",
+      "sourceHash": "sha256:a3f3e2032134bb372091581c6a47b09a88379fc82cfd2735cf1f47e32556f2fe",
+      "text": "要可视化的属性名称。"
+    },
+    {
+      "id": "DebugAppearance",
+      "field": "params/options.fragmentShaderSource/description",
+      "sourceHash": "sha256:55a3a259077f32865c1f0022953c784fdd7a3b629d36aa7f367f55bf89b3da9a",
+      "text": "可选的 GLSL 片元着色器源码，用于覆盖默认片元着色器。"
+    },
+    {
+      "id": "DebugAppearance",
+      "field": "params/options.glslDatatype/description",
+      "sourceHash": "sha256:c447e09e5833752b9e72616cf8a811840e2df80741e7bf742df1fb02b5c44a47",
+      "text": "属性的 GLSL 数据类型，支持 <code>float</code>、<code>vec2</code>、<code>vec3</code> 和 <code>vec4</code>。"
+    },
+    {
+      "id": "DebugAppearance",
+      "field": "params/options.perInstanceAttribute/description",
+      "sourceHash": "sha256:1cb4d4f6cbf5a6bd8ccff966ed4b218d97e6cbcf8e6c6e55133ccd5ebace8134",
+      "text": "决定此属性是否为逐几何实例属性的布尔值。"
+    },
+    {
+      "id": "DebugAppearance",
+      "field": "params/options.renderState/description",
+      "sourceHash": "sha256:ac5cfe764ff1b3ff2e04730f089dba67f28c7b8a734356fce91700778abaf939",
+      "text": "可选的渲染状态，用于覆盖默认渲染状态。"
+    },
+    {
+      "id": "DebugAppearance",
+      "field": "params/options.vertexShaderSource/description",
+      "sourceHash": "sha256:37f0e425161fe770c48d48412b0a9623d710dea59b2f27d08611790afcb081e4",
+      "text": "可选的 GLSL 顶点着色器源码，用于覆盖默认顶点着色器。"
+    },
+    {
+      "id": "DebugAppearance#attributeName",
+      "field": "description",
+      "sourceHash": "sha256:7598ba1d3ac9db8990f9daeefcf4e036d767a0fe72cf4676c6a675888e33e93e",
+      "text": "当前可视化的属性名称。"
+    },
+    {
+      "id": "DebugAppearance#closed",
+      "field": "description",
+      "sourceHash": "sha256:ae19418655a00ea2bbc6b4b56276f606e6900f1ec26e415f27786b93cf505378",
+      "text": "为 <code>true</code> 时，预期几何体为封闭体。"
+    },
+    {
+      "id": "DebugAppearance#fragmentShaderSource",
+      "field": "description",
+      "sourceHash": "sha256:fd176ba3fd189c6281eaa98b4c6cdd8f6742fe6865d84e7a0f4172805cc9fdc5",
+      "text": "片元着色器的 GLSL 源码。完整源码结合 {@link DebugAppearance#material} 动态生成。使用 {@link DebugAppearance#getFragmentShaderSource} 获取完整源码。"
+    },
+    {
+      "id": "DebugAppearance#getFragmentShaderSource",
+      "field": "description",
+      "sourceHash": "sha256:6cce13d079ff32667aca7b4eb2f3f818d6650a3f3de2798a3582caea598ecd16",
+      "text": "返回完整的 GLSL 片元着色器源码。对于 {@link DebugAppearance}，即 {@link DebugAppearance#fragmentShaderSource}。"
+    },
+    {
+      "id": "DebugAppearance#getFragmentShaderSource",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:406aeb78d2d174680e2ef69481a96a15d499d2330064cb0cf84aa60de1eadaa0",
+      "text": "完整的 GLSL 片元着色器源码。"
+    },
+    {
+      "id": "DebugAppearance#getRenderState",
+      "field": "description",
+      "sourceHash": "sha256:0aa9078201e111f9d66bce2d36c8a4d56db538f620ebefb0e500528a81a0319d",
+      "text": "创建渲染状态。这不是最终的渲染状态实例，而是包含部分渲染状态属性的对象，其属性与在上下文中创建的渲染状态一致。"
+    },
+    {
+      "id": "DebugAppearance#getRenderState",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:f11bd8a8ec07e4689cb642b3b8ab1f00cf291fc72f8f24dc14228f8b38c9d936",
+      "text": "渲染状态。"
+    },
+    {
+      "id": "DebugAppearance#glslDatatype",
+      "field": "description",
+      "sourceHash": "sha256:8be2c1a2365c04263bee5b8cf29fb00aa4af49cbc52ad3805279121c8e2d1e3b",
+      "text": "当前可视化属性的 GLSL 数据类型。"
+    },
+    {
+      "id": "DebugAppearance#isTranslucent",
+      "field": "description",
+      "sourceHash": "sha256:c1387fd2138cb68549c1d87250c571bb6c01bf8a819a578882068a98c2e7e205",
+      "text": "根据 {@link DebugAppearance#translucent} 判断几何体是否为半透明。"
+    },
+    {
+      "id": "DebugAppearance#isTranslucent",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:e044a985554663d43031562acf6f203a43ca47453c336f308fdbd4cc5ecedca2",
+      "text": "外观为半透明时为 <code>true</code>。"
+    },
+    {
+      "id": "DebugAppearance#material",
+      "field": "description",
+      "sourceHash": "sha256:20d39365d67125ffb85fb2062e22139a293478215a6522606c5d45d438547abc",
+      "text": "此属性属于 {@link Appearance} 接口，但 {@link DebugAppearance} 使用完全自定义的片元着色器，因此不使用此属性。"
+    },
+    {
+      "id": "DebugAppearance#renderState",
+      "field": "description",
+      "sourceHash": "sha256:1e39adf9cc47c87bc4d5197257cfeed49155c9278bcfacd8bc8fa1a052a02b5a",
+      "text": "渲染几何体时使用的 WebGL 固定功能状态。"
+    },
+    {
+      "id": "DebugAppearance#translucent",
+      "field": "description",
+      "sourceHash": "sha256:b34a1faa2cea5525451c543d46d13a5077c4d476a6c1cfe4ac1df18aa82b9b86",
+      "text": "为 <code>true</code> 时，预期几何体呈现半透明效果。"
+    },
+    {
+      "id": "DebugAppearance#vertexShaderSource",
+      "field": "description",
+      "sourceHash": "sha256:aee56bd18237d508be47a3d6bace66d73aac7f5a5a98af14e6b44040ad6315b0",
+      "text": "顶点着色器的 GLSL 源码。"
+    },
+    {
+      "id": "EllipsoidSurfaceAppearance.VERTEX_FORMAT",
+      "field": "description",
+      "sourceHash": "sha256:3e8fa9dfd7dc48f5e502a7bbad5a3410525fc6dbdbb462324b5533b3cba22aa2",
+      "text": "所有 {@link EllipsoidSurfaceAppearance} 实例兼容的 {@link VertexFormat}，仅要求 <code>position</code> 和 <code>st</code> 属性。其余属性在片元着色器中动态计算。"
+    },
+    {
+      "id": "EllipsoidSurfaceAppearance",
+      "field": "description",
+      "sourceHash": "sha256:bf95a07c53f2b0767362cf7017be07a32ef2474117f81e4d3775d396b87b83e0",
+      "text": "用于椭球表面几何体（例如 {@link PolygonGeometry} 和 {@link RectangleGeometry}）的外观。支持的材质与使用 {@link MaterialAppearance} 及 {@link MaterialAppearance.MaterialSupport.ALL} 时相同，但所需顶点属性更少，因为片元着色器可以动态计算 <code>normal</code>、<code>tangent</code> 和 <code>bitangent</code>。"
+    },
+    {
+      "id": "EllipsoidSurfaceAppearance",
+      "field": "params/options.aboveGround/description",
+      "sourceHash": "sha256:0062fb302c7e9dc2db5bc02e4cfdfb7b7e9ad452d6e1b99276b98a112f3489be",
+      "text": "为 <code>true</code> 时，预期几何体位于椭球表面上方，此时 {@link EllipsoidSurfaceAppearance#renderState} 默认不启用背面剔除；为 false 时，预期几何体贴在椭球表面，默认启用背面剔除。"
+    },
+    {
+      "id": "EllipsoidSurfaceAppearance",
+      "field": "params/options.faceForward/description",
+      "sourceHash": "sha256:1ec2a6869752c477e667c4e744a3c9f85bba035f1005596ba0072f2e5174d663",
+      "text": "为 <code>true</code> 时，片元着色器会按需翻转表面法线，使其朝向观察者，避免出现暗斑。适用于 {@link WallGeometry} 等需要两面着色的几何体。"
+    },
+    {
+      "id": "EllipsoidSurfaceAppearance",
+      "field": "params/options.flat/description",
+      "sourceHash": "sha256:c16b30881cc0baf020c985ec5e308f26a8729111aad25a4437d8ecf8200ef703",
+      "text": "为 <code>true</code> 时，片元着色器采用不考虑光照的平面着色。"
+    },
+    {
+      "id": "EllipsoidSurfaceAppearance",
+      "field": "params/options.fragmentShaderSource/description",
+      "sourceHash": "sha256:55a3a259077f32865c1f0022953c784fdd7a3b629d36aa7f367f55bf89b3da9a",
+      "text": "可选的 GLSL 片元着色器源码，用于覆盖默认片元着色器。"
+    },
+    {
+      "id": "EllipsoidSurfaceAppearance",
+      "field": "params/options.material/description",
+      "sourceHash": "sha256:20549e477a67f1d6e5abf904a3884df4c004caa0732c6f35afcd60bf28c8f72e",
+      "text": "用于确定片元颜色的材质。"
+    },
+    {
+      "id": "EllipsoidSurfaceAppearance",
+      "field": "params/options.renderState/description",
+      "sourceHash": "sha256:ac5cfe764ff1b3ff2e04730f089dba67f28c7b8a734356fce91700778abaf939",
+      "text": "可选的渲染状态，用于覆盖默认渲染状态。"
+    },
+    {
+      "id": "EllipsoidSurfaceAppearance",
+      "field": "params/options.translucent/description",
+      "sourceHash": "sha256:c2f6baa9151681c6553912a0cc9797c2662ba23cef67bcb596649543762b6e5a",
+      "text": "为 <code>true</code> 时，预期几何体呈现半透明效果，因此 {@link EllipsoidSurfaceAppearance#renderState} 会启用 alpha 混合。"
+    },
+    {
+      "id": "EllipsoidSurfaceAppearance",
+      "field": "params/options.vertexShaderSource/description",
+      "sourceHash": "sha256:37f0e425161fe770c48d48412b0a9623d710dea59b2f27d08611790afcb081e4",
+      "text": "可选的 GLSL 顶点着色器源码，用于覆盖默认顶点着色器。"
+    },
+    {
+      "id": "EllipsoidSurfaceAppearance#aboveGround",
+      "field": "description",
+      "sourceHash": "sha256:7bc9dc2e8574e5f5c76aa86a28142ba36b1b6b196b62ef2aa812ea9e9b24c5c9",
+      "text": "为 <code>true</code> 时，预期几何体位于椭球表面上方，此时 {@link EllipsoidSurfaceAppearance#renderState} 默认不启用背面剔除；为 false 时，预期几何体贴在椭球表面，默认启用背面剔除。"
+    },
+    {
+      "id": "EllipsoidSurfaceAppearance#closed",
+      "field": "description",
+      "sourceHash": "sha256:1aae3eba277f4c2d8a3e777c9190c29c07d313689b725527ae49d10e5851d1bf",
+      "text": "为 <code>true</code> 时，预期几何体为封闭体，可通过 {@link EllipsoidSurfaceAppearance#renderState} 启用背面剔除，观察者进入内部后将看不到它。此类的 closed 属性始终为 false，默认背面剔除由 aboveGround 决定。"
+    },
+    {
+      "id": "EllipsoidSurfaceAppearance#faceForward",
+      "field": "description",
+      "sourceHash": "sha256:5c8c38e47835f8dafec493ff17ac724634e5ac8f915fc7e946dc7f216436cf81",
+      "text": "为 <code>true</code> 时，片元着色器会按需翻转表面法线，使其朝向观察者，避免出现暗斑。适用于 {@link WallGeometry} 等需要两面着色的几何体。"
+    },
+    {
+      "id": "EllipsoidSurfaceAppearance#flat",
+      "field": "description",
+      "sourceHash": "sha256:676df71602fa8b4560619eb8cf4f53770cd9e74a845f7fe0ff6a472fad6a2243",
+      "text": "为 <code>true</code> 时，片元着色器采用不考虑光照的平面着色。"
+    },
+    {
+      "id": "EllipsoidSurfaceAppearance#fragmentShaderSource",
+      "field": "description",
+      "sourceHash": "sha256:063842238fce52aa258d7df280f42dd7d6b675ce4e1e452b337b22ef797afd73",
+      "text": "片元着色器的 GLSL 源码。完整源码结合 {@link EllipsoidSurfaceAppearance#material}、{@link EllipsoidSurfaceAppearance#flat} 和 {@link EllipsoidSurfaceAppearance#faceForward} 动态生成。使用 {@link EllipsoidSurfaceAppearance#getFragmentShaderSource} 获取完整源码。"
+    },
+    {
+      "id": "EllipsoidSurfaceAppearance#getFragmentShaderSource",
+      "field": "description",
+      "sourceHash": "sha256:b8a4493c164fd00cd3da4f238571cbb6b270269540f7f1dd671501f60758f8a9",
+      "text": "动态生成完整的 GLSL 片元着色器源码。对于 {@link EllipsoidSurfaceAppearance}，由 {@link EllipsoidSurfaceAppearance#fragmentShaderSource}、{@link EllipsoidSurfaceAppearance#flat} 和 {@link EllipsoidSurfaceAppearance#faceForward} 共同生成。"
+    },
+    {
+      "id": "EllipsoidSurfaceAppearance#getFragmentShaderSource",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:406aeb78d2d174680e2ef69481a96a15d499d2330064cb0cf84aa60de1eadaa0",
+      "text": "完整的 GLSL 片元着色器源码。"
+    },
+    {
+      "id": "EllipsoidSurfaceAppearance#getRenderState",
+      "field": "description",
+      "sourceHash": "sha256:0aa9078201e111f9d66bce2d36c8a4d56db538f620ebefb0e500528a81a0319d",
+      "text": "创建渲染状态。这不是最终的渲染状态实例，而是包含部分渲染状态属性的对象，其属性与在上下文中创建的渲染状态一致。"
+    },
+    {
+      "id": "EllipsoidSurfaceAppearance#getRenderState",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:f11bd8a8ec07e4689cb642b3b8ab1f00cf291fc72f8f24dc14228f8b38c9d936",
+      "text": "渲染状态。"
+    },
+    {
+      "id": "EllipsoidSurfaceAppearance#isTranslucent",
+      "field": "description",
+      "sourceHash": "sha256:a47ba57b43e256ef1ed4bb225678935baceec33761e31b095d0807389218001f",
+      "text": "根据 {@link EllipsoidSurfaceAppearance#translucent} 和 {@link Material#isTranslucent} 判断几何体是否为半透明。"
+    },
+    {
+      "id": "EllipsoidSurfaceAppearance#isTranslucent",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:e044a985554663d43031562acf6f203a43ca47453c336f308fdbd4cc5ecedca2",
+      "text": "外观为半透明时为 <code>true</code>。"
+    },
+    {
+      "id": "EllipsoidSurfaceAppearance#material",
+      "field": "description",
+      "sourceHash": "sha256:08d840b8c7fb35aaa34093cf108a338fb51ee11b170f329d74fdfa636c84def5",
+      "text": "用于确定片元颜色的材质。与其他 {@link EllipsoidSurfaceAppearance} 属性不同，此属性并非只读，因此可动态更改外观材质。"
+    },
+    {
+      "id": "EllipsoidSurfaceAppearance#renderState",
+      "field": "description",
+      "sourceHash": "sha256:2e351624b80fd2c7136a435ba133d9c9a9c813ffd275483b2e208114d6aebf9d",
+      "text": "渲染几何体时使用的 WebGL 固定功能状态。\n<p>\n可在构造 {@link EllipsoidSurfaceAppearance} 实例时显式指定，也可由 {@link EllipsoidSurfaceAppearance#translucent} 和 {@link EllipsoidSurfaceAppearance#aboveGround} 隐式确定。\n</p>"
+    },
+    {
+      "id": "EllipsoidSurfaceAppearance#translucent",
+      "field": "description",
+      "sourceHash": "sha256:b34a1faa2cea5525451c543d46d13a5077c4d476a6c1cfe4ac1df18aa82b9b86",
+      "text": "为 <code>true</code> 时，预期几何体呈现半透明效果。"
+    },
+    {
+      "id": "EllipsoidSurfaceAppearance#vertexFormat",
+      "field": "description",
+      "sourceHash": "sha256:eaccda12c7d71705e6fd346cf42663c513d30f296c6ec7c8fc71147c3bfe1738",
+      "text": "此外观实例兼容的 {@link VertexFormat}。几何体可包含更多顶点属性，仍然兼容，但可能有额外性能开销；不能少于此格式要求的属性。"
+    },
+    {
+      "id": "EllipsoidSurfaceAppearance#vertexShaderSource",
+      "field": "description",
+      "sourceHash": "sha256:aee56bd18237d508be47a3d6bace66d73aac7f5a5a98af14e6b44040ad6315b0",
+      "text": "顶点着色器的 GLSL 源码。"
+    },
+    {
+      "id": "GroundPolylinePrimitive.initializeTerrainHeights",
+      "field": "description",
+      "sourceHash": "sha256:99df1cb0698e606155c6a0af8131061043822965f2ea044eb9411a2d015d6f95",
+      "text": "初始化地形最低和最高高度。仅在同步创建 GroundPolylinePrimitive 时需要调用。"
+    },
+    {
+      "id": "GroundPolylinePrimitive.initializeTerrainHeights",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:8ba356b9974d633a39487c4053e7b4dd94dee071c9bddbcf1ff2078000d619a5",
+      "text": "地形高度加载完成时兑现的 Promise。"
+    },
+    {
+      "id": "GroundPolylinePrimitive.isSupported",
+      "field": "description",
+      "sourceHash": "sha256:0741b59f727138ebc3b4b1d6cb31ca3e2ba36bef3e6d294caa68efc5c5c6aa98",
+      "text": "检查指定 Scene 是否支持 GroundPolylinePrimitive。需要 WEBGL_depth_texture 扩展支持。"
+    },
+    {
+      "id": "GroundPolylinePrimitive.isSupported",
+      "field": "params/scene/description",
+      "sourceHash": "sha256:2602abbd222a7a83c7faadfe2d9124ad21aebd00fb3fd5848f5ec168fcd99d7a",
+      "text": "当前场景。"
+    },
+    {
+      "id": "GroundPolylinePrimitive.isSupported",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:7fe916b4e10fd11a552c7d8ae66fe5c9a932bdcd5128c6a6d65de2f96983d9df",
+      "text": "当前场景是否支持 GroundPolylinePrimitive。"
+    },
+    {
+      "id": "GroundPolylinePrimitive",
+      "field": "description",
+      "sourceHash": "sha256:4523cc7aea823b133dde7d0111aef612851fad6a275fdffeefd7157bfdc06640",
+      "text": "GroundPolylinePrimitive 表示覆盖在 {@link Scene} 中地形或 3D Tiles 表面的折线。\n<p>\n仅可与包含 {@link GroundPolylineGeometry} 的 GeometryInstance 一起使用。\n</p>"
+    },
+    {
+      "id": "GroundPolylinePrimitive",
+      "field": "params/options.allowPicking/description",
+      "sourceHash": "sha256:b837dd95cf40a996d999f635186f40b1d47db75b8a803c033d4433f40184720b",
+      "text": "为 <code>true</code> 时，每个几何实例仅可通过 {@link Scene#pick} 拾取。为 <code>false</code> 时，可节省 GPU 显存。"
+    },
+    {
+      "id": "GroundPolylinePrimitive",
+      "field": "params/options.appearance/description",
+      "sourceHash": "sha256:39911c2b8e814969da2e7f18e4030e3bbaf496c87e4e813fc7c0b7603a488df3",
+      "text": "渲染折线所用的外观。默认为白色 {@link Material} 配合 {@link PolylineMaterialAppearance}。"
+    },
+    {
+      "id": "GroundPolylinePrimitive",
+      "field": "params/options.asynchronous/description",
+      "sourceHash": "sha256:7c7240a8b8457a684910035fdb1917ea290724baf9e8f9ff0c00f883b062cc81",
+      "text": "决定图元是异步创建，还是阻塞直到就绪。若为 false，必须先调用 initializeTerrainHeights()。"
+    },
+    {
+      "id": "GroundPolylinePrimitive",
+      "field": "params/options.classificationType/description",
+      "sourceHash": "sha256:5be2a34816f38066418068d6f7c8a868acc1622352077a9672e879bf3c1194a6",
+      "text": "决定对地形、3D Tiles 或两者进行分类。"
+    },
+    {
+      "id": "GroundPolylinePrimitive",
+      "field": "params/options.debugShowBoundingVolume/description",
+      "sourceHash": "sha256:e994479c583ef7aab0de212c8ac6776e4d7c20d409ee8ee4300116517d5fe8d6",
+      "text": "仅供调试。决定是否显示此图元各命令的包围球。"
+    },
+    {
+      "id": "GroundPolylinePrimitive",
+      "field": "params/options.debugShowShadowVolume/description",
+      "sourceHash": "sha256:eda4169aa7e920e8dbf45957f35426d18a31026919b61cc19ec3118525851c4c",
+      "text": "仅供调试。决定是否绘制图元中每个几何体的阴影体积。必须在创建时设为 <code>true</code> 才有效。"
+    },
+    {
+      "id": "GroundPolylinePrimitive",
+      "field": "params/options.geometryInstances/description",
+      "sourceHash": "sha256:ee8a48925ee16f643a55cda508b33852c91907e286f5a945732235a061825f19",
+      "text": "包含 GroundPolylineGeometry 的 GeometryInstance。"
+    },
+    {
+      "id": "GroundPolylinePrimitive",
+      "field": "params/options.interleave/description",
+      "sourceHash": "sha256:967032bd3264749ac4dd951412bd46375eb14f4132631464d62d3ffdf134475f",
+      "text": "为 <code>true</code> 时，交错存储几何顶点属性，可略微提升渲染性能，但会增加加载时间。"
+    },
+    {
+      "id": "GroundPolylinePrimitive",
+      "field": "params/options.releaseGeometryInstances/description",
+      "sourceHash": "sha256:637d35ace6081ad06d856d383e5e46858923b9182e5035294ae23868fc6bb46a",
+      "text": "为 <code>true</code> 时，图元不保留对输入 <code>geometryInstances</code> 的引用，以节省内存。"
+    },
+    {
+      "id": "GroundPolylinePrimitive",
+      "field": "params/options.show/description",
+      "sourceHash": "sha256:b83bd9ba98171d041c1a967a7f3df81b98fed4b822e9f456856716a2cba0bf6b",
+      "text": "决定是否显示此图元。"
+    },
+    {
+      "id": "GroundPolylinePrimitive#allowPicking",
+      "field": "description",
+      "sourceHash": "sha256:b837dd95cf40a996d999f635186f40b1d47db75b8a803c033d4433f40184720b",
+      "text": "为 <code>true</code> 时，每个几何实例仅可通过 {@link Scene#pick} 拾取。为 <code>false</code> 时，可节省 GPU 显存。"
+    },
+    {
+      "id": "GroundPolylinePrimitive#appearance",
+      "field": "description",
+      "sourceHash": "sha256:231727f5765b0122530a7589348911ff38d57b6b2f74801caec166d02b29f853",
+      "text": "对此图元着色所用的 {@link Appearance}。每个几何实例使用相同外观；某些外观（例如 {@link PolylineColorAppearance}）允许每个实例具有独立属性。"
+    },
+    {
+      "id": "GroundPolylinePrimitive#asynchronous",
+      "field": "description",
+      "sourceHash": "sha256:917c469ca176ea56a1e7fde9f10b765813f3551944da349f3e4ed7e6858818f3",
+      "text": "决定是否在 Web Worker 中创建并合批几何实例。"
+    },
+    {
+      "id": "GroundPolylinePrimitive#classificationType",
+      "field": "description",
+      "sourceHash": "sha256:5be2a34816f38066418068d6f7c8a868acc1622352077a9672e879bf3c1194a6",
+      "text": "决定对地形、3D Tiles 或两者进行分类。"
+    },
+    {
+      "id": "GroundPolylinePrimitive#debugShowBoundingVolume",
+      "field": "description",
+      "sourceHash": "sha256:aada12c696fc8726817165d04c2ff7f8bc646a5a40f35a419053259d53655a5a",
+      "text": "此属性仅供调试，不应在生产环境中使用，也未做性能优化。<p>绘制图元中每条绘制命令的包围球。</p>"
+    },
+    {
+      "id": "GroundPolylinePrimitive#debugShowShadowVolume",
+      "field": "description",
+      "sourceHash": "sha256:7d1d39eae780454add0d89f8a713a1172fc98b7d125534fd2e28c645e9d7aeb3",
+      "text": "此属性仅供调试，不适合生产环境，也未做性能优化。\n<p>\n为 true 时，绘制图元中每个几何体的阴影体积。\n</p>"
+    },
+    {
+      "id": "GroundPolylinePrimitive#destroy",
+      "field": "description",
+      "sourceHash": "sha256:754b790bbc590a83b107df65f4ba03313464d9514314d03e7fb307567d712e2b",
+      "text": "销毁此对象持有的 WebGL 资源。显式销毁可确定地释放 WebGL 资源，而不依赖垃圾回收器回收此对象。<p>对象销毁后不应再使用；调用除 <code>isDestroyed</code> 以外的任何函数都会抛出 {@link DeveloperError}。因此，应像示例中那样将返回值（<code>undefined</code>）赋给该对象变量。</p>"
+    },
+    {
+      "id": "GroundPolylinePrimitive#geometryInstances",
+      "field": "description",
+      "sourceHash": "sha256:acb6eaba5a866ed6f986a916476241539c76a266d9209cd1c8f3dcac1622c81e",
+      "text": "由此图元渲染的几何实例。如果构造时 <code>options.releaseGeometryInstances</code> 为 <code>true</code>，此属性可能为 <code>undefined</code>。\n<p>\n图元渲染后再修改此属性不会生效。\n</p>"
+    },
+    {
+      "id": "GroundPolylinePrimitive#getGeometryInstanceAttributes",
+      "field": "description",
+      "sourceHash": "sha256:8bc34f88f9782d1a0c9486cd015b48e2ca1856b4f843350e31ab12dafd386405",
+      "text": "返回 {@link GeometryInstance} 可修改的逐实例属性。"
+    },
+    {
+      "id": "GroundPolylinePrimitive#getGeometryInstanceAttributes",
+      "field": "exceptions/0/description",
+      "sourceHash": "sha256:0bc0299ebf8ad82ed18137b0e94428b7fcf055731bb7751e7496176c7c9c9a58",
+      "text": "调用 getGeometryInstanceAttributes 之前必须先调用 update。"
+    },
+    {
+      "id": "GroundPolylinePrimitive#getGeometryInstanceAttributes",
+      "field": "params/id/description",
+      "sourceHash": "sha256:3f4b707ce51845c9a3b37691c6446aada7839ca5edb50f96c372cca6a4fed6ba",
+      "text": "{@link GeometryInstance} 的 ID。"
+    },
+    {
+      "id": "GroundPolylinePrimitive#getGeometryInstanceAttributes",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:8d3018d452eac9303a50155682250116709cf0b7f25de303afa5ace9ffb33eba",
+      "text": "采用属性格式的类型化数组；若不存在此 ID 的实例，则返回 undefined。"
+    },
+    {
+      "id": "GroundPolylinePrimitive#interleave",
+      "field": "description",
+      "sourceHash": "sha256:b28b23744e80d17455be9ffe4581de19f4721fcaff2a210b35d67687709f59e5",
+      "text": "决定是否交错存储几何顶点属性，这可略微提升渲染性能。"
+    },
+    {
+      "id": "GroundPolylinePrimitive#isDestroyed",
+      "field": "description",
+      "sourceHash": "sha256:8e0063c3cea634f0d58d690ac4d7a4fb34a488a5a13452889ede3a1d69c680e1",
+      "text": "若此对象已销毁，返回 true；否则返回 false。<p>对象销毁后不应再使用；调用除 <code>isDestroyed</code> 以外的任何函数都会抛出 {@link DeveloperError}。</p>"
+    },
+    {
+      "id": "GroundPolylinePrimitive#ready",
+      "field": "description",
+      "sourceHash": "sha256:7e8682989d8afd9b2a886a57a315a51ab222d40291af4b6499254d0fd8ec8393",
+      "text": "判断图元是否已完成创建并可供渲染。为 true 时，下一次调用 {@link GroundPolylinePrimitive#update} 就会渲染此图元。"
+    },
+    {
+      "id": "GroundPolylinePrimitive#releaseGeometryInstances",
+      "field": "description",
+      "sourceHash": "sha256:637d35ace6081ad06d856d383e5e46858923b9182e5035294ae23868fc6bb46a",
+      "text": "为 <code>true</code> 时，图元不保留对输入 <code>geometryInstances</code> 的引用，以节省内存。"
+    },
+    {
+      "id": "GroundPolylinePrimitive#show",
+      "field": "description",
+      "sourceHash": "sha256:cbc965b397c703b12633c4c63b2a29d9587a5159c0e8466102353200f2ee011b",
+      "text": "决定是否显示此图元，会影响图元内的全部几何实例。"
+    },
+    {
+      "id": "GroundPolylinePrimitive#update",
+      "field": "description",
+      "sourceHash": "sha256:c5cc5fb756479265000e8f5e05ef6b5630397b1880c9ff3316fe45c545c6b022",
+      "text": "由 {@link Viewer} 或 {@link CesiumWidget} 在渲染场景时调用，以获取渲染此图元所需的绘制命令。<p>不要直接调用。此处记录此函数，仅为列出场景渲染期间可能向上传播的异常：</p>"
+    },
+    {
+      "id": "GroundPolylinePrimitive#update",
+      "field": "exceptions/0/description",
+      "sourceHash": "sha256:712fc3883869df3b33b2c69aee0fdea0cf91f1255cf1fcb0cb9165a9f8d42e7a",
+      "text": "同步创建 GroundPolylinePrimitive 时，必须调用 GroundPolylinePrimitive.initializeTerrainHeights()，并等待返回的 Promise 兑现。"
+    },
+    {
+      "id": "GroundPolylinePrimitive#update",
+      "field": "exceptions/1/description",
+      "sourceHash": "sha256:83d9d99bfebb32b934ebb29566482801634a78bd50492b9fd3e4816a6d8f53ab",
+      "text": "GroundPolylinePrimitive 使用 PolylineColorAppearance 时，全部 GeometryInstance 都必须具有颜色属性。"
+    },
+    {
+      "id": "Material.AlphaMapType",
+      "field": "description",
+      "sourceHash": "sha256:2acf9e84856992220dd3ac2442913b044c7d49c55e54744faa0863de5838c197",
+      "text": "获取 alpha 贴图材质的名称。"
+    },
+    {
+      "id": "Material.AspectRampMaterialType",
+      "field": "description",
+      "sourceHash": "sha256:4822f6c1e47efa59f69baa7f314aa03bc0109edbe3d239005eadba6751c94d5c",
+      "text": "获取坡向色带材质的名称。"
+    },
+    {
+      "id": "Material.BumpMapType",
+      "field": "description",
+      "sourceHash": "sha256:41d266844f5a7f49064d5431b57b56348de11938b047cd3be6b65ecf418964bb",
+      "text": "获取凹凸贴图材质的名称。"
+    },
+    {
+      "id": "Material.CheckerboardType",
+      "field": "description",
+      "sourceHash": "sha256:dacf73c47bb5f9d87e423911305bdaefe62e782f7dc631793bd9b9efd9fcd834",
+      "text": "获取棋盘格材质的名称。"
+    },
+    {
+      "id": "Material.ColorType",
+      "field": "description",
+      "sourceHash": "sha256:5693020329ae71b4065cc3fc75a21b7fd5674a68d9e716d5f14d38d7b73c4700",
+      "text": "获取纯色材质的名称。"
+    },
+    {
+      "id": "Material.DefaultCubeMapId",
+      "field": "description",
+      "sourceHash": "sha256:bb549b9c95ae1594821c883f99466a12f9f5a271505175fe0d311688971404a9",
+      "text": "获取或设置默认立方体贴图纹理的 uniform 值。"
+    },
+    {
+      "id": "Material.DefaultImageId",
+      "field": "description",
+      "sourceHash": "sha256:e23ed0791275b2368b1d7cbf9d9a25ea05db40ff7d5757dadaa5e19d049d586a",
+      "text": "获取或设置默认纹理的 uniform 值。"
+    },
+    {
+      "id": "Material.DiffuseMapType",
+      "field": "description",
+      "sourceHash": "sha256:7400702451004e20e5d04904610cbc11bebc2bc47e8846b749d2db7637de38cf",
+      "text": "获取漫反射贴图材质的名称。"
+    },
+    {
+      "id": "Material.DotType",
+      "field": "description",
+      "sourceHash": "sha256:a72c247d036a41872a074d5c7b37bfccbc3fb7d02b125cfd77749ba805ae66f6",
+      "text": "获取圆点材质的名称。"
+    },
+    {
+      "id": "Material.ElevationBandType",
+      "field": "description",
+      "sourceHash": "sha256:284872bbcb76515614f1207721883e57b4c8b9d44e137d360990d49a32573bbc",
+      "text": "获取高程分带材质的名称。"
+    },
+    {
+      "id": "Material.ElevationContourType",
+      "field": "description",
+      "sourceHash": "sha256:90ab0ffdbf2178e7a637a37bcb1ba3f8bf50fe6809c7f7a8791414366feb291f",
+      "text": "获取等高线材质的名称。"
+    },
+    {
+      "id": "Material.ElevationRampType",
+      "field": "description",
+      "sourceHash": "sha256:90ab0ffdbf2178e7a637a37bcb1ba3f8bf50fe6809c7f7a8791414366feb291f",
+      "text": "获取等高线材质的名称。"
+    },
+    {
+      "id": "Material.EmissionMapType",
+      "field": "description",
+      "sourceHash": "sha256:42eecec70a181795079ac0fcb3acac8ae436fb088d79e4128c8d6da378c9d102",
+      "text": "获取自发光贴图材质的名称。"
+    },
+    {
+      "id": "Material.FadeType",
+      "field": "description",
+      "sourceHash": "sha256:997ae010e02ee10d0609dfd3a3be3b8b4832eb8180f9302a62edccb49c7d9836",
+      "text": "获取渐隐材质的名称。"
+    },
+    {
+      "id": "Material.fromType",
+      "field": "description",
+      "sourceHash": "sha256:2a563199920ee9e343769383fc75495c0d981649ba51ca05ffb6d2bedc055472",
+      "text": "使用已有材质类型创建新材质。\n<br /><br />\n等价于：new Material({fabric : {type : type}});"
+    },
+    {
+      "id": "Material.fromType",
+      "field": "exceptions/0/description",
+      "sourceHash": "sha256:c58c2f2ee9cee53909adfdeb7253d59753862ae81121f377840739678fda9dd3",
+      "text": "不存在指定类型的材质。"
+    },
+    {
+      "id": "Material.fromType",
+      "field": "params/type/description",
+      "sourceHash": "sha256:e92fc2127f2f59a9df32609169e87f9b669a08834d80e793174a730022226dbf",
+      "text": "基础材质类型。"
+    },
+    {
+      "id": "Material.fromType",
+      "field": "params/uniforms/description",
+      "sourceHash": "sha256:81135d5f525ecbf82ed2091956f55ca591267a171aecaf3f89dcc20d400d0505",
+      "text": "用于覆盖默认 uniform 的值。"
+    },
+    {
+      "id": "Material.fromType",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:19f060bc80adf2b1d8dd2b95b77275159ceba267968b153b3a08caeb609007bd",
+      "text": "新材质对象。"
+    },
+    {
+      "id": "Material.fromTypeAsync",
+      "field": "description",
+      "sourceHash": "sha256:ca7b98151a7495e72f0f69a26fc3a126ab36e84833ddd707acba6ad83158c20c",
+      "text": "使用已有材质类型创建新材质，返回的 Promise 在该材质的所有资源加载完成后兑现。"
+    },
+    {
+      "id": "Material.fromTypeAsync",
+      "field": "exceptions/0/description",
+      "sourceHash": "sha256:c58c2f2ee9cee53909adfdeb7253d59753862ae81121f377840739678fda9dd3",
+      "text": "不存在指定类型的材质。"
+    },
+    {
+      "id": "Material.fromTypeAsync",
+      "field": "params/type/description",
+      "sourceHash": "sha256:e92fc2127f2f59a9df32609169e87f9b669a08834d80e793174a730022226dbf",
+      "text": "基础材质类型。"
+    },
+    {
+      "id": "Material.fromTypeAsync",
+      "field": "params/uniforms/description",
+      "sourceHash": "sha256:81135d5f525ecbf82ed2091956f55ca591267a171aecaf3f89dcc20d400d0505",
+      "text": "用于覆盖默认 uniform 的值。"
+    },
+    {
+      "id": "Material.fromTypeAsync",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:cbb380e0193835eafacf22209b1edbd1c10682a4faac574cb31b660127715683",
+      "text": "全部资源加载完成后兑现为新材质对象的 Promise。"
+    },
+    {
+      "id": "Material.GridType",
+      "field": "description",
+      "sourceHash": "sha256:1063b687c84ed6bf288be08152d87be5d295e31c9f6b7c626089366fd4ebc86d",
+      "text": "获取网格材质的名称。"
+    },
+    {
+      "id": "Material.ImageType",
+      "field": "description",
+      "sourceHash": "sha256:f34966c0a75fb512715634a2b5eb259b9139427f36faf02dc04514aa9ae10cfc",
+      "text": "获取图像材质的名称。"
+    },
+    {
+      "id": "Material.NormalMapType",
+      "field": "description",
+      "sourceHash": "sha256:1fda5b1de4b00eaab11ac45d563a467bd83024d7571775cd7a56157fc40ae132",
+      "text": "获取法线贴图材质的名称。"
+    },
+    {
+      "id": "Material.PolylineArrowType",
+      "field": "description",
+      "sourceHash": "sha256:98c0b8e2fb3c63dd227e84256ccf57592edf33f000bbc89edd956dbada7abb62",
+      "text": "获取折线箭头材质的名称。"
+    },
+    {
+      "id": "Material.PolylineDashType",
+      "field": "description",
+      "sourceHash": "sha256:23c61ad7aa1a6b67181bc7d5da3517a52f7050d991c814ebbbbcf4a3909f22f4",
+      "text": "获取折线虚线材质的名称。"
+    },
+    {
+      "id": "Material.PolylineGlowType",
+      "field": "description",
+      "sourceHash": "sha256:23c61ad7aa1a6b67181bc7d5da3517a52f7050d991c814ebbbbcf4a3909f22f4",
+      "text": "获取折线虚线材质的名称。"
+    },
+    {
+      "id": "Material.PolylineOutlineType",
+      "field": "description",
+      "sourceHash": "sha256:9cf918ce00bd228098f06ba973ca3aa54a8ce607b73746504bc0f4ed17fe312b",
+      "text": "获取折线轮廓材质的名称。"
+    },
+    {
+      "id": "Material.RimLightingType",
+      "field": "description",
+      "sourceHash": "sha256:fe24b3c420d842ce85051b74ff8b579fb6000327dc1bb02593601277c52039f3",
+      "text": "获取边缘光材质的名称。"
+    },
+    {
+      "id": "Material.SlopeRampMaterialType",
+      "field": "description",
+      "sourceHash": "sha256:26485eeea0450954a336e665359e60e43bb7b15ba3ee5343f889f4ef9aaed857",
+      "text": "获取坡度色带材质的名称。"
+    },
+    {
+      "id": "Material.SpecularMapType",
+      "field": "description",
+      "sourceHash": "sha256:fe85a004ca5b07ca069819030a12303690e8450cfaf8501a6d0c770acfa61ff5",
+      "text": "获取镜面反射贴图材质的名称。"
+    },
+    {
+      "id": "Material.StripeType",
+      "field": "description",
+      "sourceHash": "sha256:5ee82096fa98ee134bd2310ec613d65d70d3b009142d2e7ad51201b71bc878f1",
+      "text": "获取条纹材质的名称。"
+    },
+    {
+      "id": "Material.WaterMaskType",
+      "field": "description",
+      "sourceHash": "sha256:b78a80bf255a95844e17d41bdde6512f1f64a79ca61b4061e37f1a01a6b93309",
+      "text": "获取水体掩码材质的名称。"
+    },
+    {
+      "id": "Material.WaterType",
+      "field": "description",
+      "sourceHash": "sha256:fd748547fde43a68e33c27a8f46767dd4301d6faf3f0f920e032d475cecc87d3",
+      "text": "获取水面材质的名称。"
+    },
+    {
+      "id": "Material",
+      "field": "description",
+      "sourceHash": "sha256:f455af36be27ce18c62fb822e5b2faa5c812c1ca067915731eb4744d68d770b8",
+      "text": "Material 通过漫反射、镜面反射、法线、自发光和 alpha 分量的组合定义表面外观。这些值使用名为 Fabric 的 JSON 模式描述，内部会解析并组装为 GLSL 着色器代码。Fabric 的详细用法参见{@link https://github.com/CesiumGS/cesium/wiki/Fabric|维基文档}。\r<br /><br />\r<style type=\"text/css\">\r #materialDescriptions code {\r     font-weight: normal;\r     font-family: Consolas, 'Lucida Console', Monaco, monospace;\r     color: #A35A00;\r }\r #materialDescriptions ul, #materialDescriptions ul ul {\r     list-style-type: none;\r }\r #materialDescriptions ul ul {\r     margin-bottom: 10px;\r }\r #materialDescriptions ul ul li {\r     font-weight: normal;\r     color: #000000;\r     text-indent: -2em;\r     margin-left: 2em;\r }\r #materialDescriptions ul li {\r     font-weight: bold;\r     color: #0053CF;\r }\r</style>\r\r基础材质类型及其 uniform：\r<div id='materialDescriptions'>\r<ul>\r <li>Color</li>\r <ul>\r     <li><code>color</code>:  RGBA 颜色对象。</li>\r </ul>\r <li>Image</li>\r <ul>\r     <li><code>image</code>:  图像路径。</li>\r     <li><code>repeat</code>:  通过 x 和 y 指定图像重复次数的对象。</li>\r </ul>\r <li>DiffuseMap</li>\r <ul>\r     <li><code>image</code>:  图像路径。</li>\r     <li><code>channels</code>:  由 r、g、b、a 任意组合而成的三字符字符串，用于选择图像通道。</li>\r     <li><code>repeat</code>:  通过 x 和 y 指定图像重复次数的对象。</li>\r </ul>\r <li>AlphaMap</li>\r <ul>\r     <li><code>image</code>:  图像路径。</li>\r     <li><code>channel</code>:  取 r、g、b 或 a 的单字符字符串，用于选择图像通道。 </li>\r     <li><code>repeat</code>:  通过 x 和 y 指定图像重复次数的对象。</li>\r </ul>\r <li>SpecularMap</li>\r <ul>\r     <li><code>image</code>: 图像路径。</li>\r     <li><code>channel</code>: 取 r、g、b 或 a 的单字符字符串，用于选择图像通道。 </li>\r     <li><code>repeat</code>: 通过 x 和 y 指定图像重复次数的对象。</li>\r </ul>\r <li>EmissionMap</li>\r <ul>\r     <li><code>image</code>:  图像路径。</li>\r     <li><code>channels</code>:  由 r、g、b、a 任意组合而成的三字符字符串，用于选择图像通道。 </li>\r     <li><code>repeat</code>:  通过 x 和 y 指定图像重复次数的对象。</li>\r </ul>\r <li>BumpMap</li>\r <ul>\r     <li><code>image</code>:  图像路径。</li>\r     <li><code>channel</code>:  取 r、g、b 或 a 的单字符字符串，用于选择图像通道。 </li>\r     <li><code>repeat</code>:  通过 x 和 y 指定图像重复次数的对象。</li>\r     <li><code>strength</code>:  凹凸强度，范围为 0.0 到 1.0；0.0 表示轻微凹凸，1.0 表示明显凹凸。</li>\r </ul>\r <li>NormalMap</li>\r <ul>\r     <li><code>image</code>:  图像路径。</li>\r     <li><code>channels</code>:  由 r、g、b、a 任意组合而成的三字符字符串，用于选择图像通道。 </li>\r     <li><code>repeat</code>:  通过 x 和 y 指定图像重复次数的对象。</li>\r     <li><code>strength</code>:  凹凸强度，范围为 0.0 到 1.0；0.0 表示轻微凹凸，1.0 表示明显凹凸。</li>\r </ul>\r <li>Grid</li>\r <ul>\r     <li><code>color</code>:  整个材质的 RGBA 颜色对象。</li>\r     <li><code>cellAlpha</code>: 网格线之间单元格的 alpha 值，会与 color.alpha 组合。</li>\r     <li><code>lineCount</code>:  通过 x 和 y 分别指定列数和行数的对象。</li>\r     <li><code>lineThickness</code>:  通过 x 和 y 指定网格线宽的对象，在可用时以像素为单位。</li>\r     <li><code>lineOffset</code>:  通过 x 和 y 指定网格线偏移的对象，取值范围为 0 到 1。</li>\r </ul>\r <li>Stripe</li>\r <ul>\r     <li><code>horizontal</code>:  决定条纹采用水平方向还是垂直方向的布尔值。</li>\r     <li><code>evenColor</code>:  条纹第一种颜色的 RGBA 对象。</li>\r     <li><code>oddColor</code>:  条纹第二种颜色的 RGBA 对象。</li>\r     <li><code>offset</code>:  控制从图案何处开始绘制的数值：0.0 为偶数条纹颜色的起点，1.0 为奇数条纹颜色的起点，2.0 再次回到偶数条纹颜色；其他整数或小数值依此对应。</li>\r     <li><code>repeat</code>:  控制条纹总数的数值，其中一半为亮条纹，一半为暗条纹。</li>\r </ul>\r <li>Checkerboard</li>\r <ul>\r     <li><code>lightColor</code>:  棋盘格浅色部分的 RGBA 颜色对象。</li>\r     <li><code>darkColor</code>: 棋盘格深色部分的 RGBA 颜色对象。</li>\r     <li><code>repeat</code>:  通过 x 和 y 分别指定列数和行数的对象。</li>\r </ul>\r <li>Dot</li>\r <ul>\r     <li><code>lightColor</code>:  圆点的 RGBA 颜色对象。</li>\r     <li><code>darkColor</code>:  背景的 RGBA 颜色对象。</li>\r     <li><code>repeat</code>:  通过 x 和 y 分别指定圆点列数和行数的对象。</li>\r </ul>\r <li>Water</li>\r <ul>\r     <li><code>baseWaterColor</code>:  水面基础颜色的 RGBA 对象。</li>\r     <li><code>blendColor</code>:  从水域向非水域混合过渡时使用的 RGBA 颜色对象。</li>\r     <li><code>specularMap</code>:  标识水域的单通道纹理。</li>\r     <li><code>normalMap</code>:  用于扰动水面法线的法线贴图。</li>\r     <li><code>frequency</code>:  控制波浪数量的数值。</li>\r     <li><code>animationSpeed</code>:  控制水面动画速度的数值。</li>\r     <li><code>amplitude</code>:  控制水面波幅的数值。</li>\r     <li><code>specularIntensity</code>:  控制镜面反射强度的数值。</li>\r </ul>\r <li>RimLighting</li>\r <ul>\r     <li><code>color</code>:  漫反射颜色和 alpha。</li>\r     <li><code>rimColor</code>:  边缘的漫反射颜色和 alpha。</li>\r     <li><code>width</code>:  决定边缘宽度的数值。</li>\r </ul>\r <li>Fade</li>\r <ul>\r     <li><code>fadeInColor</code>: 在 <code>time</code> 位置的漫反射颜色和 alpha。</li>\r     <li><code>fadeOutColor</code>: 在距 <code>time</code> 为 <code>maximumDistance</code> 的位置的漫反射颜色和 alpha。</li>\r     <li><code>maximumDistance</code>: 0.0 到 1.0 的数值，决定 <code>fadeInColor</code> 过渡到 <code>fadeOutColor</code> 的距离。为 0.0 时整个材质采用 <code>fadeOutColor</code>，为 1.0 时整个材质采用 <code>fadeInColor</code>。</li>\r     <li><code>repeat</code>: 为 true 时，渐隐在纹理坐标上循环。</li>\r     <li><code>fadeDirection</code>: 通过 x 和 y 分别指定是否在相应方向启用渐隐的对象。</li>\r     <li><code>time</code>: 通过 0.0 到 1.0 范围内的 x 和 y 指定 <code>fadeInColor</code> 位置的对象。</li>\r </ul>\r <li>PolylineArrow</li>\r <ul>\r     <li><code>color</code>: 漫反射颜色和 alpha。</li>\r </ul>\r <li>PolylineDash</li>\r <ul>\r     <li><code>color</code>: 线条颜色。</li>\r     <li><code>gapColor</code>: 线条间隙颜色。</li>\r     <li><code>dashLength</code>: 虚线段长度，单位为像素。</li>\r     <li><code>dashPattern</code>: 线条的 16 位点划图案。</li>\r </ul>\r <li>PolylineGlow</li>\r <ul>\r     <li><code>color</code>: 线条发光的颜色和最大 alpha。</li>\r     <li><code>glowPower</code>: 发光强度，以总线宽的比例表示，小于 1.0。</li>\r     <li><code>taperPower</code>: 渐细效果的强度，以总线长的比例表示。为 1.0 或更大时禁用渐细。</li>\r </ul>\r <li>PolylineOutline</li>\r <ul>\r     <li><code>color</code>: 线条内部的漫反射颜色和 alpha。</li>\r     <li><code>outlineColor</code>: 轮廓的漫反射颜色和 alpha。</li>\r     <li><code>outlineWidth</code>: 轮廓宽度，单位为像素。</li>\r </ul>\r <li>ElevationContour</li>\r <ul>\r     <li><code>color</code>: 等高线颜色和 alpha。</li>\r     <li><code>spacing</code>: 等高线间距，单位为米。</li>\r     <li><code>width</code>: 线条宽度，单位为像素。</li>\r </ul>\r <li>ElevationRamp</li>\r <ul>\r     <li><code>image</code>: 为地形着色所用的色带图像。</li>\r     <li><code>minimumHeight</code>: 色带的最低高度。</li>\r     <li><code>maximumHeight</code>: 色带的最高高度。</li>\r </ul>\r <li>SlopeRamp</li>\r <ul>\r     <li><code>image</code>: 按坡度为地形着色所用的色带图像。</li>\r </ul>\r <li>AspectRamp</li>\r <ul>\r     <li><code>image</code>: 按坡向为地形着色所用的色带图像。</li>\r </ul>\r <li>ElevationBand</li>\r <ul>\r     <li><code>heights</code>: 按从低到高排序的高度图像。</li>\r     <li><code>colors</code>: 对应各高度的颜色图像。</li>\r</ul>\r<li>WaterMask</li>\r<ul>\r     <li><code>waterColor</code>: 水域覆盖区域的漫反射颜色和 alpha。</li>\r     <li><code>landColor</code>: 陆地区域的漫反射颜色和 alpha。</li>\r</ul>\r</ul>\r</ul>\r</div>"
+    },
+    {
+      "id": "Material",
+      "field": "exceptions/0/description",
+      "sourceHash": "sha256:fdad3b03d5ab0a4304c2f9d4099272485867ad37c70f7e2c8e2d7d10b60daceb",
+      "text": "fabric：uniform 类型无效。"
+    },
+    {
+      "id": "Material",
+      "field": "exceptions/1/description",
+      "sourceHash": "sha256:54affc72210405b873f4d9f86fe73fa0245cb48b12b742a595b0e8fdc5937030",
+      "text": "fabric：uniforms 和 materials 不能使用同名属性。"
+    },
+    {
+      "id": "Material",
+      "field": "exceptions/2/description",
+      "sourceHash": "sha256:693bf834bb9b134def02d69b61a58e5b6bd52a6bfc5a7b4a141b77918549a992",
+      "text": "fabric：同一区段不能同时包含 source 和 components。"
+    },
+    {
+      "id": "Material",
+      "field": "exceptions/3/description",
+      "sourceHash": "sha256:52ebd1742813341a12efb270d1f197760a959e805bcee7c63c50cf1ab0f0bae0",
+      "text": "fabric：属性名无效，应为 'type'、'materials'、'uniforms'、'components' 或 'source'。"
+    },
+    {
+      "id": "Material",
+      "field": "exceptions/4/description",
+      "sourceHash": "sha256:22190cfb8ece52e6e502ec4c1d35a77e2c46d0528222fd331661868bd73eb496",
+      "text": "fabric：属性名无效，应为 'diffuse'、'specular'、'shininess'、'normal'、'emission' 或 'alpha'。"
+    },
+    {
+      "id": "Material",
+      "field": "exceptions/5/description",
+      "sourceHash": "sha256:c4badadea8ab100191d4141243273040b1e22b2ec7641b5277ffddc16ebe68ab",
+      "text": "strict：着色器源码未使用指定字符串。"
+    },
+    {
+      "id": "Material",
+      "field": "exceptions/6/description",
+      "sourceHash": "sha256:d4acb83d7f4f9645f095b3c75e616c5bb23dd0325a885c12f98b7b3dc134f34b",
+      "text": "strict：着色器源码未使用指定 uniform。"
+    },
+    {
+      "id": "Material",
+      "field": "exceptions/7/description",
+      "sourceHash": "sha256:fb4811625dee53a914cdfc6c44fa052acb5dceb199ea2693559e15d532dd009b",
+      "text": "strict：着色器源码未使用指定材质。"
+    },
+    {
+      "id": "Material",
+      "field": "params/options.fabric/description",
+      "sourceHash": "sha256:7b5f79a65e00542bf352efb395cf89067c084825f68c6786c2005b0c7f0a6bda",
+      "text": "用于生成材质的 fabric JSON。"
+    },
+    {
+      "id": "Material",
+      "field": "params/options.magnificationFilter/description",
+      "sourceHash": "sha256:48fb3fe75127feb5f97cfd30d1d876f4c45939447a8d0d32f4e8ef16762f4da2",
+      "text": "应用到材质纹理的 {@link TextureMagnificationFilter}。"
+    },
+    {
+      "id": "Material",
+      "field": "params/options.minificationFilter/description",
+      "sourceHash": "sha256:4b764b489aa725e1e0284e8c4f5a1dc91a2de6534b6ddc8e7e54aece65be958b",
+      "text": "应用到材质纹理的 {@link TextureMinificationFilter}。"
+    },
+    {
+      "id": "Material",
+      "field": "params/options.strict/description",
+      "sourceHash": "sha256:c58c8e04e2918121b5142d6899ab2985024b0a466256008834192d5f530a5a9a",
+      "text": "对通常会被忽略的问题抛出错误，包括未使用的 uniform 或材质。"
+    },
+    {
+      "id": "Material",
+      "field": "params/options.translucent/description",
+      "sourceHash": "sha256:b678e56015e3e07d88b8082ac64e620996acdee5bfbd0bc8e797474c641e3e72",
+      "text": "为 <code>true</code>，或为返回 <code>true</code> 的函数时，预期使用此材质的几何体呈现半透明效果。"
+    },
+    {
+      "id": "Material#destroy",
+      "field": "description",
+      "sourceHash": "sha256:b385add820d9f47d540aad147f1cdf85f05e8c6cb81c3928a59c8fd5f7bd8d69",
+      "text": "销毁此对象持有的 WebGL 资源。显式销毁可确定地释放 WebGL 资源，而不依赖垃圾回收器回收此对象。<br /><br />对象销毁后不应再使用；调用除 <code>isDestroyed</code> 以外的任何函数都会抛出 {@link DeveloperError}。因此，应像示例中那样将返回值（<code>undefined</code>）赋给该对象变量。"
+    },
+    {
+      "id": "Material#isDestroyed",
+      "field": "description",
+      "sourceHash": "sha256:aea7b697937631c90ae3fc0ec55b81ba0ddc7abe4d6045848b2031f9bed60091",
+      "text": "若此对象已销毁，返回 true；否则返回 false。<br /><br />对象销毁后不应再使用；调用除 <code>isDestroyed</code> 以外的任何函数都会抛出 {@link DeveloperError}。"
+    },
+    {
+      "id": "Material#isTranslucent",
+      "field": "description",
+      "sourceHash": "sha256:bf4bfdd3f50014368e2bdf66fe3cdc24904545d19d1905bd2025c7e3938f6e3f",
+      "text": "获取材质是否为半透明。"
+    },
+    {
+      "id": "Material#isTranslucent",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:90478f1f0e3da43067f11ec5616604b6cda7a71844c86b18412d43251486e8ee",
+      "text": "材质为半透明时为 <code>true</code>，否则为 <code>false</code>。"
+    },
+    {
+      "id": "Material#magnificationFilter",
+      "field": "description",
+      "sourceHash": "sha256:48fb3fe75127feb5f97cfd30d1d876f4c45939447a8d0d32f4e8ef16762f4da2",
+      "text": "应用到材质纹理的 {@link TextureMagnificationFilter}。"
+    },
+    {
+      "id": "Material#materials",
+      "field": "description",
+      "sourceHash": "sha256:e7a01bc8111fc10b8e8f42029b4e8ef9c6b1583fb8e53ab9bc7cbc0ead9ba964",
+      "text": "子材质名称到 Material 对象的映射。"
+    },
+    {
+      "id": "Material#minificationFilter",
+      "field": "description",
+      "sourceHash": "sha256:4b764b489aa725e1e0284e8c4f5a1dc91a2de6534b6ddc8e7e54aece65be958b",
+      "text": "应用到材质纹理的 {@link TextureMinificationFilter}。"
+    },
+    {
+      "id": "Material#shaderSource",
+      "field": "description",
+      "sourceHash": "sha256:d58bf17fc77d1871fe047b79c719005a39e56e31599a65dde10b75382d9dab74",
+      "text": "材质的 GLSL 着色器源码。"
+    },
+    {
+      "id": "Material#translucent",
+      "field": "description",
+      "sourceHash": "sha256:db5ab343e2a90f7b4cad9a69d20ac570214f7d90b2e247ece8d8dec3c1efab33",
+      "text": "为 <code>true</code>，或为返回 <code>true</code> 的函数时，预期几何体呈现半透明效果。"
+    },
+    {
+      "id": "Material#type",
+      "field": "description",
+      "sourceHash": "sha256:7c742a681216ead398b3ec259111e76dd2175f629da52477ccee876da51cd67a",
+      "text": "材质类型，可以是已有类型或新类型。fabric 未指定类型时，使用 GUID 作为类型。"
+    },
+    {
+      "id": "Material#uniforms",
+      "field": "description",
+      "sourceHash": "sha256:2e60a7d7797c5e728ffa1e6fcf961c3ae41daa388b7fcc5def1323949e88b12b",
+      "text": "uniform 名称到其值的映射。"
+    },
+    {
+      "id": "MaterialAppearance.MaterialSupport.ALL",
+      "field": "description",
+      "sourceHash": "sha256:5eece08d98d59aa6aa51fcf1cb37365114c63616990204eed867c40860324b55",
+      "text": "支持所有材质，包括在切线空间中工作的材质。要求顶点包含 <code>position</code>、<code>normal</code>、<code>st</code>、<code>tangent</code> 和 <code>bitangent</code> 属性。"
+    },
+    {
+      "id": "MaterialAppearance.MaterialSupport.BASIC",
+      "field": "description",
+      "sourceHash": "sha256:2e51b8a63e4e36aa0d00c1219eae582eeae22f761c6642199a1405c9f71da377",
+      "text": "仅支持基础材质，只要求顶点包含 <code>position</code> 和 <code>normal</code> 属性。"
+    },
+    {
+      "id": "MaterialAppearance.MaterialSupport.TEXTURED",
+      "field": "description",
+      "sourceHash": "sha256:e1573188eb686d6cb60062c2e2f343ee79f81e092fed227aba2c6659f9cb6185",
+      "text": "支持带纹理的材质，要求顶点包含 <code>position</code>、<code>normal</code> 和 <code>st</code> 属性。绝大多数材质属于此类。"
+    },
+    {
+      "id": "MaterialAppearance.MaterialSupport",
+      "field": "description",
+      "sourceHash": "sha256:1c394d723f1e01163e89206153e77476120161519a772028c4ee1510cb801f38",
+      "text": "确定 {@link Material} 的支持类型，供 {@link MaterialAppearance} 实例使用。需要在材质灵活性与内存和性能之间权衡，后者取决于所需顶点格式及 GLSL 着色器复杂度。"
+    },
+    {
+      "id": "MaterialAppearance",
+      "field": "description",
+      "sourceHash": "sha256:95b8893571a8c8e6daebcb8c5954e56c199ddb59713c17e77ab5016f6b626320",
+      "text": "支持材质着色、适用于任意几何体的外观，例如不像 {@link EllipsoidSurfaceAppearance} 那样对几何类型有特定要求。"
+    },
+    {
+      "id": "MaterialAppearance",
+      "field": "params/options.closed/description",
+      "sourceHash": "sha256:c1593aa682addd95bc431b49a061955b84d3722abb7053eb4a0b31c7e26c270f",
+      "text": "为 <code>true</code> 时，预期几何体为封闭体，因此 {@link MaterialAppearance#renderState} 会启用背面剔除。"
+    },
+    {
+      "id": "MaterialAppearance",
+      "field": "params/options.faceForward/description",
+      "sourceHash": "sha256:1ec2a6869752c477e667c4e744a3c9f85bba035f1005596ba0072f2e5174d663",
+      "text": "为 <code>true</code> 时，片元着色器会按需翻转表面法线，使其朝向观察者，避免出现暗斑。适用于 {@link WallGeometry} 等需要两面着色的几何体。"
+    },
+    {
+      "id": "MaterialAppearance",
+      "field": "params/options.flat/description",
+      "sourceHash": "sha256:c16b30881cc0baf020c985ec5e308f26a8729111aad25a4437d8ecf8200ef703",
+      "text": "为 <code>true</code> 时，片元着色器采用不考虑光照的平面着色。"
+    },
+    {
+      "id": "MaterialAppearance",
+      "field": "params/options.fragmentShaderSource/description",
+      "sourceHash": "sha256:55a3a259077f32865c1f0022953c784fdd7a3b629d36aa7f367f55bf89b3da9a",
+      "text": "可选的 GLSL 片元着色器源码，用于覆盖默认片元着色器。"
+    },
+    {
+      "id": "MaterialAppearance",
+      "field": "params/options.material/description",
+      "sourceHash": "sha256:20549e477a67f1d6e5abf904a3884df4c004caa0732c6f35afcd60bf28c8f72e",
+      "text": "用于确定片元颜色的材质。"
+    },
+    {
+      "id": "MaterialAppearance",
+      "field": "params/options.materialSupport/description",
+      "sourceHash": "sha256:ecb13afec76f93cbaddba802e470fa8ae48364086c10da1f4bb034b4d74c0faa",
+      "text": "支持的材质类型。"
+    },
+    {
+      "id": "MaterialAppearance",
+      "field": "params/options.renderState/description",
+      "sourceHash": "sha256:ac5cfe764ff1b3ff2e04730f089dba67f28c7b8a734356fce91700778abaf939",
+      "text": "可选的渲染状态，用于覆盖默认渲染状态。"
+    },
+    {
+      "id": "MaterialAppearance",
+      "field": "params/options.translucent/description",
+      "sourceHash": "sha256:ba9e31e5046caeda492898eeb491bdce588a1105e0d4dfb8a910b6caad410cc6",
+      "text": "为 <code>true</code> 时，预期几何体呈现半透明效果，因此 {@link MaterialAppearance#renderState} 会启用 alpha 混合。"
+    },
+    {
+      "id": "MaterialAppearance",
+      "field": "params/options.vertexShaderSource/description",
+      "sourceHash": "sha256:37f0e425161fe770c48d48412b0a9623d710dea59b2f27d08611790afcb081e4",
+      "text": "可选的 GLSL 顶点着色器源码，用于覆盖默认顶点着色器。"
+    },
+    {
+      "id": "MaterialAppearance#closed",
+      "field": "description",
+      "sourceHash": "sha256:f90ddf77196832dc7747db51d5dcce5076c3f3f4010bda10f423dc6e36ad0d9f",
+      "text": "为 <code>true</code> 时，预期几何体为封闭体，因此 {@link MaterialAppearance#renderState} 会启用背面剔除。观察者进入几何体内部后，将看不到它。"
+    },
+    {
+      "id": "MaterialAppearance#faceForward",
+      "field": "description",
+      "sourceHash": "sha256:5c8c38e47835f8dafec493ff17ac724634e5ac8f915fc7e946dc7f216436cf81",
+      "text": "为 <code>true</code> 时，片元着色器会按需翻转表面法线，使其朝向观察者，避免出现暗斑。适用于 {@link WallGeometry} 等需要两面着色的几何体。"
+    },
+    {
+      "id": "MaterialAppearance#flat",
+      "field": "description",
+      "sourceHash": "sha256:676df71602fa8b4560619eb8cf4f53770cd9e74a845f7fe0ff6a472fad6a2243",
+      "text": "为 <code>true</code> 时，片元着色器采用不考虑光照的平面着色。"
+    },
+    {
+      "id": "MaterialAppearance#fragmentShaderSource",
+      "field": "description",
+      "sourceHash": "sha256:612ce2f1e05d297d7221970f27f303589a2ff8e5919538001f25ca58c0acd4b1",
+      "text": "片元着色器的 GLSL 源码。完整源码结合 {@link MaterialAppearance#material}、{@link MaterialAppearance#flat} 和 {@link MaterialAppearance#faceForward} 动态生成。使用 {@link MaterialAppearance#getFragmentShaderSource} 获取完整源码。"
+    },
+    {
+      "id": "MaterialAppearance#getFragmentShaderSource",
+      "field": "description",
+      "sourceHash": "sha256:1056294fab306a025d20ee66ad8de7f821f1f145d36381ac900019ddd021b18f",
+      "text": "动态生成完整的 GLSL 片元着色器源码。对于 {@link MaterialAppearance}，由 {@link MaterialAppearance#fragmentShaderSource}、{@link MaterialAppearance#material}、{@link MaterialAppearance#flat} 和 {@link MaterialAppearance#faceForward} 共同生成。"
+    },
+    {
+      "id": "MaterialAppearance#getFragmentShaderSource",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:406aeb78d2d174680e2ef69481a96a15d499d2330064cb0cf84aa60de1eadaa0",
+      "text": "完整的 GLSL 片元着色器源码。"
+    },
+    {
+      "id": "MaterialAppearance#getRenderState",
+      "field": "description",
+      "sourceHash": "sha256:0aa9078201e111f9d66bce2d36c8a4d56db538f620ebefb0e500528a81a0319d",
+      "text": "创建渲染状态。这不是最终的渲染状态实例，而是包含部分渲染状态属性的对象，其属性与在上下文中创建的渲染状态一致。"
+    },
+    {
+      "id": "MaterialAppearance#getRenderState",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:f11bd8a8ec07e4689cb642b3b8ab1f00cf291fc72f8f24dc14228f8b38c9d936",
+      "text": "渲染状态。"
+    },
+    {
+      "id": "MaterialAppearance#isTranslucent",
+      "field": "description",
+      "sourceHash": "sha256:02ed63861b6a3fd37c2df6f3e2a238a7a1f7b03601bc11358e6da28028fe531f",
+      "text": "根据 {@link MaterialAppearance#translucent} 和 {@link Material#isTranslucent} 判断几何体是否为半透明。"
+    },
+    {
+      "id": "MaterialAppearance#isTranslucent",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:e044a985554663d43031562acf6f203a43ca47453c336f308fdbd4cc5ecedca2",
+      "text": "外观为半透明时为 <code>true</code>。"
+    },
+    {
+      "id": "MaterialAppearance#material",
+      "field": "description",
+      "sourceHash": "sha256:2a337f425d5b60dcc675339338eec1c2dc8f0302732803952dc03d15e2924181",
+      "text": "用于确定片元颜色的材质。与其他 {@link MaterialAppearance} 属性不同，此属性并非只读，因此可动态更改外观材质。"
+    },
+    {
+      "id": "MaterialAppearance#materialSupport",
+      "field": "description",
+      "sourceHash": "sha256:778afc0c198514c962ba059b199ca1b563798939b7c6b2c8a079098688ed0398",
+      "text": "此实例支持的材质类型，会影响所需的 {@link VertexFormat} 及顶点和片元着色器的复杂度。"
+    },
+    {
+      "id": "MaterialAppearance#renderState",
+      "field": "description",
+      "sourceHash": "sha256:36aa338273d208feb19121d772b81c30cca5516a853de0474d42ad30eb7921f3",
+      "text": "渲染几何体时使用的 WebGL 固定功能状态。\n<p>\n可在构造 {@link MaterialAppearance} 实例时显式指定，也可由 {@link MaterialAppearance#translucent} 和 {@link MaterialAppearance#closed} 隐式确定。\n</p>"
+    },
+    {
+      "id": "MaterialAppearance#translucent",
+      "field": "description",
+      "sourceHash": "sha256:b34a1faa2cea5525451c543d46d13a5077c4d476a6c1cfe4ac1df18aa82b9b86",
+      "text": "为 <code>true</code> 时，预期几何体呈现半透明效果。"
+    },
+    {
+      "id": "MaterialAppearance#vertexFormat",
+      "field": "description",
+      "sourceHash": "sha256:eaccda12c7d71705e6fd346cf42663c513d30f296c6ec7c8fc71147c3bfe1738",
+      "text": "此外观实例兼容的 {@link VertexFormat}。几何体可包含更多顶点属性，仍然兼容，但可能有额外性能开销；不能少于此格式要求的属性。"
+    },
+    {
+      "id": "MaterialAppearance#vertexShaderSource",
+      "field": "description",
+      "sourceHash": "sha256:aee56bd18237d508be47a3d6bace66d73aac7f5a5a98af14e6b44040ad6315b0",
+      "text": "顶点着色器的 GLSL 源码。"
+    },
+    {
+      "id": "PerInstanceColorAppearance.FLAT_VERTEX_FORMAT",
+      "field": "description",
+      "sourceHash": "sha256:9bcfbf80c5c2d420d010c924c755776d14cb750b0c3f3c2a3c6a08dbea1db173",
+      "text": "当 {@link PerInstanceColorAppearance#flat} 为 <code>true</code> 时，所有 {@link PerInstanceColorAppearance} 实例兼容的 {@link VertexFormat}。仅要求 <code>position</code> 属性。"
+    },
+    {
+      "id": "PerInstanceColorAppearance.VERTEX_FORMAT",
+      "field": "description",
+      "sourceHash": "sha256:23d9577150c49975db5fbec816f9ebd6ac2057eb325d5a34d108b7bf5b3af86a",
+      "text": "所有 {@link PerInstanceColorAppearance} 实例兼容的 {@link VertexFormat}，仅要求 <code>position</code> 和 <code>normal</code> 属性。"
+    },
+    {
+      "id": "PerInstanceColorAppearance",
+      "field": "description",
+      "sourceHash": "sha256:181348adb1ebb1e885b8e47684b8cf74cac3866698b0485e33977ac9803d3eab",
+      "text": "用于带颜色属性的 {@link GeometryInstance} 实例的外观。如下方示例 2 所示，可将多个颜色不同的几何实例放在同一个 {@link Primitive} 中绘制。"
+    },
+    {
+      "id": "PerInstanceColorAppearance",
+      "field": "params/options.closed/description",
+      "sourceHash": "sha256:2d7c37476ae1a1b44b558eefbc50f3849a7283620d81f3fcff7cb4b47a818184",
+      "text": "为 <code>true</code> 时，预期几何体为封闭体，因此 {@link PerInstanceColorAppearance#renderState} 会启用背面剔除。"
+    },
+    {
+      "id": "PerInstanceColorAppearance",
+      "field": "params/options.faceForward/description",
+      "sourceHash": "sha256:1ec2a6869752c477e667c4e744a3c9f85bba035f1005596ba0072f2e5174d663",
+      "text": "为 <code>true</code> 时，片元着色器会按需翻转表面法线，使其朝向观察者，避免出现暗斑。适用于 {@link WallGeometry} 等需要两面着色的几何体。"
+    },
+    {
+      "id": "PerInstanceColorAppearance",
+      "field": "params/options.flat/description",
+      "sourceHash": "sha256:c16b30881cc0baf020c985ec5e308f26a8729111aad25a4437d8ecf8200ef703",
+      "text": "为 <code>true</code> 时，片元着色器采用不考虑光照的平面着色。"
+    },
+    {
+      "id": "PerInstanceColorAppearance",
+      "field": "params/options.fragmentShaderSource/description",
+      "sourceHash": "sha256:55a3a259077f32865c1f0022953c784fdd7a3b629d36aa7f367f55bf89b3da9a",
+      "text": "可选的 GLSL 片元着色器源码，用于覆盖默认片元着色器。"
+    },
+    {
+      "id": "PerInstanceColorAppearance",
+      "field": "params/options.renderState/description",
+      "sourceHash": "sha256:ac5cfe764ff1b3ff2e04730f089dba67f28c7b8a734356fce91700778abaf939",
+      "text": "可选的渲染状态，用于覆盖默认渲染状态。"
+    },
+    {
+      "id": "PerInstanceColorAppearance",
+      "field": "params/options.translucent/description",
+      "sourceHash": "sha256:09b11c8803dc48bcad7db58511098726edfd30c6944006739fed8ae00dd8e7cb",
+      "text": "为 <code>true</code> 时，预期几何体呈现半透明效果，因此 {@link PerInstanceColorAppearance#renderState} 会启用 alpha 混合。"
+    },
+    {
+      "id": "PerInstanceColorAppearance",
+      "field": "params/options.vertexShaderSource/description",
+      "sourceHash": "sha256:37f0e425161fe770c48d48412b0a9623d710dea59b2f27d08611790afcb081e4",
+      "text": "可选的 GLSL 顶点着色器源码，用于覆盖默认顶点着色器。"
+    },
+    {
+      "id": "PerInstanceColorAppearance#closed",
+      "field": "description",
+      "sourceHash": "sha256:7691171ef19f1282d8b4db50e39d214ca322a55576f9fe3eae32524d770bfdc9",
+      "text": "为 <code>true</code> 时，预期几何体为封闭体，因此 {@link PerInstanceColorAppearance#renderState} 会启用背面剔除。观察者进入几何体内部后，将看不到它。"
+    },
+    {
+      "id": "PerInstanceColorAppearance#faceForward",
+      "field": "description",
+      "sourceHash": "sha256:5c8c38e47835f8dafec493ff17ac724634e5ac8f915fc7e946dc7f216436cf81",
+      "text": "为 <code>true</code> 时，片元着色器会按需翻转表面法线，使其朝向观察者，避免出现暗斑。适用于 {@link WallGeometry} 等需要两面着色的几何体。"
+    },
+    {
+      "id": "PerInstanceColorAppearance#flat",
+      "field": "description",
+      "sourceHash": "sha256:676df71602fa8b4560619eb8cf4f53770cd9e74a845f7fe0ff6a472fad6a2243",
+      "text": "为 <code>true</code> 时，片元着色器采用不考虑光照的平面着色。"
+    },
+    {
+      "id": "PerInstanceColorAppearance#fragmentShaderSource",
+      "field": "description",
+      "sourceHash": "sha256:871d18b230a5b0920bfbe79d782054a6aaad07023d7a6eb49ae03ed69ee796f9",
+      "text": "片元着色器的 GLSL 源码。"
+    },
+    {
+      "id": "PerInstanceColorAppearance#getFragmentShaderSource",
+      "field": "description",
+      "sourceHash": "sha256:327ac676fc63b9e0c5ac3e31edef39fd899f74c1b0eea8aa05824596623e4a94",
+      "text": "动态生成完整的 GLSL 片元着色器源码。对于 {@link PerInstanceColorAppearance}，由 {@link PerInstanceColorAppearance#fragmentShaderSource}、{@link PerInstanceColorAppearance#flat} 和 {@link PerInstanceColorAppearance#faceForward} 共同生成。"
+    },
+    {
+      "id": "PerInstanceColorAppearance#getFragmentShaderSource",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:406aeb78d2d174680e2ef69481a96a15d499d2330064cb0cf84aa60de1eadaa0",
+      "text": "完整的 GLSL 片元着色器源码。"
+    },
+    {
+      "id": "PerInstanceColorAppearance#getRenderState",
+      "field": "description",
+      "sourceHash": "sha256:0aa9078201e111f9d66bce2d36c8a4d56db538f620ebefb0e500528a81a0319d",
+      "text": "创建渲染状态。这不是最终的渲染状态实例，而是包含部分渲染状态属性的对象，其属性与在上下文中创建的渲染状态一致。"
+    },
+    {
+      "id": "PerInstanceColorAppearance#getRenderState",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:f11bd8a8ec07e4689cb642b3b8ab1f00cf291fc72f8f24dc14228f8b38c9d936",
+      "text": "渲染状态。"
+    },
+    {
+      "id": "PerInstanceColorAppearance#isTranslucent",
+      "field": "description",
+      "sourceHash": "sha256:5030e3a322160ae2bbb5883b0f948e3a656341911b2db6b435dc19cd33d1f73b",
+      "text": "根据 {@link PerInstanceColorAppearance#translucent} 判断几何体是否为半透明。"
+    },
+    {
+      "id": "PerInstanceColorAppearance#isTranslucent",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:e044a985554663d43031562acf6f203a43ca47453c336f308fdbd4cc5ecedca2",
+      "text": "外观为半透明时为 <code>true</code>。"
+    },
+    {
+      "id": "PerInstanceColorAppearance#material",
+      "field": "description",
+      "sourceHash": "sha256:ed62c9c97fee8c9263e5eeb34269a7dcf8d23ff96f0b8d50c7275261c93e8827",
+      "text": "此属性属于 {@link Appearance} 接口，但 {@link PerInstanceColorAppearance} 使用完全自定义的片元着色器，因此不使用此属性。"
+    },
+    {
+      "id": "PerInstanceColorAppearance#renderState",
+      "field": "description",
+      "sourceHash": "sha256:1077077d8fb43ae88b580ae38974f644f954b8a0c49e23d91914e90c3cd15647",
+      "text": "渲染几何体时使用的 WebGL 固定功能状态。\n<p>\n可在构造 {@link PerInstanceColorAppearance} 实例时显式指定，也可由 {@link PerInstanceColorAppearance#translucent} 和 {@link PerInstanceColorAppearance#closed} 隐式确定。\n</p>"
+    },
+    {
+      "id": "PerInstanceColorAppearance#translucent",
+      "field": "description",
+      "sourceHash": "sha256:815738af55a13ae2189561dd1dc2f2eb1e1951f1eafd868f4bf3db57b0c545a9",
+      "text": "为 <code>true</code> 时，预期几何体呈现半透明效果，因此 {@link PerInstanceColorAppearance#renderState} 会启用 alpha 混合。"
+    },
+    {
+      "id": "PerInstanceColorAppearance#vertexFormat",
+      "field": "description",
+      "sourceHash": "sha256:eaccda12c7d71705e6fd346cf42663c513d30f296c6ec7c8fc71147c3bfe1738",
+      "text": "此外观实例兼容的 {@link VertexFormat}。几何体可包含更多顶点属性，仍然兼容，但可能有额外性能开销；不能少于此格式要求的属性。"
+    },
+    {
+      "id": "PerInstanceColorAppearance#vertexShaderSource",
+      "field": "description",
+      "sourceHash": "sha256:aee56bd18237d508be47a3d6bace66d73aac7f5a5a98af14e6b44040ad6315b0",
+      "text": "顶点着色器的 GLSL 源码。"
+    },
+    {
+      "id": "PolylineColorAppearance.VERTEX_FORMAT",
+      "field": "description",
+      "sourceHash": "sha256:0f72ad50f1661ce32d2fae2965c2a46478707ed49911b48665cfec9efc7033ed",
+      "text": "所有 {@link PolylineColorAppearance} 实例兼容的 {@link VertexFormat}，仅要求 <code>position</code> 属性。"
+    },
+    {
+      "id": "PolylineColorAppearance",
+      "field": "description",
+      "sourceHash": "sha256:29e85fe0f78fe78a4387bad6daa01f839feba136a9d8fb18798debe7b59c9112",
+      "text": "用于带颜色属性的 {@link GeometryInstance} 实例，以及 {@link PolylineGeometry} 或 {@link GroundPolylineGeometry} 的外观。可将多个颜色不同的几何实例放在同一个 {@link Primitive} 中绘制。"
+    },
+    {
+      "id": "PolylineColorAppearance",
+      "field": "params/options.fragmentShaderSource/description",
+      "sourceHash": "sha256:55a3a259077f32865c1f0022953c784fdd7a3b629d36aa7f367f55bf89b3da9a",
+      "text": "可选的 GLSL 片元着色器源码，用于覆盖默认片元着色器。"
+    },
+    {
+      "id": "PolylineColorAppearance",
+      "field": "params/options.renderState/description",
+      "sourceHash": "sha256:ac5cfe764ff1b3ff2e04730f089dba67f28c7b8a734356fce91700778abaf939",
+      "text": "可选的渲染状态，用于覆盖默认渲染状态。"
+    },
+    {
+      "id": "PolylineColorAppearance",
+      "field": "params/options.translucent/description",
+      "sourceHash": "sha256:5555794a70e552236d704dac2791b172d0a929e4e03e6bfbfd95dcecde6597c5",
+      "text": "为 <code>true</code> 时，预期几何体呈现半透明效果，因此 {@link PolylineColorAppearance#renderState} 会启用 alpha 混合。"
+    },
+    {
+      "id": "PolylineColorAppearance",
+      "field": "params/options.vertexShaderSource/description",
+      "sourceHash": "sha256:37f0e425161fe770c48d48412b0a9623d710dea59b2f27d08611790afcb081e4",
+      "text": "可选的 GLSL 顶点着色器源码，用于覆盖默认顶点着色器。"
+    },
+    {
+      "id": "PolylineColorAppearance#closed",
+      "field": "description",
+      "sourceHash": "sha256:ab6c4883872393999df3607c0bab231580c5711bbf075bba2df43cf63f1e7b85",
+      "text": "为 <code>true</code> 时，预期几何体为封闭体，因此 {@link PolylineColorAppearance#renderState} 会启用背面剔除。对于 <code>PolylineColorAppearance</code>，此属性始终为 <code>false</code>。"
+    },
+    {
+      "id": "PolylineColorAppearance#fragmentShaderSource",
+      "field": "description",
+      "sourceHash": "sha256:871d18b230a5b0920bfbe79d782054a6aaad07023d7a6eb49ae03ed69ee796f9",
+      "text": "片元着色器的 GLSL 源码。"
+    },
+    {
+      "id": "PolylineColorAppearance#getFragmentShaderSource",
+      "field": "description",
+      "sourceHash": "sha256:c99248da11fb140454898c049604da4210f7c56e98837afe8e4753fa86698608",
+      "text": "动态生成完整的 GLSL 片元着色器源码。"
+    },
+    {
+      "id": "PolylineColorAppearance#getFragmentShaderSource",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:406aeb78d2d174680e2ef69481a96a15d499d2330064cb0cf84aa60de1eadaa0",
+      "text": "完整的 GLSL 片元着色器源码。"
+    },
+    {
+      "id": "PolylineColorAppearance#getRenderState",
+      "field": "description",
+      "sourceHash": "sha256:0aa9078201e111f9d66bce2d36c8a4d56db538f620ebefb0e500528a81a0319d",
+      "text": "创建渲染状态。这不是最终的渲染状态实例，而是包含部分渲染状态属性的对象，其属性与在上下文中创建的渲染状态一致。"
+    },
+    {
+      "id": "PolylineColorAppearance#getRenderState",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:f11bd8a8ec07e4689cb642b3b8ab1f00cf291fc72f8f24dc14228f8b38c9d936",
+      "text": "渲染状态。"
+    },
+    {
+      "id": "PolylineColorAppearance#isTranslucent",
+      "field": "description",
+      "sourceHash": "sha256:24f8cc884ce507317956de8da6d0c0e593bf512d495d3891187a92293ae2e801",
+      "text": "根据 {@link PolylineColorAppearance#translucent} 判断几何体是否为半透明。"
+    },
+    {
+      "id": "PolylineColorAppearance#isTranslucent",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:e044a985554663d43031562acf6f203a43ca47453c336f308fdbd4cc5ecedca2",
+      "text": "外观为半透明时为 <code>true</code>。"
+    },
+    {
+      "id": "PolylineColorAppearance#material",
+      "field": "description",
+      "sourceHash": "sha256:e94584131ef7554db64fc8b9f9f2a308753fd23b49b5583f8f457a867aa14892",
+      "text": "此属性属于 {@link Appearance} 接口，但 {@link PolylineColorAppearance} 使用完全自定义的片元着色器，因此不使用此属性。"
+    },
+    {
+      "id": "PolylineColorAppearance#renderState",
+      "field": "description",
+      "sourceHash": "sha256:679d27ffd32815ddb5c907eb8c88d731ab8dcb5ee0d6cb60e2090283c50cecff",
+      "text": "渲染几何体时使用的 WebGL 固定功能状态。\n<p>\n可在构造 {@link PolylineColorAppearance} 实例时显式指定，也可由 {@link PolylineColorAppearance#translucent} 隐式确定。\n</p>"
+    },
+    {
+      "id": "PolylineColorAppearance#translucent",
+      "field": "description",
+      "sourceHash": "sha256:2e45b742aa4772c08780f04d49774b3394ef41f8f5f2891d573935653f7dd458",
+      "text": "为 <code>true</code> 时，预期几何体呈现半透明效果，因此 {@link PolylineColorAppearance#renderState} 会启用 alpha 混合。"
+    },
+    {
+      "id": "PolylineColorAppearance#vertexFormat",
+      "field": "description",
+      "sourceHash": "sha256:eaccda12c7d71705e6fd346cf42663c513d30f296c6ec7c8fc71147c3bfe1738",
+      "text": "此外观实例兼容的 {@link VertexFormat}。几何体可包含更多顶点属性，仍然兼容，但可能有额外性能开销；不能少于此格式要求的属性。"
+    },
+    {
+      "id": "PolylineColorAppearance#vertexShaderSource",
+      "field": "description",
+      "sourceHash": "sha256:aee56bd18237d508be47a3d6bace66d73aac7f5a5a98af14e6b44040ad6315b0",
+      "text": "顶点着色器的 GLSL 源码。"
+    },
+    {
+      "id": "PolylineMaterialAppearance.VERTEX_FORMAT",
+      "field": "description",
+      "sourceHash": "sha256:dbf61984304966e095fce8b103cc298761177f3214b8d439ef80932a8fb6c538",
+      "text": "所有 {@link PolylineMaterialAppearance} 实例兼容的 {@link VertexFormat}，要求 <code>position</code> 和 <code>st</code> 属性。"
+    },
+    {
+      "id": "PolylineMaterialAppearance",
+      "field": "description",
+      "sourceHash": "sha256:45f1fc7c23b6d2b069d8cd49e58a55d0a31beebb20edd12079f6e67ab677d86c",
+      "text": "支持材质着色的 {@link PolylineGeometry} 外观。"
+    },
+    {
+      "id": "PolylineMaterialAppearance",
+      "field": "params/options.fragmentShaderSource/description",
+      "sourceHash": "sha256:55a3a259077f32865c1f0022953c784fdd7a3b629d36aa7f367f55bf89b3da9a",
+      "text": "可选的 GLSL 片元着色器源码，用于覆盖默认片元着色器。"
+    },
+    {
+      "id": "PolylineMaterialAppearance",
+      "field": "params/options.material/description",
+      "sourceHash": "sha256:20549e477a67f1d6e5abf904a3884df4c004caa0732c6f35afcd60bf28c8f72e",
+      "text": "用于确定片元颜色的材质。"
+    },
+    {
+      "id": "PolylineMaterialAppearance",
+      "field": "params/options.renderState/description",
+      "sourceHash": "sha256:ac5cfe764ff1b3ff2e04730f089dba67f28c7b8a734356fce91700778abaf939",
+      "text": "可选的渲染状态，用于覆盖默认渲染状态。"
+    },
+    {
+      "id": "PolylineMaterialAppearance",
+      "field": "params/options.translucent/description",
+      "sourceHash": "sha256:adef8246773ea676e33304d9fca74c97014147c78890ad02df0dfca758ab40b9",
+      "text": "为 <code>true</code> 时，预期几何体呈现半透明效果，因此 {@link PolylineMaterialAppearance#renderState} 会启用 alpha 混合。"
+    },
+    {
+      "id": "PolylineMaterialAppearance",
+      "field": "params/options.vertexShaderSource/description",
+      "sourceHash": "sha256:37f0e425161fe770c48d48412b0a9623d710dea59b2f27d08611790afcb081e4",
+      "text": "可选的 GLSL 顶点着色器源码，用于覆盖默认顶点着色器。"
+    },
+    {
+      "id": "PolylineMaterialAppearance#closed",
+      "field": "description",
+      "sourceHash": "sha256:91c0d1b3dd4dfbede516da482e33c80adaf346a24ff1ed82a193637359704878",
+      "text": "为 <code>true</code> 时，预期几何体为封闭体，因此 {@link PolylineMaterialAppearance#renderState} 会启用背面剔除。对于 <code>PolylineMaterialAppearance</code>，此属性始终为 <code>false</code>。"
+    },
+    {
+      "id": "PolylineMaterialAppearance#fragmentShaderSource",
+      "field": "description",
+      "sourceHash": "sha256:871d18b230a5b0920bfbe79d782054a6aaad07023d7a6eb49ae03ed69ee796f9",
+      "text": "片元着色器的 GLSL 源码。"
+    },
+    {
+      "id": "PolylineMaterialAppearance#getFragmentShaderSource",
+      "field": "description",
+      "sourceHash": "sha256:884a9cf3a9776f5a86e38842367e35a02b0b4029647e7793b001dfb4d5371cc5",
+      "text": "动态生成完整的 GLSL 片元着色器源码。对于 {@link PolylineMaterialAppearance}，由 {@link PolylineMaterialAppearance#fragmentShaderSource} 和 {@link PolylineMaterialAppearance#material} 共同生成。"
+    },
+    {
+      "id": "PolylineMaterialAppearance#getFragmentShaderSource",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:406aeb78d2d174680e2ef69481a96a15d499d2330064cb0cf84aa60de1eadaa0",
+      "text": "完整的 GLSL 片元着色器源码。"
+    },
+    {
+      "id": "PolylineMaterialAppearance#getRenderState",
+      "field": "description",
+      "sourceHash": "sha256:0aa9078201e111f9d66bce2d36c8a4d56db538f620ebefb0e500528a81a0319d",
+      "text": "创建渲染状态。这不是最终的渲染状态实例，而是包含部分渲染状态属性的对象，其属性与在上下文中创建的渲染状态一致。"
+    },
+    {
+      "id": "PolylineMaterialAppearance#getRenderState",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:f11bd8a8ec07e4689cb642b3b8ab1f00cf291fc72f8f24dc14228f8b38c9d936",
+      "text": "渲染状态。"
+    },
+    {
+      "id": "PolylineMaterialAppearance#isTranslucent",
+      "field": "description",
+      "sourceHash": "sha256:b7cb976ac6e4680ad5a8316524ea0cfae3e3ea1f30e04ef0e6a7fd88445b8344",
+      "text": "根据 {@link PolylineMaterialAppearance#translucent} 和 {@link Material#isTranslucent} 判断几何体是否为半透明。"
+    },
+    {
+      "id": "PolylineMaterialAppearance#isTranslucent",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:e044a985554663d43031562acf6f203a43ca47453c336f308fdbd4cc5ecedca2",
+      "text": "外观为半透明时为 <code>true</code>。"
+    },
+    {
+      "id": "PolylineMaterialAppearance#material",
+      "field": "description",
+      "sourceHash": "sha256:ca4f9ebd73689fe10f0deda93e338215b3b64e240537e7e971312d06a6cb9329",
+      "text": "用于确定片元颜色的材质。与其他 {@link PolylineMaterialAppearance} 属性不同，此属性并非只读，因此可动态更改外观材质。"
+    },
+    {
+      "id": "PolylineMaterialAppearance#renderState",
+      "field": "description",
+      "sourceHash": "sha256:ebe64015d23969ab2a09d4e9f209f46768a4b1e9a4be6043eb63e809b3c63fe9",
+      "text": "渲染几何体时使用的 WebGL 固定功能状态。\n<p>\n可在构造 {@link PolylineMaterialAppearance} 实例时显式指定，也可由 {@link PolylineMaterialAppearance#translucent} 和 {@link PolylineMaterialAppearance#closed} 隐式确定。\n</p>"
+    },
+    {
+      "id": "PolylineMaterialAppearance#translucent",
+      "field": "description",
+      "sourceHash": "sha256:19c3b18c9baf77032d507b9007285ddbf7c43b0f2126bfa65197232b3d1f1aaa",
+      "text": "为 <code>true</code> 时，预期几何体呈现半透明效果，因此 {@link PolylineMaterialAppearance#renderState} 会启用 alpha 混合。"
+    },
+    {
+      "id": "PolylineMaterialAppearance#vertexFormat",
+      "field": "description",
+      "sourceHash": "sha256:eaccda12c7d71705e6fd346cf42663c513d30f296c6ec7c8fc71147c3bfe1738",
+      "text": "此外观实例兼容的 {@link VertexFormat}。几何体可包含更多顶点属性，仍然兼容，但可能有额外性能开销；不能少于此格式要求的属性。"
+    },
+    {
+      "id": "PolylineMaterialAppearance#vertexShaderSource",
+      "field": "description",
+      "sourceHash": "sha256:aee56bd18237d508be47a3d6bace66d73aac7f5a5a98af14e6b44040ad6315b0",
+      "text": "顶点着色器的 GLSL 源码。"
+    }
+  ]
+}

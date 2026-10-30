@@ -74,6 +74,86 @@ const roots = new Set([
   "TilingScheme",
   "GeographicTilingScheme",
   "WebMercatorTilingScheme",
+  "Model",
+  "ModelFeature",
+  "ModelNode",
+  "ModelAnimation",
+  "ModelAnimationCollection",
+  "ModelAnimationLoop",
+  "Billboard",
+  "BillboardCollection",
+  "Label",
+  "LabelCollection",
+  "LabelStyle",
+  "HorizontalOrigin",
+  "VerticalOrigin",
+  "PointPrimitive",
+  "PointPrimitiveCollection",
+  "Polyline",
+  "PolylineCollection",
+  "Appearance",
+  "Material",
+  "MaterialAppearance",
+  "EllipsoidSurfaceAppearance",
+  "PerInstanceColorAppearance",
+  "PolylineMaterialAppearance",
+  "PolylineColorAppearance",
+  "DebugAppearance",
+  "ClassificationPrimitive",
+  "GroundPolylinePrimitive",
+  "ClippingPlane",
+  "ClippingPlaneCollection",
+  "ClippingPolygon",
+  "ClippingPolygonCollection",
+  "PostProcessStage",
+  "PostProcessStageCollection",
+  "PostProcessStageComposite",
+  "PostProcessStageLibrary",
+  "PostProcessStageSampleMode",
+  "Tonemapper",
+  "CustomShader",
+  "CustomShaderMode",
+  "CustomShaderTranslucencyMode",
+  "LightingModel",
+  "UniformType",
+  "VaryingType",
+  "TextureUniform",
+  "UniformSpecifier",
+  "Atmosphere",
+  "SkyAtmosphere",
+  "Fog",
+  "SkyBox",
+  "Sun",
+  "SunLight",
+  "Moon",
+  "DirectionalLight",
+  "Light",
+  "DynamicAtmosphereLightingType",
+  "DynamicEnvironmentMapManager",
+  "ImageBasedLighting",
+  "GlobeTranslucency",
+  "ShadowMap",
+  "ShadowMode",
+  "PointCloudShading",
+  "TimeDynamicPointCloud",
+  "ParticleSystem",
+  "Particle",
+  "ParticleBurst",
+  "ParticleEmitter",
+  "BoxEmitter",
+  "CircleEmitter",
+  "ConeEmitter",
+  "SphereEmitter",
+  "BlendOption",
+  "ClassificationType",
+  "Cesium3DTileColorBlendMode",
+  "ColorBlendMode",
+  "HeightReference",
+  "DistanceDisplayCondition",
+  "NearFarScalar",
+  "CloudCollection",
+  "CloudType",
+  "CumulusCloud",
   "ImageryProvider",
   "Terrain",
   "TerrainProvider",
@@ -209,6 +289,70 @@ test("loading and time prose preserves scheduling, context, units and interval c
   assert.match(
     childMask("QuantizedMeshTerrainData"),
     /<td>2<\/td><td>4<\/td><td>西北<\/td>/,
+  );
+});
+
+test("rendering prose preserves sizing, ownership, clipping and verified shader behavior", () => {
+  assert.match(
+    lookup.get("Billboard#sizeInMeters").description,
+    /true.*使用米.*使用像素/,
+  );
+  assert.match(lookup.get("Billboard#pixelOffset").description, /左上角/);
+  assert.match(
+    lookup.get("Model#readyEvent").description,
+    /所有纹理加载完成.*之前/,
+  );
+  assert.match(
+    lookup.get("ModelNode#matrix").description,
+    /重新赋值.*个别元素不会生效/,
+  );
+  assert.match(
+    lookup.get("CustomShader").description,
+    /应用程序负责调用此方法/,
+  );
+  assert.match(
+    lookup.get("ImageBasedLighting").description,
+    /否则应用程序负责/,
+  );
+  assert.match(
+    lookup.get("TextureUniform").params.find((p) => p.name === "options.repeat")
+      .description,
+    /false.*限制到边缘/,
+  );
+  assert.match(
+    lookup.get("ClippingPlaneCollection#unionClippingRegions").description,
+    /任意平面外侧.*全部平面外侧/,
+  );
+  assert.match(
+    lookup.get("ClippingPolygonCollection#inverse").description,
+    /全部多边形外侧.*任意多边形内部/,
+  );
+  assert.match(
+    lookup.get("EllipsoidSurfaceAppearance#aboveGround").description,
+    /默认不启用背面剔除/,
+  );
+  assert.match(
+    lookup.get("DebugAppearance").description,
+    /映射到 \[0.0, 1.0\]/,
+  );
+  assert.match(
+    lookup.get("PostProcessStageLibrary.createBrightnessStage").description,
+    /亮度.*RGB/s,
+  );
+  assert.match(
+    lookup.get("ParticleSystem#updateCallback").description,
+    /回调函数.*单位为秒/,
+  );
+  const asyncOption = (id) =>
+    lookup.get(id).params.find((p) => p.name === "options.asynchronous")
+      .description;
+  assert.match(
+    asyncOption("ClassificationPrimitive"),
+    /不要求预先初始化地形高度/,
+  );
+  assert.match(
+    asyncOption("GroundPolylinePrimitive"),
+    /必须先调用 initializeTerrainHeights/,
   );
 });
 

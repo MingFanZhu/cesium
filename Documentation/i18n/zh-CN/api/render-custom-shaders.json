@@ -1,0 +1,606 @@
+{
+  "schemaVersion": 1,
+  "locale": "zh-CN",
+  "entries": [
+    {
+      "id": "CustomShader",
+      "field": "description",
+      "sourceHash": "sha256:b4e698c79ca950182d5e8aa51a92a7fb48a04bb352ed7f12fbcb55e08b404aa2",
+      "text": "用于 {@link Model} 和 {@link Cesium3DTileset} 的用户自定义 GLSL 着色器。\n<p>\n使用纹理 uniform 时，需要额外管理资源：\n</p>\n<ul>\n  <li>\n     必须每帧调用 <code>update</code>。将自定义着色器传给 {@link Model} 或 {@link Cesium3DTileset} 时，会自动完成此步骤。\n  </li>\n  <li>\n     不再需要自定义着色器时，必须调用 {@link CustomShader#destroy}，正确释放 GPU 资源。应用程序负责调用此方法。\n  </li>\n</ul>\n<p>\n详细文档参见{@link https://github.com/CesiumGS/cesium/tree/main/Documentation/CustomShaderGuide|自定义着色器指南}。\n</p>"
+    },
+    {
+      "id": "CustomShader",
+      "field": "params/options.fragmentShaderText/description",
+      "sourceHash": "sha256:6b0b28073356e0ae91acd6d5fe5bc508082d0ca91d8a294c386359d5f29eb90e",
+      "text": "自定义片元着色器的 GLSL 代码字符串，必须包含名为 fragmentMain 的 GLSL 函数，函数签名参见示例。未指定时，生成的片元着色器会跳过自定义片元处理步骤。"
+    },
+    {
+      "id": "CustomShader",
+      "field": "params/options.lightingModel/description",
+      "sourceHash": "sha256:5d8ee7f2a876ada36e8ccbe73ff0862d67834869bfe16217abdcded7b0af7d26",
+      "text": "光照模型，例如 PBR 或无光照。提供后会覆盖模型默认光照。"
+    },
+    {
+      "id": "CustomShader",
+      "field": "params/options.mode/description",
+      "sourceHash": "sha256:8e49acddffc9ea0f50309deb3eadc4e6f2c4f3bb05dd6420f595b3106930f485",
+      "text": "自定义着色器模式，决定代码插入片元着色器的方式。"
+    },
+    {
+      "id": "CustomShader",
+      "field": "params/options.translucencyMode/description",
+      "sourceHash": "sha256:cf1cdfcab5734140b7fb951e427201d84ddb3b009fe6b1c37c7f9fdbd6f5f7f9",
+      "text": "半透明模式，决定如何应用自定义着色器。为 CustomShaderTranslucencyMode.OPAQUE 或 CustomShaderTranslucencyMode.TRANSLUCENT 时，覆盖模型材质设置；为 CustomShaderTranslucencyMode.INHERIT 时，根据图元材质设置选择不透明或半透明渲染。"
+    },
+    {
+      "id": "CustomShader",
+      "field": "params/options.uniforms/description",
+      "sourceHash": "sha256:64fe7b7a3b491855aa55c30aeba3bc537d021d550342577fede155e4956fd02a",
+      "text": "用户自定义 uniform 的字典。键为 GLSL 代码中的 uniform 名称，值为描述其类型和初始值的对象。"
+    },
+    {
+      "id": "CustomShader",
+      "field": "params/options.varyings/description",
+      "sourceHash": "sha256:3adbb0759f96e9724eb7385a9fc97a9ba4bf2215953a46df337beff30a6cb137",
+      "text": "声明着色器额外 GLSL varying 的字典。键为 GLSL 代码中的 varying 名称，值为数据类型。每个 varying 的声明会自动添加到着色器开头。调用者负责在顶点着色器中赋值，并在片元着色器中使用。"
+    },
+    {
+      "id": "CustomShader",
+      "field": "params/options.vertexShaderText/description",
+      "sourceHash": "sha256:9033c813cffec16ec802f22b33108d0ead77f82c9b9b482d45a33732119e2fd3",
+      "text": "自定义顶点着色器的 GLSL 代码字符串，必须包含名为 vertexMain 的 GLSL 函数，函数签名参见示例。未指定时，生成的顶点着色器会跳过自定义顶点处理步骤。"
+    },
+    {
+      "id": "CustomShader",
+      "field": "params/options/description",
+      "sourceHash": "sha256:cde8d9cb57ec027d68e75cfe77d95125e8c00971a09f74703456ed7875004725",
+      "text": "包含以下选项的对象。"
+    },
+    {
+      "id": "CustomShader#destroy",
+      "field": "description",
+      "sourceHash": "sha256:b385add820d9f47d540aad147f1cdf85f05e8c6cb81c3928a59c8fd5f7bd8d69",
+      "text": "销毁此对象持有的 WebGL 资源。显式销毁可确定地释放 WebGL 资源，而不依赖垃圾回收器回收此对象。<br /><br />对象销毁后不应再使用；调用除 <code>isDestroyed</code> 以外的任何函数都会抛出 {@link DeveloperError}。因此，应像示例中那样将返回值（<code>undefined</code>）赋给该对象变量。"
+    },
+    {
+      "id": "CustomShader#fragmentShaderText",
+      "field": "description",
+      "sourceHash": "sha256:b6b317cab3e705602c8463a2171e786b5c7304487b0a8b8081ebe66ecd3e0129",
+      "text": "用户自定义的片元着色器 GLSL 代码。"
+    },
+    {
+      "id": "CustomShader#isDestroyed",
+      "field": "description",
+      "sourceHash": "sha256:aea7b697937631c90ae3fc0ec55b81ba0ddc7abe4d6045848b2031f9bed60091",
+      "text": "若此对象已销毁，返回 true；否则返回 false。<br /><br />对象销毁后不应再使用；调用除 <code>isDestroyed</code> 以外的任何函数都会抛出 {@link DeveloperError}。"
+    },
+    {
+      "id": "CustomShader#lightingModel",
+      "field": "description",
+      "sourceHash": "sha256:bde41b6224edddb82960d715380743aa28ea349200bcc27a3b112300be78410d",
+      "text": "自定义着色器使用的光照模型，由 {@link CustomShaderPipelineStage} 使用。"
+    },
+    {
+      "id": "CustomShader#mode",
+      "field": "description",
+      "sourceHash": "sha256:b7d38d21b75fa7ce01956f557b203addea7014ee2f94e7d27651cd07e3f84789",
+      "text": "决定自定义着色器如何与完整片元着色器交互的值，由 {@link CustomShaderPipelineStage} 使用。"
+    },
+    {
+      "id": "CustomShader#setUniform",
+      "field": "description",
+      "sourceHash": "sha256:22e8c37f837632857b244d8f384eb98fe70c07b6fee4a7c550e3b22ece74a490",
+      "text": "更新着色器中已声明 uniform 的值。"
+    },
+    {
+      "id": "CustomShader#setUniform",
+      "field": "params/uniformName/description",
+      "sourceHash": "sha256:bc7a0c4ac5607c17976a77378bb26e162ad1f143c4d35418fd5a1674e1bb73b9",
+      "text": "uniform 的 GLSL 名称，必须与构造时声明的某个 uniform 一致。"
+    },
+    {
+      "id": "CustomShader#setUniform",
+      "field": "params/value/description",
+      "sourceHash": "sha256:c99495f1e676c46f52a2a288a460002ab54e47cac061f4516efa7b7632a68056",
+      "text": "uniform 的新值。"
+    },
+    {
+      "id": "CustomShader#translucencyMode",
+      "field": "description",
+      "sourceHash": "sha256:2f1f80c983e2c72ee1cc530db5f5719f21beab9408df2fa332ab49046fc36226",
+      "text": "半透明模式，决定如何应用自定义着色器。为 CustomShaderTranslucencyMode.OPAQUE 或 CustomShaderTranslucencyMode.TRANSLUCENT 时，覆盖模型材质设置；为 CustomShaderTranslucencyMode.INHERIT 时，根据图元材质设置选择不透明或半透明渲染。"
+    },
+    {
+      "id": "CustomShader#uniforms",
+      "field": "description",
+      "sourceHash": "sha256:4de97794e68bdb7d31d38a3949049b160ab91e815b83aa158f824302d02b6cb4",
+      "text": "用户声明的额外 uniform。"
+    },
+    {
+      "id": "CustomShader#varyings",
+      "field": "description",
+      "sourceHash": "sha256:9d4031149b173e11182a50e109b83a67d7d32cd1b39bf5fedc17489435cde8e2",
+      "text": "用户声明的额外 varying，由 {@link CustomShaderPipelineStage} 使用。"
+    },
+    {
+      "id": "CustomShader#vertexShaderText",
+      "field": "description",
+      "sourceHash": "sha256:674630a6a3c91bf1b6a3a1fce86326995e7ee3dad6ec4b57efeaa47c78f94c6f",
+      "text": "用户自定义的顶点着色器 GLSL 代码。"
+    },
+    {
+      "id": "CustomShaderMode.MODIFY_MATERIAL",
+      "field": "description",
+      "sourceHash": "sha256:3b3c066ebfcb05b87911ec7add65662bb47ce22fa87ec8aace85095e591794bf",
+      "text": "在应用光照之前，使用自定义着色器修改材质阶段的结果。"
+    },
+    {
+      "id": "CustomShaderMode.REPLACE_MATERIAL",
+      "field": "description",
+      "sourceHash": "sha256:a789d0afe069b9dc839b157c74da5aef7ee01461a0303ca129334954851d7fa7",
+      "text": "使用自定义着色器替代材质阶段，可据此优化掉原有材质处理代码。"
+    },
+    {
+      "id": "CustomShaderMode",
+      "field": "description",
+      "sourceHash": "sha256:f20b7fc0184e7cd8294735bc01d574b10baf81d411ba3a8871ef53a525310ae0",
+      "text": "描述 {@link CustomShader} 如何加入片元着色器的枚举，决定它与材质的交互方式。"
+    },
+    {
+      "id": "CustomShaderMode",
+      "field": "properties/MODIFY_MATERIAL/description",
+      "sourceHash": "sha256:3b3c066ebfcb05b87911ec7add65662bb47ce22fa87ec8aace85095e591794bf",
+      "text": "在应用光照之前，使用自定义着色器修改材质阶段的结果。"
+    },
+    {
+      "id": "CustomShaderMode",
+      "field": "properties/REPLACE_MATERIAL/description",
+      "sourceHash": "sha256:a789d0afe069b9dc839b157c74da5aef7ee01461a0303ca129334954851d7fa7",
+      "text": "使用自定义着色器替代材质阶段，可据此优化掉原有材质处理代码。"
+    },
+    {
+      "id": "CustomShaderTranslucencyMode.INHERIT",
+      "field": "description",
+      "sourceHash": "sha256:9979326bf2c5018b9d983b5c9b0247f80dc19f86b2c232adaf27dc053fb7850e",
+      "text": "继承图元材质的半透明设置。图元使用半透明材质时，自定义着色器也被视为半透明；图元使用不透明材质时，自定义着色器也被视为不透明。"
+    },
+    {
+      "id": "CustomShaderTranslucencyMode.OPAQUE",
+      "field": "description",
+      "sourceHash": "sha256:97b0a033f2da8801dd5ee450e9caf519c69120cf63ddfddb8a63e5f7c12b9174",
+      "text": "强制以不透明方式渲染图元，忽略材质设置。"
+    },
+    {
+      "id": "CustomShaderTranslucencyMode.TRANSLUCENT",
+      "field": "description",
+      "sourceHash": "sha256:7336458d380c16cd7cd4f6f8a20aa0555ce93ded557f2b68ee2683d8bb8a7a97",
+      "text": "强制以半透明方式渲染图元，忽略材质设置。"
+    },
+    {
+      "id": "CustomShaderTranslucencyMode",
+      "field": "description",
+      "sourceHash": "sha256:b2bdc4fada6595ae5d7af858a29c525a8863fe30712e565d1c8ccc20982ef382",
+      "text": "控制 {@link CustomShader} 相对于原图元如何处理半透明的枚举。"
+    },
+    {
+      "id": "CustomShaderTranslucencyMode",
+      "field": "properties/INHERIT/description",
+      "sourceHash": "sha256:9979326bf2c5018b9d983b5c9b0247f80dc19f86b2c232adaf27dc053fb7850e",
+      "text": "继承图元材质的半透明设置。图元使用半透明材质时，自定义着色器也被视为半透明；图元使用不透明材质时，自定义着色器也被视为不透明。"
+    },
+    {
+      "id": "CustomShaderTranslucencyMode",
+      "field": "properties/OPAQUE/description",
+      "sourceHash": "sha256:97b0a033f2da8801dd5ee450e9caf519c69120cf63ddfddb8a63e5f7c12b9174",
+      "text": "强制以不透明方式渲染图元，忽略材质设置。"
+    },
+    {
+      "id": "CustomShaderTranslucencyMode",
+      "field": "properties/TRANSLUCENT/description",
+      "sourceHash": "sha256:7336458d380c16cd7cd4f6f8a20aa0555ce93ded557f2b68ee2683d8bb8a7a97",
+      "text": "强制以半透明方式渲染图元，忽略材质设置。"
+    },
+    {
+      "id": "LightingModel.PBR",
+      "field": "description",
+      "sourceHash": "sha256:0870b931b4f15b925c98d16bbc84339b221fbb1bab90553a294c35e1750b7e92",
+      "text": "使用基于物理的光照计算，支持 PBR 金属度／粗糙度与 PBR 镜面反射／光泽度流程，并在可用时应用基于图像的光照。"
+    },
+    {
+      "id": "LightingModel.UNLIT",
+      "field": "description",
+      "sourceHash": "sha256:e3fb33d2143435847d299a22a91fbe56cedb913ed749a7680d814d5e3d067b96",
+      "text": "使用无光照着色，即跳过光照计算。计算 <code>out_FragColor</code> 时直接使用模型漫反射颜色，该颜色应为线性 RGB 而非 sRGB。仍会应用 alpha 模式。"
+    },
+    {
+      "id": "LightingModel",
+      "field": "description",
+      "sourceHash": "sha256:6760827ab0690a2d08310c3eff090e464bea3884f3a1435c8343439570029bad",
+      "text": "为 {@link Model} 进行光照计算时使用的光照模型。"
+    },
+    {
+      "id": "LightingModel",
+      "field": "properties/PBR/description",
+      "sourceHash": "sha256:0870b931b4f15b925c98d16bbc84339b221fbb1bab90553a294c35e1750b7e92",
+      "text": "使用基于物理的光照计算，支持 PBR 金属度／粗糙度与 PBR 镜面反射／光泽度流程，并在可用时应用基于图像的光照。"
+    },
+    {
+      "id": "LightingModel",
+      "field": "properties/UNLIT/description",
+      "sourceHash": "sha256:e3fb33d2143435847d299a22a91fbe56cedb913ed749a7680d814d5e3d067b96",
+      "text": "使用无光照着色，即跳过光照计算。计算 <code>out_FragColor</code> 时直接使用模型漫反射颜色，该颜色应为线性 RGB 而非 sRGB。仍会应用 alpha 模式。"
+    },
+    {
+      "id": "TextureUniform",
+      "field": "description",
+      "sourceHash": "sha256:e7e5e8d6d04297ba1f1e659ed99eeee38a9dc7a8dc30b2dbc9a6987074fc0996",
+      "text": "用作 <code>sampler2D</code> 类型 uniform 值的简单结构体，由 {@link CustomShader} 和 {@link TextureManager} 使用。"
+    },
+    {
+      "id": "TextureUniform",
+      "field": "params/options.height/description",
+      "sourceHash": "sha256:f00ce98691d41242bbd0f70dac9f3a637d2b2b12449e3058b33ef590d485919e",
+      "text": "图像高度。提供 options.typedArray 时必填。"
+    },
+    {
+      "id": "TextureUniform",
+      "field": "params/options.magnificationFilter/description",
+      "sourceHash": "sha256:48439f3200e1db56fd61476ba700c54e82876fab025047ea740671134511ccf0",
+      "text": "纹理采样器的放大过滤方式。"
+    },
+    {
+      "id": "TextureUniform",
+      "field": "params/options.maximumAnisotropy/description",
+      "sourceHash": "sha256:06fd881c378c678dda3ecb32b7a0f3966ffac76412c0069b1ca8cb13f5c2f322",
+      "text": "纹理采样器的最大各向异性值。"
+    },
+    {
+      "id": "TextureUniform",
+      "field": "params/options.minificationFilter/description",
+      "sourceHash": "sha256:ea2b70d940ba1878d5a6271af0ac468d72296908f0c676198c120514f8a3e683",
+      "text": "纹理采样器的缩小过滤方式。"
+    },
+    {
+      "id": "TextureUniform",
+      "field": "params/options.pixelDatatype/description",
+      "sourceHash": "sha256:46ed796def5cd2448af67dd205d48bc6bae18bc3736c655ed217ae7806afbd95",
+      "text": "定义 options.typedArray 时，类型化数组中像素值的数据类型。"
+    },
+    {
+      "id": "TextureUniform",
+      "field": "params/options.pixelFormat/description",
+      "sourceHash": "sha256:001555dfa05d031220a415823a74922fa8439a0d69f205ad4da50635e31f0a62",
+      "text": "定义 options.typedArray 时，用于确定纹理的像素格式。"
+    },
+    {
+      "id": "TextureUniform",
+      "field": "params/options.repeat/description",
+      "sourceHash": "sha256:ab50d1510b5a752f40e2689d318d2fcb50ac72ee9b16c91dbcba188fcf73b6be",
+      "text": "为 true 时，纹理采样器在两个方向上重复；为 false 时，两方向均限制到边缘。默认值为 true。"
+    },
+    {
+      "id": "TextureUniform",
+      "field": "params/options.typedArray/description",
+      "sourceHash": "sha256:9bae0d3c34e163019cbb765d6ad8b0d2654ea707ccddace389290b20b12bde98",
+      "text": "存储纹理内容的类型化数组，按行主序排列。WebGL 纹理的 y 方向向上，因此各行按从下到上的顺序排列。"
+    },
+    {
+      "id": "TextureUniform",
+      "field": "params/options.url/description",
+      "sourceHash": "sha256:971b111a702ff02bea09c060697143022249c9eba5a0cbb6bb1058aab1cacbbb",
+      "text": "指向纹理图像的 URL 字符串或资源。"
+    },
+    {
+      "id": "TextureUniform",
+      "field": "params/options.width/description",
+      "sourceHash": "sha256:de3bf7b584005e1f039fd17a47f702a7cd8b3bcbfa869d8ffee85ee3b6e78bbd",
+      "text": "图像宽度。提供 options.typedArray 时必填。"
+    },
+    {
+      "id": "UniformSpecifier",
+      "field": "description",
+      "sourceHash": "sha256:903219811eaf512c2c2e9312964a661adb15d8088cb4175cb85d6fc32d586c9c",
+      "text": "描述 uniform、其类型和初始值的对象。"
+    },
+    {
+      "id": "UniformSpecifier",
+      "field": "properties/type/description",
+      "sourceHash": "sha256:7cfa7b1229345532409aa4734e4318314a7361a9bde2cc8712f29b8fce636605",
+      "text": "uniform 的 GLSL 类型。"
+    },
+    {
+      "id": "UniformSpecifier",
+      "field": "properties/value/description",
+      "sourceHash": "sha256:8fbe01392a669bc4222797e9d19d56e970f76637f30688df17b73890e473247d",
+      "text": "uniform 的初始值。"
+    },
+    {
+      "id": "UniformType.BOOL_VEC2",
+      "field": "description",
+      "sourceHash": "sha256:16b08d0e679e14273ceec27ed6d60867606ef3b7af4b1a152878265fba42522b",
+      "text": "由两个布尔值组成的向量。"
+    },
+    {
+      "id": "UniformType.BOOL_VEC3",
+      "field": "description",
+      "sourceHash": "sha256:5078ae1876d8736ba72f37d1ef2798c30a572044c6bedef4ca01dd8dcd9bc6d3",
+      "text": "由三个布尔值组成的向量。"
+    },
+    {
+      "id": "UniformType.BOOL_VEC4",
+      "field": "description",
+      "sourceHash": "sha256:020d8c81b47918233e1b4f0304e4d5b757569cee0813e24382d9cb82b2f72b3d",
+      "text": "由四个布尔值组成的向量。"
+    },
+    {
+      "id": "UniformType.BOOL",
+      "field": "description",
+      "sourceHash": "sha256:b067bd7f2844fd3ee66091115c821fe129568c2f1bf0350dad1bf69bbeab3875",
+      "text": "单个布尔值。"
+    },
+    {
+      "id": "UniformType.FLOAT",
+      "field": "description",
+      "sourceHash": "sha256:cdbdf81fd2f5adc62262502f42433aeb104cadfafc3ed167f9dbfc3ecf28fa9f",
+      "text": "单个浮点值。"
+    },
+    {
+      "id": "UniformType.INT_VEC2",
+      "field": "description",
+      "sourceHash": "sha256:9a84c9cde3d9d2c260731b9afdd4e09cc15eb6c446f956f99f8634a9dd2f1fa9",
+      "text": "由两个整数值组成的向量。"
+    },
+    {
+      "id": "UniformType.INT_VEC3",
+      "field": "description",
+      "sourceHash": "sha256:e29e95bfc3e5a37816e9563e9ca24c4ac18f4675c46c36eb9da5f0485467bf58",
+      "text": "由三个整数值组成的向量。"
+    },
+    {
+      "id": "UniformType.INT_VEC4",
+      "field": "description",
+      "sourceHash": "sha256:6a6dc77b326b96ee4c5d31b36b4c9aa6ee534e1d52527aeecbc36eff0e87b50a",
+      "text": "由四个整数值组成的向量。"
+    },
+    {
+      "id": "UniformType.INT",
+      "field": "description",
+      "sourceHash": "sha256:a19e37c10e22378f184024ea68d3c2632d7085dd66b11854f86ac866b8a243ef",
+      "text": "单个整数值。"
+    },
+    {
+      "id": "UniformType.MAT2",
+      "field": "description",
+      "sourceHash": "sha256:bd0443cc6f9265e51b482316e5367e1728d4df5206488d14a99d0e7e4988e2ea",
+      "text": "由浮点值组成的 2x2 矩阵。"
+    },
+    {
+      "id": "UniformType.MAT3",
+      "field": "description",
+      "sourceHash": "sha256:a45d52bcf5d9c2b4b811ccc40ec9da670af9c15181796029ff766eae08c76680",
+      "text": "由浮点值组成的 3x3 矩阵。"
+    },
+    {
+      "id": "UniformType.MAT4",
+      "field": "description",
+      "sourceHash": "sha256:d8899e93a4ddd1ed0af11ee4a81ec475be10ebb647509821bc5b9f7852d62bb7",
+      "text": "由浮点值组成的 4x4 矩阵。"
+    },
+    {
+      "id": "UniformType.SAMPLER_2D",
+      "field": "description",
+      "sourceHash": "sha256:26213b6ff1f3297334ece813b010c6394abd6fff178d6fe876431d35e059bc8f",
+      "text": "二维采样纹理。"
+    },
+    {
+      "id": "UniformType.VEC2",
+      "field": "description",
+      "sourceHash": "sha256:1c06c2d57f682320a61e96f68badfc1d1204d24527e8a0999dae9c1464afb9d1",
+      "text": "由两个浮点值组成的向量。"
+    },
+    {
+      "id": "UniformType.VEC3",
+      "field": "description",
+      "sourceHash": "sha256:a42f4870b28f5857c6dd96c1ca8032e8375f988c221f808adfc3d0ee3cfdbe68",
+      "text": "由三个浮点值组成的向量。"
+    },
+    {
+      "id": "UniformType.VEC4",
+      "field": "description",
+      "sourceHash": "sha256:efe511c239a80af156866844acb9a08096668127f254c488795c7636b68684e3",
+      "text": "由四个浮点值组成的向量。"
+    },
+    {
+      "id": "UniformType",
+      "field": "description",
+      "sourceHash": "sha256:0c7a1713a0861fbd4c4d92e20ad3f0fb507faa9cf55756d6214d34b9de0d6326",
+      "text": "基本 GLSL uniform 类型枚举，可在 {@link CustomShader} 中用于声明用户自定义 uniform。"
+    },
+    {
+      "id": "UniformType",
+      "field": "properties/BOOL_VEC2/description",
+      "sourceHash": "sha256:16b08d0e679e14273ceec27ed6d60867606ef3b7af4b1a152878265fba42522b",
+      "text": "由两个布尔值组成的向量。"
+    },
+    {
+      "id": "UniformType",
+      "field": "properties/BOOL_VEC3/description",
+      "sourceHash": "sha256:5078ae1876d8736ba72f37d1ef2798c30a572044c6bedef4ca01dd8dcd9bc6d3",
+      "text": "由三个布尔值组成的向量。"
+    },
+    {
+      "id": "UniformType",
+      "field": "properties/BOOL_VEC4/description",
+      "sourceHash": "sha256:020d8c81b47918233e1b4f0304e4d5b757569cee0813e24382d9cb82b2f72b3d",
+      "text": "由四个布尔值组成的向量。"
+    },
+    {
+      "id": "UniformType",
+      "field": "properties/BOOL/description",
+      "sourceHash": "sha256:b067bd7f2844fd3ee66091115c821fe129568c2f1bf0350dad1bf69bbeab3875",
+      "text": "单个布尔值。"
+    },
+    {
+      "id": "UniformType",
+      "field": "properties/FLOAT/description",
+      "sourceHash": "sha256:cdbdf81fd2f5adc62262502f42433aeb104cadfafc3ed167f9dbfc3ecf28fa9f",
+      "text": "单个浮点值。"
+    },
+    {
+      "id": "UniformType",
+      "field": "properties/INT_VEC2/description",
+      "sourceHash": "sha256:9a84c9cde3d9d2c260731b9afdd4e09cc15eb6c446f956f99f8634a9dd2f1fa9",
+      "text": "由两个整数值组成的向量。"
+    },
+    {
+      "id": "UniformType",
+      "field": "properties/INT_VEC3/description",
+      "sourceHash": "sha256:e29e95bfc3e5a37816e9563e9ca24c4ac18f4675c46c36eb9da5f0485467bf58",
+      "text": "由三个整数值组成的向量。"
+    },
+    {
+      "id": "UniformType",
+      "field": "properties/INT_VEC4/description",
+      "sourceHash": "sha256:6a6dc77b326b96ee4c5d31b36b4c9aa6ee534e1d52527aeecbc36eff0e87b50a",
+      "text": "由四个整数值组成的向量。"
+    },
+    {
+      "id": "UniformType",
+      "field": "properties/INT/description",
+      "sourceHash": "sha256:a19e37c10e22378f184024ea68d3c2632d7085dd66b11854f86ac866b8a243ef",
+      "text": "单个整数值。"
+    },
+    {
+      "id": "UniformType",
+      "field": "properties/MAT2/description",
+      "sourceHash": "sha256:bd0443cc6f9265e51b482316e5367e1728d4df5206488d14a99d0e7e4988e2ea",
+      "text": "由浮点值组成的 2x2 矩阵。"
+    },
+    {
+      "id": "UniformType",
+      "field": "properties/MAT3/description",
+      "sourceHash": "sha256:a45d52bcf5d9c2b4b811ccc40ec9da670af9c15181796029ff766eae08c76680",
+      "text": "由浮点值组成的 3x3 矩阵。"
+    },
+    {
+      "id": "UniformType",
+      "field": "properties/MAT4/description",
+      "sourceHash": "sha256:d8899e93a4ddd1ed0af11ee4a81ec475be10ebb647509821bc5b9f7852d62bb7",
+      "text": "由浮点值组成的 4x4 矩阵。"
+    },
+    {
+      "id": "UniformType",
+      "field": "properties/SAMPLER_2D/description",
+      "sourceHash": "sha256:26213b6ff1f3297334ece813b010c6394abd6fff178d6fe876431d35e059bc8f",
+      "text": "二维采样纹理。"
+    },
+    {
+      "id": "UniformType",
+      "field": "properties/VEC2/description",
+      "sourceHash": "sha256:1c06c2d57f682320a61e96f68badfc1d1204d24527e8a0999dae9c1464afb9d1",
+      "text": "由两个浮点值组成的向量。"
+    },
+    {
+      "id": "UniformType",
+      "field": "properties/VEC3/description",
+      "sourceHash": "sha256:a42f4870b28f5857c6dd96c1ca8032e8375f988c221f808adfc3d0ee3cfdbe68",
+      "text": "由三个浮点值组成的向量。"
+    },
+    {
+      "id": "UniformType",
+      "field": "properties/VEC4/description",
+      "sourceHash": "sha256:efe511c239a80af156866844acb9a08096668127f254c488795c7636b68684e3",
+      "text": "由四个浮点值组成的向量。"
+    },
+    {
+      "id": "VaryingType.FLOAT",
+      "field": "description",
+      "sourceHash": "sha256:cdbdf81fd2f5adc62262502f42433aeb104cadfafc3ed167f9dbfc3ecf28fa9f",
+      "text": "单个浮点值。"
+    },
+    {
+      "id": "VaryingType.MAT2",
+      "field": "description",
+      "sourceHash": "sha256:bd0443cc6f9265e51b482316e5367e1728d4df5206488d14a99d0e7e4988e2ea",
+      "text": "由浮点值组成的 2x2 矩阵。"
+    },
+    {
+      "id": "VaryingType.MAT3",
+      "field": "description",
+      "sourceHash": "sha256:a45d52bcf5d9c2b4b811ccc40ec9da670af9c15181796029ff766eae08c76680",
+      "text": "由浮点值组成的 3x3 矩阵。"
+    },
+    {
+      "id": "VaryingType.MAT4",
+      "field": "description",
+      "sourceHash": "sha256:d8899e93a4ddd1ed0af11ee4a81ec475be10ebb647509821bc5b9f7852d62bb7",
+      "text": "由浮点值组成的 4x4 矩阵。"
+    },
+    {
+      "id": "VaryingType.VEC2",
+      "field": "description",
+      "sourceHash": "sha256:1c06c2d57f682320a61e96f68badfc1d1204d24527e8a0999dae9c1464afb9d1",
+      "text": "由两个浮点值组成的向量。"
+    },
+    {
+      "id": "VaryingType.VEC3",
+      "field": "description",
+      "sourceHash": "sha256:a42f4870b28f5857c6dd96c1ca8032e8375f988c221f808adfc3d0ee3cfdbe68",
+      "text": "由三个浮点值组成的向量。"
+    },
+    {
+      "id": "VaryingType.VEC4",
+      "field": "description",
+      "sourceHash": "sha256:efe511c239a80af156866844acb9a08096668127f254c488795c7636b68684e3",
+      "text": "由四个浮点值组成的向量。"
+    },
+    {
+      "id": "VaryingType",
+      "field": "description",
+      "sourceHash": "sha256:ef12acbab870f1d56d26c248cebae21ffc182bf2e7afa97aef48aae4ec90444b",
+      "text": "GLSL varying 类型枚举，可在 {@link CustomShader} 中用于声明 varying。"
+    },
+    {
+      "id": "VaryingType",
+      "field": "properties/FLOAT/description",
+      "sourceHash": "sha256:cdbdf81fd2f5adc62262502f42433aeb104cadfafc3ed167f9dbfc3ecf28fa9f",
+      "text": "单个浮点值。"
+    },
+    {
+      "id": "VaryingType",
+      "field": "properties/MAT2/description",
+      "sourceHash": "sha256:bd0443cc6f9265e51b482316e5367e1728d4df5206488d14a99d0e7e4988e2ea",
+      "text": "由浮点值组成的 2x2 矩阵。"
+    },
+    {
+      "id": "VaryingType",
+      "field": "properties/MAT3/description",
+      "sourceHash": "sha256:a45d52bcf5d9c2b4b811ccc40ec9da670af9c15181796029ff766eae08c76680",
+      "text": "由浮点值组成的 3x3 矩阵。"
+    },
+    {
+      "id": "VaryingType",
+      "field": "properties/MAT4/description",
+      "sourceHash": "sha256:d8899e93a4ddd1ed0af11ee4a81ec475be10ebb647509821bc5b9f7852d62bb7",
+      "text": "由浮点值组成的 4x4 矩阵。"
+    },
+    {
+      "id": "VaryingType",
+      "field": "properties/VEC2/description",
+      "sourceHash": "sha256:1c06c2d57f682320a61e96f68badfc1d1204d24527e8a0999dae9c1464afb9d1",
+      "text": "由两个浮点值组成的向量。"
+    },
+    {
+      "id": "VaryingType",
+      "field": "properties/VEC3/description",
+      "sourceHash": "sha256:a42f4870b28f5857c6dd96c1ca8032e8375f988c221f808adfc3d0ee3cfdbe68",
+      "text": "由三个浮点值组成的向量。"
+    },
+    {
+      "id": "VaryingType",
+      "field": "properties/VEC4/description",
+      "sourceHash": "sha256:efe511c239a80af156866844acb9a08096668127f254c488795c7636b68684e3",
+      "text": "由四个浮点值组成的向量。"
+    }
+  ]
+}

@@ -1,0 +1,1320 @@
+{
+  "schemaVersion": 1,
+  "locale": "zh-CN",
+  "entries": [
+    {
+      "id": "Model.fromGltfAsync",
+      "field": "description",
+      "sourceHash": "sha256:bba673a6ed32a49535cd126cff44a16c9026b10783150ea8810547fda8edfb26",
+      "text": "<p>\n从 glTF 资源异步创建模型。返回的 Promise 在模型可供渲染时兑现，即外部二进制、图像和着色器文件已下载，且 WebGL 资源已创建。\n</p>\n<p>\n模型可以是扩展名为 .gltf 的传统 glTF 资源，也可以是扩展名为 .glb 的二进制 glTF。"
+    },
+    {
+      "id": "Model.fromGltfAsync",
+      "field": "exceptions/0/description",
+      "sourceHash": "sha256:2465d40bc2c4898100e62e69779c21422d8771ef0707983b8ae80ea09f03abdf",
+      "text": "模型加载失败。"
+    },
+    {
+      "id": "Model.fromGltfAsync",
+      "field": "exceptions/1/description",
+      "sourceHash": "sha256:a0b5ea0cecdc258a36a2267e826b43c05b58d39db7614f9d3e1b7e4f4d09ecfe",
+      "text": "不支持的 glTF 版本。"
+    },
+    {
+      "id": "Model.fromGltfAsync",
+      "field": "exceptions/2/description",
+      "sourceHash": "sha256:b100bd0681d600211e31acdfa8575fedc321396c438372280b704cb45b153714",
+      "text": "不支持的 glTF 扩展。"
+    },
+    {
+      "id": "Model.fromGltfAsync",
+      "field": "params/options.allowPicking/description",
+      "sourceHash": "sha256:4f95fc07b87740b4bb0ff2a145c20d8686e1119373377a8f286d6ae8dd3e522c",
+      "text": "为 <code>true</code> 时，可通过 {@link Scene#pick} 拾取每个图元。"
+    },
+    {
+      "id": "Model.fromGltfAsync",
+      "field": "params/options.asynchronous/description",
+      "sourceHash": "sha256:50f0f1719ea8605f3852d7136c3739975323727f75394c15e7ae6dca8343c213",
+      "text": "决定在所有 glTF 文件加载完成后，将模型 WebGL 资源的创建分摊到多帧，还是阻塞直至创建完成。"
+    },
+    {
+      "id": "Model.fromGltfAsync",
+      "field": "params/options.backFaceCulling/description",
+      "sourceHash": "sha256:e7bff99f7cd7e02be606e8b69950fcbefb4c8d45b1445f1bcbdc4f1a74a00bdf",
+      "text": "是否剔除背向几何。为 true 时，由材质的 doubleSided 属性决定背面剔除；为 false 时，禁用背面剔除。模型颜色为半透明时，不剔除背面。"
+    },
+    {
+      "id": "Model.fromGltfAsync",
+      "field": "params/options.basePath/description",
+      "sourceHash": "sha256:d839ae9503b978d7fd48b717897d5f6fb994ef17475e36cacbdaa04e63d5d78b",
+      "text": "glTF JSON 中相对路径所基于的基础路径。"
+    },
+    {
+      "id": "Model.fromGltfAsync",
+      "field": "params/options.clampAnimations/description",
+      "sourceHash": "sha256:66ea24165dcd05cd047419123d577c6f80d9235f1298d28d358f4dc727140f02",
+      "text": "决定模型动画在未指定关键帧的帧间是否保持姿态。"
+    },
+    {
+      "id": "Model.fromGltfAsync",
+      "field": "params/options.classificationType/description",
+      "sourceHash": "sha256:438f72ea460cc74292fde2ba3c3b5ece737d19f77506b1891d3848391e556cfd",
+      "text": "决定此模型对地形、3D Tiles 或两者进行分类。模型加载后无法设置。"
+    },
+    {
+      "id": "Model.fromGltfAsync",
+      "field": "params/options.clippingPlanes/description",
+      "sourceHash": "sha256:7fa57a8971c264667c29188187b09ac241ca1dafa93c4f32a3bef6deed5bdf2d",
+      "text": "用于选择性禁用模型部分区域渲染的 {@link ClippingPlaneCollection}。"
+    },
+    {
+      "id": "Model.fromGltfAsync",
+      "field": "params/options.clippingPolygons/description",
+      "sourceHash": "sha256:93353d4621c451c96a746079c6125753d05a7b8fe78ef52fc3a09e2958afce19",
+      "text": "用于选择性禁用模型部分区域渲染的 {@link ClippingPolygonCollection}。"
+    },
+    {
+      "id": "Model.fromGltfAsync",
+      "field": "params/options.color/description",
+      "sourceHash": "sha256:7436a8b145f56ae038e9cec9af0cb88621e770999d518c4e84e38ad6cdf135be",
+      "text": "与模型渲染颜色混合的颜色。"
+    },
+    {
+      "id": "Model.fromGltfAsync",
+      "field": "params/options.colorBlendAmount/description",
+      "sourceHash": "sha256:f673e3c2079bbc9526b1295a6155f7726997867cb5ba1c7e23a1487d339b485c",
+      "text": "当 <code>colorBlendMode</code> 为 <code>MIX</code> 时，用于确定颜色强度。0.0 表示模型原始渲染颜色，1.0 表示纯色，中间值表示两者的混合。"
+    },
+    {
+      "id": "Model.fromGltfAsync",
+      "field": "params/options.colorBlendMode/description",
+      "sourceHash": "sha256:00980746f886109f8b0a0f054adf148233aa491407fc91e39d78f7a38cad84a6",
+      "text": "定义颜色与模型的混合方式。"
+    },
+    {
+      "id": "Model.fromGltfAsync",
+      "field": "params/options.content/description",
+      "sourceHash": "sha256:8e800f48a4341fcb09a5968496f36a0fd008e57791329560a36c8f056a0fe68f",
+      "text": "此模型所属的瓦片内容。模型不作为瓦片集的一部分加载时，该属性为 undefined。"
+    },
+    {
+      "id": "Model.fromGltfAsync",
+      "field": "params/options.cull/description",
+      "sourceHash": "sha256:84d370a73f1ee792c9e452fbc03ae1186d564adeda872d6871ed9d0edc998990",
+      "text": "是否使用视锥和地平线剔除来剔除模型。模型属于 3D Tiles 瓦片集时始终为 false，因为此时由 3D Tiles 剔除系统处理。"
+    },
+    {
+      "id": "Model.fromGltfAsync",
+      "field": "params/options.customShader/description",
+      "sourceHash": "sha256:89f571711225bb3edb81a948cc969d95a745c08bca3410b1cb99c5bf48be6e06",
+      "text": "自定义着色器，为顶点和片元着色器添加用户定义的 GLSL 代码。与 {@link Cesium3DTileStyle} 同时使用可能产生未定义行为。"
+    },
+    {
+      "id": "Model.fromGltfAsync",
+      "field": "params/options.debugShowBoundingVolume/description",
+      "sourceHash": "sha256:69979629a229c3dc1ce6313ab88de9a31dc836bff470314e1fbc02221431a9ae",
+      "text": "仅供调试。绘制模型中每个绘制命令的包围球。"
+    },
+    {
+      "id": "Model.fromGltfAsync",
+      "field": "params/options.debugWireframe/description",
+      "sourceHash": "sha256:f7fcdff33eb7b9e2c2974f5d2faada0c9c4ea29a21a7265e32d2ae3c5d5e6337",
+      "text": "仅供调试。以线框绘制模型。在 WebGL1 下，仅当 enableDebugWireframe 为 true 时有效。"
+    },
+    {
+      "id": "Model.fromGltfAsync",
+      "field": "params/options.distanceDisplayCondition/description",
+      "sourceHash": "sha256:102a14b8665d02f00e9cad202db3abb8a46f016abfc0f6fd0f8fe23b99990e85",
+      "text": "规定此模型在距相机多远时显示的条件。"
+    },
+    {
+      "id": "Model.fromGltfAsync",
+      "field": "params/options.edgeDisplayMode/description",
+      "sourceHash": "sha256:a268c1017e43e06def0d2e0fd1f63e778b53b70f2db9b9c6a02457bebea3e2b2",
+      "text": "控制 {@link https://github.com/KhronosGroup/glTF/pull/2479|EXT_mesh_primitive_edge_visibility} 扩展中的边相对于表面几何的渲染方式。"
+    },
+    {
+      "id": "Model.fromGltfAsync",
+      "field": "params/options.enableDebugWireframe/description",
+      "sourceHash": "sha256:997aebf353eaef4b07c1d39de8149d12b44c1628013bc518c67e620dc868c249",
+      "text": "仅供调试。在 WebGL1 下，必须设为 true 才能使用 debugWireframe。模型加载后无法设置。"
+    },
+    {
+      "id": "Model.fromGltfAsync",
+      "field": "params/options.enablePick/description",
+      "sourceHash": "sha256:5382aeae58f75ab72898c8a40a262324e9b1a59d65083b03bb12412f1e453220",
+      "text": "在未使用 WebGL 2 或更高版本时，是否允许通过 <code>pick</code> 进行 CPU 拾取。使用 WebGL 2 或更高版本时忽略此选项。在 WebGL 1 下，为 true 时 <code>pick</code> 可正常工作，但会占用更多内存；为 false 时占用较少内存，但 <code>pick</code> 始终返回 <code>undefined</code>。模型加载后无法设置。"
+    },
+    {
+      "id": "Model.fromGltfAsync",
+      "field": "params/options.enableShowOutline/description",
+      "sourceHash": "sha256:fb82e116d0488377979b0974e83a3eb9c6e2a4db5ba478c8c1d06a4358330eb7",
+      "text": "是否为使用 {@link https://github.com/KhronosGroup/glTF/tree/master/extensions/2.0/Vendor/CESIUM_primitive_outline|CESIUM_primitive_outline} 扩展的模型启用轮廓。设为 false 可避免加载时对几何进行后处理；此时忽略 showOutlines 和 outlineColor 选项。"
+    },
+    {
+      "id": "Model.fromGltfAsync",
+      "field": "params/options.enableVerticalExaggeration/description",
+      "sourceHash": "sha256:4e261ba1651647b0bab3766b213727145f1dfce1914c324c83546edfea0c0466",
+      "text": "为 <code>true</code> 时，若 {@link Scene.verticalExaggeration} 不为 <code>1.0</code>，则沿椭球法线方向夸张显示模型。"
+    },
+    {
+      "id": "Model.fromGltfAsync",
+      "field": "params/options.environmentMapOptions/description",
+      "sourceHash": "sha256:41e53e0b9667d99634badcb968191a6eb01004cd2a91ceb4eff0a34a5860e692",
+      "text": "管理此模型动态环境贴图的属性。"
+    },
+    {
+      "id": "Model.fromGltfAsync",
+      "field": "params/options.featureIdLabel/description",
+      "sourceHash": "sha256:1365d4bf81a7a8290e105747a860326158b11df7b6fe975731889839a41f157d",
+      "text": "用于拾取和样式设置的要素 ID 集标签。对于 EXT_mesh_features，使用要素 ID 的 label 属性；若未指定，使用 \"featureId_N\"，其中 N 为其在 featureIds 数组中的索引。EXT_feature_metadata 没有 label 字段，因此此类要素 ID 集始终标为 \"featureId_N\"，N 为其在全部要素 ID 列表中的索引，列表中要素 ID 顶点属性先于要素 ID 纹理。若 featureIdLabel 为整数 N，则自动转为字符串 \"featureId_N\"。逐图元和逐实例要素 ID 同时存在时，优先使用实例要素 ID。"
+    },
+    {
+      "id": "Model.fromGltfAsync",
+      "field": "params/options.forwardAxis/description",
+      "sourceHash": "sha256:32efe475857d1e31daf5977401a64516e5146252dddb205fb019c7142b441861",
+      "text": "glTF 模型的前向轴。"
+    },
+    {
+      "id": "Model.fromGltfAsync",
+      "field": "params/options.gltfCallback/description",
+      "sourceHash": "sha256:d5ff0ca0468993895df55b0a4fa3ea03d2f50ac7076fb583fe89a982ee2ac21c",
+      "text": "加载完成后，以已加载的 gltf 对象为参数调用的函数。"
+    },
+    {
+      "id": "Model.fromGltfAsync",
+      "field": "params/options.heightReference/description",
+      "sourceHash": "sha256:240223fc7968c1c6bc47fe61b366a2299199447186d185d99c9fec0394165b10",
+      "text": "决定模型相对于地形的绘制方式。"
+    },
+    {
+      "id": "Model.fromGltfAsync",
+      "field": "params/options.id/description",
+      "sourceHash": "sha256:8d5402330ef57c0b33ee6ca26ed2366ecaffa3e6482feba36ad66f57d796c04a",
+      "text": "通过 {@link Scene#pick} 拾取模型时返回的用户自定义对象。"
+    },
+    {
+      "id": "Model.fromGltfAsync",
+      "field": "params/options.imageBasedLighting/description",
+      "sourceHash": "sha256:619a1808522f1882f08ff7dc140294ecd0452e38a35b22c66672d612f74c92da",
+      "text": "管理此模型基于图像的光照的属性。"
+    },
+    {
+      "id": "Model.fromGltfAsync",
+      "field": "params/options.incrementallyLoadTextures/description",
+      "sourceHash": "sha256:3003573fcd8b9002650e9a3dbad5008e01b69dc197f7923410f3a9536596d97f",
+      "text": "决定模型加载后是否允许继续流式加载纹理。"
+    },
+    {
+      "id": "Model.fromGltfAsync",
+      "field": "params/options.instanceFeatureIdLabel/description",
+      "sourceHash": "sha256:0168e57b182f737d48d938dc7a7eeafee77f9dfdf6c9c0ca6f7b0b7e0b112a95",
+      "text": "用于拾取和样式设置的实例要素 ID 集标签。若 instanceFeatureIdLabel 为整数 N，则自动转为字符串 \"instanceFeatureId_N\"。逐图元和逐实例要素 ID 同时存在时，优先使用实例要素 ID。"
+    },
+    {
+      "id": "Model.fromGltfAsync",
+      "field": "params/options.lightColor/description",
+      "sourceHash": "sha256:122b2ebcf9f756c801ea9db8fc1fc1dbbde94b689b7442a095a0d6d5bf462794",
+      "text": "为模型着色时所用的光源颜色。为 <code>undefined</code> 时，使用场景的光源颜色。"
+    },
+    {
+      "id": "Model.fromGltfAsync",
+      "field": "params/options.maximumScale/description",
+      "sourceHash": "sha256:4853017dff37e6141da176d099de45efdd275950259e97abf8afd4237d44fc8a",
+      "text": "模型的最大缩放值，是 minimumPixelSize 引起缩放的上限。"
+    },
+    {
+      "id": "Model.fromGltfAsync",
+      "field": "params/options.minimumPixelSize/description",
+      "sourceHash": "sha256:1c8b1a814d37a0a619eb80a47a190cc610f4248bd8806a0b8af781140444fa16",
+      "text": "无论缩放级别如何，模型都尽量保持的最小像素尺寸。"
+    },
+    {
+      "id": "Model.fromGltfAsync",
+      "field": "params/options.modelMatrix/description",
+      "sourceHash": "sha256:bfbb6e27b86271a00c4c1e904f5678177426e52dd061c2fb6b8bc341ed0b0415",
+      "text": "将模型坐标变换到世界坐标的 4x4 变换矩阵。"
+    },
+    {
+      "id": "Model.fromGltfAsync",
+      "field": "params/options.opaquePass/description",
+      "sourceHash": "sha256:320b72bd0a65915b814a7972276f61cf2cb98de82e2927d894d0ab252a0ddca4",
+      "text": "模型不透明部分的 {@link DrawCommand} 所用的渲染通道。"
+    },
+    {
+      "id": "Model.fromGltfAsync",
+      "field": "params/options.outlineColor/description",
+      "sourceHash": "sha256:56ed3803bb7cd74623ade9b13216c6c345e04a72df4a6c022f6d6335d816728e",
+      "text": "渲染轮廓时使用的颜色。"
+    },
+    {
+      "id": "Model.fromGltfAsync",
+      "field": "params/options.pointCloudShading/description",
+      "sourceHash": "sha256:e808bbfd39673de6db14f12892ec18cd488b9f4f7642c7216830e4739054829d",
+      "text": "构造 {@link PointCloudShading} 对象以控制点衰减和光照的选项。"
+    },
+    {
+      "id": "Model.fromGltfAsync",
+      "field": "params/options.projectTo2D/description",
+      "sourceHash": "sha256:79fba60eddf64e857189af188a3055a351103342b07f326c53c321a41d8a7ff5",
+      "text": "是否在 2D 中精确投影模型位置。为 true 时会精确投影，但占用更多内存；为 false 时占用较少内存，仍可在 2D / CV 模式渲染，但位置可能不精确。启用后会禁用 minimumPixelSize，并禁止后续修改模型矩阵。模型加载后也无法设置此选项。"
+    },
+    {
+      "id": "Model.fromGltfAsync",
+      "field": "params/options.releaseGltfJson/description",
+      "sourceHash": "sha256:5d1e2bb0fdf0db8781cf8ea242451c6950e7c14b7960f5a5bdd1233d36c49ee6",
+      "text": "为 true 时，glTF 加载后释放其 JSON。特别适合 3D Tiles 等每个 .gltf 模型都不同、缓存 glTF JSON 收益较低的场景。"
+    },
+    {
+      "id": "Model.fromGltfAsync",
+      "field": "params/options.scale/description",
+      "sourceHash": "sha256:36c92d0fbfd7d62c8ea05a5a4a9852ea6e26243b6e860f7310ca5df24dc650eb",
+      "text": "应用到此模型的统一缩放值。"
+    },
+    {
+      "id": "Model.fromGltfAsync",
+      "field": "params/options.scene/description",
+      "sourceHash": "sha256:a645ee02403796935defe695c398f5f282769c14118e802694c6db6512371e83",
+      "text": "模型使用高度参考属性时，必须传入场景。"
+    },
+    {
+      "id": "Model.fromGltfAsync",
+      "field": "params/options.shadows/description",
+      "sourceHash": "sha256:d677dac50c2cf077aeb6f44be38a301995cb76ed58216aa037900b226648fb6f",
+      "text": "决定模型是否投射或接收光源产生的阴影。"
+    },
+    {
+      "id": "Model.fromGltfAsync",
+      "field": "params/options.show/description",
+      "sourceHash": "sha256:6418461dccf421c64460d0b9137759862d6d3844ad27140e62a9207fabd01ca0",
+      "text": "是否渲染模型。"
+    },
+    {
+      "id": "Model.fromGltfAsync",
+      "field": "params/options.showCreditsOnScreen/description",
+      "sourceHash": "sha256:8a13bfd806e3c56c4a2aff9f3ff40c7f695e7331effcf759ba0e2b17367e871a",
+      "text": "是否在屏幕上显示此模型的来源署名。"
+    },
+    {
+      "id": "Model.fromGltfAsync",
+      "field": "params/options.showOutline/description",
+      "sourceHash": "sha256:c00ba378e517d28be15c00381c3c19553e834c45106e7609ba38355951885dd2",
+      "text": "是否显示使用 {@link https://github.com/KhronosGroup/glTF/tree/master/extensions/2.0/Vendor/CESIUM_primitive_outline|CESIUM_primitive_outline} 扩展的模型轮廓。为 true 时显示，为 false 时不显示。"
+    },
+    {
+      "id": "Model.fromGltfAsync",
+      "field": "params/options.silhouetteColor/description",
+      "sourceHash": "sha256:06f19b8d09b3d9c77368e69f143d00414666589ece3a51dae81f329e60b1cbe9",
+      "text": "剪影颜色。启用剪影的模型超过 256 个时，重叠模型有小概率出现轻微显示瑕疵。"
+    },
+    {
+      "id": "Model.fromGltfAsync",
+      "field": "params/options.silhouetteSize/description",
+      "sourceHash": "sha256:c6fb17baace2dd4cc270a118da4bf22f0753a182c5de1f03a39a33bc0b97d7de",
+      "text": "剪影尺寸，单位为像素。"
+    },
+    {
+      "id": "Model.fromGltfAsync",
+      "field": "params/options.splitDirection/description",
+      "sourceHash": "sha256:2c46c2928752981c10126a426706c3970143190b14c6fc77a48696dd04b4da42",
+      "text": "应用到此模型的 {@link SplitDirection} 分屏方向。"
+    },
+    {
+      "id": "Model.fromGltfAsync",
+      "field": "params/options.upAxis/description",
+      "sourceHash": "sha256:32347930c24ebe69f539f80f265812868e9f1c57f7349fc5ecda417bd035c8e5",
+      "text": "glTF 模型的向上轴。"
+    },
+    {
+      "id": "Model.fromGltfAsync",
+      "field": "params/options.url/description",
+      "sourceHash": "sha256:4be2b71dd26e38856c876fe4d3cf801837fe5578d3d9d2ca335f7451fdcdfffd",
+      "text": ".gltf 或 .glb 文件的 URL。"
+    },
+    {
+      "id": "Model.fromGltfAsync",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:406c3fa2510f6e1da368d5e21d168274c9926238707c4fdac510d142f15453be",
+      "text": "模型可供渲染时兑现为所创建模型的 Promise。"
+    },
+    {
+      "id": "Model.GltfCallback",
+      "field": "description",
+      "sourceHash": "sha256:41be4cada0ffbcb43d30c0b647131aae7391eaf77c9f675d72af61ee905bf3cc",
+      "text": "加载完成后接收已加载 gltf 对象的回调函数接口。"
+    },
+    {
+      "id": "Model.GltfCallback",
+      "field": "params/gltf/description",
+      "sourceHash": "sha256:02c3e15dea3870cf8fe034f56f8d381c392b92ef76ac52e36ff7e659570c73d6",
+      "text": "gltf 对象。"
+    },
+    {
+      "id": "Model",
+      "field": "description",
+      "sourceHash": "sha256:9de22396b43423abb269c319594044afdf177fec8dddd1d71086faddcd29a8a0",
+      "text": "<div class=\"notice\">\r请调用 {@link Model.fromGltfAsync} 创建 Model，不要直接调用构造函数。\r</div>\r基于 glTF 的三维模型。glTF 是面向 WebGL、OpenGL ES 和 OpenGL 的运行时资源格式。\r<p>\r支持带有以下扩展的 glTF 资源：\r<ul>\r <li>\r {@link https://github.com/KhronosGroup/glTF/tree/master/extensions/2.0/Vendor/AGI_articulations/README.md|AGI_articulations}\r </li>\r <li>\r {@link https://github.com/KhronosGroup/glTF/tree/main/extensions/2.0/Vendor/CESIUM_primitive_outline|CESIUM_primitive_outline}\r </li>\r <li>\r {@link https://github.com/KhronosGroup/glTF/blob/master/extensions/1.0/Vendor/CESIUM_RTC/README.md|CESIUM_RTC}\r </li>\r <li>\r {@link https://github.com/CesiumGS/glTF/tree/3d-tiles-next/extensions/2.0/Vendor/EXT_instance_features|EXT_instance_features}\r </li>\r <li>\r {@link https://github.com/CesiumGS/glTF/tree/3d-tiles-next/extensions/2.0/Vendor/EXT_mesh_features|EXT_mesh_features}\r </li>\r <li>\r {@link https://github.com/KhronosGroup/glTF/tree/main/extensions/2.0/Vendor/EXT_mesh_gpu_instancing|EXT_mesh_gpu_instancing}\r </li>\r <li>\r {@link https://github.com/KhronosGroup/glTF/tree/main/extensions/2.0/Vendor/EXT_mesh_primitive_restart|EXT_mesh_primitive_restart}\r </li>\r <li>\r {@link https://github.com/KhronosGroup/glTF/pull/2479|EXT_mesh_primitive_edge_visibility}\r （默认隐藏边；设置 {@link EdgeDisplayMode} 可显示这些边，设置入口为 {@link Model#edgeDisplayMode} 或 {@link Cesium3DTileset#edgeDisplayMode}）\r </li>\r <li>\r {@link https://github.com/KhronosGroup/glTF/tree/main/extensions/2.0/Vendor/EXT_meshopt_compression|EXT_meshopt_compression}\r </li>\r <li>\r {@link https://github.com/CesiumGS/glTF/tree/3d-tiles-next/extensions/2.0/Vendor/EXT_structural_metadata|EXT_structural_metadata}\r </li>\r <li>\r {@link https://github.com/KhronosGroup/glTF/tree/main/extensions/2.0/Vendor/EXT_texture_webp|EXT_texture_webp}\r </li>\r <li>\r {@link https://github.com/KhronosGroup/glTF/blob/master/extensions/2.0/Khronos/KHR_draco_mesh_compression/README.md|KHR_draco_mesh_compression}\r </li>\r <li>\r {@link https://github.com/KhronosGroup/glTF/blob/main/extensions/2.0/Archived/KHR_techniques_webgl/README.md|KHR_techniques_webgl}\r </li>\r <li>\r {@link https://github.com/KhronosGroup/glTF/blob/main/extensions/1.0/Khronos/KHR_materials_common/README.md|KHR_materials_common}\r </li>\r <li>\r {@link https://github.com/KhronosGroup/glTF/tree/main/extensions/2.0/Archived/KHR_materials_pbrSpecularGlossiness|KHR_materials_pbrSpecularGlossiness}\r </li>\r <li>\r {@link https://github.com/KhronosGroup/glTF/tree/master/extensions/2.0/Khronos/KHR_materials_unlit/README.md|KHR_materials_unlit}\r </li>\r <li>\r {@link https://github.com/KhronosGroup/glTF/pull/2569|KHR_mesh_primitive_restart}\r （需要 WebGL 2 上下文；在 WebGL 1 下的行为未定义）\r </li>\r <li>\r {@link https://github.com/KhronosGroup/glTF/tree/main/extensions/2.0/Khronos/KHR_mesh_quantization|KHR_mesh_quantization}\r </li>\r <li>\r {@link https://github.com/KhronosGroup/glTF/tree/main/extensions/2.0/Khronos/KHR_meshopt_compression|KHR_meshopt_compression}\r </li>\r <li>\r {@link https://github.com/KhronosGroup/glTF/blob/master/extensions/2.0/Khronos/KHR_texture_basisu|KHR_texture_basisu}\r </li>\r <li>\r {@link https://github.com/KhronosGroup/glTF/blob/master/extensions/2.0/Khronos/KHR_texture_transform/README.md|KHR_texture_transform}\r </li>\r <li>\r {@link https://github.com/KhronosGroup/glTF/blob/main/extensions/1.0/Vendor/WEB3D_quantized_attributes/README.md|WEB3D_quantized_attributes}\r </li>\r <li>\r {@link https://nsgreg.nga.mil/csmwg.jsp|NGA_gpm_local（实验性）}\r </li>\r</ul>\r</p>\r<p>\r注意：模型通过 KHR_texture_basisu 扩展使用压缩纹理时，建议宽高均采用 2 的幂，以获得最佳兼容性。这是因为部分采样器要求纹理尺寸为 2 的幂（{@link https://developer.mozilla.org/en-US/docs/Web/API/WebGL_API/Tutorial/Using_textures_in_WebGL|在 WebGL 中使用纹理}），而 KHR_texture_basisu 要求宽高均为 4 的倍数（{@link https://github.com/KhronosGroup/glTF/blob/master/extensions/2.0/Khronos/KHR_texture_basisu/README.md#additional-requirements|KHR_texture_basisu 附加要求}）。\r</p>"
+    },
+    {
+      "id": "Model#activeAnimations",
+      "field": "description",
+      "sourceHash": "sha256:d29223e74e31645fe0edcf1b585b7cab35663af37de82c0a6e70898b2e9fa86e",
+      "text": "当前正在播放的 glTF 动画。"
+    },
+    {
+      "id": "Model#applyArticulations",
+      "field": "description",
+      "sourceHash": "sha256:3d0b91a32caf168766dd6612353e0b583839d71c0a36347a9b79a8c528f90d0a",
+      "text": "将所有修改过的关节阶段应用到参与关节运动的各节点矩阵。注意，这会覆盖参与节点已有的节点变换。"
+    },
+    {
+      "id": "Model#applyArticulations",
+      "field": "exceptions/0/description",
+      "sourceHash": "sha256:d0465423f837a370fe03a1e6e0e7e66f9b26741836f431e8a8e6eab70e92bc69",
+      "text": "模型尚未加载。请使用 Model.readyEvent，或等待 Model.ready 为 true。"
+    },
+    {
+      "id": "Model#backFaceCulling",
+      "field": "description",
+      "sourceHash": "sha256:691ac9737b3fe4a4c7feb4ac7e39f970e56dd78bc28a0bb736e19f5f63ceffda",
+      "text": "是否剔除背向几何。为 true 时，由材质的 doubleSided 属性决定背面剔除；为 false 时禁用背面剔除。若 {@link Model#color} 为半透明，或 {@link Model#silhouetteSize} 大于 0.0，则不剔除背面。"
+    },
+    {
+      "id": "Model#boundingSphere",
+      "field": "description",
+      "sourceHash": "sha256:f2a96ba807f57d2750a11cae906ced1e1c0c966522a1d4bceaba507cecccc202",
+      "text": "获取模型在世界空间中的包围球。不考虑 glTF 动画、蒙皮或变形目标，也不考虑 {@link Model#minimumPixelSize}。"
+    },
+    {
+      "id": "Model#clampAnimations",
+      "field": "description",
+      "sourceHash": "sha256:66ea24165dcd05cd047419123d577c6f80d9235f1298d28d358f4dc727140f02",
+      "text": "决定模型动画在未指定关键帧的帧间是否保持姿态。"
+    },
+    {
+      "id": "Model#classificationType",
+      "field": "description",
+      "sourceHash": "sha256:2586e3eafb52f915f8eeb364ec33f3dda34cda45d2e3f257b833c75fd907cc9c",
+      "text": "获取模型的分类类型，决定此模型对地形、3D Tiles 或两者进行分类。\n<p>\n另有以下要求和限制：\n<ul>\n    <li>glTF 不能包含变形目标、蒙皮或动画。</li>\n    <li>glTF 不能包含 <code>EXT_mesh_gpu_instancing</code> 扩展。</li>\n    <li>只能使用 TRIANGLES 网格对其他资源进行分类。</li>\n    <li>网格必须封闭且无孔洞。</li>\n    <li>必须包含 POSITION 属性。</li>\n    <li>同时存在要素 ID 和索引缓冲区时，相同要素 ID 对应的所有索引必须在索引缓冲区中连续排列。</li>\n    <li>存在要素 ID 但没有索引缓冲区时，相同要素 ID 对应的所有位置必须在位置缓冲区中连续排列。</li>\n</ul>\n</p>\n<p>\n接收分类的 3D Tiles 或地形必须不透明。\n</p>"
+    },
+    {
+      "id": "Model#clippingPlanes",
+      "field": "description",
+      "sourceHash": "sha256:7fa57a8971c264667c29188187b09ac241ca1dafa93c4f32a3bef6deed5bdf2d",
+      "text": "用于选择性禁用模型部分区域渲染的 {@link ClippingPlaneCollection}。"
+    },
+    {
+      "id": "Model#clippingPolygons",
+      "field": "description",
+      "sourceHash": "sha256:93353d4621c451c96a746079c6125753d05a7b8fe78ef52fc3a09e2958afce19",
+      "text": "用于选择性禁用模型部分区域渲染的 {@link ClippingPolygonCollection}。"
+    },
+    {
+      "id": "Model#color",
+      "field": "description",
+      "sourceHash": "sha256:63002fb9d261c61ce0fc5be5ff867d622196824aabd2019745ebfcb14c57115c",
+      "text": "与模型渲染颜色混合的颜色。"
+    },
+    {
+      "id": "Model#colorBlendAmount",
+      "field": "description",
+      "sourceHash": "sha256:f673e3c2079bbc9526b1295a6155f7726997867cb5ba1c7e23a1487d339b485c",
+      "text": "当 <code>colorBlendMode</code> 为 <code>MIX</code> 时，用于确定颜色强度。0.0 表示模型原始渲染颜色，1.0 表示纯色，中间值表示两者的混合。"
+    },
+    {
+      "id": "Model#colorBlendMode",
+      "field": "description",
+      "sourceHash": "sha256:00980746f886109f8b0a0f054adf148233aa491407fc91e39d78f7a38cad84a6",
+      "text": "定义颜色与模型的混合方式。"
+    },
+    {
+      "id": "Model#credit",
+      "field": "description",
+      "sourceHash": "sha256:426979c6309120163466d548e680c0fbb3f60b15af1df078c1497ba08a023f4f",
+      "text": "获取为此模型显示的来源署名。"
+    },
+    {
+      "id": "Model#customShader",
+      "field": "description",
+      "sourceHash": "sha256:59ac04237d82c9f0494de0666b63b33183c613de25abcac8b8996218d7c88469",
+      "text": "模型的自定义着色器（若有）。与 {@link Cesium3DTileStyle} 同时使用可能产生未定义行为。"
+    },
+    {
+      "id": "Model#debugShowBoundingVolume",
+      "field": "description",
+      "sourceHash": "sha256:42e2cd6aa8fba19bc9483c4251698f7ae373b6d2c78594303565e3eb8295fd74",
+      "text": "此属性仅供调试，不适合生产环境，也未做性能优化。\n<p>\n绘制模型中每个绘制命令的包围球。\n</p>"
+    },
+    {
+      "id": "Model#debugWireframe",
+      "field": "description",
+      "sourceHash": "sha256:acfdd5ea411ca4040ca17cb755e31d165658c4f316edfe07a32e949ef441446d",
+      "text": "此属性仅供调试，不适合生产环境，也未做性能优化。\n<p>\n以线框绘制模型。\n</p>"
+    },
+    {
+      "id": "Model#destroy",
+      "field": "description",
+      "sourceHash": "sha256:b385add820d9f47d540aad147f1cdf85f05e8c6cb81c3928a59c8fd5f7bd8d69",
+      "text": "销毁此对象持有的 WebGL 资源。显式销毁可确定地释放 WebGL 资源，而不依赖垃圾回收器回收此对象。<br /><br />对象销毁后不应再使用；调用除 <code>isDestroyed</code> 以外的任何函数都会抛出 {@link DeveloperError}。因此，应像示例中那样将返回值（<code>undefined</code>）赋给该对象变量。"
+    },
+    {
+      "id": "Model#distanceDisplayCondition",
+      "field": "description",
+      "sourceHash": "sha256:7ba34d25a13f0b49000e99829362d5b301ae45757322e0ddf1849a4dee08aebe",
+      "text": "获取或设置距离显示条件，规定此模型在距相机多远时显示。"
+    },
+    {
+      "id": "Model#edgeDisplayMode",
+      "field": "description",
+      "sourceHash": "sha256:75c4e389f68a00ad7974282848fa5953030b45a3815547a1ecb3ae8a60ea9d65",
+      "text": "控制 glTF 扩展 {@link https://github.com/KhronosGroup/glTF/pull/2479|EXT_mesh_primitive_edge_visibility} 中的边相对于表面几何的渲染方式。未声明此扩展的图元不受此设置影响。"
+    },
+    {
+      "id": "Model#edgeDisplayMode",
+      "field": "experimental/0",
+      "sourceHash": "sha256:460e31793a0efaefeb54f7cc7c444baaa9285a7f864a724e6670fa3b1fe7bd5e",
+      "text": "此功能使用尚未定稿的 glTF 规范内容，可能不遵循 Cesium 标准弃用政策而发生变化。"
+    },
+    {
+      "id": "Model#enableVerticalExaggeration",
+      "field": "description",
+      "sourceHash": "sha256:4e261ba1651647b0bab3766b213727145f1dfce1914c324c83546edfea0c0466",
+      "text": "为 <code>true</code> 时，若 {@link Scene.verticalExaggeration} 不为 <code>1.0</code>，则沿椭球法线方向夸张显示模型。"
+    },
+    {
+      "id": "Model#environmentMapManager",
+      "field": "description",
+      "sourceHash": "sha256:2a7e36b288564ef667ef95da8e7c6261454bb68c13c3de99ae3d76f5a27451b8",
+      "text": "管理此模型动态环境贴图的属性，会影响光照。"
+    },
+    {
+      "id": "Model#errorEvent",
+      "field": "description",
+      "sourceHash": "sha256:27d4b6ff571a8a5e37a0fc1bc62ee7f238238216227ffa5b449d6b68e1f2c294",
+      "text": "获取模型发生异步渲染错误时触发的事件。订阅此事件可接收错误通知，并尝试恢复。事件监听器接收一个 {@link ModelError} 实例。"
+    },
+    {
+      "id": "Model#featureIdLabel",
+      "field": "description",
+      "sourceHash": "sha256:2f5827270fdd229a78b4411dc7a338c7d2cf4e905b951a356261da6b10af1ae8",
+      "text": "用于拾取和样式设置的要素 ID 集标签。<p>对于 EXT_mesh_features，使用要素 ID 的 label 属性；若未指定，使用 \"featureId_N\"，其中 N 为其在 featureIds 数组中的索引。EXT_feature_metadata 没有 label 字段，因此此类要素 ID 集始终标为 \"featureId_N\"，N 为其在全部要素 ID 列表中的索引，列表中要素 ID 顶点属性先于要素 ID 纹理。</p><p>若 featureIdLabel 为整数 N，则自动转为字符串 \"featureId_N\"。逐图元和逐实例要素 ID 同时存在时，优先使用实例要素 ID。</p>"
+    },
+    {
+      "id": "Model#getExtension",
+      "field": "description",
+      "sourceHash": "sha256:84e22dafbb4ca368d0f8123e06c4690bd46166979a109a3650beb81216ef1d0b",
+      "text": "返回为指定扩展创建的对象。给定名称可以是 glTF 扩展名称，例如 `\"EXT_example_extension\"`。如果底层 glTF 资源的根对象包含此扩展，且对应扩展加载器已处理其数据，则返回该扩展的模型表示。"
+    },
+    {
+      "id": "Model#getExtension",
+      "field": "exceptions/0/description",
+      "sourceHash": "sha256:d0465423f837a370fe03a1e6e0e7e66f9b26741836f431e8a8e6eab70e92bc69",
+      "text": "模型尚未加载。请使用 Model.readyEvent，或等待 Model.ready 为 true。"
+    },
+    {
+      "id": "Model#getExtension",
+      "field": "params/extensionName/description",
+      "sourceHash": "sha256:d374ed64426a1df3324a44db76eeffc0948466b0ceb01aaf4a38384ab67ff8a4",
+      "text": "扩展名称。"
+    },
+    {
+      "id": "Model#getExtension",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:fe85fa67d968a1bd627951cd6f5054160dc3083f06ae7d0d37852d9f1381b253",
+      "text": "对应对象，或 `undefined`。"
+    },
+    {
+      "id": "Model#getNode",
+      "field": "description",
+      "sourceHash": "sha256:efb9bc9ecaf7b59e10f1f90e1bdfb709168b72d2dc107559a12299cde019c717",
+      "text": "返回 glTF 中具有指定 <code>name</code> 的节点，用于修改节点变换，实现用户自定义动画。"
+    },
+    {
+      "id": "Model#getNode",
+      "field": "exceptions/0/description",
+      "sourceHash": "sha256:1cb980e32114b486cea4e0c50a8d3b2533157c0dd86429148b0631ffe40b7343",
+      "text": "模型尚未加载。请使用 Model.readyEvent，或等待 Model.ready 为 true。"
+    },
+    {
+      "id": "Model#getNode",
+      "field": "params/name/description",
+      "sourceHash": "sha256:08f98c0d5e9e674af5277d073d514e26e4deb111343a869a8b14ca900a4a8e04",
+      "text": "节点在 glTF 中的名称。"
+    },
+    {
+      "id": "Model#getNode",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:7aee9652f2a63694410c49bdfc2b06040b5d41c8c963e8c97e9a13684e01c5a4",
+      "text": "对应节点；如果不存在指定 <code>name</code> 的节点，则为 <code>undefined</code>。"
+    },
+    {
+      "id": "Model#heightReference",
+      "field": "description",
+      "sourceHash": "sha256:0ad0df2d5f7de98254ba6f5998ec85286b14570f48d07b617c9011632fedf7a4",
+      "text": "模型的高度参考，决定模型相对于地形的绘制方式。"
+    },
+    {
+      "id": "Model#id",
+      "field": "description",
+      "sourceHash": "sha256:fe5df61fe52b8bb94d8c515ec4cb25e39cb04bb0d92d62cc66337432ef570db6",
+      "text": "拾取模型时返回的用户自定义对象。"
+    },
+    {
+      "id": "Model#imageBasedLighting",
+      "field": "description",
+      "sourceHash": "sha256:619a1808522f1882f08ff7dc140294ecd0452e38a35b22c66672d612f74c92da",
+      "text": "管理此模型基于图像的光照的属性。"
+    },
+    {
+      "id": "Model#instanceFeatureIdLabel",
+      "field": "description",
+      "sourceHash": "sha256:bf00ca874cdd7962bdd6cc420d5b1b0e2895b472a90865ef009ca1f3e92e049d",
+      "text": "用于拾取和样式设置的实例要素 ID 集标签。<p>若 instanceFeatureIdLabel 为整数 N，则自动转为字符串 \"instanceFeatureId_N\"。逐图元和逐实例要素 ID 同时存在时，优先使用实例要素 ID。</p>"
+    },
+    {
+      "id": "Model#isDestroyed",
+      "field": "description",
+      "sourceHash": "sha256:aea7b697937631c90ae3fc0ec55b81ba0ddc7abe4d6045848b2031f9bed60091",
+      "text": "若此对象已销毁，返回 true；否则返回 false。<br /><br />对象销毁后不应再使用；调用除 <code>isDestroyed</code> 以外的任何函数都会抛出 {@link DeveloperError}。"
+    },
+    {
+      "id": "Model#lightColor",
+      "field": "description",
+      "sourceHash": "sha256:6dd3427d1b7da770f4aeb108178cf9f6b53dc8533019d9d1aca57e8b112727e7",
+      "text": "为模型着色时使用的方向光颜色。为 <code>undefined</code> 时，使用场景的光源颜色。\n<p>\n通过设置 <code>model.imageBasedLighting.imageBasedLightingFactor = new Cartesian2(0.0, 0.0)</code> 禁用额外光源后，模型会明显变暗。此时提高光源强度可使模型更亮。\n</p>"
+    },
+    {
+      "id": "Model#makeStyleDirty",
+      "field": "description",
+      "sourceHash": "sha256:74986fcf17e91c5e0ebf8dbaf7cf097dba068deaf76682db646dd38024f15300",
+      "text": "将模型的 {@link Model#style} 标记为已修改，强制全部要素在模型下一次可见的帧中重新计算样式。"
+    },
+    {
+      "id": "Model#maximumScale",
+      "field": "description",
+      "sourceHash": "sha256:df35e4528e7eb3eed9564d52026cc48d3752ac846199945147d5809c7dbe97b7",
+      "text": "模型的最大缩放值，可作为 {@link Model#minimumPixelSize} 引起缩放的上限，防止模型被不合理地放大。"
+    },
+    {
+      "id": "Model#minimumPixelSize",
+      "field": "description",
+      "sourceHash": "sha256:32500355a76cf74ab861fbb36929dce1dbfb4401724b724ca50bd6010d06f3a5",
+      "text": "无论缩放级别如何，模型都尽量保持的最小像素尺寸。可用于确保拉远视角时模型仍可见。为 <code>0.0</code> 时，不强制最小尺寸。"
+    },
+    {
+      "id": "Model#modelMatrix",
+      "field": "description",
+      "sourceHash": "sha256:0faf2916993f825c66adc6eac510e2765d06162315c24bfd116608fbfc614172",
+      "text": "将模型坐标变换到世界坐标的 4x4 矩阵。为单位矩阵时，模型按世界坐标绘制，即地球的 WGS84 笛卡尔坐标。可提供其他变换矩阵来使用局部参考系，例如 {@link Transforms.eastNorthUpToFixedFrame} 的返回值。"
+    },
+    {
+      "id": "Model#outlineColor",
+      "field": "description",
+      "sourceHash": "sha256:56ed3803bb7cd74623ade9b13216c6c345e04a72df4a6c022f6d6335d816728e",
+      "text": "渲染轮廓时使用的颜色。"
+    },
+    {
+      "id": "Model#pointCloudShading",
+      "field": "description",
+      "sourceHash": "sha256:8be72a6026e5327973409bed2bf741ceff9467db51304b58135519b3ffa15856",
+      "text": "用于控制点云衰减和光照的着色设置。对于 3D Tiles，继承自 {@link Cesium3DTileset}。"
+    },
+    {
+      "id": "Model#ready",
+      "field": "description",
+      "sourceHash": "sha256:17b777b34f83bf211b165ae584cbd76892344f423be3acc91958ab8ff3a50daa",
+      "text": "为 <code>true</code> 时，模型已可供渲染，即外部二进制、图像和着色器文件已下载，且 WebGL 资源已创建。"
+    },
+    {
+      "id": "Model#readyEvent",
+      "field": "description",
+      "sourceHash": "sha256:848449844e0b40209ba3591b466658c10a1e75d640bd263ceb1f99f861833cb8",
+      "text": "获取模型加载完成并可供渲染时触发的事件，即外部资源已下载且 WebGL 资源已创建。事件监听器接收一个 {@link Model} 实例。\n<p>\n如果 {@link Model.incrementallyLoadTextures} 为 true，此事件会在所有纹理加载完成并可供渲染之前触发。可订阅 {@link Model.texturesReadyEvent} 接收纹理就绪通知。\n</p>"
+    },
+    {
+      "id": "Model#scale",
+      "field": "description",
+      "sourceHash": "sha256:879183c3ca0e18fa7311b2b66b1b9f9e92065dc5095ae994a7ec750bbeaa3a5a",
+      "text": "在 {@link Model#modelMatrix} 之前应用到模型的统一缩放值。大于 <code>1.0</code> 时放大模型，小于 <code>1.0</code> 时缩小。"
+    },
+    {
+      "id": "Model#setArticulationStage",
+      "field": "description",
+      "sourceHash": "sha256:36fd603ac2466f4e4e9d78602b35a31f13101f23668acc18ae2caff975d49567",
+      "text": "设置关节阶段的当前值。设置一个或多个阶段值后，调用 Model.applyArticulations() 重新计算节点矩阵。"
+    },
+    {
+      "id": "Model#setArticulationStage",
+      "field": "exceptions/0/description",
+      "sourceHash": "sha256:d0465423f837a370fe03a1e6e0e7e66f9b26741836f431e8a8e6eab70e92bc69",
+      "text": "模型尚未加载。请使用 Model.readyEvent，或等待 Model.ready 为 true。"
+    },
+    {
+      "id": "Model#setArticulationStage",
+      "field": "params/articulationStageKey/description",
+      "sourceHash": "sha256:4ea0fc3af7d91ff159623a6d06f1d472c7f6f2d13431faeacc341dd3e894b296",
+      "text": "关节名称、一个空格和阶段名称组成的键。"
+    },
+    {
+      "id": "Model#setArticulationStage",
+      "field": "params/value/description",
+      "sourceHash": "sha256:a1e8c54a12f0a536e48d90bd0b900d1d4d691df14e8c5515d997c9ac672ed12f",
+      "text": "该关节阶段的数值。"
+    },
+    {
+      "id": "Model#shadows",
+      "field": "description",
+      "sourceHash": "sha256:d677dac50c2cf077aeb6f44be38a301995cb76ed58216aa037900b226648fb6f",
+      "text": "决定模型是否投射或接收光源产生的阴影。"
+    },
+    {
+      "id": "Model#show",
+      "field": "description",
+      "sourceHash": "sha256:6418461dccf421c64460d0b9137759862d6d3844ad27140e62a9207fabd01ca0",
+      "text": "是否渲染模型。"
+    },
+    {
+      "id": "Model#showCreditsOnScreen",
+      "field": "description",
+      "sourceHash": "sha256:2c51e1c1de3f5208eff41f7a13a7bce55e5893aa3fcb08d89e89e7bff1d5f64d",
+      "text": "获取或设置是否在屏幕上显示模型的来源署名。"
+    },
+    {
+      "id": "Model#showOutline",
+      "field": "description",
+      "sourceHash": "sha256:7f0ef4838f172aef1629509a37b04e0763a6a16f2ddd641ac691d39d31460d94",
+      "text": "是否显示使用 {@link https://github.com/KhronosGroup/glTF/tree/master/extensions/2.0/Vendor/CESIUM_primitive_outline|CESIUM_primitive_outline} 扩展的模型轮廓。为 true 时显示，为 false 时不显示。"
+    },
+    {
+      "id": "Model#silhouetteColor",
+      "field": "description",
+      "sourceHash": "sha256:93db3bdec13b957122cddb0527e3303bdee1f85be2a848ce51bfc12fa952e98a",
+      "text": "剪影颜色。"
+    },
+    {
+      "id": "Model#silhouetteSize",
+      "field": "description",
+      "sourceHash": "sha256:c6fb17baace2dd4cc270a118da4bf22f0753a182c5de1f03a39a33bc0b97d7de",
+      "text": "剪影尺寸，单位为像素。"
+    },
+    {
+      "id": "Model#splitDirection",
+      "field": "description",
+      "sourceHash": "sha256:ca42461680e54e9778c63f2b2da4947413b2afc6fa106897c003dd7ac3321a0a",
+      "text": "应用到此模型的 {@link SplitDirection} 分屏方向。"
+    },
+    {
+      "id": "Model#style",
+      "field": "description",
+      "sourceHash": "sha256:91a103303a7cf5acbe66017f1f06d0b963bd823e95a82c3f68ccd863c1f2a009",
+      "text": "应用到模型要素的样式。已应用 {@link CustomShader} 时无法同时使用。"
+    },
+    {
+      "id": "Model#texturesReadyEvent",
+      "field": "description",
+      "sourceHash": "sha256:0efa66f5aa7ef7972ffb023d0d439b1577b4234fbafbf60e7e52e7977553f8c6",
+      "text": "获取纹理就绪事件。若 {@link Model.incrementallyLoadTextures} 为 true，则在模型纹理加载完成并可供渲染时触发，即外部资源已下载且 WebGL 资源已创建。事件监听器接收一个 {@link Model} 实例。"
+    },
+    {
+      "id": "Model#update",
+      "field": "description",
+      "sourceHash": "sha256:c5cc5fb756479265000e8f5e05ef6b5630397b1880c9ff3316fe45c545c6b022",
+      "text": "由 {@link Viewer} 或 {@link CesiumWidget} 在渲染场景时调用，以获取渲染此图元所需的绘制命令。<p>不要直接调用。此处记录此函数，仅为列出场景渲染期间可能向上传播的异常：</p>"
+    },
+    {
+      "id": "Model#update",
+      "field": "exceptions/0/description",
+      "sourceHash": "sha256:469464451eefd9402e991f357ff5a8911a4c377b6358dd441c194a585a697c9f",
+      "text": "外部引用加载失败。"
+    },
+    {
+      "id": "ModelAnimation.AnimationTimeCallback",
+      "field": "description",
+      "sourceHash": "sha256:051821b73f517af7b2f8bb018e27498f5fa9ed9fd94e6beca5e4eae756c7f639",
+      "text": "用于计算 ModelAnimation 局部动画时间的函数。"
+    },
+    {
+      "id": "ModelAnimation.AnimationTimeCallback",
+      "field": "params/duration/description",
+      "sourceHash": "sha256:44f8e747e5746dd0ff04ec1c8a3824a02619a582e46ff2d31679372ecfd7eaab",
+      "text": "动画的原始时长，单位为秒。"
+    },
+    {
+      "id": "ModelAnimation.AnimationTimeCallback",
+      "field": "params/seconds/description",
+      "sourceHash": "sha256:8d43aba6a73ba98853546c549212702e22096c9a96a6034e8d44b0b86909d0ca",
+      "text": "按场景时间计，从动画开始起经过的秒数。"
+    },
+    {
+      "id": "ModelAnimation.AnimationTimeCallback",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:8bc76c84f28b72578e37643e099dbdb27fdbf7d6f4ec3b7f34fd5bec26d3f99c",
+      "text": "返回局部动画时间。"
+    },
+    {
+      "id": "ModelAnimation",
+      "field": "description",
+      "sourceHash": "sha256:296757fe6129c555ada3fdd1c3fd2dd23960c1fa9457ecbf080a014666ea59bc",
+      "text": "<div class=\"notice\">\n请调用 {@link ModelAnimationCollection#add} 创建动画，不要直接调用构造函数。\n</div>\n\n从 glTF 资源派生的活动动画。活动动画指当前正在播放，或已加入模型的 {@link ModelAnimationCollection} 并计划播放的动画。它是动画的一个实例；例如，同一个 glTF 动画可以有多个开始时间不同的活动实例。"
+    },
+    {
+      "id": "ModelAnimation#animationTime",
+      "field": "description",
+      "sourceHash": "sha256:847fb9a3e35d489ef20e1a816ae809b7908c095d2913db3cc8c6a84f2ed7924b",
+      "text": "定义后，用它来计算局部动画时间，替代场景时间。"
+    },
+    {
+      "id": "ModelAnimation#delay",
+      "field": "description",
+      "sourceHash": "sha256:c04801c2da842f34ffe40cb072f458e88fe819f0c25c97422d20dc14fc71c13d",
+      "text": "从 {@link ModelAnimation#startTime} 到开始播放之间的延迟，单位为秒。"
+    },
+    {
+      "id": "ModelAnimation#loop",
+      "field": "description",
+      "sourceHash": "sha256:e30b8f37bc9db7aba26aa50a0a39d90f6d9f3b48be07a860469c3c354a117644",
+      "text": "决定动画是否循环及其循环方式。"
+    },
+    {
+      "id": "ModelAnimation#multiplier",
+      "field": "description",
+      "sourceHash": "sha256:25cea68c2339723760c75c9fd2803ec3749ddb46cf0a05f430fe52d45aa3e685",
+      "text": "相对于场景时钟速度，大于 <code>1.0</code> 的值会加快播放，小于 <code>1.0</code> 会减慢；值为 <code>1.0</code> 时，按 glTF 动画速度映射到场景时钟。例如场景以实时两倍速播放时，即使 <code>multiplier</code> 为 <code>1.0</code>，一个时长两秒的 glTF 动画也会在一秒内播完。"
+    },
+    {
+      "id": "ModelAnimation#name",
+      "field": "description",
+      "sourceHash": "sha256:efd69e0204ad21c02ec4fdb439d338a2d38f6604cf8e6b174c3887073270fcf7",
+      "text": "模型中标识此动画的名称（若有）。"
+    },
+    {
+      "id": "ModelAnimation#removeOnStop",
+      "field": "description",
+      "sourceHash": "sha256:e095dd5bee1fb25bacfd6d9a19189c3ab033c4dbf08849fa1e6ddad0feb4656d",
+      "text": "为 <code>true</code> 时，动画停止后会被移除。相比保留动画略有效率优势，但此后即使时间倒放，也不会再次播放该动画。"
+    },
+    {
+      "id": "ModelAnimation#reverse",
+      "field": "description",
+      "sourceHash": "sha256:71a7d74f31178bddf7c353d4012f7ce4e2307733e9e852c0e8aa0413b7bc5a05",
+      "text": "为 <code>true</code> 时，反向播放动画。"
+    },
+    {
+      "id": "ModelAnimation#start",
+      "field": "description",
+      "sourceHash": "sha256:c8a813a52a9d8a12ba4c08ff944bd8ef3a9411aef059607e965e020deba4746f",
+      "text": "此动画开始时触发的事件，可用于播放声音或启动粒子系统等。\n<p>\n事件在场景完成渲染后的帧末触发。\n</p>"
+    },
+    {
+      "id": "ModelAnimation#startTime",
+      "field": "description",
+      "sourceHash": "sha256:bcdb42fbd55abf02129e9e81d448f8c69f446f495bd50ef8f26887f16cf11a3c",
+      "text": "开始播放此动画的场景时间。为 <code>undefined</code> 时，在下一帧开始播放。"
+    },
+    {
+      "id": "ModelAnimation#stop",
+      "field": "description",
+      "sourceHash": "sha256:fa62050e5e60f24d59b738ab63cbb3fead6fc6ab2ac744e099bc814ca208f266",
+      "text": "此动画停止时触发的事件，可用于播放声音或启动粒子系统等。\n<p>\n事件在场景完成渲染后的帧末触发。\n</p>"
+    },
+    {
+      "id": "ModelAnimation#stopTime",
+      "field": "description",
+      "sourceHash": "sha256:368be5385aecdd5ffc55cdd38ace44a71fa393d945df5ffe32b0a5432bc63fb0",
+      "text": "停止播放此动画的场景时间。为 <code>undefined</code> 时，播放完整动画，并根据 {@link ModelAnimation#loop} 决定是否重复。"
+    },
+    {
+      "id": "ModelAnimation#update",
+      "field": "description",
+      "sourceHash": "sha256:7f9251791dec4a5e2b119b76909346d37875841f16eff4d8cfbd778230f91be9",
+      "text": "此动画每帧更新时触发的事件。事件会传入相对于 glTF 动画时间范围的当前动画时间，可据此在正在播放的动画到达指定时刻时启动其他动画。\n<p>\n事件在场景完成渲染后的帧末触发。\n</p>"
+    },
+    {
+      "id": "ModelAnimationCollection",
+      "field": "description",
+      "sourceHash": "sha256:6a4e438fe98b685a38ecddaa5a21061bd09b9a0b80517ce7eb17094ed402657b",
+      "text": "<div class=\"notice\">\n请通过 {@link Model#activeAnimations} 访问模型动画，不要直接调用构造函数。\n</div>\n\n活动模型动画的集合。"
+    },
+    {
+      "id": "ModelAnimationCollection#add",
+      "field": "description",
+      "sourceHash": "sha256:0c1f46bfe3c69cec11b1c4b87374ed8428f7c9be756d8f5ee05af4ed22a90108",
+      "text": "使用指定初始属性创建动画并加入集合。\n<p>\n会触发 {@link ModelAnimationCollection#animationAdded} 事件，可用于保持 UI 同步等。\n</p>"
+    },
+    {
+      "id": "ModelAnimationCollection#add",
+      "field": "exceptions/0/description",
+      "sourceHash": "sha256:be6ce9b2ed97b474bea4027785a698442e4579688923cc19923b0734cd788daa",
+      "text": "动画尚未加载。请等待 {@link Model#ready} 返回 true。"
+    },
+    {
+      "id": "ModelAnimationCollection#add",
+      "field": "exceptions/1/description",
+      "sourceHash": "sha256:9dbe7db6ea9c971567993bdf0c795dca87beabe47da70fa402efc5235e5d387c",
+      "text": "options.name 必须是有效的动画名称。"
+    },
+    {
+      "id": "ModelAnimationCollection#add",
+      "field": "exceptions/2/description",
+      "sourceHash": "sha256:bb68049be0628a651352b44e2ab6af83969898bf45f7a1c71dbe4ba10aaa7758",
+      "text": "options.index 必须是有效的动画索引。"
+    },
+    {
+      "id": "ModelAnimationCollection#add",
+      "field": "exceptions/3/description",
+      "sourceHash": "sha256:820d6d3917cacbae377d07dcc493731025e0a7a02af7209e64ad9e40bd8369dd",
+      "text": "必须定义 options.name 或 options.index。"
+    },
+    {
+      "id": "ModelAnimationCollection#add",
+      "field": "exceptions/4/description",
+      "sourceHash": "sha256:64cb406fac5e525bd402dbe55a2e66e6d9729188ee4195b49315a2c5f4127730",
+      "text": "options.multiplier 必须大于零。"
+    },
+    {
+      "id": "ModelAnimationCollection#add",
+      "field": "params/options.animationTime/description",
+      "sourceHash": "sha256:1d3c9d8f68c6bf32ad03be476ff4564b3d6558a56fbbff60e86d7c88e9cdc61a",
+      "text": "若定义，则用于计算此动画的局部动画时间。"
+    },
+    {
+      "id": "ModelAnimationCollection#add",
+      "field": "params/options.delay/description",
+      "sourceHash": "sha256:84b253a1d7e62d701d29b5b092ca35f14f32399cefb322a2c005b2be1aa88c62",
+      "text": "从 <code>startTime</code> 到开始播放之间的延迟，单位为秒。仅当 <code>options.loop</code> 为 ModelAnimationLoop.NONE 时有效。"
+    },
+    {
+      "id": "ModelAnimationCollection#add",
+      "field": "params/options.index/description",
+      "sourceHash": "sha256:38c574352a7f66345ac8d788d91dd82627a97fb913cb3cd520699292e3229f0b",
+      "text": "标识动画的 glTF 动画索引。若 <code>options.name</code> 为 <code>undefined</code>，则必须定义此项。"
+    },
+    {
+      "id": "ModelAnimationCollection#add",
+      "field": "params/options.loop/description",
+      "sourceHash": "sha256:e30b8f37bc9db7aba26aa50a0a39d90f6d9f3b48be07a860469c3c354a117644",
+      "text": "决定动画是否循环及其循环方式。"
+    },
+    {
+      "id": "ModelAnimationCollection#add",
+      "field": "params/options.multiplier/description",
+      "sourceHash": "sha256:b974118765e552a1581040a9fd164170e746ae5027e62b84beb2ad32755ba6d6",
+      "text": "相对于场景时钟速度，大于 <code>1.0</code> 时加快动画播放，小于 <code>1.0</code> 时减慢。"
+    },
+    {
+      "id": "ModelAnimationCollection#add",
+      "field": "params/options.name/description",
+      "sourceHash": "sha256:a9d1a48bfa8e11494076027fdc2a8b73c1f8dff12fe8011a7f3e74273f6d5263",
+      "text": "标识动画的 glTF 动画名称。若 <code>options.index</code> 为 <code>undefined</code>，则必须定义此项。"
+    },
+    {
+      "id": "ModelAnimationCollection#add",
+      "field": "params/options.removeOnStop/description",
+      "sourceHash": "sha256:b19a6b1cfc101753736c9a2c45fe8601d904e227b6903284d8ac4757820b3f81",
+      "text": "为 <code>true</code> 时，动画停止后会被移除。仅当 <code>options.loop</code> 为 ModelAnimationLoop.NONE 时有效。"
+    },
+    {
+      "id": "ModelAnimationCollection#add",
+      "field": "params/options.reverse/description",
+      "sourceHash": "sha256:71a7d74f31178bddf7c353d4012f7ce4e2307733e9e852c0e8aa0413b7bc5a05",
+      "text": "为 <code>true</code> 时，反向播放动画。"
+    },
+    {
+      "id": "ModelAnimationCollection#add",
+      "field": "params/options.startTime/description",
+      "sourceHash": "sha256:5de99cfa63b4c548a838e62ea78d83b331eaf4dab26bed1c25488ac4dbda6682",
+      "text": "开始播放动画的场景时间。为 <code>undefined</code> 时，在下一帧开始播放。"
+    },
+    {
+      "id": "ModelAnimationCollection#add",
+      "field": "params/options.stopTime/description",
+      "sourceHash": "sha256:d29293620222b362080737812f3f7fecb7f74535fa2f6cefd9fe2e85ea4f1a13",
+      "text": "停止播放动画的场景时间。为 <code>undefined</code> 时，播放完整动画。"
+    },
+    {
+      "id": "ModelAnimationCollection#add",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:fdf091c770f16dc600cd8ae85646f5f177f04add7ce74f8927f3385bc5cbe477",
+      "text": "加入集合的动画。"
+    },
+    {
+      "id": "ModelAnimationCollection#addAll",
+      "field": "description",
+      "sourceHash": "sha256:db8403741ea6266f2d05dd964f3ed57bf1e67323dbbe9439cc277760f595a439",
+      "text": "为模型中的所有动画按指定初始属性创建实例，并加入集合。\n<p>\n每添加一个动画都会触发 {@link ModelAnimationCollection#animationAdded} 事件，可用于保持 UI 同步等。\n</p>"
+    },
+    {
+      "id": "ModelAnimationCollection#addAll",
+      "field": "exceptions/0/description",
+      "sourceHash": "sha256:59db1206e4fd204ee3fd64808c82701bd05817a7656fa1531048833c8740cda1",
+      "text": "动画尚未加载。请等待 {@link Model#ready} 返回 true。"
+    },
+    {
+      "id": "ModelAnimationCollection#addAll",
+      "field": "exceptions/1/description",
+      "sourceHash": "sha256:64cb406fac5e525bd402dbe55a2e66e6d9729188ee4195b49315a2c5f4127730",
+      "text": "options.multiplier 必须大于零。"
+    },
+    {
+      "id": "ModelAnimationCollection#addAll",
+      "field": "params/options.animationTime/description",
+      "sourceHash": "sha256:8d5c9ea5b47170559376d890cc74024ff9c563a07bd54e255f2eb47d71d8773b",
+      "text": "若定义，则用于计算所有动画的局部动画时间。"
+    },
+    {
+      "id": "ModelAnimationCollection#addAll",
+      "field": "params/options.delay/description",
+      "sourceHash": "sha256:84b253a1d7e62d701d29b5b092ca35f14f32399cefb322a2c005b2be1aa88c62",
+      "text": "从 <code>startTime</code> 到开始播放之间的延迟，单位为秒。仅当 <code>options.loop</code> 为 ModelAnimationLoop.NONE 时有效。"
+    },
+    {
+      "id": "ModelAnimationCollection#addAll",
+      "field": "params/options.loop/description",
+      "sourceHash": "sha256:ba8bdf446ce4e98b6c5b1a5ca109fa3f94ee8db4fbcc8039fe7909d576e37446",
+      "text": "决定动画是否循环及其循环方式。"
+    },
+    {
+      "id": "ModelAnimationCollection#addAll",
+      "field": "params/options.multiplier/description",
+      "sourceHash": "sha256:2fbe34ecc60e4092d664ae05fffa23c29c9353b68ee54d352cca953439b8b19d",
+      "text": "相对于场景时钟速度，大于 <code>1.0</code> 时加快动画播放，小于 <code>1.0</code> 时减慢。"
+    },
+    {
+      "id": "ModelAnimationCollection#addAll",
+      "field": "params/options.removeOnStop/description",
+      "sourceHash": "sha256:aeb7e9b50e4d7fd076dc091357463ea9dccb5fc9b785d0432a0637bfdb8c398a",
+      "text": "为 <code>true</code> 时，动画停止后会被移除。仅当 <code>options.loop</code> 为 ModelAnimationLoop.NONE 时有效。"
+    },
+    {
+      "id": "ModelAnimationCollection#addAll",
+      "field": "params/options.reverse/description",
+      "sourceHash": "sha256:dfdb591f161ac197c4b074328d706565e286df1a4705626793a83daa1f693f60",
+      "text": "为 <code>true</code> 时，反向播放动画。"
+    },
+    {
+      "id": "ModelAnimationCollection#addAll",
+      "field": "params/options.startTime/description",
+      "sourceHash": "sha256:98ecae57503b971ac4663eb0041952299e6a775f6739f372af7bf6bc5cc98dd1",
+      "text": "开始播放动画的场景时间。为 <code>undefined</code> 时，在下一帧开始播放。"
+    },
+    {
+      "id": "ModelAnimationCollection#addAll",
+      "field": "params/options.stopTime/description",
+      "sourceHash": "sha256:b2188975d3b468798fa8b8d2d0bedfd83eb6706be4a5effe1c26238c8eff4d83",
+      "text": "停止播放动画的场景时间。为 <code>undefined</code> 时，播放完整动画。"
+    },
+    {
+      "id": "ModelAnimationCollection#addAll",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:483ea32e46b418cabb2f90e9e188aed4e923135ecbe3fd0a218abd35157d7bcf",
+      "text": "{@link ModelAnimation} 对象数组，每个新加入集合的动画对应一个对象。没有 glTF 动画时，数组为空。"
+    },
+    {
+      "id": "ModelAnimationCollection#animateWhilePaused",
+      "field": "description",
+      "sourceHash": "sha256:0b0cffdbb2908d01f4a3a0cf9011df1b944952092ff7d8843af3e4411d0aed4a",
+      "text": "为 true 时，即使场景时间暂停，也允许播放动画。但是否实际产生动画仍取决于各动画的 animationTime 函数。默认函数基于场景时间，因此采用默认函数的模型无论此设置如何，都不会在暂停时播放。"
+    },
+    {
+      "id": "ModelAnimationCollection#animationAdded",
+      "field": "description",
+      "sourceHash": "sha256:bf01f2fd80ad3e13cc0e6602f2a15c839294a93892c5cd93109a7377f210c38d",
+      "text": "动画加入集合时触发的事件，可用于保持 UI 同步等。"
+    },
+    {
+      "id": "ModelAnimationCollection#animationRemoved",
+      "field": "description",
+      "sourceHash": "sha256:c47e9b2f0b1d585bd4da613178f1379de4f537744a0b40053b8d7b3e49a607e4",
+      "text": "动画从集合移除时触发的事件，可用于保持 UI 同步等。"
+    },
+    {
+      "id": "ModelAnimationCollection#contains",
+      "field": "description",
+      "sourceHash": "sha256:127c47c3b20edd899fab7583812779ab9039e6c2e5ffe0b75bcbcb6632855a39",
+      "text": "判断集合是否包含指定动画。"
+    },
+    {
+      "id": "ModelAnimationCollection#contains",
+      "field": "params/runtimeAnimation/description",
+      "sourceHash": "sha256:d7fbc7846a03a9ff54167e1b6eb75d059c45edbce1f777ba466d9e95881dde2b",
+      "text": "要检查的运行时动画。"
+    },
+    {
+      "id": "ModelAnimationCollection#contains",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:6aa01ff123e1afc2a5a2ee88daff3eca3e2da9b5bdd7c5c513ddb06a0e7eddbb",
+      "text": "集合包含此动画时为 <code>true</code>，否则为 <code>false</code>。"
+    },
+    {
+      "id": "ModelAnimationCollection#get",
+      "field": "description",
+      "sourceHash": "sha256:3ed799100a6f15a7f4c6c309260402a05ddf21ac5d67ea1fcb7c16b64509c919",
+      "text": "返回集合中指定索引的动画。索引从零开始，随动画加入而增加。移除动画会使后续动画向前移动，改变其索引。此函数常用于遍历集合中的全部动画。"
+    },
+    {
+      "id": "ModelAnimationCollection#get",
+      "field": "params/index/description",
+      "sourceHash": "sha256:bb9c179930060af6ab1253227cd1ce641789ff97d84e3daa4ed6fced8c5c80e4",
+      "text": "动画从零开始的索引。"
+    },
+    {
+      "id": "ModelAnimationCollection#get",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:76827fc25175425daccc243e1219df5b122bf7bee360058d23efcab1e41e48ad",
+      "text": "指定索引处的运行时动画。"
+    },
+    {
+      "id": "ModelAnimationCollection#length",
+      "field": "description",
+      "sourceHash": "sha256:20f1f8e5cdb7f86a348d08c78b45f73e318bb33c62c5b4348d0fb6346ee2e10d",
+      "text": "集合中的动画数量。"
+    },
+    {
+      "id": "ModelAnimationCollection#model",
+      "field": "description",
+      "sourceHash": "sha256:9156cb4f6c905f3563c607bbf6cf6cbe2318db6d5de2312fc32a955c9fbd436e",
+      "text": "此动画集合所属的模型。"
+    },
+    {
+      "id": "ModelAnimationCollection#remove",
+      "field": "description",
+      "sourceHash": "sha256:bd8450f426e0f9b031adaeee98d6eedbea0ae0134291d4a8208c4d416f56208b",
+      "text": "从集合中移除动画。\n<p>\n会触发 {@link ModelAnimationCollection#animationRemoved} 事件，可用于保持 UI 同步等。\n</p>\n<p>\n也可将 {@link ModelAnimationCollection#removeOnStop} 设为 <code>true</code>，使动画停止后从集合中隐式移除；移除时仍会触发 {@link ModelAnimationCollection#animationRemoved} 事件。\n</p>"
+    },
+    {
+      "id": "ModelAnimationCollection#remove",
+      "field": "params/runtimeAnimation/description",
+      "sourceHash": "sha256:a6a91ae97d77f535299f213936ffb980a8d475885ec693d10974324daaaee063",
+      "text": "要移除的运行时动画。"
+    },
+    {
+      "id": "ModelAnimationCollection#remove",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:c2261c79e1037a612cf48eaedc20d7fce6648bd4755c4cafbff7170349f69c94",
+      "text": "已移除动画时为 <code>true</code>；集合中未找到动画时为 <code>false</code>。"
+    },
+    {
+      "id": "ModelAnimationCollection#removeAll",
+      "field": "description",
+      "sourceHash": "sha256:17e1ababa880b26062dee0e150b94a573a72449b1b5d01f9b70ed031292cd7fd",
+      "text": "从集合中移除全部动画。\n<p>\n每移除一个动画都会触发 {@link ModelAnimationCollection#animationRemoved} 事件，可用于保持 UI 同步等。\n</p>"
+    },
+    {
+      "id": "ModelAnimationLoop.MIRRORED_REPEAT",
+      "field": "description",
+      "sourceHash": "sha256:ac050eb48cde36243fa0ab5fc189ac34ba9204fc4f1525e6dd11714c960f169e",
+      "text": "循环播放动画：先正向，再反向，再正向，依此交替。"
+    },
+    {
+      "id": "ModelAnimationLoop.NONE",
+      "field": "description",
+      "sourceHash": "sha256:e1d9130a687f4779fde19c2c6bb7b9233a6b861988c437ae1a03b2dba5170076",
+      "text": "仅播放一次动画，不循环。"
+    },
+    {
+      "id": "ModelAnimationLoop.REPEAT",
+      "field": "description",
+      "sourceHash": "sha256:91459f0bd91d558bc8f07c291ffad8a89d5c49acf8c4924679e91e1b0499cf4e",
+      "text": "循环播放动画，每次结束后立即从头开始。"
+    },
+    {
+      "id": "ModelAnimationLoop",
+      "field": "description",
+      "sourceHash": "sha256:c5a6ab057abc4d5b017bfcf4f275ae533236a468be98261ec145351191ed46ab",
+      "text": "决定 glTF 动画是否循环及其循环方式。"
+    },
+    {
+      "id": "ModelAnimationLoop",
+      "field": "properties/MIRRORED_REPEAT/description",
+      "sourceHash": "sha256:ac050eb48cde36243fa0ab5fc189ac34ba9204fc4f1525e6dd11714c960f169e",
+      "text": "循环播放动画：先正向，再反向，再正向，依此交替。"
+    },
+    {
+      "id": "ModelAnimationLoop",
+      "field": "properties/NONE/description",
+      "sourceHash": "sha256:e1d9130a687f4779fde19c2c6bb7b9233a6b861988c437ae1a03b2dba5170076",
+      "text": "仅播放一次动画，不循环。"
+    },
+    {
+      "id": "ModelAnimationLoop",
+      "field": "properties/REPEAT/description",
+      "sourceHash": "sha256:91459f0bd91d558bc8f07c291ffad8a89d5c49acf8c4924679e91e1b0499cf4e",
+      "text": "循环播放动画，每次结束后立即从头开始。"
+    },
+    {
+      "id": "ModelFeature",
+      "field": "description",
+      "sourceHash": "sha256:ebec0e22850fe6e5f10833c0a1c321f6b3091e5d7ccb570883ce750cef046395",
+      "text": "{@link Model} 中的一个要素。\n<p>\n可访问存储在模型要素表中的要素属性。\n</p>\n<p>\n对 <code>ModelFeature</code> 对象的修改在模型的生命周期内有效。\n</p>\n<p>\n不要直接构造；请通过 {@link Scene#pick} 拾取来访问。\n</p>"
+    },
+    {
+      "id": "ModelFeature",
+      "field": "params/options.featureId/description",
+      "sourceHash": "sha256:8e218a79af2efde82ec373e82d478c0b228e99e70acdc80a1af7d81510667493",
+      "text": "此要素的唯一整数标识。"
+    },
+    {
+      "id": "ModelFeature",
+      "field": "params/options.model/description",
+      "sourceHash": "sha256:3b36fc200c9d96444c111b57f9105122dc8a27866c02a8bb23b938b8240b7f6c",
+      "text": "此要素所属的模型。"
+    },
+    {
+      "id": "ModelFeature#color",
+      "field": "description",
+      "sourceHash": "sha256:dc3adf7f9de561cc467084b286d5caed5e308187446a4ddb5d4fbcfb0868c7fb",
+      "text": "获取或设置与要素颜色相乘的高亮颜色。为白色时不改变要素颜色。计算样式颜色时，会为全部要素设置此属性。"
+    },
+    {
+      "id": "ModelFeature#featureId",
+      "field": "description",
+      "sourceHash": "sha256:bbc510e6154d42aaf9d8533169b9ee23390570099ae1f4c7f6f0e8e8ac41be52",
+      "text": "获取与此要素关联的要素 ID。对于 3D Tiles 1.0，返回批次 ID；对于 EXT_mesh_features，返回选定要素 ID 集中的要素 ID。"
+    },
+    {
+      "id": "ModelFeature#getProperty",
+      "field": "description",
+      "sourceHash": "sha256:7423782af1ae2c4a4ec9cfadd8ec7bd8d8bab58ba47f87d035e4702d6c5dbabc",
+      "text": "返回此要素指定名称属性值的副本。"
+    },
+    {
+      "id": "ModelFeature#getProperty",
+      "field": "params/name/description",
+      "sourceHash": "sha256:1d563bfdab1974fb0a02ca01600b3df70346dd8d59e7280bd1db72e5105d382b",
+      "text": "区分大小写的属性名称。"
+    },
+    {
+      "id": "ModelFeature#getProperty",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:f75f480b4290acc6dc1f1a208cca56fa45ae3653fec3da384bd298dd80cdce15",
+      "text": "属性值；若要素没有此属性，则返回 <code>undefined</code>。"
+    },
+    {
+      "id": "ModelFeature#getPropertyIds",
+      "field": "description",
+      "sourceHash": "sha256:a8d0436f865d4300bfb0e54afa353e6dbd2f489648e6790aa99772463d1cefc6",
+      "text": "返回此要素的属性 ID 数组。"
+    },
+    {
+      "id": "ModelFeature#getPropertyIds",
+      "field": "params/results/description",
+      "sourceHash": "sha256:0f1f582cfbcab738a0807be7a5a416b2e54e1e5f9471fa3ab4851b4b6025a9a9",
+      "text": "用于保存结果的数组。"
+    },
+    {
+      "id": "ModelFeature#getPropertyIds",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:07b3bb19bf1cd34e983a9f64de3f836ad8bc8f7973e3efaf72461dc469ad2da2",
+      "text": "要素的属性 ID。"
+    },
+    {
+      "id": "ModelFeature#getPropertyInherited",
+      "field": "description",
+      "sourceHash": "sha256:66462710822a8f4440db3c2a3ac61b0e907484d89d1e99cfcfe79860c0f6896e",
+      "text": "返回指定名称的要素属性值副本，检查 EXT_structural_metadata 以及旧版 EXT_feature_metadata glTF 扩展中的全部元数据。按从最具体到最通用的顺序查找名称，并返回首个匹配项。检查顺序为：\n<ol>\n  <li>按语义查找结构化元数据属性。</li>\n  <li>按属性 ID 查找结构化元数据属性。</li>\n</ol>\n<p>\n参见 glTF 的 {@link https://github.com/CesiumGS/glTF/tree/3d-tiles-next/extensions/2.0/Vendor/EXT_structural_metadata|EXT_structural_metadata 扩展}和旧版 {@link https://github.com/CesiumGS/glTF/tree/3d-tiles-next/extensions/2.0/Vendor/EXT_feature_metadata|EXT_feature_metadata 扩展}。\n</p>"
+    },
+    {
+      "id": "ModelFeature#getPropertyInherited",
+      "field": "params/name/description",
+      "sourceHash": "sha256:e002dcd0916c418ca84537298f1b4f1847a778c58f7bf5e8817c527ebea71523",
+      "text": "要素的语义或属性 ID。在每种粒度的元数据中，先检查语义，再检查属性 ID。"
+    },
+    {
+      "id": "ModelFeature#getPropertyInherited",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:f75f480b4290acc6dc1f1a208cca56fa45ae3653fec3da384bd298dd80cdce15",
+      "text": "属性值；若要素没有此属性，则返回 <code>undefined</code>。"
+    },
+    {
+      "id": "ModelFeature#hasProperty",
+      "field": "description",
+      "sourceHash": "sha256:3431c3be9329977e3a5fd4dfee3e87d232bb5c41e762b10b135ca5fc75d41de7",
+      "text": "返回此要素是否包含指定属性。"
+    },
+    {
+      "id": "ModelFeature#hasProperty",
+      "field": "params/name/description",
+      "sourceHash": "sha256:1d563bfdab1974fb0a02ca01600b3df70346dd8d59e7280bd1db72e5105d382b",
+      "text": "区分大小写的属性名称。"
+    },
+    {
+      "id": "ModelFeature#hasProperty",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:cd256c2ab9781ac0aade19a4078af43fc69c89e4352aa0ddc76ce50989136ece",
+      "text": "要素是否包含此属性。"
+    },
+    {
+      "id": "ModelFeature#setProperty",
+      "field": "description",
+      "sourceHash": "sha256:b2c8421dfc9940635bd4114d7dcfca3941fdbf2568dcd96c26f450e19227e319",
+      "text": "设置此要素指定名称的属性值。"
+    },
+    {
+      "id": "ModelFeature#setProperty",
+      "field": "exceptions/0/description",
+      "sourceHash": "sha256:62ad3d79724a85ade450969f2aec59b06b2b657e17f3455b211a04638f5f4436",
+      "text": "从批次表层次结构继承的属性是只读的。"
+    },
+    {
+      "id": "ModelFeature#setProperty",
+      "field": "params/name/description",
+      "sourceHash": "sha256:1d563bfdab1974fb0a02ca01600b3df70346dd8d59e7280bd1db72e5105d382b",
+      "text": "区分大小写的属性名称。"
+    },
+    {
+      "id": "ModelFeature#setProperty",
+      "field": "params/value/description",
+      "sourceHash": "sha256:d7c84e0f1a5a99e586972a02ef155f4eb94505f412a973fddba330e37901eecc",
+      "text": "要复制的属性值。"
+    },
+    {
+      "id": "ModelFeature#setProperty",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:70662f047ddb8ef9c32d027bb4e754baf39d5fb5f924a302f6326d499880a03d",
+      "text": "属性设置成功时为 <code>true</code>，否则为 <code>false</code>。"
+    },
+    {
+      "id": "ModelFeature#show",
+      "field": "description",
+      "sourceHash": "sha256:798f9c3403a98333fde5a1d10a7f7222f374401f6865c7168842a0968ae4b097",
+      "text": "获取或设置是否显示要素。计算样式的 show 时，会为全部要素设置此属性。"
+    },
+    {
+      "id": "ModelNode",
+      "field": "description",
+      "sourceHash": "sha256:c755d5ebe1814286804907235bc338a0a8a59b0d822affab6a3b518f51d2fa3c",
+      "text": "<div class=\"notice\">\n请使用 {@link Model#getNode} 获取已加载模型的节点，不要直接调用构造函数。\n</div>\n\n具有可修改变换的模型节点，供用户定义自己的动画。模型资源本身可以包含针对节点变换的动画，此类也允许从外部修改节点变换，从而让其他数据源驱动动画。"
+    },
+    {
+      "id": "ModelNode#id",
+      "field": "description",
+      "sourceHash": "sha256:4ce8f0b4aff65028b1a5722c6178c19a930a4d6fb9706490f624daf42cc50890",
+      "text": "节点在 glTF 中的索引。"
+    },
+    {
+      "id": "ModelNode#matrix",
+      "field": "description",
+      "sourceHash": "sha256:6610c8926c14a60d0f15aecaefe7798a3147171b88d3714866398c634163e325",
+      "text": "将节点局部坐标变换到父节点坐标的 4x4 矩阵。设为 undefined 会恢复原始变换，并允许模型中的动画再次驱动此节点。\n<p>\n必须对该属性重新赋值才能生效；只修改矩阵的个别元素不会生效。\n</p>"
+    },
+    {
+      "id": "ModelNode#name",
+      "field": "description",
+      "sourceHash": "sha256:a25ff37b87828c4b898f2f6823cd128f035fc577adc6201fa85b4afdda652724",
+      "text": "节点的 <code>name</code> 属性值。"
+    },
+    {
+      "id": "ModelNode#originalMatrix",
+      "field": "description",
+      "sourceHash": "sha256:d787de8e7b8787fa3af1f37371c44f3a9f17f14641eb6b710ca6c11a7b67283e",
+      "text": "获取节点从局部坐标到父节点坐标的原始 4x4 变换矩阵，不包含后续节点变换或关节运动。"
+    },
+    {
+      "id": "ModelNode#show",
+      "field": "description",
+      "sourceHash": "sha256:0e38e730da0680c722c3f8d784339d542ce42792771f2993917fe26f748695f2",
+      "text": "决定是否显示此节点及其子节点。"
+    }
+  ]
+}

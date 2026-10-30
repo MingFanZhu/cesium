@@ -1,0 +1,1188 @@
+{
+  "schemaVersion": 1,
+  "locale": "zh-CN",
+  "entries": [
+    {
+      "id": "BlendOption.OPAQUE_AND_TRANSLUCENT",
+      "field": "description",
+      "sourceHash": "sha256:3dc524e522a727da6ae830294dc0ce75f37a9b1a5fe5ee098ea278ce66c3f7fc",
+      "text": "集合中的广告牌、点或标签同时包含不透明和半透明部分。"
+    },
+    {
+      "id": "BlendOption.OPAQUE",
+      "field": "description",
+      "sourceHash": "sha256:1bbeeb07195f994838aba150faa8483ab00e37587c93ed5cfe7726c2be109402",
+      "text": "集合中的广告牌、点或标签全部为不透明。"
+    },
+    {
+      "id": "BlendOption.TRANSLUCENT",
+      "field": "description",
+      "sourceHash": "sha256:e27363e27b88991d698c6e04e50f7b8aefbfca45f6e257d1efd5196c7d656901",
+      "text": "集合中的广告牌、点或标签全部为半透明。"
+    },
+    {
+      "id": "BlendOption",
+      "field": "description",
+      "sourceHash": "sha256:567845dcf9813c61016aeabf4d30759bdc94f976bdbd51ac29a2fbc5f8f963ea",
+      "text": "决定广告牌、点和标签的不透明及半透明部分如何与场景混合。"
+    },
+    {
+      "id": "BlendOption",
+      "field": "properties/OPAQUE_AND_TRANSLUCENT/description",
+      "sourceHash": "sha256:3dc524e522a727da6ae830294dc0ce75f37a9b1a5fe5ee098ea278ce66c3f7fc",
+      "text": "集合中的广告牌、点或标签同时包含不透明和半透明部分。"
+    },
+    {
+      "id": "BlendOption",
+      "field": "properties/OPAQUE/description",
+      "sourceHash": "sha256:1bbeeb07195f994838aba150faa8483ab00e37587c93ed5cfe7726c2be109402",
+      "text": "集合中的广告牌、点或标签全部为不透明。"
+    },
+    {
+      "id": "BlendOption",
+      "field": "properties/TRANSLUCENT/description",
+      "sourceHash": "sha256:e27363e27b88991d698c6e04e50f7b8aefbfca45f6e257d1efd5196c7d656901",
+      "text": "集合中的广告牌、点或标签全部为半透明。"
+    },
+    {
+      "id": "BoxEmitter",
+      "field": "description",
+      "sourceHash": "sha256:b463607ad140c6d3d4a17ca7734285d82d9be20a9c620bbe0e28e46d054acb2b",
+      "text": "在盒体内发射粒子的 ParticleEmitter。粒子位置在盒内随机分布，初始速度方向从盒体中心向外。"
+    },
+    {
+      "id": "BoxEmitter",
+      "field": "params/dimensions/description",
+      "sourceHash": "sha256:12fb4c554002c63acabeebe5c5c606ef251d7f24a74827a73f4f99fcfe9b7b09",
+      "text": "盒体的宽、高和深。"
+    },
+    {
+      "id": "BoxEmitter#dimensions",
+      "field": "description",
+      "sourceHash": "sha256:79379e696fc73218be5413de62f91d24bc63b35dcc9b55ce5f9f6b9d05ecd031",
+      "text": "盒体的宽、高和深，单位为米。"
+    },
+    {
+      "id": "Cesium3DTileColorBlendMode.HIGHLIGHT",
+      "field": "description",
+      "sourceHash": "sha256:4dc048cc7e23dca46a31cee9bb412c534ae5b0d95609a74cb7b5df08d21ae3b4",
+      "text": "将源颜色与要素颜色相乘。"
+    },
+    {
+      "id": "Cesium3DTileColorBlendMode.MIX",
+      "field": "description",
+      "sourceHash": "sha256:7243992e1bd5d60b0f0b5ab8ba4569921e8f875d5897cba651df809fd22025df",
+      "text": "将源颜色与要素颜色混合。"
+    },
+    {
+      "id": "Cesium3DTileColorBlendMode.REPLACE",
+      "field": "description",
+      "sourceHash": "sha256:048f315c4db649565ec3b347f256cc83e05d4b390f912411cc567839042420df",
+      "text": "用要素颜色替换源颜色。"
+    },
+    {
+      "id": "Cesium3DTileColorBlendMode",
+      "field": "description",
+      "sourceHash": "sha256:d24593dd4c67fcd3575b57eceba281a8248d43800f41455f85bd9cc2f4ba7181",
+      "text": "定义通过 API 或声明式样式设置的逐要素颜色与原始源颜色（如 glTF 材质或瓦片逐点颜色）的混合方式。\n<p>\n源颜色为 glTF 材质时，使用 <code>REPLACE</code> 或 <code>MIX</code> 要求技术为漫反射颜色参数指定 <code>_3DTILESDIFFUSE</code> 语义，否则仅支持 <code>HIGHLIGHT</code>。\n</p>\n<p>\n要素颜色计算为白色 (1.0, 1.0, 1.0) 时，无论瓦片集的颜色混合模式如何，都不进行颜色混合。\n</p>\n<pre><code>\r\"techniques\": {\r  \"technique0\": {\r    \"parameters\": {\r      \"diffuse\": {\r        \"semantic\": \"_3DTILESDIFFUSE\",\r        \"type\": 35666\r      }\r    }\r  }\r}\r</code></pre>"
+    },
+    {
+      "id": "Cesium3DTileColorBlendMode",
+      "field": "properties/HIGHLIGHT/description",
+      "sourceHash": "sha256:4dc048cc7e23dca46a31cee9bb412c534ae5b0d95609a74cb7b5df08d21ae3b4",
+      "text": "将源颜色与要素颜色相乘。"
+    },
+    {
+      "id": "Cesium3DTileColorBlendMode",
+      "field": "properties/MIX/description",
+      "sourceHash": "sha256:7243992e1bd5d60b0f0b5ab8ba4569921e8f875d5897cba651df809fd22025df",
+      "text": "将源颜色与要素颜色混合。"
+    },
+    {
+      "id": "Cesium3DTileColorBlendMode",
+      "field": "properties/REPLACE/description",
+      "sourceHash": "sha256:048f315c4db649565ec3b347f256cc83e05d4b390f912411cc567839042420df",
+      "text": "用要素颜色替换源颜色。"
+    },
+    {
+      "id": "CircleEmitter",
+      "field": "description",
+      "sourceHash": "sha256:7f283d63bd1a0c6786dd1048418756170ca67117d400273e8258468e591abf2e",
+      "text": "从圆形区域发射粒子的 ParticleEmitter。粒子位于圆内，初始速度沿 z 向量方向。"
+    },
+    {
+      "id": "CircleEmitter",
+      "field": "params/radius/description",
+      "sourceHash": "sha256:0824b65f934deca7fbb7c053d74de46d4310e5417b1d61e385b77445f90be59a",
+      "text": "圆的半径，单位为米。"
+    },
+    {
+      "id": "CircleEmitter#angle",
+      "field": "description",
+      "sourceHash": "sha256:90e1fde26c010a0672895811bd3b73490d474168acfbf4ae908a73188fd53116",
+      "text": "圆锥的角度，单位为弧度。"
+    },
+    {
+      "id": "CircleEmitter#radius",
+      "field": "description",
+      "sourceHash": "sha256:0824b65f934deca7fbb7c053d74de46d4310e5417b1d61e385b77445f90be59a",
+      "text": "圆的半径，单位为米。"
+    },
+    {
+      "id": "ClassificationType.BOTH",
+      "field": "description",
+      "sourceHash": "sha256:d6ab146236a671c1dcfa3ba4223c8f7315672fae1bdd4b9bbeef1bfee28e7071",
+      "text": "对地形和 3D Tiles 都进行分类。"
+    },
+    {
+      "id": "ClassificationType.CESIUM_3D_TILE",
+      "field": "description",
+      "sourceHash": "sha256:e8d3027968697fd59a2e862ae96b8f564c815f32753ad4684f436011dbdbf79f",
+      "text": "仅对 3D Tiles 进行分类。"
+    },
+    {
+      "id": "ClassificationType.TERRAIN",
+      "field": "description",
+      "sourceHash": "sha256:19c2640d0dde26e15e097dbc411fbed6d6398558fdcc3f8790c8b44ab4d12fd8",
+      "text": "仅对地形进行分类。"
+    },
+    {
+      "id": "ClassificationType",
+      "field": "description",
+      "sourceHash": "sha256:3ec21bafadfdd91446c818b849e009db8864d5de8d96599d6b9258bc349e39df",
+      "text": "分类作用于地形、3D Tiles 还是两者。"
+    },
+    {
+      "id": "ClassificationType",
+      "field": "properties/BOTH/description",
+      "sourceHash": "sha256:d6ab146236a671c1dcfa3ba4223c8f7315672fae1bdd4b9bbeef1bfee28e7071",
+      "text": "对地形和 3D Tiles 都进行分类。"
+    },
+    {
+      "id": "ClassificationType",
+      "field": "properties/CESIUM_3D_TILE/description",
+      "sourceHash": "sha256:e8d3027968697fd59a2e862ae96b8f564c815f32753ad4684f436011dbdbf79f",
+      "text": "仅对 3D Tiles 进行分类。"
+    },
+    {
+      "id": "ClassificationType",
+      "field": "properties/TERRAIN/description",
+      "sourceHash": "sha256:19c2640d0dde26e15e097dbc411fbed6d6398558fdcc3f8790c8b44ab4d12fd8",
+      "text": "仅对地形进行分类。"
+    },
+    {
+      "id": "ColorBlendMode",
+      "field": "description",
+      "sourceHash": "sha256:8e4ca307b202a489dee7f4e8ce2c3cceaa2529a595138faf3f697f24cbebf3f1",
+      "text": "定义目标颜色与图元源颜色之间的混合模式。\n\nHIGHLIGHT：将源颜色与目标颜色相乘。\nREPLACE：用目标颜色替换源颜色。\nMIX：将源颜色与目标颜色混合。"
+    },
+    {
+      "id": "ConeEmitter",
+      "field": "description",
+      "sourceHash": "sha256:ad0950e9972de1a0816bfa6fb84b49127467528fe91fc18cd1da44babf058c8f",
+      "text": "在圆锥内发射粒子的 ParticleEmitter。粒子位于圆锥顶点，初始速度指向底面。"
+    },
+    {
+      "id": "ConeEmitter",
+      "field": "params/angle/description",
+      "sourceHash": "sha256:90e1fde26c010a0672895811bd3b73490d474168acfbf4ae908a73188fd53116",
+      "text": "圆锥的角度，单位为弧度。"
+    },
+    {
+      "id": "DistanceDisplayCondition.clone",
+      "field": "description",
+      "sourceHash": "sha256:929dfe68f17fbfd6e102646af6da55baba14ace3d7e9638084940a75e974393b",
+      "text": "复制距离显示条件实例。"
+    },
+    {
+      "id": "DistanceDisplayCondition.clone",
+      "field": "params/result/description",
+      "sourceHash": "sha256:7007cf99a62c0d2b28da4473d557a3d59de024711c73b5413db2d4be190383e7",
+      "text": "用于保存结果的对象。"
+    },
+    {
+      "id": "DistanceDisplayCondition.clone",
+      "field": "params/value/description",
+      "sourceHash": "sha256:4da83b86e0c833588135913f787da1d045c66fcf9615008c7dfd9ef6fb1f7123",
+      "text": "要复制的距离显示条件。"
+    },
+    {
+      "id": "DistanceDisplayCondition.clone",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:4a2745e48dd81cd549d68de2d58fc7174d399648df4e874a25816887da1bc223",
+      "text": "复制得到的实例。"
+    },
+    {
+      "id": "DistanceDisplayCondition.equals",
+      "field": "description",
+      "sourceHash": "sha256:26130e53d550ea84729a7f5227067229e905637d9a410a77bc59671d2cd370c0",
+      "text": "判断两个距离显示条件是否相等。"
+    },
+    {
+      "id": "DistanceDisplayCondition.equals",
+      "field": "params/left/description",
+      "sourceHash": "sha256:b40cc04189d7b80111f527075d8be35aaf247e75685ca218c7d1d1ccc03d74d6",
+      "text": "一个距离显示条件。"
+    },
+    {
+      "id": "DistanceDisplayCondition.equals",
+      "field": "params/right/description",
+      "sourceHash": "sha256:e7a06fdf273b6f5f9eef3484401dde9295c98a8ec863c60bafb4b3284447abc7",
+      "text": "另一个距离显示条件。"
+    },
+    {
+      "id": "DistanceDisplayCondition.equals",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:e7bd4cde4ecd66adf366fc14ba4766daf685e9cea067b278bb1a1182068f8c99",
+      "text": "两个距离显示条件是否相等。"
+    },
+    {
+      "id": "DistanceDisplayCondition.unpack",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:46cbe2cb63005fb52e627be81e0dceb2b667c7e1c4dc9d4d949f8e264a8c4835",
+      "text": "修改后的 result 参数；未提供时返回新的 DistanceDisplayCondition 实例。"
+    },
+    {
+      "id": "DistanceDisplayCondition",
+      "field": "description",
+      "sourceHash": "sha256:c6342b63719bfe7b4f0d7dd95cb80f1bafc577d1cad106dd9a2a2f5a9c2513ed",
+      "text": "根据到相机的距离确定可见性。"
+    },
+    {
+      "id": "DistanceDisplayCondition",
+      "field": "params/far/description",
+      "sourceHash": "sha256:33fef7e8283a8a31a2e7571b15afab265d0b9d943e1f408cf9039d4e8951f7c5",
+      "text": "对象可见距离区间的最大距离。"
+    },
+    {
+      "id": "DistanceDisplayCondition",
+      "field": "params/near/description",
+      "sourceHash": "sha256:eebcf62d9370857e6891c436f432a8a90a60611fb482d3270f78bd1979cb3e09",
+      "text": "对象可见距离区间的最小距离。"
+    },
+    {
+      "id": "DistanceDisplayCondition#clone",
+      "field": "params/result/description",
+      "sourceHash": "sha256:7007cf99a62c0d2b28da4473d557a3d59de024711c73b5413db2d4be190383e7",
+      "text": "用于保存结果的对象。"
+    },
+    {
+      "id": "DistanceDisplayCondition#clone",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:4a2745e48dd81cd549d68de2d58fc7174d399648df4e874a25816887da1bc223",
+      "text": "复制得到的实例。"
+    },
+    {
+      "id": "DistanceDisplayCondition#equals",
+      "field": "description",
+      "sourceHash": "sha256:bc55153638006c86fe6fe07c605ddbc6d7bb6ae0c1a9ed45f34cb2c5c3e85184",
+      "text": "判断此距离显示条件是否与另一个相等。"
+    },
+    {
+      "id": "DistanceDisplayCondition#equals",
+      "field": "params/other/description",
+      "sourceHash": "sha256:e7a06fdf273b6f5f9eef3484401dde9295c98a8ec863c60bafb4b3284447abc7",
+      "text": "另一个距离显示条件。"
+    },
+    {
+      "id": "DistanceDisplayCondition#equals",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:f1c2c10840b1a3ae65d7471b9445670f432321add762a951bc48961a4fbce5af",
+      "text": "此距离显示条件是否与另一个相等。"
+    },
+    {
+      "id": "DistanceDisplayCondition#far",
+      "field": "description",
+      "sourceHash": "sha256:33fef7e8283a8a31a2e7571b15afab265d0b9d943e1f408cf9039d4e8951f7c5",
+      "text": "对象可见距离区间的最大距离。"
+    },
+    {
+      "id": "DistanceDisplayCondition#near",
+      "field": "description",
+      "sourceHash": "sha256:eebcf62d9370857e6891c436f432a8a90a60611fb482d3270f78bd1979cb3e09",
+      "text": "对象可见距离区间的最小距离。"
+    },
+    {
+      "id": "HeightReference.CLAMP_TO_3D_TILE",
+      "field": "description",
+      "sourceHash": "sha256:d9b8ef24606e2b5b4c577a2526edf828e10f2af13e912fc64162a2ff98819823",
+      "text": "将位置贴合到 3D Tiles。"
+    },
+    {
+      "id": "HeightReference.CLAMP_TO_GROUND",
+      "field": "description",
+      "sourceHash": "sha256:5e3f4cd409c22f4d82eec84798ddaee2b11705f410e387b555534de755263d90",
+      "text": "将位置贴合到地形和 3D Tiles。贴合到真实感 3D Tiles 等瓦片集时，须确保 {@link Cesium3DTileset#enableCollision} 为 <code>true</code>，否则实体可能无法正确贴合到瓦片集表面。"
+    },
+    {
+      "id": "HeightReference.CLAMP_TO_TERRAIN",
+      "field": "description",
+      "sourceHash": "sha256:bd860419ad360f9813a36e60b68294d1cca4ec2c62236e4c890f9ed566f13e42",
+      "text": "将位置贴合到地形。"
+    },
+    {
+      "id": "HeightReference.NONE",
+      "field": "description",
+      "sourceHash": "sha256:aeb5321aef2ec0d41773fef73d74feb9474f69ef952fdb8b143a2260094ecafb",
+      "text": "位置为绝对坐标。"
+    },
+    {
+      "id": "HeightReference.RELATIVE_TO_3D_TILE",
+      "field": "description",
+      "sourceHash": "sha256:b28b6dbd65b5a0da3ef2701df31ae71177ce269faeb7cb36324df82413699e55",
+      "text": "位置高度相对于 3D Tiles 表面。"
+    },
+    {
+      "id": "HeightReference.RELATIVE_TO_GROUND",
+      "field": "description",
+      "sourceHash": "sha256:759c99a439dac6b5dcb72ad013341a0052576be47ce328abb592d007267b4518",
+      "text": "位置高度相对于地形和 3D Tiles 表面。"
+    },
+    {
+      "id": "HeightReference.RELATIVE_TO_TERRAIN",
+      "field": "description",
+      "sourceHash": "sha256:46ac63b0cd9b12110dc9fc4efa8ea727806880719c7e3c9cff4851adaa570d3b",
+      "text": "位置高度相对于地形表面。"
+    },
+    {
+      "id": "HeightReference",
+      "field": "description",
+      "sourceHash": "sha256:36cad87362aa635a368fa50947af26d1806d3bb327bae345b5dfb5608754c050",
+      "text": "表示位置相对于地形的高度参考。"
+    },
+    {
+      "id": "HeightReference",
+      "field": "properties/CLAMP_TO_3D_TILE/description",
+      "sourceHash": "sha256:d9b8ef24606e2b5b4c577a2526edf828e10f2af13e912fc64162a2ff98819823",
+      "text": "将位置贴合到 3D Tiles。"
+    },
+    {
+      "id": "HeightReference",
+      "field": "properties/CLAMP_TO_GROUND/description",
+      "sourceHash": "sha256:5e3f4cd409c22f4d82eec84798ddaee2b11705f410e387b555534de755263d90",
+      "text": "将位置贴合到地形和 3D Tiles。贴合到真实感 3D Tiles 等瓦片集时，须确保 {@link Cesium3DTileset#enableCollision} 为 <code>true</code>，否则实体可能无法正确贴合到瓦片集表面。"
+    },
+    {
+      "id": "HeightReference",
+      "field": "properties/CLAMP_TO_TERRAIN/description",
+      "sourceHash": "sha256:bd860419ad360f9813a36e60b68294d1cca4ec2c62236e4c890f9ed566f13e42",
+      "text": "将位置贴合到地形。"
+    },
+    {
+      "id": "HeightReference",
+      "field": "properties/NONE/description",
+      "sourceHash": "sha256:aeb5321aef2ec0d41773fef73d74feb9474f69ef952fdb8b143a2260094ecafb",
+      "text": "位置为绝对坐标。"
+    },
+    {
+      "id": "HeightReference",
+      "field": "properties/RELATIVE_TO_3D_TILE/description",
+      "sourceHash": "sha256:b28b6dbd65b5a0da3ef2701df31ae71177ce269faeb7cb36324df82413699e55",
+      "text": "位置高度相对于 3D Tiles 表面。"
+    },
+    {
+      "id": "HeightReference",
+      "field": "properties/RELATIVE_TO_GROUND/description",
+      "sourceHash": "sha256:759c99a439dac6b5dcb72ad013341a0052576be47ce328abb592d007267b4518",
+      "text": "位置高度相对于地形和 3D Tiles 表面。"
+    },
+    {
+      "id": "HeightReference",
+      "field": "properties/RELATIVE_TO_TERRAIN/description",
+      "sourceHash": "sha256:46ac63b0cd9b12110dc9fc4efa8ea727806880719c7e3c9cff4851adaa570d3b",
+      "text": "位置高度相对于地形表面。"
+    },
+    {
+      "id": "HorizontalOrigin.CENTER",
+      "field": "description",
+      "sourceHash": "sha256:10e839eba5584c200a4e5782cdedd1365fb7967e360ceb7bee3a8d81e9e402e1",
+      "text": "原点位于对象的水平中心。"
+    },
+    {
+      "id": "HorizontalOrigin.LEFT",
+      "field": "description",
+      "sourceHash": "sha256:09cec369f91f398e457df3b48e06939f35339e344fa0b218ca9d1d8761a199a6",
+      "text": "原点位于对象左侧。"
+    },
+    {
+      "id": "HorizontalOrigin.RIGHT",
+      "field": "description",
+      "sourceHash": "sha256:5a959fd66bcb123ad4fadb9ba45eecb98953b2aebe84c5e43fe421d7ba0a2dfe",
+      "text": "原点位于对象右侧。"
+    },
+    {
+      "id": "HorizontalOrigin",
+      "field": "description",
+      "sourceHash": "sha256:ccb197b5fcf4f8acf7dea2bed64c7844b048ad8b13ad2c907ba0ca844bf321f2",
+      "text": "原点相对于对象（例如 {@link Billboard} 或 {@link Label}）的水平位置。例如设为 <code>LEFT</code> 或 <code>RIGHT</code> 时，分别将对象的左侧或右侧对齐锚点。\n<br /><br />\n<div align='center'>\n<img src='Images/Billboard.setHorizontalOrigin.png' width='648' height='196' /><br />\n</div>"
+    },
+    {
+      "id": "HorizontalOrigin",
+      "field": "properties/CENTER/description",
+      "sourceHash": "sha256:10e839eba5584c200a4e5782cdedd1365fb7967e360ceb7bee3a8d81e9e402e1",
+      "text": "原点位于对象的水平中心。"
+    },
+    {
+      "id": "HorizontalOrigin",
+      "field": "properties/LEFT/description",
+      "sourceHash": "sha256:09cec369f91f398e457df3b48e06939f35339e344fa0b218ca9d1d8761a199a6",
+      "text": "原点位于对象左侧。"
+    },
+    {
+      "id": "HorizontalOrigin",
+      "field": "properties/RIGHT/description",
+      "sourceHash": "sha256:5a959fd66bcb123ad4fadb9ba45eecb98953b2aebe84c5e43fe421d7ba0a2dfe",
+      "text": "原点位于对象右侧。"
+    },
+    {
+      "id": "NearFarScalar.clone",
+      "field": "description",
+      "sourceHash": "sha256:347b6f9698915a3692b57ed572c4eb3658e925e9405b8a3c2fb3039c1f4f2509",
+      "text": "复制 NearFarScalar 实例。"
+    },
+    {
+      "id": "NearFarScalar.clone",
+      "field": "params/nearFarScalar/description",
+      "sourceHash": "sha256:4df37aab2322680f15fcc6c99a5cca726519a0217832799f42d3cb0f94fa8175",
+      "text": "要复制的 NearFarScalar。"
+    },
+    {
+      "id": "NearFarScalar.clone",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:e204c1f5c4adbf8f6999a0d5f0692717f6403071323b064c9c087ee872ea217f",
+      "text": "修改后的 result 参数；未提供时返回新的 NearFarScalar 实例。nearFarScalar 为 undefined 时返回 undefined。"
+    },
+    {
+      "id": "NearFarScalar.equals",
+      "field": "description",
+      "sourceHash": "sha256:c47d9c19fb0bb5fb71d71676aa913b4d9022526bd872ffc38476d7cddad4d382",
+      "text": "比较给定 NearFarScalar，相等时返回 <code>true</code>，否则返回 <code>false</code>。"
+    },
+    {
+      "id": "NearFarScalar.equals",
+      "field": "params/left/description",
+      "sourceHash": "sha256:4efcb50636596d73f486cbe3221ae95a379a8b2a6ed1ae6f334db1527dacfcdd",
+      "text": "第一个 NearFarScalar。"
+    },
+    {
+      "id": "NearFarScalar.equals",
+      "field": "params/right/description",
+      "sourceHash": "sha256:2302e2aa52be5647ee26e6a5227062f42c6ff2ac343ab5387745c3f0c57fb5bf",
+      "text": "第二个 NearFarScalar。"
+    },
+    {
+      "id": "NearFarScalar.equals",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:f27beb8fce90b73f90f1a5d09d23c19bda3e1ea8180abb94d9d7da7ed9ba4f42",
+      "text": "若 left 与 right 相等，则返回 <code>true</code>；否则返回 <code>false</code>。"
+    },
+    {
+      "id": "NearFarScalar.unpack",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:5b7fcb5d41049c6a7d93ddde1fade923c8b6e219debe209a3fde76229d52d42c",
+      "text": "修改后的 result 参数；未提供时返回新的 NearFarScalar 实例。"
+    },
+    {
+      "id": "NearFarScalar",
+      "field": "description",
+      "sourceHash": "sha256:5fefb6b80affdd36622d2b9058d92c5c9e9e3695d031bacb8f5df6859ec5e121",
+      "text": "表示眼空间中近距离和远距离对应的标量值上下界。"
+    },
+    {
+      "id": "NearFarScalar",
+      "field": "params/far/description",
+      "sourceHash": "sha256:d110ef29af2004e3c2105435d89077beaf6959a2024a98839a38d5d3f9e2d05f",
+      "text": "相机距离范围的上界。"
+    },
+    {
+      "id": "NearFarScalar",
+      "field": "params/farValue/description",
+      "sourceHash": "sha256:1b08e23e4603702aa9c9c8e0ffcf5054f18dc0319f5bd58df04ad38ee7121cbb",
+      "text": "相机距离上界处的值。"
+    },
+    {
+      "id": "NearFarScalar",
+      "field": "params/near/description",
+      "sourceHash": "sha256:0a2831533c132baa96cff96138e77c206bff012b74ae96cc88c308121556c47e",
+      "text": "相机距离范围的下界。"
+    },
+    {
+      "id": "NearFarScalar",
+      "field": "params/nearValue/description",
+      "sourceHash": "sha256:9b5a3bd11b08127bad604ac30b0c2cd82ca944316260aed06ddd457b5934dcb3",
+      "text": "相机距离下界处的值。"
+    },
+    {
+      "id": "NearFarScalar#clone",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:5b7fcb5d41049c6a7d93ddde1fade923c8b6e219debe209a3fde76229d52d42c",
+      "text": "修改后的 result 参数；未提供时返回新的 NearFarScalar 实例。"
+    },
+    {
+      "id": "NearFarScalar#equals",
+      "field": "description",
+      "sourceHash": "sha256:c88f51fd100be4d397ba7be29232ae0bd8f0775121ff44f92dfd0a60c21b5b7a",
+      "text": "比较此实例与给定 NearFarScalar，相等时返回 <code>true</code>，否则返回 <code>false</code>。"
+    },
+    {
+      "id": "NearFarScalar#equals",
+      "field": "params/right/description",
+      "sourceHash": "sha256:2ce73dea21d0a6256bd6d3cffff976187e6113cbfe8fa4f0d300e683652c115c",
+      "text": "右侧 NearFarScalar。"
+    },
+    {
+      "id": "NearFarScalar#equals",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:f27beb8fce90b73f90f1a5d09d23c19bda3e1ea8180abb94d9d7da7ed9ba4f42",
+      "text": "若 left 与 right 相等，则返回 <code>true</code>；否则返回 <code>false</code>。"
+    },
+    {
+      "id": "NearFarScalar#far",
+      "field": "description",
+      "sourceHash": "sha256:d110ef29af2004e3c2105435d89077beaf6959a2024a98839a38d5d3f9e2d05f",
+      "text": "相机距离范围的上界。"
+    },
+    {
+      "id": "NearFarScalar#farValue",
+      "field": "description",
+      "sourceHash": "sha256:1b08e23e4603702aa9c9c8e0ffcf5054f18dc0319f5bd58df04ad38ee7121cbb",
+      "text": "相机距离上界处的值。"
+    },
+    {
+      "id": "NearFarScalar#near",
+      "field": "description",
+      "sourceHash": "sha256:0a2831533c132baa96cff96138e77c206bff012b74ae96cc88c308121556c47e",
+      "text": "相机距离范围的下界。"
+    },
+    {
+      "id": "NearFarScalar#nearValue",
+      "field": "description",
+      "sourceHash": "sha256:9b5a3bd11b08127bad604ac30b0c2cd82ca944316260aed06ddd457b5934dcb3",
+      "text": "相机距离下界处的值。"
+    },
+    {
+      "id": "Particle",
+      "field": "description",
+      "sourceHash": "sha256:d66a1e5df0e913e79066451d5ed841de7dca8eb893dee475f47945028d3c7dde",
+      "text": "由 {@link ParticleSystem} 发射的粒子。"
+    },
+    {
+      "id": "Particle",
+      "field": "params/options.endColor/description",
+      "sourceHash": "sha256:11e9afcd71fc7b6170e6d271555836c33e0b6942b8ef0c2ffe82511987ecd66c",
+      "text": "粒子消亡时的颜色。"
+    },
+    {
+      "id": "Particle",
+      "field": "params/options.endScale/description",
+      "sourceHash": "sha256:becf229144f62032e7e84c1622b39023b183e106676ecb5d3c382e98475b42de",
+      "text": "粒子消亡时的缩放值。"
+    },
+    {
+      "id": "Particle",
+      "field": "params/options.image/description",
+      "sourceHash": "sha256:bbef1086e651e498c485fc78a4c3091d44cf9eec244fc9abe65fb8f7e3d2d214",
+      "text": "广告牌使用的 URI、HTMLImageElement 或 HTMLCanvasElement。"
+    },
+    {
+      "id": "Particle",
+      "field": "params/options.imageSize/description",
+      "sourceHash": "sha256:6eb26d22a7be7cfc7cd88160c7457413ca1af62e4d8e4cdb6277b5846042a422",
+      "text": "粒子图像的宽和高，单位为像素。"
+    },
+    {
+      "id": "Particle",
+      "field": "params/options.life/description",
+      "sourceHash": "sha256:e4e08f86f8bb36f5e8e2a7bf7f1578c74880d930b26b9243380723110d812aa0",
+      "text": "粒子的生命周期，单位为秒。"
+    },
+    {
+      "id": "Particle",
+      "field": "params/options.mass/description",
+      "sourceHash": "sha256:db1b388c7e24e0ab7743b8b2c7412c8e9407284b40a2034d2c5581d3f9597c86",
+      "text": "粒子的质量，单位为千克。"
+    },
+    {
+      "id": "Particle",
+      "field": "params/options.position/description",
+      "sourceHash": "sha256:08f475d5cd585360b3cc64a1372cf690a03fc0a29cd303a9340e8a04ec04de11",
+      "text": "粒子在世界坐标中的初始位置。"
+    },
+    {
+      "id": "Particle",
+      "field": "params/options.startColor/description",
+      "sourceHash": "sha256:11a92d8655eee3baa33359f9cce7056004bfa863468d2fed6a1441e0cdd64765",
+      "text": "粒子生成时的颜色。"
+    },
+    {
+      "id": "Particle",
+      "field": "params/options.startScale/description",
+      "sourceHash": "sha256:45a46dd6c39c8cc8855ab72f45495bbb68b2c0e31c1928c36cb19e4b2794434a",
+      "text": "粒子生成时的缩放值。"
+    },
+    {
+      "id": "Particle",
+      "field": "params/options.velocity/description",
+      "sourceHash": "sha256:26a545eadb27321375f7f5cb8fc98deaf4c976fe8ac275b0357aa7842afe5c4e",
+      "text": "粒子在世界坐标中的速度向量。"
+    },
+    {
+      "id": "Particle#age",
+      "field": "description",
+      "sourceHash": "sha256:af984d5215028dc82e6d9ece546581cdaa376ba1d099acc999d69cda8b7f623d",
+      "text": "获取粒子的年龄，单位为秒。"
+    },
+    {
+      "id": "Particle#endColor",
+      "field": "description",
+      "sourceHash": "sha256:529a9a85fc50d5f1c2181624c3719f4bd60fe64cfa0dbe01665c6795e938d241",
+      "text": "粒子消亡时的颜色。"
+    },
+    {
+      "id": "Particle#endScale",
+      "field": "description",
+      "sourceHash": "sha256:becf229144f62032e7e84c1622b39023b183e106676ecb5d3c382e98475b42de",
+      "text": "粒子消亡时的缩放值。"
+    },
+    {
+      "id": "Particle#image",
+      "field": "description",
+      "sourceHash": "sha256:9f6dd7835f1e37413c29d50e34c7af1a4d1d5c37ca03fed6964e51d29d3ba417",
+      "text": "粒子使用的图像。"
+    },
+    {
+      "id": "Particle#imageSize",
+      "field": "description",
+      "sourceHash": "sha256:6eb26d22a7be7cfc7cd88160c7457413ca1af62e4d8e4cdb6277b5846042a422",
+      "text": "粒子图像的宽和高，单位为像素。"
+    },
+    {
+      "id": "Particle#life",
+      "field": "description",
+      "sourceHash": "sha256:e4e08f86f8bb36f5e8e2a7bf7f1578c74880d930b26b9243380723110d812aa0",
+      "text": "粒子的生命周期，单位为秒。"
+    },
+    {
+      "id": "Particle#mass",
+      "field": "description",
+      "sourceHash": "sha256:db1b388c7e24e0ab7743b8b2c7412c8e9407284b40a2034d2c5581d3f9597c86",
+      "text": "粒子的质量，单位为千克。"
+    },
+    {
+      "id": "Particle#normalizedAge",
+      "field": "description",
+      "sourceHash": "sha256:ba39d96f1972510086a9dd58df90d7e67d7e90834829a0ce355e1dd496e8a4f2",
+      "text": "获取归一化到 [0.0, 1.0] 范围内的粒子年龄。"
+    },
+    {
+      "id": "Particle#position",
+      "field": "description",
+      "sourceHash": "sha256:88e38f1217d00f583f42394a60a0dba5250a11ff811c626a6f1898f123ec4a5f",
+      "text": "粒子在世界坐标中的位置。"
+    },
+    {
+      "id": "Particle#startColor",
+      "field": "description",
+      "sourceHash": "sha256:0437b4444dcef1119bd959d79337254d8e7bb7a8a8ab146f2b7c1b935a61ab12",
+      "text": "粒子生成时的颜色。"
+    },
+    {
+      "id": "Particle#startScale",
+      "field": "description",
+      "sourceHash": "sha256:548785dfba9f3df519407d204b19018ff969592f9351358d791565caa1c0d03b",
+      "text": "粒子生成时的缩放值。"
+    },
+    {
+      "id": "Particle#velocity",
+      "field": "description",
+      "sourceHash": "sha256:439d4b0d16a35c62e8901146cf7817687996c42437570d2bfaa82ba76a7618e1",
+      "text": "粒子在世界坐标中的速度。"
+    },
+    {
+      "id": "ParticleBurst",
+      "field": "description",
+      "sourceHash": "sha256:7f2216f41abefcd583cfeea44d44e542f09f72b64409ff96ea0e0972a24420e7",
+      "text": "表示在 {@link ParticleSystem} 生命周期内指定时刻突发发射的一批 {@link Particle}。"
+    },
+    {
+      "id": "ParticleBurst",
+      "field": "params/options.maximum/description",
+      "sourceHash": "sha256:f0e70535a4925f418d6cd800302ee2450182ac24728039a0ec1fa64e1ef427ac",
+      "text": "此次突发发射的最大粒子数。"
+    },
+    {
+      "id": "ParticleBurst",
+      "field": "params/options.minimum/description",
+      "sourceHash": "sha256:8954c712c4a9e45e812f29c352881c21718f3cb8e57d9dc3c364309b369ee49f",
+      "text": "此次突发发射的最小粒子数。"
+    },
+    {
+      "id": "ParticleBurst",
+      "field": "params/options.time/description",
+      "sourceHash": "sha256:eb1ff30567d74c9eced595fda0ab3c4b8c928ad2461dfc828b235608bb8a8d8c",
+      "text": "相对于粒子系统生命周期起点的突发发射时刻，单位为秒。"
+    },
+    {
+      "id": "ParticleBurst#complete",
+      "field": "description",
+      "sourceHash": "sha256:b16b5d547c70a1177e3cabf4d305b78fce9d7854b2dbef74c0ebe17346bca90d",
+      "text": "突发发射完成时为 <code>true</code>，否则为 <code>false</code>。"
+    },
+    {
+      "id": "ParticleBurst#maximum",
+      "field": "description",
+      "sourceHash": "sha256:f8b4174855b7124478bf6d9911d4f7de9b6495ea59276b3fed86445d99a41972",
+      "text": "发射粒子的最大数量。"
+    },
+    {
+      "id": "ParticleBurst#minimum",
+      "field": "description",
+      "sourceHash": "sha256:8a0d6d8087ecafc705fe0ced00da827fa5dff5adff5ac8a2980eb5fa63b2c4a3",
+      "text": "发射粒子的最小数量。"
+    },
+    {
+      "id": "ParticleBurst#time",
+      "field": "description",
+      "sourceHash": "sha256:eb1ff30567d74c9eced595fda0ab3c4b8c928ad2461dfc828b235608bb8a8d8c",
+      "text": "相对于粒子系统生命周期起点的突发发射时刻，单位为秒。"
+    },
+    {
+      "id": "ParticleEmitter",
+      "field": "description",
+      "sourceHash": "sha256:a15aaa55b4f850c98d50f52656e1fb77b1794e1e20edb72d925cd5e62bd4ed1b",
+      "text": "<p>\n用于初始化来自 {@link ParticleSystem} 的 {@link Particle} 的对象。\n</p>\n<p>\n此类型描述接口，不应直接实例化。\n</p>"
+    },
+    {
+      "id": "ParticleSystem.updateCallback",
+      "field": "description",
+      "sourceHash": "sha256:58ea1d061bda5788b6d998f18c2e8f2526af253672f1efaa8713c6fa0b4fa92f",
+      "text": "每个时间步用于修改粒子属性的函数，可修改力、颜色、尺寸等。"
+    },
+    {
+      "id": "ParticleSystem.updateCallback",
+      "field": "params/dt/description",
+      "sourceHash": "sha256:dc5f754ac25fdd95b57f3eb13e97caa617fee6a12588fae3f89837232fae99da",
+      "text": "自上次更新起经过的时间，单位为秒。"
+    },
+    {
+      "id": "ParticleSystem.updateCallback",
+      "field": "params/particle/description",
+      "sourceHash": "sha256:843d28292126c62fb5fc0f307356a584e77d3e3f1fb0139ab730985d4e8543e5",
+      "text": "正在更新的粒子。"
+    },
+    {
+      "id": "ParticleSystem",
+      "field": "description",
+      "sourceHash": "sha256:939062ef38fcfcedb4dd5dfff280b366c566a10e1debbdad79568679f051b0c2",
+      "text": "ParticleSystem 管理一组粒子的更新与显示。"
+    },
+    {
+      "id": "ParticleSystem",
+      "field": "params/options.bursts/description",
+      "sourceHash": "sha256:f45aa24c3f0b2d66ae7c9024c40492c54baca5a2e953d0f9b10078455cfbd3d1",
+      "text": "在特定时刻突发发射粒子的 {@link ParticleBurst} 数组。"
+    },
+    {
+      "id": "ParticleSystem",
+      "field": "params/options.color/description",
+      "sourceHash": "sha256:ac916c5dacbeb0596b3c4af53ea95456dc58578100be6d619b07bde0c5e08ea8",
+      "text": "设置粒子在整个 particleLife 生命周期内的颜色。"
+    },
+    {
+      "id": "ParticleSystem",
+      "field": "params/options.emissionRate/description",
+      "sourceHash": "sha256:e2224b9ea41dee33b063a6101c0eee62fc863540e17a8ef6c175979b1780244b",
+      "text": "每秒发射的粒子数量。"
+    },
+    {
+      "id": "ParticleSystem",
+      "field": "params/options.emitter/description",
+      "sourceHash": "sha256:72ee57fd3fcee98227715f220193e8f72af5f9c17e60092701895bb4b31fd26c",
+      "text": "此系统的粒子发射器。"
+    },
+    {
+      "id": "ParticleSystem",
+      "field": "params/options.emitterModelMatrix/description",
+      "sourceHash": "sha256:ba756b636d09985b14adb751c34825fdc7439fcfa73e66dea763ceccbec84b2f",
+      "text": "在粒子系统局部坐标系内变换发射器的 4x4 矩阵。"
+    },
+    {
+      "id": "ParticleSystem",
+      "field": "params/options.endColor/description",
+      "sourceHash": "sha256:4ab5ffe29ea513e61e5a8ca2b9e162a0c8df5ed822f3191e8445fae9237b173f",
+      "text": "粒子生命周期结束时的颜色。"
+    },
+    {
+      "id": "ParticleSystem",
+      "field": "params/options.endScale/description",
+      "sourceHash": "sha256:a0b497ea53d91a517e5d4b7012ee4b9efa085ebe57b64277de484bffa043199b",
+      "text": "粒子生命周期结束时应用到图像的最终缩放值。"
+    },
+    {
+      "id": "ParticleSystem",
+      "field": "params/options.image/description",
+      "sourceHash": "sha256:bbef1086e651e498c485fc78a4c3091d44cf9eec244fc9abe65fb8f7e3d2d214",
+      "text": "广告牌使用的 URI、HTMLImageElement 或 HTMLCanvasElement。"
+    },
+    {
+      "id": "ParticleSystem",
+      "field": "params/options.imageSize/description",
+      "sourceHash": "sha256:f70b35c9aadde6b77721a4404787dd68056b0c590d33c88775e2703395128961",
+      "text": "设置后覆盖 minimumImageSize 和 maximumImageSize，用于确定粒子图像宽高，单位为像素。"
+    },
+    {
+      "id": "ParticleSystem",
+      "field": "params/options.lifetime/description",
+      "sourceHash": "sha256:458839ad16cfad2efba9f38e5e6db0058873dfbd14ae7a12c069ea27f61e49d5",
+      "text": "粒子系统持续发射粒子的时长，单位为秒。"
+    },
+    {
+      "id": "ParticleSystem",
+      "field": "params/options.loop/description",
+      "sourceHash": "sha256:b9efe6cde14ed5f76a85434e30653219efac0ce60ff79ecce2c25cf0a2ffa5ea",
+      "text": "粒子系统完成后是否循环其突发发射。"
+    },
+    {
+      "id": "ParticleSystem",
+      "field": "params/options.mass/description",
+      "sourceHash": "sha256:5c9b020f4427d461c8c47eb19196fd44aec0c814247485b982ad58e70078d342",
+      "text": "将粒子的最小和最大质量设置为此值，单位为千克。"
+    },
+    {
+      "id": "ParticleSystem",
+      "field": "params/options.maximumImageSize/description",
+      "sourceHash": "sha256:366f9526efcf0ed826d55b1ba3d187c96b3bd76577799f9ab811bd4825d7adde",
+      "text": "粒子图像随机尺寸的宽高上限，单位为像素。"
+    },
+    {
+      "id": "ParticleSystem",
+      "field": "params/options.maximumMass/description",
+      "sourceHash": "sha256:ac4efa3b945c02a642c22b81c03ce6c779c19118221f5059c24cdc5f7ca828c7",
+      "text": "粒子的最大质量，单位为千克。实际质量会在此上限以下随机选择。"
+    },
+    {
+      "id": "ParticleSystem",
+      "field": "params/options.maximumParticleLife/description",
+      "sourceHash": "sha256:4abc75812f48aeaaa9442247145501ad34e5b57dd87c42dcfe0e1fc4e5e2ddbf",
+      "text": "粒子可能生命周期的上限，单位为秒。实际生命周期在此上限以下随机选择。"
+    },
+    {
+      "id": "ParticleSystem",
+      "field": "params/options.maximumSpeed/description",
+      "sourceHash": "sha256:e5b725be4232b5870243018a351ab0b2158476dcfe17e6645d84e330b7f6f1da",
+      "text": "粒子随机初始速率的上限，单位为米每秒。"
+    },
+    {
+      "id": "ParticleSystem",
+      "field": "params/options.minimumImageSize/description",
+      "sourceHash": "sha256:3e92551e959dee4adb0bff3f3ed8c4f53334e96cea3d0351235c152536ff4dcd",
+      "text": "粒子图像随机尺寸的宽高下限，单位为像素。"
+    },
+    {
+      "id": "ParticleSystem",
+      "field": "params/options.minimumMass/description",
+      "sourceHash": "sha256:d1745f07b453c7069d4808b3c3e421a77fe11585def6348f62b7af3249a231c0",
+      "text": "粒子的最小质量，单位为千克。实际质量会在此下限以上随机选择。"
+    },
+    {
+      "id": "ParticleSystem",
+      "field": "params/options.minimumParticleLife/description",
+      "sourceHash": "sha256:dd0211561ef596e383ecd030af489111e82d3f56313c895fcd9f22bc28f68338",
+      "text": "粒子可能生命周期的下限，单位为秒。实际生命周期在此下限以上随机选择。"
+    },
+    {
+      "id": "ParticleSystem",
+      "field": "params/options.minimumSpeed/description",
+      "sourceHash": "sha256:943ceaa27813c07329a9b413d3666b340f4b7916877dad75efbfd2061370c662",
+      "text": "粒子随机初始速率的下限，单位为米每秒。"
+    },
+    {
+      "id": "ParticleSystem",
+      "field": "params/options.modelMatrix/description",
+      "sourceHash": "sha256:90bff367a0b11d2409182520a9dd661b21a40b0d355a7d88e8f7ec8e90deef4f",
+      "text": "将粒子系统从模型坐标变换到世界坐标的 4x4 矩阵。"
+    },
+    {
+      "id": "ParticleSystem",
+      "field": "params/options.particleLife/description",
+      "sourceHash": "sha256:d0e1ee16fe6c2e07f14d7ea244fa2bf10ce781f44786c014457aef22c7fdc47d",
+      "text": "设置后，以此值覆盖 minimumParticleLife 和 maximumParticleLife。"
+    },
+    {
+      "id": "ParticleSystem",
+      "field": "params/options.scale/description",
+      "sourceHash": "sha256:2b951b3989ce8bc3019b7a5dec1d9b573653338718c98c5ed24ba41d396dc6e1",
+      "text": "设置粒子在整个 particleLife 生命周期内应用到图像的缩放值。"
+    },
+    {
+      "id": "ParticleSystem",
+      "field": "params/options.show/description",
+      "sourceHash": "sha256:7642d852e4de82995c5d4a3f7e20b93355d1eee6a9e388f50bcc85bbcace857a",
+      "text": "是否显示粒子系统。"
+    },
+    {
+      "id": "ParticleSystem",
+      "field": "params/options.sizeInMeters/description",
+      "sourceHash": "sha256:50fa13fc66fc557855220dfc21f0a012ff70e22b9368b8d823ef6858f3bd7cd5",
+      "text": "设置粒子尺寸采用米还是像素。为 <code>true</code> 时使用米，否则使用像素。"
+    },
+    {
+      "id": "ParticleSystem",
+      "field": "params/options.speed/description",
+      "sourceHash": "sha256:a106fd34352cf867f34878cb6c2a9518c4e37df13d54f830a2ceef182817ec8b",
+      "text": "设置后，以此值覆盖 minimumSpeed 和 maximumSpeed。"
+    },
+    {
+      "id": "ParticleSystem",
+      "field": "params/options.startColor/description",
+      "sourceHash": "sha256:575e1981e12a8b92ad964f89cecfdd84e4608962b3b306136daf4cc3ddb8a879",
+      "text": "粒子生命周期开始时的颜色。"
+    },
+    {
+      "id": "ParticleSystem",
+      "field": "params/options.startScale/description",
+      "sourceHash": "sha256:956b3e238430e226ba2b3a1bc2d045bc275c7b2e088a3eaff4c27d7ffbd8dbc3",
+      "text": "粒子生命周期开始时应用到图像的初始缩放值。"
+    },
+    {
+      "id": "ParticleSystem",
+      "field": "params/options.updateCallback/description",
+      "sourceHash": "sha256:4f7aa1eb5449455434b31d860f34c9561fb4a33046c46a3b8c738068961904cb",
+      "text": "每帧用于更新粒子的回调函数。"
+    },
+    {
+      "id": "ParticleSystem#bursts",
+      "field": "description",
+      "sourceHash": "sha256:f45aa24c3f0b2d66ae7c9024c40492c54baca5a2e953d0f9b10078455cfbd3d1",
+      "text": "在特定时刻突发发射粒子的 {@link ParticleBurst} 数组。"
+    },
+    {
+      "id": "ParticleSystem#complete",
+      "field": "description",
+      "sourceHash": "sha256:ca34a421d6fa805143d9b85baa731c97e5d8dd389563410abf4d1a3e70726360",
+      "text": "粒子系统到达生命周期终点时触发的事件。"
+    },
+    {
+      "id": "ParticleSystem#destroy",
+      "field": "description",
+      "sourceHash": "sha256:b385add820d9f47d540aad147f1cdf85f05e8c6cb81c3928a59c8fd5f7bd8d69",
+      "text": "销毁此对象持有的 WebGL 资源。显式销毁可确定地释放 WebGL 资源，而不依赖垃圾回收器回收此对象。<br /><br />对象销毁后不应再使用；调用除 <code>isDestroyed</code> 以外的任何函数都会抛出 {@link DeveloperError}。因此，应像示例中那样将返回值（<code>undefined</code>）赋给该对象变量。"
+    },
+    {
+      "id": "ParticleSystem#emissionRate",
+      "field": "description",
+      "sourceHash": "sha256:e2224b9ea41dee33b063a6101c0eee62fc863540e17a8ef6c175979b1780244b",
+      "text": "每秒发射的粒子数量。"
+    },
+    {
+      "id": "ParticleSystem#emitter",
+      "field": "description",
+      "sourceHash": "sha256:bd4883095a7c63775d97c6dd949e57a404410ac866e220ca2fc71306fa8aa9b5",
+      "text": "此系统的粒子发射器。"
+    },
+    {
+      "id": "ParticleSystem#emitterModelMatrix",
+      "field": "description",
+      "sourceHash": "sha256:ba756b636d09985b14adb751c34825fdc7439fcfa73e66dea763ceccbec84b2f",
+      "text": "在粒子系统局部坐标系内变换发射器的 4x4 矩阵。"
+    },
+    {
+      "id": "ParticleSystem#endColor",
+      "field": "description",
+      "sourceHash": "sha256:4ab5ffe29ea513e61e5a8ca2b9e162a0c8df5ed822f3191e8445fae9237b173f",
+      "text": "粒子生命周期结束时的颜色。"
+    },
+    {
+      "id": "ParticleSystem#endScale",
+      "field": "description",
+      "sourceHash": "sha256:a0b497ea53d91a517e5d4b7012ee4b9efa085ebe57b64277de484bffa043199b",
+      "text": "粒子生命周期结束时应用到图像的最终缩放值。"
+    },
+    {
+      "id": "ParticleSystem#image",
+      "field": "description",
+      "sourceHash": "sha256:bbef1086e651e498c485fc78a4c3091d44cf9eec244fc9abe65fb8f7e3d2d214",
+      "text": "广告牌使用的 URI、HTMLImageElement 或 HTMLCanvasElement。"
+    },
+    {
+      "id": "ParticleSystem#isComplete",
+      "field": "description",
+      "sourceHash": "sha256:24f1efb1d7dc7c8667c1265e1d35f4ac31d5367eec7c73cd18016fe61d663190",
+      "text": "粒子系统已到达生命周期终点时为 <code>true</code>，否则为 <code>false</code>。"
+    },
+    {
+      "id": "ParticleSystem#isDestroyed",
+      "field": "description",
+      "sourceHash": "sha256:aea7b697937631c90ae3fc0ec55b81ba0ddc7abe4d6045848b2031f9bed60091",
+      "text": "若此对象已销毁，返回 true；否则返回 false。<br /><br />对象销毁后不应再使用；调用除 <code>isDestroyed</code> 以外的任何函数都会抛出 {@link DeveloperError}。"
+    },
+    {
+      "id": "ParticleSystem#lifetime",
+      "field": "description",
+      "sourceHash": "sha256:458839ad16cfad2efba9f38e5e6db0058873dfbd14ae7a12c069ea27f61e49d5",
+      "text": "粒子系统持续发射粒子的时长，单位为秒。"
+    },
+    {
+      "id": "ParticleSystem#loop",
+      "field": "description",
+      "sourceHash": "sha256:49c79484dcbb72431e031baa05ce74be97c80ee0d3870939a3c6a55eccfa4f47",
+      "text": "粒子系统完成后是否循环其突发发射。"
+    },
+    {
+      "id": "ParticleSystem#maximumImageSize",
+      "field": "description",
+      "sourceHash": "sha256:366f9526efcf0ed826d55b1ba3d187c96b3bd76577799f9ab811bd4825d7adde",
+      "text": "粒子图像随机尺寸的宽高上限，单位为像素。"
+    },
+    {
+      "id": "ParticleSystem#maximumMass",
+      "field": "description",
+      "sourceHash": "sha256:29c2527a4699d4473ad446834135d96b50cb83b7ac1f46a610cbf33e75345b26",
+      "text": "设置粒子的最大质量，单位为千克。"
+    },
+    {
+      "id": "ParticleSystem#maximumParticleLife",
+      "field": "description",
+      "sourceHash": "sha256:4abc75812f48aeaaa9442247145501ad34e5b57dd87c42dcfe0e1fc4e5e2ddbf",
+      "text": "粒子可能生命周期的上限，单位为秒。实际生命周期在此上限以下随机选择。"
+    },
+    {
+      "id": "ParticleSystem#maximumSpeed",
+      "field": "description",
+      "sourceHash": "sha256:e5b725be4232b5870243018a351ab0b2158476dcfe17e6645d84e330b7f6f1da",
+      "text": "粒子随机初始速率的上限，单位为米每秒。"
+    },
+    {
+      "id": "ParticleSystem#minimumImageSize",
+      "field": "description",
+      "sourceHash": "sha256:3e92551e959dee4adb0bff3f3ed8c4f53334e96cea3d0351235c152536ff4dcd",
+      "text": "粒子图像随机尺寸的宽高下限，单位为像素。"
+    },
+    {
+      "id": "ParticleSystem#minimumMass",
+      "field": "description",
+      "sourceHash": "sha256:d9da3e8840378021b2de8b5c8220496bed8a761545f9a11ccb66256e75d354ea",
+      "text": "设置粒子的最小质量，单位为千克。"
+    },
+    {
+      "id": "ParticleSystem#minimumParticleLife",
+      "field": "description",
+      "sourceHash": "sha256:dd0211561ef596e383ecd030af489111e82d3f56313c895fcd9f22bc28f68338",
+      "text": "粒子可能生命周期的下限，单位为秒。实际生命周期在此下限以上随机选择。"
+    },
+    {
+      "id": "ParticleSystem#minimumSpeed",
+      "field": "description",
+      "sourceHash": "sha256:943ceaa27813c07329a9b413d3666b340f4b7916877dad75efbfd2061370c662",
+      "text": "粒子随机初始速率的下限，单位为米每秒。"
+    },
+    {
+      "id": "ParticleSystem#modelMatrix",
+      "field": "description",
+      "sourceHash": "sha256:90bff367a0b11d2409182520a9dd661b21a40b0d355a7d88e8f7ec8e90deef4f",
+      "text": "将粒子系统从模型坐标变换到世界坐标的 4x4 矩阵。"
+    },
+    {
+      "id": "ParticleSystem#show",
+      "field": "description",
+      "sourceHash": "sha256:7642d852e4de82995c5d4a3f7e20b93355d1eee6a9e388f50bcc85bbcace857a",
+      "text": "是否显示粒子系统。"
+    },
+    {
+      "id": "ParticleSystem#sizeInMeters",
+      "field": "description",
+      "sourceHash": "sha256:5cddeafc4e4cc3d4c91cd4d4e5353ea354b2a309dd5b430fd4b1310147831dfa",
+      "text": "获取或设置粒子尺寸采用米还是像素。为 <code>true</code> 时使用米，否则使用像素。"
+    },
+    {
+      "id": "ParticleSystem#startColor",
+      "field": "description",
+      "sourceHash": "sha256:575e1981e12a8b92ad964f89cecfdd84e4608962b3b306136daf4cc3ddb8a879",
+      "text": "粒子生命周期开始时的颜色。"
+    },
+    {
+      "id": "ParticleSystem#startScale",
+      "field": "description",
+      "sourceHash": "sha256:956b3e238430e226ba2b3a1bc2d045bc275c7b2e088a3eaff4c27d7ffbd8dbc3",
+      "text": "粒子生命周期开始时应用到图像的初始缩放值。"
+    },
+    {
+      "id": "ParticleSystem#updateCallback",
+      "field": "description",
+      "sourceHash": "sha256:74c2647febf3a1f5b06dbaed4dabb6c7d74596d84bd622b6978a13aaf0260223",
+      "text": "粒子更新回调函数，接收一个 {@link Particle} 以及距上次更新的时间差，单位为秒。可在回调中施加力或修改其他粒子属性。"
+    },
+    {
+      "id": "SphereEmitter",
+      "field": "description",
+      "sourceHash": "sha256:daaa33afc870a9a1c18ca58f2b7dbeeac3fc9e249dba1f728ac30d3eb1f90d8f",
+      "text": "在球体内发射粒子的 ParticleEmitter。粒子位置在球内随机分布，初始速度方向从球心向外。"
+    },
+    {
+      "id": "SphereEmitter",
+      "field": "params/radius/description",
+      "sourceHash": "sha256:3abaee3e65bab672342f6770f328546b4608107103baf7e75ecbf1c6ac0f6b16",
+      "text": "球的半径，单位为米。"
+    },
+    {
+      "id": "SphereEmitter#radius",
+      "field": "description",
+      "sourceHash": "sha256:3abaee3e65bab672342f6770f328546b4608107103baf7e75ecbf1c6ac0f6b16",
+      "text": "球的半径，单位为米。"
+    },
+    {
+      "id": "VerticalOrigin.BASELINE",
+      "field": "description",
+      "sourceHash": "sha256:0d667cdbe4ada42321366e8e0c188e57740c9046550ac1cc9385b7ecc8af5af3",
+      "text": "对象包含文字时，原点位于文字基线；否则位于对象底部。"
+    },
+    {
+      "id": "VerticalOrigin.BOTTOM",
+      "field": "description",
+      "sourceHash": "sha256:139a8b4be63ac3ef35ea04a20d571aaee3c8be2e80d527eccb31dccb0a199641",
+      "text": "原点位于对象底部。"
+    },
+    {
+      "id": "VerticalOrigin.CENTER",
+      "field": "description",
+      "sourceHash": "sha256:b8b0daf40bc210af23596ff1b0056f428be40f57dd3285ab02ce4b6d854d84a9",
+      "text": "原点位于 <code>BASELINE</code> 与 <code>TOP</code> 之间的垂直中心。"
+    },
+    {
+      "id": "VerticalOrigin.TOP",
+      "field": "description",
+      "sourceHash": "sha256:8d96b7d4a596c57466250f121e4b2cc21309248f1537b80e16b463a0b2588587",
+      "text": "原点位于对象顶部。"
+    },
+    {
+      "id": "VerticalOrigin",
+      "field": "description",
+      "sourceHash": "sha256:60f8fbc65ebe5869e4e69577bb94f92c806b4763cdf7f77be25359c862aaa494",
+      "text": "原点相对于对象（例如 {@link Billboard} 或 {@link Label}）的垂直位置。例如设为 <code>TOP</code> 或 <code>BOTTOM</code> 时，分别将对象顶部或底部对齐锚点。\n<br /><br />\n<div align='center'>\n<img src='Images/Billboard.setVerticalOrigin.png' width='695' height='175' /><br />\n</div>"
+    },
+    {
+      "id": "VerticalOrigin",
+      "field": "properties/BASELINE/description",
+      "sourceHash": "sha256:0d667cdbe4ada42321366e8e0c188e57740c9046550ac1cc9385b7ecc8af5af3",
+      "text": "对象包含文字时，原点位于文字基线；否则位于对象底部。"
+    },
+    {
+      "id": "VerticalOrigin",
+      "field": "properties/BOTTOM/description",
+      "sourceHash": "sha256:139a8b4be63ac3ef35ea04a20d571aaee3c8be2e80d527eccb31dccb0a199641",
+      "text": "原点位于对象底部。"
+    },
+    {
+      "id": "VerticalOrigin",
+      "field": "properties/CENTER/description",
+      "sourceHash": "sha256:b8b0daf40bc210af23596ff1b0056f428be40f57dd3285ab02ce4b6d854d84a9",
+      "text": "原点位于 <code>BASELINE</code> 与 <code>TOP</code> 之间的垂直中心。"
+    },
+    {
+      "id": "VerticalOrigin",
+      "field": "properties/TOP/description",
+      "sourceHash": "sha256:8d96b7d4a596c57466250f121e4b2cc21309248f1537b80e16b463a0b2588587",
+      "text": "原点位于对象顶部。"
+    }
+  ]
+}

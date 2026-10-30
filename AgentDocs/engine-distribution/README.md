@@ -8,9 +8,9 @@
 | Status                 | `active`                                                                  |
 | Planning model         | `extension`                                                               |
 | Active extension plan  | [Distribution](plans/2026-10-29-extension.md)                             |
-| Current phase          | T2 completed; T3 awaiting inventory                                       |
+| Current phase          | T3 completed; next phase awaiting inventory                               |
 | Active standalone plan | None; latest [Native batch](plans/2026-10-30-native-translation-batch.md) |
-| Active phase plan      | None; latest [T2](plans/2026-10-30-t2-loading-time-translation.md)        |
+| Active phase plan      | [T3](plans/2026-10-30-t3-rendering-translation.md)                        |
 | Architecture contact   | Architecture Agent (current task)                                         |
 | Execution contact      | Execution Agent (current task)                                            |
 | Last updated           | 2026-10-30                                                                |
@@ -41,7 +41,7 @@ and committed as `05362428b6`; [C2](plans/2026-10-30-c2-chinese-edition.md) is
 
 All 73 owned API source files maintain Chinese prose directly. The 2,337 published owned
 fields include synthetic VERSION and bypass external translation. Native English comments
-remain intact; independent catalogs translate 8,093 of 15,294 native fields. The 7,201 remaining
+remain intact; independent catalogs translate 9,653 of 15,294 native fields. The 5,641 remaining
 native fields retain English, with zero stale/unused entries. Each build overwrites source
 inventory/report without altering maintained catalogs. Historical bilingual delivery in
 [ADR-0206](../../Documentation/SceneGIS/Decisions/ADR-0206-documentation-localization.md) and
@@ -58,6 +58,14 @@ No upstream or runtime changes.
 [Asset directory correction](plans/2026-10-29-asset-directories.md): completed and
 [reviewed](reviews/2026-10-29-asset-directories.md). SGP-0074 filters directory entries in the
 shared asset stream. Rebuilt artifact has zero empty directories; 8 Node and 7 browser tests pass.
+
+## Latest rendering phase
+
+[T3](plans/2026-10-30-t3-rendering-translation.md) is completed and
+[reviewed](reviews/2026-10-30-t3-rendering-translation.md): 1,560 new records complete all
+1,713 fields of 80 rendering roots. Native coverage is 63.1%; 25 Node checks and one focused
+browser case pass. Pixel sizing, texture ownership, clipping logic and corrected source
+semantics reach HTML and metadata. No runtime, generator, upstream or SDK changes.
 
 ## Latest loading and time phase
 

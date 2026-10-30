@@ -1,0 +1,2088 @@
+{
+  "schemaVersion": 1,
+  "locale": "zh-CN",
+  "entries": [
+    {
+      "id": "Billboard.ConstructorOptions",
+      "field": "description",
+      "sourceHash": "sha256:c8a2ce98f74960aba106d1d4ff585dc59b18243d0b41feca889be4012f475614",
+      "text": "Billboard 构造函数第一个参数的初始化选项。"
+    },
+    {
+      "id": "Billboard.ConstructorOptions",
+      "field": "properties/alignedAxis/description",
+      "sourceHash": "sha256:afed19d4d4cf82895e2a7f83864ab6270443970588bdbb0d0d1c90ede9b36b43",
+      "text": "指定世界空间中对齐轴的 {@link Cartesian3}。"
+    },
+    {
+      "id": "Billboard.ConstructorOptions",
+      "field": "properties/color/description",
+      "sourceHash": "sha256:c011d7c5c09036532a03ebe6969032185b119610f9a112b2c87f346ebfe5c68b",
+      "text": "与广告牌纹理相乘的 {@link Color}。"
+    },
+    {
+      "id": "Billboard.ConstructorOptions",
+      "field": "properties/disableDepthTestDistance/description",
+      "sourceHash": "sha256:cee180f37db767287ef9d33124874a0d49a241d89d9fae551748785ebdc0d5dd",
+      "text": "禁用深度测试的相机距离阈值；超过该距离后禁用深度测试，例如用于避免被地形裁剪。"
+    },
+    {
+      "id": "Billboard.ConstructorOptions",
+      "field": "properties/distanceDisplayCondition/description",
+      "sourceHash": "sha256:21f6c39dfd86b5ba24ca05a6795ba8fa360a0136d873c37a7e9d000771ccf194",
+      "text": "指定广告牌在距相机多远时显示的 {@link DistanceDisplayCondition}。"
+    },
+    {
+      "id": "Billboard.ConstructorOptions",
+      "field": "properties/eyeOffset/description",
+      "sourceHash": "sha256:6510fa5b176f457c2e620eafbbb31eaedd2201ef7e7d6516f461c1e224d249c0",
+      "text": "在眼坐标中应用到广告牌的三维笛卡尔偏移，类型为 {@link Cartesian3}。"
+    },
+    {
+      "id": "Billboard.ConstructorOptions",
+      "field": "properties/height/description",
+      "sourceHash": "sha256:9ce40e5ed7e6f0780963f89a7160eb643663f4477e32e7abf83707e2e9f046bb",
+      "text": "广告牌高度。为 undefined 时使用图像高度。"
+    },
+    {
+      "id": "Billboard.ConstructorOptions",
+      "field": "properties/heightReference/description",
+      "sourceHash": "sha256:ed980bfa2e17ba53e9a91db4255a269aa13e973853c6558a9f4a981b7be8db2d",
+      "text": "指定广告牌高度参考的 {@link HeightReference}。"
+    },
+    {
+      "id": "Billboard.ConstructorOptions",
+      "field": "properties/horizontalOrigin/description",
+      "sourceHash": "sha256:b7c3206f409f55a3242a690566ce46be8d3d1aa7e35ee775c1c27d8f484cd361",
+      "text": "指定广告牌水平原点的 {@link HorizontalOrigin}。"
+    },
+    {
+      "id": "Billboard.ConstructorOptions",
+      "field": "properties/id/description",
+      "sourceHash": "sha256:659791f577416b75ad677c68bd9ad3232edf0157e59ac6fd4f3d1887fe0b024e",
+      "text": "通过 {@link Scene#pick} 拾取广告牌时返回的用户自定义对象。"
+    },
+    {
+      "id": "Billboard.ConstructorOptions",
+      "field": "properties/image/description",
+      "sourceHash": "sha256:3c57d39a5d5c266a67cc2a1655c6e1e20aaf72677abd231eb3edfb105dc5f9bd",
+      "text": "广告牌使用的已加载 HTMLImageElement、ImageData 或图像 URL。"
+    },
+    {
+      "id": "Billboard.ConstructorOptions",
+      "field": "properties/imageSubRegion/description",
+      "sourceHash": "sha256:5214320fd0466b49eea5688325557a5f3edbbf6af7fbd6875f80081822d5b12e",
+      "text": "指定广告牌所用图像子区域的 {@link BoundingRectangle}，用于替代整张图像。"
+    },
+    {
+      "id": "Billboard.ConstructorOptions",
+      "field": "properties/pixelOffset/description",
+      "sourceHash": "sha256:fdfdb0762436d54329626a77cc4c0288c0e866f3994a3c399acd0d3afd10ee34",
+      "text": "指定相对于广告牌原点的屏幕空间像素偏移，类型为 {@link Cartesian2}。"
+    },
+    {
+      "id": "Billboard.ConstructorOptions",
+      "field": "properties/pixelOffsetScaleByDistance/description",
+      "sourceHash": "sha256:c3ac1dd0924ba36f33388b6d5ee605d695176b04d9aa760e0743f3faa480304e",
+      "text": "根据广告牌到相机的距离，指定近远距离像素偏移缩放属性的 {@link NearFarScalar}。"
+    },
+    {
+      "id": "Billboard.ConstructorOptions",
+      "field": "properties/position/description",
+      "sourceHash": "sha256:77a02f638a2608c1579d04479b49359f3d0d028a039f91d23c79b247c07b0b5a",
+      "text": "广告牌的笛卡尔位置。"
+    },
+    {
+      "id": "Billboard.ConstructorOptions",
+      "field": "properties/rotation/description",
+      "sourceHash": "sha256:3532edaabf59505de31dc39cdb3748d40a2c3f4223a5c2d4deeff66078cd2090",
+      "text": "旋转角度，单位为弧度。"
+    },
+    {
+      "id": "Billboard.ConstructorOptions",
+      "field": "properties/scale/description",
+      "sourceHash": "sha256:7794f33f254339ff51f08a824bbd55cc537ffd5a2374e3bd45c358af266da9eb",
+      "text": "与广告牌图像像素尺寸相乘的统一缩放值。"
+    },
+    {
+      "id": "Billboard.ConstructorOptions",
+      "field": "properties/scaleByDistance/description",
+      "sourceHash": "sha256:c4306444999d41cae09eec1bb3d4e0c424dd4f247c62654feceb4d05ac61a4a0",
+      "text": "根据广告牌到相机的距离，指定近远距离缩放属性的 {@link NearFarScalar}。"
+    },
+    {
+      "id": "Billboard.ConstructorOptions",
+      "field": "properties/show/description",
+      "sourceHash": "sha256:79fdd0bdbe65bf8a246f73665f4184f0ab3ad10dff8009142a7396ea0ce6b77b",
+      "text": "决定是否显示此广告牌。"
+    },
+    {
+      "id": "Billboard.ConstructorOptions",
+      "field": "properties/sizeInMeters/description",
+      "sourceHash": "sha256:5dc5a1d781d8a2b14a6071373075f2a1f85b3d800aac376fd22a9eee3f031e39",
+      "text": "指定广告牌尺寸采用米还是像素的布尔值。"
+    },
+    {
+      "id": "Billboard.ConstructorOptions",
+      "field": "properties/splitDirection/description",
+      "sourceHash": "sha256:354613f8f06963108251d92731e34f6597adadc4d0d73879c88f114426a67264",
+      "text": "指定广告牌分屏属性的 {@link SplitDirection}。"
+    },
+    {
+      "id": "Billboard.ConstructorOptions",
+      "field": "properties/translucencyByDistance/description",
+      "sourceHash": "sha256:46fffd3b1e308b10261a1c98a9f6680d15b355a806668f082a414fc72bacca56",
+      "text": "根据广告牌到相机的距离，指定近远距离半透明属性的 {@link NearFarScalar}。"
+    },
+    {
+      "id": "Billboard.ConstructorOptions",
+      "field": "properties/verticalOrigin/description",
+      "sourceHash": "sha256:1c52ecff68468144110809d9c8a9f9735db5622514c50eec73e29ed10d1a4227",
+      "text": "指定广告牌垂直原点的 {@link VerticalOrigin}。"
+    },
+    {
+      "id": "Billboard.ConstructorOptions",
+      "field": "properties/width/description",
+      "sourceHash": "sha256:b8f9aa98154203ba5917ed297c4225460c0975a18fac6f631b7c7f449cdaec0d",
+      "text": "广告牌宽度。为 undefined 时使用图像宽度。"
+    },
+    {
+      "id": "Billboard.CreateImageCallback",
+      "field": "description",
+      "sourceHash": "sha256:fe5713c751ea1db1a33e74152ec6cb3db565f2ed71b55fcd3cce8944e6d07447",
+      "text": "创建图像的函数。"
+    },
+    {
+      "id": "Billboard.CreateImageCallback",
+      "field": "params/id/description",
+      "sourceHash": "sha256:5c678c1c86b14922ec7d3ded924f642bf88b48c130de10dd90b8cf6f252e29bc",
+      "text": "待加载图像的标识。"
+    },
+    {
+      "id": "Billboard.CreateImageCallback",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:e667edeee24ab6f3c9fc6051feae555bb85ac24fb8fb2857348a0f81d360010e",
+      "text": "图像，或兑现为图像的 Promise。"
+    },
+    {
+      "id": "Billboard",
+      "field": "description",
+      "sourceHash": "sha256:00333de6cd0a83e2caf6f8a96a3fdca4d39fecd0822000cba858062ea300cdd8",
+      "text": "<div class=\"notice\">\n请调用 {@link BillboardCollection#add} 创建广告牌并设置初始属性，不要直接调用构造函数。\n</div>\n位于三维场景中、始终对齐视口的图像，通过 {@link BillboardCollection} 创建和渲染。\n<br /><br />\n<div align='center'>\n<img src='Images/Billboard.png' width='400' height='300' /><br />\n广告牌示例\n</div>"
+    },
+    {
+      "id": "Billboard",
+      "field": "exceptions/0/description",
+      "sourceHash": "sha256:ba6dc3f70f9ae6f028bdfdfdda6a26a540c903f8b16680ea89f2af37e133f9e7",
+      "text": "scaleByDistance.far 必须大于 scaleByDistance.near。"
+    },
+    {
+      "id": "Billboard",
+      "field": "exceptions/1/description",
+      "sourceHash": "sha256:f6fd60fa63be09b7231db8b18e4cc8950e90ec2105efd05d28f9862cbe45c67a",
+      "text": "translucencyByDistance.far 必须大于 translucencyByDistance.near。"
+    },
+    {
+      "id": "Billboard",
+      "field": "exceptions/2/description",
+      "sourceHash": "sha256:fe5eff8e0463a7c5efa9f5f45046b550d3a0bb3b0cd073de8b880f164c9993b1",
+      "text": "pixelOffsetScaleByDistance.far 必须大于 pixelOffsetScaleByDistance.near。"
+    },
+    {
+      "id": "Billboard",
+      "field": "exceptions/3/description",
+      "sourceHash": "sha256:ddaf7d687784d98e9f1a7ee8ecb25a8ada3f31d3eb5ea128a4bd78d6ab486fc7",
+      "text": "distanceDisplayCondition.far 必须大于 distanceDisplayCondition.near。"
+    },
+    {
+      "id": "Billboard",
+      "field": "params/billboardCollection/description",
+      "sourceHash": "sha256:ccbe9c20e8a073374b2bc1a964b0d81cd2d479525502bd557ef5f31e7ed1b4bf",
+      "text": "BillboardCollection 实例。"
+    },
+    {
+      "id": "Billboard",
+      "field": "performance/0",
+      "sourceHash": "sha256:f97b08d27be7ab6e27a8726a87477db47d6733785e386e3c956438319282cf8f",
+      "text": "读取属性（例如 {@link Billboard#show}）的时间复杂度为常数。属性赋值也是常数时间，但在调用 {@link BillboardCollection#update} 时会产生从 CPU 到 GPU 的数据传输。无论修改多少个属性，每个广告牌的传输量相同。如果集合中的大部分广告牌都需要更新，使用 {@link BillboardCollection#removeAll} 清空集合并重新添加，可能比逐个修改更高效。"
+    },
+    {
+      "id": "Billboard#alignedAxis",
+      "field": "description",
+      "sourceHash": "sha256:8eac8daa940025caa4a42597ac235dcca144542849e158d04942d8843e91b618",
+      "text": "对齐轴为广告牌向上向量所指向的方向向量。默认值为零向量，表示对齐屏幕向上方向。注意，只有零向量 (0,0,0) 才会将对齐方式重置为屏幕向上。"
+    },
+    {
+      "id": "Billboard#color",
+      "field": "description",
+      "sourceHash": "sha256:cafb94c1f1fc14614265bb0a9274d8bdbd2a5a03f450685f0ebe16c98bcb8007",
+      "text": "获取或设置与广告牌纹理相乘的颜色。常见用途有两种：多个广告牌共用同一张白色纹理，分别乘以不同颜色，得到彩色广告牌；或通过颜色的 alpha 分量实现半透明。alpha 为 <code>0.0</code> 时完全透明，为 <code>1.0</code> 时不透明。\r<br /><br />\r<div align='center'>\r<table border='0' cellpadding='5'><tr>\r<td align='center'><code>default</code><br/><img src='Images/Billboard.setColor.Alpha255.png' width='250' height='188' /></td>\r<td align='center'><code>alpha : 0.5</code><br/><img src='Images/Billboard.setColor.Alpha127.png' width='250' height='188' /></td>\r</tr></table>\r</div>\r<br />\r如示例 1 所示，红、绿、蓝和 alpha 值分别由 <code>value</code> 的 <code>red</code>、<code>green</code>、<code>blue</code> 和 <code>alpha</code> 属性指定。各分量范围为 <code>0.0</code>（无强度）到 <code>1.0</code>（完整强度）。"
+    },
+    {
+      "id": "Billboard#computeScreenSpacePosition",
+      "field": "description",
+      "sourceHash": "sha256:ee6438c32c52430d84d7960f44a45f0af8de928a6021573b85e7b40eb6233d60",
+      "text": "计算广告牌原点的屏幕空间位置，包含眼坐标偏移和像素偏移。屏幕空间原点位于画布左上角；<code>x</code> 从左向右增加，<code>y</code> 从上向下增加。"
+    },
+    {
+      "id": "Billboard#computeScreenSpacePosition",
+      "field": "exceptions/0/description",
+      "sourceHash": "sha256:d54e02c59fd53cc8a9885ec9f6c121ec6491e701d00af1113647801a844ce56e",
+      "text": "广告牌必须位于集合中。"
+    },
+    {
+      "id": "Billboard#computeScreenSpacePosition",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:71cd62f40347284269c8198df501822eb0ac8fb0c04385a83c3923a4a48d915f",
+      "text": "广告牌的屏幕空间位置。"
+    },
+    {
+      "id": "Billboard#disableDepthTestDistance",
+      "field": "description",
+      "sourceHash": "sha256:7815846c04bf9fddae3c435e5ff304eea64f814747bb615d8dd2c6328871f095",
+      "text": "获取或设置禁用深度测试的相机距离阈值；超过该距离后禁用深度测试，例如用于避免被地形裁剪。设为 <code>undefined</code> 或 <code>0</code> 时，始终执行深度测试；设为 <code>Number.POSITIVE_INFINITY</code> 时，始终不执行深度测试。"
+    },
+    {
+      "id": "Billboard#distanceDisplayCondition",
+      "field": "description",
+      "sourceHash": "sha256:8f651768916c803e8f6356c10694dcf3dbfc794421d434f5da0b8a956442216e",
+      "text": "获取或设置距离显示条件，规定广告牌在距相机多远时显示。"
+    },
+    {
+      "id": "Billboard#equals",
+      "field": "description",
+      "sourceHash": "sha256:352d464c7c9f72d40a749696ecda85c1f82f9cf4260ebab81a12657e77eb49b1",
+      "text": "判断此广告牌是否与另一个广告牌相等。全部属性相等时，广告牌相等；不同集合中的广告牌也可能相等。"
+    },
+    {
+      "id": "Billboard#equals",
+      "field": "params/other/description",
+      "sourceHash": "sha256:7666e846468f5faa1fef88f411026c4adb52372e2d77fceb2c31f3f126e7fbe7",
+      "text": "用于比较是否相等的广告牌。"
+    },
+    {
+      "id": "Billboard#equals",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:6333234afced057706f8ba5f1c7ecef1aa9cc4d4fe581e1f7335c001d5bf4148",
+      "text": "广告牌相等时为 <code>true</code>，否则为 <code>false</code>。"
+    },
+    {
+      "id": "Billboard#eyeOffset",
+      "field": "description",
+      "sourceHash": "sha256:36ff7da06176227ac442423658db8902e7d61b70dcf7d18fdef270052b9e6bdd",
+      "text": "获取或设置在眼坐标中应用到广告牌的三维笛卡尔偏移。这里的眼坐标为左手坐标系，<code>x</code> 向观察者右侧，<code>y</code> 向上，<code>z</code> 指向屏幕内部。其尺度与世界和模型坐标相同，通常为米。\n<br /><br />\n眼坐标偏移常用于排列位于同一位置的多个广告牌或对象，例如将广告牌放在对应三维模型上方。\n<br /><br />\n下图中广告牌位于地心，但通过眼坐标偏移，无论视角或地球朝向如何，它都出现在地球上方。\n<br /><br />\n<div align='center'>\r<table border='0' cellpadding='5'><tr>\r<td align='center'><img src='Images/Billboard.setEyeOffset.one.png' width='250' height='188' /></td>\r<td align='center'><img src='Images/Billboard.setEyeOffset.two.png' width='250' height='188' /></td>\r</tr></table>\r<code>b.eyeOffset = new Cartesian3(0.0, 8000000.0, 0.0);</code><br /><br />\r</div>"
+    },
+    {
+      "id": "Billboard#height",
+      "field": "description",
+      "sourceHash": "sha256:0ff48c069e964585a21310b7a724875fa1d3903d099a1eb4659cf0fa42a8bb5a",
+      "text": "获取或设置广告牌高度。为 undefined 时使用图像高度。"
+    },
+    {
+      "id": "Billboard#heightReference",
+      "field": "description",
+      "sourceHash": "sha256:2f868e01f0e473fe67fc728ea4405a5a5067ae890653fbc2b83c233a2cc16f0f",
+      "text": "获取或设置广告牌的高度参考。"
+    },
+    {
+      "id": "Billboard#horizontalOrigin",
+      "field": "description",
+      "sourceHash": "sha256:2640b3b836aee991b2ce55c1b29ee882a059a6671757252229d9d3b9295bb7b6",
+      "text": "获取或设置广告牌的水平原点，决定广告牌位于锚点左侧、居中还是右侧。\n<br /><br />\n<div align='center'>\n<img src='Images/Billboard.setHorizontalOrigin.png' width='648' height='196' /><br />\n</div>"
+    },
+    {
+      "id": "Billboard#id",
+      "field": "description",
+      "sourceHash": "sha256:7fbc359d3c72aa5d240b3e198f3e5e9634022d84a156e987aca4ae97a3d40994",
+      "text": "获取或设置拾取广告牌时返回的用户自定义对象。"
+    },
+    {
+      "id": "Billboard#image",
+      "field": "description",
+      "sourceHash": "sha256:c70eb75b500d5886aa6dd37b064c9eea5d2a8319d4884b640510aa57565db98f",
+      "text": "<p>\n获取或设置广告牌使用的图像。如果已为指定图像创建纹理，则复用现有纹理。\n</p>\n<p>\n可设为已加载的 Image、会自动加载为 Image 的 URL、canvas，或同一广告牌集合中其他广告牌的 image 属性。\n</p>"
+    },
+    {
+      "id": "Billboard#pixelOffset",
+      "field": "description",
+      "sourceHash": "sha256:6042d2553ed3c4a7b3c9c7729ed03c7246e39aba488f46adc71975fddf37f3e5",
+      "text": "获取或设置广告牌相对于原点的屏幕空间像素偏移，常用于排列位于同一位置的多个广告牌和标签，例如图像与文字。屏幕空间原点位于画布左上角；<code>x</code> 从左向右增加，<code>y</code> 从上向下增加。\r<br /><br />\r<div align='center'>\r<table border='0' cellpadding='5'><tr>\r<td align='center'><code>default</code><br/><img src='Images/Billboard.setPixelOffset.default.png' width='250' height='188' /></td>\r<td align='center'><code>b.pixeloffset = new Cartesian2(50, 25);</code><br/><img src='Images/Billboard.setPixelOffset.x50y-25.png' width='250' height='188' /></td>\r</tr></table>\r黄色点表示广告牌原点。\r</div>"
+    },
+    {
+      "id": "Billboard#pixelOffsetScaleByDistance",
+      "field": "description",
+      "sourceHash": "sha256:031e32644b37de0ae94465401f02c6d6d9f9fe6257ebe0893b4db1bd8094f51c",
+      "text": "获取或设置根据广告牌到相机距离变化的近远距离像素偏移缩放属性。当相机距离处于指定范围内时，像素偏移缩放值在 {@link NearFarScalar#nearValue} 与 {@link NearFarScalar#farValue} 之间变化，距离上下界由 {@link NearFarScalar#near} 和 {@link NearFarScalar#far} 指定。超出范围时，缩放值保持为最近端点值。为 undefined 时禁用 pixelOffsetScaleByDistance。"
+    },
+    {
+      "id": "Billboard#position",
+      "field": "description",
+      "sourceHash": "sha256:0d900c7a986b873a8eee29be8d22d8ee67719bc6e99be00bb03e787c3b8648f8",
+      "text": "获取或设置广告牌的笛卡尔位置。"
+    },
+    {
+      "id": "Billboard#ready",
+      "field": "description",
+      "sourceHash": "sha256:5c79a2133d68e9c4fcdc1030b11031f6d2bb939ddd0fa5ebc56a0b1694473a2e",
+      "text": "为 <code>true</code> 时，广告牌已可供渲染，即图像已下载且 WebGL 资源已创建。"
+    },
+    {
+      "id": "Billboard#rotation",
+      "field": "description",
+      "sourceHash": "sha256:1a3428dee33fccdd00eba0c59e0b2a577d9006570b2d5d764878761b3ca0077d",
+      "text": "获取或设置旋转角度，单位为弧度。"
+    },
+    {
+      "id": "Billboard#scale",
+      "field": "description",
+      "sourceHash": "sha256:6cf640f3fd4cabb642100c1083bd61bd1bf65988bda61dfcb2288666c1b4f8c7",
+      "text": "获取或设置与广告牌图像像素尺寸相乘的统一缩放值。为 <code>1.0</code> 时尺寸不变，大于 <code>1.0</code> 时放大，正值小于 <code>1.0</code> 时缩小。\r<br /><br />\r<div align='center'>\r<img src='Images/Billboard.setScale.png' width='400' height='300' /><br/>\r上图从左到右的缩放值分别为 <code>0.5</code>、<code>1.0</code> 和 <code>2.0</code>。\r</div>"
+    },
+    {
+      "id": "Billboard#scaleByDistance",
+      "field": "description",
+      "sourceHash": "sha256:79aa8364ad262413803c53c8a8d5611409fbb30030cc01b821a91fca12a14405",
+      "text": "获取或设置根据广告牌到相机距离变化的近远距离缩放属性。当相机距离处于指定范围内时，广告牌缩放值在 {@link NearFarScalar#nearValue} 与 {@link NearFarScalar#farValue} 之间插值，距离上下界由 {@link NearFarScalar#near} 和 {@link NearFarScalar#far} 指定。超出范围时，缩放值保持为最近端点值。为 undefined 时禁用 scaleByDistance。"
+    },
+    {
+      "id": "Billboard#setImage",
+      "field": "description",
+      "sourceHash": "sha256:7b0c5accfb59c978dd928c5db3ae800298c14681cd2f034236609fbf1ed6be6a",
+      "text": "<p>\n设置广告牌使用的图像。如果已为指定 id 创建纹理，则复用现有纹理。\n</p>\n<p>\n此函数适用于动态创建由多个广告牌共享的纹理。只有第一个广告牌会真正调用图像创建函数并创建纹理，后续使用相同 id 的广告牌直接复用已有纹理。\n</p>\n<p>\n从 URL 加载图像时，设置 {@link Billboard#image} 属性更方便。\n</p>"
+    },
+    {
+      "id": "Billboard#setImage",
+      "field": "params/id/description",
+      "sourceHash": "sha256:d9c741b98b1a7c49ca32469ea45cd34bc62e65fd38941d73263a65ec86fc08b8",
+      "text": "图像 id，可以是任意唯一标识图像的字符串。"
+    },
+    {
+      "id": "Billboard#setImage",
+      "field": "params/image/description",
+      "sourceHash": "sha256:fb62d80afe5cc3826deffeb16bad70c5e11f552c42c05e64e519551d4ea3c63e",
+      "text": "待加载的图像。可以是已加载的 Image 或 Canvas、会自动加载为 Image 的 URL，或在图像尚未加载时用于创建图像的函数。"
+    },
+    {
+      "id": "Billboard#setImageSubRegion",
+      "field": "description",
+      "sourceHash": "sha256:0054b0ee9faa40b8823ec8dc85d8eb682a673256f651192578a67ffe8342db8e",
+      "text": "使用指定 id 的图像子区域作为广告牌图像。子区域以图像左下角为原点，单位为像素。"
+    },
+    {
+      "id": "Billboard#setImageSubRegion",
+      "field": "exceptions/0/description",
+      "sourceHash": "sha256:f5341eab83837351bd5dd3ba275b78ebdabf49347ec3acf7b2e052c9d14e6c1f",
+      "text": "图集中必须存在指定 id 的图像。"
+    },
+    {
+      "id": "Billboard#setImageSubRegion",
+      "field": "params/id/description",
+      "sourceHash": "sha256:f03b39da8b4d60d04f5ac74a9411b90445f3379d096b23ee6141ab1afbdca45d",
+      "text": "要使用的图像 id。"
+    },
+    {
+      "id": "Billboard#setImageSubRegion",
+      "field": "params/subRegion/description",
+      "sourceHash": "sha256:9637a3e0f50334a15e2b2643a3b27f4d12d185674a936f6f1518b656c81fbcec",
+      "text": "图像的子区域。"
+    },
+    {
+      "id": "Billboard#show",
+      "field": "description",
+      "sourceHash": "sha256:42f6625398d112a0ad6fa4ac8faa2c4c59a4d30b65215c48db425b55315ec75b",
+      "text": "决定是否显示广告牌。请使用此属性隐藏或显示，而不必从集合移除后重新添加。"
+    },
+    {
+      "id": "Billboard#sizeInMeters",
+      "field": "description",
+      "sourceHash": "sha256:c08e5a7e9a71b13a6f950671c5c0dca48a138270a564ebf941033adf0b2d462c",
+      "text": "获取或设置广告牌尺寸采用米还是像素。为 <code>true</code> 时使用米，否则使用像素。"
+    },
+    {
+      "id": "Billboard#splitDirection",
+      "field": "description",
+      "sourceHash": "sha256:46683c5c6c9fcaa554e80dfa4b397c9261777266cff64c54cf6a60ae1b09e042",
+      "text": "获取或设置广告牌的 {@link SplitDirection}。"
+    },
+    {
+      "id": "Billboard#translucencyByDistance",
+      "field": "description",
+      "sourceHash": "sha256:9371963e88f2ddd3f93c5db1e808bf50d0af7c805d82941a1822eb62d07fca79",
+      "text": "获取或设置根据广告牌到相机距离变化的近远距离半透明属性。当相机距离处于指定范围内时，半透明值在 {@link NearFarScalar#nearValue} 与 {@link NearFarScalar#farValue} 之间插值，距离上下界由 {@link NearFarScalar#near} 和 {@link NearFarScalar#far} 指定。超出范围时，半透明值保持为最近端点值。为 undefined 时禁用 translucencyByDistance。"
+    },
+    {
+      "id": "Billboard#verticalOrigin",
+      "field": "description",
+      "sourceHash": "sha256:c9ae6058b5aa44ec75be9eb78e6b0c2262437db6f8f29fa4e08ece78058025ea",
+      "text": "获取或设置广告牌的垂直原点，决定广告牌位于锚点上方、下方还是居中。\n<br /><br />\n<div align='center'>\n<img src='Images/Billboard.setVerticalOrigin.png' width='695' height='175' /><br />\n</div>"
+    },
+    {
+      "id": "Billboard#width",
+      "field": "description",
+      "sourceHash": "sha256:455e0e9c219745d8a51abbe3721ba0af251563b26b21468cdca9a099fb4a1050",
+      "text": "获取或设置广告牌宽度。为 undefined 时使用图像宽度。"
+    },
+    {
+      "id": "BillboardCollection",
+      "field": "description",
+      "sourceHash": "sha256:4fe5229accb108176f398e553d450f2db7f9defbe5e2e76fdc84e5aa86af104d",
+      "text": "可渲染的广告牌集合。广告牌是位于三维场景中、始终对齐视口的图像。\n<br /><br />\n<div align='center'>\n<img src='Images/Billboard.png' width='400' height='300' /><br />\n广告牌示例\n</div>\n<br /><br />\n通过 {@link BillboardCollection#add} 和 {@link BillboardCollection#remove} 添加和移除广告牌。同一集合中具有相同图像标识的广告牌会自动共享纹理。"
+    },
+    {
+      "id": "BillboardCollection",
+      "field": "params/options.blendOption/description",
+      "sourceHash": "sha256:9a7bb291273da70cd99566e10e0daff71a9ce3833d22e4ecd7a6fa5b6dba921b",
+      "text": "广告牌混合选项。默认同时渲染不透明和半透明广告牌。如果全部广告牌都完全不透明，或全部都为半透明，设为 BlendOption.OPAQUE 或 BlendOption.TRANSLUCENT 最多可使性能提高至两倍。"
+    },
+    {
+      "id": "BillboardCollection",
+      "field": "params/options.coarseDepthTestDistance/description",
+      "sourceHash": "sha256:0999484c5f63c1e54ce4dce1f248b29155b7237972093a64e3521b4988b4d810",
+      "text": "粗略深度测试的相机距离阈值；超过该距离后，广告牌改为对地球椭球的近似表示进行深度测试，而非完整地球深度缓冲。未指定时，默认值相对于 {@link Ellipsoid.default} 确定。"
+    },
+    {
+      "id": "BillboardCollection",
+      "field": "params/options.debugShowBoundingVolume/description",
+      "sourceHash": "sha256:e994479c583ef7aab0de212c8ac6776e4d7c20d409ee8ee4300116517d5fe8d6",
+      "text": "仅供调试。决定是否显示此图元各命令的包围球。"
+    },
+    {
+      "id": "BillboardCollection",
+      "field": "params/options.modelMatrix/description",
+      "sourceHash": "sha256:a5078f4786ec172e54a6942dbcc18d139270c8bca1780fc2d06f5c4ede517187",
+      "text": "将每个广告牌从模型坐标变换到世界坐标的 4x4 矩阵。"
+    },
+    {
+      "id": "BillboardCollection",
+      "field": "params/options.scene/description",
+      "sourceHash": "sha256:441dbf9d9f7c0424bea124f488846565a6377d48317399795982cf60dfd6b906",
+      "text": "广告牌使用高度参考属性，或需要对地球进行深度测试时，必须传入场景。"
+    },
+    {
+      "id": "BillboardCollection",
+      "field": "params/options.show/description",
+      "sourceHash": "sha256:d71c9d061a2062c0ae3b7c0c08d56734fbe6e9dbfccef3e35bea42d3807aefb0",
+      "text": "决定是否显示集合中的广告牌。"
+    },
+    {
+      "id": "BillboardCollection",
+      "field": "params/options.threePointDepthTestDistance/description",
+      "sourceHash": "sha256:d9165d3988841b981e364b5448077c259be679c5561e91648d3f0644d830fa40",
+      "text": "三点深度测试的相机距离阈值；在该距离以内，{@link Billboard#heightReference} 为 {@link HeightReference.CLAMP_TO_GROUND} 或 {@link HeightReference.CLAMP_TO_TERRAIN} 的广告牌会对三个关键点进行深度测试，只要任一点可见，就显示整张广告牌。未指定时，默认值相对于 {@link Ellipsoid.default} 确定。"
+    },
+    {
+      "id": "BillboardCollection",
+      "field": "performance/0",
+      "sourceHash": "sha256:de857b332bd462d3aa45aef7dd6a3d0097a5229a01bba11f79444fa8095c08b6",
+      "text": "为获得最佳性能，建议使用少量各含大量广告牌的集合，而非大量只含少数广告牌的集合。按更新频率分组：静态广告牌放在一个集合，每帧变化的广告牌放在另一个集合，依此类推。"
+    },
+    {
+      "id": "BillboardCollection#add",
+      "field": "description",
+      "sourceHash": "sha256:9461476b9172634aca4fb687e791804301958d8d8e2704d41dfbbb007e776c87",
+      "text": "按指定初始属性创建广告牌并加入集合。返回新广告牌，便于后续修改或从集合移除。"
+    },
+    {
+      "id": "BillboardCollection#add",
+      "field": "params/options/description",
+      "sourceHash": "sha256:fb273f08f65d05df99d2b5a5836d045dfe4a8ac1f8c2757530b41a13561d6b7c",
+      "text": "描述广告牌属性的模板，参见示例 1。"
+    },
+    {
+      "id": "BillboardCollection#add",
+      "field": "performance/0",
+      "sourceHash": "sha256:6972ee0292b4a443d0f9e237551107c1abc93ea7cca2c3db31911a069e339bf8",
+      "text": "调用 <code>add</code> 的预期时间复杂度为常数，但会重写集合的顶点缓冲区，这是 <code>O(n)</code> 操作，并产生从 CPU 到 GPU 的传输开销。为获得最佳性能，应在调用 <code>update</code> 前尽可能批量添加广告牌。"
+    },
+    {
+      "id": "BillboardCollection#add",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:6c9dff48db43b6263a2164681f2a70f410bffee73ca2e063bf97161d3ee28576",
+      "text": "加入集合的广告牌。"
+    },
+    {
+      "id": "BillboardCollection#blendOption",
+      "field": "description",
+      "sourceHash": "sha256:0c1f104305855124f28b8452a80349c69c4a0609a0998d5626def1ed774af88c",
+      "text": "广告牌混合选项。默认同时渲染不透明和半透明广告牌。如果全部广告牌都完全不透明，或全部都为半透明，设为 BlendOption.OPAQUE 或 BlendOption.TRANSLUCENT 最多可使性能提高至两倍。"
+    },
+    {
+      "id": "BillboardCollection#coarseDepthTestDistance",
+      "field": "description",
+      "sourceHash": "sha256:7da8ba1ee9fa39e1ede6508286db5b9b294f6a72ec4544262136690fbce9886e",
+      "text": "粗略深度测试的相机距离阈值；超过该距离后，广告牌改为对地球椭球的近似表示进行深度测试，而非完整地球深度缓冲。设为 <code>0</code> 时，始终使用近似测试；设为 <code>Number.POSITIVE_INFINITY</code> 时，始终不使用近似测试。\n<br/><br/>\n此设置仅在广告牌的 {@link Billboard#disableDepthTestDistance} 允许深度测试时生效，即相机到广告牌的距离小于其 {@link Billboard#disableDepthTestDistance} 值时。"
+    },
+    {
+      "id": "BillboardCollection#contains",
+      "field": "description",
+      "sourceHash": "sha256:dc0f0af89f82159c7687e16c28dd482107d391598032d16996d0c99f1a6270a0",
+      "text": "检查集合是否包含指定广告牌。"
+    },
+    {
+      "id": "BillboardCollection#contains",
+      "field": "params/billboard/description",
+      "sourceHash": "sha256:897a10c7fd59fbb0204fcb1f75b08f24178ba6b0f9903c3d5703aa03825b5a9f",
+      "text": "要检查的广告牌。"
+    },
+    {
+      "id": "BillboardCollection#contains",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:e4cedb9cb24d68b56e46de69467bef4d7491288a217f08c67552cd1c6a332632",
+      "text": "集合包含此广告牌时为 true，否则为 false。"
+    },
+    {
+      "id": "BillboardCollection#debugShowBoundingVolume",
+      "field": "description",
+      "sourceHash": "sha256:aada12c696fc8726817165d04c2ff7f8bc646a5a40f35a419053259d53655a5a",
+      "text": "此属性仅供调试，不应在生产环境中使用，也未做性能优化。<p>绘制图元中每条绘制命令的包围球。</p>"
+    },
+    {
+      "id": "BillboardCollection#debugShowTextureAtlas",
+      "field": "description",
+      "sourceHash": "sha256:514780a40303c7a64fd75745fb5fee7cd949e71113b5b2bbf9c11b12a2876946",
+      "text": "此属性仅供调试，不适合生产环境，也未做性能优化。\n<p>\n将此 BillboardCollection 的纹理图集绘制为全屏四边形。\n</p>"
+    },
+    {
+      "id": "BillboardCollection#destroy",
+      "field": "description",
+      "sourceHash": "sha256:b385add820d9f47d540aad147f1cdf85f05e8c6cb81c3928a59c8fd5f7bd8d69",
+      "text": "销毁此对象持有的 WebGL 资源。显式销毁可确定地释放 WebGL 资源，而不依赖垃圾回收器回收此对象。<br /><br />对象销毁后不应再使用；调用除 <code>isDestroyed</code> 以外的任何函数都会抛出 {@link DeveloperError}。因此，应像示例中那样将返回值（<code>undefined</code>）赋给该对象变量。"
+    },
+    {
+      "id": "BillboardCollection#get",
+      "field": "description",
+      "sourceHash": "sha256:8ba3cbc8eb490977490fb86f8bd4c148014e9eff4511787b0038b23bd75fd08e",
+      "text": "返回集合中指定索引的广告牌。索引从零开始，随广告牌加入而增加。移除广告牌会使其后所有广告牌向前移动，改变它们的索引。此函数常与 {@link BillboardCollection#length} 一起用于遍历全部广告牌。"
+    },
+    {
+      "id": "BillboardCollection#get",
+      "field": "params/index/description",
+      "sourceHash": "sha256:b2e44e01276472408d18bc823badac346627320280a2867526a96b2a2eaec7c8",
+      "text": "广告牌从零开始的索引。"
+    },
+    {
+      "id": "BillboardCollection#get",
+      "field": "performance/0",
+      "sourceHash": "sha256:79b78cbb27bb9f42a63d62349169a8b7a4cfa72bc57c6e6dcbc16dbde98c1c7e",
+      "text": "预期为常数时间。如果已从集合移除广告牌，但尚未调用 {@link BillboardCollection#update}，则会隐式执行一次 <code>O(n)</code> 操作。"
+    },
+    {
+      "id": "BillboardCollection#get",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:f73a7ecd8edc476690891ad8b0e95b31bd3cdde21d6bb984d7e139f14a2d843b",
+      "text": "指定索引处的广告牌。"
+    },
+    {
+      "id": "BillboardCollection#isDestroyed",
+      "field": "description",
+      "sourceHash": "sha256:aea7b697937631c90ae3fc0ec55b81ba0ddc7abe4d6045848b2031f9bed60091",
+      "text": "若此对象已销毁，返回 true；否则返回 false。<br /><br />对象销毁后不应再使用；调用除 <code>isDestroyed</code> 以外的任何函数都会抛出 {@link DeveloperError}。"
+    },
+    {
+      "id": "BillboardCollection#length",
+      "field": "description",
+      "sourceHash": "sha256:8b5c84a27c160995b1103a59c3fd9bf0f8a6b53ff0eadca055f6bb212f319dd8",
+      "text": "返回集合中的广告牌数量，常与 {@link BillboardCollection#get} 一起用于遍历全部广告牌。"
+    },
+    {
+      "id": "BillboardCollection#modelMatrix",
+      "field": "description",
+      "sourceHash": "sha256:6451cb09482893917fb385a0f53d550fb424a59191bd056416efb564cb1242b2",
+      "text": "将集合中每个广告牌从模型坐标变换到世界坐标的 4x4 矩阵。为单位矩阵时，广告牌按世界坐标绘制，即地球的 WGS84 坐标。可提供其他变换矩阵来使用局部参考系，例如 {@link Transforms.eastNorthUpToFixedFrame} 的返回值。"
+    },
+    {
+      "id": "BillboardCollection#remove",
+      "field": "description",
+      "sourceHash": "sha256:e6ec83fb970b551c9cf7be94f168204f473f259b8937b480398665261a31971b",
+      "text": "从集合中移除广告牌。"
+    },
+    {
+      "id": "BillboardCollection#remove",
+      "field": "params/billboard/description",
+      "sourceHash": "sha256:6237b07efcd942d3b1b1ee235b437bb9a6f145134e705932ad37fcc3b6d7b08c",
+      "text": "要移除的广告牌。"
+    },
+    {
+      "id": "BillboardCollection#remove",
+      "field": "performance/0",
+      "sourceHash": "sha256:b8caf88298ce880781b71d9063e459101689b396592273c75198a4f206508d64",
+      "text": "调用 <code>remove</code> 的预期时间复杂度为常数，但会重写集合的顶点缓冲区，这是 <code>O(n)</code> 操作，并产生从 CPU 到 GPU 的传输开销。为获得最佳性能，应在调用 <code>update</code> 前尽可能批量移除。若只是临时隐藏广告牌，使用 {@link Billboard#show} 通常比移除后重新添加更高效。"
+    },
+    {
+      "id": "BillboardCollection#remove",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:def130e47b59e88663c5c50256e1a59eb3bd13e40908f846b570ca26a45eecb9",
+      "text": "已移除广告牌时为 <code>true</code>；集合中未找到广告牌时为 <code>false</code>。"
+    },
+    {
+      "id": "BillboardCollection#removeAll",
+      "field": "description",
+      "sourceHash": "sha256:c4d36432ecaf43a692f0a714b72fe9296707a96519932c6e764a7b38012d44ab",
+      "text": "从集合中移除全部广告牌。"
+    },
+    {
+      "id": "BillboardCollection#removeAll",
+      "field": "performance/0",
+      "sourceHash": "sha256:530d840cfc6863de3e0cb424d555e3be0d63f3f249c9597148ee5f1844ce1b1d",
+      "text": "<code>O(n)</code>。清空现有集合再添加新广告牌，比创建全新集合更高效。"
+    },
+    {
+      "id": "BillboardCollection#show",
+      "field": "description",
+      "sourceHash": "sha256:3fc44f6b7fcd27c360eb90514b0288726d7e23278647bd0065d60c92034cccfb",
+      "text": "决定是否显示集合中的广告牌。"
+    },
+    {
+      "id": "BillboardCollection#threePointDepthTestDistance",
+      "field": "description",
+      "sourceHash": "sha256:aabe59ff6114ad8aa7f355232a5b3f32a333caa5645980fee4301e4ec0366c2c",
+      "text": "三点深度测试的相机距离阈值；在该距离以内，{@link Billboard#heightReference} 为 {@link HeightReference.CLAMP_TO_GROUND} 或 {@link HeightReference.CLAMP_TO_TERRAIN} 的广告牌会对三个关键点进行深度测试，只要任一点可见，就显示整张广告牌。设为 <code>0</code> 时禁用此功能，广告牌位于地形后方的部分会被裁剪。\n<br/><br/>\n此设置仅在广告牌的 {@link Billboard#disableDepthTestDistance} 允许深度测试时生效，即相机到广告牌的距离小于其 {@link Billboard#disableDepthTestDistance} 值时。"
+    },
+    {
+      "id": "BillboardCollection#update",
+      "field": "description",
+      "sourceHash": "sha256:c5cc5fb756479265000e8f5e05ef6b5630397b1880c9ff3316fe45c545c6b022",
+      "text": "由 {@link Viewer} 或 {@link CesiumWidget} 在渲染场景时调用，以获取渲染此图元所需的绘制命令。<p>不要直接调用。此处记录此函数，仅为列出场景渲染期间可能向上传播的异常：</p>"
+    },
+    {
+      "id": "BillboardCollection#update",
+      "field": "exceptions/0/description",
+      "sourceHash": "sha256:bfc98794c017fa37944a0ab727b123b6bd2cfbbafcc5ec73b7577fc25981d701",
+      "text": "图集中必须存在指定 id 的图像。"
+    },
+    {
+      "id": "CloudCollection",
+      "field": "description",
+      "sourceHash": "sha256:e027c8c85470b2a181a54d66456c9789de4a29860f030a026c31163a9dca5422",
+      "text": "三维场景中可渲染的云集合。\n<br /><br />\n<div align='center'>\n<img src='Images/CumulusCloud.png' width='400' height='300' /><br />\n积云示例\n</div>\n<br /><br />\n通过 {@link CloudCollection#add} 和 {@link CloudCollection#remove} 添加和移除云。"
+    },
+    {
+      "id": "CloudCollection",
+      "field": "params/options.debugBillboards/description",
+      "sourceHash": "sha256:d75609730d3b7beb50f352566b4bb765361734bbafc12b6f96c82d2175a23515",
+      "text": "仅供调试。决定是否用不透明颜色渲染广告牌。"
+    },
+    {
+      "id": "CloudCollection",
+      "field": "params/options.debugEllipsoids/description",
+      "sourceHash": "sha256:c53f280ef61babceb58fbcc78eadb4a976b36007b00c2d693e3f631e1c08a28d",
+      "text": "仅供调试。决定是否将云渲染为不透明椭球。"
+    },
+    {
+      "id": "CloudCollection",
+      "field": "params/options.noiseDetail/description",
+      "sourceHash": "sha256:7c98f5cf791abcf50a8c9c68ceec37833ae2e65c7165f8d6ac490417c5dd7153",
+      "text": "噪声纹理的期望细节量。"
+    },
+    {
+      "id": "CloudCollection",
+      "field": "params/options.noiseOffset/description",
+      "sourceHash": "sha256:c26f33a3515ed54652fa18eaaf360fdcb7b7038f96584e0e42b1f91793ae148e",
+      "text": "噪声纹理中数据的期望平移。"
+    },
+    {
+      "id": "CloudCollection",
+      "field": "params/options.show/description",
+      "sourceHash": "sha256:60c413fe583caa90c5d1a5060daa136036a4e1713294e84467d67b16ce7f7277",
+      "text": "是否显示云。"
+    },
+    {
+      "id": "CloudCollection#add",
+      "field": "description",
+      "sourceHash": "sha256:6b2db335240df823665dce92f4476f5f5b634ede910d044577f9406e41de29e7",
+      "text": "按指定初始属性创建云并加入集合。返回新云，便于后续修改或从集合移除。"
+    },
+    {
+      "id": "CloudCollection#add",
+      "field": "params/options/description",
+      "sourceHash": "sha256:c87a4f57eaf131649979859078bc4a44cf8be3874cac9bcd0539bf2c149716b6",
+      "text": "描述云属性的模板，参见示例 1。"
+    },
+    {
+      "id": "CloudCollection#add",
+      "field": "performance/0",
+      "sourceHash": "sha256:f1cd27bc44c122e9523423021525cdffd4bd2ccfb7c2b32a2a0131d2e7c7a6ad",
+      "text": "调用 <code>add</code> 的预期时间复杂度为常数，但会重写集合的顶点缓冲区，这是 <code>O(n)</code> 操作，并产生从 CPU 到 GPU 的传输开销。为获得最佳性能，应在调用 <code>update</code> 前尽可能批量添加云。"
+    },
+    {
+      "id": "CloudCollection#add",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:5bfc4e8effa9aa92f23d3c0768574d77c56862a802704315b49b18d6ede2be95",
+      "text": "加入集合的云。"
+    },
+    {
+      "id": "CloudCollection#contains",
+      "field": "description",
+      "sourceHash": "sha256:7702b5fa44b603103c44f47a7a4e1b2f6f6e5b997084b104a124a423424553f6",
+      "text": "检查集合是否包含指定云。"
+    },
+    {
+      "id": "CloudCollection#contains",
+      "field": "params/cloud/description",
+      "sourceHash": "sha256:a96f30e044aaf589ca1622b02fc58a92bfad269a96b2cee23cc6674fecc7b836",
+      "text": "要检查的云。"
+    },
+    {
+      "id": "CloudCollection#contains",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:1a1f7cc0272cebcc0bdab75f35f2dab14a8dbe6a553d4e880f09d0a07e083361",
+      "text": "集合包含此云时为 true，否则为 false。"
+    },
+    {
+      "id": "CloudCollection#debugBillboards",
+      "field": "description",
+      "sourceHash": "sha256:2a80bfb1f371ad059b3e5b495f862d66b8fbe04584935e18831abfcef9559b79",
+      "text": "此属性仅供调试，不适合生产环境，也未做性能优化。\n<p>\n使用单一不透明颜色渲染广告牌，以便调试。\n</p>"
+    },
+    {
+      "id": "CloudCollection#debugEllipsoids",
+      "field": "description",
+      "sourceHash": "sha256:4938668b11b13cc8a4eeefbeeef1fe5d3b5e3c7b53bb20b6af1291740b5fe4b2",
+      "text": "此属性仅供调试，不适合生产环境，也未做性能优化。\n<p>\n将云绘制为不透明单色椭球。若 <code>debugBillboards</code> 也为 true，椭球绘制在广告牌上方。\n</p>"
+    },
+    {
+      "id": "CloudCollection#destroy",
+      "field": "description",
+      "sourceHash": "sha256:b385add820d9f47d540aad147f1cdf85f05e8c6cb81c3928a59c8fd5f7bd8d69",
+      "text": "销毁此对象持有的 WebGL 资源。显式销毁可确定地释放 WebGL 资源，而不依赖垃圾回收器回收此对象。<br /><br />对象销毁后不应再使用；调用除 <code>isDestroyed</code> 以外的任何函数都会抛出 {@link DeveloperError}。因此，应像示例中那样将返回值（<code>undefined</code>）赋给该对象变量。"
+    },
+    {
+      "id": "CloudCollection#get",
+      "field": "description",
+      "sourceHash": "sha256:82bd7e8ebcec501d765c69492440e4333e0122d30ecf8e410197061eaa56ef8f",
+      "text": "返回集合中指定索引的云。索引从零开始，随云加入而增加。移除云会使后续云向前移动，改变其索引。此函数常与 {@link CloudCollection#length} 一起用于遍历全部云。"
+    },
+    {
+      "id": "CloudCollection#get",
+      "field": "params/index/description",
+      "sourceHash": "sha256:ab23e009be4e203648be31ce52c2d5548a34bbdf6d38c2854d4e244ffe2918af",
+      "text": "云从零开始的索引。"
+    },
+    {
+      "id": "CloudCollection#get",
+      "field": "performance/0",
+      "sourceHash": "sha256:43d3f20b4a0d652382c620e27e72d4ab217204f9c5d11d37ec81f938752497f8",
+      "text": "预期为常数时间。如果已从集合移除云，但尚未调用 {@link CloudCollection#update}，则会隐式执行一次 <code>O(n)</code> 操作。"
+    },
+    {
+      "id": "CloudCollection#get",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:a3e8bfb5f0d937f5e4467dc2376ce8842669b9a18e6b6e78de8ed94dda14f897",
+      "text": "指定索引处的云。"
+    },
+    {
+      "id": "CloudCollection#isDestroyed",
+      "field": "description",
+      "sourceHash": "sha256:aea7b697937631c90ae3fc0ec55b81ba0ddc7abe4d6045848b2031f9bed60091",
+      "text": "若此对象已销毁，返回 true；否则返回 false。<br /><br />对象销毁后不应再使用；调用除 <code>isDestroyed</code> 以外的任何函数都会抛出 {@link DeveloperError}。"
+    },
+    {
+      "id": "CloudCollection#length",
+      "field": "description",
+      "sourceHash": "sha256:85d3aab076d5ec8353ce71733160c308180670739073163e234203a6d0e0eb80",
+      "text": "返回集合中的云数量。"
+    },
+    {
+      "id": "CloudCollection#noiseDetail",
+      "field": "description",
+      "sourceHash": "sha256:e883d3e6b4dcc30e5a9d6a206613433ebe030ae6508de3ab0113eb1c81dee6c1",
+      "text": "<p>\n控制渲染积云所用预计算噪声纹理的细节量。为使纹理可平铺，此值必须是 2 的幂。建议使用 <code>8.0</code> 至 <code>32.0</code>（包含端点）之间的 2 的幂，以获得最佳效果。\n</p>\n\n<div align='center'>\r<table border='0' cellpadding='5'><tr>\r<td align='center'>\r  <code>clouds.noiseDetail = 8.0;</code><br/>\r  <img src='Images/CloudCollection.noiseDetail8.png' width='250' height='158' />\r</td>\r<td align='center'>\r  <code>clouds.noiseDetail = 32.0;</code><br/>\r  <img src='Images/CloudCollection.noiseDetail32.png' width='250' height='158' />\r</td>\r</tr></table>\r</div>"
+    },
+    {
+      "id": "CloudCollection#noiseOffset",
+      "field": "description",
+      "sourceHash": "sha256:ff5981fcfe8d93f8047f71473cdf5c79e8343d6f37fade7fec0080658ece94ca",
+      "text": "<p>\n平移噪声纹理坐标以生成不同数据。默认噪声生成的云外观不理想时，可修改此属性。\n</p>\n\n<div align='center'>\r<table border='0' cellpadding='5'><tr>\r<td align='center'>\r  <code>default</code><br/>\r  <img src='Images/CloudCollection.noiseOffsetdefault.png' width='250' height='158' />\r</td>\r<td align='center'>\r  <code>clouds.noiseOffset = new Cesium.Cartesian3(10, 20, 10);</code><br/>\r  <img src='Images/CloudCollection.noiseOffsetx10y20z10.png' width='250' height='158' />\r</td>\r</tr></table>\r</div>"
+    },
+    {
+      "id": "CloudCollection#remove",
+      "field": "description",
+      "sourceHash": "sha256:ba689430ebe93ba342e8606a20a24a6417714c6c2a6dcf6d92952bff4aaa9e99",
+      "text": "从集合中移除云。"
+    },
+    {
+      "id": "CloudCollection#remove",
+      "field": "params/cloud/description",
+      "sourceHash": "sha256:5f6dcb4244f8435823013402dcb52ad9d3950b433e95b6ea1bbecf77e18def69",
+      "text": "要移除的云。"
+    },
+    {
+      "id": "CloudCollection#remove",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:6f2f59f7754b4d121d92ea0f52dd088ab54efda401ecbb16fd0b7c7db0adf3f0",
+      "text": "已移除云时为 <code>true</code>；集合中未找到云时为 <code>false</code>。"
+    },
+    {
+      "id": "CloudCollection#removeAll",
+      "field": "description",
+      "sourceHash": "sha256:593ff37c7e39b55cae2aa194d984182445e7c9b06f5b7f2d98001fc411faef15",
+      "text": "从集合中移除全部云。"
+    },
+    {
+      "id": "CloudCollection#removeAll",
+      "field": "performance/0",
+      "sourceHash": "sha256:4c333e901bca1394d589073143f6da8e1371c5ee16c7d645d575cdc5e4a866a0",
+      "text": "<code>O(n)</code>。清空现有集合再添加新云，比创建全新集合更高效。"
+    },
+    {
+      "id": "CloudCollection#show",
+      "field": "description",
+      "sourceHash": "sha256:3fc44f6b7fcd27c360eb90514b0288726d7e23278647bd0065d60c92034cccfb",
+      "text": "决定是否显示集合中的广告牌。"
+    },
+    {
+      "id": "CloudType.CUMULUS",
+      "field": "description",
+      "sourceHash": "sha256:ba019d7846eba2a11b029003f29a15ef5978ac569d0eadf8ae14fb87b51d51f6",
+      "text": "积云。"
+    },
+    {
+      "id": "CloudType.validate",
+      "field": "description",
+      "sourceHash": "sha256:df61f48d9f0086e87101d7bee758ecf4622bdfe9be2eb8e01c87d8dc3284470f",
+      "text": "验证给定云类型是否为有效的 {@link CloudType}。"
+    },
+    {
+      "id": "CloudType.validate",
+      "field": "params/cloudType/description",
+      "sourceHash": "sha256:ea6d3188e5e91e4283340137ad419a9967336ab329529f088c2853c644a87c94",
+      "text": "要验证的云类型。"
+    },
+    {
+      "id": "CloudType.validate",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:ebfa03e6f66198475124685f756f8bf96dc34c09ddf37a146fd204f723d45fe9",
+      "text": "云类型有效时为 <code>true</code>，否则为 <code>false</code>。"
+    },
+    {
+      "id": "CloudType",
+      "field": "description",
+      "sourceHash": "sha256:f547978f257879a6082bd7564a07fce1e3289b90ce84d6e4ff39fac7c462aa5b",
+      "text": "指定调用 {@link CloudCollection#add} 加入 {@link CloudCollection} 的云类型。"
+    },
+    {
+      "id": "CloudType",
+      "field": "properties/CUMULUS/description",
+      "sourceHash": "sha256:ba019d7846eba2a11b029003f29a15ef5978ac569d0eadf8ae14fb87b51d51f6",
+      "text": "积云。"
+    },
+    {
+      "id": "CumulusCloud",
+      "field": "description",
+      "sourceHash": "sha256:24bc42e06a1ed3526b67d0946ae2f03876072586d1496a15609d15b73717cdcc",
+      "text": "<div class=\"notice\">\n通过 {@link CloudCollection#add} 创建云并设置初始属性，通过 {@link CloudCollection#remove} 移除云。不要直接调用构造函数。\n</div>\n位于三维场景中的积云广告牌，通过 {@link CloudCollection} 创建和渲染。\n<br /><br />\n<div align='center'>\n<img src='Images/CumulusCloud.png' width='400' height='300' /><br />\n积云示例\n</div>"
+    },
+    {
+      "id": "CumulusCloud",
+      "field": "performance/0",
+      "sourceHash": "sha256:8632cf165dca46d75cec1957ef69f2e2e236c3e6bc622bddea8deb200773c33a",
+      "text": "与 {@link Billboard} 类似，读取属性（例如 {@link CumulusCloud#show}）为常数时间。属性赋值也是常数时间，但在调用 {@link CloudCollection#update} 时会产生从 CPU 到 GPU 的数据传输。无论修改多少个属性，每朵云的传输量相同。如果大部分云都需要更新，使用 {@link CloudCollection#removeAll} 清空集合并重新添加，可能比逐个修改更高效。"
+    },
+    {
+      "id": "CumulusCloud#brightness",
+      "field": "description",
+      "sourceHash": "sha256:c4da52d0cd670b9aea30e9637766e5011c57ad29d354d440fd20f396058e666a",
+      "text": "获取或设置云的亮度，可使云呈现更暗、更灰的外观。\r<br /><br />\r<div align='center'>\r<table border='0' cellpadding='5'><tr>\r<td align='center'><code>cloud.brightness = 1.0;</code><br/><img src='Images/CumulusCloud.brightness1.png' width='250' height='158' /></td>\r<td align='center'><code>cloud.brightness = 0.6;</code><br/><img src='Images/CumulusCloud.brightness0.6.png' width='250' height='158' /></td>\r<td align='center'><code>cloud.brightness = 0.0;</code><br/><img src='Images/CumulusCloud.brightness0.png' width='250' height='158' /></td>\r</tr></table>\r</div>"
+    },
+    {
+      "id": "CumulusCloud#color",
+      "field": "description",
+      "sourceHash": "sha256:02f1aa3c5bc55bd3a7a10ec2e8e84bfc9f1f84dfd1ec3108897a49b07e5dab48",
+      "text": "设置云的颜色。"
+    },
+    {
+      "id": "CumulusCloud#maximumSize",
+      "field": "description",
+      "sourceHash": "sha256:a6d2d0d81c7c13fbfc7d75390dffec62cfedc826e9507914c32de4d133b019bb",
+      "text": "<p>获取或设置广告牌内渲染积云的最大尺寸，定义云可出现的最大椭球体积。此属性限定的是云出现的边界，而不保证具体尺寸；改变它可能影响云形状。</p>\n<p>修改 <code>maximumSize</code> 的 z 值会显著改变外观，因为它会改变云的深度，进而改变塑造云形状的纹理采样位置。</p>\n<div align='center'>\n<table border='0' cellpadding='5'>\n<tr>\n  <td align='center'>\n    <code>cloud.maximumSize = new Cesium.Cartesian3(14, 9, 10);</code><br/>\n    <img src='Images/CumulusCloud.maximumSizex14y9z10.png' width='250' height='158' />\n  </td>\n  <td align='center'>\n    <code>cloud.maximumSize.x = 25;</code><br/>\n    <img src='Images/CumulusCloud.maximumSizex25.png' width='250' height='158' />\n  </td>\n</tr>\n<tr>\n  <td align='center'>\n    <code>cloud.maximumSize.y = 5;</code><br/>\n    <img src='Images/CumulusCloud.maximumSizey5.png' width='250' height='158' />\n  </td>\n  <td align='center'>\n    <code>cloud.maximumSize.z = 17;</code><br/>\n    <img src='Images/CumulusCloud.maximumSizez17.png' width='250' height='158' />\n  </td>\n</tr>\n</table>\n</div>\n\n<p>若需改变广告牌的实际尺寸，请修改云的 <code>scale</code> 属性。</p>"
+    },
+    {
+      "id": "CumulusCloud#position",
+      "field": "description",
+      "sourceHash": "sha256:d2f081041d0615232383621ccde9ba0e4e7dd4a1ee0d11ac0f91efce072b6ff8",
+      "text": "获取或设置积云的笛卡尔位置。"
+    },
+    {
+      "id": "CumulusCloud#scale",
+      "field": "description",
+      "sourceHash": "sha256:2aac1ec1b14a4392c8e6ad263e0c4bf11ea50c658538a60682b101431eb0411d",
+      "text": "<p>获取或设置积云广告牌的尺寸，单位为米。<code>scale</code> 会影响广告牌尺寸，但不会改变云本身的形态。</p>\n<div align='center'>\r<table border='0' cellpadding='5'><tr>\r<td align='center'>\r  <code>cloud.scale = new Cesium.Cartesian2(12, 8);</code><br/>\r  <img src='Images/CumulusCloud.scalex12y8.png' width='250' height='158' />\r</td>\r<td align='center'>\r  <code>cloud.scale = new Cesium.Cartesian2(24, 10);</code><br/>\r  <img src='Images/CumulusCloud.scalex24y10.png' width='250' height='158' />\r</td>\r</tr></table>\r</div>\r\r<p>若需改变云的形态，请修改其 <code>maximumSize</code> 和 <code>slice</code> 属性。</p>"
+    },
+    {
+      "id": "CumulusCloud#show",
+      "field": "description",
+      "sourceHash": "sha256:ce01d4491395173e10e7fad1154d79efcf1fa7a08197e3e7cc09c389776c6e4b",
+      "text": "决定是否显示积云。请使用此属性隐藏或显示，而不必从集合移除后重新添加。"
+    },
+    {
+      "id": "CumulusCloud#slice",
+      "field": "description",
+      "sourceHash": "sha256:ae105163bc7368483e367c0caada85baad77818f162892609f672c6c5a3bd1b1",
+      "text": "<p>获取或设置广告牌上渲染的云切片，即用于呈现云外观的具体截面。值为 0 到 1 时，根据云在 z 方向的最大尺寸，指定截面深入云内部的程度。</p>\r<div align='center'>\r<table border='0' cellpadding='5'><tr>\r<td align='center'><code>cloud.slice = 0.32;</code><br/><img src='Images/CumulusCloud.slice0.32.png' width='250' height='158' /></td>\r<td align='center'><code>cloud.slice = 0.5;</code><br/><img src='Images/CumulusCloud.slice0.5.png' width='250' height='158' /></td>\r<td align='center'><code>cloud.slice = 0.6;</code><br/><img src='Images/CumulusCloud.slice0.6.png' width='250' height='158' /></td>\r</tr></table>\r</div>\r\r<br />\r<p>受切片计算方式影响，小于 <code>0.2</code> 时可能使截面过小，露出椭球边缘；大于 <code>0.7</code> 时也会使云显得更小。应避免使用 <code>[0.1, 0.9]</code> 范围之外的值，因为其显示效果不理想。</p>\r\r<div align='center'>\r<table border='0' cellpadding='5'><tr>\r<td align='center'><code>cloud.slice = 0.08;</code><br/><img src='Images/CumulusCloud.slice0.08.png' width='250' height='158' /></td>\r<td align='center'><code>cloud.slice = 0.8;</code><br/><img src='Images/CumulusCloud.slice0.8.png' width='250' height='158' /></td>\r</tr></table>\r</div>\r\r<p>将 <code>slice</code> 设为负数时，不再渲染截面，而是渲染椭球的可见外表面。对 `maximumSize.z` 较小的云，这可能产生较好效果；较大的云则可能过度贴合椭球体积而变形。</p>\r\r<div align='center'>\r<table border='0' cellpadding='5'><tr>\r<td align='center'>\r <code>cloud.slice = -1.0;<br/>cloud.maximumSize.z = 18;</code><br/>\r <img src='Images/CumulusCloud.slice-1z18.png' width='250' height='158' />\r</td>\r<td align='center'>\r  <code>cloud.slice = -1.0;<br/>cloud.maximumSize.z = 30;</code><br/>\r  <img src='Images/CumulusCloud.slice-1z30.png' width='250' height='158' /></td>\r</tr></table>\r</div>"
+    },
+    {
+      "id": "Label.ConstructorOptions",
+      "field": "description",
+      "sourceHash": "sha256:6d958739315f3fc574dcd51d4fd73efa631435d4f1863e78022a16e94fbb0913",
+      "text": "Label 构造函数的初始化选项。"
+    },
+    {
+      "id": "Label.ConstructorOptions",
+      "field": "properties/backgroundColor/description",
+      "sourceHash": "sha256:57ba75fd8e1a7370996fd06f533501c5b164cc85b8f13e69c9daf40ea08fe004",
+      "text": "指定标签背景颜色的 {@link Color}。"
+    },
+    {
+      "id": "Label.ConstructorOptions",
+      "field": "properties/backgroundPadding/description",
+      "sourceHash": "sha256:11e1767042a1fad03b51e4e258d41e90413d77ad06395123fbb6bfad2583a817",
+      "text": "指定背景水平和垂直内边距的 {@link Cartesian2}，单位为像素。"
+    },
+    {
+      "id": "Label.ConstructorOptions",
+      "field": "properties/disableDepthTestDistance/description",
+      "sourceHash": "sha256:cee180f37db767287ef9d33124874a0d49a241d89d9fae551748785ebdc0d5dd",
+      "text": "禁用深度测试的相机距离阈值；超过该距离后禁用深度测试，例如用于避免被地形裁剪。"
+    },
+    {
+      "id": "Label.ConstructorOptions",
+      "field": "properties/distanceDisplayCondition/description",
+      "sourceHash": "sha256:0e07c8dfeb5843092d171abe429043c587eadd6e12e0893da182bee33690bd0b",
+      "text": "指定标签在距相机多远时显示的 {@link DistanceDisplayCondition}。"
+    },
+    {
+      "id": "Label.ConstructorOptions",
+      "field": "properties/eyeOffset/description",
+      "sourceHash": "sha256:c4406235d2a69a23f42bab499f4b1ada93564d3fa4491dfb1f232098e4b917a0",
+      "text": "在眼坐标中应用到标签的三维笛卡尔偏移，类型为 {@link Cartesian3}。"
+    },
+    {
+      "id": "Label.ConstructorOptions",
+      "field": "properties/fillColor/description",
+      "sourceHash": "sha256:941814bcc278211f14fc204ea8ada3ae2c03ea95723eebd42c56547be7af502b",
+      "text": "指定标签填充颜色的 {@link Color}。"
+    },
+    {
+      "id": "Label.ConstructorOptions",
+      "field": "properties/font/description",
+      "sourceHash": "sha256:3628a8663650218cc79dd100fd88b434b82b4b1ab354bd2a3ad3e581da3fe31f",
+      "text": "绘制标签所用字体的字符串，采用与 CSS 'font' 属性相同的语法。"
+    },
+    {
+      "id": "Label.ConstructorOptions",
+      "field": "properties/heightReference/description",
+      "sourceHash": "sha256:f05aa26901762c4d116f29dbe1547013a109d20048d3915444df1ba51402aa67",
+      "text": "指定标签高度参考的 {@link HeightReference}。"
+    },
+    {
+      "id": "Label.ConstructorOptions",
+      "field": "properties/horizontalOrigin/description",
+      "sourceHash": "sha256:55dc3d3c77cea76bcee1b24caf0476df5c7149340deb801f0485609d9db3b913",
+      "text": "指定标签水平原点的 {@link HorizontalOrigin}。"
+    },
+    {
+      "id": "Label.ConstructorOptions",
+      "field": "properties/id/description",
+      "sourceHash": "sha256:45cfc4e6fe10c30e86abf21c6ff48b4703394d51cc02b9375b8c2a2914d9b13e",
+      "text": "通过 {@link Scene#pick} 拾取标签时返回的用户自定义对象。"
+    },
+    {
+      "id": "Label.ConstructorOptions",
+      "field": "properties/outlineColor/description",
+      "sourceHash": "sha256:5a171a860218c13c21007384801e3621b4b09c246329fa5bdfe985d75b76ab5e",
+      "text": "指定标签轮廓颜色的 {@link Color}。"
+    },
+    {
+      "id": "Label.ConstructorOptions",
+      "field": "properties/outlineWidth/description",
+      "sourceHash": "sha256:f9bd45321b5ff49cfb79e7a46f1c4b8a4eac19c2037a7fad294637dd2303a5e7",
+      "text": "标签轮廓宽度。"
+    },
+    {
+      "id": "Label.ConstructorOptions",
+      "field": "properties/pixelOffset/description",
+      "sourceHash": "sha256:28c961f257056c9dd982419e77d7381f6d95edb8fa4e928afedd6781399c03a1",
+      "text": "指定相对于标签原点的屏幕空间像素偏移，类型为 {@link Cartesian2}。"
+    },
+    {
+      "id": "Label.ConstructorOptions",
+      "field": "properties/pixelOffsetScaleByDistance/description",
+      "sourceHash": "sha256:b6d0da079e2502eb46d8eacf2a40f52e7f8d92d58875774d710df0ee35ecf65a",
+      "text": "根据标签到相机的距离，指定近远距离像素偏移缩放属性的 {@link NearFarScalar}。"
+    },
+    {
+      "id": "Label.ConstructorOptions",
+      "field": "properties/position/description",
+      "sourceHash": "sha256:9985a0e07c30be79bced4d7ea212198520f3d0fb3fde4b9a6fe5685fcba6698d",
+      "text": "标签的笛卡尔位置。"
+    },
+    {
+      "id": "Label.ConstructorOptions",
+      "field": "properties/scale/description",
+      "sourceHash": "sha256:96495f0fc6025d38403d77c4f3b1a0144784909acf983534f0ae5fabb6321dd3",
+      "text": "与标签尺寸相乘的统一缩放值。"
+    },
+    {
+      "id": "Label.ConstructorOptions",
+      "field": "properties/scaleByDistance/description",
+      "sourceHash": "sha256:e49a0930e0dca4f576c6d597279476f662b911a2da18853bb54ec436321c11cf",
+      "text": "根据标签到相机的距离，指定近远距离缩放属性的 {@link NearFarScalar}。"
+    },
+    {
+      "id": "Label.ConstructorOptions",
+      "field": "properties/show/description",
+      "sourceHash": "sha256:d8383b1dfe42057171b6f4d18033f961e75101720e180f861eb6139db66d1aae",
+      "text": "决定是否显示此标签。"
+    },
+    {
+      "id": "Label.ConstructorOptions",
+      "field": "properties/showBackground/description",
+      "sourceHash": "sha256:60360e2ffb47f67b81bfd2e8b82a08efbc4f68170c425260b91faec29d1d7532",
+      "text": "决定是否显示标签后方的背景。"
+    },
+    {
+      "id": "Label.ConstructorOptions",
+      "field": "properties/style/description",
+      "sourceHash": "sha256:7ce3771ff2dddbcc211a41274152c5d91f19c67599b2f833e4158ba1e17ffa63",
+      "text": "指定标签样式的 {@link LabelStyle}。"
+    },
+    {
+      "id": "Label.ConstructorOptions",
+      "field": "properties/text/description",
+      "sourceHash": "sha256:71906bb76bc63ccc4cd095323b4a4a77f757c4dff12b5ed15a69bea895f0d0cc",
+      "text": "标签文字字符串。"
+    },
+    {
+      "id": "Label.ConstructorOptions",
+      "field": "properties/translucencyByDistance/description",
+      "sourceHash": "sha256:a9cb17cc1789ad69c7206403e1d7b08a2332b4352f41474efb322a2f6df3de83",
+      "text": "根据标签到相机的距离，指定近远距离半透明属性的 {@link NearFarScalar}。"
+    },
+    {
+      "id": "Label.ConstructorOptions",
+      "field": "properties/verticalOrigin/description",
+      "sourceHash": "sha256:3941e55739e08c33f29c625c3c2d05d1a4d6691f5e9049137eb0d5da318aecd7",
+      "text": "指定标签垂直原点的 {@link VerticalOrigin}。"
+    },
+    {
+      "id": "Label.enableRightToLeftDetection",
+      "field": "description",
+      "sourceHash": "sha256:7ced27c38120110d1363cda105a9d518dbaf263b48784a533218cd30f7642954",
+      "text": "决定是否运行从右向左书写语言的标签文字适配算法。"
+    },
+    {
+      "id": "Label",
+      "field": "description",
+      "sourceHash": "sha256:0444cb257c870227f8e282a1eb447dcc23ef684dbf3f103717362df72c94b033",
+      "text": "<div class=\"notice\">\n请调用 {@link LabelCollection#add} 创建标签，不要直接调用构造函数。\n</div>"
+    },
+    {
+      "id": "Label",
+      "field": "exceptions/0/description",
+      "sourceHash": "sha256:f6fd60fa63be09b7231db8b18e4cc8950e90ec2105efd05d28f9862cbe45c67a",
+      "text": "translucencyByDistance.far 必须大于 translucencyByDistance.near。"
+    },
+    {
+      "id": "Label",
+      "field": "exceptions/1/description",
+      "sourceHash": "sha256:fe5eff8e0463a7c5efa9f5f45046b550d3a0bb3b0cd073de8b880f164c9993b1",
+      "text": "pixelOffsetScaleByDistance.far 必须大于 pixelOffsetScaleByDistance.near。"
+    },
+    {
+      "id": "Label",
+      "field": "exceptions/2/description",
+      "sourceHash": "sha256:ddaf7d687784d98e9f1a7ee8ecb25a8ada3f31d3eb5ea128a4bd78d6ab486fc7",
+      "text": "distanceDisplayCondition.far 必须大于 distanceDisplayCondition.near。"
+    },
+    {
+      "id": "Label",
+      "field": "params/labelCollection/description",
+      "sourceHash": "sha256:bae5b59f90b9af1c8d832cf8fe78a151166822d6976609d120f11cd34ad42005",
+      "text": "LabelCollection 实例。"
+    },
+    {
+      "id": "Label#backgroundColor",
+      "field": "description",
+      "sourceHash": "sha256:7c2da41856e4da375c3bc9ddbd4785c2ca1f25511b3d7d12ef6f0c09b100a628",
+      "text": "获取或设置标签的背景颜色。"
+    },
+    {
+      "id": "Label#backgroundPadding",
+      "field": "description",
+      "sourceHash": "sha256:9dc5e11373f8ee30d771ab93036048d5223fd221394e920509eb6c54edb5d04c",
+      "text": "获取或设置标签背景的内边距，单位为像素。<code>x</code> 控制水平内边距，<code>y</code> 控制垂直内边距。"
+    },
+    {
+      "id": "Label#computeScreenSpacePosition",
+      "field": "description",
+      "sourceHash": "sha256:2699210d6a5d1275c110f07f4bb47d9b45dcf02cbfb46bd2edf4a7f30c061c42",
+      "text": "计算标签原点的屏幕空间位置，包含眼坐标偏移和像素偏移。屏幕空间原点位于画布左上角；<code>x</code> 从左向右增加，<code>y</code> 从上向下增加。"
+    },
+    {
+      "id": "Label#computeScreenSpacePosition",
+      "field": "params/scene/description",
+      "sourceHash": "sha256:b52b3b142307d28b9c3a4e04fe2d0e8fa5595c41c2b9850330da6bb78c9c039d",
+      "text": "标签所在的场景。"
+    },
+    {
+      "id": "Label#computeScreenSpacePosition",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:665f6a996ef5ef39519e9833166677a0164e47c02c7079c2841902edf63944f6",
+      "text": "标签的屏幕空间位置。"
+    },
+    {
+      "id": "Label#disableDepthTestDistance",
+      "field": "description",
+      "sourceHash": "sha256:506d21e5c5e86837233267e59fb148277b6f01054b810f03d2fbf1f3aaa6a1b6",
+      "text": "获取或设置禁用深度测试的相机距离阈值；超过该距离后禁用深度测试，例如用于避免被地形裁剪。设为 <code>undefined</code> 或 <code>0</code> 时，始终执行深度测试；设为 Number.<code>POSITIVE_INFINITY</code> 时，始终不执行深度测试。"
+    },
+    {
+      "id": "Label#distanceDisplayCondition",
+      "field": "description",
+      "sourceHash": "sha256:ab79e929eddefa057dd63e50900192111e4ff3d965640a7e079c2733fecba684",
+      "text": "获取或设置距离显示条件，规定标签在距相机多远时显示。"
+    },
+    {
+      "id": "Label#equals",
+      "field": "description",
+      "sourceHash": "sha256:438eeaa4ea816493c98a3f208e7edc87205af259cebca5e2eaead06773197564",
+      "text": "判断此标签是否与另一个标签相等。全部属性相等时，标签相等；不同集合中的标签也可能相等。"
+    },
+    {
+      "id": "Label#equals",
+      "field": "params/other/description",
+      "sourceHash": "sha256:8432ad9472c56a5e781f2cb7f5c427c6ed9d7746d2019ebc1580d9761b98f9cd",
+      "text": "用于比较是否相等的标签。"
+    },
+    {
+      "id": "Label#equals",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:220fd29e3d7edce0ba3d71afe7fb536629ded125025d10fe8a44464f9b1fe925",
+      "text": "标签相等时为 <code>true</code>，否则为 <code>false</code>。"
+    },
+    {
+      "id": "Label#eyeOffset",
+      "field": "description",
+      "sourceHash": "sha256:75f2bd92bc84511ec794a350774aa760b21938df1fe1aac899ac36c012e0e283",
+      "text": "获取或设置在眼坐标中应用到标签的三维笛卡尔偏移。这里的眼坐标为左手坐标系，<code>x</code> 向观察者右侧，<code>y</code> 向上，<code>z</code> 指向屏幕内部。其尺度与世界和模型坐标相同，通常为米。\n<br /><br />\n眼坐标偏移常用于排列位于同一位置的多个标签或对象，例如将标签放在对应三维模型上方。\n<br /><br />\n下图中标签位于地心，但通过眼坐标偏移，无论视角或地球朝向如何，它都出现在地球上方。\n<br /><br />\n<div align='center'>\r<table border='0' cellpadding='5'><tr>\r<td align='center'><img src='Images/Billboard.setEyeOffset.one.png' width='250' height='188' /></td>\r<td align='center'><img src='Images/Billboard.setEyeOffset.two.png' width='250' height='188' /></td>\r</tr></table>\r<code>l.eyeOffset = new Cartesian3(0.0, 8000000.0, 0.0);</code><br /><br />\r</div>"
+    },
+    {
+      "id": "Label#fillColor",
+      "field": "description",
+      "sourceHash": "sha256:64a33a142954de2d9c306ce3550c46a825cb3677e6d4d5024162ee2fd20af7b7",
+      "text": "获取或设置标签的填充颜色。"
+    },
+    {
+      "id": "Label#font",
+      "field": "description",
+      "sourceHash": "sha256:05a6af422931185ca18cd4a55e538332e7f4151f0166a1a1198c175f2101bbcb",
+      "text": "获取或设置绘制标签的字体，采用与 CSS 'font' 属性相同的语法。"
+    },
+    {
+      "id": "Label#heightReference",
+      "field": "description",
+      "sourceHash": "sha256:2f868e01f0e473fe67fc728ea4405a5a5067ae890653fbc2b83c233a2cc16f0f",
+      "text": "获取或设置广告牌的高度参考。"
+    },
+    {
+      "id": "Label#horizontalOrigin",
+      "field": "description",
+      "sourceHash": "sha256:437df8ae439075608a6d1feda1d48ac63311fd2fbc0a1e191aca454c2d086db7",
+      "text": "获取或设置标签的水平原点，决定标签位于锚点左侧、居中还是右侧。\n<br /><br />\n<div align='center'>\n<img src='Images/Billboard.setHorizontalOrigin.png' width='648' height='196' /><br />\n</div>"
+    },
+    {
+      "id": "Label#id",
+      "field": "description",
+      "sourceHash": "sha256:888c648ac2c707d0ca29cab3bbb3f0d3aadfa4dd3d76db0b8efa36fe4e877c96",
+      "text": "获取或设置拾取标签时返回的用户自定义值。"
+    },
+    {
+      "id": "Label#isDestroyed",
+      "field": "description",
+      "sourceHash": "sha256:aea7b697937631c90ae3fc0ec55b81ba0ddc7abe4d6045848b2031f9bed60091",
+      "text": "若此对象已销毁，返回 true；否则返回 false。<br /><br />对象销毁后不应再使用；调用除 <code>isDestroyed</code> 以外的任何函数都会抛出 {@link DeveloperError}。"
+    },
+    {
+      "id": "Label#outlineColor",
+      "field": "description",
+      "sourceHash": "sha256:6afc025bf55f8e88c08e0fc8eda404e8337cbfe49ed9d5bf03cd6c2eb4223c94",
+      "text": "获取或设置标签的轮廓颜色。"
+    },
+    {
+      "id": "Label#outlineWidth",
+      "field": "description",
+      "sourceHash": "sha256:7110e26b9596c507f4496431e53328c41397a45eda1d404723a2d1ccaf2d8af8",
+      "text": "获取或设置标签的轮廓宽度。"
+    },
+    {
+      "id": "Label#pixelOffset",
+      "field": "description",
+      "sourceHash": "sha256:b5b38fd8acf997b1688069ba68edd0c1cba214ef18f31bbb11974fa68f5d2d3d",
+      "text": "获取或设置标签相对于原点的屏幕空间像素偏移，常用于排列位于同一位置的多个标签和广告牌，例如图像与文字。屏幕空间原点位于画布左上角；<code>x</code> 从左向右增加，<code>y</code> 从上向下增加。\r<br /><br />\r<div align='center'>\r<table border='0' cellpadding='5'><tr>\r<td align='center'><code>default</code><br/><img src='Images/Label.setPixelOffset.default.png' width='250' height='188' /></td>\r<td align='center'><code>l.pixeloffset = new Cartesian2(25, 75);</code><br/><img src='Images/Label.setPixelOffset.x50y-25.png' width='250' height='188' /></td>\r</tr></table>\r黄色点表示标签原点。\r</div>"
+    },
+    {
+      "id": "Label#pixelOffsetScaleByDistance",
+      "field": "description",
+      "sourceHash": "sha256:fd15cca2efa9d945f1118238d3789927be320747d2a0c3f9169fc1728c4c95ae",
+      "text": "获取或设置根据标签到相机距离变化的近远距离像素偏移缩放属性。当相机距离处于指定范围内时，像素偏移缩放值在 {@link NearFarScalar#nearValue} 与 {@link NearFarScalar#farValue} 之间变化，距离上下界由 {@link NearFarScalar#near} 和 {@link NearFarScalar#far} 指定。超出范围时，缩放值保持为最近端点值。为 undefined 时禁用 pixelOffsetScaleByDistance。"
+    },
+    {
+      "id": "Label#position",
+      "field": "description",
+      "sourceHash": "sha256:0391669c540bb3bcc1ff14e99b126de271a1e20b00a5eb2d6a8b9d7b08e0658f",
+      "text": "获取或设置标签的笛卡尔位置。"
+    },
+    {
+      "id": "Label#scale",
+      "field": "description",
+      "sourceHash": "sha256:7b191914e543b282d1746845b9e14d241e16b38dcd0ea21125b9de13442ee34c",
+      "text": "获取或设置与标签像素尺寸相乘的统一缩放值。为 <code>1.0</code> 时尺寸不变，大于 <code>1.0</code> 时放大，正值小于 <code>1.0</code> 时缩小。\n<br /><br />\n较大的缩放值可能使标签出现像素化。若需放大文字并保持清晰，应通过 {@link Label#font} 使用更大的字号。\n<br /><br />\n<div align='center'>\r<img src='Images/Label.setScale.png' width='400' height='300' /><br/>\r上图从左到右的缩放值分别为 <code>0.5</code>、<code>1.0</code> 和 <code>2.0</code>。\r</div>"
+    },
+    {
+      "id": "Label#scaleByDistance",
+      "field": "description",
+      "sourceHash": "sha256:ac38840c229c040a39587858068a6832e8e58b6146c983865b2eb2a2310ae272",
+      "text": "获取或设置根据标签到相机距离变化的近远距离缩放属性。当相机距离处于指定范围内时，缩放值在 {@link NearFarScalar#nearValue} 与 {@link NearFarScalar#farValue} 之间插值，距离上下界由 {@link NearFarScalar#near} 和 {@link NearFarScalar#far} 指定。超出范围时，缩放值保持为最近端点值。为 undefined 时禁用 scaleByDistance。"
+    },
+    {
+      "id": "Label#show",
+      "field": "description",
+      "sourceHash": "sha256:db3de6e6e757cd432479936bc28924dde4dc2530810089aa6c91128e70cc9a3b",
+      "text": "决定是否显示标签。请使用此属性隐藏或显示，而不必从集合移除后重新添加。"
+    },
+    {
+      "id": "Label#showBackground",
+      "field": "description",
+      "sourceHash": "sha256:60360e2ffb47f67b81bfd2e8b82a08efbc4f68170c425260b91faec29d1d7532",
+      "text": "决定是否显示标签后方的背景。"
+    },
+    {
+      "id": "Label#style",
+      "field": "description",
+      "sourceHash": "sha256:8bb7e55de7862b4099b8be8d9aa63cbf02b00a736e20094d69c0aa0c6b465c81",
+      "text": "获取或设置标签样式。"
+    },
+    {
+      "id": "Label#text",
+      "field": "description",
+      "sourceHash": "sha256:c6c1819355645c4993472a9eec959df6871f082b49e1f2ac4379e47d5c163c60",
+      "text": "获取或设置标签文字。"
+    },
+    {
+      "id": "Label#totalScale",
+      "field": "description",
+      "sourceHash": "sha256:5924f2c76050aab42f290d69b6e5de4b3feca252efd32c765433072df8fc88ee",
+      "text": "获取标签的总缩放值，即标签 scale 乘以所需字体尺寸相对于生成字形尺寸的比例。"
+    },
+    {
+      "id": "Label#translucencyByDistance",
+      "field": "description",
+      "sourceHash": "sha256:9c1992fba1e04d04650c956ea5945312c3b2eaeb0a66bbe20b1867fb48fd3f5b",
+      "text": "获取或设置根据标签到相机距离变化的近远距离半透明属性。当相机距离处于指定范围内时，半透明值在 {@link NearFarScalar#nearValue} 与 {@link NearFarScalar#farValue} 之间插值，距离上下界由 {@link NearFarScalar#near} 和 {@link NearFarScalar#far} 指定。超出范围时，半透明值保持为最近端点值。为 undefined 时禁用 translucencyByDistance。"
+    },
+    {
+      "id": "Label#verticalOrigin",
+      "field": "description",
+      "sourceHash": "sha256:ae9e424c20a7e821f65d4ca98e7e86e43b24a87abfa99a2198c71e1f52911020",
+      "text": "获取或设置标签的垂直原点，决定标签位于锚点上方、下方还是居中。\n<br /><br />\n<div align='center'>\n<img src='Images/Billboard.setVerticalOrigin.png' width='695' height='175' /><br />\n</div>"
+    },
+    {
+      "id": "LabelCollection",
+      "field": "description",
+      "sourceHash": "sha256:181b8596f9355d1861c9849b55920e7dc6b9bfaf74081a34073ecdf7ee7501e9",
+      "text": "可渲染的标签集合。标签是位于三维场景中、始终对齐视口的文字，每个标签可使用不同字体、颜色和缩放等属性。\n<br /><br />\n<div align='center'>\n<img src='Images/Label.png' width='400' height='300' /><br />\n标签示例\n</div>\n<br /><br />\n通过 {@link LabelCollection#add} 和 {@link LabelCollection#remove} 添加和移除标签。"
+    },
+    {
+      "id": "LabelCollection",
+      "field": "params/options.blendOption/description",
+      "sourceHash": "sha256:a9c245baea009141b7ea1976f13f721b79110c7fadeefaed345e42e4c00ed802",
+      "text": "标签混合选项。默认同时渲染不透明和半透明标签。如果全部标签都完全不透明，或全部都为半透明，设为 BlendOption.OPAQUE 或 BlendOption.TRANSLUCENT 最多可使性能提高至两倍。"
+    },
+    {
+      "id": "LabelCollection",
+      "field": "params/options.coarseDepthTestDistance/description",
+      "sourceHash": "sha256:205c7238973a442c5f13605f4b9d4dc95176b85843fa1bffb4edb7ac0e0e1714",
+      "text": "粗略深度测试的相机距离阈值；超过该距离后，标签改为对地球椭球的近似表示进行深度测试，而非完整地球深度缓冲。未指定时，默认值相对于 {@link Ellipsoid.default} 确定。"
+    },
+    {
+      "id": "LabelCollection",
+      "field": "params/options.debugShowBoundingVolume/description",
+      "sourceHash": "sha256:e994479c583ef7aab0de212c8ac6776e4d7c20d409ee8ee4300116517d5fe8d6",
+      "text": "仅供调试。决定是否显示此图元各命令的包围球。"
+    },
+    {
+      "id": "LabelCollection",
+      "field": "params/options.modelMatrix/description",
+      "sourceHash": "sha256:b121216012740360f4071866cc9ff7266fed06656dc17b79cf32c8b52604e6ef",
+      "text": "将每个标签从模型坐标变换到世界坐标的 4x4 矩阵。"
+    },
+    {
+      "id": "LabelCollection",
+      "field": "params/options.scene/description",
+      "sourceHash": "sha256:878be1511ccdd87255869f5139a71e3c272ad87fee9ae30a42d781e8d949eecc",
+      "text": "标签使用高度参考属性，或需要对地球进行深度测试时，必须传入场景。"
+    },
+    {
+      "id": "LabelCollection",
+      "field": "params/options.show/description",
+      "sourceHash": "sha256:cafe4f5b5924566aec1637364fcb8b297173bd643e87c3b384cf707544d41ed2",
+      "text": "决定是否显示集合中的标签。"
+    },
+    {
+      "id": "LabelCollection",
+      "field": "params/options.threePointDepthTestDistance/description",
+      "sourceHash": "sha256:15c5afae22a2649aaf7afa9eed5cf56478e4c9ec2779f74de97aa7278bb71306",
+      "text": "三点深度测试的相机距离阈值；在该距离以内，{@link Label#heightReference} 为 {@link HeightReference.CLAMP_TO_GROUND} 或 {@link HeightReference.CLAMP_TO_TERRAIN} 的标签会对三个关键点进行深度测试，只要任一点可见，就显示整个标签。未指定时，默认值相对于 {@link Ellipsoid.default} 确定。"
+    },
+    {
+      "id": "LabelCollection",
+      "field": "performance/0",
+      "sourceHash": "sha256:13ba7433b56cfe773b418627e450adde9f63fb5a7bc0b0bdb874c8bc1d91d51c",
+      "text": "为获得最佳性能，建议使用少量各含大量标签的集合，而非大量只含少数标签的集合。避免将每帧变化的标签与静态标签混在一个集合中；应分别为静态和动态标签创建一个或多个集合。"
+    },
+    {
+      "id": "LabelCollection#add",
+      "field": "description",
+      "sourceHash": "sha256:2816f89536eaf59b2dced50ae4e65f5005ffa72c625a400643757bd8ccadf6e4",
+      "text": "按指定初始属性创建标签并加入集合。返回新标签，便于后续修改或从集合移除。"
+    },
+    {
+      "id": "LabelCollection#add",
+      "field": "params/options/description",
+      "sourceHash": "sha256:0487cce45fbec10255744338ce0150405ca77a8a74e224642a58338c0a7ace99",
+      "text": "描述标签属性的模板，参见示例 1。"
+    },
+    {
+      "id": "LabelCollection#add",
+      "field": "performance/0",
+      "sourceHash": "sha256:c449687dbf59ce0d91a94dd32dae01198ce666fc09856126a1a3045e43ff7136",
+      "text": "调用 <code>add</code> 的预期时间复杂度为常数，但会重写集合的顶点缓冲区，这是 <code>O(n)</code> 操作，并产生从 CPU 到 GPU 的传输开销。为获得最佳性能，应在调用 <code>update</code> 前尽可能批量添加标签。"
+    },
+    {
+      "id": "LabelCollection#add",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:92006af2209ce685f5837c841747256e623e4d6189f6621af33512adbd740463",
+      "text": "加入集合的标签。"
+    },
+    {
+      "id": "LabelCollection#blendOption",
+      "field": "description",
+      "sourceHash": "sha256:ccb32967fbf46a23100c3c9416c726aebb6fbe33bc299775ee7c1b18b8b9b322",
+      "text": "标签混合选项。默认同时渲染不透明和半透明标签。如果全部标签都完全不透明，或全部都为半透明，设为 BlendOption.OPAQUE 或 BlendOption.TRANSLUCENT 最多可使性能提高至两倍。"
+    },
+    {
+      "id": "LabelCollection#coarseDepthTestDistance",
+      "field": "description",
+      "sourceHash": "sha256:968b24cac2d305a5c652e72e1ff4d78e26f9fdfde0e0b3a0d50ce17daa13322e",
+      "text": "粗略深度测试的相机距离阈值；超过该距离后，标签改为对地球椭球的近似表示进行深度测试，而非完整地球深度缓冲。设为 <code>0</code> 时，始终使用近似测试；设为 <code>Number.POSITIVE_INFINITY</code> 时，始终不使用近似测试。\n<br/><br/>\n此设置仅在标签的 {@link Label#disableDepthTestDistance} 允许深度测试时生效，即相机到标签的距离小于其 {@link Label#disableDepthTestDistance} 值时。"
+    },
+    {
+      "id": "LabelCollection#contains",
+      "field": "description",
+      "sourceHash": "sha256:8b937b368314041b4a32317d0f07c6e40d71b02ef528b35c18433769ce551f39",
+      "text": "检查集合是否包含指定标签。"
+    },
+    {
+      "id": "LabelCollection#contains",
+      "field": "params/label/description",
+      "sourceHash": "sha256:5c37343241e6fe7fcf3c8e7418d7236b6eeafd85b95a70fad6dfd473c02a3bab",
+      "text": "要检查的标签。"
+    },
+    {
+      "id": "LabelCollection#contains",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:acb5d881848e524d0c208f6a3ccfc72e846b96adf3d8a8fbb93e787965eff4b8",
+      "text": "集合包含此标签时为 true，否则为 false。"
+    },
+    {
+      "id": "LabelCollection#debugShowBoundingVolume",
+      "field": "description",
+      "sourceHash": "sha256:aada12c696fc8726817165d04c2ff7f8bc646a5a40f35a419053259d53655a5a",
+      "text": "此属性仅供调试，不应在生产环境中使用，也未做性能优化。<p>绘制图元中每条绘制命令的包围球。</p>"
+    },
+    {
+      "id": "LabelCollection#destroy",
+      "field": "description",
+      "sourceHash": "sha256:b385add820d9f47d540aad147f1cdf85f05e8c6cb81c3928a59c8fd5f7bd8d69",
+      "text": "销毁此对象持有的 WebGL 资源。显式销毁可确定地释放 WebGL 资源，而不依赖垃圾回收器回收此对象。<br /><br />对象销毁后不应再使用；调用除 <code>isDestroyed</code> 以外的任何函数都会抛出 {@link DeveloperError}。因此，应像示例中那样将返回值（<code>undefined</code>）赋给该对象变量。"
+    },
+    {
+      "id": "LabelCollection#get",
+      "field": "description",
+      "sourceHash": "sha256:669c00afec06f3d767ac79195bbfe4182f0810209bb70427162a2275bf228c39",
+      "text": "返回集合中指定索引的标签。索引从零开始，随标签加入而增加。移除标签会使后续标签向前移动，改变其索引。此函数常与 {@link LabelCollection#length} 一起用于遍历全部标签。"
+    },
+    {
+      "id": "LabelCollection#get",
+      "field": "params/index/description",
+      "sourceHash": "sha256:b2e44e01276472408d18bc823badac346627320280a2867526a96b2a2eaec7c8",
+      "text": "广告牌从零开始的索引。"
+    },
+    {
+      "id": "LabelCollection#get",
+      "field": "performance/0",
+      "sourceHash": "sha256:fbe1be78cb8fab0a89ad654c350c53259ed6eb570284e0f36b8aa13a264333b0",
+      "text": "预期为常数时间。如果已从集合移除标签，但尚未调用 {@link Scene#render}，则会隐式执行一次 <code>O(n)</code> 操作。"
+    },
+    {
+      "id": "LabelCollection#get",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:27d63a9d76fff27078fd7fc39f16643d68f0824c0c98cd6ab5601dd1447687bc",
+      "text": "指定索引处的标签。"
+    },
+    {
+      "id": "LabelCollection#isDestroyed",
+      "field": "description",
+      "sourceHash": "sha256:aea7b697937631c90ae3fc0ec55b81ba0ddc7abe4d6045848b2031f9bed60091",
+      "text": "若此对象已销毁，返回 true；否则返回 false。<br /><br />对象销毁后不应再使用；调用除 <code>isDestroyed</code> 以外的任何函数都会抛出 {@link DeveloperError}。"
+    },
+    {
+      "id": "LabelCollection#length",
+      "field": "description",
+      "sourceHash": "sha256:b98c6909f77dae6e02791d294787a38931d25b1f2502a74cf3aba06619789867",
+      "text": "返回集合中的标签数量，常与 {@link LabelCollection#get} 一起用于遍历全部标签。"
+    },
+    {
+      "id": "LabelCollection#modelMatrix",
+      "field": "description",
+      "sourceHash": "sha256:6dccb136d28c9fccc1e0adc25ec0987d2382dbec3de0da278603a34010d35270",
+      "text": "将集合中每个标签从模型坐标变换到世界坐标的 4x4 矩阵。为单位矩阵时，标签按世界坐标绘制，即地球的 WGS84 坐标。可提供其他变换矩阵来使用局部参考系，例如 {@link Transforms.eastNorthUpToFixedFrame} 的返回值。"
+    },
+    {
+      "id": "LabelCollection#remove",
+      "field": "description",
+      "sourceHash": "sha256:46b7c9a5b490d87629e82bdf14bf9f69d759705ef0d89f7d1c8d30e3c0415b97",
+      "text": "从集合中移除标签。移除后标签不再可用。"
+    },
+    {
+      "id": "LabelCollection#remove",
+      "field": "params/label/description",
+      "sourceHash": "sha256:353fb9c8a27fd0cb57a5f9fee2305ef067ad3c0aaa642497fca1fbbf6be5dabb",
+      "text": "要移除的标签。"
+    },
+    {
+      "id": "LabelCollection#remove",
+      "field": "performance/0",
+      "sourceHash": "sha256:b5442e070a27bb31c955e9054d5bd3b5612bc72f9c47887c022af3f550a5390f",
+      "text": "调用 <code>remove</code> 的预期时间复杂度为常数，但会重写集合的顶点缓冲区，这是 <code>O(n)</code> 操作，并产生从 CPU 到 GPU 的传输开销。为获得最佳性能，应在调用 <code>update</code> 前尽可能批量移除。若只是临时隐藏标签，使用 {@link Label#show} 通常比移除后重新添加更高效。"
+    },
+    {
+      "id": "LabelCollection#remove",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:bc9db15ad74e82c64f33117510b80df4a2687af0b166de851df76d38b9a8a35d",
+      "text": "已移除标签时为 <code>true</code>；集合中未找到标签时为 <code>false</code>。"
+    },
+    {
+      "id": "LabelCollection#removeAll",
+      "field": "description",
+      "sourceHash": "sha256:23e873f25de7d66bfb8566bd2218b469f50acb8b95aa92d7fc95efc91830e7ae",
+      "text": "从集合中移除全部标签。"
+    },
+    {
+      "id": "LabelCollection#removeAll",
+      "field": "performance/0",
+      "sourceHash": "sha256:175b19b2b58d41255e8e269ed264ea9ea1c0ea0ca2878823585e2eb55ab7d376",
+      "text": "<code>O(n)</code>。清空现有集合再添加新标签，比创建全新集合更高效。"
+    },
+    {
+      "id": "LabelCollection#show",
+      "field": "description",
+      "sourceHash": "sha256:77fc198bdec47350c625582d17eadceeda9bcfd49a9586a7521d729fcbfafb94",
+      "text": "决定是否显示集合中的标签。"
+    },
+    {
+      "id": "LabelCollection#threePointDepthTestDistance",
+      "field": "description",
+      "sourceHash": "sha256:105fcaa22fc2989c9385ce6572a14a41ae9005e5666388c94841f44ccc8bc8e4",
+      "text": "三点深度测试的相机距离阈值；在该距离以内，{@link Label#heightReference} 为 {@link HeightReference.CLAMP_TO_GROUND} 或 {@link HeightReference.CLAMP_TO_TERRAIN} 的标签会对三个关键点进行深度测试，只要任一点可见，就显示整个标签。设为 <code>0</code> 时禁用此功能，标签位于地形后方的部分会被裁剪。\n<br/><br/>\n此设置仅在标签的 {@link Label#disableDepthTestDistance} 允许深度测试时生效，即相机到标签的距离小于其 {@link Label#disableDepthTestDistance} 值时。"
+    },
+    {
+      "id": "LabelStyle.FILL_AND_OUTLINE",
+      "field": "description",
+      "sourceHash": "sha256:2ac523b9e9e000f9160be86d4bb81f0a5b9b9ce4a6e9ff813eab02b3255906e0",
+      "text": "填充标签文字并绘制轮廓。"
+    },
+    {
+      "id": "LabelStyle.FILL",
+      "field": "description",
+      "sourceHash": "sha256:808c29cadc125585e1037dd728edd702a3218ff30c789bb0dc20d67e50a927f0",
+      "text": "填充标签文字，不绘制轮廓。"
+    },
+    {
+      "id": "LabelStyle.OUTLINE",
+      "field": "description",
+      "sourceHash": "sha256:47003e632cc24827bd95d5b35abda57995f87a6179d0a859b2d05b2d883cf82e",
+      "text": "绘制标签文字轮廓，不填充。"
+    },
+    {
+      "id": "LabelStyle",
+      "field": "description",
+      "sourceHash": "sha256:d540ca18fb622b8f397fbd48e69937919388de0ac57ca2b4633d06e2319fe29c",
+      "text": "描述标签的绘制方式。"
+    },
+    {
+      "id": "LabelStyle",
+      "field": "properties/FILL_AND_OUTLINE/description",
+      "sourceHash": "sha256:2ac523b9e9e000f9160be86d4bb81f0a5b9b9ce4a6e9ff813eab02b3255906e0",
+      "text": "填充标签文字并绘制轮廓。"
+    },
+    {
+      "id": "LabelStyle",
+      "field": "properties/FILL/description",
+      "sourceHash": "sha256:808c29cadc125585e1037dd728edd702a3218ff30c789bb0dc20d67e50a927f0",
+      "text": "填充标签文字，不绘制轮廓。"
+    },
+    {
+      "id": "LabelStyle",
+      "field": "properties/OUTLINE/description",
+      "sourceHash": "sha256:47003e632cc24827bd95d5b35abda57995f87a6179d0a859b2d05b2d883cf82e",
+      "text": "绘制标签文字轮廓，不填充。"
+    },
+    {
+      "id": "PointPrimitive",
+      "field": "description",
+      "sourceHash": "sha256:c427dfca63d650fe1eab67eb722d2aad4669867eefdb9472e3b93a3d0f44a95d",
+      "text": "<div class=\"notice\">\n请调用 {@link PointPrimitiveCollection#add} 创建点并设置初始属性，不要直接调用构造函数。\n</div>\n位于三维场景中的图形点，通过 {@link PointPrimitiveCollection} 创建和渲染。"
+    },
+    {
+      "id": "PointPrimitive",
+      "field": "exceptions/0/description",
+      "sourceHash": "sha256:ba6dc3f70f9ae6f028bdfdfdda6a26a540c903f8b16680ea89f2af37e133f9e7",
+      "text": "scaleByDistance.far 必须大于 scaleByDistance.near。"
+    },
+    {
+      "id": "PointPrimitive",
+      "field": "exceptions/1/description",
+      "sourceHash": "sha256:f6fd60fa63be09b7231db8b18e4cc8950e90ec2105efd05d28f9862cbe45c67a",
+      "text": "translucencyByDistance.far 必须大于 translucencyByDistance.near。"
+    },
+    {
+      "id": "PointPrimitive",
+      "field": "exceptions/2/description",
+      "sourceHash": "sha256:ddaf7d687784d98e9f1a7ee8ecb25a8ada3f31d3eb5ea128a4bd78d6ab486fc7",
+      "text": "distanceDisplayCondition.far 必须大于 distanceDisplayCondition.near。"
+    },
+    {
+      "id": "PointPrimitive",
+      "field": "performance/0",
+      "sourceHash": "sha256:84d7872824f0c7b816cac483b5f8e4875eff9e663cfa7357e3039720bea72dbe",
+      "text": "读取属性（例如 {@link PointPrimitive#show}）的时间复杂度为常数。属性赋值也是常数时间，但在调用 {@link PointPrimitiveCollection#update} 时会产生从 CPU 到 GPU 的数据传输。无论修改多少个属性，每个点的传输量相同。如果集合中的大部分点都需要更新，使用 {@link PointPrimitiveCollection#removeAll} 清空集合并重新添加，可能比逐个修改更高效。"
+    },
+    {
+      "id": "PointPrimitive#color",
+      "field": "description",
+      "sourceHash": "sha256:ad6807bd0aa85fa56ba2cf62ff5d1dabea1040e508c2d839b09d610dcc225544",
+      "text": "获取或设置点的内部颜色。如示例 1 所示，红、绿、蓝和 alpha 值分别由 <code>value</code> 的 <code>red</code>、<code>green</code>、<code>blue</code> 和 <code>alpha</code> 属性指定。各分量范围为 <code>0.0</code>（无强度）到 <code>1.0</code>（完整强度）。"
+    },
+    {
+      "id": "PointPrimitive#computeScreenSpacePosition",
+      "field": "description",
+      "sourceHash": "sha256:8e8015acd814b4155ea0ff99bbcfa89070c68a52fad0ba37dd4c948a88b00671",
+      "text": "计算点原点的屏幕空间位置。屏幕空间原点位于画布左上角；<code>x</code> 从左向右增加，<code>y</code> 从上向下增加。"
+    },
+    {
+      "id": "PointPrimitive#computeScreenSpacePosition",
+      "field": "exceptions/0/description",
+      "sourceHash": "sha256:f02d5f22076e09a9dbc0ad9b8dc32acf2e89ebb8b2f7425e77f730f7d22014dd",
+      "text": "PointPrimitive 必须位于集合中。"
+    },
+    {
+      "id": "PointPrimitive#computeScreenSpacePosition",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:b78b5f4dbdac40948f9303ba5ea3a1097b51ff7079e4035bb95783ed6359626a",
+      "text": "点的屏幕空间位置。"
+    },
+    {
+      "id": "PointPrimitive#disableDepthTestDistance",
+      "field": "description",
+      "sourceHash": "sha256:aa0b32cdff61ca417310b582153d07f621329cae49321b3a182985f71f7fe5cf",
+      "text": "获取或设置禁用深度测试的相机距离阈值，例如用于避免被地形裁剪。设为零时始终执行深度测试；设为 Number.POSITIVE_INFINITY 时始终不执行深度测试。"
+    },
+    {
+      "id": "PointPrimitive#distanceDisplayCondition",
+      "field": "description",
+      "sourceHash": "sha256:5477149e7b7bfe5e79e4208538a7de4cb8fab0640d17dde74816c2802a615ea9",
+      "text": "获取或设置距离显示条件，规定点在距相机多远时显示。"
+    },
+    {
+      "id": "PointPrimitive#equals",
+      "field": "description",
+      "sourceHash": "sha256:a77e4b97ecb81cb2abef2c151f7fd1102821ab719da74c06e93895db02495c06",
+      "text": "判断此点是否与另一个点相等。全部属性相等时，两点相等；不同集合中的点也可能相等。"
+    },
+    {
+      "id": "PointPrimitive#equals",
+      "field": "params/other/description",
+      "sourceHash": "sha256:bb34389e40954d8116e26e56ad14eb309fe9eb7f8e4767853f2391e7c1442cdd",
+      "text": "用于比较是否相等的点。"
+    },
+    {
+      "id": "PointPrimitive#equals",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:83bf240cc0590d5f01f5219691e16b60a813ee2f8175d8f916abb8279db4ac57",
+      "text": "两点相等时为 <code>true</code>，否则为 <code>false</code>。"
+    },
+    {
+      "id": "PointPrimitive#id",
+      "field": "description",
+      "sourceHash": "sha256:186c0719e6b321c9b45fd507cddecd436ef27e7b1acf28aa374fd67d29d47cac",
+      "text": "获取或设置拾取点时返回的用户自定义值。"
+    },
+    {
+      "id": "PointPrimitive#outlineColor",
+      "field": "description",
+      "sourceHash": "sha256:8bba48d83ff21e6bbefc80851c201c215e28e35738c5d43a6234a05b6100520c",
+      "text": "获取或设置点的轮廓颜色。"
+    },
+    {
+      "id": "PointPrimitive#outlineWidth",
+      "field": "description",
+      "sourceHash": "sha256:1d752dce1c45abd8c1ff24beeda9b7ad7ba8f49931690136c5641006ae2998e6",
+      "text": "获取或设置轮廓宽度，单位为像素。此宽度会叠加到 pixelSize 上，增大点的总尺寸。"
+    },
+    {
+      "id": "PointPrimitive#pixelSize",
+      "field": "description",
+      "sourceHash": "sha256:c697b56de7417384cc6523da32793bf43957f50cab2c873f717dd456e60b34a8",
+      "text": "获取或设置点内部的尺寸，单位为像素。"
+    },
+    {
+      "id": "PointPrimitive#position",
+      "field": "description",
+      "sourceHash": "sha256:b67370385d228098bbd2c83e1039e15f03f949558e07a5497c663d5d3a0481ae",
+      "text": "获取或设置点的笛卡尔位置。"
+    },
+    {
+      "id": "PointPrimitive#scaleByDistance",
+      "field": "description",
+      "sourceHash": "sha256:c998c571623813eaa9ab9e740c5d66587468065a8e861a6ffc275db1d050f721",
+      "text": "获取或设置根据点到相机距离变化的近远距离缩放属性。当相机距离处于指定范围内时，缩放值在 {@link NearFarScalar#nearValue} 与 {@link NearFarScalar#farValue} 之间插值，距离上下界由 {@link NearFarScalar#near} 和 {@link NearFarScalar#far} 指定。超出范围时，缩放值保持为最近端点值。该缩放值会乘以 pixelSize 和 outlineWidth，影响点的总尺寸。为 undefined 时禁用 scaleByDistance。"
+    },
+    {
+      "id": "PointPrimitive#show",
+      "field": "description",
+      "sourceHash": "sha256:d64d99f5e05113a7f54565deaccbbd0dca6be7113608667004befc9745f4151a",
+      "text": "决定是否显示点。请使用此属性隐藏或显示，而不必从集合移除后重新添加。"
+    },
+    {
+      "id": "PointPrimitive#splitDirection",
+      "field": "description",
+      "sourceHash": "sha256:2db0eb82f26611eb6ab2d6e8bd4b3477c033f5700de30897ff7ed081993fdec3",
+      "text": "应用到此点的 {@link SplitDirection} 分屏方向。"
+    },
+    {
+      "id": "PointPrimitive#translucencyByDistance",
+      "field": "description",
+      "sourceHash": "sha256:ce2239adb41c5482cd794a0bd74be83119f266fdd3534df0a8d23c6c2b25a14d",
+      "text": "获取或设置根据点到相机距离变化的近远距离半透明属性。当相机距离处于指定范围内时，半透明值在 {@link NearFarScalar#nearValue} 与 {@link NearFarScalar#farValue} 之间插值，距离上下界由 {@link NearFarScalar#near} 和 {@link NearFarScalar#far} 指定。超出范围时，半透明值保持为最近端点值。为 undefined 时禁用 translucencyByDistance。"
+    },
+    {
+      "id": "PointPrimitiveCollection",
+      "field": "description",
+      "sourceHash": "sha256:1da443f8ff3d514f24de7b3f1352a36cca5ecb08b282c4cbfe02fbf1f1cce792",
+      "text": "可渲染的点集合。\n<br /><br />\n通过 {@link PointPrimitiveCollection#add} 和 {@link PointPrimitiveCollection#remove} 添加和移除点。"
+    },
+    {
+      "id": "PointPrimitiveCollection",
+      "field": "params/options.blendOption/description",
+      "sourceHash": "sha256:68fbd4e0f616a2cbd7540c6dfcde2b96fd281dc28b754442cc21ceaf3d4bcfb7",
+      "text": "点的混合选项。默认同时渲染不透明和半透明点。如果全部点都完全不透明，或全部都为半透明，设为 BlendOption.OPAQUE 或 BlendOption.TRANSLUCENT 最多可使性能提高至两倍。"
+    },
+    {
+      "id": "PointPrimitiveCollection",
+      "field": "params/options.debugShowBoundingVolume/description",
+      "sourceHash": "sha256:e994479c583ef7aab0de212c8ac6776e4d7c20d409ee8ee4300116517d5fe8d6",
+      "text": "仅供调试。决定是否显示此图元各命令的包围球。"
+    },
+    {
+      "id": "PointPrimitiveCollection",
+      "field": "params/options.modelMatrix/description",
+      "sourceHash": "sha256:4f23f04f1f93361abad871e0bda0363b0db4113b02e55425511ce3dc1979b2de",
+      "text": "将每个点从模型坐标变换到世界坐标的 4x4 矩阵。"
+    },
+    {
+      "id": "PointPrimitiveCollection",
+      "field": "params/options.show/description",
+      "sourceHash": "sha256:fbdbc6a0f03f1b521fe82d1c9ffea90536768933c2ac938993b66b563ba3c69d",
+      "text": "决定是否显示集合中的图元。"
+    },
+    {
+      "id": "PointPrimitiveCollection",
+      "field": "performance/0",
+      "sourceHash": "sha256:196ccdc8496884c0484bd87dbe915367e36a66291ae79f5767f30f43828e9b3e",
+      "text": "为获得最佳性能，建议使用少量各含大量点的集合，而非大量只含少数点的集合。按更新频率分组：静态点放在一个集合，每帧变化的点放在另一个集合，依此类推。"
+    },
+    {
+      "id": "PointPrimitiveCollection#add",
+      "field": "description",
+      "sourceHash": "sha256:234a4bd689c59e3761306f75602b769f2178596a8d637fff3a8d71161a317375",
+      "text": "按指定初始属性创建点并加入集合。返回新点，便于后续修改或从集合移除。"
+    },
+    {
+      "id": "PointPrimitiveCollection#add",
+      "field": "params/options/description",
+      "sourceHash": "sha256:992a0b073b597409b63e8bffdd2d06abad5d33c6a7e41f2c386c9ffa8a794b3c",
+      "text": "描述点属性的模板，参见示例 1。"
+    },
+    {
+      "id": "PointPrimitiveCollection#add",
+      "field": "performance/0",
+      "sourceHash": "sha256:0fce79a3454e67c40691299e2466d6c9ab693f5a51d2f2837dddd46a7db44d33",
+      "text": "调用 <code>add</code> 的预期时间复杂度为常数，但会重写集合的顶点缓冲区，这是 <code>O(n)</code> 操作，并产生从 CPU 到 GPU 的传输开销。为获得最佳性能，应在调用 <code>update</code> 前尽可能批量添加点。"
+    },
+    {
+      "id": "PointPrimitiveCollection#add",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:2ac7ae5a3f155033cfcf35eebe965c3d8fd782a41e9b0300667330b7e297388c",
+      "text": "加入集合的点。"
+    },
+    {
+      "id": "PointPrimitiveCollection#blendOption",
+      "field": "description",
+      "sourceHash": "sha256:e3d4855f53c1d4441628b3707c605a84ae6d960038aa01765269911789139433",
+      "text": "点的混合选项。默认同时渲染不透明和半透明点。如果全部点都完全不透明，或全部都为半透明，设为 BlendOption.OPAQUE 或 BlendOption.TRANSLUCENT 最多可使性能提高至两倍。"
+    },
+    {
+      "id": "PointPrimitiveCollection#contains",
+      "field": "description",
+      "sourceHash": "sha256:27f4b09a547ee1536b1c30cf86c05c108369fb05b772fc53ca352f1d6620f57e",
+      "text": "检查集合是否包含指定点。"
+    },
+    {
+      "id": "PointPrimitiveCollection#contains",
+      "field": "params/pointPrimitive/description",
+      "sourceHash": "sha256:50a9f5a5cd29749f26c0b62872f838da13062cdf16fe68ebdaf898e3373ea077",
+      "text": "要检查的点。"
+    },
+    {
+      "id": "PointPrimitiveCollection#contains",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:b479c7ace4f7d626624c747ef167fa4a317f1829ab3448c6c68266024cd9d5ba",
+      "text": "集合包含此点时为 true，否则为 false。"
+    },
+    {
+      "id": "PointPrimitiveCollection#debugShowBoundingVolume",
+      "field": "description",
+      "sourceHash": "sha256:aada12c696fc8726817165d04c2ff7f8bc646a5a40f35a419053259d53655a5a",
+      "text": "此属性仅供调试，不应在生产环境中使用，也未做性能优化。<p>绘制图元中每条绘制命令的包围球。</p>"
+    },
+    {
+      "id": "PointPrimitiveCollection#destroy",
+      "field": "description",
+      "sourceHash": "sha256:b385add820d9f47d540aad147f1cdf85f05e8c6cb81c3928a59c8fd5f7bd8d69",
+      "text": "销毁此对象持有的 WebGL 资源。显式销毁可确定地释放 WebGL 资源，而不依赖垃圾回收器回收此对象。<br /><br />对象销毁后不应再使用；调用除 <code>isDestroyed</code> 以外的任何函数都会抛出 {@link DeveloperError}。因此，应像示例中那样将返回值（<code>undefined</code>）赋给该对象变量。"
+    },
+    {
+      "id": "PointPrimitiveCollection#get",
+      "field": "description",
+      "sourceHash": "sha256:2e7a3c1508e6f499d6396e36a8185420dee092b06693328d621221c6b62950fa",
+      "text": "返回集合中指定索引的点。索引从零开始，随点加入而增加。移除点会使后续点向前移动，改变其索引。此函数常与 {@link PointPrimitiveCollection#length} 一起用于遍历全部点。"
+    },
+    {
+      "id": "PointPrimitiveCollection#get",
+      "field": "params/index/description",
+      "sourceHash": "sha256:a120c22804e6efaac3ff83c31f6631eb0edfa9d411ec1c26228fa6be7c9202f1",
+      "text": "点从零开始的索引。"
+    },
+    {
+      "id": "PointPrimitiveCollection#get",
+      "field": "performance/0",
+      "sourceHash": "sha256:97dce129bf611c6ed12de6ab8deb6df4e4484577d85c443c8c37efc10fa59696",
+      "text": "预期为常数时间。如果已从集合移除点，但尚未调用 {@link PointPrimitiveCollection#update}，则会隐式执行一次 <code>O(n)</code> 操作。"
+    },
+    {
+      "id": "PointPrimitiveCollection#get",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:7d3e5a244d38bcd28005b4b0538df34bc3a984e99fb487f03b97fe472f7595f8",
+      "text": "指定索引处的点。"
+    },
+    {
+      "id": "PointPrimitiveCollection#isDestroyed",
+      "field": "description",
+      "sourceHash": "sha256:aea7b697937631c90ae3fc0ec55b81ba0ddc7abe4d6045848b2031f9bed60091",
+      "text": "若此对象已销毁，返回 true；否则返回 false。<br /><br />对象销毁后不应再使用；调用除 <code>isDestroyed</code> 以外的任何函数都会抛出 {@link DeveloperError}。"
+    },
+    {
+      "id": "PointPrimitiveCollection#length",
+      "field": "description",
+      "sourceHash": "sha256:52ba96badb86ce107e2e54086b5885dad07c4de941e9b835e28dd64cbee533e6",
+      "text": "返回集合中的点数量，常与 {@link PointPrimitiveCollection#get} 一起用于遍历全部点。"
+    },
+    {
+      "id": "PointPrimitiveCollection#modelMatrix",
+      "field": "description",
+      "sourceHash": "sha256:3b3f2e8939a7282d5d4d03e610f72b7f40282813282891fdac8319945d0f61f8",
+      "text": "将集合中每个点从模型坐标变换到世界坐标的 4x4 矩阵。为单位矩阵时，点按世界坐标绘制，即地球的 WGS84 坐标。可提供其他变换矩阵来使用局部参考系，例如 {@link Transforms.eastNorthUpToFixedFrame} 的返回值。"
+    },
+    {
+      "id": "PointPrimitiveCollection#remove",
+      "field": "description",
+      "sourceHash": "sha256:814204489c22a927b6e59cec655dc0bd175c9a2493245b8ad0c1b580fdb70fa6",
+      "text": "从集合中移除点。"
+    },
+    {
+      "id": "PointPrimitiveCollection#remove",
+      "field": "params/pointPrimitive/description",
+      "sourceHash": "sha256:b8da60ce5a1c9febf9dce9cd01b097f16b08586c16a5e1d387abf7b31a44563d",
+      "text": "要移除的点。"
+    },
+    {
+      "id": "PointPrimitiveCollection#remove",
+      "field": "performance/0",
+      "sourceHash": "sha256:a61a70e8892d75c841e334007e615f82961598f3d191480bd5d8f46ce9ecae66",
+      "text": "调用 <code>remove</code> 的预期时间复杂度为常数，但会重写集合的顶点缓冲区，这是 <code>O(n)</code> 操作，并产生从 CPU 到 GPU 的传输开销。为获得最佳性能，应在调用 <code>update</code> 前尽可能批量移除。若只是临时隐藏点，使用 {@link PointPrimitive#show} 通常比移除后重新添加更高效。"
+    },
+    {
+      "id": "PointPrimitiveCollection#remove",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:2c2015da0531680a6f8e60a4669b8379b4ba1f816c50430181f236983147afdc",
+      "text": "已移除点时为 <code>true</code>；集合中未找到点时为 <code>false</code>。"
+    },
+    {
+      "id": "PointPrimitiveCollection#removeAll",
+      "field": "description",
+      "sourceHash": "sha256:803a2ce34615dc2fd40bee046f68095c9521c7f9250cd7747dc799b5e36fd16a",
+      "text": "从集合中移除全部点。"
+    },
+    {
+      "id": "PointPrimitiveCollection#removeAll",
+      "field": "performance/0",
+      "sourceHash": "sha256:739e3dd9000f89ec7adcfe4d2daced8bceb1cc5d36db0420902aa22e1c972104",
+      "text": "<code>O(n)</code>。清空现有集合再添加新点，比创建全新集合更高效。"
+    },
+    {
+      "id": "PointPrimitiveCollection#show",
+      "field": "description",
+      "sourceHash": "sha256:3647cf81e0e7096802170b04c1c8b4ad40bbb866adbb8fbb807d55ce8dee17aa",
+      "text": "决定是否显示此集合中的图元。"
+    },
+    {
+      "id": "Polyline",
+      "field": "description",
+      "sourceHash": "sha256:769fdba1b2e80ba35bf62224e9fdfb532b2d512a73004e87fd8492dd67c7afb8",
+      "text": "<div class=\"notice\">\n请调用 {@link PolylineCollection#add} 创建，不要直接调用构造函数。\n</div>\n\n可渲染的折线。"
+    },
+    {
+      "id": "Polyline#distanceDisplayCondition",
+      "field": "description",
+      "sourceHash": "sha256:275a5f470514dc32feca3a75d4fef9c5df5b5ac9e29bd7f6355c3c1ac0425c2a",
+      "text": "获取或设置距离显示条件，规定折线在距相机多远时显示。"
+    },
+    {
+      "id": "Polyline#id",
+      "field": "description",
+      "sourceHash": "sha256:6d25f6e1f7c829c4427a86a4abb747e78ad5895d23a77c278bbd550573101e02",
+      "text": "获取或设置拾取折线时返回的用户自定义值。"
+    },
+    {
+      "id": "Polyline#loop",
+      "field": "description",
+      "sourceHash": "sha256:6a4e64ef6a237b335f4bd5ab6288d2138a3bd9a12b8381c2866d8d7c51937d58",
+      "text": "获取或设置是否在折线首尾位置之间添加线段。"
+    },
+    {
+      "id": "Polyline#material",
+      "field": "description",
+      "sourceHash": "sha256:2a3dc57541836509aad04ceb7f7aea831f9cfac6d41113de8612ec66010ae597",
+      "text": "获取或设置折线的表面外观，可以使用内置 {@link Material} 对象，也可以使用通过 {@link https://github.com/CesiumGS/cesium/wiki/Fabric|Fabric} 描述的自定义材质。"
+    },
+    {
+      "id": "Polyline#positions",
+      "field": "description",
+      "sourceHash": "sha256:a2699b489f4b038bb88da40bcc00c69e0944879f03810ef18bb857fa527bbcd1",
+      "text": "获取或设置折线的位置数组。"
+    },
+    {
+      "id": "Polyline#show",
+      "field": "description",
+      "sourceHash": "sha256:c88db8ba24060a2139909cb4bc41bffdee9551fe86a995cdf810610ac047e4c8",
+      "text": "决定是否显示折线。请使用此属性隐藏或显示，而不必从集合移除后重新添加。"
+    },
+    {
+      "id": "Polyline#width",
+      "field": "description",
+      "sourceHash": "sha256:4203bc47bee1cdb72bfa67d7f1187eebea6f32706fa58bd911d860b9e46b7b53",
+      "text": "获取或设置折线宽度。"
+    },
+    {
+      "id": "PolylineCollection",
+      "field": "description",
+      "sourceHash": "sha256:8f36c375eeb7c00b7565e6cdd8712b34e9c2404a20ba0cecb2e765a7ffc9fea3",
+      "text": "可渲染的折线集合。\n<br /><br />\n<div align=\"center\">\n<img src=\"Images/Polyline.png\" width=\"400\" height=\"300\" /><br />\n折线示例\n</div>\n<br /><br />\n通过 {@link PolylineCollection#add} 和 {@link PolylineCollection#remove} 添加和移除折线。"
+    },
+    {
+      "id": "PolylineCollection",
+      "field": "params/options.debugShowBoundingVolume/description",
+      "sourceHash": "sha256:e994479c583ef7aab0de212c8ac6776e4d7c20d409ee8ee4300116517d5fe8d6",
+      "text": "仅供调试。决定是否显示此图元各命令的包围球。"
+    },
+    {
+      "id": "PolylineCollection",
+      "field": "params/options.modelMatrix/description",
+      "sourceHash": "sha256:69971043e911d5d8b99c25f877547e63be29478727ad0a24d4d4f3e67843e7ab",
+      "text": "将每条折线从模型坐标变换到世界坐标的 4x4 矩阵。"
+    },
+    {
+      "id": "PolylineCollection",
+      "field": "params/options.show/description",
+      "sourceHash": "sha256:f6cccf8004ec5325e64901edf910b21b3579dd2f6f944ec2b7b8c564741fb528",
+      "text": "决定是否显示集合中的折线。"
+    },
+    {
+      "id": "PolylineCollection",
+      "field": "performance/0",
+      "sourceHash": "sha256:64079dc00d73cff30acbd4f7a904ee004c4fc5bd4692428609ec1d793124e205",
+      "text": "为获得最佳性能，建议使用少量各含大量折线的集合，而非大量只含少数折线的集合。按更新频率分组：静态折线放在一个集合，每帧变化的折线放在另一个集合，依此类推。"
+    },
+    {
+      "id": "PolylineCollection#add",
+      "field": "description",
+      "sourceHash": "sha256:a8f3b9474d517c9338a6175e062c1cef7c9bb085dce85e897c1f7f683486c764",
+      "text": "按指定初始属性创建折线并加入集合。返回新折线，便于后续修改或从集合移除。"
+    },
+    {
+      "id": "PolylineCollection#add",
+      "field": "params/options/description",
+      "sourceHash": "sha256:d4821b5b7d5e2957ab2ea4d1244835553ce04c2de51cc927c2dc7404ed5e3115",
+      "text": "描述折线属性的模板，参见示例 1。"
+    },
+    {
+      "id": "PolylineCollection#add",
+      "field": "performance/0",
+      "sourceHash": "sha256:cc4b8a60e22b548770d60c8fd66705f59bb209db6fe18f647c0b365707a3d46a",
+      "text": "调用 <code>add</code> 后，在 {@link PolylineCollection#update} 时会重写集合的顶点缓冲区，这是 <code>O(n)</code> 操作，并产生从 CPU 到 GPU 的传输开销。为获得最佳性能，应在调用 <code>update</code> 前尽可能批量添加折线。"
+    },
+    {
+      "id": "PolylineCollection#add",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:5b11108a99eb5b47dd091518479581bc78d39fc6a3d89b2e7a99ac4ff60fd5ac",
+      "text": "加入集合的折线。"
+    },
+    {
+      "id": "PolylineCollection#contains",
+      "field": "description",
+      "sourceHash": "sha256:704905d9715a7c150f8896863a6a710608b65b487b391ff4830a38faa5fa237c",
+      "text": "判断集合是否包含指定折线。"
+    },
+    {
+      "id": "PolylineCollection#contains",
+      "field": "params/polyline/description",
+      "sourceHash": "sha256:fb716e07c4a3a2ee66f3443a3013d790d4aa14b389edd6c09c19c301d505285c",
+      "text": "要检查的折线。"
+    },
+    {
+      "id": "PolylineCollection#contains",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:d5961bc103cfd3c4a99a039f95da157da6daadac5070ed80601d8bacfd881889",
+      "text": "集合包含此折线时为 true，否则为 false。"
+    },
+    {
+      "id": "PolylineCollection#debugShowBoundingVolume",
+      "field": "description",
+      "sourceHash": "sha256:aada12c696fc8726817165d04c2ff7f8bc646a5a40f35a419053259d53655a5a",
+      "text": "此属性仅供调试，不应在生产环境中使用，也未做性能优化。<p>绘制图元中每条绘制命令的包围球。</p>"
+    },
+    {
+      "id": "PolylineCollection#destroy",
+      "field": "description",
+      "sourceHash": "sha256:b385add820d9f47d540aad147f1cdf85f05e8c6cb81c3928a59c8fd5f7bd8d69",
+      "text": "销毁此对象持有的 WebGL 资源。显式销毁可确定地释放 WebGL 资源，而不依赖垃圾回收器回收此对象。<br /><br />对象销毁后不应再使用；调用除 <code>isDestroyed</code> 以外的任何函数都会抛出 {@link DeveloperError}。因此，应像示例中那样将返回值（<code>undefined</code>）赋给该对象变量。"
+    },
+    {
+      "id": "PolylineCollection#get",
+      "field": "description",
+      "sourceHash": "sha256:fd0638ee6e61c29f0fd905c027f1a0bfa3ec297b924c21a93023b00857375626",
+      "text": "返回集合中指定索引的折线。索引从零开始，随折线加入而增加。移除折线会使后续折线向前移动，改变其索引。此函数常与 {@link PolylineCollection#length} 一起用于遍历全部折线。"
+    },
+    {
+      "id": "PolylineCollection#get",
+      "field": "params/index/description",
+      "sourceHash": "sha256:dea5db665513c81d92fed43fbd8561d7f8d851682cb6b394d3d3ddf959902109",
+      "text": "折线从零开始的索引。"
+    },
+    {
+      "id": "PolylineCollection#get",
+      "field": "performance/0",
+      "sourceHash": "sha256:4c520e0b04bdc8c02b42273da14a889a53eb56990349e0647b30db2ea49d38bc",
+      "text": "如果已从集合移除折线，但尚未调用 {@link PolylineCollection#update}，则会隐式执行一次 <code>O(n)</code> 操作。"
+    },
+    {
+      "id": "PolylineCollection#get",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:d1627b27252ed5dba2f59caffbdb35f0fd75092182bba29521f7a13c7507d119",
+      "text": "指定索引处的折线。"
+    },
+    {
+      "id": "PolylineCollection#isDestroyed",
+      "field": "description",
+      "sourceHash": "sha256:aea7b697937631c90ae3fc0ec55b81ba0ddc7abe4d6045848b2031f9bed60091",
+      "text": "若此对象已销毁，返回 true；否则返回 false。<br /><br />对象销毁后不应再使用；调用除 <code>isDestroyed</code> 以外的任何函数都会抛出 {@link DeveloperError}。"
+    },
+    {
+      "id": "PolylineCollection#length",
+      "field": "description",
+      "sourceHash": "sha256:2624e742cbc9a83d8bf88912746d64065ba79aa94b4b55bf0741cb5971984311",
+      "text": "返回集合中的折线数量，常与 {@link PolylineCollection#get} 一起用于遍历全部折线。"
+    },
+    {
+      "id": "PolylineCollection#modelMatrix",
+      "field": "description",
+      "sourceHash": "sha256:47fddef48dc90bcbff82ab8ce4e65ee350a136fe20a70fa16897299fda19a562",
+      "text": "将集合中每条折线从模型坐标变换到世界坐标的 4x4 矩阵。为单位矩阵时，折线按世界坐标绘制，即地球的 WGS84 坐标。可提供其他变换矩阵来使用局部参考系，例如 {@link Transforms.eastNorthUpToFixedFrame} 的返回值。"
+    },
+    {
+      "id": "PolylineCollection#remove",
+      "field": "description",
+      "sourceHash": "sha256:ae5f460569133c3ce3d856d29a069c207053daf7c1ec7d31f169e2e2d0efe7ef",
+      "text": "从集合中移除折线。"
+    },
+    {
+      "id": "PolylineCollection#remove",
+      "field": "params/polyline/description",
+      "sourceHash": "sha256:e851e5a4e6549228d8a2e41adf4caeabd2c4c391fe4b3eefa02d357cf132ea76",
+      "text": "要移除的折线。"
+    },
+    {
+      "id": "PolylineCollection#remove",
+      "field": "performance/0",
+      "sourceHash": "sha256:fe6a1276655d15d7a0f3747859e10b17b87aa5f60cf18d81a3f2147933e07bb8",
+      "text": "调用 <code>remove</code> 后，在 {@link PolylineCollection#update} 时会重写集合的顶点缓冲区，这是 <code>O(n)</code> 操作，并产生从 CPU 到 GPU 的传输开销。为获得最佳性能，应在调用 <code>update</code> 前尽可能批量移除。若只是临时隐藏折线，使用 {@link Polyline#show} 通常比移除后重新添加更高效。"
+    },
+    {
+      "id": "PolylineCollection#remove",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:d4c1e20c5a55dea6f355077055af1183189c9fdad98319d810b17a6d1314be9d",
+      "text": "已移除折线时为 <code>true</code>；集合中未找到折线时为 <code>false</code>。"
+    },
+    {
+      "id": "PolylineCollection#removeAll",
+      "field": "description",
+      "sourceHash": "sha256:6bcdfdc1b42813a2dde2548862231e15fc7415ec3418e43ea6538e91a7c3719c",
+      "text": "从集合中移除全部折线。"
+    },
+    {
+      "id": "PolylineCollection#removeAll",
+      "field": "performance/0",
+      "sourceHash": "sha256:38b29663164cade38326b6e79fc40ace3d8ac2693fa5a52aeb2c186e5a43dc51",
+      "text": "<code>O(n)</code>。清空现有集合再添加新折线，比创建全新集合更高效。"
+    },
+    {
+      "id": "PolylineCollection#show",
+      "field": "description",
+      "sourceHash": "sha256:e5f6a5b9516c948b952ff23461ce1535674611c7b2c444d358f1ad8fcd5e75d6",
+      "text": "决定是否显示集合中的折线。"
+    },
+    {
+      "id": "PolylineCollection#update",
+      "field": "description",
+      "sourceHash": "sha256:c5cc5fb756479265000e8f5e05ef6b5630397b1880c9ff3316fe45c545c6b022",
+      "text": "由 {@link Viewer} 或 {@link CesiumWidget} 在渲染场景时调用，以获取渲染此图元所需的绘制命令。<p>不要直接调用。此处记录此函数，仅为列出场景渲染期间可能向上传播的异常：</p>"
+    },
+    {
+      "id": "PolylineCollection#update",
+      "field": "exceptions/0/description",
+      "sourceHash": "sha256:8d081372a509f91bce1438d73fb9818fc156a619911cdf6b741f486e8b049868",
+      "text": "渲染具有逐实例属性的图元需要支持顶点纹理读取。顶点纹理图像单元的最大数量必须大于零。"
+    }
+  ]
+}

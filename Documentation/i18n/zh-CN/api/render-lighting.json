@@ -1,0 +1,1200 @@
+{
+  "schemaVersion": 1,
+  "locale": "zh-CN",
+  "entries": [
+    {
+      "id": "Atmosphere.requiresColorCorrect",
+      "field": "description",
+      "sourceHash": "sha256:073a1ddbbb5eb180af27d5ddb63adec4592a4e1b9ce55e6cfdde3a6f0c3a683e",
+      "text": "大气着色器需要颜色校正步骤时返回 <code>true</code>。"
+    },
+    {
+      "id": "Atmosphere.requiresColorCorrect",
+      "field": "params/atmosphere/description",
+      "sourceHash": "sha256:b85a71a535c01aedf5ca0323cdc2a05256128f47d6650e0d4486183b10c4f0e2",
+      "text": "要检查的大气实例。"
+    },
+    {
+      "id": "Atmosphere.requiresColorCorrect",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:f42415b7cf2529af3cbe137763f5e2fc51e8d0ad40cbd7747653979be204211d",
+      "text": "大气着色器需要颜色校正步骤时为 true。"
+    },
+    {
+      "id": "Atmosphere",
+      "field": "description",
+      "sourceHash": "sha256:368d73fbb768595dfaa72c6c335303cc157454218a955401b2397770d5c60e36",
+      "text": "供 3D Tiles 和模型渲染天空大气、地表大气和雾时使用的通用大气设置。\n\n<p>\n此类与负责绘制天空的 {@link SkyAtmosphere} 不同。\n</p>\n<p>\n大气设置会影响雾的颜色；雾的具体渲染控制参见 {@link Fog}。\n</p>"
+    },
+    {
+      "id": "Atmosphere#brightnessShift",
+      "field": "description",
+      "sourceHash": "sha256:a2d16b05b058d1fa0ea3a84a18e9a861bda5c0567170480e08d381828ef7674d",
+      "text": "应用于大气的亮度偏移。默认值为 0.0，即不偏移。偏移为 -1.0 时完全变暗，使太空背景显露。"
+    },
+    {
+      "id": "Atmosphere#dynamicLighting",
+      "field": "description",
+      "sourceHash": "sha256:47970be83bbb6ce894d5c4089bbca00fa7a2c24a54706cc84e65e17855d23e0e",
+      "text": "不为 DynamicAtmosphereLightingType.NONE 时，使用选定光源动态照亮全部大气相关渲染效果。"
+    },
+    {
+      "id": "Atmosphere#hueShift",
+      "field": "description",
+      "sourceHash": "sha256:6ea96e1e8c9b57131131142772524f729d5a2f47d03289506dd80fd1ff8bb1a1",
+      "text": "应用于大气的色相偏移。默认值为 0.0，即不偏移。偏移为 1.0 表示遍历可用色相的完整一圈。"
+    },
+    {
+      "id": "Atmosphere#lightIntensity",
+      "field": "description",
+      "sourceHash": "sha256:079ee619d2f76a452a3c0a94ada64337b4e82bf067f6c33dbef0d527480d252c",
+      "text": "计算地表大气颜色时使用的光照强度。"
+    },
+    {
+      "id": "Atmosphere#mieAnisotropy",
+      "field": "description",
+      "sourceHash": "sha256:7dcce32db6406a41eac0ef089fb0b7e7e1c026cc456c8509514b2e3aeccaeb79",
+      "text": "米氏散射所考虑介质的各向异性。<p>有效值范围为 -1.0 至 1.0。</p>"
+    },
+    {
+      "id": "Atmosphere#mieCoefficient",
+      "field": "description",
+      "sourceHash": "sha256:783407a60d0d7fca2eb716eee971fdd49468f1f39198c52634f852e66fb5478a",
+      "text": "地表大气散射方程使用的米氏散射系数。"
+    },
+    {
+      "id": "Atmosphere#mieScaleHeight",
+      "field": "description",
+      "sourceHash": "sha256:6ccdc94c622b5d70ceeefac1a0bdc7745964430a30b6205bb9452d6feef8bf20",
+      "text": "地表大气散射方程使用的米氏标高，单位为米。"
+    },
+    {
+      "id": "Atmosphere#rayleighCoefficient",
+      "field": "description",
+      "sourceHash": "sha256:17dbeb93417a4766af975230da3a0043a3dcbb1a3701929727afe546af71666e",
+      "text": "地表大气散射方程使用的瑞利散射系数。"
+    },
+    {
+      "id": "Atmosphere#rayleighScaleHeight",
+      "field": "description",
+      "sourceHash": "sha256:64e032a0e5b4ec7751ddfc748c32ae0f1cccc5320cdd812da79327bf52b64b90",
+      "text": "地表大气散射方程使用的瑞利标高，单位为米。"
+    },
+    {
+      "id": "Atmosphere#saturationShift",
+      "field": "description",
+      "sourceHash": "sha256:b145c14c520c14153331023820c48ba4212c20225b8d7be9f29e0ed84222d1bc",
+      "text": "应用于大气的饱和度偏移。默认值为 0.0，即不偏移。偏移为 -1.0 时呈单色。"
+    },
+    {
+      "id": "DirectionalLight",
+      "field": "description",
+      "sourceHash": "sha256:95f356daab79a4496d2404f9a364782a298111ff259610f61b6f6779d0d84de4",
+      "text": "从无限远处沿单一方向发出的光源。"
+    },
+    {
+      "id": "DirectionalLight",
+      "field": "exceptions/0/description",
+      "sourceHash": "sha256:44724204ccce9f30f151c0ee9bbf030309f0b44f3af88c45e78c3c06fcc3837b",
+      "text": "options.direction 不能为零向量。"
+    },
+    {
+      "id": "DirectionalLight",
+      "field": "params/options.color/description",
+      "sourceHash": "sha256:d5b46ba4996c7751efb95789a5c5db5123f357eadb93fefdb75a79d834e5f4e7",
+      "text": "光源颜色。"
+    },
+    {
+      "id": "DirectionalLight",
+      "field": "params/options.direction/description",
+      "sourceHash": "sha256:17a9dec1123726c3ffe84f9b4feba9fbf26bd4ec488d3e0e3e342139c4cd9ec8",
+      "text": "光线传播的方向。"
+    },
+    {
+      "id": "DirectionalLight",
+      "field": "params/options.intensity/description",
+      "sourceHash": "sha256:88ba46d525310f3bc29b8f364e9acac1bc83f6b1d2730314f6b84295d509872a",
+      "text": "光源强度。"
+    },
+    {
+      "id": "DirectionalLight#color",
+      "field": "description",
+      "sourceHash": "sha256:d5b46ba4996c7751efb95789a5c5db5123f357eadb93fefdb75a79d834e5f4e7",
+      "text": "光源颜色。"
+    },
+    {
+      "id": "DirectionalLight#direction",
+      "field": "description",
+      "sourceHash": "sha256:17a9dec1123726c3ffe84f9b4feba9fbf26bd4ec488d3e0e3e342139c4cd9ec8",
+      "text": "光线传播的方向。"
+    },
+    {
+      "id": "DirectionalLight#intensity",
+      "field": "description",
+      "sourceHash": "sha256:88ba46d525310f3bc29b8f364e9acac1bc83f6b1d2730314f6b84295d509872a",
+      "text": "光源强度。"
+    },
+    {
+      "id": "DynamicAtmosphereLightingType.NONE",
+      "field": "description",
+      "sourceHash": "sha256:081aab4728e5e4d2992ef16b4db243e92a207c6b947ca5e3a5b25633822fd245",
+      "text": "不使用动态大气光照。大气光照效果由正上方照亮，而不使用场景光源。"
+    },
+    {
+      "id": "DynamicAtmosphereLightingType.SCENE_LIGHT",
+      "field": "description",
+      "sourceHash": "sha256:202071d1ccb8fb5047a47b943f4b70361325d899a48ffbdd9b3ca36953ad07b4",
+      "text": "使用场景当前光源进行动态大气光照计算。"
+    },
+    {
+      "id": "DynamicAtmosphereLightingType.SUNLIGHT",
+      "field": "description",
+      "sourceHash": "sha256:78d4d354eec9e5d966d7b061000c2792d28453578b8eb66d2d7e8cfd87d07b31",
+      "text": "即使场景使用其他光源，也强制动态大气光照始终采用太阳光方向。"
+    },
+    {
+      "id": "DynamicAtmosphereLightingType",
+      "field": "description",
+      "sourceHash": "sha256:0714def9427e90c36946b96e791320b5cccd6fb655aa59cbcaf054faf3479efa",
+      "text": "天空大气、地表大气和雾等效果可叠加来自太阳或其他随时间变化光源的动态光照。此枚举决定使用哪个光源。"
+    },
+    {
+      "id": "DynamicAtmosphereLightingType",
+      "field": "properties/NONE/description",
+      "sourceHash": "sha256:081aab4728e5e4d2992ef16b4db243e92a207c6b947ca5e3a5b25633822fd245",
+      "text": "不使用动态大气光照。大气光照效果由正上方照亮，而不使用场景光源。"
+    },
+    {
+      "id": "DynamicAtmosphereLightingType",
+      "field": "properties/SCENE_LIGHT/description",
+      "sourceHash": "sha256:202071d1ccb8fb5047a47b943f4b70361325d899a48ffbdd9b3ca36953ad07b4",
+      "text": "使用场景当前光源进行动态大气光照计算。"
+    },
+    {
+      "id": "DynamicAtmosphereLightingType",
+      "field": "properties/SUNLIGHT/description",
+      "sourceHash": "sha256:78d4d354eec9e5d966d7b061000c2792d28453578b8eb66d2d7e8cfd87d07b31",
+      "text": "即使场景使用其他光源，也强制动态大气光照始终采用太阳光方向。"
+    },
+    {
+      "id": "DynamicEnvironmentMapManager.AVERAGE_EARTH_GROUND_COLOR",
+      "field": "description",
+      "sourceHash": "sha256:6c49dbed9bef6bf028fe1b95125866f184fe487c9bb6ee8e4a6edfc38d04c095",
+      "text": "地球地面颜色的平均色调，为偏暖的灰绿色。"
+    },
+    {
+      "id": "DynamicEnvironmentMapManager.ConstructorOptions",
+      "field": "description",
+      "sourceHash": "sha256:d2adea9cffc2dcac740dd13915e16e657e281b9e19546a7d6a25a35a24c493a6",
+      "text": "DynamicEnvironmentMapManager 构造函数的选项。"
+    },
+    {
+      "id": "DynamicEnvironmentMapManager.ConstructorOptions",
+      "field": "properties/atmosphereScatteringIntensity/description",
+      "sourceHash": "sha256:9c9ddd77ed00a7c00feb114318153d16683dfb2a4fa24931d065494e7e6cef90",
+      "text": "大气发出的散射光强度，应相对于 {@link Scene.light} 的光照强度调整。"
+    },
+    {
+      "id": "DynamicEnvironmentMapManager.ConstructorOptions",
+      "field": "properties/brightness/description",
+      "sourceHash": "sha256:275a137817fdf09a83302621bd6d11965aa0d37c13846d3bdb5b171b39917379",
+      "text": "环境发光亮度。1.0 使用原始环境发光颜色，小于 1.0 时更暗，大于 1.0 时更亮。"
+    },
+    {
+      "id": "DynamicEnvironmentMapManager.ConstructorOptions",
+      "field": "properties/enabled/description",
+      "sourceHash": "sha256:26fdd031b427db2e76d57e552b748fe8cedc3fdb8b0b6e17be5b64952c4c5ae9",
+      "text": "为 true 时，环境贴图和相关属性持续更新。"
+    },
+    {
+      "id": "DynamicEnvironmentMapManager.ConstructorOptions",
+      "field": "properties/gamma/description",
+      "sourceHash": "sha256:7708046b33f39b4735099d8b25b9c2a42f32a2960ae21596a638392d196bb034",
+      "text": "对环境发光范围应用的 gamma 校正。1.0 使用原始发光颜色。"
+    },
+    {
+      "id": "DynamicEnvironmentMapManager.ConstructorOptions",
+      "field": "properties/groundAlbedo/description",
+      "sourceHash": "sha256:598c3e105fb82e594bf2c39244f120fe9bbf26e20ee0ab727f70d3980889a9d1",
+      "text": "地面反射光线的比例。地球平均反照率为 0.31。"
+    },
+    {
+      "id": "DynamicEnvironmentMapManager.ConstructorOptions",
+      "field": "properties/groundColor/description",
+      "sourceHash": "sha256:46e0537fbfaaddb30b23317181283ec7dbc4df397d420bf91fefe002786203e5",
+      "text": "用于表示地面的纯色。"
+    },
+    {
+      "id": "DynamicEnvironmentMapManager.ConstructorOptions",
+      "field": "properties/maximumPositionEpsilon/description",
+      "sourceHash": "sha256:b37271b3b7bffef9016a327f2a80cd51da1f7ea1084b4556f06e31d86e32877c",
+      "text": "触发创建新环境贴图的位置变化阈值，单位为米。较小位置差异不会明显影响结果。"
+    },
+    {
+      "id": "DynamicEnvironmentMapManager.ConstructorOptions",
+      "field": "properties/maximumSecondsDifference/description",
+      "sourceHash": "sha256:b07a8dc07e17fb7183789f7f8d6524d65d479bfdd0499c1dac0553ee54050c76",
+      "text": "重新创建环境贴图前允许经过的最长秒数。"
+    },
+    {
+      "id": "DynamicEnvironmentMapManager.ConstructorOptions",
+      "field": "properties/mipmapLevels/description",
+      "sourceHash": "sha256:03e2f3a1c2d4ed6e0e78ec411c3208071082cf50e3d9f48338772e9c086582c7",
+      "text": "希望为镜面反射贴图生成的最大 mipmap 层数。层数越多，镜面反射分辨率越高；实际层数受客户端支持的立方体贴图尺寸限制。至少需要一层才能生成环境贴图。"
+    },
+    {
+      "id": "DynamicEnvironmentMapManager.ConstructorOptions",
+      "field": "properties/saturation/description",
+      "sourceHash": "sha256:a403b97b8e35c86f4e0f2e8ddcfb2da551fc21288461167d26355c199c2afeb4",
+      "text": "环境发光饱和度。1.0 使用原始环境发光颜色，小于 1.0 时降低饱和度，大于 1.0 时提高饱和度。"
+    },
+    {
+      "id": "DynamicEnvironmentMapManager.DEFAULT_SPHERICAL_HARMONIC_COEFFICIENTS",
+      "field": "description",
+      "sourceHash": "sha256:de2e7feb9206a9d836ebf778f0c25e522cfe866449c7fbef58ccb06646b483f4",
+      "text": "基于图像的光照所用的默认三阶球谐漫反射系数，表示低强度白色环境光。\n<p>\n包含九个 <code>Cartesian3</code> 系数，依次为：L<sub>0,0</sub>、L<sub>1,-1</sub>、L<sub>1,0</sub>、L<sub>1,1</sub>、L<sub>2,-2</sub>、L<sub>2,-1</sub>、L<sub>2,0</sub>、L<sub>2,1</sub>、L<sub>2,2</sub>。\n</p>"
+    },
+    {
+      "id": "DynamicEnvironmentMapManager.isDynamicUpdateSupported",
+      "field": "description",
+      "sourceHash": "sha256:c27d22c9eac80db46decd6351162916d6a505e99d154d7bc9946273b16e692ff",
+      "text": "当前 WebGL 渲染上下文支持动态更新时返回 <code>true</code>。动态更新需要 EXT_color_buffer_float 或 EXT_color_buffer_half_float 扩展。"
+    },
+    {
+      "id": "DynamicEnvironmentMapManager.isDynamicUpdateSupported",
+      "field": "params/scene/description",
+      "sourceHash": "sha256:2637e3a0a7cebfb35862cc87310f255ab804508ae7c69bde20ed181e629eb976",
+      "text": "包含渲染上下文的对象。"
+    },
+    {
+      "id": "DynamicEnvironmentMapManager.isDynamicUpdateSupported",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:d69b21a2af1ebe78c4c6f1c8b8a522ba83231a85c0983088e68d55754e86239d",
+      "text": "支持时为 true。"
+    },
+    {
+      "id": "DynamicEnvironmentMapManager",
+      "field": "description",
+      "sourceHash": "sha256:4a86c2f0f22c71fb4e9666efeb37caa44fd30773ecf7c8674ab1e85a05f22e5e",
+      "text": "根据场景当前光照条件，在指定位置生成环境贴图，并生成多级镜面反射贴图和球谐系数，供模型或瓦片集的 {@link ImageBasedLighting} 使用。"
+    },
+    {
+      "id": "DynamicEnvironmentMapManager",
+      "field": "params/options/description",
+      "sourceHash": "sha256:7fd5e48c805a1ec2c19032658555e50e0c3ed2802396c9dafaafc8eb754198ee",
+      "text": "描述初始化选项的对象。"
+    },
+    {
+      "id": "DynamicEnvironmentMapManager#atmosphereScatteringIntensity",
+      "field": "description",
+      "sourceHash": "sha256:9c9ddd77ed00a7c00feb114318153d16683dfb2a4fa24931d065494e7e6cef90",
+      "text": "大气发出的散射光强度，应相对于 {@link Scene.light} 的光照强度调整。"
+    },
+    {
+      "id": "DynamicEnvironmentMapManager#brightness",
+      "field": "description",
+      "sourceHash": "sha256:c2ac65840913966411d5a80961066749368a06f308da5b9ffb693c44897aaaab",
+      "text": "环境发光亮度。1.0 使用原始环境发光颜色，小于 1.0 时更暗，大于 1.0 时更亮。"
+    },
+    {
+      "id": "DynamicEnvironmentMapManager#destroy",
+      "field": "description",
+      "sourceHash": "sha256:b385add820d9f47d540aad147f1cdf85f05e8c6cb81c3928a59c8fd5f7bd8d69",
+      "text": "销毁此对象持有的 WebGL 资源。显式销毁可确定地释放 WebGL 资源，而不依赖垃圾回收器回收此对象。<br /><br />对象销毁后不应再使用；调用除 <code>isDestroyed</code> 以外的任何函数都会抛出 {@link DeveloperError}。因此，应像示例中那样将返回值（<code>undefined</code>）赋给该对象变量。"
+    },
+    {
+      "id": "DynamicEnvironmentMapManager#enabled",
+      "field": "description",
+      "sourceHash": "sha256:26fdd031b427db2e76d57e552b748fe8cedc3fdb8b0b6e17be5b64952c4c5ae9",
+      "text": "为 true 时，环境贴图和相关属性持续更新。"
+    },
+    {
+      "id": "DynamicEnvironmentMapManager#gamma",
+      "field": "description",
+      "sourceHash": "sha256:a3df44e1c93e58f7ad0e56ae481917f2e57dfb8ed67c5908aec98e80e48f8c6d",
+      "text": "对环境发光范围应用的 gamma 校正。1.0 使用原始入射光颜色。"
+    },
+    {
+      "id": "DynamicEnvironmentMapManager#groundAlbedo",
+      "field": "description",
+      "sourceHash": "sha256:598c3e105fb82e594bf2c39244f120fe9bbf26e20ee0ab727f70d3980889a9d1",
+      "text": "地面反射光线的比例。地球平均反照率为 0.31。"
+    },
+    {
+      "id": "DynamicEnvironmentMapManager#groundColor",
+      "field": "description",
+      "sourceHash": "sha256:46e0537fbfaaddb30b23317181283ec7dbc4df397d420bf91fefe002786203e5",
+      "text": "用于表示地面的纯色。"
+    },
+    {
+      "id": "DynamicEnvironmentMapManager#isDestroyed",
+      "field": "description",
+      "sourceHash": "sha256:aea7b697937631c90ae3fc0ec55b81ba0ddc7abe4d6045848b2031f9bed60091",
+      "text": "若此对象已销毁，返回 true；否则返回 false。<br /><br />对象销毁后不应再使用；调用除 <code>isDestroyed</code> 以外的任何函数都会抛出 {@link DeveloperError}。"
+    },
+    {
+      "id": "DynamicEnvironmentMapManager#maximumPositionEpsilon",
+      "field": "description",
+      "sourceHash": "sha256:b37271b3b7bffef9016a327f2a80cd51da1f7ea1084b4556f06e31d86e32877c",
+      "text": "触发创建新环境贴图的位置变化阈值，单位为米。较小位置差异不会明显影响结果。"
+    },
+    {
+      "id": "DynamicEnvironmentMapManager#maximumSecondsDifference",
+      "field": "description",
+      "sourceHash": "sha256:b07a8dc07e17fb7183789f7f8d6524d65d479bfdd0499c1dac0553ee54050c76",
+      "text": "重新创建环境贴图前允许经过的最长秒数。"
+    },
+    {
+      "id": "DynamicEnvironmentMapManager#position",
+      "field": "description",
+      "sourceHash": "sha256:0032b714d3632018c8d3c31185ebf6fd1f773ae5b75ddc47d6d83a131b2802d9",
+      "text": "环境贴图围绕生成的位置。"
+    },
+    {
+      "id": "DynamicEnvironmentMapManager#saturation",
+      "field": "description",
+      "sourceHash": "sha256:f89fe83bef07c8ed2c5aa95d61c236e6ef1c7dbc9999cc230615bea12e6bcf12",
+      "text": "环境发光饱和度。1.0 使用原始环境发光颜色，小于 1.0 时降低饱和度，大于 1.0 时提高饱和度。"
+    },
+    {
+      "id": "Fog",
+      "field": "description",
+      "sourceHash": "sha256:2376bbaae07f646c4f112e4e688e4cf0354bf8bd74b97e1a27f67b4ea32955ce",
+      "text": "在地平线视角下，将大气与远离相机的几何混合。通过减少绘制几何和地形请求，还可进一步提升性能。"
+    },
+    {
+      "id": "Fog#density",
+      "field": "description",
+      "sourceHash": "sha256:d68f93d5bc2b07c7d6ab0b156a0672129983215f173f58c82f1cb0df720f6b51",
+      "text": "决定雾密度的标量。完全处于雾中的地形会被剔除。值接近 1.0 时雾更浓，接近零时更稀薄。雾越浓，地形剔除越积极。例如相机位于椭球上方 1000.0 米时，增大到 3.0e-3 会剔除许多靠近观察者的瓦片。减小此值会将雾推得更远，但因渲染更多地形而降低性能。"
+    },
+    {
+      "id": "Fog#enabled",
+      "field": "description",
+      "sourceHash": "sha256:c10c2227d6e84159a97b0441e1dc79fd7846915bc65adf38e354e98240c1ad66",
+      "text": "启用雾时为 <code>true</code>，否则为 <code>false</code>。"
+    },
+    {
+      "id": "Fog#heightFalloff",
+      "field": "description",
+      "sourceHash": "sha256:4b6ca3213636278c8475ccbcaf2df3bce79d572326faa399c830c5979bec3d0a",
+      "text": "根据相机相对于椭球的高度调整雾密度的指数因子。较小值使密度随相机升高的过渡更平缓。必须大于 0。"
+    },
+    {
+      "id": "Fog#heightScalar",
+      "field": "description",
+      "sourceHash": "sha256:a6c2ae8cde48caed8258bfa8e7ad2e014d1cb4c013cf4448234f05dbdc1e44b3",
+      "text": "根据相机相对于地形的高度调整雾密度的系数。"
+    },
+    {
+      "id": "Fog#maxHeight",
+      "field": "description",
+      "sourceHash": "sha256:45ae66b4327df13d8e1e36e0a3151f9e98543600e97b1680675ea6e1680b0f0d",
+      "text": "应用雾的最高高度。相机高于此值时禁用雾。"
+    },
+    {
+      "id": "Fog#minimumBrightness",
+      "field": "description",
+      "sourceHash": "sha256:2e4973eaf5d6f0df9779ef9eb0bbb867d36ca277234ee59e2bf1c5f3fc99bb4e",
+      "text": "光照作用下雾颜色的最低亮度。0.0 可能使雾完全变黑，1.0 则完全不影响亮度。"
+    },
+    {
+      "id": "Fog#renderable",
+      "field": "description",
+      "sourceHash": "sha256:58f4c28ebc4508a544e7d15b2ff5bc7abb8bed6d0709df09fedcbd13c6665dc4",
+      "text": "在着色器中渲染雾时为 <code>true</code>，否则为 <code>false</code>。可禁用实际显示，同时保留基于雾密度优化瓦片加载的策略。"
+    },
+    {
+      "id": "Fog#screenSpaceErrorFactor",
+      "field": "description",
+      "sourceHash": "sha256:7ba4555de749279311d678bc43293af436f8b79ad5b7cfeaea3eeb843a30f91b",
+      "text": "地形瓦片部分处于雾中时，提高其屏幕空间误差的系数，用于减少请求渲染的地形瓦片。为零时禁用。山区使用较大值可减少请求，但地平线附近的地形网格分辨率可能明显降低；较平坦区域使用较大值时，地平线外观变化通常较小。"
+    },
+    {
+      "id": "Fog#visualDensityScalar",
+      "field": "description",
+      "sourceHash": "sha256:a726778b1fb19a11477e31004bd16a32c85e37037b8c98cf39e0fed2f1b49028",
+      "text": "影响雾视觉密度的系数，不影响地形剔除。可与 {@link Fog.density} 配合，使雾看起来更浓或更淡。"
+    },
+    {
+      "id": "Fog#visualDensityScalar",
+      "field": "experimental/0",
+      "sourceHash": "sha256:18b07955540ba3eb981d2b064c9880f2b3248bdcb8dbf6a6987988be81d442c1",
+      "text": "此系数的取值定义尚未最终确定，后续可能更改。"
+    },
+    {
+      "id": "GlobeTranslucency",
+      "field": "description",
+      "sourceHash": "sha256:b3b8ec8449df72994f12bcc5770b6103524456e8f2d236719d459f0e940cc9e3",
+      "text": "控制地球半透明效果的属性。"
+    },
+    {
+      "id": "GlobeTranslucency#backFaceAlpha",
+      "field": "description",
+      "sourceHash": "sha256:3a2e38fcfd2308146bee93733e4101f28fc169f8c97c6d2d56c0b205bd4f3296",
+      "text": "应用到地球背面的固定半透明值。\n<br /><br />\n必须将 {@link GlobeTranslucency#enabled} 设为 true 才生效。"
+    },
+    {
+      "id": "GlobeTranslucency#backFaceAlphaByDistance",
+      "field": "description",
+      "sourceHash": "sha256:790a9eb0fdd45f817d08158864293fb0f5cee8accab0f4fa07726e454f437c87",
+      "text": "获取或设置根据相机距离变化的地球背面近远距离半透明属性。当相机距离处于指定范围内时，半透明值在 {@link NearFarScalar#nearValue} 与 {@link NearFarScalar#farValue} 之间插值，距离上下界由 {@link NearFarScalar#near} 和 {@link NearFarScalar#far} 指定。超出范围时，半透明值保持为最近端点值。为 undefined 时禁用 backFaceAlphaByDistance。\n<br /><br />\n必须将 {@link GlobeTranslucency#enabled} 设为 true 才生效。"
+    },
+    {
+      "id": "GlobeTranslucency#enabled",
+      "field": "description",
+      "sourceHash": "sha256:542cc487a078fcbda64461c10f274caadf431b874c77c4e291378170b25af059",
+      "text": "为 true 时，将地球渲染为半透明表面。\n<br /><br />\n先混合 {@link Globe#material}、{@link Globe#imageryLayers} 和 {@link Globe#baseColor} 中可能包含的透明度，得到 alpha；正面再乘以 {@link GlobeTranslucency#frontFaceAlpha} 和 {@link GlobeTranslucency#frontFaceAlphaByDistance}，背面乘以 {@link GlobeTranslucency#backFaceAlpha} 和 {@link GlobeTranslucency#backFaceAlphaByDistance}。相机位于地下时交换正反面判定，即将背向几何视为正向。\n<br /><br />\n默认禁用半透明。"
+    },
+    {
+      "id": "GlobeTranslucency#frontFaceAlpha",
+      "field": "description",
+      "sourceHash": "sha256:f856676e9c93eb4d6e27fe48b7a7a27ecc6ed91b39a1474c13082d87e65b8286",
+      "text": "应用到地球正面的固定半透明值。\n<br /><br />\n必须将 {@link GlobeTranslucency#enabled} 设为 true 才生效。"
+    },
+    {
+      "id": "GlobeTranslucency#frontFaceAlphaByDistance",
+      "field": "description",
+      "sourceHash": "sha256:60f71591cf991781a83e52976d72abcb35c0bdcbeabebef1a61d90802a101f5b",
+      "text": "获取或设置根据相机距离变化的地球正面近远距离半透明属性。当相机距离处于指定范围内时，半透明值在 {@link NearFarScalar#nearValue} 与 {@link NearFarScalar#farValue} 之间插值，距离上下界由 {@link NearFarScalar#near} 和 {@link NearFarScalar#far} 指定。超出范围时，半透明值保持为最近端点值。为 undefined 时禁用 frontFaceAlphaByDistance。\n<br /><br />\n必须将 {@link GlobeTranslucency#enabled} 设为 true 才生效。"
+    },
+    {
+      "id": "GlobeTranslucency#rectangle",
+      "field": "description",
+      "sourceHash": "sha256:b9184f5502e9bbd526143c8c8d1e36f60ee3cb087d5e954c203db20cc218a111",
+      "text": "用于将半透明效果限制在指定地理区域的 {@link Rectangle}。默认为经纬度坐标的最大范围。"
+    },
+    {
+      "id": "ImageBasedLighting",
+      "field": "description",
+      "sourceHash": "sha256:e4439d6d5636a8735e59ba93591e797e8ac312c0adde83710583ed7c59205233",
+      "text": "管理瓦片集和模型的基于图像的光照属性，同时管理所需资源和纹理。\n<p>\n使用镜面反射环境贴图时，不再需要基于图像的光照后，必须调用 {@link ImageBasedLighting#destroy} 正确释放 GPU 资源。如果实例由模型或瓦片集创建，会由其负责；否则应用程序负责调用 destroy()。\n</p>"
+    },
+    {
+      "id": "ImageBasedLighting",
+      "field": "params/options.imageBasedLightingFactor/description",
+      "sourceHash": "sha256:6d8693801734faaa5ddf627601a5e0958f353b4a3c50bd0f2d6b5abf32d9c40f",
+      "text": "缩放来自地球、天空、大气和星空天空盒的漫反射及镜面反射图像光照。"
+    },
+    {
+      "id": "ImageBasedLighting",
+      "field": "params/options.specularEnvironmentMaps/description",
+      "sourceHash": "sha256:6bfa2efe23bb55f8efcb155d362d8c76e4cc40ed6774f1504c34e3abb4a6a679",
+      "text": "KTX2 文件的 URL，文件包含镜面光照立方体贴图及卷积后的镜面反射 mipmap。"
+    },
+    {
+      "id": "ImageBasedLighting",
+      "field": "params/options.sphericalHarmonicCoefficients/description",
+      "sourceHash": "sha256:ba30f50a05e3739184ca741207cb625b44426ab7de1d6202c302d5578945b935",
+      "text": "基于图像的光照所用的三阶球谐漫反射系数。"
+    },
+    {
+      "id": "ImageBasedLighting#imageBasedLightingFactor",
+      "field": "description",
+      "sourceHash": "sha256:b3725d36b18eb82ee9a3a482f3a01e1a63854f49227568b221ee5d1c55a8a6eb",
+      "text": "引擎叠加来自地球、天空、大气和星空天空盒的光照。此笛卡尔向量用于缩放这些来源对最终颜色的漫反射和镜面反射贡献。值为 0.0 时禁用相应光照来源。"
+    },
+    {
+      "id": "ImageBasedLighting#specularEnvironmentMaps",
+      "field": "description",
+      "sourceHash": "sha256:6bfa2efe23bb55f8efcb155d362d8c76e4cc40ed6774f1504c34e3abb4a6a679",
+      "text": "KTX2 文件的 URL，文件包含镜面光照立方体贴图及卷积后的镜面反射 mipmap。"
+    },
+    {
+      "id": "ImageBasedLighting#sphericalHarmonicCoefficients",
+      "field": "description",
+      "sourceHash": "sha256:565ef7fc89cd37569e1903b94029cf28a94998236b454114b44a1ec79dc8dbbf",
+      "text": "基于图像的光照所用的三阶球谐漫反射系数。为 <code>undefined</code> 时，使用根据大气颜色计算的漫反射辐照度。\n<p>\n包含九个 <code>Cartesian3</code> 系数，依次为：L<sub>0,0</sub>、L<sub>1,-1</sub>、L<sub>1,0</sub>、L<sub>1,1</sub>、L<sub>2,-2</sub>、L<sub>2,-1</sub>、L<sub>2,0</sub>、L<sub>2,1</sub>、L<sub>2,2</sub>。\n</p>\n\n可使用 {@link https://github.com/google/filament/releases|Google Filament 项目}的 <code>cmgen</code> 工具预处理环境贴图以获取这些值。务必为 <code>cmgen</code> 指定 <code>--no-mirror</code> 选项。"
+    },
+    {
+      "id": "Light",
+      "field": "description",
+      "sourceHash": "sha256:71408916ad482d9733d85f9455d2649d2fde8a15ac7eeea87c1bbac7f388949a",
+      "text": "光源接口，不应直接实例化。<code>color</code> 与 <code>intensity</code> 共同产生高动态范围光源颜色；也可单独调整 <code>intensity</code>，在不改变色相的情况下调暗或调亮光源。"
+    },
+    {
+      "id": "Light#color",
+      "field": "description",
+      "sourceHash": "sha256:d5b46ba4996c7751efb95789a5c5db5123f357eadb93fefdb75a79d834e5f4e7",
+      "text": "光源颜色。"
+    },
+    {
+      "id": "Light#intensity",
+      "field": "description",
+      "sourceHash": "sha256:a31117b2f13d980aea3b976e52b708ed7d3ca333c209ecd89e68842db98b8a85",
+      "text": "控制光源强弱的强度值。<code>intensity</code> 最小为 0.0，没有最大值限制。"
+    },
+    {
+      "id": "Moon",
+      "field": "description",
+      "sourceHash": "sha256:0a899f49c00e2876daa3fd583cea82d7d3f36e5a7a2518649ea257f120932fe4",
+      "text": "在三维模式中绘制月球。"
+    },
+    {
+      "id": "Moon",
+      "field": "params/options.ellipsoid/description",
+      "sourceHash": "sha256:5c9652c659a75e1974b6321029c85c165d5b46444ec506a6f94b3b0ea39812b7",
+      "text": "月球椭球。"
+    },
+    {
+      "id": "Moon",
+      "field": "params/options.onlySunLighting/description",
+      "sourceHash": "sha256:5a4fe3070412f9fe7deb9744b1dfd23a95152bd26660529f2a4496e62abd8b96",
+      "text": "仅使用太阳作为光源。"
+    },
+    {
+      "id": "Moon",
+      "field": "params/options.show/description",
+      "sourceHash": "sha256:a3f31155d184a98a26139b7bf8f1889029e57ddf9d76e53fdcd2f6587b38c9ef",
+      "text": "决定是否渲染月球。"
+    },
+    {
+      "id": "Moon",
+      "field": "params/options.textureUrl/description",
+      "sourceHash": "sha256:11a2f86679d61f901b8a893fe032098bd9f112490275f342ee5bc6b541210eef",
+      "text": "月球纹理。"
+    },
+    {
+      "id": "Moon#destroy",
+      "field": "description",
+      "sourceHash": "sha256:b385add820d9f47d540aad147f1cdf85f05e8c6cb81c3928a59c8fd5f7bd8d69",
+      "text": "销毁此对象持有的 WebGL 资源。显式销毁可确定地释放 WebGL 资源，而不依赖垃圾回收器回收此对象。<br /><br />对象销毁后不应再使用；调用除 <code>isDestroyed</code> 以外的任何函数都会抛出 {@link DeveloperError}。因此，应像示例中那样将返回值（<code>undefined</code>）赋给该对象变量。"
+    },
+    {
+      "id": "Moon#ellipsoid",
+      "field": "description",
+      "sourceHash": "sha256:e59c1e356664b08680199777fb2b8a506f06f098daffb31885a83d03aae9f9e2",
+      "text": "获取定义月球形状的椭球。"
+    },
+    {
+      "id": "Moon#isDestroyed",
+      "field": "description",
+      "sourceHash": "sha256:aea7b697937631c90ae3fc0ec55b81ba0ddc7abe4d6045848b2031f9bed60091",
+      "text": "若此对象已销毁，返回 true；否则返回 false。<br /><br />对象销毁后不应再使用；调用除 <code>isDestroyed</code> 以外的任何函数都会抛出 {@link DeveloperError}。"
+    },
+    {
+      "id": "Moon#onlySunLighting",
+      "field": "description",
+      "sourceHash": "sha256:5a4fe3070412f9fe7deb9744b1dfd23a95152bd26660529f2a4496e62abd8b96",
+      "text": "仅使用太阳作为光源。"
+    },
+    {
+      "id": "Moon#show",
+      "field": "description",
+      "sourceHash": "sha256:2aca326201fafc07fa60cd46ed38bfe948a36995265d6f62796d249907df58c8",
+      "text": "决定是否显示月球。"
+    },
+    {
+      "id": "Moon#textureUrl",
+      "field": "description",
+      "sourceHash": "sha256:11a2f86679d61f901b8a893fe032098bd9f112490275f342ee5bc6b541210eef",
+      "text": "月球纹理。"
+    },
+    {
+      "id": "PointCloudShading.isSupported",
+      "field": "description",
+      "sourceHash": "sha256:bd492838ff6416dc6f16871138a631f2322ff5cb8a8306a17d29faf3abe8abc6",
+      "text": "判断是否支持点云着色。"
+    },
+    {
+      "id": "PointCloudShading.isSupported",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:00c9713db2f708fbddc62579e07739d46fefea3555a01b2ce3af948a2b1e4fc9",
+      "text": "支持点云着色时为 <code>true</code>，否则为 <code>false</code>。"
+    },
+    {
+      "id": "PointCloudShading",
+      "field": "description",
+      "sourceHash": "sha256:97f8ff5488f5db3e21acf5d70e7e1f7d258d28d661e18926dc4edf0978bb0a27",
+      "text": "使用 3D Tiles 渲染点云时，根据几何误差对点进行衰减的选项。"
+    },
+    {
+      "id": "PointCloudShading",
+      "field": "params/options.attenuation/description",
+      "sourceHash": "sha256:cc7dd5b9ac5814b42695a9b28fe6a2ec85b64960069e14f40d6313434c22dadb",
+      "text": "根据几何误差对点进行衰减。"
+    },
+    {
+      "id": "PointCloudShading",
+      "field": "params/options.backFaceCulling/description",
+      "sourceHash": "sha256:1d8f11752c195ee58efca2dc787ad1e5fdc496fe0473a1527dfa5b25e6c9e289",
+      "text": "决定是否隐藏背向点。仅当数据包含法线时有效。"
+    },
+    {
+      "id": "PointCloudShading",
+      "field": "params/options.baseResolution/description",
+      "sourceHash": "sha256:12702cd43d3a9fc1bfd6ba8b0e06e8a0b4de6d900529da67ab8a2ce510775465",
+      "text": "数据集的平均基础分辨率，单位为米。没有几何误差时用于替代。"
+    },
+    {
+      "id": "PointCloudShading",
+      "field": "params/options.eyeDomeLighting/description",
+      "sourceHash": "sha256:22c3a1b3057bd8e2b9db413381a4310296dde5938ca2be4108f763923785084e",
+      "text": "为 true 时，在启用点衰减的绘制中使用眼穹光照。"
+    },
+    {
+      "id": "PointCloudShading",
+      "field": "params/options.eyeDomeLightingRadius/description",
+      "sourceHash": "sha256:2f8ff948435800c2d7ed84b92ce7e40a12e092ebdfcefc1768be0f587d3409f6",
+      "text": "增大眼穹光照生成的轮廓厚度。"
+    },
+    {
+      "id": "PointCloudShading",
+      "field": "params/options.eyeDomeLightingStrength/description",
+      "sourceHash": "sha256:181a6a90690f92cdc2e0dbed3f8a3ffa244b4a38b2323ae1d69b7f55f8eb7e70",
+      "text": "增大此值会提高坡面和边缘的对比度。"
+    },
+    {
+      "id": "PointCloudShading",
+      "field": "params/options.geometricErrorScale/description",
+      "sourceHash": "sha256:9e06584e72dc6b19a70fe2321e75e78eb54083fdecff9a62bf83ad20f453e642",
+      "text": "应用到每张瓦片几何误差的缩放值。"
+    },
+    {
+      "id": "PointCloudShading",
+      "field": "params/options.maximumAttenuation/description",
+      "sourceHash": "sha256:0dfe161b1640a321e248fdb4e90a67f65b0425e9527cab8e820c9aa10e4cf073",
+      "text": "最大点衰减值，单位为像素，默认采用 Cesium3DTileset 的 maximumScreenSpaceError。"
+    },
+    {
+      "id": "PointCloudShading",
+      "field": "params/options.normalShading/description",
+      "sourceHash": "sha256:9392fabb12904cb8c34211b936fb3fd3a3c8f04f78caa72200c65225afabf992",
+      "text": "决定包含法线的点云是否接受场景光源着色。"
+    },
+    {
+      "id": "PointCloudShading#attenuation",
+      "field": "description",
+      "sourceHash": "sha256:cc7dd5b9ac5814b42695a9b28fe6a2ec85b64960069e14f40d6313434c22dadb",
+      "text": "根据几何误差对点进行衰减。"
+    },
+    {
+      "id": "PointCloudShading#backFaceCulling",
+      "field": "description",
+      "sourceHash": "sha256:3b11f71257fb12b20a5d3f19c562fc31d03f8988a886f6ba7a6583da3dacf804",
+      "text": "决定是否隐藏背向点。仅当数据包含法线时有效。"
+    },
+    {
+      "id": "PointCloudShading#baseResolution",
+      "field": "description",
+      "sourceHash": "sha256:8f86e12036ef5e58aa82326ae56d8531f9da452c91f4ebd9b1e0435746d6bd0a",
+      "text": "数据集的平均基础分辨率，单位为米。几何误差为 0 时用于替代；未定义时，为每张几何误差为 0 的瓦片计算近似值。"
+    },
+    {
+      "id": "PointCloudShading#eyeDomeLighting",
+      "field": "description",
+      "sourceHash": "sha256:81ec1e638f34e474804ec4ac76ad85e48c200410c1ec2fcf05dfd2f688d5ddd8",
+      "text": "启用点衰减绘制时使用眼穹光照。在 WebGL 1.0 下，需要 EXT_frag_depth、OES_texture_float 和 WEBGL_draw_buffers 扩展，否则忽略眼穹光照。"
+    },
+    {
+      "id": "PointCloudShading#eyeDomeLightingRadius",
+      "field": "description",
+      "sourceHash": "sha256:ca87aff1a773b63e13a4f54f95d6e26fec2aff1f128efb5602f72aa0c47106df",
+      "text": "眼穹光照生成的轮廓厚度。"
+    },
+    {
+      "id": "PointCloudShading#eyeDomeLightingStrength",
+      "field": "description",
+      "sourceHash": "sha256:fc331a0b5a8066a84be19cf4cbde2519011c8ee236f69a76a2fdfe69741778ab",
+      "text": "眼穹光照强度，即视觉对比度。"
+    },
+    {
+      "id": "PointCloudShading#geometricErrorScale",
+      "field": "description",
+      "sourceHash": "sha256:7099f9f6f91d2aa862606f64308f303d239966d0cd95dd23b1ae187d5dc61ec4",
+      "text": "计算衰减前应用到几何误差的缩放值。"
+    },
+    {
+      "id": "PointCloudShading#maximumAttenuation",
+      "field": "description",
+      "sourceHash": "sha256:69f63121a787a79df068ecd73d43a697e30b8b4e63abfba540504ebaf38627b7",
+      "text": "最大点衰减值，单位为像素。未定义时，使用 Cesium3DTileset 的 maximumScreenSpaceError。"
+    },
+    {
+      "id": "PointCloudShading#normalShading",
+      "field": "description",
+      "sourceHash": "sha256:9392fabb12904cb8c34211b936fb3fd3a3c8f04f78caa72200c65225afabf992",
+      "text": "决定包含法线的点云是否接受场景光源着色。"
+    },
+    {
+      "id": "ShadowMap",
+      "field": "description",
+      "sourceHash": "sha256:87fa788c95d2bb74da7c1edd04efa2b7bfafe4c0c7582ee584a776562c85aac0",
+      "text": "<div class=\"notice\">\n请使用 {@link Viewer#shadowMap} 获取场景的阴影贴图，不要直接构造。\n</div>\n\n<p>\nnormalOffset 偏差会将阴影略微向前推移；对阴影精度要求极高的应用可禁用它。\n</p>"
+    },
+    {
+      "id": "ShadowMap",
+      "field": "exceptions/0/description",
+      "sourceHash": "sha256:7b29486cb1e5781d9be61b3f3002196a4da821bc64c3a5e49a8042e9ad3bf026",
+      "text": "仅支持一级或四级联阴影。"
+    },
+    {
+      "id": "ShadowMap#darkness",
+      "field": "description",
+      "sourceHash": "sha256:ec5b861532449f51b55357d4077282c8e8389425324961308764f8979f0502a1",
+      "text": "决定阴影的暗度。"
+    },
+    {
+      "id": "ShadowMap#enabled",
+      "field": "description",
+      "sourceHash": "sha256:c2fd42f5872c80e225a1c1f54c22b3b91dd5aa32bf5000932664cc70d0e7e491",
+      "text": "决定是否显示阴影贴图。"
+    },
+    {
+      "id": "ShadowMap#fadingEnabled",
+      "field": "description",
+      "sourceHash": "sha256:f9a2f0b0ea5f0cbb00bbb2d5ff650a6ecbfd722d0e0fb178b14d6c4d3d6928d6",
+      "text": "决定光源接近地平线时，阴影是否开始淡出。"
+    },
+    {
+      "id": "ShadowMap#maximumDistance",
+      "field": "description",
+      "sourceHash": "sha256:d8129f56142565f2516a5862045c9712ad2da2fd86a5d5327759bb9cb4598ae3",
+      "text": "阴影贴图的最大距离，仅对级联阴影有效。距离越大，阴影质量可能越低。"
+    },
+    {
+      "id": "ShadowMap#normalOffset",
+      "field": "description",
+      "sourceHash": "sha256:452d1b4879445d00d393eb8b7d34f0b909327656618448a3ff14a9e896cab15a",
+      "text": "决定是否对阴影应用法线偏差。"
+    },
+    {
+      "id": "ShadowMap#size",
+      "field": "description",
+      "sourceHash": "sha256:48eb00cd3f45eff2d71af2a69d8777bb7ea335f172b5a53b4cab62b8aa9d0abc",
+      "text": "每张阴影贴图的宽度和高度，单位为像素。"
+    },
+    {
+      "id": "ShadowMap#softShadows",
+      "field": "description",
+      "sourceHash": "sha256:2917ec5c5b6ec974809d4d4bdbde066407dfb847e9e49327753ea5ed9987e4a4",
+      "text": "决定是否启用软阴影。使用 PCF 滤波，需要更多纹理读取，可能降低性能。"
+    },
+    {
+      "id": "ShadowMode.CAST_ONLY",
+      "field": "description",
+      "sourceHash": "sha256:1c3538822a443b29c56b8912f7767acd6ad57ab72cd8890715d4ac7ad07b9544",
+      "text": "对象仅投射阴影。"
+    },
+    {
+      "id": "ShadowMode.DISABLED",
+      "field": "description",
+      "sourceHash": "sha256:b08b5a36fe13dbbe11bf1b14d199d0777d5cf5f641b10b68ac9e4903dde9d736",
+      "text": "对象既不投射也不接收阴影。"
+    },
+    {
+      "id": "ShadowMode.ENABLED",
+      "field": "description",
+      "sourceHash": "sha256:348adac450618c0248677d908e66cce115432feebff0eebd31088dea40c01e8c",
+      "text": "对象同时投射和接收阴影。"
+    },
+    {
+      "id": "ShadowMode.RECEIVE_ONLY",
+      "field": "description",
+      "sourceHash": "sha256:1539fa9fff0ef26217cfd61bb2b98b4411eba60fe59af89e631b128555cb4f2c",
+      "text": "对象仅接收阴影。"
+    },
+    {
+      "id": "ShadowMode",
+      "field": "description",
+      "sourceHash": "sha256:1520080b36da83e1c3f23a5aa8f49b8f20278c37d18bd0248b2d5f752aaab516",
+      "text": "启用阴影时，指定对象是否投射或接收来自光源的阴影。"
+    },
+    {
+      "id": "ShadowMode",
+      "field": "properties/CAST_ONLY/description",
+      "sourceHash": "sha256:1c3538822a443b29c56b8912f7767acd6ad57ab72cd8890715d4ac7ad07b9544",
+      "text": "对象仅投射阴影。"
+    },
+    {
+      "id": "ShadowMode",
+      "field": "properties/DISABLED/description",
+      "sourceHash": "sha256:b08b5a36fe13dbbe11bf1b14d199d0777d5cf5f641b10b68ac9e4903dde9d736",
+      "text": "对象既不投射也不接收阴影。"
+    },
+    {
+      "id": "ShadowMode",
+      "field": "properties/ENABLED/description",
+      "sourceHash": "sha256:348adac450618c0248677d908e66cce115432feebff0eebd31088dea40c01e8c",
+      "text": "对象同时投射和接收阴影。"
+    },
+    {
+      "id": "ShadowMode",
+      "field": "properties/RECEIVE_ONLY/description",
+      "sourceHash": "sha256:1539fa9fff0ef26217cfd61bb2b98b4411eba60fe59af89e631b128555cb4f2c",
+      "text": "对象仅接收阴影。"
+    },
+    {
+      "id": "SkyAtmosphere",
+      "field": "description",
+      "sourceHash": "sha256:f1834b79eda57fe5969cfa48b3851edaa2db854872a251a653500e80e71dc402",
+      "text": "围绕指定椭球边缘绘制的大气，基于论文 {@link http://nishitalab.org/user/nis/cdrom/sig93_nis.pdf|Display of The Earth Taking Into Account Atmospheric Scattering}。\n<p>\n仅支持三维模式。渐变到二维或哥伦布视图时，大气会逐渐淡出。\n</p>"
+    },
+    {
+      "id": "SkyAtmosphere",
+      "field": "params/ellipsoid/description",
+      "sourceHash": "sha256:7a501fd5ddbe4af96d553acd78b86203f78cfe1ed87310734eca518b65c85540",
+      "text": "大气环绕绘制的椭球。"
+    },
+    {
+      "id": "SkyAtmosphere#atmosphereLightIntensity",
+      "field": "description",
+      "sourceHash": "sha256:73ecb0849fec428008c08995570a5a0b2306955f848dd4091fad3e9664d02cba",
+      "text": "计算天空大气颜色所用的光照强度。"
+    },
+    {
+      "id": "SkyAtmosphere#atmosphereMieAnisotropy",
+      "field": "description",
+      "sourceHash": "sha256:7dcce32db6406a41eac0ef089fb0b7e7e1c026cc456c8509514b2e3aeccaeb79",
+      "text": "米氏散射所考虑介质的各向异性。<p>有效值范围为 -1.0 至 1.0。</p>"
+    },
+    {
+      "id": "SkyAtmosphere#atmosphereMieCoefficient",
+      "field": "description",
+      "sourceHash": "sha256:9250d2cef54fdd8dc9bbd4d30a5f70dadf6fb3e597cd657fdeac3d4f306ccdad",
+      "text": "天空大气散射方程所用的米氏散射系数。"
+    },
+    {
+      "id": "SkyAtmosphere#atmosphereMieScaleHeight",
+      "field": "description",
+      "sourceHash": "sha256:249588271f94f83ff7b85ab5fa3cc3ccfdfe86ed3fdb9c8f895edf456bbe6f9e",
+      "text": "天空大气散射方程所用的米氏标高，单位为米。"
+    },
+    {
+      "id": "SkyAtmosphere#atmosphereRayleighCoefficient",
+      "field": "description",
+      "sourceHash": "sha256:e89d4c7f642d3084e931527aca943e465ff23a30033234c6e9cc110fb4642090",
+      "text": "天空大气散射方程所用的瑞利散射系数。"
+    },
+    {
+      "id": "SkyAtmosphere#atmosphereRayleighScaleHeight",
+      "field": "description",
+      "sourceHash": "sha256:9a5cc1988f330c2b4df10bbbacd49d4025b7fefa660ebccf9be9526d8bbbcc7f",
+      "text": "天空大气散射方程所用的瑞利标高，单位为米。"
+    },
+    {
+      "id": "SkyAtmosphere#brightnessShift",
+      "field": "description",
+      "sourceHash": "sha256:a2d16b05b058d1fa0ea3a84a18e9a861bda5c0567170480e08d381828ef7674d",
+      "text": "应用于大气的亮度偏移。默认值为 0.0，即不偏移。偏移为 -1.0 时完全变暗，使太空背景显露。"
+    },
+    {
+      "id": "SkyAtmosphere#destroy",
+      "field": "description",
+      "sourceHash": "sha256:b385add820d9f47d540aad147f1cdf85f05e8c6cb81c3928a59c8fd5f7bd8d69",
+      "text": "销毁此对象持有的 WebGL 资源。显式销毁可确定地释放 WebGL 资源，而不依赖垃圾回收器回收此对象。<br /><br />对象销毁后不应再使用；调用除 <code>isDestroyed</code> 以外的任何函数都会抛出 {@link DeveloperError}。因此，应像示例中那样将返回值（<code>undefined</code>）赋给该对象变量。"
+    },
+    {
+      "id": "SkyAtmosphere#ellipsoid",
+      "field": "description",
+      "sourceHash": "sha256:9173201ed01f471286c67df54f892cb841e69023f9cc4aff1500c18effe063a2",
+      "text": "获取大气环绕绘制的椭球。"
+    },
+    {
+      "id": "SkyAtmosphere#hueShift",
+      "field": "description",
+      "sourceHash": "sha256:6ea96e1e8c9b57131131142772524f729d5a2f47d03289506dd80fd1ff8bb1a1",
+      "text": "应用于大气的色相偏移。默认值为 0.0，即不偏移。偏移为 1.0 表示遍历可用色相的完整一圈。"
+    },
+    {
+      "id": "SkyAtmosphere#isDestroyed",
+      "field": "description",
+      "sourceHash": "sha256:aea7b697937631c90ae3fc0ec55b81ba0ddc7abe4d6045848b2031f9bed60091",
+      "text": "若此对象已销毁，返回 true；否则返回 false。<br /><br />对象销毁后不应再使用；调用除 <code>isDestroyed</code> 以外的任何函数都会抛出 {@link DeveloperError}。"
+    },
+    {
+      "id": "SkyAtmosphere#perFragmentAtmosphere",
+      "field": "description",
+      "sourceHash": "sha256:9c02aec2c4057d4580c634ae2ce3fce7d84b1cbe36390bc45202d32cc376f509",
+      "text": "逐片元而非逐顶点计算大气，可提升显示效果，但略有性能开销。"
+    },
+    {
+      "id": "SkyAtmosphere#saturationShift",
+      "field": "description",
+      "sourceHash": "sha256:b145c14c520c14153331023820c48ba4212c20225b8d7be9f29e0ed84222d1bc",
+      "text": "应用于大气的饱和度偏移。默认值为 0.0，即不偏移。偏移为 -1.0 时呈单色。"
+    },
+    {
+      "id": "SkyAtmosphere#show",
+      "field": "description",
+      "sourceHash": "sha256:bfcfc2b96ee44b0fc5eb84f3a321edf81f9e379caf77431c27808b514a590aca",
+      "text": "决定是否显示大气。"
+    },
+    {
+      "id": "SkyBox.createEarthSkyBox",
+      "field": "description",
+      "sourceHash": "sha256:ec0eed292470e38301e477ec4216b659de20abc6d05b390ea1efaaef8ee4e51a",
+      "text": "使用默认地球星图创建天空盒实例。"
+    },
+    {
+      "id": "SkyBox.createEarthSkyBox",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:dc128704d300b850af0befc6b392d10449230fde8bc46b4c7c67b15eebc7b811",
+      "text": "地球的默认天空盒。"
+    },
+    {
+      "id": "SkyBox",
+      "field": "description",
+      "sourceHash": "sha256:501fda5af59aeb2af2fb42894d78b9234310bc9e49fdfac33604b7511d6fae42",
+      "text": "环绕场景、用于绘制星空的天空盒，采用真赤道平春分点（TEME）坐标轴。\n<p>\n仅支持三维模式。渐变到二维或哥伦布视图时，天空盒会逐渐淡出。天空盒尺寸不能超过 {@link Scene#maximumCubeMapSize}。\n</p>"
+    },
+    {
+      "id": "SkyBox",
+      "field": "params/options.show/description",
+      "sourceHash": "sha256:b83bd9ba98171d041c1a967a7f3df81b98fed4b822e9f456856716a2cba0bf6b",
+      "text": "决定是否显示此图元。"
+    },
+    {
+      "id": "SkyBox",
+      "field": "params/options.sources/description",
+      "sourceHash": "sha256:a06b10decea8085e663ccbde34ebae41c3d62e54af0e5eba0565fb546421d9ef",
+      "text": "立方体贴图六个面的源 URL 或 <code>Image</code> 对象，参见下方示例。"
+    },
+    {
+      "id": "SkyBox#destroy",
+      "field": "description",
+      "sourceHash": "sha256:b385add820d9f47d540aad147f1cdf85f05e8c6cb81c3928a59c8fd5f7bd8d69",
+      "text": "销毁此对象持有的 WebGL 资源。显式销毁可确定地释放 WebGL 资源，而不依赖垃圾回收器回收此对象。<br /><br />对象销毁后不应再使用；调用除 <code>isDestroyed</code> 以外的任何函数都会抛出 {@link DeveloperError}。因此，应像示例中那样将返回值（<code>undefined</code>）赋给该对象变量。"
+    },
+    {
+      "id": "SkyBox#isDestroyed",
+      "field": "description",
+      "sourceHash": "sha256:aea7b697937631c90ae3fc0ec55b81ba0ddc7abe4d6045848b2031f9bed60091",
+      "text": "若此对象已销毁，返回 true；否则返回 false。<br /><br />对象销毁后不应再使用；调用除 <code>isDestroyed</code> 以外的任何函数都会抛出 {@link DeveloperError}。"
+    },
+    {
+      "id": "SkyBox#show",
+      "field": "description",
+      "sourceHash": "sha256:08505eff2a300ad8ad52834cde1af8b18805e2990a5fba4953e5c56072e62470",
+      "text": "决定是否显示天空盒。"
+    },
+    {
+      "id": "SkyBox#sources",
+      "field": "description",
+      "sourceHash": "sha256:a260bb7685a439bec2ea3c3d49c8527dd01ac7a168cf0ace9ea9181dc39a5b51",
+      "text": "获取或设置天空盒各面的来源对象。"
+    },
+    {
+      "id": "SkyBox#update",
+      "field": "description",
+      "sourceHash": "sha256:c5cc5fb756479265000e8f5e05ef6b5630397b1880c9ff3316fe45c545c6b022",
+      "text": "由 {@link Viewer} 或 {@link CesiumWidget} 在渲染场景时调用，以获取渲染此图元所需的绘制命令。<p>不要直接调用。此处记录此函数，仅为列出场景渲染期间可能向上传播的异常：</p>"
+    },
+    {
+      "id": "SkyBox#update",
+      "field": "exceptions/0/description",
+      "sourceHash": "sha256:3e6209105b398730395ae76086219dfba7c81014e01568180392e268ee66ae41",
+      "text": "必须提供 this.sources，且须包含 positiveX、negativeX、positiveY、negativeY、positiveZ 和 negativeZ 属性。"
+    },
+    {
+      "id": "SkyBox#update",
+      "field": "exceptions/1/description",
+      "sourceHash": "sha256:ed70a676f47092bf099ad848c8ca06093dd9ea28cc25d038633404271f0ba71b",
+      "text": "this.sources 的全部属性必须为相同类型。"
+    },
+    {
+      "id": "Sun",
+      "field": "description",
+      "sourceHash": "sha256:33abec39f66d89ae2c098022967ddc7faa9754a1e285e806a6a010561b62f26c",
+      "text": "绘制太阳广告牌。\n<p>仅支持三维和哥伦布视图。</p>"
+    },
+    {
+      "id": "Sun#destroy",
+      "field": "description",
+      "sourceHash": "sha256:b385add820d9f47d540aad147f1cdf85f05e8c6cb81c3928a59c8fd5f7bd8d69",
+      "text": "销毁此对象持有的 WebGL 资源。显式销毁可确定地释放 WebGL 资源，而不依赖垃圾回收器回收此对象。<br /><br />对象销毁后不应再使用；调用除 <code>isDestroyed</code> 以外的任何函数都会抛出 {@link DeveloperError}。因此，应像示例中那样将返回值（<code>undefined</code>）赋给该对象变量。"
+    },
+    {
+      "id": "Sun#glowFactor",
+      "field": "description",
+      "sourceHash": "sha256:cddf7494a01bf86e8c82e2fa6aa2bd6ba8a580dc751d60087322c4486d2bb9b3",
+      "text": "获取或设置控制太阳镜头光晕亮度的数值。为零时仅显示太阳圆盘，不显示光晕。值越大，太阳周围的光晕越明显。"
+    },
+    {
+      "id": "Sun#isDestroyed",
+      "field": "description",
+      "sourceHash": "sha256:aea7b697937631c90ae3fc0ec55b81ba0ddc7abe4d6045848b2031f9bed60091",
+      "text": "若此对象已销毁，返回 true；否则返回 false。<br /><br />对象销毁后不应再使用；调用除 <code>isDestroyed</code> 以外的任何函数都会抛出 {@link DeveloperError}。"
+    },
+    {
+      "id": "Sun#show",
+      "field": "description",
+      "sourceHash": "sha256:2900d4cb1b89a37b1802acd77a3a8e8f0ff51fe65a14c725997a1fe55338a0d9",
+      "text": "决定是否显示太阳。"
+    },
+    {
+      "id": "SunLight",
+      "field": "description",
+      "sourceHash": "sha256:250f0dd445356e786ae8120d3446102d459ce837d8de3ea2a7799559892bf424",
+      "text": "来自太阳的方向光源。"
+    },
+    {
+      "id": "SunLight",
+      "field": "params/options.color/description",
+      "sourceHash": "sha256:e14463f859d4b96a96561e7710f8ec979472011b00f536d9bd76091e9e2c4140",
+      "text": "光源颜色。"
+    },
+    {
+      "id": "SunLight",
+      "field": "params/options.intensity/description",
+      "sourceHash": "sha256:266c368dfbbd9372bee654335ac478cc23b7f71d933d2249cd9a30e6d27be2d3",
+      "text": "光源强度。"
+    },
+    {
+      "id": "SunLight#color",
+      "field": "description",
+      "sourceHash": "sha256:d5b46ba4996c7751efb95789a5c5db5123f357eadb93fefdb75a79d834e5f4e7",
+      "text": "光源颜色。"
+    },
+    {
+      "id": "SunLight#intensity",
+      "field": "description",
+      "sourceHash": "sha256:88ba46d525310f3bc29b8f364e9acac1bc83f6b1d2730314f6b84295d509872a",
+      "text": "光源强度。"
+    },
+    {
+      "id": "TimeDynamicPointCloud",
+      "field": "description",
+      "sourceHash": "sha256:02db25f1e17d6421e9c657ca7c986804144fbfe1fa7efaeaea1d322a52bb317b",
+      "text": "播放随时间变化的点云数据。\n<p>\n根据平均帧加载时间和当前时钟速度确定预取间隔。如果中间帧无法及时加载以满足播放速度，则跳过；帧足够小或时钟足够慢时，不会跳帧。\n</p>"
+    },
+    {
+      "id": "TimeDynamicPointCloud",
+      "field": "params/options.clippingPlanes/description",
+      "sourceHash": "sha256:d0e9a79fb55593125f775398b02365a87ae18e479ac21bf4b9a92b121ff61fa8",
+      "text": "用于选择性禁用点云部分区域渲染的 {@link ClippingPlaneCollection}。"
+    },
+    {
+      "id": "TimeDynamicPointCloud",
+      "field": "params/options.clock/description",
+      "sourceHash": "sha256:323eb7b24bc95dc0ddeff32ffd29465baacede4ca1956e42dd53b79a0635069e",
+      "text": "用于确定时间维度取值的 {@link Clock} 实例。"
+    },
+    {
+      "id": "TimeDynamicPointCloud",
+      "field": "params/options.intervals/description",
+      "sourceHash": "sha256:c4039476249c3f96c286537cd696afffed3b5e5c29f8689a18d701d43816b93e",
+      "text": "一个 {@link TimeIntervalCollection}，各区间的 data 属性为包含指向 3D Tiles 点云瓦片的 <code>uri</code> 及可选 <code>transform</code> 的对象。"
+    },
+    {
+      "id": "TimeDynamicPointCloud",
+      "field": "params/options.maximumMemoryUsage/description",
+      "sourceHash": "sha256:e9fa49fce37df2bb6dba0b6935f05454a560026a199cc18c0ce3a28a877ba868",
+      "text": "点云允许使用的最大内存量，单位为 MB。"
+    },
+    {
+      "id": "TimeDynamicPointCloud",
+      "field": "params/options.modelMatrix/description",
+      "sourceHash": "sha256:a40f18779b9bea225fce0c487977d94582078cc582b1f9eb4f09844f5bb125f8",
+      "text": "变换点云的 4x4 矩阵。"
+    },
+    {
+      "id": "TimeDynamicPointCloud",
+      "field": "params/options.shading/description",
+      "sourceHash": "sha256:f8064e0121d02c2a0e8ff47dff955109ac055e29951f70dc2b18961437f922e0",
+      "text": "构造 {@link PointCloudShading} 对象以控制点衰减和眼穹光照的选项。"
+    },
+    {
+      "id": "TimeDynamicPointCloud",
+      "field": "params/options.shadows/description",
+      "sourceHash": "sha256:c3ad491a5c7950d707cb66b644aae7e40dd337953879046f6ac9e1528a03f5bd",
+      "text": "决定点云是否投射或接收来自光源的阴影。"
+    },
+    {
+      "id": "TimeDynamicPointCloud",
+      "field": "params/options.show/description",
+      "sourceHash": "sha256:5a9e72ddb3932e998bb0941af676670be1ae47b0d9f78878fa7573475d88e33a",
+      "text": "决定是否显示点云。"
+    },
+    {
+      "id": "TimeDynamicPointCloud",
+      "field": "params/options.style/description",
+      "sourceHash": "sha256:54b987138a077458500c2710921fb3933e5785af455a40881a52fa25327de5dc",
+      "text": "使用 {@link https://github.com/CesiumGS/3d-tiles/tree/main/specification/Styling|3D Tiles 样式语言}定义、应用于点云中每个点的样式。"
+    },
+    {
+      "id": "TimeDynamicPointCloud#boundingSphere",
+      "field": "description",
+      "sourceHash": "sha256:fb4463e37e1844b44a0e0b1b3447509fc27696c60d34be8a2d811a87f4f962d1",
+      "text": "当前渲染帧的包围球。没有正在渲染的帧时，返回 <code>undefined</code>。"
+    },
+    {
+      "id": "TimeDynamicPointCloud#clippingPlanes",
+      "field": "description",
+      "sourceHash": "sha256:d0e9a79fb55593125f775398b02365a87ae18e479ac21bf4b9a92b121ff61fa8",
+      "text": "用于选择性禁用点云部分区域渲染的 {@link ClippingPlaneCollection}。"
+    },
+    {
+      "id": "TimeDynamicPointCloud#destroy",
+      "field": "description",
+      "sourceHash": "sha256:b385add820d9f47d540aad147f1cdf85f05e8c6cb81c3928a59c8fd5f7bd8d69",
+      "text": "销毁此对象持有的 WebGL 资源。显式销毁可确定地释放 WebGL 资源，而不依赖垃圾回收器回收此对象。<br /><br />对象销毁后不应再使用；调用除 <code>isDestroyed</code> 以外的任何函数都会抛出 {@link DeveloperError}。因此，应像示例中那样将返回值（<code>undefined</code>）赋给该对象变量。"
+    },
+    {
+      "id": "TimeDynamicPointCloud#frameChanged",
+      "field": "description",
+      "sourceHash": "sha256:56419b5b9c88966294f16b1094e665b33a7bbf2566eb65366ddc3176f45cc63d",
+      "text": "表示已渲染新帧的事件。\n<p>\n事件监听器接收时间动态点云 {@link TimeDynamicPointCloud}。\n</p>"
+    },
+    {
+      "id": "TimeDynamicPointCloud#frameFailed",
+      "field": "description",
+      "sourceHash": "sha256:ff537a0b1768ccef274eaf8c2327fd8e04bcc5423f05047de8d27bb1f2a6c707",
+      "text": "表示帧加载失败的事件。URI 请求失败或因内容无效而处理失败，都可能导致加载失败。\n<p>\n没有事件监听器时，将错误信息输出到控制台。\n</p>\n<p>\n传给监听器的错误对象包含两个属性：\n<ul>\n<li><code>uri</code>：失败帧的 URI。</li>\n<li><code>message</code>：错误信息。</li>\n</ul>"
+    },
+    {
+      "id": "TimeDynamicPointCloud#isDestroyed",
+      "field": "description",
+      "sourceHash": "sha256:aea7b697937631c90ae3fc0ec55b81ba0ddc7abe4d6045848b2031f9bed60091",
+      "text": "若此对象已销毁，返回 true；否则返回 false。<br /><br />对象销毁后不应再使用；调用除 <code>isDestroyed</code> 以外的任何函数都会抛出 {@link DeveloperError}。"
+    },
+    {
+      "id": "TimeDynamicPointCloud#makeStyleDirty",
+      "field": "description",
+      "sourceHash": "sha256:44164fa6a529a405f50d79c20d8aae669b817086fe8c12622ac56624a51c7fda",
+      "text": "将点云的 {@link TimeDynamicPointCloud#style} 标记为已修改，强制全部点在下一帧重新计算样式。"
+    },
+    {
+      "id": "TimeDynamicPointCloud#maximumMemoryUsage",
+      "field": "description",
+      "sourceHash": "sha256:839bfe5d42157a2173b5613251057989c52d17a174dc011bb3b5f7d1ecf645e6",
+      "text": "允许用于缓存点云帧的最大 GPU 内存量，单位为 MB。\n<p>\n通过卸载不在加载或渲染中的帧来满足此限制。\n</p>\n<p>\n减小此值导致需要卸载瓦片时，会在下一帧执行卸载。\n</p>"
+    },
+    {
+      "id": "TimeDynamicPointCloud#modelMatrix",
+      "field": "description",
+      "sourceHash": "sha256:a40f18779b9bea225fce0c487977d94582078cc582b1f9eb4f09844f5bb125f8",
+      "text": "变换点云的 4x4 矩阵。"
+    },
+    {
+      "id": "TimeDynamicPointCloud#shading",
+      "field": "description",
+      "sourceHash": "sha256:0fddd6782b482cd9dc1499a712b2f389578d1c0bab01f049a1caf6989db4fbc7",
+      "text": "根据几何误差和眼穹照明控制点大小的选项。"
+    },
+    {
+      "id": "TimeDynamicPointCloud#shadows",
+      "field": "description",
+      "sourceHash": "sha256:b2b0cb43756035f186c1f587b84699ef796e9cd45b3fe1a4265c1608391a4b4f",
+      "text": "决定点云是否投射或接收来自光源的阴影。\n<p>\n启用阴影有性能开销。投射阴影的点云需要渲染两次：一次从相机视角，一次从光源视角。\n</p>\n<p>\n仅当 {@link Viewer#shadows} 为 <code>true</code> 时渲染阴影。\n</p>"
+    },
+    {
+      "id": "TimeDynamicPointCloud#show",
+      "field": "description",
+      "sourceHash": "sha256:5a9e72ddb3932e998bb0941af676670be1ae47b0d9f78878fa7573475d88e33a",
+      "text": "决定是否显示点云。"
+    },
+    {
+      "id": "TimeDynamicPointCloud#style",
+      "field": "description",
+      "sourceHash": "sha256:6a6c16101a5029e9bbb3f0e512531bd3fa7cb79c35ebc535ee62c0726fc449e6",
+      "text": "使用 {@link https://github.com/CesiumGS/3d-tiles/tree/main/specification/Styling|3D Tiles 样式语言}定义、应用于点云中每个点的样式。\n<p>\n赋为 <code>undefined</code> 可移除样式，恢复未应用样式时的默认外观。\n</p>"
+    },
+    {
+      "id": "TimeDynamicPointCloud#totalMemoryUsageInBytes",
+      "field": "description",
+      "sourceHash": "sha256:4df216f9248653d83db4e9c41b2296495e7d9f3af1eb53bba5375e056a6f2d67",
+      "text": "点云使用的 GPU 内存总量，单位为字节。"
+    }
+  ]
+}

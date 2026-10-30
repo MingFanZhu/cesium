@@ -1,0 +1,1218 @@
+{
+  "schemaVersion": 1,
+  "locale": "zh-CN",
+  "entries": [
+    {
+      "id": "ClippingPlane.clone",
+      "field": "description",
+      "sourceHash": "sha256:e574811115c6ebb9b85ef04268f037abaf04bfb05d6f718c9aef867ec1c7627c",
+      "text": "克隆 ClippingPlane，但不设置其所有权。"
+    },
+    {
+      "id": "ClippingPlane.clone",
+      "field": "params/clippingPlane/description",
+      "sourceHash": "sha256:0381ee35162ead585b181bf47c54cff7d7c05cbdbe9ffc76c725f61b965e1e19",
+      "text": "待克隆的 ClippingPlane。"
+    },
+    {
+      "id": "ClippingPlane.clone",
+      "field": "params/result/description",
+      "sourceHash": "sha256:58b4cc82fb6f2d3165e28304dae93826a58fbd4a352bc83e675d3ad68ad2f389",
+      "text": "用于存储克隆参数的对象。"
+    },
+    {
+      "id": "ClippingPlane.clone",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:0801788269ca3e465820e8a1ff9c1d1e25d07ecc4b1c08fed1f1d3536149df68",
+      "text": "输入 ClippingPlane 的副本。"
+    },
+    {
+      "id": "ClippingPlane.fromPlane",
+      "field": "description",
+      "sourceHash": "sha256:2bd257d8c84a286a0a069fe5137e2eb231ecad24a2471123e3109b5254076da3",
+      "text": "从 Plane 对象创建 ClippingPlane。"
+    },
+    {
+      "id": "ClippingPlane.fromPlane",
+      "field": "params/plane/description",
+      "sourceHash": "sha256:1c39782e08dd0c54b07f7de376e21046521293349be5e5c5a411abe514b85d73",
+      "text": "包含待复制参数的平面。"
+    },
+    {
+      "id": "ClippingPlane.fromPlane",
+      "field": "params/result/description",
+      "sourceHash": "sha256:393d55f9aa159045309de07fcdb7cb89aa345d21b3b6d3c1bd7a128d404f050f",
+      "text": "用于存储结果的对象。"
+    },
+    {
+      "id": "ClippingPlane.fromPlane",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:6169dd6b5021bff8ff62a8f8898289230055c95283d583ef3469982fb9c5714a",
+      "text": "根据平面参数生成的 ClippingPlane。"
+    },
+    {
+      "id": "ClippingPlane",
+      "field": "description",
+      "sourceHash": "sha256:35926c3f8ef4389ab1d53d0d2dc1006f7e6dc52338191ef34f4fe3963a68e837",
+      "text": "采用 Hessian 标准式、供 {@link ClippingPlaneCollection} 使用的平面。兼容 {@link Plane} 中的数学运算函数。"
+    },
+    {
+      "id": "ClippingPlane",
+      "field": "params/distance/description",
+      "sourceHash": "sha256:d57fa7b01d7012ab6b28d966912d07d9f249ce79783b5208382a599bea2b29d3",
+      "text": "原点到平面的最短距离。<code>distance</code> 的符号决定原点位于平面的哪一侧：<code>distance</code> 为正时，原点位于法线方向的半空间；为负时位于法线反方向的半空间；为零时平面经过原点。"
+    },
+    {
+      "id": "ClippingPlane",
+      "field": "params/normal/description",
+      "sourceHash": "sha256:c520b73a696963008b2a68b2adbe7aa960ad974726ed2b6752fd1c0b1f8c8a7b",
+      "text": "平面方程系数，其中法线分量必须已归一化。"
+    },
+    {
+      "id": "ClippingPlane#distance",
+      "field": "description",
+      "sourceHash": "sha256:d57fa7b01d7012ab6b28d966912d07d9f249ce79783b5208382a599bea2b29d3",
+      "text": "原点到平面的最短距离。<code>distance</code> 的符号决定原点位于平面的哪一侧：<code>distance</code> 为正时，原点位于法线方向的半空间；为负时位于法线反方向的半空间；为零时平面经过原点。"
+    },
+    {
+      "id": "ClippingPlane#normal",
+      "field": "description",
+      "sourceHash": "sha256:a30014359cddede5263a76fb62f256badd0545fa5d4810032ebff074290a88c4",
+      "text": "平面法线。"
+    },
+    {
+      "id": "ClippingPlaneCollection",
+      "field": "description",
+      "sourceHash": "sha256:3ab106edf8aba473090bf5cf5428c8f09e938b0b9f994171208e2e49c32cb765",
+      "text": "一组裁剪平面。针对单个 glTF 模型、3D Tiles 瓦片集或地球，选择性禁用指定 {@link ClippingPlane} 列表外侧区域的渲染。\n<p>\n裁剪平面的坐标通常相对于其附着对象，因此 distance 为 0 的平面会穿过对象中心。\n</p>\n<p>\n对于 3D Tiles，使用根瓦片的变换定位裁剪平面；未定义变换时，改用根瓦片的 {@link Cesium3DTile#boundingSphere}。\n</p>"
+    },
+    {
+      "id": "ClippingPlaneCollection",
+      "field": "params/options.edgeColor/description",
+      "sourceHash": "sha256:67d71e38012e8809a48c170aa09be95f7f2beeee85ad3d02e4db59fc6fd7a60d",
+      "text": "高亮对象裁剪边缘所用的颜色。"
+    },
+    {
+      "id": "ClippingPlaneCollection",
+      "field": "params/options.edgeWidth/description",
+      "sourceHash": "sha256:3e9c04d1387db1179bca3419b8031efe70e3f63915f9fe3ef18d6564eb4114fc",
+      "text": "对象裁剪边缘的高亮宽度，单位为像素。"
+    },
+    {
+      "id": "ClippingPlaneCollection",
+      "field": "params/options.enabled/description",
+      "sourceHash": "sha256:648b5eec9dc6f00a0806e73db9deef1b202da870ac5d05fca359e10530b5ed62",
+      "text": "决定是否启用裁剪平面。"
+    },
+    {
+      "id": "ClippingPlaneCollection",
+      "field": "params/options.modelMatrix/description",
+      "sourceHash": "sha256:af6fc9aa97fa8bb0ad0dbabe6acd565106800a78dd646c4a9963225937b480d1",
+      "text": "相对于裁剪平面原始坐标系的附加 4x4 变换矩阵。"
+    },
+    {
+      "id": "ClippingPlaneCollection",
+      "field": "params/options.planes/description",
+      "sourceHash": "sha256:927a60f1cf41aceaae0d61e92704dcaeec1e5a753c230f8f1838a1808ff2f6da",
+      "text": "用于选择性禁用各平面外侧区域渲染的 {@link ClippingPlane} 数组。"
+    },
+    {
+      "id": "ClippingPlaneCollection",
+      "field": "params/options.unionClippingRegions/description",
+      "sourceHash": "sha256:10119ebc73fffa1d669eb9f4ba6376f594fe6eb59d98b8f911a6d275dc1200ea",
+      "text": "为 true 时，位于任意平面外侧的区域都会被裁剪；否则，仅裁剪位于全部平面外侧的区域。"
+    },
+    {
+      "id": "ClippingPlaneCollection#add",
+      "field": "description",
+      "sourceHash": "sha256:32a4a0a397b3b39e69a50a2e1161bca08fa2f0996a3235761d6c5505bf62eea8",
+      "text": "将指定 {@link ClippingPlane} 加入集合，用于选择性禁用平面外侧区域的渲染。使用 {@link ClippingPlaneCollection#unionClippingRegions} 修改多个平面组合时的裁剪行为。"
+    },
+    {
+      "id": "ClippingPlaneCollection#add",
+      "field": "params/plane/description",
+      "sourceHash": "sha256:c53b5856b2f97bbcaf085ba64c0e6c352a7f20cce90112b1f0d4f214a5b60c08",
+      "text": "要加入集合的 ClippingPlane。"
+    },
+    {
+      "id": "ClippingPlaneCollection#contains",
+      "field": "description",
+      "sourceHash": "sha256:97f8ac058478dc1dd2c8f3e03f30720d91bae07f62baeb19747c961774ef8b2f",
+      "text": "检查集合是否包含与给定 ClippingPlane 相等的裁剪平面。"
+    },
+    {
+      "id": "ClippingPlaneCollection#contains",
+      "field": "params/clippingPlane/description",
+      "sourceHash": "sha256:f2ed3eec57c753adbf7f2eb9493191c562f9be853c39ee665027fc401764b163",
+      "text": "要检查的 ClippingPlane。"
+    },
+    {
+      "id": "ClippingPlaneCollection#contains",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:74709fabf1362357c696765bcaa37cfa141b6874147646eeba34fefc8a69727f",
+      "text": "集合包含此 ClippingPlane 时为 true，否则为 false。"
+    },
+    {
+      "id": "ClippingPlaneCollection#destroy",
+      "field": "description",
+      "sourceHash": "sha256:b385add820d9f47d540aad147f1cdf85f05e8c6cb81c3928a59c8fd5f7bd8d69",
+      "text": "销毁此对象持有的 WebGL 资源。显式销毁可确定地释放 WebGL 资源，而不依赖垃圾回收器回收此对象。<br /><br />对象销毁后不应再使用；调用除 <code>isDestroyed</code> 以外的任何函数都会抛出 {@link DeveloperError}。因此，应像示例中那样将返回值（<code>undefined</code>）赋给该对象变量。"
+    },
+    {
+      "id": "ClippingPlaneCollection#edgeColor",
+      "field": "description",
+      "sourceHash": "sha256:67d71e38012e8809a48c170aa09be95f7f2beeee85ad3d02e4db59fc6fd7a60d",
+      "text": "高亮对象裁剪边缘所用的颜色。"
+    },
+    {
+      "id": "ClippingPlaneCollection#edgeWidth",
+      "field": "description",
+      "sourceHash": "sha256:3e9c04d1387db1179bca3419b8031efe70e3f63915f9fe3ef18d6564eb4114fc",
+      "text": "对象裁剪边缘的高亮宽度，单位为像素。"
+    },
+    {
+      "id": "ClippingPlaneCollection#enabled",
+      "field": "description",
+      "sourceHash": "sha256:23127ebd92e90b2a0bd2f463eef443b39e7f4c939c6443e6a0d36a8f0275bf1b",
+      "text": "为 true 时启用裁剪。"
+    },
+    {
+      "id": "ClippingPlaneCollection#get",
+      "field": "description",
+      "sourceHash": "sha256:3ba99a47ce796e0bea1d4779371a1154febf14671b1ef4fa530d2c5de2ff1302",
+      "text": "返回集合中指定索引的平面。索引从零开始，随平面加入而增加。移除平面会使后续平面向前移动，改变其索引。此函数常与 {@link ClippingPlaneCollection#length} 一起用于遍历全部平面。"
+    },
+    {
+      "id": "ClippingPlaneCollection#get",
+      "field": "params/index/description",
+      "sourceHash": "sha256:eee81914939df37d1346028edd89fc27415af54952c745869a290219ff3f00d1",
+      "text": "平面从零开始的索引。"
+    },
+    {
+      "id": "ClippingPlaneCollection#get",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:a618cceefd9fa729004017e1f8657d47d82f71937d4f369e385705e4efa19049",
+      "text": "指定索引处的 ClippingPlane。"
+    },
+    {
+      "id": "ClippingPlaneCollection#isDestroyed",
+      "field": "description",
+      "sourceHash": "sha256:aea7b697937631c90ae3fc0ec55b81ba0ddc7abe4d6045848b2031f9bed60091",
+      "text": "若此对象已销毁，返回 true；否则返回 false。<br /><br />对象销毁后不应再使用；调用除 <code>isDestroyed</code> 以外的任何函数都会抛出 {@link DeveloperError}。"
+    },
+    {
+      "id": "ClippingPlaneCollection#length",
+      "field": "description",
+      "sourceHash": "sha256:9312a1c1365c344d27fc6e7c30d9e2a0b8c96e74d0f3f84b8e8aad1e7a8b8dcf",
+      "text": "返回集合中的平面数量，常与 {@link ClippingPlaneCollection#get} 一起用于遍历全部平面。"
+    },
+    {
+      "id": "ClippingPlaneCollection#modelMatrix",
+      "field": "description",
+      "sourceHash": "sha256:59d8558907106a9bd18e96caffa6bfa2349f1e259025af2335d065f70f7c3ff3",
+      "text": "相对于裁剪平面原始坐标系的附加 4x4 变换矩阵。"
+    },
+    {
+      "id": "ClippingPlaneCollection#planeAdded",
+      "field": "description",
+      "sourceHash": "sha256:f15f2bb6b60c7b430cab9e0760ea96f055bda5caf6a42181cc6a2d4bd3642b4e",
+      "text": "新裁剪平面加入集合时触发的事件。处理函数接收新平面及其加入时的索引。"
+    },
+    {
+      "id": "ClippingPlaneCollection#planeRemoved",
+      "field": "description",
+      "sourceHash": "sha256:5bd401e5fad8c321d0f2fc79dcaaaee0323d702c6fab00fe708de82279df7c70",
+      "text": "裁剪平面从集合移除时触发的事件。处理函数接收被移除的平面及其原索引。"
+    },
+    {
+      "id": "ClippingPlaneCollection#remove",
+      "field": "description",
+      "sourceHash": "sha256:1b716ef7133af54abc25af2f4991b97df689e376419de4a340b036b63b8c42d3",
+      "text": "从集合中移除第一个与给定 ClippingPlane 相等的平面。"
+    },
+    {
+      "id": "ClippingPlaneCollection#remove",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:fdcf071e416abb195cb0b387dc22c5cd098a823acef857f2be1862ab1561f53b",
+      "text": "已移除平面时为 <code>true</code>；集合中未找到平面时为 <code>false</code>。"
+    },
+    {
+      "id": "ClippingPlaneCollection#removeAll",
+      "field": "description",
+      "sourceHash": "sha256:ce087dd8e024b86edc12ea4f034babe00c4cdc9ceef46795fd8a9863ef3f926b",
+      "text": "从集合中移除全部平面。"
+    },
+    {
+      "id": "ClippingPlaneCollection#unionClippingRegions",
+      "field": "description",
+      "sourceHash": "sha256:b0f52e4ebbd26c42ee589f9b5db9fc357935c164a8463d9ebe9546a63bc2384f",
+      "text": "为 true 时，位于集合中任意平面外侧的区域都会被裁剪；否则，仅裁剪位于全部平面外侧的区域。"
+    },
+    {
+      "id": "ClippingPlaneCollection#update",
+      "field": "description",
+      "sourceHash": "sha256:b220a31e31e45dce165630f1b1577435220702749e82234b58d765603af26813",
+      "text": "由 {@link Viewer} 或 {@link CesiumWidget} 在渲染场景时调用，以创建裁剪平面所需资源。\n<p>\n不要直接调用此函数。\n</p>"
+    },
+    {
+      "id": "ClippingPolygon.clone",
+      "field": "description",
+      "sourceHash": "sha256:b0dbe493a6d2cbf936245f03f2f3eca84c2b30e5b6b302a0ebccbfd9fccadeea",
+      "text": "克隆 ClippingPolygon，但不设置其所有权。"
+    },
+    {
+      "id": "ClippingPolygon.clone",
+      "field": "params/polygon/description",
+      "sourceHash": "sha256:f72dd56a59a783375bb33bfe7c2ee7c754e5102bcad6d07ad9b7e5f320fc0275",
+      "text": "待克隆的 ClippingPolygon。"
+    },
+    {
+      "id": "ClippingPolygon.clone",
+      "field": "params/result/description",
+      "sourceHash": "sha256:58b4cc82fb6f2d3165e28304dae93826a58fbd4a352bc83e675d3ad68ad2f389",
+      "text": "用于存储克隆参数的对象。"
+    },
+    {
+      "id": "ClippingPolygon.clone",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:78b474926b2b47f435ec54df01ef81af15b118d8353fe0bda8df26148979e69f",
+      "text": "输入 ClippingPolygon 的副本。"
+    },
+    {
+      "id": "ClippingPolygon.equals",
+      "field": "description",
+      "sourceHash": "sha256:6f3d1b6a9cb99ef4cb17b35e0c6cbac6e88afed430032a160b5d87d52f462302",
+      "text": "比较两个 ClippingPolygon，相等时返回 <code>true</code>，否则返回 <code>false</code>。"
+    },
+    {
+      "id": "ClippingPolygon.equals",
+      "field": "params/left/description",
+      "sourceHash": "sha256:e74e6fcb58b770e1294ca1148f67db4999e2d3c254c098a6ef8c10e12771d1cf",
+      "text": "第一个多边形。"
+    },
+    {
+      "id": "ClippingPolygon.equals",
+      "field": "params/right/description",
+      "sourceHash": "sha256:d65a05e5d7b76bd255c5befcc5fdb753219a4d08d52322d950155691f28d5004",
+      "text": "第二个多边形。"
+    },
+    {
+      "id": "ClippingPolygon",
+      "field": "description",
+      "sourceHash": "sha256:22b2e63b9a866c48f9676239cbae82e85fbb162e7fa47c48200d689fabf66e93",
+      "text": "用于选择性隐藏模型、3D Tiles 瓦片集或地球局部区域的测地多边形。多边形集合使用 ClippingPolygonCollection；平面集合相关接口参见 {@link ClippingPlaneCollection}。"
+    },
+    {
+      "id": "ClippingPolygon",
+      "field": "params/options.positions/description",
+      "sourceHash": "sha256:2377b2e94ca90eb95d191103c718fc01426d8fb6018ac9a36a8a70c30fbe9b32",
+      "text": "定义裁剪多边形外环的笛卡尔坐标列表，至少包含三个位置。"
+    },
+    {
+      "id": "ClippingPolygon#computeRectangle",
+      "field": "description",
+      "sourceHash": "sha256:4cfc5c0ea52bd5fd491b6d63917710e5979c3be1e52489f125717753e34dcc1e",
+      "text": "计算包围位置列表所定义多边形的经纬度矩形，支持跨越国际日期变更线和极点的情况。"
+    },
+    {
+      "id": "ClippingPolygon#computeRectangle",
+      "field": "params/result/description",
+      "sourceHash": "sha256:6a8719e889fa28260f1981bc4bd10845ec2c8694792e5da8511b742ca24ce161",
+      "text": "用于存储结果的对象。"
+    },
+    {
+      "id": "ClippingPolygon#computeRectangle",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:99212ffccc2417b8a170d7269cc228af388d3b69c7eaba74a13cbb746c93b34f",
+      "text": "结果矩形。"
+    },
+    {
+      "id": "ClippingPolygon#ellipsoid",
+      "field": "description",
+      "sourceHash": "sha256:c6c6ba25a4d12fff316e3761784c1b3896bdf3ceb7514b1acd80d8c67a6f650a",
+      "text": "返回裁剪时将多边形投影到表面所用的椭球。"
+    },
+    {
+      "id": "ClippingPolygon#length",
+      "field": "description",
+      "sourceHash": "sha256:e53672c2847242e30b0e7ace7d0b0a5a856da5af1cf0cd2929302e77da540eca",
+      "text": "返回多边形中的位置总数，包括孔洞。"
+    },
+    {
+      "id": "ClippingPolygon#positions",
+      "field": "description",
+      "sourceHash": "sha256:c49599a6cc2f0f271478604d61b9e752dbfdfdd9df980e0b2660588a08d7c7cf",
+      "text": "返回外环位置数组。"
+    },
+    {
+      "id": "ClippingPolygonCollection.isSupported",
+      "field": "description",
+      "sourceHash": "sha256:f03a00a18a155eacc49a6b2502412de103acbcb5afdb01a4716bcba5da004511",
+      "text": "检查上下文是否支持裁剪多边形；该功能需要浮点纹理。"
+    },
+    {
+      "id": "ClippingPolygonCollection.isSupported",
+      "field": "params/scene/description",
+      "sourceHash": "sha256:6b875178718848f80f6bac8583b3cf0bf8523448d6b9547e3ba8dc8c9dbd150c",
+      "text": "将包含被裁剪对象及裁剪纹理的场景。"
+    },
+    {
+      "id": "ClippingPolygonCollection.isSupported",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:c547dd730f9485e497765e8e26bc8468bb267651abb083b1549c1f4fc254e2d2",
+      "text": "上下文支持裁剪多边形时为 <code>true</code>。"
+    },
+    {
+      "id": "ClippingPolygonCollection",
+      "field": "description",
+      "sourceHash": "sha256:e44b515cb0f8c496bd146d56f04db66365c4eafc65445756967297135ece32d3",
+      "text": "一组裁剪多边形。针对单个 glTF 模型、3D Tiles 瓦片集或地球，选择性禁用指定 {@link ClippingPolygon} 列表内部或外部区域的渲染。\n\n裁剪多边形仅支持 WebGL 2 上下文。"
+    },
+    {
+      "id": "ClippingPolygonCollection",
+      "field": "params/options.enabled/description",
+      "sourceHash": "sha256:67c7947d3fc236b48c37b9d51b16a1599e2322d3e443485e8c39013a9f57470c",
+      "text": "决定是否启用裁剪多边形。"
+    },
+    {
+      "id": "ClippingPolygonCollection",
+      "field": "params/options.inverse/description",
+      "sourceHash": "sha256:96d04e685dc692183476b29108bc6a1bc8c14c93f0d11e3d88e8a808a9831dd7",
+      "text": "为 true 时，裁剪位于集合中全部多边形外侧的区域；否则，裁剪位于任意多边形内部的区域。"
+    },
+    {
+      "id": "ClippingPolygonCollection",
+      "field": "params/options.polygons/description",
+      "sourceHash": "sha256:b7e38a3f959547f15be35057f5a733a0c64830ae9992ea152685f86cb9f03ea8",
+      "text": "用于选择性禁用各多边形内部区域渲染的 {@link ClippingPolygon} 数组。"
+    },
+    {
+      "id": "ClippingPolygonCollection",
+      "field": "params/options.quality/description",
+      "sourceHash": "sha256:8c225272c53dbebae7fc65a3613fd52d07063b3a8bbd2f813532824288914b81",
+      "text": "控制裁剪所用有符号距离纹理分辨率的系数。大于 1.0 时提高质量，小于 1.0 时降低质量；必须大于 0.0。"
+    },
+    {
+      "id": "ClippingPolygonCollection#add",
+      "field": "description",
+      "sourceHash": "sha256:d72e859e41d3d9bff99b195cb61761a5d1f1cfb9d4b4d3fc741a7cbcdf9c9285",
+      "text": "将指定 {@link ClippingPolygon} 加入集合，用于选择性禁用各多边形内部区域的渲染。多个区域的组合裁剪概念参见 {@link ClippingPolygonCollection#unionClippingRegions}；此集合通过 inverse 属性控制内外反选。"
+    },
+    {
+      "id": "ClippingPolygonCollection#add",
+      "field": "params/polygon/description",
+      "sourceHash": "sha256:957c478a28ef00d60a53a3d36d07fd84bcdf4cce1d92685809269a786ecf6a5b",
+      "text": "要加入集合的 ClippingPolygon。"
+    },
+    {
+      "id": "ClippingPolygonCollection#add",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:c8d339278936c4171b889ee35ebb7febab8181ed5b800b31db36d57cc8310f8f",
+      "text": "新加入的 ClippingPolygon。"
+    },
+    {
+      "id": "ClippingPolygonCollection#contains",
+      "field": "description",
+      "sourceHash": "sha256:1dda40097555203ac75f125841358dbccf44a77cf8e028828286ee3348f96229",
+      "text": "检查集合是否包含与给定 ClippingPolygon 相等的裁剪多边形。"
+    },
+    {
+      "id": "ClippingPolygonCollection#contains",
+      "field": "params/polygon/description",
+      "sourceHash": "sha256:fcadc029f76c65f81f7e72679d65f7a28acfac3cf69e99d71e6c256f5ef21dfb",
+      "text": "要检查的 ClippingPolygon。"
+    },
+    {
+      "id": "ClippingPolygonCollection#contains",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:59812eda76d1fc799362905da81995daebd56b2f13f5c959e691f53bd800bb2d",
+      "text": "集合包含此 ClippingPolygon 时为 true，否则为 false。"
+    },
+    {
+      "id": "ClippingPolygonCollection#destroy",
+      "field": "description",
+      "sourceHash": "sha256:b385add820d9f47d540aad147f1cdf85f05e8c6cb81c3928a59c8fd5f7bd8d69",
+      "text": "销毁此对象持有的 WebGL 资源。显式销毁可确定地释放 WebGL 资源，而不依赖垃圾回收器回收此对象。<br /><br />对象销毁后不应再使用；调用除 <code>isDestroyed</code> 以外的任何函数都会抛出 {@link DeveloperError}。因此，应像示例中那样将返回值（<code>undefined</code>）赋给该对象变量。"
+    },
+    {
+      "id": "ClippingPolygonCollection#enabled",
+      "field": "description",
+      "sourceHash": "sha256:23127ebd92e90b2a0bd2f463eef443b39e7f4c939c6443e6a0d36a8f0275bf1b",
+      "text": "为 true 时启用裁剪。"
+    },
+    {
+      "id": "ClippingPolygonCollection#get",
+      "field": "description",
+      "sourceHash": "sha256:d2eda77702e05f6af8016e3bb3df7af7c78746dbf2da6b0cc0759bb0546608b6",
+      "text": "返回集合中指定索引的裁剪多边形。索引从零开始，随多边形加入而增加。移除多边形会使后续多边形向前移动，改变其索引。此函数常与 {@link ClippingPolygonCollection#length} 一起用于遍历全部多边形。"
+    },
+    {
+      "id": "ClippingPolygonCollection#get",
+      "field": "params/index/description",
+      "sourceHash": "sha256:dbbacddf3903bcad4757632bb7a3ff00fcec564a938f9d6f0d026d349735cef4",
+      "text": "多边形从零开始的索引。"
+    },
+    {
+      "id": "ClippingPolygonCollection#get",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:d2411cd94962de4eeedada4123fb568ff8b1f2f2762fa464ff5055c88d114c7e",
+      "text": "指定索引处的 ClippingPolygon。"
+    },
+    {
+      "id": "ClippingPolygonCollection#inverse",
+      "field": "description",
+      "sourceHash": "sha256:1c3012c0e6ac5b88bdc9d11fc4012b72646236b2977176d444158c3f57df4e86",
+      "text": "为 true 时，裁剪位于集合中全部多边形外侧的区域；否则，裁剪位于任意多边形内部的区域。"
+    },
+    {
+      "id": "ClippingPolygonCollection#isDestroyed",
+      "field": "description",
+      "sourceHash": "sha256:aea7b697937631c90ae3fc0ec55b81ba0ddc7abe4d6045848b2031f9bed60091",
+      "text": "若此对象已销毁，返回 true；否则返回 false。<br /><br />对象销毁后不应再使用；调用除 <code>isDestroyed</code> 以外的任何函数都会抛出 {@link DeveloperError}。"
+    },
+    {
+      "id": "ClippingPolygonCollection#length",
+      "field": "description",
+      "sourceHash": "sha256:736dc5be4ab1e335864e22bb12508bdbd827ab9c7a2c7059ba72f9d4ad60495f",
+      "text": "返回集合中的多边形数量，常与 {@link ClippingPolygonCollection#get} 一起用于遍历全部多边形。"
+    },
+    {
+      "id": "ClippingPolygonCollection#polygonAdded",
+      "field": "description",
+      "sourceHash": "sha256:2416f14a8b3364d26ad5eb47e77e433d2461d3e17d517c79c12b0c625b11e0b8",
+      "text": "新裁剪多边形加入集合时触发的事件。处理函数接收新多边形及其加入时的索引。"
+    },
+    {
+      "id": "ClippingPolygonCollection#polygonRemoved",
+      "field": "description",
+      "sourceHash": "sha256:b4de91fbd959689b5cfc35d0fc32d24a5892fd7725fbe50a0bf8e2cd64937cfd",
+      "text": "裁剪多边形从集合移除时触发的事件。处理函数接收被移除的多边形及其原索引。"
+    },
+    {
+      "id": "ClippingPolygonCollection#quality",
+      "field": "description",
+      "sourceHash": "sha256:b82d99c4a955f183e23dc32739c76473988773b05c8789e1095d00557b1562c8",
+      "text": "控制裁剪所用有符号距离纹理分辨率的系数。大于 1.0 时提高质量，小于 1.0 时降低质量；必须大于 0.0。"
+    },
+    {
+      "id": "ClippingPolygonCollection#remove",
+      "field": "description",
+      "sourceHash": "sha256:65f6e2cc1aeed0232c953f757a90df50ccd2b0828f21ba17ab90ead6b8f67689",
+      "text": "从集合中移除第一个与给定 ClippingPolygon 相等的多边形。"
+    },
+    {
+      "id": "ClippingPolygonCollection#remove",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:a7ba0e5bf900ee6c710a62543861f05c321f5d06d2b0839a700b5ee5e95d89e5",
+      "text": "已移除多边形时为 <code>true</code>；集合中未找到多边形时为 <code>false</code>。"
+    },
+    {
+      "id": "ClippingPolygonCollection#removeAll",
+      "field": "description",
+      "sourceHash": "sha256:48463fc86fe88c4fa06623ac52878e9a74db38ebb062f37c02e30e7b5f49fd43",
+      "text": "从集合中移除全部多边形。"
+    },
+    {
+      "id": "PostProcessStage",
+      "field": "description",
+      "sourceHash": "sha256:51309ed49b71638ad9a6825a93dd87581622f6eea4fda15aacbf9b2766666111",
+      "text": "对场景渲染得到的纹理，或前一个后处理阶段的输出执行一个后处理阶段。"
+    },
+    {
+      "id": "PostProcessStage",
+      "field": "exceptions/0/description",
+      "sourceHash": "sha256:f88359a3c9d635876c09a7d88f29832680d3939f7c6088f34d9ac025bd9a91ac",
+      "text": "options.textureScale 必须大于 0.0，且小于等于 1.0。"
+    },
+    {
+      "id": "PostProcessStage",
+      "field": "exceptions/1/description",
+      "sourceHash": "sha256:049f1eaea4498df459bcbb2e036f44289bb699fb53043c628afb3e3be1858d79",
+      "text": "options.pixelFormat 必须是颜色格式。"
+    },
+    {
+      "id": "PostProcessStage",
+      "field": "exceptions/2/description",
+      "sourceHash": "sha256:0d8299a3626406ffd22f9c144d676debceb26628945e91e58c3640aa6a68b8cd",
+      "text": "options.pixelDatatype 为 FLOAT 时，当前 WebGL 实现必须支持浮点纹理。可检查 context.floatingPointTexture。"
+    },
+    {
+      "id": "PostProcessStage",
+      "field": "params/options.clearColor/description",
+      "sourceHash": "sha256:d32cd9a7c7963ab9043b70f44841be7a63cb0472da7c0b30946ddaca1f9faac9",
+      "text": "清空输出纹理时所用的颜色。"
+    },
+    {
+      "id": "PostProcessStage",
+      "field": "params/options.forcePowerOfTwo/description",
+      "sourceHash": "sha256:4349ef78d56d9bb7015085083b56fe2c2176d9b313972c67587d05ff6fbbd665",
+      "text": "是否强制纹理宽高相等且均为 2 的幂。取原宽高较小值向上对应的 2 的幂。"
+    },
+    {
+      "id": "PostProcessStage",
+      "field": "params/options.fragmentShader/description",
+      "sourceHash": "sha256:cc66d785c0f5bee8a2b1a50c63f65d90ce97875a87a3f32063c4db8c04b37701",
+      "text": "使用的片元着色器。默认 <code>sampler2D</code> uniform 为 <code>colorTexture</code> 和 <code>depthTexture</code>。颜色纹理来自场景渲染或前一阶段，深度纹理来自场景渲染。着色器应声明其中一个或两个 uniform。还提供名为 <code>v_textureCoordinates</code> 的 <code>vec2</code> varying，用于采样纹理。"
+    },
+    {
+      "id": "PostProcessStage",
+      "field": "params/options.name/description",
+      "sourceHash": "sha256:0308cbdca97103b71e311e8381d0903c5380684e838b57b560935e5bccc49fa2",
+      "text": "此后处理阶段的唯一名称，供组合中的其他阶段引用。未提供时生成 GUID。"
+    },
+    {
+      "id": "PostProcessStage",
+      "field": "params/options.pixelDatatype/description",
+      "sourceHash": "sha256:7c45a0534647cc98b2e9c5139299b2b3c6b02d594ef4c6f59a1b6f74a66bff4c",
+      "text": "输出纹理的像素数据类型。"
+    },
+    {
+      "id": "PostProcessStage",
+      "field": "params/options.pixelFormat/description",
+      "sourceHash": "sha256:c307611482e93374b4e65193ba73aa6e8e60d6066944ab247e5679243b7bf146",
+      "text": "输出纹理的颜色像素格式。"
+    },
+    {
+      "id": "PostProcessStage",
+      "field": "params/options.sampleMode/description",
+      "sourceHash": "sha256:1260de92561b84a8157cbce084e753641f27092c3d3fe6f594a9e2fcf79aa4d1",
+      "text": "输入颜色纹理的采样方式。"
+    },
+    {
+      "id": "PostProcessStage",
+      "field": "params/options.scissorRectangle/description",
+      "sourceHash": "sha256:5743cc9eeb6b1ee0bf692310e1810bb6732570b53b7f524a4888536f3e6b805b",
+      "text": "裁剪测试所用的矩形。"
+    },
+    {
+      "id": "PostProcessStage",
+      "field": "params/options.textureScale/description",
+      "sourceHash": "sha256:9f3c92a7ceb7278118ea10ee978b2f4fab6aa2401b50b96d811eeed8aa012bef",
+      "text": "用于缩放纹理尺寸的系数，范围为 (0.0, 1.0]。为 1.0 时，将此后处理阶段渲染到与视口尺寸相同的纹理。"
+    },
+    {
+      "id": "PostProcessStage",
+      "field": "params/options.uniforms/description",
+      "sourceHash": "sha256:e542c6ce33983ecda75d519022bfb4eb8a458fca949f132dc48078f350894a91",
+      "text": "用于设置着色器 uniform 的属性对象。属性可以是常量或函数；常量也可以是用作纹理的 URI、data URI 或 HTML 元素。"
+    },
+    {
+      "id": "PostProcessStage#clearColor",
+      "field": "description",
+      "sourceHash": "sha256:d32cd9a7c7963ab9043b70f44841be7a63cb0472da7c0b30946ddaca1f9faac9",
+      "text": "清空输出纹理时所用的颜色。"
+    },
+    {
+      "id": "PostProcessStage#destroy",
+      "field": "description",
+      "sourceHash": "sha256:754b790bbc590a83b107df65f4ba03313464d9514314d03e7fb307567d712e2b",
+      "text": "销毁此对象持有的 WebGL 资源。显式销毁可确定地释放 WebGL 资源，而不依赖垃圾回收器回收此对象。<p>对象销毁后不应再使用；调用除 <code>isDestroyed</code> 以外的任何函数都会抛出 {@link DeveloperError}。因此，应像示例中那样将返回值（<code>undefined</code>）赋给该对象变量。</p>"
+    },
+    {
+      "id": "PostProcessStage#enabled",
+      "field": "description",
+      "sourceHash": "sha256:3eb19eece264775a72ba95f493d678e3056c32092659186c0628ec761b8f8d23",
+      "text": "就绪后是否执行此后处理阶段。"
+    },
+    {
+      "id": "PostProcessStage#forcePowerOfTwo",
+      "field": "description",
+      "sourceHash": "sha256:290e4c1c2c4f746f9f4c0823d142da6d57f3eaec7ebbc0e38ea6e77e82f4b88f",
+      "text": "是否强制输出纹理宽高相等且均为 2 的幂。取原宽高较小值向上对应的 2 的幂。"
+    },
+    {
+      "id": "PostProcessStage#fragmentShader",
+      "field": "description",
+      "sourceHash": "sha256:eb7ca809b95ef422e4e284ef902687ab6afbb2b5a8d55718e4b41c1649c78b76",
+      "text": "执行此后处理阶段所用的片元着色器。\n<p>\n必须声明 <code>colorTexture</code>、<code>depthTexture</code> 中的一个或两个 sampler uniform。\n</p>\n<p>\n还必须声明名为 <code>v_textureCoordinates</code>、类型为 <code>vec2</code> 的 varying，用于采样纹理 uniform。\n</p>"
+    },
+    {
+      "id": "PostProcessStage#isDestroyed",
+      "field": "description",
+      "sourceHash": "sha256:8e0063c3cea634f0d58d690ac4d7a4fb34a488a5a13452889ede3a1d69c680e1",
+      "text": "若此对象已销毁，返回 true；否则返回 false。<p>对象销毁后不应再使用；调用除 <code>isDestroyed</code> 以外的任何函数都会抛出 {@link DeveloperError}。</p>"
+    },
+    {
+      "id": "PostProcessStage#name",
+      "field": "description",
+      "sourceHash": "sha256:4e5feb4b70b534b1ff400b960cfbbae1ee28afe9f4757d2e954fba68ad30a0c3",
+      "text": "此后处理阶段的唯一名称，供 {@link PostProcessStageComposite} 中的其他阶段引用。"
+    },
+    {
+      "id": "PostProcessStage#pixelDatatype",
+      "field": "description",
+      "sourceHash": "sha256:7c45a0534647cc98b2e9c5139299b2b3c6b02d594ef4c6f59a1b6f74a66bff4c",
+      "text": "输出纹理的像素数据类型。"
+    },
+    {
+      "id": "PostProcessStage#pixelFormat",
+      "field": "description",
+      "sourceHash": "sha256:c307611482e93374b4e65193ba73aa6e8e60d6066944ab247e5679243b7bf146",
+      "text": "输出纹理的颜色像素格式。"
+    },
+    {
+      "id": "PostProcessStage#ready",
+      "field": "description",
+      "sourceHash": "sha256:5ee61f26da71632cb779684e24e69205b1317673a0e7f5d018fc81e6ffce865c",
+      "text": "判断此后处理阶段是否可执行。仅当 <code>ready</code> 和 {@link PostProcessStage#enabled} 都为 <code>true</code> 时才会执行。等待纹理加载期间不会就绪。"
+    },
+    {
+      "id": "PostProcessStage#sampleMode",
+      "field": "description",
+      "sourceHash": "sha256:1260de92561b84a8157cbce084e753641f27092c3d3fe6f594a9e2fcf79aa4d1",
+      "text": "输入颜色纹理的采样方式。"
+    },
+    {
+      "id": "PostProcessStage#scissorRectangle",
+      "field": "description",
+      "sourceHash": "sha256:5e9ff6f194f7f6432c5c66adf758745f2e6bda3393e0c942141d826f944a0774",
+      "text": "裁剪测试所用的 {@link BoundingRectangle}。使用默认包围矩形会禁用裁剪测试。"
+    },
+    {
+      "id": "PostProcessStage#selected",
+      "field": "description",
+      "sourceHash": "sha256:78e9f5a5eb9786b3c70844449027adb0e68e05679f2d168c65c4d604cd0566ba",
+      "text": "选中并应用后处理的要素。\n<p>\n在片元着色器中使用 <code>czm_selected</code> 判断是否对当前片元应用此阶段。例如：\n<code>\rif (czm_selected(v_textureCoordinates)) {\r    // apply post-process stage\r} else {\r    out_FragColor = texture(colorTexture, v_textureCoordinates);\r}\r</code>\r</p>"
+    },
+    {
+      "id": "PostProcessStage#textureScale",
+      "field": "description",
+      "sourceHash": "sha256:130422b0d9fb0f1f067ecedd7b574dce2187b15b8076db7fddc8a1fa08d5e950",
+      "text": "用于缩放输出纹理尺寸的系数，范围为 (0.0, 1.0]。为 1.0 时，将此后处理阶段渲染到与视口尺寸相同的纹理。"
+    },
+    {
+      "id": "PostProcessStage#uniforms",
+      "field": "description",
+      "sourceHash": "sha256:f4bdbdff7072bf4ac43833dc6d6e69396669a6fa6857f03d773720a2afda0d24",
+      "text": "用于设置片元着色器 uniform 的属性对象。\n<p>\n属性值可以是常量或函数。函数在每帧执行此后处理阶段之前调用。\n</p>\n<p>\n常量也可以是图像 URI、data URI，或可用作纹理的 HTML 元素，例如 HTMLImageElement 或 HTMLCanvasElement。\n</p>\n<p>\n若此阶段属于一个非串行执行的 {@link PostProcessStageComposite}，常量还可以是组合中另一阶段的名称，此时 uniform 会引用该名称对应阶段的输出纹理。\n</p>"
+    },
+    {
+      "id": "PostProcessStageCollection",
+      "field": "description",
+      "sourceHash": "sha256:e0afb76dff13cb16ff4542cf734efa63bb2a61abab5031e0b013e815dd1dca45",
+      "text": "{@link PostProcessStage} 和／或 {@link PostProcessStageComposite} 的集合。\n<p>\n每个后处理阶段的输入纹理来自场景渲染，或集合中前一阶段的输出。\n</p>\n<p>\n启用环境光遮蔽或泛光阶段时，它们在其他全部阶段之前执行。\n</p>\n<p>\n启用 FXAA 阶段时，它在其他全部阶段之后执行。\n</p>"
+    },
+    {
+      "id": "PostProcessStageCollection#add",
+      "field": "description",
+      "sourceHash": "sha256:2019b5d0681529ff9526482c5d14bf60f154c7e04d7361796b894f50cede9d45",
+      "text": "将后处理阶段加入集合。"
+    },
+    {
+      "id": "PostProcessStageCollection#add",
+      "field": "exceptions/0/description",
+      "sourceHash": "sha256:f660df236ec6de3bf94905bfe9e94e436a54f41a903dcdde6a8c0c95b63f6a16",
+      "text": "此后处理阶段已加入集合，或其名称不唯一。"
+    },
+    {
+      "id": "PostProcessStageCollection#add",
+      "field": "params/stage/description",
+      "sourceHash": "sha256:894685439e95b42d6305454ac8b10c971ce8c9ab9945f51a17211dbcbfea05bd",
+      "text": "要加入集合的后处理阶段。"
+    },
+    {
+      "id": "PostProcessStageCollection#add",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:5451ccdf0ce5c4034e7666c78fb5fd9084b2f407deeeb17f2ae954b485ecd46a",
+      "text": "加入集合的后处理阶段。"
+    },
+    {
+      "id": "PostProcessStageCollection#ambientOcclusion",
+      "field": "description",
+      "sourceHash": "sha256:627d1aecfef7563a806c1cb73bc7c3945d64df89645548a174b237a544886f66",
+      "text": "控制当前帧的真实感环境光遮蔽（GTAO）。遮蔽在大气效果之前作用于不透明地形、受光图元和模型的环境光／IBL，保留直接光、自发光及无光照表面。需要 SCENE3D、WebGL2 和浮点渲染目标，默认禁用。\n<p>uniform 包含以下属性：</p>\n<ul>\n<li><code>intensity</code>：非负可见度指数，默认 <code>1.5</code>。</li>\n<li><code>bias</code>：地平线余弦偏差，范围为 [0, 1)，默认 <code>0.03</code>。</li>\n<li><code>lengthCap</code>：正值半径，单位为米，默认 <code>1.0</code>。</li>\n<li><code>directionCount</code>：射线数量，必须是至少为 2 的整数，默认 <code>8</code>。奇数会向上取整为成对射线。</li>\n<li><code>stepCount</code>：每条射线的采样数，必须是正整数，默认 <code>8</code>。</li>\n<li><code>randomTexture</code>：接受此项但不使用；采样采用稳定的空间噪声。</li>\n<li><code>ambientOcclusionOnly</code>：显示滤波后的可见度而非场景颜色，默认 <code>false</code>。</li>\n<li><code>directionalOcclusion</code>：可选的不透明／MASK PBR 环境镜面反射方向可见度，包括独立的清漆方向，默认 <code>false</code>。接受布尔值或返回布尔值的回调；要求此阶段已启用。漫反射可见度仍为标量。</li>\n</ul>\n<p>禁用期间复用标量资源。禁用或布局更改时释放方向估计和滤波资源；集合销毁时释放全部资源。方向环境可见度不会乘到直接光、自发光或已解析命中的 SSR 上。屏幕空间采样无法恢复屏外或被遮挡的遮蔽物。首版支持范围不包含透明或分类接收对象。</p>"
+    },
+    {
+      "id": "PostProcessStageCollection#bloom",
+      "field": "description",
+      "sourceHash": "sha256:15dd071fb56ca285f1e93699375cb67939d5254b93ac91cc632868cf2e56064b",
+      "text": "用于泛光效果的后处理阶段。\n<p>\n泛光添加辉光，使亮区更亮、暗区更暗。\n</p>\n<p>\n包含以下 uniform：<code>contrast</code>、<code>brightness</code>、<code>glowOnly</code>、<code>delta</code>、<code>sigma</code> 和 <code>stepSize</code>。\n</p>\n<ul>\n<li><code>contrast</code> 为 [-255.0, 255.0] 范围内的标量，影响效果的对比度。默认 <code>128.0</code>。</li>\n\n<li><code>brightness</code> 为标量。输入纹理的 RGB 转为色相、饱和度和亮度（HSB）后，将此值加到亮度上。默认 <code>-0.3</code>。</li>\n\n<li><code>glowOnly</code> 为布尔值。为 <code>true</code> 时只显示辉光，为 <code>false</code> 时将辉光叠加到输入纹理。默认 <code>false</code>。这是用于查看其他 uniform 调整效果的调试选项。</li>\n</ul>\n<p>\n<code>delta</code>、<code>sigma</code> 和 <code>stepSize</code> 与 {@link PostProcessStageLibrary#createBlurStage} 中的同名属性一致。对从图像生成的明暗效果进行模糊，使其更平滑。\n</p>\n<p>\n启用时，此阶段在其他全部阶段之前执行。\n</p>"
+    },
+    {
+      "id": "PostProcessStageCollection#contains",
+      "field": "description",
+      "sourceHash": "sha256:ce16f2f12e8f47849c62652b83e3d1689bef7931c851ad0d926c62afcece3be3",
+      "text": "返回集合是否包含指定后处理阶段。"
+    },
+    {
+      "id": "PostProcessStageCollection#contains",
+      "field": "params/stage/description",
+      "sourceHash": "sha256:dad543ef023936049a38ce0676414c8a76b16d7f972948a023b3e6830c11bc47",
+      "text": "后处理阶段。"
+    },
+    {
+      "id": "PostProcessStageCollection#contains",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:75ac10d181e212cf838a501797ea20296e5e09a7e6082f9c5b10ea5448b6fdc4",
+      "text": "集合是否包含此后处理阶段。"
+    },
+    {
+      "id": "PostProcessStageCollection#destroy",
+      "field": "description",
+      "sourceHash": "sha256:754b790bbc590a83b107df65f4ba03313464d9514314d03e7fb307567d712e2b",
+      "text": "销毁此对象持有的 WebGL 资源。显式销毁可确定地释放 WebGL 资源，而不依赖垃圾回收器回收此对象。<p>对象销毁后不应再使用；调用除 <code>isDestroyed</code> 以外的任何函数都会抛出 {@link DeveloperError}。因此，应像示例中那样将返回值（<code>undefined</code>）赋给该对象变量。</p>"
+    },
+    {
+      "id": "PostProcessStageCollection#exposure",
+      "field": "description",
+      "sourceHash": "sha256:525ee0972f901adb4a6d9c1132451dde27a1ed58cc2e46af2bb1130172272bed",
+      "text": "在 HDR 开启时控制曝光。小于 1.0 时色调映射更暗，大于 1.0 时更亮。"
+    },
+    {
+      "id": "PostProcessStageCollection#fxaa",
+      "field": "description",
+      "sourceHash": "sha256:05763a5167c1d7e7f20e25f46b5360ec6bc17e8b1e7eaf038d267014d9e0a8d5",
+      "text": "快速近似抗锯齿后处理阶段。\n<p>\n启用时，在其他全部阶段之后执行。\n</p>"
+    },
+    {
+      "id": "PostProcessStageCollection#get",
+      "field": "description",
+      "sourceHash": "sha256:8ca946a8c44dbe1147b018f009a1b5691367b64a9a2126251a4b3adac740757a",
+      "text": "获取 <code>index</code> 处的后处理阶段。"
+    },
+    {
+      "id": "PostProcessStageCollection#get",
+      "field": "params/index/description",
+      "sourceHash": "sha256:fcf382dbf404962f1cef66885a43f8f118e38a32ceecaa9edee56e061b2ddb25",
+      "text": "后处理阶段的索引。"
+    },
+    {
+      "id": "PostProcessStageCollection#get",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:c016db66ae3b91598d42441b07194b72ac8f178977686fa3784c88b04d6308c5",
+      "text": "指定索引处的后处理阶段。"
+    },
+    {
+      "id": "PostProcessStageCollection#isDestroyed",
+      "field": "description",
+      "sourceHash": "sha256:8e0063c3cea634f0d58d690ac4d7a4fb34a488a5a13452889ede3a1d69c680e1",
+      "text": "若此对象已销毁，返回 true；否则返回 false。<p>对象销毁后不应再使用；调用除 <code>isDestroyed</code> 以外的任何函数都会抛出 {@link DeveloperError}。</p>"
+    },
+    {
+      "id": "PostProcessStageCollection#length",
+      "field": "description",
+      "sourceHash": "sha256:3ff29bad410415d0d1df4f2eb7173c4e0cff14bddb0ee3201059c3e823eca17d",
+      "text": "集合中的后处理阶段数量。"
+    },
+    {
+      "id": "PostProcessStageCollection#ready",
+      "field": "description",
+      "sourceHash": "sha256:7b989a5cba8ced3749217330a56135e1c5978a694c4298fe951a7ab0574f7ea9",
+      "text": "判断集合中的全部后处理阶段是否都可执行。"
+    },
+    {
+      "id": "PostProcessStageCollection#remove",
+      "field": "description",
+      "sourceHash": "sha256:eb9c2c40f2c9e54c89fa18f3ed44182efff3d2f10c72fad8526e3f2dd4401e94",
+      "text": "从集合中移除后处理阶段并销毁它。"
+    },
+    {
+      "id": "PostProcessStageCollection#remove",
+      "field": "params/stage/description",
+      "sourceHash": "sha256:50ae81c5eaaf903a26c324b220b1e491dd13817bc5ae97c78c2712ab2ad61b2c",
+      "text": "要从集合移除的后处理阶段。"
+    },
+    {
+      "id": "PostProcessStageCollection#remove",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:628d05ed4ae4bccb8d28bd1ee7e978996fe097a025af6fb5a7a72e190dea165a",
+      "text": "是否已移除后处理阶段。"
+    },
+    {
+      "id": "PostProcessStageCollection#removeAll",
+      "field": "description",
+      "sourceHash": "sha256:2cb8f7e95f1ab524f5934651c9dc0b4a65c2df35ff83d967cba3f1518394536a",
+      "text": "从集合中移除并销毁全部后处理阶段。"
+    },
+    {
+      "id": "PostProcessStageCollection#tonemapper",
+      "field": "description",
+      "sourceHash": "sha256:03c064cbf05eb4d08355213457e3b9dc40ddd00a2828542f6924f3b753eb240a",
+      "text": "指定高动态范围渲染所用的色调映射算法。{@link https://sandcastle.cesium.com/?id=high-dynamic-range|Sandcastle 示例}"
+    },
+    {
+      "id": "PostProcessStageComposite",
+      "field": "description",
+      "sourceHash": "sha256:72a934a02355196ea0f2612759043cbcf05502e3d4085a1db9246eb4783371fa",
+      "text": "在逻辑上一起执行的 {@link PostProcessStage} 或其他后处理组合阶段的集合。\n<p>\n所有阶段按数组顺序执行。输入纹理由 <code>inputPreviousStageTexture</code> 决定。<code>inputPreviousStageTexture</code> 为 <code>true</code> 时，每个阶段接收场景渲染结果或前一已执行阶段的输出纹理；<code>inputPreviousStageTexture</code> 为 <code>false</code> 时，组合内各阶段使用相同输入，即场景渲染结果或组合之前一个阶段的输出纹理。\n</p>"
+    },
+    {
+      "id": "PostProcessStageComposite",
+      "field": "exceptions/0/description",
+      "sourceHash": "sha256:d9314ab16f8a7c133e2c689f208fc4a44923058759f89eeb1957c2394641374d",
+      "text": "options.stages.length 必须大于 0.0。"
+    },
+    {
+      "id": "PostProcessStageComposite",
+      "field": "params/options.inputPreviousStageTexture/description",
+      "sourceHash": "sha256:e7b5ed4856e96219c090fcd6d93fe653e2cf29a932e372c778790f2f9ec83936",
+      "text": "是否使每个阶段的输入采用前一阶段的输出。否则，各内部阶段都接收组合开始之前最后一个阶段的输出。"
+    },
+    {
+      "id": "PostProcessStageComposite",
+      "field": "params/options.name/description",
+      "sourceHash": "sha256:6fd727a4f3a78d2a878528e071d6edb4c231c7cd19fa1479b88c0b1fd80074f8",
+      "text": "供其他组合引用的此后处理阶段唯一名称。未提供时生成 GUID。"
+    },
+    {
+      "id": "PostProcessStageComposite",
+      "field": "params/options.stages/description",
+      "sourceHash": "sha256:93b0d7d498bfa5516bd70ecd5fb3e33880c733cd66f8b08d780d9e9a7e3c0d21",
+      "text": "按顺序执行的 {@link PostProcessStage} 或组合阶段数组。"
+    },
+    {
+      "id": "PostProcessStageComposite",
+      "field": "params/options.uniforms/description",
+      "sourceHash": "sha256:50d3fca3152b784f38a85c03cd99852522b5ef73cbe76e2e239359002d036da2",
+      "text": "后处理阶段 uniform 的别名。"
+    },
+    {
+      "id": "PostProcessStageComposite#destroy",
+      "field": "description",
+      "sourceHash": "sha256:754b790bbc590a83b107df65f4ba03313464d9514314d03e7fb307567d712e2b",
+      "text": "销毁此对象持有的 WebGL 资源。显式销毁可确定地释放 WebGL 资源，而不依赖垃圾回收器回收此对象。<p>对象销毁后不应再使用；调用除 <code>isDestroyed</code> 以外的任何函数都会抛出 {@link DeveloperError}。因此，应像示例中那样将返回值（<code>undefined</code>）赋给该对象变量。</p>"
+    },
+    {
+      "id": "PostProcessStageComposite#enabled",
+      "field": "description",
+      "sourceHash": "sha256:3eb19eece264775a72ba95f493d678e3056c32092659186c0628ec761b8f8d23",
+      "text": "就绪后是否执行此后处理阶段。"
+    },
+    {
+      "id": "PostProcessStageComposite#get",
+      "field": "description",
+      "sourceHash": "sha256:109fa72607b20e93a4b5dfbe0d42baec409156f5943aeab3ef6fbdaf9c609880",
+      "text": "获取 <code>index</code> 处的后处理阶段。"
+    },
+    {
+      "id": "PostProcessStageComposite#get",
+      "field": "exceptions/0/description",
+      "sourceHash": "sha256:2c0490c9e8b2802362f5d490693712a90c9f7f8337469a8b65b676ae2226f63a",
+      "text": "index 必须大于等于 0。"
+    },
+    {
+      "id": "PostProcessStageComposite#get",
+      "field": "exceptions/1/description",
+      "sourceHash": "sha256:6c9f6a185e33602df3d43b5e941c913357d350bd9776f2235cfc8ad327763efc",
+      "text": "index 必须小于 {@link PostProcessStageComposite#length}。"
+    },
+    {
+      "id": "PostProcessStageComposite#get",
+      "field": "params/index/description",
+      "sourceHash": "sha256:8a112ee7d850e0be09fe70cb3330186202889cc18762c3b00a7780d512095aed",
+      "text": "后处理阶段或组合阶段的索引。"
+    },
+    {
+      "id": "PostProcessStageComposite#get",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:dc5fb6b3b38cacc9a0d44af5c150493face091f90aff70fac333863ddb91f0dd",
+      "text": "指定索引处的后处理阶段或组合阶段。"
+    },
+    {
+      "id": "PostProcessStageComposite#inputPreviousStageTexture",
+      "field": "description",
+      "sourceHash": "sha256:c28ee65601aa880a811d076f1b44c8d981223aed486ca9042ec40d0d9a50af4a",
+      "text": "所有阶段按数组顺序执行。输入纹理由 <code>inputPreviousStageTexture</code> 决定。<code>inputPreviousStageTexture</code> 为 <code>true</code> 时，每个阶段接收场景渲染结果或前一已执行阶段的输出纹理；<code>inputPreviousStageTexture</code> 为 <code>false</code> 时，组合内各阶段使用相同输入，即场景渲染结果或组合之前一个阶段的输出纹理。"
+    },
+    {
+      "id": "PostProcessStageComposite#isDestroyed",
+      "field": "description",
+      "sourceHash": "sha256:8e0063c3cea634f0d58d690ac4d7a4fb34a488a5a13452889ede3a1d69c680e1",
+      "text": "若此对象已销毁，返回 true；否则返回 false。<p>对象销毁后不应再使用；调用除 <code>isDestroyed</code> 以外的任何函数都会抛出 {@link DeveloperError}。</p>"
+    },
+    {
+      "id": "PostProcessStageComposite#length",
+      "field": "description",
+      "sourceHash": "sha256:d1ab278fc2ab74b3ea676fae0c8ebc10d44805234fcec25f379017ff8268c3e0",
+      "text": "组合中的后处理阶段数量。"
+    },
+    {
+      "id": "PostProcessStageComposite#name",
+      "field": "description",
+      "sourceHash": "sha256:465bf263a993b32356a8bef0adad99a9af60eeef4ba13b93bf0a140f9252192c",
+      "text": "此后处理阶段的唯一名称，供 PostProcessStageComposite 中的其他阶段引用。"
+    },
+    {
+      "id": "PostProcessStageComposite#ready",
+      "field": "description",
+      "sourceHash": "sha256:2029377390a0b161b5bf2ba8d9882a3ef89e8d3b8119ec54b923770820edcda2",
+      "text": "判断此后处理阶段是否可执行。"
+    },
+    {
+      "id": "PostProcessStageComposite#selected",
+      "field": "description",
+      "sourceHash": "sha256:cbde897183b4909e6b4b3671e60decff2489891f00b66aec8e6e5644f896776d",
+      "text": "选中并应用后处理的要素。"
+    },
+    {
+      "id": "PostProcessStageComposite#uniforms",
+      "field": "description",
+      "sourceHash": "sha256:464e8ca845c7b8b562696a164f9fcd0ebcd73b3d140aed8549935fb0a1e80b81",
+      "text": "后处理阶段 uniform 值的别名。可能为 <code>undefined</code>，此时需获取各阶段并分别设置 uniform。"
+    },
+    {
+      "id": "PostProcessStageLibrary.createBlackAndWhiteStage",
+      "field": "description",
+      "sourceHash": "sha256:c3bcdf82d89092ce5fdae95381fb91331cf2306446ef26e929fe0376f6b17ec4",
+      "text": "创建将输入纹理渲染为黑白灰度层次的后处理阶段。\n<p>\n包含一个 uniform 值 <code>gradations</code>，用于缩放每个像素的亮度。\n</p>"
+    },
+    {
+      "id": "PostProcessStageLibrary.createBlackAndWhiteStage",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:d4878ff7438739bdbd09acbe4898a429c165af872c9756e785bd53eac7563bc1",
+      "text": "将输入纹理渲染为黑白灰度层次的后处理阶段。"
+    },
+    {
+      "id": "PostProcessStageLibrary.createBlurStage",
+      "field": "description",
+      "sourceHash": "sha256:ae077f69c63b1749b3ed3041171cb80f74bdc6fa872b89c12b8b9df42410b74a",
+      "text": "创建对输入纹理应用高斯模糊的后处理阶段，通常与其他阶段组合使用。\n<p>\n包含以下 uniform：<code>delta</code>、<code>sigma</code> 和 <code>stepSize</code>。\n</p>\n<p>\n<code>delta</code> 和 <code>sigma</code> 用于计算高斯滤波权重，公式为 <code>exp((-0.5 * delta * delta) / (sigma * sigma))</code>。<code>delta</code> 默认 <code>1.0</code>，<code>sigma</code> 默认 <code>2.0</code>。<code>stepSize</code> 为到下一纹素的距离，默认 <code>1.0</code>。\n</p>"
+    },
+    {
+      "id": "PostProcessStageLibrary.createBlurStage",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:fda6166109510015519196f8756554d684aff9b74c56759445f022313adf70c7",
+      "text": "对输入纹理应用高斯模糊的后处理阶段。"
+    },
+    {
+      "id": "PostProcessStageLibrary.createBrightnessStage",
+      "field": "description",
+      "sourceHash": "sha256:d74cd65fcc1e1cb62ed7b5ddac8052a05b67e73621ffb1617edfaaded8c98d5e",
+      "text": "创建调整输入纹理亮度的后处理阶段。\n<p>\n包含一个 uniform 值 <code>brightness</code>，用于按比例缩放每个像素的 RGB 颜色。\n</p>"
+    },
+    {
+      "id": "PostProcessStageLibrary.createBrightnessStage",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:537bab54aecee526644f1d38749b6d8caf8d568ca6003e3035d0a84fbb4b5126",
+      "text": "调整输入纹理亮度的后处理阶段。"
+    },
+    {
+      "id": "PostProcessStageLibrary.createDepthOfFieldStage",
+      "field": "description",
+      "sourceHash": "sha256:c3bcbf746a81d5ac0a94da5c95c39808c7df2fe0758ce66a83811b8cfcafe224",
+      "text": "创建景深后处理阶段。\n<p>\n景深模拟相机对焦：场景中位于焦点范围的对象清晰，其他对象模糊。\n</p>\n<p>\n包含以下 uniform：<code>focalDistance</code>、<code>delta</code>、<code>sigma</code> 和 <code>stepSize</code>。\n</p>\n<p>\n<code>focalDistance</code> 为相机到对焦位置的距离，单位为米。\n</p>\n<p>\n<code>delta</code>、<code>sigma</code> 和 <code>stepSize</code> 与 {@link PostProcessStageLibrary#createBlurStage} 中的同名属性一致，对未对焦区域进行模糊。\n</p>"
+    },
+    {
+      "id": "PostProcessStageLibrary.createDepthOfFieldStage",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:1dca631085959e7f33746d1b8c551c1b5ac485afd56a7c1ddc1040c3de2e8660",
+      "text": "应用景深效果的后处理阶段。"
+    },
+    {
+      "id": "PostProcessStageLibrary.createEdgeDetectionStage",
+      "field": "description",
+      "sourceHash": "sha256:3a62dc8ed51bab1006f1d04ac08730d7b745d02c736ea1d1025d52f670cda434",
+      "text": "创建检测边缘的后处理阶段。\n<p>\n边缘处向输出纹理写入颜色，并将 alpha 设为 1.0。\n</p>\n<p>\n包含以下 uniform：<code>color</code> 和 <code>length</code>。\n</p>\n<ul>\n<li><code>color</code> 为边缘高亮颜色，默认 {@link Color#BLACK}。</li>\n<li><code>length</code> 为边缘长度，单位为像素，默认 <code>0.5</code>。</li>\n</ul>\n<p>\n此阶段不支持 2D。\n</p>"
+    },
+    {
+      "id": "PostProcessStageLibrary.createEdgeDetectionStage",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:0d2f9cd0e067f1390a18a3c845773e859ac92956f52ac076a34403c6d56ae647",
+      "text": "应用边缘检测效果的后处理阶段。"
+    },
+    {
+      "id": "PostProcessStageLibrary.createLensFlareStage",
+      "field": "description",
+      "sourceHash": "sha256:960b65851c1616f1392a7f385389df7a69d0716d4bdb69db583b850445026ef4",
+      "text": "创建模拟相机镜头眩光的后处理阶段。\n<p>\n包含以下 uniform：<code>dirtTexture</code>、<code>starTexture</code>、<code>intensity</code>、<code>distortion</code>、<code>ghostDispersal</code>、<code>haloWidth</code>、<code>dirtAmount</code> 和 <code>earthRadius</code>。\n<ul>\n<li><code>dirtTexture</code> 为模拟镜头污渍所采样的纹理。</li>\n<li><code>starTexture</code> 为眩光星芒图案所采样的纹理。</li>\n<li><code>intensity</code> 为与眩光结果相乘的标量，默认 <code>2.0</code>。</li>\n<li><code>distortion</code> 为控制色差畸变的标量，默认 <code>10.0</code>。</li>\n<li><code>ghostDispersal</code> 为控制光晕距纹理中心距离的标量，默认 <code>0.4</code>。</li>\n<li><code>haloWidth</code> 为相对于鬼影分散位置的光晕宽度，默认 <code>0.4</code>。</li>\n<li><code>dirtAmount</code> 为镜头污渍量，默认 <code>0.4</code>。</li>\n<li><code>earthRadius</code> 为地球最大半径，默认 <code>Ellipsoid.WGS84.maximumRadius</code>。</li>\n</ul>\n</p>"
+    },
+    {
+      "id": "PostProcessStageLibrary.createLensFlareStage",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:8267e9edd9023efea896b4cb8c1c8d934712fb84d99d3a6b8232a723fcd2e823",
+      "text": "应用镜头眩光效果的后处理阶段。"
+    },
+    {
+      "id": "PostProcessStageLibrary.createNightVisionStage",
+      "field": "description",
+      "sourceHash": "sha256:a090ea6a423755ff25d34cb985fa61b4c5a282004b5aa2927431d5a2fc88257b",
+      "text": "创建对输入纹理添加夜视效果的后处理阶段。"
+    },
+    {
+      "id": "PostProcessStageLibrary.createNightVisionStage",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:19ae70b9f168102163c2bbb2e2c4bbeea07806dd29e7bcdc359a7db34609cef8",
+      "text": "对输入纹理添加夜视效果的后处理阶段。"
+    },
+    {
+      "id": "PostProcessStageLibrary.createSilhouetteStage",
+      "field": "description",
+      "sourceHash": "sha256:849e2a1242ae09131e8b138b243f9e2e4fa653b86eaeb64b490c9a0c00377b4e",
+      "text": "创建剪影效果后处理阶段。\n<p>\n剪影效果将边缘检测通道的颜色与输入颜色纹理合成。\n</p>\n<p>\n当 <code>edgeDetectionStages</code> 为 <code>undefined</code> 时，包含以下 uniform：<code>color</code> 和 <code>length</code>。\n</p>\n<p>\n<code>color</code> 为边缘高亮颜色，默认 {@link Color#BLACK}。<code>length</code> 为边缘长度，单位为像素，默认 <code>0.5</code>。\n</p>"
+    },
+    {
+      "id": "PostProcessStageLibrary.createSilhouetteStage",
+      "field": "params/edgeDetectionStages/description",
+      "sourceHash": "sha256:08999aff27d9844bbb3b5867a9f1e05de2ae93fad10be1cc408c178add2a545a",
+      "text": "边缘检测后处理阶段数组。"
+    },
+    {
+      "id": "PostProcessStageLibrary.createSilhouetteStage",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:0b62ad043d01688295e6c61c153fcb2549364bbb117dc4aaee5214af91fd37bb",
+      "text": "应用剪影效果的后处理阶段。"
+    },
+    {
+      "id": "PostProcessStageLibrary.isAmbientOcclusionSupported",
+      "field": "description",
+      "sourceHash": "sha256:eb91be27156ab184ff04be0a07aed0495fa26ef9bca374793b3ea46cadfb732f",
+      "text": "是否支持环境光遮蔽阶段。\n<p>\n此函数检查 WEBGL_depth_texture 扩展支持。当前 GTAO 的完整运行条件还包括三维模式、WebGL2 及浮点渲染目标，详见 PostProcessStageCollection.ambientOcclusion。\n</p>"
+    },
+    {
+      "id": "PostProcessStageLibrary.isAmbientOcclusionSupported",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:9fb320a0ff48693310b956b94c2a2cf1d3ec9e4e882cae57a25924267faac78f",
+      "text": "是否支持此后处理阶段。"
+    },
+    {
+      "id": "PostProcessStageLibrary.isDepthOfFieldSupported",
+      "field": "description",
+      "sourceHash": "sha256:359a9c67e2d59de26524188577121b7b28c85158eb077ef4c1482eb36e906c3b",
+      "text": "是否支持景深后处理阶段。\n<p>\n需要 WEBGL_depth_texture 扩展。\n</p>"
+    },
+    {
+      "id": "PostProcessStageLibrary.isDepthOfFieldSupported",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:9fb320a0ff48693310b956b94c2a2cf1d3ec9e4e882cae57a25924267faac78f",
+      "text": "是否支持此后处理阶段。"
+    },
+    {
+      "id": "PostProcessStageLibrary.isEdgeDetectionSupported",
+      "field": "description",
+      "sourceHash": "sha256:b1d5dd0349dddd9aa08f4ba4142f9bf7404d3156444dbd2bc466a731a3ac5403",
+      "text": "是否支持边缘检测后处理阶段。\n<p>\n需要 WEBGL_depth_texture 扩展。\n</p>"
+    },
+    {
+      "id": "PostProcessStageLibrary.isEdgeDetectionSupported",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:9fb320a0ff48693310b956b94c2a2cf1d3ec9e4e882cae57a25924267faac78f",
+      "text": "是否支持此后处理阶段。"
+    },
+    {
+      "id": "PostProcessStageLibrary.isSilhouetteSupported",
+      "field": "description",
+      "sourceHash": "sha256:b6c28990811171905688c728d99c247244675919ab6954f2accaf08c0d62499b",
+      "text": "是否支持剪影后处理阶段。\n<p>\n需要 WEBGL_depth_texture 扩展。\n</p>"
+    },
+    {
+      "id": "PostProcessStageLibrary.isSilhouetteSupported",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:9fb320a0ff48693310b956b94c2a2cf1d3ec9e4e882cae57a25924267faac78f",
+      "text": "是否支持此后处理阶段。"
+    },
+    {
+      "id": "PostProcessStageLibrary",
+      "field": "description",
+      "sourceHash": "sha256:1d9b1196dd8791a3f0b0391cccedb8186df6c81add256bea815472da79f9c040",
+      "text": "用于创建常见后处理阶段的函数集合。"
+    },
+    {
+      "id": "PostProcessStageSampleMode.LINEAR",
+      "field": "description",
+      "sourceHash": "sha256:54fe3dbf4d32f4deba9a8546f0a33f52711ed5f18f8e844509fc4cba56e40234",
+      "text": "使用最近四个纹素的双线性插值采样纹理。"
+    },
+    {
+      "id": "PostProcessStageSampleMode.NEAREST",
+      "field": "description",
+      "sourceHash": "sha256:9b3989d1e04d0e1f0caa9e8715853885acf027dfc9eb706738d56d67ca0b3b3b",
+      "text": "返回最近的纹素进行采样。"
+    },
+    {
+      "id": "PostProcessStageSampleMode",
+      "field": "description",
+      "sourceHash": "sha256:db10926e6e2e18c8d730d00b8988a29bb0bc49c03c8a633980a0c064486e18ca",
+      "text": "决定 {@link PostProcessStage} 输入纹理的采样方式。"
+    },
+    {
+      "id": "PostProcessStageSampleMode",
+      "field": "properties/LINEAR/description",
+      "sourceHash": "sha256:54fe3dbf4d32f4deba9a8546f0a33f52711ed5f18f8e844509fc4cba56e40234",
+      "text": "使用最近四个纹素的双线性插值采样纹理。"
+    },
+    {
+      "id": "PostProcessStageSampleMode",
+      "field": "properties/NEAREST/description",
+      "sourceHash": "sha256:9b3989d1e04d0e1f0caa9e8715853885acf027dfc9eb706738d56d67ca0b3b3b",
+      "text": "返回最近的纹素进行采样。"
+    },
+    {
+      "id": "Tonemapper.ACES",
+      "field": "description",
+      "sourceHash": "sha256:2ab670f23191172c807086a93bc54e94400636932f2509e36ce613a1c52b2b57",
+      "text": "使用 ACES 色调映射。"
+    },
+    {
+      "id": "Tonemapper.AGX",
+      "field": "description",
+      "sourceHash": "sha256:0502c2fd7de189faeb4729c5ce45cb23932c5f475037fd16d3f09a2edcfe4b7e",
+      "text": "在线性 sRGB 中使用中性色调外观的 AgX 色调映射，随后应用场景 gamma。曝光仍由 PostProcessStageCollection 控制。"
+    },
+    {
+      "id": "Tonemapper.FILMIC",
+      "field": "description",
+      "sourceHash": "sha256:2aceda186c444f6efe33d4499be803aa3b26fb099423086d6fb24165134e43a4",
+      "text": "使用 Filmic 色调映射。"
+    },
+    {
+      "id": "Tonemapper.MODIFIED_REINHARD",
+      "field": "description",
+      "sourceHash": "sha256:8d99e7fac64c8de5c7eb44b13f7e41c95673f9894d0fa56f470b6360d92c5cb5",
+      "text": "使用修正 Reinhard 色调映射。"
+    },
+    {
+      "id": "Tonemapper.PBR_NEUTRAL",
+      "field": "description",
+      "sourceHash": "sha256:64dfc3898b79429b8caa9bc0eff14fc4622cfabfd9db77ba55e3d389a412bbdf",
+      "text": "使用 {@link https://github.com/KhronosGroup/ToneMapping/tree/main/PBR_Neutral|Khronos 提供的 PBR Neutral} 色调映射。"
+    },
+    {
+      "id": "Tonemapper.REINHARD",
+      "field": "description",
+      "sourceHash": "sha256:b4209a18678697058d96da6dead769efb999636c63911c66177816b4512ee66c",
+      "text": "使用 Reinhard 色调映射。"
+    },
+    {
+      "id": "Tonemapper",
+      "field": "description",
+      "sourceHash": "sha256:7f7d7bd7bc543b35d2ee4002b330d8ccad593084beecda2b14a51ca5a9d7fddf",
+      "text": "高动态范围渲染时使用的色调映射算法。"
+    },
+    {
+      "id": "Tonemapper",
+      "field": "properties/ACES/description",
+      "sourceHash": "sha256:2ab670f23191172c807086a93bc54e94400636932f2509e36ce613a1c52b2b57",
+      "text": "使用 ACES 色调映射。"
+    },
+    {
+      "id": "Tonemapper",
+      "field": "properties/AGX/description",
+      "sourceHash": "sha256:0502c2fd7de189faeb4729c5ce45cb23932c5f475037fd16d3f09a2edcfe4b7e",
+      "text": "在线性 sRGB 中使用中性色调外观的 AgX 色调映射，随后应用场景 gamma。曝光仍由 PostProcessStageCollection 控制。"
+    },
+    {
+      "id": "Tonemapper",
+      "field": "properties/FILMIC/description",
+      "sourceHash": "sha256:2aceda186c444f6efe33d4499be803aa3b26fb099423086d6fb24165134e43a4",
+      "text": "使用 Filmic 色调映射。"
+    },
+    {
+      "id": "Tonemapper",
+      "field": "properties/MODIFIED_REINHARD/description",
+      "sourceHash": "sha256:8d99e7fac64c8de5c7eb44b13f7e41c95673f9894d0fa56f470b6360d92c5cb5",
+      "text": "使用修正 Reinhard 色调映射。"
+    },
+    {
+      "id": "Tonemapper",
+      "field": "properties/PBR_NEUTRAL/description",
+      "sourceHash": "sha256:64dfc3898b79429b8caa9bc0eff14fc4622cfabfd9db77ba55e3d389a412bbdf",
+      "text": "使用 {@link https://github.com/KhronosGroup/ToneMapping/tree/main/PBR_Neutral|Khronos 提供的 PBR Neutral} 色调映射。"
+    },
+    {
+      "id": "Tonemapper",
+      "field": "properties/REINHARD/description",
+      "sourceHash": "sha256:b4209a18678697058d96da6dead769efb999636c63911c66177816b4512ee66c",
+      "text": "使用 Reinhard 色调映射。"
+    }
+  ]
+}
