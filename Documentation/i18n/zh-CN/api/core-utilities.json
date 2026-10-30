@@ -1,0 +1,1854 @@
+{
+  "schemaVersion": 1,
+  "locale": "zh-CN",
+  "entries": [
+    {
+      "id": "AssociativeArray#contains",
+      "field": "description",
+      "sourceHash": "sha256:5fe26cb0d7b810b458b14b297967ff8790413364a1616f5030985469ae7a0bc3",
+      "text": "判断集合是否包含给定键。"
+    },
+    {
+      "id": "AssociativeArray#contains",
+      "field": "params/key/description",
+      "sourceHash": "sha256:d971ce30271dce62d410ce059248b285e9e0c1c49b90938ebd223027a8e8baf8",
+      "text": "要检查的键。"
+    },
+    {
+      "id": "AssociativeArray#contains",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:eb9fdb1e664f11a3560404a2a7944efdfec6bd9b2ec6e8723ef10648391d0180",
+      "text": "集合包含此键时为 <code>true</code>，否则为 <code>false</code>。"
+    },
+    {
+      "id": "AssociativeArray#get",
+      "field": "description",
+      "sourceHash": "sha256:c614b989c8b641943f1bbdbc3a4199069d98d4e90c02cb02e99b6e0d2437a94f",
+      "text": "获取与给定键关联的值。"
+    },
+    {
+      "id": "AssociativeArray#get",
+      "field": "params/key/description",
+      "sourceHash": "sha256:ad11315f34fc0623daf8474912b70c5e964fd016ea2e150e6922bce1d417e460",
+      "text": "要获取其值的键。"
+    },
+    {
+      "id": "AssociativeArray#get",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:d330a3f39c5f57689956fd974fbbbe89af1e74070858091e266c46d314350aad",
+      "text": "关联的值；集合中不存在此键时为 undefined。"
+    },
+    {
+      "id": "AssociativeArray#length",
+      "field": "description",
+      "sourceHash": "sha256:9f20b6057e769aeb911f5917fb38f6790118f5cd51957010b67f09b8529e7fc2",
+      "text": "获取集合中的元素数量。"
+    },
+    {
+      "id": "AssociativeArray#removeAll",
+      "field": "description",
+      "sourceHash": "sha256:2ad92c341153e4cb46d8e0c6ebc0b7046b7579196d46492fad76c22029bc50c8",
+      "text": "清空集合。"
+    },
+    {
+      "id": "AssociativeArray#remove",
+      "field": "description",
+      "sourceHash": "sha256:aa270203b4dad783fb404d4e83d2220f0f8bed3c15095a04a024366692d13a4c",
+      "text": "从集合移除键值对。"
+    },
+    {
+      "id": "AssociativeArray#remove",
+      "field": "params/key/description",
+      "sourceHash": "sha256:78597460f62862051cecd6771d5c1755a58da901084e479607e613dd042b8708",
+      "text": "要移除的键。"
+    },
+    {
+      "id": "AssociativeArray#remove",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:67d16c6f27e7f9de1241ae9b2e399cf09326de411f1d512dba7fc939ce6ee4e8",
+      "text": "成功移除时为 true；集合不包含此键时为 false。"
+    },
+    {
+      "id": "AssociativeArray#set",
+      "field": "description",
+      "sourceHash": "sha256:2645435518910d89f0c60d4756ca5e832bdf79f2e79ff2321d49e747077f7e82",
+      "text": "将给定键与给定值关联。键已存在时，用新值覆盖原值。"
+    },
+    {
+      "id": "AssociativeArray#set",
+      "field": "params/key/description",
+      "sourceHash": "sha256:ec687b82a89531db3a39e49752a5d76781b14c15734e021618a257c37977e0e0",
+      "text": "唯一标识符。"
+    },
+    {
+      "id": "AssociativeArray#set",
+      "field": "params/value/description",
+      "sourceHash": "sha256:05db05354709348e3f9ffb68ad8fe26239757b57377674888e703c109b67d4ec",
+      "text": "要与给定键关联的值。"
+    },
+    {
+      "id": "AssociativeArray#values",
+      "field": "description",
+      "sourceHash": "sha256:b2562d495df5341ea4599efb7589c6f2480dd499ccb7428178c88349c864252b",
+      "text": "获取集合中全部值的无序数组。这是实时数组，会自动反映集合内容，不应直接修改。"
+    },
+    {
+      "id": "AssociativeArray",
+      "field": "classdesc",
+      "sourceHash": "sha256:f419b71ee7dfd84d2c7c86fe3220a59906cb4c7214c8d53b6121611525deda6d",
+      "text": "键值对集合，以哈希形式存储以便查找，同时提供数组以便快速遍历。"
+    },
+    {
+      "id": "binarySearchComparator",
+      "field": "description",
+      "sourceHash": "sha256:1fb82bedcae8ed411b06d4a0d849a37ae6072f9f3d7493a3498ed5097dbca3cd",
+      "text": "二分查找时比较两个元素的函数。"
+    },
+    {
+      "id": "binarySearchComparator",
+      "field": "params/a/description",
+      "sourceHash": "sha256:bcc3b5fbeb9b38c86c6e860bb050ea92149daab4988da5ce97f6f21305e003a7",
+      "text": "待比较的元素。"
+    },
+    {
+      "id": "binarySearchComparator",
+      "field": "params/b/description",
+      "sourceHash": "sha256:ad0f50fc1ab06bf53d9923cf3bfd31b619bf9ffaff4b5bba8ed9bc8fa2f49dae",
+      "text": "正在查找的元素。"
+    },
+    {
+      "id": "binarySearchComparator",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:c5e006d3f81f7c4a3ca8c54518fea31add0defa9fa87d1bd68e25d6a4808e9e4",
+      "text": "<code>a</code> 小于 <code>b</code> 时返回负数，<code>a</code> 大于 <code>b</code> 时返回正数，<code>a</code> 等于 <code>b</code> 时返回 0。"
+    },
+    {
+      "id": "binarySearch",
+      "field": "description",
+      "sourceHash": "sha256:e88c273c73c76e6df89cada160bf35ba07add3c7039249206570daaa2580b581",
+      "text": "在已排序数组中查找元素。"
+    },
+    {
+      "id": "binarySearch",
+      "field": "params/array/description",
+      "sourceHash": "sha256:8c99fcae62b413bde18225f061bb12b55a2fb63c98fd40f273a925548c804711",
+      "text": "要搜索的已排序数组。"
+    },
+    {
+      "id": "binarySearch",
+      "field": "params/comparator/description",
+      "sourceHash": "sha256:d143f82da8e4924bf55ff4b72f281871c5d810cb581cde41c3a75c8f6354e193",
+      "text": "将待查找元素与数组元素进行比较的函数。"
+    },
+    {
+      "id": "binarySearch",
+      "field": "params/itemToFind/description",
+      "sourceHash": "sha256:7b0a16d357141ca2c36b13ded8074fb8f3c071eb830ac440dab9ad0e8232b766",
+      "text": "要在数组中查找的元素。"
+    },
+    {
+      "id": "binarySearch",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:a70f19a7e254918628351e124da3ed11350896c4415e54349d84110253961404",
+      "text": "存在时返回 <code>itemToFind</code> 的数组索引。若 <code>itemToFind</code> 不存在，返回负数，其值为插入位置索引的按位取反（~）；在该索引之前插入元素可保持数组有序。"
+    },
+    {
+      "id": "buildModuleUrl.getCesiumBaseUrl",
+      "field": "description",
+      "sourceHash": "sha256:308524dced69fdbe03fd21821b5c63564fb815275c5e71a2ed32c1071aaf3cbb",
+      "text": "获取用于解析模块的资源基址。"
+    },
+    {
+      "id": "buildModuleUrl.getCesiumBaseUrl",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:3c97e377a3c05b5a6faec5f698bab2cfa1cc94745fdacbb9a842e277c75eac98",
+      "text": "已配置的资源基址。"
+    },
+    {
+      "id": "buildModuleUrl.setBaseUrl",
+      "field": "description",
+      "sourceHash": "sha256:ae9e10bfc620f1e485814807b081363912358d772adcf189c795e1152b82a018",
+      "text": "设置用于解析模块的资源基址。"
+    },
+    {
+      "id": "buildModuleUrl.setBaseUrl",
+      "field": "params/value/description",
+      "sourceHash": "sha256:5c52f8cddfc602138031ba865e3f4bf2f6a28ff19c31f69b26174d0d7c78bc7e",
+      "text": "新的资源基址。"
+    },
+    {
+      "id": "buildModuleUrl",
+      "field": "description",
+      "sourceHash": "sha256:825031fc35a83830544ca1ed7a07fc90b5e3ed6c07d37e3713754cd442ad5afb",
+      "text": "将 Cesium 资源基址下的相对 URL 转换为绝对 URL。"
+    },
+    {
+      "id": "buildModuleUrl",
+      "field": "params/relativeUrl/description",
+      "sourceHash": "sha256:ea46275b804cd07bc13388669780def6dacf3dae2a5c845e39bfd684370aaebe",
+      "text": "相对路径。"
+    },
+    {
+      "id": "buildModuleUrl",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:3124da7594928123a3ea273b826df99f08c4c60619328b56eadeee0746336ba5",
+      "text": "给定路径的绝对 URL 表示。"
+    },
+    {
+      "id": "Check.defined",
+      "field": "description",
+      "sourceHash": "sha256:eec00efaa9e3e3b0a65321b28caa63254a3ea990e2228bf70cda1f779316d4f1",
+      "text": "test 未定义时抛出异常。"
+    },
+    {
+      "id": "Check.defined",
+      "field": "exceptions/0/description",
+      "sourceHash": "sha256:fe29cf5f6603467ffd4fadab14f68c09d225aac36199a4a9de2e2324569faf0f",
+      "text": "test 必须已定义。"
+    },
+    {
+      "id": "Check.defined",
+      "field": "params/name/description",
+      "sourceHash": "sha256:b30bcc54c0c5033f0453bcfa475fb9a6c3c355e90a9abe8d2c28e309327d02cf",
+      "text": "被检查变量的名称。"
+    },
+    {
+      "id": "Check.defined",
+      "field": "params/test/description",
+      "sourceHash": "sha256:628e42eed53aa54a16bca33ed19ecaa11ece66fcb0adcc7ae3ce68a85706f2b0",
+      "text": "要检查的值。"
+    },
+    {
+      "id": "Check.typeOf.bigint",
+      "field": "description",
+      "sourceHash": "sha256:dc9bdc76021e8427d28219d3ae095048c941b39c857c6dac809160b78fe76c65",
+      "text": "test 的 typeof 结果不是 bigint 时抛出异常。"
+    },
+    {
+      "id": "Check.typeOf.bigint",
+      "field": "exceptions/0/description",
+      "sourceHash": "sha256:eaeec6d9d92b88e9c28559e8479793f8264ce4eafcaae9dbbacbe39bb3c40ff3",
+      "text": "test 的 typeof 结果必须为 bigint。"
+    },
+    {
+      "id": "Check.typeOf.bigint",
+      "field": "params/name/description",
+      "sourceHash": "sha256:b30bcc54c0c5033f0453bcfa475fb9a6c3c355e90a9abe8d2c28e309327d02cf",
+      "text": "被检查变量的名称。"
+    },
+    {
+      "id": "Check.typeOf.bigint",
+      "field": "params/test/description",
+      "sourceHash": "sha256:920c9b3ffb2c39bc9f917db791dafef0916b65efc0e3b300e4dad643b8df3705",
+      "text": "要检查的值。"
+    },
+    {
+      "id": "Check.typeOf.bool",
+      "field": "description",
+      "sourceHash": "sha256:74e27000d857425b2b7987a0426588ea02d0f5e0deea13106347185af76da948",
+      "text": "test 的 typeof 结果不是 boolean 时抛出异常。"
+    },
+    {
+      "id": "Check.typeOf.bool",
+      "field": "exceptions/0/description",
+      "sourceHash": "sha256:a95df526af8feb9ef12e9ff7a4c29df7fb1ac1c980e4b09b5b805488865eb0dd",
+      "text": "test 的 typeof 结果必须为 boolean。"
+    },
+    {
+      "id": "Check.typeOf.bool",
+      "field": "params/name/description",
+      "sourceHash": "sha256:b30bcc54c0c5033f0453bcfa475fb9a6c3c355e90a9abe8d2c28e309327d02cf",
+      "text": "被检查变量的名称。"
+    },
+    {
+      "id": "Check.typeOf.bool",
+      "field": "params/test/description",
+      "sourceHash": "sha256:920c9b3ffb2c39bc9f917db791dafef0916b65efc0e3b300e4dad643b8df3705",
+      "text": "要检查的值。"
+    },
+    {
+      "id": "Check.typeOf.func",
+      "field": "description",
+      "sourceHash": "sha256:eb00e0a8c0ef32e4442e5c7f774f78a5111526b53c76ee3a31a82c909436c35d",
+      "text": "test 的 typeof 结果不是 function 时抛出异常。"
+    },
+    {
+      "id": "Check.typeOf.func",
+      "field": "exceptions/0/description",
+      "sourceHash": "sha256:798a4dd48b5646c145372c17beb9c9c5b67c512d4620dd0c65919ee931fb757f",
+      "text": "test 的 typeof 结果必须为 function。"
+    },
+    {
+      "id": "Check.typeOf.func",
+      "field": "params/name/description",
+      "sourceHash": "sha256:b30bcc54c0c5033f0453bcfa475fb9a6c3c355e90a9abe8d2c28e309327d02cf",
+      "text": "被检查变量的名称。"
+    },
+    {
+      "id": "Check.typeOf.func",
+      "field": "params/test/description",
+      "sourceHash": "sha256:920c9b3ffb2c39bc9f917db791dafef0916b65efc0e3b300e4dad643b8df3705",
+      "text": "要检查的值。"
+    },
+    {
+      "id": "Check.typeOf.number.equals",
+      "field": "description",
+      "sourceHash": "sha256:16ac2581b104b788592ae8372c3354e57321350fe6f358e8cf519883abad19fa",
+      "text": "test1、test2 不是 number 类型或值不相等时抛出异常。"
+    },
+    {
+      "id": "Check.typeOf.number.equals",
+      "field": "exceptions/0/description",
+      "sourceHash": "sha256:f05623942b48c4730a536c553e223069d0bced9df33708897a14af51ef479694",
+      "text": "test1、test2 必须都是 number 类型且值相等。"
+    },
+    {
+      "id": "Check.typeOf.number.equals",
+      "field": "params/name1/description",
+      "sourceHash": "sha256:259559dd13daa0a111194bf33d29f6bd347c703c563cc92e2b8a36fdafe50381",
+      "text": "第一个被检查变量的名称。"
+    },
+    {
+      "id": "Check.typeOf.number.equals",
+      "field": "params/name2/description",
+      "sourceHash": "sha256:75c46cdf4e9e9754d0e0337ecfba6133179aeafba57dd979b4ec41eacc6e012e",
+      "text": "第二个比较变量的名称。"
+    },
+    {
+      "id": "Check.typeOf.number.equals",
+      "field": "params/test1/description",
+      "sourceHash": "sha256:920c9b3ffb2c39bc9f917db791dafef0916b65efc0e3b300e4dad643b8df3705",
+      "text": "要检查的值。"
+    },
+    {
+      "id": "Check.typeOf.number.equals",
+      "field": "params/test2/description",
+      "sourceHash": "sha256:63317f4b8c4f0f1086f76a87d684043f09f0a8c46f2bbeaee5a5a90946a828ba",
+      "text": "用于比较的值。"
+    },
+    {
+      "id": "Check.typeOf.number.greaterThan",
+      "field": "description",
+      "sourceHash": "sha256:867b650a6fc8589180051d8816d45735d964ddc9d6f23c402f9c4bb1b0f0986a",
+      "text": "test 不是 number 类型或不大于 limit 时抛出异常。"
+    },
+    {
+      "id": "Check.typeOf.number.greaterThan",
+      "field": "exceptions/0/description",
+      "sourceHash": "sha256:9d9db2fe28c282d2ab06da349032b4ba0339068ed316097190e3bda64aad9107",
+      "text": "test 必须为 number 类型，且大于 limit。"
+    },
+    {
+      "id": "Check.typeOf.number.greaterThanOrEquals",
+      "field": "description",
+      "sourceHash": "sha256:59f7417a34385503e1cbe79354be4e21186832260b51bb32082dd106a4d40bc6",
+      "text": "test 不是 number 类型或小于 limit 时抛出异常。"
+    },
+    {
+      "id": "Check.typeOf.number.greaterThanOrEquals",
+      "field": "exceptions/0/description",
+      "sourceHash": "sha256:b5f1a3b1c8f47ab29661010d2772041cc92139a061a1279c730cf098e177e21a",
+      "text": "test 必须为 number 类型，且大于等于 limit。"
+    },
+    {
+      "id": "Check.typeOf.number.greaterThanOrEquals",
+      "field": "params/limit/description",
+      "sourceHash": "sha256:97c8d67430b89c81344e5c77385dff16fcdc8a6ac041fdbe85e6a3b2a5b633c4",
+      "text": "用于比较的限制值。"
+    },
+    {
+      "id": "Check.typeOf.number.greaterThanOrEquals",
+      "field": "params/name/description",
+      "sourceHash": "sha256:b30bcc54c0c5033f0453bcfa475fb9a6c3c355e90a9abe8d2c28e309327d02cf",
+      "text": "被检查变量的名称。"
+    },
+    {
+      "id": "Check.typeOf.number.greaterThanOrEquals",
+      "field": "params/test/description",
+      "sourceHash": "sha256:920c9b3ffb2c39bc9f917db791dafef0916b65efc0e3b300e4dad643b8df3705",
+      "text": "要检查的值。"
+    },
+    {
+      "id": "Check.typeOf.number.greaterThan",
+      "field": "params/limit/description",
+      "sourceHash": "sha256:97c8d67430b89c81344e5c77385dff16fcdc8a6ac041fdbe85e6a3b2a5b633c4",
+      "text": "用于比较的限制值。"
+    },
+    {
+      "id": "Check.typeOf.number.greaterThan",
+      "field": "params/name/description",
+      "sourceHash": "sha256:b30bcc54c0c5033f0453bcfa475fb9a6c3c355e90a9abe8d2c28e309327d02cf",
+      "text": "被检查变量的名称。"
+    },
+    {
+      "id": "Check.typeOf.number.greaterThan",
+      "field": "params/test/description",
+      "sourceHash": "sha256:920c9b3ffb2c39bc9f917db791dafef0916b65efc0e3b300e4dad643b8df3705",
+      "text": "要检查的值。"
+    },
+    {
+      "id": "Check.typeOf.number.lessThan",
+      "field": "description",
+      "sourceHash": "sha256:c1587318eebe1a151a5dbe00449df61f39becc4303ea10f8de6fe5bff7d51cae",
+      "text": "test 不是 number 类型或不小于 limit 时抛出异常。"
+    },
+    {
+      "id": "Check.typeOf.number.lessThan",
+      "field": "exceptions/0/description",
+      "sourceHash": "sha256:8d2e1a6c0671cb9a6872e139a8040b19b3a99ca1fad082c87307bb31f4a9481b",
+      "text": "test 必须为 number 类型，且小于 limit。"
+    },
+    {
+      "id": "Check.typeOf.number.lessThanOrEquals",
+      "field": "description",
+      "sourceHash": "sha256:81114f48f6d88050a6eb750fcddaba70cc85bdcd266dc8e94dfdda7fec4fe6ca",
+      "text": "test 不是 number 类型或大于 limit 时抛出异常。"
+    },
+    {
+      "id": "Check.typeOf.number.lessThanOrEquals",
+      "field": "exceptions/0/description",
+      "sourceHash": "sha256:2b362463f4cc688f14cf1d842b6943e091860893aa42ece658fd06d60e7b0986",
+      "text": "test 必须为 number 类型，且小于等于 limit。"
+    },
+    {
+      "id": "Check.typeOf.number.lessThanOrEquals",
+      "field": "params/limit/description",
+      "sourceHash": "sha256:97c8d67430b89c81344e5c77385dff16fcdc8a6ac041fdbe85e6a3b2a5b633c4",
+      "text": "用于比较的限制值。"
+    },
+    {
+      "id": "Check.typeOf.number.lessThanOrEquals",
+      "field": "params/name/description",
+      "sourceHash": "sha256:b30bcc54c0c5033f0453bcfa475fb9a6c3c355e90a9abe8d2c28e309327d02cf",
+      "text": "被检查变量的名称。"
+    },
+    {
+      "id": "Check.typeOf.number.lessThanOrEquals",
+      "field": "params/test/description",
+      "sourceHash": "sha256:920c9b3ffb2c39bc9f917db791dafef0916b65efc0e3b300e4dad643b8df3705",
+      "text": "要检查的值。"
+    },
+    {
+      "id": "Check.typeOf.number.lessThan",
+      "field": "params/limit/description",
+      "sourceHash": "sha256:97c8d67430b89c81344e5c77385dff16fcdc8a6ac041fdbe85e6a3b2a5b633c4",
+      "text": "用于比较的限制值。"
+    },
+    {
+      "id": "Check.typeOf.number.lessThan",
+      "field": "params/name/description",
+      "sourceHash": "sha256:b30bcc54c0c5033f0453bcfa475fb9a6c3c355e90a9abe8d2c28e309327d02cf",
+      "text": "被检查变量的名称。"
+    },
+    {
+      "id": "Check.typeOf.number.lessThan",
+      "field": "params/test/description",
+      "sourceHash": "sha256:920c9b3ffb2c39bc9f917db791dafef0916b65efc0e3b300e4dad643b8df3705",
+      "text": "要检查的值。"
+    },
+    {
+      "id": "Check.typeOf.number",
+      "field": "description",
+      "sourceHash": "sha256:85d9ae01ef56c33b3a48e170c8a5327cf0e437327f824efb4f95bfd869866b60",
+      "text": "test 的 typeof 结果不是 number 时抛出异常。"
+    },
+    {
+      "id": "Check.typeOf.number",
+      "field": "exceptions/0/description",
+      "sourceHash": "sha256:d82cfbb40cc1dae956244173a89977daaf036cc6d73d60fda05ad6aedbe815f2",
+      "text": "test 的 typeof 结果必须为 number。"
+    },
+    {
+      "id": "Check.typeOf.number",
+      "field": "params/name/description",
+      "sourceHash": "sha256:b30bcc54c0c5033f0453bcfa475fb9a6c3c355e90a9abe8d2c28e309327d02cf",
+      "text": "被检查变量的名称。"
+    },
+    {
+      "id": "Check.typeOf.number",
+      "field": "params/test/description",
+      "sourceHash": "sha256:920c9b3ffb2c39bc9f917db791dafef0916b65efc0e3b300e4dad643b8df3705",
+      "text": "要检查的值。"
+    },
+    {
+      "id": "Check.typeOf.object",
+      "field": "description",
+      "sourceHash": "sha256:8c1efd293cbbd943e882f2b158d47d49933bcf4697f06d613977764040926cd4",
+      "text": "test 的 typeof 结果不是 object 时抛出异常。"
+    },
+    {
+      "id": "Check.typeOf.object",
+      "field": "exceptions/0/description",
+      "sourceHash": "sha256:8c8fd4cf3119464942979f2608b12928065141e504e0538d1437c456c9173b21",
+      "text": "test 的 typeof 结果必须为 object。"
+    },
+    {
+      "id": "Check.typeOf.object",
+      "field": "params/name/description",
+      "sourceHash": "sha256:b30bcc54c0c5033f0453bcfa475fb9a6c3c355e90a9abe8d2c28e309327d02cf",
+      "text": "被检查变量的名称。"
+    },
+    {
+      "id": "Check.typeOf.object",
+      "field": "params/test/description",
+      "sourceHash": "sha256:920c9b3ffb2c39bc9f917db791dafef0916b65efc0e3b300e4dad643b8df3705",
+      "text": "要检查的值。"
+    },
+    {
+      "id": "Check.typeOf.string",
+      "field": "description",
+      "sourceHash": "sha256:2fcd9d4ea7ff4541d0829a6d49890bb33c99cdc78be7dba511d37e5a1a99358f",
+      "text": "test 的 typeof 结果不是 string 时抛出异常。"
+    },
+    {
+      "id": "Check.typeOf.string",
+      "field": "exceptions/0/description",
+      "sourceHash": "sha256:3362adf65831096e6cab85c4be34dc635a5f4f1a8c5a9c7fd50320c73a9c5dd6",
+      "text": "test 的 typeof 结果必须为 string。"
+    },
+    {
+      "id": "Check.typeOf.string",
+      "field": "params/name/description",
+      "sourceHash": "sha256:b30bcc54c0c5033f0453bcfa475fb9a6c3c355e90a9abe8d2c28e309327d02cf",
+      "text": "被检查变量的名称。"
+    },
+    {
+      "id": "Check.typeOf.string",
+      "field": "params/test/description",
+      "sourceHash": "sha256:920c9b3ffb2c39bc9f917db791dafef0916b65efc0e3b300e4dad643b8df3705",
+      "text": "要检查的值。"
+    },
+    {
+      "id": "Check.typeOf",
+      "field": "description",
+      "sourceHash": "sha256:470a9da516d2dde1695983fd68adf65d9bcd08c42f7e25c8c533c9ea8d4def1a",
+      "text": "使用 typeof 运算符的类型检查函数集合。"
+    },
+    {
+      "id": "Check",
+      "field": "description",
+      "sourceHash": "sha256:28c13ffc457b4352b2c989f292affbfd52cd641abb4fea5fdbd98a56a8485505",
+      "text": "用于检查所给参数类型及指定条件的函数集合。"
+    },
+    {
+      "id": "clone",
+      "field": "description",
+      "sourceHash": "sha256:4b07bb15cb8456b209f541dda7a5bbeee56fa356b00da61898aeb888552ba5c3",
+      "text": "克隆对象，返回具有相同属性的新对象。"
+    },
+    {
+      "id": "clone",
+      "field": "params/deep/description",
+      "sourceHash": "sha256:d53dff7b764b45cfc0a5338285c6b54174d262dae02aae6ae133806c524a6d7a",
+      "text": "为 true 时，递归深度克隆所有属性。"
+    },
+    {
+      "id": "clone",
+      "field": "params/object/description",
+      "sourceHash": "sha256:b5f68d19155bfd32fe82b7429410058f5579bfcd7c932a47e58b9da9192b8f30",
+      "text": "要克隆的对象。"
+    },
+    {
+      "id": "clone",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:dd8683dae5daa0aa65fe518bae96cd540970f67ac8eaad33ce5a362fe12cd9ba",
+      "text": "克隆后的对象。"
+    },
+    {
+      "id": "combine",
+      "field": "description",
+      "sourceHash": "sha256:da1fbdde3c1794d4a130aaf7a370e150f2d3066d6c37b2b340587ed152fbd006",
+      "text": "合并两个对象，将其属性复制到新的组合对象。属性同名时采用第一个对象的值。任一对象为 undefined 时，按空对象处理。"
+    },
+    {
+      "id": "combine",
+      "field": "params/deep/description",
+      "sourceHash": "sha256:c28ef71a721f00e7c9446a9cafc166da299e1eb38b119aa17e1555b0abb41b30",
+      "text": "是否递归合并。"
+    },
+    {
+      "id": "combine",
+      "field": "params/object1/description",
+      "sourceHash": "sha256:68e8ef2839c2ed3b6f7a321a1687ab2a411be5dc35839ece1246eb372509307e",
+      "text": "要合并的第一个对象。"
+    },
+    {
+      "id": "combine",
+      "field": "params/object2/description",
+      "sourceHash": "sha256:3c40412da981c4a3cc5b7f5dafc4e7b159c8a546fdfad5a7f6d7db5486657727",
+      "text": "要合并的第二个对象。"
+    },
+    {
+      "id": "combine",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:ec5249ac0e4f04f883b893f1d5ff55c7d9a76ccf4d9e518b7c0a69db80752589",
+      "text": "合并后的对象，包含两个对象的全部属性。"
+    },
+    {
+      "id": "createGuid",
+      "field": "description",
+      "sourceHash": "sha256:966aca3b9349ae264c78431465bc7b3c4d4c8fa3c79853943f4c45980ed4e032",
+      "text": "创建全局唯一标识符（GUID）字符串。GUID 长度为 128 位，用于跨空间与时间标识对象。"
+    },
+    {
+      "id": "defined",
+      "field": "params/value/description",
+      "sourceHash": "sha256:891f3a2b778909f769372ea379bd3be0e2953ff4003e564c47099e7b211c4450",
+      "text": "要检查的对象。"
+    },
+    {
+      "id": "defined",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:e8d7b0730794d65bf2e7cdb30cc96dcd06bd3af2914d90e309f75703f72d5b3e",
+      "text": "对象既不是 undefined 也不是 null 时返回 true，否则返回 false。"
+    },
+    {
+      "id": "destroyObject",
+      "field": "description",
+      "sourceHash": "sha256:93b41ac7b7b6b8fc29f734266ebcfd360553ab505bcc0e6809f1cc2588d739c5",
+      "text": "销毁对象。将对象及其原型上可枚举的函数替换为抛出 {@link DeveloperError} 的函数；<code>isDestroyed</code> 除外，它被替换为返回 <code>true</code> 的函数。资源的实际释放由调用方完成，而非由 <code>delete</code> 自动实现。\n<br /><br />\n此函数供持有 WebGL 等必须显式释放的原生资源的对象使用。调用方调用对象的 <code>destroy</code> 函数，先释放原生资源，再调用 <code>destroyObject</code> 将对象置为已销毁状态。"
+    },
+    {
+      "id": "destroyObject",
+      "field": "params/message/description",
+      "sourceHash": "sha256:b5bd10a0cf54cbbb2e1c03360509262c07d6189846f07af761252001114be83b",
+      "text": "调用已销毁对象的函数时，所抛异常包含的消息。"
+    },
+    {
+      "id": "destroyObject",
+      "field": "params/object/description",
+      "sourceHash": "sha256:869bf26c4c4c4a2bad500b806b45e94d43170de794ac7250c62b9f6c60090a98",
+      "text": "要销毁的对象。"
+    },
+    {
+      "id": "DeveloperError#message",
+      "field": "description",
+      "sourceHash": "sha256:592c470e51f6290752d1ac636f740e403b0ddc721e908f29a4697e8103b98240",
+      "text": "解释抛出此异常原因的文本。"
+    },
+    {
+      "id": "DeveloperError#name",
+      "field": "description",
+      "sourceHash": "sha256:e80578adcca6c8278ad53200503e0f6c0c9760509cc53f3a4f17c9983239482a",
+      "text": "名称为 DeveloperError，表示异常由开发错误引起。"
+    },
+    {
+      "id": "DeveloperError#stack",
+      "field": "description",
+      "sourceHash": "sha256:33bbafab1c8187dc07ae19e00ab44f60e4f8010efdff337dce12b887ea0f6056",
+      "text": "此异常的堆栈跟踪，如可用。"
+    },
+    {
+      "id": "DeveloperError",
+      "field": "description",
+      "sourceHash": "sha256:568970cf0e31ffafe4f079fd5da75ed1efd4e9f181f97e98e9e60e8537aa30ad",
+      "text": "构造表示开发错误的异常对象，例如无效参数或参数越界。此异常应只在开发期间抛出，通常表示调用代码存在缺陷。不应捕获后继续运行，而应修复调用代码以避免触发。\n<br /><br />\n与之不同，{@link RuntimeError} 表示内存不足等可能在运行时发生的异常，调用代码应准备捕获和处理。"
+    },
+    {
+      "id": "DeveloperError",
+      "field": "params/message/description",
+      "sourceHash": "sha256:ede3754ec86194a2c7c6867d52ea3d401e8e7d767802263c0902e1d2de6beb88",
+      "text": "此异常的错误消息。"
+    },
+    {
+      "id": "FeatureDetection.supportsBasis",
+      "field": "description",
+      "sourceHash": "sha256:26f37a6f3903d2055242285df6603ecb0041e3cb9e96985f2ef81730354e9732",
+      "text": "检测当前浏览器是否支持 Basis Universal 纹理及其转码所需的 WebAssembly 模块。"
+    },
+    {
+      "id": "FeatureDetection.supportsBasis",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:0f142199c88bfdaa911fba7cccc0c672b6734019ffc02dcc81d1a9abde055bbf",
+      "text": "浏览器支持 WebAssembly 模块且场景支持 Basis Universal 纹理时为 true，否则为 false。"
+    },
+    {
+      "id": "FeatureDetection.supportsBigInt64Array",
+      "field": "description",
+      "sourceHash": "sha256:fb548ec6fe0aff420456032a7bd49796846255b516beb35905afc4f28e0fe11e",
+      "text": "检测当前浏览器是否支持 BigInt64Array 类型化数组。"
+    },
+    {
+      "id": "FeatureDetection.supportsBigInt64Array",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:3517909f78d48dcae2dabd143b9d5f384921b589f12f4c71fdcbc6ab51c84883",
+      "text": "支持 BigInt64Array 类型化数组时为 true，否则为 false。"
+    },
+    {
+      "id": "FeatureDetection.supportsBigInt",
+      "field": "description",
+      "sourceHash": "sha256:12e0c05419501ca1970b84059300573b70138682511a0dabb177a57cf21755e1",
+      "text": "检测当前浏览器是否支持 BigInt。"
+    },
+    {
+      "id": "FeatureDetection.supportsBigInt",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:ea89048ecfdd9a41b0df30a8a9b883e6bcd949d98c6613957efa6405bf1d6f2f",
+      "text": "支持 BigInt 时为 true，否则为 false。"
+    },
+    {
+      "id": "FeatureDetection.supportsBigUint64Array",
+      "field": "description",
+      "sourceHash": "sha256:e4e0723069113b6f0fdd75bba4de33ccdb1b39ac641a37364a192c4a53dea15a",
+      "text": "检测当前浏览器是否支持 BigUint64Array 类型化数组。"
+    },
+    {
+      "id": "FeatureDetection.supportsBigUint64Array",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:a50daf184e444740a2e46bed3025b0fb4bda900875dc58dce44a4d6befb2a7fa",
+      "text": "支持 BigUint64Array 类型化数组时为 true，否则为 false。"
+    },
+    {
+      "id": "FeatureDetection.supportsEsmWebWorkers",
+      "field": "description",
+      "sourceHash": "sha256:dee6323227b7f5da780a80413ad787044d1715537fe90bb5c9c73333b9445c2c",
+      "text": "检测当前浏览器是否支持在 Web Worker 中使用 ECMAScript 模块。"
+    },
+    {
+      "id": "FeatureDetection.supportsEsmWebWorkers",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:7dc97a24ba44ca90dc12021990c72ac85bb152642620ba1c748c56984e1a3fd0",
+      "text": "支持在 Web Worker 中使用 ECMAScript 模块时为 true。"
+    },
+    {
+      "id": "FeatureDetection.supportsFullscreen",
+      "field": "description",
+      "sourceHash": "sha256:d4ca7e129dd317626526dbf2e5d877e2b382ce7199b93f199782ed7f9f277e51",
+      "text": "检测当前浏览器是否支持标准全屏功能。"
+    },
+    {
+      "id": "FeatureDetection.supportsFullscreen",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:22d570abb39368b4769165cf14cae7666dc44a09d7d8c4b6a6e336bf860157ee",
+      "text": "支持标准全屏功能时为 true，否则为 false。"
+    },
+    {
+      "id": "FeatureDetection.supportsTypedArrays",
+      "field": "description",
+      "sourceHash": "sha256:d658e36c30445495e49885c70b90c256fd3fbde0bf89524d8a694d772ee47d50",
+      "text": "检测当前浏览器是否支持类型化数组。"
+    },
+    {
+      "id": "FeatureDetection.supportsTypedArrays",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:09913d08fe006e55ca0d403d90d0323e054506c883cc8356b83b09fe94e46fac",
+      "text": "支持类型化数组时为 true，否则为 false。"
+    },
+    {
+      "id": "FeatureDetection.supportsWebAssembly",
+      "field": "description",
+      "sourceHash": "sha256:1ed758b01500067c187ae4abd6fd181e2194abf9a33d9b9ddda34d37d01026a9",
+      "text": "检测当前浏览器是否支持 WebAssembly。"
+    },
+    {
+      "id": "FeatureDetection.supportsWebAssembly",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:78ed37defaa2058c3cc9ff0c94f811db5444fc7809b52b80cfedef609d412e37",
+      "text": "支持 WebAssembly 时为 true，否则为 false。"
+    },
+    {
+      "id": "FeatureDetection.supportsWebgl2",
+      "field": "description",
+      "sourceHash": "sha256:c568be7947caff50e03d8e6b316df63920638810a14aff7ca9adf0864a4e2c12",
+      "text": "检测当前浏览器是否支持指定场景所用的 WebGL2 渲染上下文。"
+    },
+    {
+      "id": "FeatureDetection.supportsWebgl2",
+      "field": "params/scene/description",
+      "sourceHash": "sha256:192ec4ec6fe9eec2ddb7f8d5903eb6bad920de7eeb8991965cdeb20f6db909aa",
+      "text": "指定渲染上下文的 Cesium 场景。"
+    },
+    {
+      "id": "FeatureDetection.supportsWebgl2",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:ab6a69a20ca718e61d5bceac833d1051389aa78ef7249efea71179c5d0573a63",
+      "text": "支持 WebGL2 渲染上下文时为 true，否则为 false。"
+    },
+    {
+      "id": "FeatureDetection.supportsWebWorkers",
+      "field": "description",
+      "sourceHash": "sha256:d8fda80f1ae493e0689f40381fb62702b04dbd829b72359a165f6f739689d79d",
+      "text": "检测当前浏览器是否支持 Web Worker。"
+    },
+    {
+      "id": "FeatureDetection.supportsWebWorkers",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:9c0de401bf9461726d21dfaf0da2e99819ec7808c86df5ba19190be89c126291",
+      "text": "支持 Web Worker 时为 true，否则为 false。"
+    },
+    {
+      "id": "FeatureDetection",
+      "field": "description",
+      "sourceHash": "sha256:5f5dee47bd188674a58cb4387a0f27a50a8e2debded78a458688c2e3b86d9c18",
+      "text": "检测当前浏览器各项功能支持情况的函数集合。"
+    },
+    {
+      "id": "formatError",
+      "field": "description",
+      "sourceHash": "sha256:da2708f5d8c0cdb206dea55e344b8ee7c0affc18d9899f8286c6eafddb11cf11",
+      "text": "将错误对象格式化为字符串。可用时使用 name、message 和 stack 属性，否则调用 toString()。"
+    },
+    {
+      "id": "formatError",
+      "field": "params/object/description",
+      "sourceHash": "sha256:7b0a16d357141ca2c36b13ded8074fb8f3c071eb830ac440dab9ad0e8232b766",
+      "text": "要格式化的错误对象。"
+    },
+    {
+      "id": "formatError",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:b311f5e77821d3cdba26f11afe97187ce1cfe7bb9b91291b864655528a9102a1",
+      "text": "包含格式化错误的字符串。"
+    },
+    {
+      "id": "FrameRateMonitor.defaultSettings",
+      "field": "description",
+      "sourceHash": "sha256:723d03f46bbfe0d9791e06a1a5e92e07ef2457aea69860fba25f72044f116168",
+      "text": "默认帧率监测设置。{@link FrameRateMonitor.fromScene} 需要创建监测器时，以及 {@link FrameRateMonitor} 构造函数未提供相应设置时，使用这些默认值。"
+    },
+    {
+      "id": "FrameRateMonitor.fromScene",
+      "field": "description",
+      "sourceHash": "sha256:f5ec36910a1131a695d48d67365e357e9ee027b8dfb31eca24ef4fa9ec69af46",
+      "text": "获取指定场景的 {@link FrameRateMonitor}。若场景尚无 {@link FrameRateMonitor}，则使用 {@link FrameRateMonitor.defaultSettings} 创建。"
+    },
+    {
+      "id": "FrameRateMonitor.fromScene",
+      "field": "params/scene/description",
+      "sourceHash": "sha256:81af147600d31e1690fe08fecc392cc861329c69ddb3de3600582eb6aa5e353d",
+      "text": "要获取其 {@link FrameRateMonitor} 的场景。"
+    },
+    {
+      "id": "FrameRateMonitor.fromScene",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:9a931b791cd906344549f26fc02196f2faebbc5b710f98283b4e21aa534516bd",
+      "text": "场景的 {@link FrameRateMonitor}。"
+    },
+    {
+      "id": "FrameRateMonitor#destroy",
+      "field": "description",
+      "sourceHash": "sha256:ce5cab37badc8040605a76e3d5972d1cdddd87c5f069c2ab1b7fddc899d40670",
+      "text": "取消此实例监听的全部事件。对象销毁后不应再使用；调用除 <code>isDestroyed</code> 以外的任何函数都会抛出 {@link DeveloperError}。因此，应像示例中那样将返回值（<code>undefined</code>）赋给该对象变量。"
+    },
+    {
+      "id": "FrameRateMonitor#isDestroyed",
+      "field": "description",
+      "sourceHash": "sha256:aea7b697937631c90ae3fc0ec55b81ba0ddc7abe4d6045848b2031f9bed60091",
+      "text": "若此对象已销毁，返回 true；否则返回 false。<br /><br />对象销毁后不应再使用；调用除 <code>isDestroyed</code> 以外的任何函数都会抛出 {@link DeveloperError}。"
+    },
+    {
+      "id": "FrameRateMonitor#lastFramesPerSecond",
+      "field": "description",
+      "sourceHash": "sha256:2dff3ff746981fadf604dca415ba7218173f72844840cc198c4b70bb33f903e7",
+      "text": "获取最近一个 <code>samplingWindow</code> 内计算的平均每秒帧数。尚未计算帧率时可能为 undefined。"
+    },
+    {
+      "id": "FrameRateMonitor#lowFrameRate",
+      "field": "description",
+      "sourceHash": "sha256:9e8882a41431dace72915364451783b79b1caba822d4a97b749a953975268c48",
+      "text": "获取检测到低帧率时触发的事件。监听函数的第一个参数为 {@link Scene} 实例，第二个参数为采样窗口内的平均每秒帧数。"
+    },
+    {
+      "id": "FrameRateMonitor#minimumFrameRateAfterWarmup",
+      "field": "description",
+      "sourceHash": "sha256:682a5f265c65146e8cd20dca23c836edf56b382c11295a3c0e0274707926de52",
+      "text": "获取或设置预热结束后可接受的最低每秒帧数。在 <code>warmupPeriod</code> 之后，任一 <code>samplingWindow</code> 的平均帧率低于此值时触发 <code>lowFrameRate</code> 事件。监测器本身不执行 <code>redirectOnLowFrameRateUrl</code> 页面跳转。"
+    },
+    {
+      "id": "FrameRateMonitor#minimumFrameRateDuringWarmup",
+      "field": "description",
+      "sourceHash": "sha256:8202c119330e392acf12f7ae9dc567d95fbbba046f56520105526a854d7234cf",
+      "text": "获取或设置预热期间可接受的最低每秒帧数。在 <code>warmupPeriod</code> 内，任一 <code>samplingWindow</code> 的平均帧率低于此值时触发 <code>lowFrameRate</code> 事件。监测器本身不执行 <code>redirectOnLowFrameRateUrl</code> 页面跳转。"
+    },
+    {
+      "id": "FrameRateMonitor#nominalFrameRate",
+      "field": "description",
+      "sourceHash": "sha256:09615d8c88268491f52e6d8892456a73b82c7ed57957a34041e0c15b0bf17e76",
+      "text": "获取低帧率恢复正常后触发的事件。监听函数的第一个参数为 {@link Scene} 实例，第二个参数为采样窗口内的平均每秒帧数。"
+    },
+    {
+      "id": "FrameRateMonitor#pause",
+      "field": "description",
+      "sourceHash": "sha256:4c2e3f25bfa68d3b3bef4047521acab1e57e9820cf6dff829aac65291d157094",
+      "text": "暂停帧率监测。每调用一次此函数，必须相应调用一次 {@link FrameRateMonitor#unpause} 才能恢复监测。"
+    },
+    {
+      "id": "FrameRateMonitor#quietPeriod",
+      "field": "description",
+      "sourceHash": "sha256:ca2dc6cd3074c5318c6d53c10605a06b90b231c513f52325d53305edad283b86",
+      "text": "获取或设置启动及页面重新可见时（例如用户切回标签页），开始性能采样前等待的时长，单位为秒。"
+    },
+    {
+      "id": "FrameRateMonitor#samplingWindow",
+      "field": "description",
+      "sourceHash": "sha256:b4d870cbf18fa3c03d0be3ab26fb8eb7d2ea5113aff6d26c74932817b747241f",
+      "text": "获取或设置计算平均帧率的滑动窗口时长，单位为秒。"
+    },
+    {
+      "id": "FrameRateMonitor#scene",
+      "field": "description",
+      "sourceHash": "sha256:ab5ac30eafe14dc2e22aad185dfa99c23096f70c120d31b49a1e74a6d677d9c0",
+      "text": "获取需要监测性能的 {@link Scene} 实例。"
+    },
+    {
+      "id": "FrameRateMonitor#unpause",
+      "field": "description",
+      "sourceHash": "sha256:87b5a79e6516c8654cb70a750c40549a863cf00cc115f13a856cac318efae95e",
+      "text": "恢复帧率监测。如果多次调用了 {@link FrameRateMonitor#pause}，必须调用相同次数的此函数才能真正恢复监测。"
+    },
+    {
+      "id": "FrameRateMonitor#warmupPeriod",
+      "field": "description",
+      "sourceHash": "sha256:310dd22032b5d2290f6d802558d88943e8f5467004fb92865375c2bbbaa10b7d",
+      "text": "获取或设置预热时长，单位为秒。预热期间使用单独的帧率要求，通常更低。"
+    },
+    {
+      "id": "FrameRateMonitor",
+      "field": "description",
+      "sourceHash": "sha256:9f1e56a8163fed8b97d2c542c23e2bc81637508fc9f2ddb8d72c78300d7c2435",
+      "text": "监测 {@link Scene} 的帧率（每秒帧数），低于阈值时触发事件；之后帧率恢复至所需水平时，触发另一个事件。为避免对同一个 {@link Scene} 创建多个 FrameRateMonitor，应使用 {@link FrameRateMonitor.fromScene}，而非直接构造实例。"
+    },
+    {
+      "id": "FrameRateMonitor",
+      "field": "params/options.minimumFrameRateAfterWarmup/description",
+      "sourceHash": "sha256:6a192eca1fb3931da1e391745b83e9eedbe2d5e3c7b3155f7357ab66937a296e",
+      "text": "预热结束后，性能可接受所需的最低每秒帧数。warmupPeriod 后任一 samplingWindow 的平均帧率低于此值时，触发 lowFrameRate 事件。"
+    },
+    {
+      "id": "FrameRateMonitor",
+      "field": "params/options.minimumFrameRateDuringWarmup/description",
+      "sourceHash": "sha256:31b72373e0034d5f022fa4e0a45a4bde975a2ef4c9507d5fd118db3592403cb4",
+      "text": "预热期间，性能可接受所需的最低每秒帧数。warmupPeriod 内任一 samplingWindow 的平均帧率低于此值时，触发 lowFrameRate 事件。"
+    },
+    {
+      "id": "FrameRateMonitor",
+      "field": "params/options.quietPeriod/description",
+      "sourceHash": "sha256:255abfa7c54805c50dcfbf4479c5d8a947c7e6b09272e24bfab7e7766ea89fa7",
+      "text": "启动及页面重新可见时（例如用户切回标签页），开始性能采样前等待的时长，单位为秒。"
+    },
+    {
+      "id": "FrameRateMonitor",
+      "field": "params/options.samplingWindow/description",
+      "sourceHash": "sha256:f70085c959981db9870a61b362914e578c46024460a8bc03f8787121ccb23d64",
+      "text": "计算平均帧率的滑动窗口时长，单位为秒。"
+    },
+    {
+      "id": "FrameRateMonitor",
+      "field": "params/options.scene/description",
+      "sourceHash": "sha256:59261474ce09a018c8c55003bf1e094654600153eba30693a368882569412db8",
+      "text": "需要监测性能的 Scene 实例。"
+    },
+    {
+      "id": "FrameRateMonitor",
+      "field": "params/options.warmupPeriod/description",
+      "sourceHash": "sha256:b04fc33f3332e8d4245f80cd9d70b7482d9d45cacd6db8b6aa70524d6f4ccc3d",
+      "text": "预热时长，单位为秒。预热期间使用单独的帧率要求，通常更低。"
+    },
+    {
+      "id": "Frozen.EMPTY_ARRAY",
+      "field": "description",
+      "sourceHash": "sha256:169ac9ea3e6f74bdee3d31216b48ddacf0a30e36634e1da0a13cae21c033e0b7",
+      "text": "冻结的空数组，可作为数组参数的默认值。"
+    },
+    {
+      "id": "Frozen.EMPTY_OBJECT",
+      "field": "description",
+      "sourceHash": "sha256:9307bc8c360e88b6a0e59a05ea1e9cfa8523e1306928d753709a1b71e73e6dcb",
+      "text": "冻结的空对象，可作为对象参数的默认值。"
+    },
+    {
+      "id": "Frozen",
+      "field": "description",
+      "sourceHash": "sha256:d23378baa062f5254dfbcb593adee9f799fcbf62dd41e18bb97c27c6217e32fa",
+      "text": "辅助设置参数默认值的工具。"
+    },
+    {
+      "id": "getAbsoluteUri",
+      "field": "description",
+      "sourceHash": "sha256:f6b51badc5cdcc49871f26a64ea045c706b8ab928ce1aac495243d77ff40dff9",
+      "text": "根据相对 URI 和基准 URI，返回对应绝对 URI。"
+    },
+    {
+      "id": "getAbsoluteUri",
+      "field": "params/base/description",
+      "sourceHash": "sha256:e28a37638fcc6d887e1c8ea44d85d99fd3e4c9bedc47f2e366fed529bad9211e",
+      "text": "基准 URI。"
+    },
+    {
+      "id": "getAbsoluteUri",
+      "field": "params/relative/description",
+      "sourceHash": "sha256:a2eac479f22e5d79d31bc55f4fe4f45155c4651d7bde0247902ce70f33e12f90",
+      "text": "相对 URI。"
+    },
+    {
+      "id": "getAbsoluteUri",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:de849da2dcc388ce898c28f5f5102aea1122e3410628c0865e9fab3d36baab1d",
+      "text": "给定相对 URI 对应的绝对 URI。"
+    },
+    {
+      "id": "getBaseUri",
+      "field": "description",
+      "sourceHash": "sha256:10e5096df624a6fbf9a56129f38e4fafc13d748d07d4f603d960c7954a45011d",
+      "text": "返回给定 URI 的基础路径。"
+    },
+    {
+      "id": "getBaseUri",
+      "field": "params/includeQuery/description",
+      "sourceHash": "sha256:e011a2e4a71a4430260f101c14793ad8365e6bfedb39c2c3e683528e7695ce41",
+      "text": "是否包含 URI 的查询字符串和片段。"
+    },
+    {
+      "id": "getBaseUri",
+      "field": "params/uri/description",
+      "sourceHash": "sha256:51f005c4f887fb0f724fe76f2c6b94dfd55b98c1a3a6825b701120330d468c85",
+      "text": "待处理的 URI。"
+    },
+    {
+      "id": "getBaseUri",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:0f70185eed9bc2df01fc6872e919301a9b920ec5bacfb074b38635cb6153f54a",
+      "text": "URI 的基础路径。"
+    },
+    {
+      "id": "getExtensionFromUri",
+      "field": "description",
+      "sourceHash": "sha256:fb3d6e9ee6ec7a22ab5f5cdf9cacf01d55dc969b84dfa5383308f706a8e42465",
+      "text": "返回给定 URI 的扩展名。"
+    },
+    {
+      "id": "getExtensionFromUri",
+      "field": "params/uri/description",
+      "sourceHash": "sha256:51f005c4f887fb0f724fe76f2c6b94dfd55b98c1a3a6825b701120330d468c85",
+      "text": "待处理的 URI。"
+    },
+    {
+      "id": "getExtensionFromUri",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:a09163eeea7f32ad704dfc8cf059555e8837d45c1e40856e43c32beca2bc7a57",
+      "text": "URI 的扩展名。"
+    },
+    {
+      "id": "getFilenameFromUri",
+      "field": "description",
+      "sourceHash": "sha256:6fdc4c52363a5891f30e24f3c2ae465714bb7c9104ca0735a12a70c58c8cc780",
+      "text": "返回给定 URI 路径的最后一段，不包含前面的路径及查询信息。"
+    },
+    {
+      "id": "getFilenameFromUri",
+      "field": "params/uri/description",
+      "sourceHash": "sha256:51f005c4f887fb0f724fe76f2c6b94dfd55b98c1a3a6825b701120330d468c85",
+      "text": "待处理的 URI。"
+    },
+    {
+      "id": "getFilenameFromUri",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:9bdf7732898ecd4c700a70f5aa2850f7765d6b75bab137caeb1c49bda0415c19",
+      "text": "URI 的最后一段。"
+    },
+    {
+      "id": "getImagePixels",
+      "field": "description",
+      "sourceHash": "sha256:9f3ef751edbfe95f29776cc156fd18d41a20f0d47cab188868044e820ba69d8a",
+      "text": "从已加载的图像提取像素数组。先将图像绘制到画布，再读取像素。"
+    },
+    {
+      "id": "getImagePixels",
+      "field": "params/height/description",
+      "sourceHash": "sha256:44410ae7d91b56986f8b38cd66c5e2b865ad2f541eb2c4b898ddd7d08c3cbd91",
+      "text": "图像高度；未定义时使用 image.height。"
+    },
+    {
+      "id": "getImagePixels",
+      "field": "params/image/description",
+      "sourceHash": "sha256:34f15f92e7cdf9e6cd166c5bc618f7047e6613a036a2be189f24a671d8d39e57",
+      "text": "要提取像素的图像。"
+    },
+    {
+      "id": "getImagePixels",
+      "field": "params/width/description",
+      "sourceHash": "sha256:11591d5e21bd5d559584253dcacc579f1857d0e5526da3a0dc2217d5ae8f3c70",
+      "text": "图像宽度；未定义时使用 image.width。"
+    },
+    {
+      "id": "getImagePixels",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:8cb7e70bdf4edd8a487aa338e42b3aebacf8efc61c9c113330fcc4651e51dff5",
+      "text": "图像像素数组。"
+    },
+    {
+      "id": "getTimestamp",
+      "field": "description",
+      "sourceHash": "sha256:58b9e7ed643b4f27684680e4058ab57363cad2f379aa451bb68cfaac5a02497d",
+      "text": "获取可用于测量事件间隔的时间戳，单位为毫秒，但基准时刻未指定。优先使用 performance.now()，不可用时使用 Date.now()。"
+    },
+    {
+      "id": "getTimestamp",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:89d9c5200f28be52c6af9fd24dc4b652395008533a4711a5889835665b8b7d04",
+      "text": "自某个未指定基准时刻起的毫秒时间戳。"
+    },
+    {
+      "id": "isLeapYear",
+      "field": "description",
+      "sourceHash": "sha256:199e64c241b8d47555b73eaae361624ddb39a0dbbf36aab93d37fe64e9d0a9ae",
+      "text": "判断给定年份是否为闰年。"
+    },
+    {
+      "id": "isLeapYear",
+      "field": "params/year/description",
+      "sourceHash": "sha256:077c4054916d90b3a3e62cec7a1df0486a8c7c9bbb94e4598afb8a2301059d58",
+      "text": "要检查的年份。"
+    },
+    {
+      "id": "isLeapYear",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:957c7113e9d66277b38cc3df05a9663760be4eaa0f9804bdf5880f6edae90045",
+      "text": "<code>year</code> 是闰年时为 true。"
+    },
+    {
+      "id": "Iso8601.MAXIMUM_INTERVAL",
+      "field": "description",
+      "sourceHash": "sha256:93604e7dcbc02297845bf49e09c2da8290163065180241ceedb8904402c4d7c2",
+      "text": "表示 ISO8601 可表示最大时间区间的 {@link TimeInterval}，等价于区间字符串 0000-01-01T00:00:00Z/9999-12-31T24:00:00Z。"
+    },
+    {
+      "id": "Iso8601.MAXIMUM_VALUE",
+      "field": "description",
+      "sourceHash": "sha256:d849da1db3a1cd0494a74e78fae0d8a154ab73746d2e59d93be7a8a5fbe8e2a9",
+      "text": "表示 ISO8601 可表示最晚时间的 {@link JulianDate}，等价于日期字符串 9999-12-31T24:00:00Z。"
+    },
+    {
+      "id": "Iso8601.MINIMUM_VALUE",
+      "field": "description",
+      "sourceHash": "sha256:86a6d03b9193e0f632cca78f194f0dadf7d03a489af68964d09ff7b5f7a92d68",
+      "text": "表示 ISO8601 可表示最早时间的 {@link JulianDate}，等价于日期字符串 0000-01-01T00:00:00Z。"
+    },
+    {
+      "id": "Iso8601",
+      "field": "description",
+      "sourceHash": "sha256:a5d7093452955a652f4e7e8a9ade966c98f54067fd4b0d5ec465a96119e9b3ce",
+      "text": "与 ISO8601 支持相关的常量。"
+    },
+    {
+      "id": "mergeSortComparator",
+      "field": "description",
+      "sourceHash": "sha256:61933aeaabbc08ce743ddc0d9dd7590e053a42c2a6dc3c652f9e5ce273f90f9f",
+      "text": "归并排序时比较两个元素的函数。"
+    },
+    {
+      "id": "mergeSortComparator",
+      "field": "params/a/description",
+      "sourceHash": "sha256:bcc3b5fbeb9b38c86c6e860bb050ea92149daab4988da5ce97f6f21305e003a7",
+      "text": "待比较的元素。"
+    },
+    {
+      "id": "mergeSortComparator",
+      "field": "params/b/description",
+      "sourceHash": "sha256:bcc3b5fbeb9b38c86c6e860bb050ea92149daab4988da5ce97f6f21305e003a7",
+      "text": "待比较的元素。"
+    },
+    {
+      "id": "mergeSortComparator",
+      "field": "params/userDefinedObject/description",
+      "sourceHash": "sha256:176b5287238aff9bda6fafcabc328bf992e6148851501f8896ac3cf34116b1ab",
+      "text": "传给 {@link mergeSort} 的对象。"
+    },
+    {
+      "id": "mergeSortComparator",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:c5e006d3f81f7c4a3ca8c54518fea31add0defa9fa87d1bd68e25d6a4808e9e4",
+      "text": "<code>a</code> 小于 <code>b</code> 时返回负数，<code>a</code> 大于 <code>b</code> 时返回正数，<code>a</code> 等于 <code>b</code> 时返回 0。"
+    },
+    {
+      "id": "mergeSort",
+      "field": "description",
+      "sourceHash": "sha256:08b2501c2da7e1287de7c23f137b419e3cf613514ae10c9d78810a9eedd741c4",
+      "text": "稳定的归并排序。"
+    },
+    {
+      "id": "mergeSort",
+      "field": "params/array/description",
+      "sourceHash": "sha256:3b6989a0006470aff402c5cb94629d9352741ebae731479417d0ec1e9998385e",
+      "text": "待排序的数组。"
+    },
+    {
+      "id": "mergeSort",
+      "field": "params/comparator/description",
+      "sourceHash": "sha256:9bfd742c955b764cc93fa04cf9ef098901127e615ea20a356fae3b999290dc1c",
+      "text": "比较数组元素的函数。"
+    },
+    {
+      "id": "mergeSort",
+      "field": "params/userDefinedObject/description",
+      "sourceHash": "sha256:ea200c11ade0dd2bdca5055491148a427ddb5fae6303870919cd4cdb9cd518f6",
+      "text": "作为第三个参数传给 <code>comparator</code> 的任意值。"
+    },
+    {
+      "id": "objectToQuery",
+      "field": "description",
+      "sourceHash": "sha256:d5a807506041bc777392deeebbb644fb7a7b4aef46bb50f5f0e4e4accb8cce4c",
+      "text": "将表示名称/值对的对象转换为查询字符串，名称和值按 URL 规则编码。数组值会生成多个同名参数。"
+    },
+    {
+      "id": "objectToQuery",
+      "field": "params/obj/description",
+      "sourceHash": "sha256:3a9ae96841a83ab94b49768bb28b057607be3c488a97adbd8554f8ae24b7a2fe",
+      "text": "包含待编码数据的对象。"
+    },
+    {
+      "id": "objectToQuery",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:4818fff3eb19399a44f9cdf23802f00be8e0215c3114503eb5e2e42c4b348462",
+      "text": "编码后的查询字符串。"
+    },
+    {
+      "id": "PinBuilder#fromColor",
+      "field": "description",
+      "sourceHash": "sha256:fb8b31f7c933260d349fc1506b488ce1e7a3f96460adaa2484ac4e8531fc0ddd",
+      "text": "创建指定颜色和尺寸的空白图钉。"
+    },
+    {
+      "id": "PinBuilder#fromColor",
+      "field": "params/color/description",
+      "sourceHash": "sha256:631a141d60caa3126b195374f2690071b7f1f5ce4d7378f56a79a5a52a6db731",
+      "text": "图钉颜色。"
+    },
+    {
+      "id": "PinBuilder#fromColor",
+      "field": "params/size/description",
+      "sourceHash": "sha256:e7a25fb97e61c3289230215563393da88401089d3928c26018dc07161b4f503f",
+      "text": "图钉尺寸，单位为像素。"
+    },
+    {
+      "id": "PinBuilder#fromColor",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:718c15d43456839c33dcf05e69de20e7704fa627034e4807d2c6f7a5f1a3703f",
+      "text": "表示所生成图钉的画布元素。"
+    },
+    {
+      "id": "PinBuilder#fromMakiIconId",
+      "field": "description",
+      "sourceHash": "sha256:559b0455f44194f6ad6a70ef384a3aa88ed33a6b587726f1360717618ce0f168",
+      "text": "按指定的 {@link https://www.mapbox.com/maki/|maki} 图标标识符、颜色和尺寸创建图钉。"
+    },
+    {
+      "id": "PinBuilder#fromMakiIconId",
+      "field": "params/color/description",
+      "sourceHash": "sha256:631a141d60caa3126b195374f2690071b7f1f5ce4d7378f56a79a5a52a6db731",
+      "text": "图钉颜色。"
+    },
+    {
+      "id": "PinBuilder#fromMakiIconId",
+      "field": "params/id/description",
+      "sourceHash": "sha256:7a2c5196520b6f11e0effd402721ed3bdd4a954b58b8ef009114b90b39f43521",
+      "text": "要印在图钉上的 maki 图标 ID。"
+    },
+    {
+      "id": "PinBuilder#fromMakiIconId",
+      "field": "params/size/description",
+      "sourceHash": "sha256:e7a25fb97e61c3289230215563393da88401089d3928c26018dc07161b4f503f",
+      "text": "图钉尺寸，单位为像素。"
+    },
+    {
+      "id": "PinBuilder#fromMakiIconId",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:045d9ddc9c5395b97d2bad7dccbb2243a1f120b33c74b8f0d2bb3c4c0bc2ec40",
+      "text": "表示所生成图钉的画布元素，或兑现为该画布元素的 Promise。"
+    },
+    {
+      "id": "PinBuilder#fromText",
+      "field": "description",
+      "sourceHash": "sha256:a62d8cfc5c8756251f42d2ec0ac6042c8b66267152b99b92f92062363bd51284",
+      "text": "按指定文本、颜色和尺寸创建图钉。在文本完全位于图钉内部的前提下，尽量放大文本。"
+    },
+    {
+      "id": "PinBuilder#fromText",
+      "field": "params/color/description",
+      "sourceHash": "sha256:631a141d60caa3126b195374f2690071b7f1f5ce4d7378f56a79a5a52a6db731",
+      "text": "图钉颜色。"
+    },
+    {
+      "id": "PinBuilder#fromText",
+      "field": "params/size/description",
+      "sourceHash": "sha256:e7a25fb97e61c3289230215563393da88401089d3928c26018dc07161b4f503f",
+      "text": "图钉尺寸，单位为像素。"
+    },
+    {
+      "id": "PinBuilder#fromText",
+      "field": "params/text/description",
+      "sourceHash": "sha256:03a43760964870c0e2b7ddeb61a11a79c45f1b92bbae64facd217c3ef14aa3cf",
+      "text": "要印在图钉上的文本。"
+    },
+    {
+      "id": "PinBuilder#fromText",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:718c15d43456839c33dcf05e69de20e7704fa627034e4807d2c6f7a5f1a3703f",
+      "text": "表示所生成图钉的画布元素。"
+    },
+    {
+      "id": "PinBuilder#fromUrl",
+      "field": "description",
+      "sourceHash": "sha256:35ce5cd12a8a8755ab8aff4a1db7122bd4ac2e6fdf5c0e2ca6576df20a55bf66",
+      "text": "按指定图标、颜色和尺寸创建图钉。"
+    },
+    {
+      "id": "PinBuilder#fromUrl",
+      "field": "params/color/description",
+      "sourceHash": "sha256:631a141d60caa3126b195374f2690071b7f1f5ce4d7378f56a79a5a52a6db731",
+      "text": "图钉颜色。"
+    },
+    {
+      "id": "PinBuilder#fromUrl",
+      "field": "params/size/description",
+      "sourceHash": "sha256:e7a25fb97e61c3289230215563393da88401089d3928c26018dc07161b4f503f",
+      "text": "图钉尺寸，单位为像素。"
+    },
+    {
+      "id": "PinBuilder#fromUrl",
+      "field": "params/url/description",
+      "sourceHash": "sha256:e12ed40e0187066aa3854432e64005363c10733f50a7ac5c838be580d7fece6c",
+      "text": "要印在图钉上的图像 URL。"
+    },
+    {
+      "id": "PinBuilder#fromUrl",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:045d9ddc9c5395b97d2bad7dccbb2243a1f120b33c74b8f0d2bb3c4c0bc2ec40",
+      "text": "表示所生成图钉的画布元素，或兑现为该画布元素的 Promise。"
+    },
+    {
+      "id": "PinBuilder",
+      "field": "description",
+      "sourceHash": "sha256:83be3e55feaf9b58e9af10f48b8b90dc01687891f4c68cee7ff82bb63b95edc1",
+      "text": "以画布元素生成自定义地图图钉的工具类。\n<br /><br />\n<div align='center'>\n<img src='Images/PinBuilder.png' width='500'/><br />\n使用 Cesium 随附的 maki 图标集及单字符文本生成的图钉示例。\n</div>"
+    },
+    {
+      "id": "Proxy#getURL",
+      "field": "description",
+      "sourceHash": "sha256:963b053aa3a87c4af751134f8c3cc2af80f7fe7137f55568802ca730bea0b26a",
+      "text": "获取请求给定资源时使用的最终 URL。"
+    },
+    {
+      "id": "Proxy#getURL",
+      "field": "params/resource/description",
+      "sourceHash": "sha256:37ae5b9f6a166729a6bcf679f8336b9354f6dcaa1ea4b7171d13ac76fa4bd5fe",
+      "text": "要请求的资源。"
+    },
+    {
+      "id": "Proxy#getURL",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:48eba9b4853ded331954bf580ebc00f6e01a8ef9942747c856aeaf7d66a2d8f3",
+      "text": "代理后的资源地址。"
+    },
+    {
+      "id": "Proxy",
+      "field": "description",
+      "sourceHash": "sha256:6ba1c0a1d5974512ae30fa9e5cf9d0d26eb52dddabadcf1189eef51f520756b9",
+      "text": "用于代理 {@link Resource} 所发请求的基类。"
+    },
+    {
+      "id": "queryToObject",
+      "field": "description",
+      "sourceHash": "sha256:8e56f6adb66e9d07fbf3623ecd998a83175793ca6a7c169816be47764a15b637",
+      "text": "将查询字符串解析为对象，键和值为解码后的名称/值对。名称多次出现时，对应值为数组。"
+    },
+    {
+      "id": "queryToObject",
+      "field": "params/queryString/description",
+      "sourceHash": "sha256:701461caf290bdc2a62e4270e8d665ac15795686ccbe523cc3a5cc13e15bea05",
+      "text": "查询字符串。"
+    },
+    {
+      "id": "queryToObject",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:345c758ec05fd9bb7103bbb28a778ab26adaa72faf58e93f25ce355ff9cf3218",
+      "text": "包含查询字符串解析所得参数的对象。"
+    },
+    {
+      "id": "Queue.Comparator",
+      "field": "description",
+      "sourceHash": "sha256:ee904430d30360075191fdfdfd677f7569873bcf182f09e6046f040fb74a8447",
+      "text": "对队列排序时比较两个元素的函数。"
+    },
+    {
+      "id": "Queue.Comparator",
+      "field": "params/a/description",
+      "sourceHash": "sha256:bcc3b5fbeb9b38c86c6e860bb050ea92149daab4988da5ce97f6f21305e003a7",
+      "text": "待比较的元素。"
+    },
+    {
+      "id": "Queue.Comparator",
+      "field": "params/b/description",
+      "sourceHash": "sha256:bcc3b5fbeb9b38c86c6e860bb050ea92149daab4988da5ce97f6f21305e003a7",
+      "text": "待比较的元素。"
+    },
+    {
+      "id": "Queue.Comparator",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:c5e006d3f81f7c4a3ca8c54518fea31add0defa9fa87d1bd68e25d6a4808e9e4",
+      "text": "<code>a</code> 小于 <code>b</code> 时返回负数，<code>a</code> 大于 <code>b</code> 时返回正数，<code>a</code> 等于 <code>b</code> 时返回 0。"
+    },
+    {
+      "id": "Queue#clear",
+      "field": "description",
+      "sourceHash": "sha256:c322dd2309574241f4e1797c9c003f778c2f62257f6f0d645775d7168f05dae5",
+      "text": "移除队列中的全部元素。"
+    },
+    {
+      "id": "Queue#contains",
+      "field": "description",
+      "sourceHash": "sha256:1358a91f8f6e801eead279186a39a5225d472b677b9fce9d5dc475351196a07e",
+      "text": "检查队列是否包含指定元素。"
+    },
+    {
+      "id": "Queue#contains",
+      "field": "params/item/description",
+      "sourceHash": "sha256:4b3e44dfc4476fef2cf4a7ccbae53a93efaba2eb5f2d1802676282946dee435a",
+      "text": "要查找的元素。"
+    },
+    {
+      "id": "Queue#dequeue",
+      "field": "description",
+      "sourceHash": "sha256:2da676e6d97c25b61f20b73e6b0ed40b4924c58925deacd5fbf3737d2d26d914",
+      "text": "将队首元素出队；队列为空时返回 undefined。"
+    },
+    {
+      "id": "Queue#dequeue",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:8feb645f051342b0559ceca3e63146e2b30868047abb0b91705237b263f440c8",
+      "text": "出队的元素。"
+    },
+    {
+      "id": "Queue#enqueue",
+      "field": "description",
+      "sourceHash": "sha256:1620926e82fa3032222f9daad6e6158a1c4028b2e6f490d0f8eb128b8dc7c4cc",
+      "text": "将指定元素加入队尾。"
+    },
+    {
+      "id": "Queue#enqueue",
+      "field": "params/item/description",
+      "sourceHash": "sha256:8c52d2acc49c6c6ba2f2ba7fb0c2948492a30f82b62fb97a3d7baff6c5ac2fde",
+      "text": "要入队的元素。"
+    },
+    {
+      "id": "Queue#length",
+      "field": "description",
+      "sourceHash": "sha256:adb9a92b0db760516b7fe15e3ed1d027a2141b7c85150f6b3f23e3aaf00d0ebf",
+      "text": "队列长度。"
+    },
+    {
+      "id": "Queue#peek",
+      "field": "description",
+      "sourceHash": "sha256:2f5b1a580f253cd9f3ea895c517354cd2cacaeb0b109257d394f92efe4819f56",
+      "text": "返回队首元素；队列为空时返回 undefined。"
+    },
+    {
+      "id": "Queue#peek",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:1e038f65e50ef5d393d86ac1295c4331cfc6d7576dfa46259a02df68c441058e",
+      "text": "队首元素。"
+    },
+    {
+      "id": "Queue#sort",
+      "field": "description",
+      "sourceHash": "sha256:633a1e189224e1cf85429ff4f4388ad2ea6cf66779385f49799c085f8070c442",
+      "text": "在原队列上对元素排序。"
+    },
+    {
+      "id": "Queue#sort",
+      "field": "params/compareFunction/description",
+      "sourceHash": "sha256:0cb1aa1e1e233ba8bfc0a3a4542c8c9681819fd9c284cccba08acf804f69c63e",
+      "text": "定义排序顺序的函数。"
+    },
+    {
+      "id": "Queue",
+      "field": "description",
+      "sourceHash": "sha256:744d9da7a08a3a649b5738422fd00c26715dd92c28b7e015b64d5e42737be91d",
+      "text": "从队尾入队、从队首出队的队列。"
+    },
+    {
+      "id": "removeExtension",
+      "field": "description",
+      "sourceHash": "sha256:5794bd300b267f83d8ed56b286e98c5730759308fd514b12b697ff42c2bb0462",
+      "text": "若指定扩展存在，从 gltf.extensions、gltf.extensionsUsed、gltf.extensionsRequired 以及 glTF 中其他对象移除该扩展。"
+    },
+    {
+      "id": "removeExtension",
+      "field": "params/extension/description",
+      "sourceHash": "sha256:e16d9c4c1ce3953f232ff9ec10baad50b86bb48b210230ef77d5b36f96866c2d",
+      "text": "要移除的扩展。"
+    },
+    {
+      "id": "removeExtension",
+      "field": "params/gltf/description",
+      "sourceHash": "sha256:58fa0838a4b0b657e5d855e722776b9f55903cac59d87394fd7f5883e5505286",
+      "text": "包含 glTF 资源的 JavaScript 对象。"
+    },
+    {
+      "id": "removeExtension",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:a023357c4fac0a0d6de177cfcb5432f085725fb49b6a9f395bf9e647b0743cdf",
+      "text": "从 gltf.extensions 移除的扩展数据。"
+    },
+    {
+      "id": "RequestErrorEvent#response",
+      "field": "description",
+      "sourceHash": "sha256:c2a00606935f3a0dd7eb654118bb57832947c9a6e2196e4c6970b52140d857aa",
+      "text": "错误附带的响应。错误未包含响应时，此属性为 undefined。"
+    },
+    {
+      "id": "RequestErrorEvent#responseHeaders",
+      "field": "description",
+      "sourceHash": "sha256:7895a7c12bf0c65d1b2f5fdfa067bb4a2b83fbda2d9fdbdaca18545cb7d85cce",
+      "text": "响应中包含的响应头，表示为键值对对象。错误未包含响应头时，此属性为 undefined。"
+    },
+    {
+      "id": "RequestErrorEvent#statusCode",
+      "field": "description",
+      "sourceHash": "sha256:45e60b0cb31f9d43fe58e93b503a9c4a8926250453b7d37afa4bc6782eb0c454",
+      "text": "HTTP 错误状态码，例如 404。错误没有特定 HTTP 状态码时，此属性为 undefined。"
+    },
+    {
+      "id": "RequestErrorEvent#toString",
+      "field": "description",
+      "sourceHash": "sha256:e9093ff0efa2e5cc9b4b4c35ab277202445ef5176f7e254bee90da11173530eb",
+      "text": "创建表示此 RequestErrorEvent 的字符串。"
+    },
+    {
+      "id": "RequestErrorEvent#toString",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:ddc34737cfe738892b6bd2ef21209746de9eefa58b668655b9d058670eff1985",
+      "text": "表示给定 RequestErrorEvent 的字符串。"
+    },
+    {
+      "id": "RequestErrorEvent",
+      "field": "description",
+      "sourceHash": "sha256:b2226946883e11c33b683b81ee086b037f00313225ca67a1f1f3f980c848f4a1",
+      "text": "描述请求出错信息的对象。"
+    },
+    {
+      "id": "RequestErrorEvent",
+      "field": "params/response/description",
+      "sourceHash": "sha256:4211d135de8a57fdc70b3c53e227b0f06f5fdd9796954bd617d8caf365cdd96c",
+      "text": "错误附带的响应。"
+    },
+    {
+      "id": "RequestErrorEvent",
+      "field": "params/responseHeaders/description",
+      "sourceHash": "sha256:85f8ad8ea57c90802693ef17cbb5d6dfaa66e0567e29203ab17bd1538b3ac459",
+      "text": "响应头，可为对象字面量，也可为 XMLHttpRequest.getAllResponseHeaders() 返回格式的字符串。"
+    },
+    {
+      "id": "RequestErrorEvent",
+      "field": "params/statusCode/description",
+      "sourceHash": "sha256:1f7f1c1d98751322feabaec64f1232375ac1b4f4bb5fe9e49fa1e97a2b002df0",
+      "text": "HTTP 错误状态码，例如 404。"
+    },
+    {
+      "id": "RuntimeError#message",
+      "field": "description",
+      "sourceHash": "sha256:592c470e51f6290752d1ac636f740e403b0ddc721e908f29a4697e8103b98240",
+      "text": "解释抛出此异常原因的文本。"
+    },
+    {
+      "id": "RuntimeError#name",
+      "field": "description",
+      "sourceHash": "sha256:51b23a3813531c2c7091a8a28c31d5b64ae6c45aaecdf3b7f25417298ba618ca",
+      "text": "名称为 RuntimeError，表示异常由运行时错误引起。"
+    },
+    {
+      "id": "RuntimeError#stack",
+      "field": "description",
+      "sourceHash": "sha256:33bbafab1c8187dc07ae19e00ab44f60e4f8010efdff337dce12b887ea0f6056",
+      "text": "此异常的堆栈跟踪，如可用。"
+    },
+    {
+      "id": "RuntimeError",
+      "field": "description",
+      "sourceHash": "sha256:05636b758cefc85f4ea5eb16aedc9bda1b75e420fae04a5684a35c939124f867",
+      "text": "构造表示运行时错误的异常对象，例如内存不足或着色器编译失败。函数可能抛出此异常时，调用代码应准备捕获和处理。\n<br /><br />\n与之不同，{@link DeveloperError} 表示无效参数等开发错误，通常意味着调用代码存在缺陷。"
+    },
+    {
+      "id": "RuntimeError",
+      "field": "params/message/description",
+      "sourceHash": "sha256:ede3754ec86194a2c7c6867d52ea3d401e8e7d767802263c0902e1d2de6beb88",
+      "text": "此异常的错误消息。"
+    },
+    {
+      "id": "srgbToLinear",
+      "field": "description",
+      "sourceHash": "sha256:92c8c1775105451003121ee0ebdc64471b776a8d9c30e6db66960c32f4b3cc24",
+      "text": "将值从 sRGB 色彩空间转换至线性色彩空间。"
+    },
+    {
+      "id": "srgbToLinear",
+      "field": "params/value/description",
+      "sourceHash": "sha256:e06cd75cdb031631f27039a394a63741fd1e1cd7bc48b151637b3382560d1df6",
+      "text": "sRGB 色彩空间中的颜色值。"
+    },
+    {
+      "id": "srgbToLinear",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:1021f02fac0853fcdba2772e1b542e23641f2b93f25ce2a360cb5c8934baa99e",
+      "text": "线性色彩空间中的颜色值。"
+    },
+    {
+      "id": "subdivideArray",
+      "field": "description",
+      "sourceHash": "sha256:61daa657d402fe4d21e2a5fc1b387398c3bdcff7b13736e5cbd35465ee4e16f7",
+      "text": "将数组拆分为指定数量、大小尽量均衡的较小数组。"
+    },
+    {
+      "id": "subdivideArray",
+      "field": "exceptions/0/description",
+      "sourceHash": "sha256:6e14c31a7af8b587367c6f43d611b8e645534e9e6a149e66e20dfba2c0a873a6",
+      "text": "numberOfArrays 必须大于 0。"
+    },
+    {
+      "id": "subdivideArray",
+      "field": "params/array/description",
+      "sourceHash": "sha256:15d1c2e19c49c97bf1cf5782eb60100fc4b70d89242eff2bcf41311735fe7b4b",
+      "text": "要拆分的数组。"
+    },
+    {
+      "id": "subdivideArray",
+      "field": "params/numberOfArrays/description",
+      "sourceHash": "sha256:35a2f4ddc3a45884c2bf3930560036ac03b6598f1a48a6a5344cb56234049ddb",
+      "text": "要将给定数组拆分成的数组数量。"
+    },
+    {
+      "id": "TaskProcessor#destroy",
+      "field": "description",
+      "sourceHash": "sha256:0c969cb5c9c88ec89b7366d87f421ec3c3fd140c3db5fe785e9b941684f12d0e",
+      "text": "销毁此对象，立即终止 Worker。\n<br /><br />\n对象销毁后不应再使用；调用除 <code>isDestroyed</code> 以外的任何函数都会抛出 {@link DeveloperError}。"
+    },
+    {
+      "id": "TaskProcessor#initWebAssemblyModule",
+      "field": "description",
+      "sourceHash": "sha256:31c287878b17f0da5294058cbb3f5539f9a94164e718e091d482f40d05d67dcc",
+      "text": "向 Web Worker 发送配置消息，异步加载并编译 WebAssembly 模块；也可配置不支持 WebAssembly 时使用的备用 JavaScript 模块。"
+    },
+    {
+      "id": "TaskProcessor#initWebAssemblyModule",
+      "field": "exceptions/0/description",
+      "sourceHash": "sha256:6114b777ca50b86800e9404c21c13c9576e94ef3890b80c0538fd70452cd5f03",
+      "text": "浏览器不支持 WebAssembly，且未提供备用模块。"
+    },
+    {
+      "id": "TaskProcessor#initWebAssemblyModule",
+      "field": "params/webAssemblyOptions.fallbackModulePath/description",
+      "sourceHash": "sha256:d3638312e0915c29295d303061b26b42781f4fb98b7ccd960174f3beb096ccdc",
+      "text": "不支持 WebAssembly 时使用的备用 JavaScript 模块路径。"
+    },
+    {
+      "id": "TaskProcessor#initWebAssemblyModule",
+      "field": "params/webAssemblyOptions.modulePath/description",
+      "sourceHash": "sha256:b50ec1485502b1813218a226850159c79921fcc1675c9f19db18b84314d4def3",
+      "text": "WebAssembly 的 JavaScript 封装模块路径。"
+    },
+    {
+      "id": "TaskProcessor#initWebAssemblyModule",
+      "field": "params/webAssemblyOptions.wasmBinaryFile/description",
+      "sourceHash": "sha256:0af1e8a2ae8c3221111ba508fb516e36372e473170caf86b9d971f7a530bc74b",
+      "text": "WebAssembly 二进制文件路径。"
+    },
+    {
+      "id": "TaskProcessor#initWebAssemblyModule",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:d3876a619546a6b21ecb701394779f019e8155414501b4be8c88102cb711a20d",
+      "text": "Worker 加载并编译 WebAssembly 模块、准备好处理任务后，兑现为初始化结果的 Promise。"
+    },
+    {
+      "id": "TaskProcessor#isDestroyed",
+      "field": "description",
+      "sourceHash": "sha256:aea7b697937631c90ae3fc0ec55b81ba0ddc7abe4d6045848b2031f9bed60091",
+      "text": "若此对象已销毁，返回 true；否则返回 false。<br /><br />对象销毁后不应再使用；调用除 <code>isDestroyed</code> 以外的任何函数都会抛出 {@link DeveloperError}。"
+    },
+    {
+      "id": "TaskProcessor#scheduleTask",
+      "field": "description",
+      "sourceHash": "sha256:d059d6ed37f6b1f045ddce86b3a4bf8db85168cbd56104d616f9d137ae27df88",
+      "text": "调度由 Web Worker 异步处理的任务。活动任务数已达到构造时设定的上限时，立即返回 undefined。否则返回 Promise，在 Worker 完成并发回结果时兑现。"
+    },
+    {
+      "id": "TaskProcessor#scheduleTask",
+      "field": "params/parameters/description",
+      "sourceHash": "sha256:dd61bb8854b2ad43712cba414ec1430808e82f04f6f6ee8cd3108061883877a0",
+      "text": "要发送给 Worker 的任意输入数据。"
+    },
+    {
+      "id": "TaskProcessor#scheduleTask",
+      "field": "params/transferableObjects/description",
+      "sourceHash": "sha256:6e37ff035f7c9ada1cce9e30c91f96729c6aebba3342f8cdbda869b8770ee51d",
+      "text": "parameters 中要转移给 Worker 而非复制的对象数组。"
+    },
+    {
+      "id": "TaskProcessor#scheduleTask",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:85fef3400cfca82d3a5a4783ccdb105390a15a2ddbce55aec7b4661db6eabdf6",
+      "text": "结果可用时兑现的 Promise；活动任务过多时为 undefined。"
+    },
+    {
+      "id": "TaskProcessor",
+      "field": "description",
+      "sourceHash": "sha256:4309d207aab6a65648feb3e1a62a02595551202656b795aebd7b327817a29819",
+      "text": "Web Worker 的封装，用于向指定 Worker 调度任务，并通过 Promise 异步返回结果。首次调度任务前不会创建 Worker。"
+    },
+    {
+      "id": "TaskProcessor",
+      "field": "params/maximumActiveTasks/description",
+      "sourceHash": "sha256:38a21e607d0b6af3fa7e61d04ef312eac720913da2ad1350d00692c3c3d392fc",
+      "text": "最大活动任务数。达到上限时，scheduleTask 不再接收新任务，可在后续帧重新调度。"
+    },
+    {
+      "id": "TaskProcessor",
+      "field": "params/workerPath/description",
+      "sourceHash": "sha256:5ae7f8220eb1aadd3c1f4c62dc32573c0a4957c8f4904cc913a0f06f8f19c985",
+      "text": "Worker 的 URL，可以是绝对路径，也可以相对于 Cesium Workers 文件夹。"
+    },
+    {
+      "id": "TrustedServers.add",
+      "field": "description",
+      "sourceHash": "sha256:1f0f376ea9d22fbe3c16c59f76c159fdbe995d768d94a11bd991fcc7d326c1e0",
+      "text": "向注册表添加可信服务器。"
+    },
+    {
+      "id": "TrustedServers.add",
+      "field": "params/host/description",
+      "sourceHash": "sha256:4f83e9b69a717495d7b087dc2194f39db80a368a85dec7e455c6c15bfc1c9e1f",
+      "text": "要添加的主机。"
+    },
+    {
+      "id": "TrustedServers.add",
+      "field": "params/port/description",
+      "sourceHash": "sha256:d0be3d5283336a15c94583c46d410812bf9f3c95f2dccf6dc4b488f1a756f124",
+      "text": "访问主机所用端口。"
+    },
+    {
+      "id": "TrustedServers.clear",
+      "field": "description",
+      "sourceHash": "sha256:321a94b73495ab2b5b487ecf19e66e6c0ec23722e7e741871ec4be6b5c299650",
+      "text": "清空注册表。"
+    },
+    {
+      "id": "TrustedServers.contains",
+      "field": "description",
+      "sourceHash": "sha256:3e65adaf2dc2c8f3a101ce968c8b98b9e2b8c6c7ad5286f7cdf3731c1b2907a4",
+      "text": "检查服务器是否可信。URL 包含端口时，注册该服务器时也必须包含端口。"
+    },
+    {
+      "id": "TrustedServers.contains",
+      "field": "params/url/description",
+      "sourceHash": "sha256:bf22d6df2f3ee99757e19af2d5dd30a939c26fa3685cf663ca1847a14d3d88f1",
+      "text": "要与可信列表比较的 URL。"
+    },
+    {
+      "id": "TrustedServers.contains",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:ca5f917775abc0aeb93d48fa1c93e8702c54c3e37a32bdcf11ed7919acdd532e",
+      "text": "URL 可信时返回 true，否则返回 false。"
+    },
+    {
+      "id": "TrustedServers.remove",
+      "field": "description",
+      "sourceHash": "sha256:050da7147b01b6790ff77ef826d93e411543ad53b7f1e8236e4ea4d2199d307a",
+      "text": "从注册表移除可信服务器。"
+    },
+    {
+      "id": "TrustedServers.remove",
+      "field": "params/host/description",
+      "sourceHash": "sha256:f5712ac8b67b39ebca6bcadff9411912332dc0c90601b5761e9a73e31e865c5c",
+      "text": "要移除的主机。"
+    },
+    {
+      "id": "TrustedServers.remove",
+      "field": "params/port/description",
+      "sourceHash": "sha256:d0be3d5283336a15c94583c46d410812bf9f3c95f2dccf6dc4b488f1a756f124",
+      "text": "访问主机所用端口。"
+    },
+    {
+      "id": "TrustedServers",
+      "field": "description",
+      "sourceHash": "sha256:4627a93987c27761a8a64a7be192fe09513aadcfdcadfef44c6f78c31b3b53b7",
+      "text": "记录全部可信服务器的单例。向这些服务器发出的请求会携带凭据。"
+    },
+    {
+      "id": "TypedArrayConstructor",
+      "field": "description",
+      "sourceHash": "sha256:10a7b310f370d997c15086c40f444a3fe64bee50e245783a8363c9dc5533cfab",
+      "text": "所有数值类型化数组构造函数类型的联合。"
+    },
+    {
+      "id": "TypedArray",
+      "field": "description",
+      "sourceHash": "sha256:9dad5ab39557f6db5dfe94b5a08242112590910cdf80e18bb745b61d153a0bf2",
+      "text": "所有数值类型化数组类型的联合。"
+    },
+    {
+      "id": "writeTextToCanvas",
+      "field": "description",
+      "sourceHash": "sha256:cd220457f8b49da70eecdbe6cee8b35cee0be99bcca044ab93618539fe0e9d64",
+      "text": "将给定文本绘制到新画布，并调整画布尺寸以容纳文本。文本为空时返回 undefined。"
+    },
+    {
+      "id": "writeTextToCanvas",
+      "field": "params/options.backgroundColor/description",
+      "sourceHash": "sha256:5300ad28ca90477fe1602b66d659659e73695f2920efb15317e6d41f89bc13b2",
+      "text": "画布背景颜色。"
+    },
+    {
+      "id": "writeTextToCanvas",
+      "field": "params/options.fill/description",
+      "sourceHash": "sha256:dcd120c8b039ff3e5a1b743068719e89e359e20dbda0eae6105b25311410711e",
+      "text": "是否填充文本。"
+    },
+    {
+      "id": "writeTextToCanvas",
+      "field": "params/options.fillColor/description",
+      "sourceHash": "sha256:46e5cca6d389e0bd50e00f30631566c061cca3635fdda8a42e5dae28c05e4357",
+      "text": "填充颜色。"
+    },
+    {
+      "id": "writeTextToCanvas",
+      "field": "params/options.font/description",
+      "sourceHash": "sha256:2dc05a0fcc3799352988ec1c5b83a28cd0aec45440fa4a701f46e32b423fdd35",
+      "text": "使用的 CSS 字体。"
+    },
+    {
+      "id": "writeTextToCanvas",
+      "field": "params/options.padding/description",
+      "sourceHash": "sha256:975df5482d9fe5b8c4880ca84d49becb1e2dd801d2cba0cb65d96c142d51c9fb",
+      "text": "在文本周围添加的内边距，单位为像素。"
+    },
+    {
+      "id": "writeTextToCanvas",
+      "field": "params/options.stroke/description",
+      "sourceHash": "sha256:f2e629909b644f00a4d92d5641a4475caf68080a19c1db455d370e50868075d3",
+      "text": "是否对文本描边。"
+    },
+    {
+      "id": "writeTextToCanvas",
+      "field": "params/options.strokeColor/description",
+      "sourceHash": "sha256:81fe78c0223bb3e4dee3249141b8796486780ffdca983cc366391a67bc90616b",
+      "text": "描边颜色。"
+    },
+    {
+      "id": "writeTextToCanvas",
+      "field": "params/options.strokeWidth/description",
+      "sourceHash": "sha256:660ed75d413575e5c1f94e40c7b85460db213624afc94b9dc3c1f7ec5b4441b4",
+      "text": "描边宽度。"
+    },
+    {
+      "id": "writeTextToCanvas",
+      "field": "params/text/description",
+      "sourceHash": "sha256:77c45d70ea0afba79d79af886735715621b29db13a387d98493ba9be4e9f8832",
+      "text": "要绘制的文本。"
+    },
+    {
+      "id": "writeTextToCanvas",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:309abf8d01bb35c24c0bb364f5a9353cc1d8a949237eae29fa73436bbdc92d6d",
+      "text": "绘制了给定文本的新画布。measureText 返回的尺寸对象也会添加到画布上。文本为空时返回 undefined。"
+    }
+  ]
+}

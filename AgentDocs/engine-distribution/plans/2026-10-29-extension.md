@@ -69,8 +69,10 @@ phases, each reviewed and committed before the next begins. No new runtime or ge
 - [T5 geometry/numerics](2026-10-30-t5-geometry-translation.md): completed and reviewed;
   1,547 new records complete 95 roots and reach 82.8% coverage. Checkpoint `67269fc68a`.
 - [T6 widgets and input](2026-10-30-t6-widget-input-translation.md): completed and reviewed after T5 checkpoint;
-  832 new records complete 69 widget/input/controller roots and inherited native fields. Ready for checkpoint.
-- Remaining metadata/providers and utilities will be elaborated after each checkpoint.
+  832 new records complete 69 widget/input/controller roots and inherited native fields. Checkpoint `03dab19ec1`.
+- [T7 utilities](2026-10-30-t7-utility-translation.md): completed and reviewed; 509 new records across
+  55 utility and rendering-constant roots after T6 checkpoint.
+- Remaining metadata/providers and specialized scene APIs will be elaborated after this checkpoint.
 - Remainder and final gate: cover every remaining native field, resolve changed/unused
   catalog records, and verify missing/stale/unused are all zero. Preserve semantic metadata,
   code, links and Chinese owned-source separation throughout.

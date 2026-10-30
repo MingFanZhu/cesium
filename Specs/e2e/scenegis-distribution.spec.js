@@ -454,3 +454,34 @@ test("widget and input documentation displays cancellation and projected pan uni
   });
   expect(errors).toEqual([]);
 });
+
+test("utility documentation displays task backpressure and mip filtering", async ({
+  page,
+}, info) => {
+  const errors = [];
+  page.on("pageerror", (error) => errors.push(error.message));
+  page.on("response", (response) => {
+    if (response.status() >= 400) {
+      errors.push(`${response.status()} ${response.url()}`);
+    }
+  });
+  await page.route(/^https?:\/\/(?!127\.0\.0\.1:8104)/, (route) =>
+    route.abort(),
+  );
+  const prefix = "/deep/site/vendor/engine/Documentation/";
+  await page.goto(`${prefix}TaskProcessor.html#scheduleTask`);
+  await expect(page.locator('[id="scheduleTask"]')).toBeVisible();
+  await expect(page.locator("#main")).toContainText("立即返回 undefined");
+  await expect(page.locator("#main")).toContainText("转移给 Worker 而非复制");
+  await page.goto(`${prefix}global.html#TextureMinificationFilter`);
+  await expect(page.locator('[id="TextureMinificationFilter"]')).toBeVisible();
+  await expect(page.locator("#main")).toContainText("相邻两个 mip 层级");
+  await expect(page.locator("#main")).toContainText("要求纹理具有 mipmap");
+  await info.attach("utility-documentation", {
+    body: await page.screenshot({
+      path: info.outputPath("utility-documentation.png"),
+    }),
+    contentType: "image/png",
+  });
+  expect(errors).toEqual([]);
+});

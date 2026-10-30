@@ -1,0 +1,1212 @@
+{
+  "schemaVersion": 1,
+  "locale": "zh-CN",
+  "entries": [
+    {
+      "id": "BlendEquation.ADD",
+      "field": "description",
+      "sourceHash": "sha256:084abae9e321c9a174c736239410ec5353c8737fde5d5a461bee7b4259fd2320",
+      "text": "逐分量相加像素值，可用于半透明的加法混合。"
+    },
+    {
+      "id": "BlendEquation.MAX",
+      "field": "description",
+      "sourceHash": "sha256:e6b2566dd2051b88901451bfc5e883a00428d115d8454e31a1778eb8d667809f",
+      "text": "逐像素颜色分量取最大值，即 max(source, destination)。"
+    },
+    {
+      "id": "BlendEquation.MIN",
+      "field": "description",
+      "sourceHash": "sha256:eaa730b0a0f07adf29cf4faeb750280a1224a48bd03269b8630ee0b51c9d2e91",
+      "text": "逐像素颜色分量取最小值，即 min(source, destination)。"
+    },
+    {
+      "id": "BlendEquation.REVERSE_SUBTRACT",
+      "field": "description",
+      "sourceHash": "sha256:721c85a251c90073e81aa0eae89ae3569e92704489b4b6bfb7ce616df2238236",
+      "text": "逐分量相减像素值，即 destination - source。"
+    },
+    {
+      "id": "BlendEquation.SUBTRACT",
+      "field": "description",
+      "sourceHash": "sha256:41fe6eab1c77a466265e401a15ac5f93499d2badebad3664cc119fb20dd36ca5",
+      "text": "逐分量相减像素值，即 source - destination，可用于半透明混合。"
+    },
+    {
+      "id": "BlendEquation",
+      "field": "description",
+      "sourceHash": "sha256:33c97f2a484e613d925078581127351f588e30490bbf6d1f44d855c910e50601",
+      "text": "决定如何组合两个像素的值。"
+    },
+    {
+      "id": "BlendEquation",
+      "field": "properties/ADD/description",
+      "sourceHash": "sha256:084abae9e321c9a174c736239410ec5353c8737fde5d5a461bee7b4259fd2320",
+      "text": "逐分量相加像素值，可用于半透明的加法混合。"
+    },
+    {
+      "id": "BlendEquation",
+      "field": "properties/MAX/description",
+      "sourceHash": "sha256:e6b2566dd2051b88901451bfc5e883a00428d115d8454e31a1778eb8d667809f",
+      "text": "逐像素颜色分量取最大值，即 max(source, destination)。"
+    },
+    {
+      "id": "BlendEquation",
+      "field": "properties/MIN/description",
+      "sourceHash": "sha256:eaa730b0a0f07adf29cf4faeb750280a1224a48bd03269b8630ee0b51c9d2e91",
+      "text": "逐像素颜色分量取最小值，即 min(source, destination)。"
+    },
+    {
+      "id": "BlendEquation",
+      "field": "properties/REVERSE_SUBTRACT/description",
+      "sourceHash": "sha256:721c85a251c90073e81aa0eae89ae3569e92704489b4b6bfb7ce616df2238236",
+      "text": "逐分量相减像素值，即 destination - source。"
+    },
+    {
+      "id": "BlendEquation",
+      "field": "properties/SUBTRACT/description",
+      "sourceHash": "sha256:41fe6eab1c77a466265e401a15ac5f93499d2badebad3664cc119fb20dd36ca5",
+      "text": "逐分量相减像素值，即 source - destination，可用于半透明混合。"
+    },
+    {
+      "id": "BlendFunction.CONSTANT_ALPHA",
+      "field": "description",
+      "sourceHash": "sha256:2898dfaffed294c98e3758bed7952283de8177d95dd1ad050e774589716fbd46",
+      "text": "混合因子为常量 alpha。"
+    },
+    {
+      "id": "BlendFunction.CONSTANT_COLOR",
+      "field": "description",
+      "sourceHash": "sha256:ffc5707f9813e4e07a3bfd1f13893c791d89f889c791d62996db25d348a86208",
+      "text": "混合因子为常量颜色。"
+    },
+    {
+      "id": "BlendFunction.DESTINATION_ALPHA",
+      "field": "description",
+      "sourceHash": "sha256:de33af1939b399c55588ec3651034f4c894656d12bac00b174a16e9b58770879",
+      "text": "混合因子为目标 alpha。"
+    },
+    {
+      "id": "BlendFunction.DESTINATION_COLOR",
+      "field": "description",
+      "sourceHash": "sha256:8f6d037d8cd9d7a25937c109bfa9235e16037a3598b14afa6c75b5b6f4ef7e18",
+      "text": "混合因子为目标颜色。"
+    },
+    {
+      "id": "BlendFunction.ONE_MINUS_CONSTANT_ALPHA",
+      "field": "description",
+      "sourceHash": "sha256:40901d477ebcfd0a1a6e316d572efbb869dda37286b637564306f903e44e29d0",
+      "text": "混合因子为 1 减去常量 alpha。"
+    },
+    {
+      "id": "BlendFunction.ONE_MINUS_CONSTANT_COLOR",
+      "field": "description",
+      "sourceHash": "sha256:6b1d00d0dbeb5a2a3aba4075a893db5aa5ce30eae5ba036c703b083f56e69603",
+      "text": "混合因子为 1 减去常量颜色。"
+    },
+    {
+      "id": "BlendFunction.ONE_MINUS_DESTINATION_ALPHA",
+      "field": "description",
+      "sourceHash": "sha256:44b93e100cf5796fa4266b891c47afe82a7ba14327ed277fbc077800a3529d16",
+      "text": "混合因子为 1 减去目标 alpha。"
+    },
+    {
+      "id": "BlendFunction.ONE_MINUS_DESTINATION_COLOR",
+      "field": "description",
+      "sourceHash": "sha256:467a34c36d1b52a53e311b7e04466dbc52b159399be66916264d8caa1b4056ac",
+      "text": "混合因子为 1 减去目标颜色。"
+    },
+    {
+      "id": "BlendFunction.ONE_MINUS_SOURCE_ALPHA",
+      "field": "description",
+      "sourceHash": "sha256:6739bdd5b07d8b25f148d8be47de251b192a41cbc2a4cab44a07fde4ac11b2f3",
+      "text": "混合因子为 1 减去源 alpha。"
+    },
+    {
+      "id": "BlendFunction.ONE_MINUS_SOURCE_COLOR",
+      "field": "description",
+      "sourceHash": "sha256:13bd8f5ea1e9156bb01317c217dfc1770b5d950b600beee87287922f75ad1bd9",
+      "text": "混合因子为 1 减去源颜色。"
+    },
+    {
+      "id": "BlendFunction.ONE",
+      "field": "description",
+      "sourceHash": "sha256:03c499b8ce97454ad320ff6536694412de012d5cbf23072e48840a3bdc377405",
+      "text": "混合因子为 1。"
+    },
+    {
+      "id": "BlendFunction.SOURCE_ALPHA_SATURATE",
+      "field": "description",
+      "sourceHash": "sha256:080497fa8e6e95e82c2b689de45279af6a1911f308a47d7e5b65e594cd573435",
+      "text": "混合因子使用饱和源 alpha。"
+    },
+    {
+      "id": "BlendFunction.SOURCE_ALPHA",
+      "field": "description",
+      "sourceHash": "sha256:2f636816e2f77d369b918d7a88db9a56d8eed77277831976aeb7ef81e4ad79f4",
+      "text": "混合因子为源 alpha。"
+    },
+    {
+      "id": "BlendFunction.SOURCE_COLOR",
+      "field": "description",
+      "sourceHash": "sha256:1b7333ce422b6c1c4fec8c006cea320f6b11fbb9aa1a5c5174044b18a722c042",
+      "text": "混合因子为源颜色。"
+    },
+    {
+      "id": "BlendFunction.ZERO",
+      "field": "description",
+      "sourceHash": "sha256:e366fcf34004efd8fb5a2f235c1fbd6c8be178d7abc1351553d4caddca7722f2",
+      "text": "混合因子为 0。"
+    },
+    {
+      "id": "BlendFunction",
+      "field": "description",
+      "sourceHash": "sha256:fe68201684e47635033a7ef5b0b51dc68fcd4ae0de4c8710cbd5bd7e028adace",
+      "text": "决定混合因子的计算方式。"
+    },
+    {
+      "id": "BlendFunction",
+      "field": "properties/CONSTANT_ALPHA/description",
+      "sourceHash": "sha256:2898dfaffed294c98e3758bed7952283de8177d95dd1ad050e774589716fbd46",
+      "text": "混合因子为常量 alpha。"
+    },
+    {
+      "id": "BlendFunction",
+      "field": "properties/CONSTANT_COLOR/description",
+      "sourceHash": "sha256:ffc5707f9813e4e07a3bfd1f13893c791d89f889c791d62996db25d348a86208",
+      "text": "混合因子为常量颜色。"
+    },
+    {
+      "id": "BlendFunction",
+      "field": "properties/DESTINATION_ALPHA/description",
+      "sourceHash": "sha256:de33af1939b399c55588ec3651034f4c894656d12bac00b174a16e9b58770879",
+      "text": "混合因子为目标 alpha。"
+    },
+    {
+      "id": "BlendFunction",
+      "field": "properties/DESTINATION_COLOR/description",
+      "sourceHash": "sha256:8f6d037d8cd9d7a25937c109bfa9235e16037a3598b14afa6c75b5b6f4ef7e18",
+      "text": "混合因子为目标颜色。"
+    },
+    {
+      "id": "BlendFunction",
+      "field": "properties/ONE_MINUS_CONSTANT_ALPHA/description",
+      "sourceHash": "sha256:40901d477ebcfd0a1a6e316d572efbb869dda37286b637564306f903e44e29d0",
+      "text": "混合因子为 1 减去常量 alpha。"
+    },
+    {
+      "id": "BlendFunction",
+      "field": "properties/ONE_MINUS_CONSTANT_COLOR/description",
+      "sourceHash": "sha256:6b1d00d0dbeb5a2a3aba4075a893db5aa5ce30eae5ba036c703b083f56e69603",
+      "text": "混合因子为 1 减去常量颜色。"
+    },
+    {
+      "id": "BlendFunction",
+      "field": "properties/ONE_MINUS_DESTINATION_ALPHA/description",
+      "sourceHash": "sha256:44b93e100cf5796fa4266b891c47afe82a7ba14327ed277fbc077800a3529d16",
+      "text": "混合因子为 1 减去目标 alpha。"
+    },
+    {
+      "id": "BlendFunction",
+      "field": "properties/ONE_MINUS_DESTINATION_COLOR/description",
+      "sourceHash": "sha256:467a34c36d1b52a53e311b7e04466dbc52b159399be66916264d8caa1b4056ac",
+      "text": "混合因子为 1 减去目标颜色。"
+    },
+    {
+      "id": "BlendFunction",
+      "field": "properties/ONE_MINUS_SOURCE_ALPHA/description",
+      "sourceHash": "sha256:6739bdd5b07d8b25f148d8be47de251b192a41cbc2a4cab44a07fde4ac11b2f3",
+      "text": "混合因子为 1 减去源 alpha。"
+    },
+    {
+      "id": "BlendFunction",
+      "field": "properties/ONE_MINUS_SOURCE_COLOR/description",
+      "sourceHash": "sha256:13bd8f5ea1e9156bb01317c217dfc1770b5d950b600beee87287922f75ad1bd9",
+      "text": "混合因子为 1 减去源颜色。"
+    },
+    {
+      "id": "BlendFunction",
+      "field": "properties/ONE/description",
+      "sourceHash": "sha256:03c499b8ce97454ad320ff6536694412de012d5cbf23072e48840a3bdc377405",
+      "text": "混合因子为 1。"
+    },
+    {
+      "id": "BlendFunction",
+      "field": "properties/SOURCE_ALPHA_SATURATE/description",
+      "sourceHash": "sha256:080497fa8e6e95e82c2b689de45279af6a1911f308a47d7e5b65e594cd573435",
+      "text": "混合因子使用饱和源 alpha。"
+    },
+    {
+      "id": "BlendFunction",
+      "field": "properties/SOURCE_ALPHA/description",
+      "sourceHash": "sha256:2f636816e2f77d369b918d7a88db9a56d8eed77277831976aeb7ef81e4ad79f4",
+      "text": "混合因子为源 alpha。"
+    },
+    {
+      "id": "BlendFunction",
+      "field": "properties/SOURCE_COLOR/description",
+      "sourceHash": "sha256:1b7333ce422b6c1c4fec8c006cea320f6b11fbb9aa1a5c5174044b18a722c042",
+      "text": "混合因子为源颜色。"
+    },
+    {
+      "id": "BlendFunction",
+      "field": "properties/ZERO/description",
+      "sourceHash": "sha256:e366fcf34004efd8fb5a2f235c1fbd6c8be178d7abc1351553d4caddca7722f2",
+      "text": "混合因子为 0。"
+    },
+    {
+      "id": "BlendingState.ADDITIVE_BLEND",
+      "field": "description",
+      "sourceHash": "sha256:89d724fbf3876d044d4a1f8869b5aafefbd50152e0f1890b154728b3f6017c93",
+      "text": "启用加法混合：<code>source(source.alpha) + destination</code>。"
+    },
+    {
+      "id": "BlendingState.ALPHA_BLEND",
+      "field": "description",
+      "sourceHash": "sha256:f38f7520fe2640093d340f7e97f48d42aa4870c8e1257b30362855251d1e356c",
+      "text": "启用 alpha 混合：<code>source(source.alpha) + destination(1 - source.alpha)</code>。"
+    },
+    {
+      "id": "BlendingState.DISABLED",
+      "field": "description",
+      "sourceHash": "sha256:26c003f08c661007de855a0861edcc703be7b537fc38fde650265551f18b6204",
+      "text": "禁用混合。"
+    },
+    {
+      "id": "BlendingState.PRE_MULTIPLIED_ALPHA_BLEND",
+      "field": "description",
+      "sourceHash": "sha256:1a136c96a1de84cdb880c4f1105f411f44f3ec486744238244c8aef0057aadec",
+      "text": "启用预乘 alpha 混合：<code>source + destination(1 - source.alpha)</code>。"
+    },
+    {
+      "id": "BlendingState",
+      "field": "description",
+      "sourceHash": "sha256:9dfaf7556c7933fd2104d4862738082fe04b7db2b21c1aab072e7d3228309829",
+      "text": "混合状态组合 {@link BlendEquation}、{@link BlendFunction} 和 <code>enabled</code> 标记，完整定义渲染时源片元与目标片元的混合方式。\n<p>\n可用于辅助配置 {@link Appearance#renderState} 的自定义渲染状态。\n</p>"
+    },
+    {
+      "id": "CompressedTextureBuffer.clone",
+      "field": "description",
+      "sourceHash": "sha256:d491e3c0be604f35dfe1a5a4731f44fb53535460e0e4ca5c615ec9c5e4f1bd23",
+      "text": "创建压缩纹理缓冲的浅克隆。"
+    },
+    {
+      "id": "CompressedTextureBuffer.clone",
+      "field": "params/object/description",
+      "sourceHash": "sha256:5147c03bf49eb0a8a9982bf66bf119d87e76543e025d043803ca4b3a0fee9504",
+      "text": "待克隆的压缩纹理缓冲。"
+    },
+    {
+      "id": "CompressedTextureBuffer.clone",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:e8ce9e527d08299c78d8f28f08d9c62f797f572839e8a7855e3fade482139945",
+      "text": "压缩纹理缓冲的浅克隆。"
+    },
+    {
+      "id": "CompressedTextureBuffer#arrayBufferView",
+      "field": "description",
+      "sourceHash": "sha256:f5cd08a48d939a4e0bbcabca809e6af0c8be835defe8a1a40fbf75046628b289",
+      "text": "压缩纹理缓冲，为 bufferView 的别名。"
+    },
+    {
+      "id": "CompressedTextureBuffer#bufferView",
+      "field": "description",
+      "sourceHash": "sha256:63db1431c720fa08ed21e5563c9ff1c8bb0108624c71b230ba812f3861b3855e",
+      "text": "压缩纹理缓冲。"
+    },
+    {
+      "id": "CompressedTextureBuffer#clone",
+      "field": "description",
+      "sourceHash": "sha256:0253f2fb5ffbfd49b2b1ed63ba2a94a0f1402385142417da95c0e7953d2c75ea",
+      "text": "创建此压缩纹理缓冲的浅克隆。"
+    },
+    {
+      "id": "CompressedTextureBuffer#clone",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:e8ce9e527d08299c78d8f28f08d9c62f797f572839e8a7855e3fade482139945",
+      "text": "压缩纹理缓冲的浅克隆。"
+    },
+    {
+      "id": "CompressedTextureBuffer#height",
+      "field": "description",
+      "sourceHash": "sha256:d320a41e2c221747535c51ec05f36efbe49598085cd11226211f26e8ca975af7",
+      "text": "纹理高度。"
+    },
+    {
+      "id": "CompressedTextureBuffer#internalFormat",
+      "field": "description",
+      "sourceHash": "sha256:08db724c714fe5a039e4a6a0cddf1dfa8b77266a00104cdfb12e181a1099ecb5",
+      "text": "压缩纹理格式。"
+    },
+    {
+      "id": "CompressedTextureBuffer#pixelDatatype",
+      "field": "description",
+      "sourceHash": "sha256:87d9ed2cb27058481d9b1ebef050d8f13befd6a817dca54190fed025be521396",
+      "text": "压缩纹理数据类型。"
+    },
+    {
+      "id": "CompressedTextureBuffer#width",
+      "field": "description",
+      "sourceHash": "sha256:c8f1b55fef7db24e7ee3ea64a86e122d4352e7aa94dde27c0fd1b81428ff17a2",
+      "text": "纹理宽度。"
+    },
+    {
+      "id": "CompressedTextureBuffer",
+      "field": "description",
+      "sourceHash": "sha256:5bd271ddfdeeddaa09989db7ef982a227486b5a8c0979731b380adc73d7a6a85",
+      "text": "描述压缩纹理，并包含压缩纹理缓冲。"
+    },
+    {
+      "id": "CompressedTextureBuffer",
+      "field": "params/buffer/description",
+      "sourceHash": "sha256:63db1431c720fa08ed21e5563c9ff1c8bb0108624c71b230ba812f3861b3855e",
+      "text": "压缩纹理缓冲。"
+    },
+    {
+      "id": "CompressedTextureBuffer",
+      "field": "params/height/description",
+      "sourceHash": "sha256:d320a41e2c221747535c51ec05f36efbe49598085cd11226211f26e8ca975af7",
+      "text": "纹理高度。"
+    },
+    {
+      "id": "CompressedTextureBuffer",
+      "field": "params/internalFormat/description",
+      "sourceHash": "sha256:c9fbbb821367e1bfa6a54cdb0d27147ba03c128da86326ddeeb4ff7c0d77a24d",
+      "text": "压缩纹理的像素格式。"
+    },
+    {
+      "id": "CompressedTextureBuffer",
+      "field": "params/pixelDatatype/description",
+      "sourceHash": "sha256:888d031ded9a68f342c78721cca62a6d1757a59f948c58709abcadedd4b00883",
+      "text": "压缩纹理的像素数据类型。"
+    },
+    {
+      "id": "CompressedTextureBuffer",
+      "field": "params/width/description",
+      "sourceHash": "sha256:c8f1b55fef7db24e7ee3ea64a86e122d4352e7aa94dde27c0fd1b81428ff17a2",
+      "text": "纹理宽度。"
+    },
+    {
+      "id": "ContextOptions",
+      "field": "description",
+      "sourceHash": "sha256:ea48905db33c36650c6f7ca775aa8b6470bad091458135c1ee19caeccdf41835",
+      "text": "控制 WebGL Context 初始化的选项。\n<p>\n<code>allowTextureFilterAnisotropic</code> 默认为 true，在支持相应 WebGL 扩展时启用各向异性纹理过滤。设为 false 可提高性能，但会降低画质，尤其是在接近地平线的视角下。\n</p>"
+    },
+    {
+      "id": "ContextOptions",
+      "field": "properties/allowTextureFilterAnisotropic/description",
+      "sourceHash": "sha256:5dd99c1ceeaa1726b7e7a6ec35cfb516489c5bde3c018b6633dfdde64b5a4df6",
+      "text": "为 true 时，纹理采样采用各向异性过滤。"
+    },
+    {
+      "id": "ContextOptions",
+      "field": "properties/getWebGLStub/description",
+      "sourceHash": "sha256:f02f2a81a575b898d5cde8a09fc0f4e3d23d2e133cb1e50f4ecc4939921e31e6",
+      "text": "为测试创建 WebGL 桩对象的函数。"
+    },
+    {
+      "id": "ContextOptions",
+      "field": "properties/requestWebgl1/description",
+      "sourceHash": "sha256:e2945c4dfc9932341fd7ef0c37de5f7be474a31f58bd269072add9840da28153",
+      "text": "为 true 且浏览器支持时，使用 WebGL 1 渲染上下文。"
+    },
+    {
+      "id": "ContextOptions",
+      "field": "properties/webgl/description",
+      "sourceHash": "sha256:0734d01b9386616b198ff540467eb03f659486c6687a2a06b65dc1f902b5f82b",
+      "text": "传给 canvas.getContext 的 WebGL 选项。"
+    },
+    {
+      "id": "CullFace.BACK",
+      "field": "description",
+      "sourceHash": "sha256:7f923355c0758db76abfafc6dda14a0cf4d9a2a3689381b21b17951395e55392",
+      "text": "剔除背面三角形。"
+    },
+    {
+      "id": "CullFace.FRONT_AND_BACK",
+      "field": "description",
+      "sourceHash": "sha256:5d7ad612119b694a271e7f4f25d08460332f74db919d4d59d0a3cf59433b2da0",
+      "text": "同时剔除正面和背面三角形。"
+    },
+    {
+      "id": "CullFace.FRONT",
+      "field": "description",
+      "sourceHash": "sha256:77346ec158582de8a86a8616fb72ef99e8d82dbe3f7dc8926c17f0564e3d3418",
+      "text": "剔除正面三角形。"
+    },
+    {
+      "id": "CullFace",
+      "field": "description",
+      "sourceHash": "sha256:e1428e1a3612df58e0407e28c2372cd5f77b067df41b7db5b6267c4a1c625174",
+      "text": "决定剔除哪些朝向的三角形。"
+    },
+    {
+      "id": "CullFace",
+      "field": "properties/BACK/description",
+      "sourceHash": "sha256:7f923355c0758db76abfafc6dda14a0cf4d9a2a3689381b21b17951395e55392",
+      "text": "剔除背面三角形。"
+    },
+    {
+      "id": "CullFace",
+      "field": "properties/FRONT_AND_BACK/description",
+      "sourceHash": "sha256:5d7ad612119b694a271e7f4f25d08460332f74db919d4d59d0a3cf59433b2da0",
+      "text": "同时剔除正面和背面三角形。"
+    },
+    {
+      "id": "CullFace",
+      "field": "properties/FRONT/description",
+      "sourceHash": "sha256:77346ec158582de8a86a8616fb72ef99e8d82dbe3f7dc8926c17f0564e3d3418",
+      "text": "剔除正面三角形。"
+    },
+    {
+      "id": "DepthFunction.ALWAYS",
+      "field": "description",
+      "sourceHash": "sha256:6ae758034d7f43ba0e066f8dc2d83b464da25555742be28cc201621a59914219",
+      "text": "深度测试始终通过。"
+    },
+    {
+      "id": "DepthFunction.EQUAL",
+      "field": "description",
+      "sourceHash": "sha256:c4cc1dd92e3adda181334e7e068f25b66b32f549c6222d2c3c87e33c9d6d5849",
+      "text": "传入深度等于已存储深度时，深度测试通过。"
+    },
+    {
+      "id": "DepthFunction.GREATER_OR_EQUAL",
+      "field": "description",
+      "sourceHash": "sha256:63e7a545832235fb8d7432ca10c9e48c43a4495dd932b5d092e474268a6fb976",
+      "text": "传入深度大于等于已存储深度时，深度测试通过。"
+    },
+    {
+      "id": "DepthFunction.GREATER",
+      "field": "description",
+      "sourceHash": "sha256:7265ce7fac6f2bfc353f3c342275ba93c36a4f8cb0b47dfa86d17c5fa20609f3",
+      "text": "传入深度大于已存储深度时，深度测试通过。"
+    },
+    {
+      "id": "DepthFunction.LESS_OR_EQUAL",
+      "field": "description",
+      "sourceHash": "sha256:2bb1c843edb5ad32ea82aed6e7ae90eabc08126273f8a07e7f6a724d02416d9f",
+      "text": "传入深度小于等于已存储深度时，深度测试通过。"
+    },
+    {
+      "id": "DepthFunction.LESS",
+      "field": "description",
+      "sourceHash": "sha256:5b74a71feb04b00abd4cdbaef0d238cd2e53384835b3550d591b02b73d8f33ea",
+      "text": "传入深度小于已存储深度时，深度测试通过。"
+    },
+    {
+      "id": "DepthFunction.NEVER",
+      "field": "description",
+      "sourceHash": "sha256:4737f5e867f4ca9d4370b564706029640c62efd307c88909788a8d6546218017",
+      "text": "深度测试始终不通过。"
+    },
+    {
+      "id": "DepthFunction.NOT_EQUAL",
+      "field": "description",
+      "sourceHash": "sha256:8ff5ce633cea53e01208c040e3634a4b48087c11b1dc32f980754d9d7dca54b6",
+      "text": "传入深度不等于已存储深度时，深度测试通过。"
+    },
+    {
+      "id": "DepthFunction",
+      "field": "description",
+      "sourceHash": "sha256:da80b52f8437ef8e7189210e0d0e35879af73c51c0f7e816c9e7a2f0219dd147",
+      "text": "决定深度测试中比较两个深度值的函数。"
+    },
+    {
+      "id": "DepthFunction",
+      "field": "properties/ALWAYS/description",
+      "sourceHash": "sha256:6ae758034d7f43ba0e066f8dc2d83b464da25555742be28cc201621a59914219",
+      "text": "深度测试始终通过。"
+    },
+    {
+      "id": "DepthFunction",
+      "field": "properties/EQUAL/description",
+      "sourceHash": "sha256:c4cc1dd92e3adda181334e7e068f25b66b32f549c6222d2c3c87e33c9d6d5849",
+      "text": "传入深度等于已存储深度时，深度测试通过。"
+    },
+    {
+      "id": "DepthFunction",
+      "field": "properties/GREATER_OR_EQUAL/description",
+      "sourceHash": "sha256:63e7a545832235fb8d7432ca10c9e48c43a4495dd932b5d092e474268a6fb976",
+      "text": "传入深度大于等于已存储深度时，深度测试通过。"
+    },
+    {
+      "id": "DepthFunction",
+      "field": "properties/GREATER/description",
+      "sourceHash": "sha256:7265ce7fac6f2bfc353f3c342275ba93c36a4f8cb0b47dfa86d17c5fa20609f3",
+      "text": "传入深度大于已存储深度时，深度测试通过。"
+    },
+    {
+      "id": "DepthFunction",
+      "field": "properties/LESS_OR_EQUAL/description",
+      "sourceHash": "sha256:2bb1c843edb5ad32ea82aed6e7ae90eabc08126273f8a07e7f6a724d02416d9f",
+      "text": "传入深度小于等于已存储深度时，深度测试通过。"
+    },
+    {
+      "id": "DepthFunction",
+      "field": "properties/LESS/description",
+      "sourceHash": "sha256:5b74a71feb04b00abd4cdbaef0d238cd2e53384835b3550d591b02b73d8f33ea",
+      "text": "传入深度小于已存储深度时，深度测试通过。"
+    },
+    {
+      "id": "DepthFunction",
+      "field": "properties/NEVER/description",
+      "sourceHash": "sha256:4737f5e867f4ca9d4370b564706029640c62efd307c88909788a8d6546218017",
+      "text": "深度测试始终不通过。"
+    },
+    {
+      "id": "DepthFunction",
+      "field": "properties/NOT_EQUAL/description",
+      "sourceHash": "sha256:8ff5ce633cea53e01208c040e3634a4b48087c11b1dc32f980754d9d7dca54b6",
+      "text": "传入深度不等于已存储深度时，深度测试通过。"
+    },
+    {
+      "id": "PixelDatatype",
+      "field": "description",
+      "sourceHash": "sha256:d0fb3009b07a07187620fae0cc103fc5eecd00876828885dbc42c35f09307bcb",
+      "text": "像素数据类型。"
+    },
+    {
+      "id": "PixelFormat.ALPHA",
+      "field": "description",
+      "sourceHash": "sha256:a540e9fd7d32c115f4dd8c020a522b7222a037ece4b9aadb04e861a622118875",
+      "text": "包含 alpha 通道的像素格式。"
+    },
+    {
+      "id": "PixelFormat.DEPTH_COMPONENT",
+      "field": "description",
+      "sourceHash": "sha256:6fcad0a8a9de722bd646c8b87302a749245da434aba7c181dae11825dda307e4",
+      "text": "包含深度值的像素格式。"
+    },
+    {
+      "id": "PixelFormat.DEPTH_STENCIL",
+      "field": "description",
+      "sourceHash": "sha256:ac4de1f9e134d596467402562d758c5a9ad4e348a58c3eab54e04b2ae6749268",
+      "text": "包含深度和模板值的像素格式，通常与 {@link PixelDatatype.UNSIGNED_INT_24_8} 配合使用。"
+    },
+    {
+      "id": "PixelFormat.LUMINANCE_ALPHA",
+      "field": "description",
+      "sourceHash": "sha256:8b18975910d48e6864b2c869382b626b04d65803ff8fa78de17695edd35cb673",
+      "text": "包含亮度（强度）和 alpha 通道的像素格式。"
+    },
+    {
+      "id": "PixelFormat.LUMINANCE",
+      "field": "description",
+      "sourceHash": "sha256:0483a47e9709c3d51527e7e61121e0deaf586e3afc9b9e764ff43759afeb15b2",
+      "text": "包含亮度（强度）通道的像素格式。"
+    },
+    {
+      "id": "PixelFormat.RED_INTEGER",
+      "field": "description",
+      "sourceHash": "sha256:c13f9c45fc0062f0dde873e5fec89a857107f3c514c3663d96257890b5e4e47d",
+      "text": "包含整数红色通道的像素格式。"
+    },
+    {
+      "id": "PixelFormat.RED",
+      "field": "description",
+      "sourceHash": "sha256:bae48661823aa997cbbbfc45fb609eb7606f530fbbcb25970c908efbe77251fd",
+      "text": "包含红色通道的像素格式。"
+    },
+    {
+      "id": "PixelFormat.RG_INTEGER",
+      "field": "description",
+      "sourceHash": "sha256:2197ef6f04e3bc536c8fb366f9f515227d45f76416fc07f13a15015f0836ab7d",
+      "text": "包含整数红色和绿色通道的像素格式。"
+    },
+    {
+      "id": "PixelFormat.RGB_DXT1",
+      "field": "description",
+      "sourceHash": "sha256:6a47aa520fef6cc1f646ee09d0fc84297d5047eb45d5fcfb68c721f52ccc9fdb",
+      "text": "包含红、绿、蓝通道并采用 DXT1 压缩的像素格式。"
+    },
+    {
+      "id": "PixelFormat.RGB_ETC1",
+      "field": "description",
+      "sourceHash": "sha256:18b6a5e00f70752b60741ed68d647eacb30b9b7d75ba92a6ec821533848a974b",
+      "text": "包含红、绿、蓝通道并采用 ETC1 压缩的像素格式。"
+    },
+    {
+      "id": "PixelFormat.RGB_INTEGER",
+      "field": "description",
+      "sourceHash": "sha256:d4b619f954507215973b78b646708ddd31c00dff37d8779d7d7244612584e400",
+      "text": "包含整数红、绿、蓝通道的像素格式。"
+    },
+    {
+      "id": "PixelFormat.RGB_PVRTC_2BPPV1",
+      "field": "description",
+      "sourceHash": "sha256:ec651fae1dd64b4adcb9e73b160eefc63b15b5660c89626552bfb9e86fe34e17",
+      "text": "包含红、绿、蓝通道并采用 PVR 2bpp 压缩的像素格式。"
+    },
+    {
+      "id": "PixelFormat.RGB_PVRTC_4BPPV1",
+      "field": "description",
+      "sourceHash": "sha256:f2e2559ef244ec5b8bc528feae53173ac5cd2ca26f74831f56f46e4928b997ab",
+      "text": "包含红、绿、蓝通道并采用 PVR 4bpp 压缩的像素格式。"
+    },
+    {
+      "id": "PixelFormat.RGB8_ETC2",
+      "field": "description",
+      "sourceHash": "sha256:c2e9fac6dd5af2b158bd545c5175fc923bcac8f5d59f5343c637d89bdbaa07ba",
+      "text": "包含红、绿、蓝通道并采用 ETC2 压缩的像素格式。"
+    },
+    {
+      "id": "PixelFormat.RGBA_ASTC",
+      "field": "description",
+      "sourceHash": "sha256:9172d185e720321caa441afe702aac731d3fb73c4632690b5b8fba727b1096d4",
+      "text": "包含红、绿、蓝及 alpha 通道并采用 ASTC 压缩的像素格式。"
+    },
+    {
+      "id": "PixelFormat.RGBA_BC7",
+      "field": "description",
+      "sourceHash": "sha256:9b50385e8f420b55c29316d5e026d04a114f93f48270de1729a486a58131f5a3",
+      "text": "包含红、绿、蓝及 alpha 通道并采用 BC7 压缩的像素格式。"
+    },
+    {
+      "id": "PixelFormat.RGBA_DXT1",
+      "field": "description",
+      "sourceHash": "sha256:af8d0359b9260d28b09aba180caf3b9a2bf0694740ba740182b0dd787518a2f2",
+      "text": "包含红、绿、蓝及 alpha 通道并采用 DXT1 压缩的像素格式。"
+    },
+    {
+      "id": "PixelFormat.RGBA_DXT3",
+      "field": "description",
+      "sourceHash": "sha256:383d77ddeac8b40863768c4266ea7d7923f88d07bea82a5370e5955092644b1f",
+      "text": "包含红、绿、蓝及 alpha 通道并采用 DXT3 压缩的像素格式。"
+    },
+    {
+      "id": "PixelFormat.RGBA_DXT5",
+      "field": "description",
+      "sourceHash": "sha256:bffc601b872c557660796b312e0014137c9d5163d5383029e7e51bcd016c3232",
+      "text": "包含红、绿、蓝及 alpha 通道并采用 DXT5 压缩的像素格式。"
+    },
+    {
+      "id": "PixelFormat.RGBA_INTEGER",
+      "field": "description",
+      "sourceHash": "sha256:0241319f15b14a24777f2d6c7c1786a74dd69efd47db933eed319bdad921ea29",
+      "text": "包含整数红、绿、蓝及 alpha 通道的像素格式。"
+    },
+    {
+      "id": "PixelFormat.RGBA_PVRTC_2BPPV1",
+      "field": "description",
+      "sourceHash": "sha256:892dee5bfabbd0f3a7014c65eca61e58a3b8fd1673562eaf543c6889572b7cbb",
+      "text": "包含红、绿、蓝及 alpha 通道并采用 PVR 2bpp 压缩的像素格式。"
+    },
+    {
+      "id": "PixelFormat.RGBA_PVRTC_4BPPV1",
+      "field": "description",
+      "sourceHash": "sha256:21b58fde490928e58aa156b0c99405d8d429edc273b234f4538b0987daf46563",
+      "text": "包含红、绿、蓝及 alpha 通道并采用 PVR 4bpp 压缩的像素格式。"
+    },
+    {
+      "id": "PixelFormat.RGBA8_ETC2_EAC",
+      "field": "description",
+      "sourceHash": "sha256:ce79faf24c1248932ac9d75d476d6b65713b0973d2bc304c571e179e8dd53b13",
+      "text": "包含红、绿、蓝及 alpha 通道并采用 ETC2 压缩的像素格式。"
+    },
+    {
+      "id": "PixelFormat.RGBA",
+      "field": "description",
+      "sourceHash": "sha256:b39b37205bbd1cec682da9928b6fb483f191c923fbf3b84b82a1073dfed52777",
+      "text": "包含红、绿、蓝及 alpha 通道的像素格式。"
+    },
+    {
+      "id": "PixelFormat.RGB",
+      "field": "description",
+      "sourceHash": "sha256:6bd6875d25b441b20f301e3ef82f8ff35360c2dedc5eba5c83b686fd6f1d247b",
+      "text": "包含红、绿、蓝通道的像素格式。"
+    },
+    {
+      "id": "PixelFormat.RG",
+      "field": "description",
+      "sourceHash": "sha256:32e6e76345ddbff375932d0198c48f965ea789dda0cca5e892a28930ae1fe52d",
+      "text": "包含红色和绿色通道的像素格式。"
+    },
+    {
+      "id": "PixelFormat",
+      "field": "description",
+      "sourceHash": "sha256:eff593cefb89cb9afd785c628410d915d0a56ee8e7ff346c35f056bdc4ce7ad4",
+      "text": "像素格式，即分量数量及其各自含义。"
+    },
+    {
+      "id": "PixelFormat",
+      "field": "properties/ALPHA/description",
+      "sourceHash": "sha256:a540e9fd7d32c115f4dd8c020a522b7222a037ece4b9aadb04e861a622118875",
+      "text": "包含 alpha 通道的像素格式。"
+    },
+    {
+      "id": "PixelFormat",
+      "field": "properties/DEPTH_COMPONENT/description",
+      "sourceHash": "sha256:6fcad0a8a9de722bd646c8b87302a749245da434aba7c181dae11825dda307e4",
+      "text": "包含深度值的像素格式。"
+    },
+    {
+      "id": "PixelFormat",
+      "field": "properties/DEPTH_STENCIL/description",
+      "sourceHash": "sha256:ac4de1f9e134d596467402562d758c5a9ad4e348a58c3eab54e04b2ae6749268",
+      "text": "包含深度和模板值的像素格式，通常与 {@link PixelDatatype.UNSIGNED_INT_24_8} 配合使用。"
+    },
+    {
+      "id": "PixelFormat",
+      "field": "properties/LUMINANCE_ALPHA/description",
+      "sourceHash": "sha256:8b18975910d48e6864b2c869382b626b04d65803ff8fa78de17695edd35cb673",
+      "text": "包含亮度（强度）和 alpha 通道的像素格式。"
+    },
+    {
+      "id": "PixelFormat",
+      "field": "properties/LUMINANCE/description",
+      "sourceHash": "sha256:0483a47e9709c3d51527e7e61121e0deaf586e3afc9b9e764ff43759afeb15b2",
+      "text": "包含亮度（强度）通道的像素格式。"
+    },
+    {
+      "id": "PixelFormat",
+      "field": "properties/RED_INTEGER/description",
+      "sourceHash": "sha256:c13f9c45fc0062f0dde873e5fec89a857107f3c514c3663d96257890b5e4e47d",
+      "text": "包含整数红色通道的像素格式。"
+    },
+    {
+      "id": "PixelFormat",
+      "field": "properties/RED/description",
+      "sourceHash": "sha256:bae48661823aa997cbbbfc45fb609eb7606f530fbbcb25970c908efbe77251fd",
+      "text": "包含红色通道的像素格式。"
+    },
+    {
+      "id": "PixelFormat",
+      "field": "properties/RG_INTEGER/description",
+      "sourceHash": "sha256:2197ef6f04e3bc536c8fb366f9f515227d45f76416fc07f13a15015f0836ab7d",
+      "text": "包含整数红色和绿色通道的像素格式。"
+    },
+    {
+      "id": "PixelFormat",
+      "field": "properties/RG/description",
+      "sourceHash": "sha256:32e6e76345ddbff375932d0198c48f965ea789dda0cca5e892a28930ae1fe52d",
+      "text": "包含红色和绿色通道的像素格式。"
+    },
+    {
+      "id": "PixelFormat",
+      "field": "properties/RGB_DXT1/description",
+      "sourceHash": "sha256:6a47aa520fef6cc1f646ee09d0fc84297d5047eb45d5fcfb68c721f52ccc9fdb",
+      "text": "包含红、绿、蓝通道并采用 DXT1 压缩的像素格式。"
+    },
+    {
+      "id": "PixelFormat",
+      "field": "properties/RGB_ETC1/description",
+      "sourceHash": "sha256:18b6a5e00f70752b60741ed68d647eacb30b9b7d75ba92a6ec821533848a974b",
+      "text": "包含红、绿、蓝通道并采用 ETC1 压缩的像素格式。"
+    },
+    {
+      "id": "PixelFormat",
+      "field": "properties/RGB_INTEGER/description",
+      "sourceHash": "sha256:d4b619f954507215973b78b646708ddd31c00dff37d8779d7d7244612584e400",
+      "text": "包含整数红、绿、蓝通道的像素格式。"
+    },
+    {
+      "id": "PixelFormat",
+      "field": "properties/RGB_PVRTC_2BPPV1/description",
+      "sourceHash": "sha256:ec651fae1dd64b4adcb9e73b160eefc63b15b5660c89626552bfb9e86fe34e17",
+      "text": "包含红、绿、蓝通道并采用 PVR 2bpp 压缩的像素格式。"
+    },
+    {
+      "id": "PixelFormat",
+      "field": "properties/RGB_PVRTC_4BPPV1/description",
+      "sourceHash": "sha256:f2e2559ef244ec5b8bc528feae53173ac5cd2ca26f74831f56f46e4928b997ab",
+      "text": "包含红、绿、蓝通道并采用 PVR 4bpp 压缩的像素格式。"
+    },
+    {
+      "id": "PixelFormat",
+      "field": "properties/RGB/description",
+      "sourceHash": "sha256:6bd6875d25b441b20f301e3ef82f8ff35360c2dedc5eba5c83b686fd6f1d247b",
+      "text": "包含红、绿、蓝通道的像素格式。"
+    },
+    {
+      "id": "PixelFormat",
+      "field": "properties/RGB8_ETC2/description",
+      "sourceHash": "sha256:c2e9fac6dd5af2b158bd545c5175fc923bcac8f5d59f5343c637d89bdbaa07ba",
+      "text": "包含红、绿、蓝通道并采用 ETC2 压缩的像素格式。"
+    },
+    {
+      "id": "PixelFormat",
+      "field": "properties/RGBA_ASTC/description",
+      "sourceHash": "sha256:9172d185e720321caa441afe702aac731d3fb73c4632690b5b8fba727b1096d4",
+      "text": "包含红、绿、蓝及 alpha 通道并采用 ASTC 压缩的像素格式。"
+    },
+    {
+      "id": "PixelFormat",
+      "field": "properties/RGBA_BC7/description",
+      "sourceHash": "sha256:9b50385e8f420b55c29316d5e026d04a114f93f48270de1729a486a58131f5a3",
+      "text": "包含红、绿、蓝及 alpha 通道并采用 BC7 压缩的像素格式。"
+    },
+    {
+      "id": "PixelFormat",
+      "field": "properties/RGBA_DXT1/description",
+      "sourceHash": "sha256:af8d0359b9260d28b09aba180caf3b9a2bf0694740ba740182b0dd787518a2f2",
+      "text": "包含红、绿、蓝及 alpha 通道并采用 DXT1 压缩的像素格式。"
+    },
+    {
+      "id": "PixelFormat",
+      "field": "properties/RGBA_DXT3/description",
+      "sourceHash": "sha256:383d77ddeac8b40863768c4266ea7d7923f88d07bea82a5370e5955092644b1f",
+      "text": "包含红、绿、蓝及 alpha 通道并采用 DXT3 压缩的像素格式。"
+    },
+    {
+      "id": "PixelFormat",
+      "field": "properties/RGBA_DXT5/description",
+      "sourceHash": "sha256:bffc601b872c557660796b312e0014137c9d5163d5383029e7e51bcd016c3232",
+      "text": "包含红、绿、蓝及 alpha 通道并采用 DXT5 压缩的像素格式。"
+    },
+    {
+      "id": "PixelFormat",
+      "field": "properties/RGBA_INTEGER/description",
+      "sourceHash": "sha256:0241319f15b14a24777f2d6c7c1786a74dd69efd47db933eed319bdad921ea29",
+      "text": "包含整数红、绿、蓝及 alpha 通道的像素格式。"
+    },
+    {
+      "id": "PixelFormat",
+      "field": "properties/RGBA_PVRTC_2BPPV1/description",
+      "sourceHash": "sha256:892dee5bfabbd0f3a7014c65eca61e58a3b8fd1673562eaf543c6889572b7cbb",
+      "text": "包含红、绿、蓝及 alpha 通道并采用 PVR 2bpp 压缩的像素格式。"
+    },
+    {
+      "id": "PixelFormat",
+      "field": "properties/RGBA_PVRTC_4BPPV1/description",
+      "sourceHash": "sha256:21b58fde490928e58aa156b0c99405d8d429edc273b234f4538b0987daf46563",
+      "text": "包含红、绿、蓝及 alpha 通道并采用 PVR 4bpp 压缩的像素格式。"
+    },
+    {
+      "id": "PixelFormat",
+      "field": "properties/RGBA/description",
+      "sourceHash": "sha256:b39b37205bbd1cec682da9928b6fb483f191c923fbf3b84b82a1073dfed52777",
+      "text": "包含红、绿、蓝及 alpha 通道的像素格式。"
+    },
+    {
+      "id": "PixelFormat",
+      "field": "properties/RGBA8_ETC2_EAC/description",
+      "sourceHash": "sha256:ce79faf24c1248932ac9d75d476d6b65713b0973d2bc304c571e179e8dd53b13",
+      "text": "包含红、绿、蓝及 alpha 通道并采用 ETC2 压缩的像素格式。"
+    },
+    {
+      "id": "StencilFunction.ALWAYS",
+      "field": "description",
+      "sourceHash": "sha256:007a680382acee28a85c5190f15903b84192653feddb454dffe418a5777cbf09",
+      "text": "模板测试始终通过。"
+    },
+    {
+      "id": "StencilFunction.EQUAL",
+      "field": "description",
+      "sourceHash": "sha256:57485f84898dc2361786647c06fa5ea38f87aab59ed59c58e0f73eca7f4b8af7",
+      "text": "掩码处理后的参考值等于掩码处理后的模板值时，模板测试通过。"
+    },
+    {
+      "id": "StencilFunction.GREATER_OR_EQUAL",
+      "field": "description",
+      "sourceHash": "sha256:65db33d73f47335845ef8eaf8e166a6249040fb76aaf7e46a04ec0f5e3e2fcc8",
+      "text": "掩码处理后的参考值大于等于掩码处理后的模板值时，模板测试通过。"
+    },
+    {
+      "id": "StencilFunction.GREATER",
+      "field": "description",
+      "sourceHash": "sha256:f2b35d8a2ba8ba68cd348b7f9dfd64dcd2695ca819b5f74a50acf6f38e2058c2",
+      "text": "掩码处理后的参考值大于掩码处理后的模板值时，模板测试通过。"
+    },
+    {
+      "id": "StencilFunction.LESS_OR_EQUAL",
+      "field": "description",
+      "sourceHash": "sha256:3df6391706c82071ac2913e02ec3b5f54dfee73fac57f3e4c54d0d8a8838239d",
+      "text": "掩码处理后的参考值小于等于掩码处理后的模板值时，模板测试通过。"
+    },
+    {
+      "id": "StencilFunction.LESS",
+      "field": "description",
+      "sourceHash": "sha256:f5f8a9eef61d36dbec4e859b5b0ba73dd93babf35b06c414301753caf215f096",
+      "text": "掩码处理后的参考值小于掩码处理后的模板值时，模板测试通过。"
+    },
+    {
+      "id": "StencilFunction.NEVER",
+      "field": "description",
+      "sourceHash": "sha256:36843c68e273f5600d588d405c4b3d1c3b3cffbb419556b534e9e953f5381957",
+      "text": "模板测试始终不通过。"
+    },
+    {
+      "id": "StencilFunction.NOT_EQUAL",
+      "field": "description",
+      "sourceHash": "sha256:dba78d24735ecb761620492a9f7f62e787c63b722635efae6220323e5b382df8",
+      "text": "掩码处理后的参考值不等于掩码处理后的模板值时，模板测试通过。"
+    },
+    {
+      "id": "StencilFunction",
+      "field": "description",
+      "sourceHash": "sha256:ef181c7505269a425d64346a4d40398b5d328dbc57700481d02e43d3d00a846d",
+      "text": "决定模板测试中比较模板值的函数。"
+    },
+    {
+      "id": "StencilFunction",
+      "field": "properties/ALWAYS/description",
+      "sourceHash": "sha256:007a680382acee28a85c5190f15903b84192653feddb454dffe418a5777cbf09",
+      "text": "模板测试始终通过。"
+    },
+    {
+      "id": "StencilFunction",
+      "field": "properties/EQUAL/description",
+      "sourceHash": "sha256:57485f84898dc2361786647c06fa5ea38f87aab59ed59c58e0f73eca7f4b8af7",
+      "text": "掩码处理后的参考值等于掩码处理后的模板值时，模板测试通过。"
+    },
+    {
+      "id": "StencilFunction",
+      "field": "properties/GREATER_OR_EQUAL/description",
+      "sourceHash": "sha256:65db33d73f47335845ef8eaf8e166a6249040fb76aaf7e46a04ec0f5e3e2fcc8",
+      "text": "掩码处理后的参考值大于等于掩码处理后的模板值时，模板测试通过。"
+    },
+    {
+      "id": "StencilFunction",
+      "field": "properties/GREATER/description",
+      "sourceHash": "sha256:f2b35d8a2ba8ba68cd348b7f9dfd64dcd2695ca819b5f74a50acf6f38e2058c2",
+      "text": "掩码处理后的参考值大于掩码处理后的模板值时，模板测试通过。"
+    },
+    {
+      "id": "StencilFunction",
+      "field": "properties/LESS_OR_EQUAL/description",
+      "sourceHash": "sha256:3df6391706c82071ac2913e02ec3b5f54dfee73fac57f3e4c54d0d8a8838239d",
+      "text": "掩码处理后的参考值小于等于掩码处理后的模板值时，模板测试通过。"
+    },
+    {
+      "id": "StencilFunction",
+      "field": "properties/LESS/description",
+      "sourceHash": "sha256:f5f8a9eef61d36dbec4e859b5b0ba73dd93babf35b06c414301753caf215f096",
+      "text": "掩码处理后的参考值小于掩码处理后的模板值时，模板测试通过。"
+    },
+    {
+      "id": "StencilFunction",
+      "field": "properties/NEVER/description",
+      "sourceHash": "sha256:36843c68e273f5600d588d405c4b3d1c3b3cffbb419556b534e9e953f5381957",
+      "text": "模板测试始终不通过。"
+    },
+    {
+      "id": "StencilFunction",
+      "field": "properties/NOT_EQUAL/description",
+      "sourceHash": "sha256:dba78d24735ecb761620492a9f7f62e787c63b722635efae6220323e5b382df8",
+      "text": "掩码处理后的参考值不等于掩码处理后的模板值时，模板测试通过。"
+    },
+    {
+      "id": "StencilOperation.DECREMENT_WRAP",
+      "field": "description",
+      "sourceHash": "sha256:19a47a025adaa32dbaf1cf5bbc74d376c657e5484f14c714c08994dfb085796a",
+      "text": "将模板缓冲值减一，低于零时回绕至无符号字节最大值。"
+    },
+    {
+      "id": "StencilOperation.DECREMENT",
+      "field": "description",
+      "sourceHash": "sha256:1a0850cd0d33a58b0a1afd9fbf90dbb9f8708e10c9ce830440f20f5a61ae7283",
+      "text": "将模板缓冲值减一，并钳制为不低于零。"
+    },
+    {
+      "id": "StencilOperation.INCREMENT_WRAP",
+      "field": "description",
+      "sourceHash": "sha256:fc31e208180ed0bd1cabc59e479d235ee51a4ce25bd56d01ec5bf5e88f4f84cf",
+      "text": "将模板缓冲值加一，超过无符号字节范围时回绕至零。"
+    },
+    {
+      "id": "StencilOperation.INCREMENT",
+      "field": "description",
+      "sourceHash": "sha256:6d5d9c4db1215d318dac0cec797bd4e714e0b3a3425a0a16a30f251713038d2e",
+      "text": "将模板缓冲值加一，并钳制在无符号字节范围内。"
+    },
+    {
+      "id": "StencilOperation.INVERT",
+      "field": "description",
+      "sourceHash": "sha256:38ea82f129d6fdf26453dcfac9db98cd1d97c8cb58c281bfd58d51a79e8fafdf",
+      "text": "将现有模板缓冲值按位取反。"
+    },
+    {
+      "id": "StencilOperation.KEEP",
+      "field": "description",
+      "sourceHash": "sha256:4e94324d8719dc7b989126b370fddbecc6bfae4a037d9501d71321a5505bc8f1",
+      "text": "保持模板缓冲值不变。"
+    },
+    {
+      "id": "StencilOperation.REPLACE",
+      "field": "description",
+      "sourceHash": "sha256:3e24096537be47e45998b5c3e3df71338dbc5972c205304a29379eb048b9170b",
+      "text": "用参考值替换模板缓冲值。"
+    },
+    {
+      "id": "StencilOperation.ZERO",
+      "field": "description",
+      "sourceHash": "sha256:e8d143bf7e5a74fd6134f81bf7bddc6ba6775582cc0b81e4ff309e036f690192",
+      "text": "将模板缓冲值设为零。"
+    },
+    {
+      "id": "StencilOperation",
+      "field": "description",
+      "sourceHash": "sha256:573d64539e98a1c9774c191d6663312912883f17ca27e1de3c2dcf7df83bde60",
+      "text": "决定根据模板测试结果执行的操作。"
+    },
+    {
+      "id": "StencilOperation",
+      "field": "properties/DECREMENT_WRAP/description",
+      "sourceHash": "sha256:19a47a025adaa32dbaf1cf5bbc74d376c657e5484f14c714c08994dfb085796a",
+      "text": "将模板缓冲值减一，低于零时回绕至无符号字节最大值。"
+    },
+    {
+      "id": "StencilOperation",
+      "field": "properties/DECREMENT/description",
+      "sourceHash": "sha256:1a0850cd0d33a58b0a1afd9fbf90dbb9f8708e10c9ce830440f20f5a61ae7283",
+      "text": "将模板缓冲值减一，并钳制为不低于零。"
+    },
+    {
+      "id": "StencilOperation",
+      "field": "properties/INCREMENT_WRAP/description",
+      "sourceHash": "sha256:fc31e208180ed0bd1cabc59e479d235ee51a4ce25bd56d01ec5bf5e88f4f84cf",
+      "text": "将模板缓冲值加一，超过无符号字节范围时回绕至零。"
+    },
+    {
+      "id": "StencilOperation",
+      "field": "properties/INCREMENT/description",
+      "sourceHash": "sha256:6d5d9c4db1215d318dac0cec797bd4e714e0b3a3425a0a16a30f251713038d2e",
+      "text": "将模板缓冲值加一，并钳制在无符号字节范围内。"
+    },
+    {
+      "id": "StencilOperation",
+      "field": "properties/INVERT/description",
+      "sourceHash": "sha256:38ea82f129d6fdf26453dcfac9db98cd1d97c8cb58c281bfd58d51a79e8fafdf",
+      "text": "将现有模板缓冲值按位取反。"
+    },
+    {
+      "id": "StencilOperation",
+      "field": "properties/KEEP/description",
+      "sourceHash": "sha256:4e94324d8719dc7b989126b370fddbecc6bfae4a037d9501d71321a5505bc8f1",
+      "text": "保持模板缓冲值不变。"
+    },
+    {
+      "id": "StencilOperation",
+      "field": "properties/REPLACE/description",
+      "sourceHash": "sha256:3e24096537be47e45998b5c3e3df71338dbc5972c205304a29379eb048b9170b",
+      "text": "用参考值替换模板缓冲值。"
+    },
+    {
+      "id": "StencilOperation",
+      "field": "properties/ZERO/description",
+      "sourceHash": "sha256:e8d143bf7e5a74fd6134f81bf7bddc6ba6775582cc0b81e4ff309e036f690192",
+      "text": "将模板缓冲值设为零。"
+    },
+    {
+      "id": "TextureMagnificationFilter.LINEAR",
+      "field": "description",
+      "sourceHash": "sha256:61187b09b82abd0bb737067e8bb6ebaa6c2cd133fa1b0f51e3b76d0f122831cf",
+      "text": "对最近四个纹素进行双线性插值采样，比 <code>NEAREST</code> 过滤更平滑。"
+    },
+    {
+      "id": "TextureMagnificationFilter.NEAREST",
+      "field": "description",
+      "sourceHash": "sha256:ed390af38d16b99f12e83f5384c79d77752216c0148069d2a2b4f46fe11228b3",
+      "text": "返回最近纹素的值进行纹理采样。"
+    },
+    {
+      "id": "TextureMagnificationFilter",
+      "field": "description",
+      "sourceHash": "sha256:a0dc2992a89cdaf5bc91533c21156c15ceb1a61e2d80e1e26bb9deefe243e240",
+      "text": "枚举放大 WebGL 纹理时可用的过滤方式。"
+    },
+    {
+      "id": "TextureMagnificationFilter",
+      "field": "properties/LINEAR/description",
+      "sourceHash": "sha256:61187b09b82abd0bb737067e8bb6ebaa6c2cd133fa1b0f51e3b76d0f122831cf",
+      "text": "对最近四个纹素进行双线性插值采样，比 <code>NEAREST</code> 过滤更平滑。"
+    },
+    {
+      "id": "TextureMagnificationFilter",
+      "field": "properties/NEAREST/description",
+      "sourceHash": "sha256:ed390af38d16b99f12e83f5384c79d77752216c0148069d2a2b4f46fe11228b3",
+      "text": "返回最近纹素的值进行纹理采样。"
+    },
+    {
+      "id": "TextureMinificationFilter.LINEAR_MIPMAP_LINEAR",
+      "field": "description",
+      "sourceHash": "sha256:1c33340025222500794d35d4c2bb00593b3875fbc5a37f5b7fded1260ab3deef",
+      "text": "在相邻两个 mip 层级内分别线性采样，再对结果线性插值。\n<p>\n采样具有 mipmap 的纹理时，在画质和速度之间取得较好平衡。\n</p>\n<p>\n要求纹理具有 mipmap。mip 层级根据观察角度及纹理在屏幕空间的尺寸选择。\n</p>"
+    },
+    {
+      "id": "TextureMinificationFilter.LINEAR_MIPMAP_NEAREST",
+      "field": "description",
+      "sourceHash": "sha256:5da2369172a03e8d287c7da505451dbde45ebb51f8ce58775fa92d05d33f3ebd",
+      "text": "选择最近的 mip 层级，并在该层级内线性采样。\n<p>\n要求纹理具有 mipmap。mip 层级根据观察角度及纹理在屏幕空间的尺寸选择。\n</p>"
+    },
+    {
+      "id": "TextureMinificationFilter.LINEAR",
+      "field": "description",
+      "sourceHash": "sha256:61187b09b82abd0bb737067e8bb6ebaa6c2cd133fa1b0f51e3b76d0f122831cf",
+      "text": "对最近四个纹素进行双线性插值采样，比 <code>NEAREST</code> 过滤更平滑。"
+    },
+    {
+      "id": "TextureMinificationFilter.NEAREST_MIPMAP_LINEAR",
+      "field": "description",
+      "sourceHash": "sha256:e12996f3bdd70c319bd732093cc8012055beac7220e97d4fd4bb54f97cc86d1c",
+      "text": "在相邻两个 mip 层级内分别采用最近邻采样，再对结果线性插值。\n<p>\n采样具有 mipmap 的纹理时，在画质和速度之间取得较好平衡。\n</p>\n<p>\n要求纹理具有 mipmap。mip 层级根据观察角度及纹理在屏幕空间的尺寸选择。\n</p>"
+    },
+    {
+      "id": "TextureMinificationFilter.NEAREST_MIPMAP_NEAREST",
+      "field": "description",
+      "sourceHash": "sha256:22f427b37674fadb174b4cf29e9d54b45a397ca34a5b0733f69f4677464bdaa4",
+      "text": "选择最近的 mip 层级，并在该层级内采用最近邻采样。\n<p>\n要求纹理具有 mipmap。mip 层级根据观察角度及纹理在屏幕空间的尺寸选择。\n</p>"
+    },
+    {
+      "id": "TextureMinificationFilter.NEAREST",
+      "field": "description",
+      "sourceHash": "sha256:ed390af38d16b99f12e83f5384c79d77752216c0148069d2a2b4f46fe11228b3",
+      "text": "返回最近纹素的值进行纹理采样。"
+    },
+    {
+      "id": "TextureMinificationFilter",
+      "field": "description",
+      "sourceHash": "sha256:4770d9f1f836618fd2e339dcc12d209e117fe1da4428407624737043fd08125d",
+      "text": "枚举缩小 WebGL 纹理时可用的过滤方式。"
+    },
+    {
+      "id": "TextureMinificationFilter",
+      "field": "properties/LINEAR_MIPMAP_LINEAR/description",
+      "sourceHash": "sha256:1c33340025222500794d35d4c2bb00593b3875fbc5a37f5b7fded1260ab3deef",
+      "text": "在相邻两个 mip 层级内分别线性采样，再对结果线性插值。\n<p>\n采样具有 mipmap 的纹理时，在画质和速度之间取得较好平衡。\n</p>\n<p>\n要求纹理具有 mipmap。mip 层级根据观察角度及纹理在屏幕空间的尺寸选择。\n</p>"
+    },
+    {
+      "id": "TextureMinificationFilter",
+      "field": "properties/LINEAR_MIPMAP_NEAREST/description",
+      "sourceHash": "sha256:5da2369172a03e8d287c7da505451dbde45ebb51f8ce58775fa92d05d33f3ebd",
+      "text": "选择最近的 mip 层级，并在该层级内线性采样。\n<p>\n要求纹理具有 mipmap。mip 层级根据观察角度及纹理在屏幕空间的尺寸选择。\n</p>"
+    },
+    {
+      "id": "TextureMinificationFilter",
+      "field": "properties/LINEAR/description",
+      "sourceHash": "sha256:61187b09b82abd0bb737067e8bb6ebaa6c2cd133fa1b0f51e3b76d0f122831cf",
+      "text": "对最近四个纹素进行双线性插值采样，比 <code>NEAREST</code> 过滤更平滑。"
+    },
+    {
+      "id": "TextureMinificationFilter",
+      "field": "properties/NEAREST_MIPMAP_LINEAR/description",
+      "sourceHash": "sha256:e12996f3bdd70c319bd732093cc8012055beac7220e97d4fd4bb54f97cc86d1c",
+      "text": "在相邻两个 mip 层级内分别采用最近邻采样，再对结果线性插值。\n<p>\n采样具有 mipmap 的纹理时，在画质和速度之间取得较好平衡。\n</p>\n<p>\n要求纹理具有 mipmap。mip 层级根据观察角度及纹理在屏幕空间的尺寸选择。\n</p>"
+    },
+    {
+      "id": "TextureMinificationFilter",
+      "field": "properties/NEAREST_MIPMAP_NEAREST/description",
+      "sourceHash": "sha256:22f427b37674fadb174b4cf29e9d54b45a397ca34a5b0733f69f4677464bdaa4",
+      "text": "选择最近的 mip 层级，并在该层级内采用最近邻采样。\n<p>\n要求纹理具有 mipmap。mip 层级根据观察角度及纹理在屏幕空间的尺寸选择。\n</p>"
+    },
+    {
+      "id": "TextureMinificationFilter",
+      "field": "properties/NEAREST/description",
+      "sourceHash": "sha256:ed390af38d16b99f12e83f5384c79d77752216c0148069d2a2b4f46fe11228b3",
+      "text": "返回最近纹素的值进行纹理采样。"
+    },
+    {
+      "id": "WebGLConstants",
+      "field": "description",
+      "sourceHash": "sha256:1eae7f5f69e6268bc8a0e6003183ce1558661f3cbc0246ff31c2c47680de0cf6",
+      "text": "按名称提供 WebGL 常量值的枚举，可在没有活动 WebGL 上下文，或上下文未提供某些常量时使用，例如 [Safari 9]{@link https://github.com/CesiumGS/cesium/issues/2989}。这些值与 [WebGL 1.0]{@link https://www.khronos.org/registry/webgl/specs/latest/1.0/} 和 [WebGL 2.0]{@link https://www.khronos.org/registry/webgl/specs/latest/2.0/} 规范中的常量一致。"
+    },
+    {
+      "id": "WebGLOptions",
+      "field": "description",
+      "sourceHash": "sha256:8e094b8bf89cead9cae2bc77200de906feadc2ef36ab61b35f2c376f2a691441",
+      "text": "传给 HTMLCanvasElement.getContext() 的 WebGL 选项。参见 {@link https://registry.khronos.org/webgl/specs/latest/1.0/#5.2|WebGLContextAttributes}，注意 alpha、stencil 和 powerPreference 的默认值有所调整。\n<p>\n<code>alpha</code> 默认为 false，相比 WebGL 标准默认值 true 可提高性能。应用需要通过 alpha 混合将 Cesium 叠加在其他 HTML 元素上时，应将 <code>alpha</code> 设为 true。\n</p>"
+    }
+  ]
+}

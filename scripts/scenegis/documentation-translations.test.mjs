@@ -445,6 +445,61 @@ const roots = new Set([
   "SceneGISSnowLensStage",
   "SceneGISVideoProjection",
   "SceneGISViewshed",
+  "AssociativeArray",
+  "binarySearch",
+  "binarySearchComparator",
+  "buildModuleUrl",
+  "Check",
+  "clone",
+  "combine",
+  "createGuid",
+  "defined",
+  "destroyObject",
+  "DeveloperError",
+  "FeatureDetection",
+  "formatError",
+  "FrameRateMonitor",
+  "Frozen",
+  "getAbsoluteUri",
+  "getBaseUri",
+  "getExtensionFromUri",
+  "getFilenameFromUri",
+  "getImagePixels",
+  "getTimestamp",
+  "isLeapYear",
+  "Iso8601",
+  "mergeSort",
+  "mergeSortComparator",
+  "objectToQuery",
+  "PinBuilder",
+  "Proxy",
+  "queryToObject",
+  "Queue",
+  "removeExtension",
+  "RequestErrorEvent",
+  "RuntimeError",
+  "srgbToLinear",
+  "subdivideArray",
+  "TaskProcessor",
+  "TrustedServers",
+  "TypedArray",
+  "TypedArrayConstructor",
+  "writeTextToCanvas",
+  "BlendEquation",
+  "BlendFunction",
+  "BlendingState",
+  "CullFace",
+  "DepthFunction",
+  "StencilFunction",
+  "StencilOperation",
+  "TextureMagnificationFilter",
+  "TextureMinificationFilter",
+  "PixelDatatype",
+  "PixelFormat",
+  "WebGLConstants",
+  "WebGLOptions",
+  "ContextOptions",
+  "CompressedTextureBuffer",
 ]);
 
 test("reviewed native API roots have complete source-bound prose translations", () => {
@@ -797,6 +852,52 @@ test("widget input prose preserves cancellation, controller units and native inh
     assert.ok(inherited.i18n.translatedFields.includes("description"));
   }
   assert.equal(lookup.get("SceneGISModelFlatten").sourceLocale, "zh-CN");
+});
+
+test("utility prose preserves task backpressure, live arrays and render formulas", () => {
+  assert.match(
+    lookup.get("AssociativeArray#values").description,
+    /实时数组.*不应直接修改/,
+  );
+  assert.match(lookup.get("binarySearch").returns[0].description, /按位取反/);
+  assert.match(lookup.get("combine").description, /第一个对象的值/);
+  assert.match(
+    lookup.get("formatError").params.find((p) => p.name === "object")
+      .description,
+    /错误对象/,
+  );
+  assert.match(lookup.get("getTimestamp").description, /毫秒.*基准时刻未指定/);
+  assert.match(
+    lookup.get("TaskProcessor#scheduleTask").description,
+    /已达到.*立即返回 undefined/,
+  );
+  assert.match(
+    lookup
+      .get("TaskProcessor#scheduleTask")
+      .params.find((p) => p.name === "transferableObjects").description,
+    /转移.*而非复制/,
+  );
+  assert.match(lookup.get("FrameRateMonitor#unpause").description, /相同次数/);
+  assert.match(
+    lookup.get("FrameRateMonitor#minimumFrameRateAfterWarmup").description,
+    /本身不执行/,
+  );
+  assert.match(
+    lookup.get("StencilFunction.GREATER").description,
+    /参考值大于.*模板值/,
+  );
+  assert.match(
+    lookup.get("StencilOperation.DECREMENT_WRAP").description,
+    /回绕至无符号字节最大值/,
+  );
+  assert.match(
+    lookup.get("BlendingState.PRE_MULTIPLIED_ALPHA_BLEND").description,
+    /<code>source \+ destination\(1 - source.alpha\)<\/code>/,
+  );
+  assert.match(
+    lookup.get("TextureMinificationFilter.LINEAR_MIPMAP_LINEAR").description,
+    /相邻两个 mip.*线性插值.*要求纹理具有 mipmap/s,
+  );
 });
 
 test("spatial units, ownership, boundary conditions and callback limits reach metadata", () => {
