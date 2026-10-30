@@ -1,0 +1,13 @@
+{
+  "documentationTitle": "API Documentation",
+  "homeTitle": "engine API",
+  "help": "Engine API · generated from the distributed engine sources.",
+  "otherLanguage": "简体中文",
+  "coverageNotice": "English source documentation",
+  "search": {
+    "loading": "Loading search index…",
+    "failed": "Search index could not be loaded.",
+    "results": "{shown} of {total} symbols"
+  },
+  "template": {}
+}

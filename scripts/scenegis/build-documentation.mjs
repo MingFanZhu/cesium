@@ -22,6 +22,43 @@ export async function buildDocumentation() {
     await rm(target, { recursive: true, force: true });
   }
   await mkdir(template, { recursive: true });
+  for (const locale of ["en-US", "zh-CN"]) {
+    await buildLocale({
+      locale,
+      symbols,
+      version,
+      root: output,
+      staging: template,
+    });
+  }
+  await writeFile(
+    path.join(output, "locales.json"),
+    JSON.stringify(
+      {
+        schemaVersion: 1,
+        sourceLocale: "en-US",
+        locales: [
+          { locale: "en-US", name: "English", path: "./" },
+          { locale: "zh-CN", name: "简体中文", path: "zh-CN/" },
+        ],
+      },
+      null,
+      2,
+    ),
+  );
+  await cp(
+    "Documentation/SceneGIS/Distribution.md",
+    path.resolve("Build/SceneGIS/README.md"),
+  );
+}
+
+async function buildLocale({ locale, symbols, version, root, staging }) {
+  const output = locale === "en-US" ? root : path.join(root, locale);
+  const template = path.join(staging, locale);
+  const ui = JSON.parse(
+    await readFile(`Documentation/i18n/${locale}/ui.json`, "utf8"),
+  );
+  await mkdir(template, { recursive: true });
   for (const folder of ["tmpl", "static"]) {
     await cp(
       `Tools/jsdoc/cesium_template/${folder}`,
@@ -33,7 +70,10 @@ export async function buildDocumentation() {
     const target = path.join(template, "tmpl", filename);
     let source = await readFile(target, "utf8");
     source = source
-      .replaceAll("'Cesium Documentation'", "'SceneGIS API Documentation'")
+      .replaceAll(
+        "'Cesium Documentation'",
+        JSON.stringify(`SceneGIS ${ui.documentationTitle}`),
+      )
       .replaceAll("'Cesium.'", "'SceneGIS.'")
       .replaceAll(
         'src="javascript/cesiumDoc.js"',
@@ -45,11 +85,31 @@ export async function buildDocumentation() {
       )
       .replace(
         /<div class="help">[\s\S]*?<\/div>/,
-        '<div class="help">SceneGIS engine API · generated from the distributed engine sources.</div>',
+        `<div class="help">${ui.help}</div>`,
       );
     // Source checkouts and hosted source browsers are not required by this artifact.
     if (filename === "sourceLink.tmpl") {
       source = "";
+    }
+    for (const [english, translated] of Object.entries(ui.template)) {
+      source = source.replaceAll(english, translated);
+    }
+    source = source.replace('<html lang="en">', `<html lang="${locale}">`);
+    if (filename === "layout.tmpl" || filename === "indexLayout.tmpl") {
+      const otherRoot = locale === "en-US" ? "zh-CN/" : "../";
+      source = source.replace(
+        /<div id="(?:main|mainIndex)">/,
+        (opening) => `${opening}
+<div class="doc-locale" style="margin-bottom:1em">
+<a id="DocLanguage" data-root="${otherRoot}" href="${otherRoot}index.html">${ui.otherLanguage}</a>
+ · ${ui.coverageNotice}
+</div>`,
+      );
+      source = source.replace(
+        '<script src="javascript/scenegisDoc.js"></script>',
+        `<script id="DocMessages" type="application/json">${JSON.stringify(ui.search).replaceAll("<", "\\u003c")}</script>
+<script src="javascript/scenegisDoc.js"></script>`,
+      );
     }
     await writeFile(target, source);
   }
@@ -68,6 +128,8 @@ export async function buildDocumentation() {
   configuration.templates.sourceUrl = "";
   configuration.templates.scenegis = {
     version,
+    locale,
+    translationDirectory: path.resolve(`Documentation/i18n/${locale}/api`),
     nativeTemplate: template,
     exports: [...symbols.names],
     aliases: Object.fromEntries(symbols.aliases),
@@ -76,10 +138,13 @@ export async function buildDocumentation() {
     ...configuration.opts,
     destination: output,
     template,
-    readme: "./scripts/scenegis/jsdoc/README.md",
-    mainpagetitle: "SceneGIS engine API",
+    readme:
+      locale === "en-US"
+        ? "./scripts/scenegis/jsdoc/README.md"
+        : `./Documentation/i18n/${locale}/README.md`,
+    mainpagetitle: `SceneGIS ${ui.homeTitle}`,
   };
-  const configPath = path.resolve("Build/SceneGIS-jsdoc.json");
+  const configPath = path.resolve(`Build/SceneGIS-jsdoc-${locale}.json`);
   await writeFile(configPath, JSON.stringify(configuration, null, 2));
   execFileSync(
     process.execPath,
@@ -96,10 +161,6 @@ export async function buildDocumentation() {
   await cp("Documentation/Images", path.join(output, "Images"), {
     recursive: true,
   });
-  await cp(
-    "Documentation/SceneGIS/Distribution.md",
-    path.resolve("Build/SceneGIS/README.md"),
-  );
 }
 
 if (

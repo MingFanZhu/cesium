@@ -1,0 +1,50 @@
+{
+  "schemaVersion": 1,
+  "locale": "zh-CN",
+  "terms": [
+    { "source": "scene", "translation": "场景" },
+    { "source": "primitive", "translation": "图元" },
+    { "source": "entity", "translation": "实体" },
+    { "source": "tileset", "translation": "瓦片集" },
+    { "source": "imagery", "translation": "影像" },
+    { "source": "terrain", "translation": "地形" },
+    { "source": "ellipsoid", "translation": "椭球" },
+    { "source": "cartographic", "translation": "地理坐标" },
+    { "source": "Cartesian", "translation": "笛卡尔" },
+    { "source": "ECEF", "translation": "地心地固坐标系（ECEF）" },
+    { "source": "ENU", "translation": "东、北、天局部坐标系（ENU）" },
+    { "source": "radian", "translation": "弧度" },
+    {
+      "source": "ellipsoidal height",
+      "translation": "椭球高",
+      "note": "Do not substitute elevation above mean sea level."
+    },
+    { "source": "pick", "translation": "拾取" },
+    { "source": "frustum", "translation": "视锥" },
+    { "source": "bounding volume", "translation": "包围体" },
+    { "source": "clipping", "translation": "裁剪" },
+    {
+      "source": "opacity",
+      "translation": "不透明度",
+      "note": "Zero is transparent, one is opaque."
+    },
+    { "source": "ownership", "translation": "所有权" },
+    {
+      "source": "borrowed",
+      "translation": "借用",
+      "note": "The borrower must not destroy the owner's resource."
+    },
+    { "source": "tracer", "translation": "示踪物" },
+    { "source": "dimensionless tracer", "translation": "无量纲示踪量" },
+    { "source": "voxel", "translation": "体素" },
+    {
+      "source": "streamline",
+      "translation": "流线",
+      "note": "Instantaneous field line, distinct from a particle trajectory."
+    },
+    { "source": "trajectory", "translation": "轨迹" },
+    { "source": "underwater", "translation": "水下" },
+    { "source": "caustics", "translation": "焦散" },
+    { "source": "whitecaps", "translation": "风浪白沫" }
+  ]
+}

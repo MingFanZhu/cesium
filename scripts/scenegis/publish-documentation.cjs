@@ -4,6 +4,12 @@
 const fs = require("node:fs");
 const path = require("node:path");
 const helper = require("jsdoc/lib/jsdoc/util/templateHelper");
+const translations = require("../docs-i18n/doclets.cjs");
+const annotationPrefix = "SCENEGIS_" + "PATCH_";
+const annotationPattern = new RegExp(
+  `^[ \\t]*${annotationPrefix}(?:BEGIN|END) SGP-\\d{4}[^\\r\\n]*`,
+  "gm",
+);
 const native = require("../../Tools/jsdoc/cesium_template/publish.js");
 
 function canonical(name) {
@@ -73,7 +79,13 @@ function cleanDoclet(doclet) {
     ) {
       continue;
     }
-    result[key] = value;
+    result[key] = Array.isArray(value)
+      ? value.map((item) =>
+          item && typeof item === "object" ? cleanDoclet(item) : item,
+        )
+      : value && typeof value === "object"
+        ? cleanDoclet(value)
+        : value;
   }
   if (doclet.meta) {
     result.meta = {
@@ -130,6 +142,39 @@ exports.publish = function (data, opts, tutorials) {
     description: "The version of the engine in this SceneGIS distribution.",
     defaultvalue: settings.version,
   });
+  // Integration annotations in source comments are not API prose or translation units.
+  translations.mapProse(publicDoclets, (text) =>
+    text.replace(annotationPattern, ""),
+  );
+  fs.mkdirSync(opts.destination, { recursive: true });
+  const locale = settings.locale;
+  if (locale === "en-US") {
+    fs.writeFileSync(
+      path.join(opts.destination, "translation-source.json"),
+      JSON.stringify(
+        {
+          schemaVersion: 1,
+          sourceLocale: locale,
+          units: translations.collectUnits(publicDoclets),
+        },
+        null,
+        2,
+      ),
+    );
+  } else {
+    const catalog = translations.readCatalog(
+      settings.translationDirectory,
+      locale,
+    );
+    const report = translations.localizeDoclets(publicDoclets, catalog);
+    fs.writeFileSync(
+      path.join(opts.destination, "translation-report.json"),
+      JSON.stringify(report, null, 2),
+    );
+    console.log(
+      `Documentation ${locale}: ${report.counts.translated}/${report.counts.total} translated fields, ${report.counts.stale} stale, ${report.counts.unused} unused.`,
+    );
+  }
   publicDoclets.forEach(mapText);
   const doclets = publicDoclets.map(cleanDoclet);
   // Render through the native publisher with its actual prune/link/anchor allocation.
@@ -181,6 +226,8 @@ exports.publish = function (data, opts, tutorials) {
   const header = {
     schemaVersion: 1,
     namespace: "SceneGIS",
+    locale,
+    sourceLocale: "en-US",
     version: settings.version,
     generator: { name: "JSDoc", version: env.version.number },
   };

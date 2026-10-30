@@ -8,11 +8,11 @@
 | Status                | `completed`                                   |
 | Planning model        | `extension`                                   |
 | Active extension plan | [Distribution](plans/2026-10-29-extension.md) |
-| Current phase         | D1 and D2 complete                            |
+| Current phase         | D1, D2 and localization complete              |
 | Active phase plan     | None                                          |
 | Architecture contact  | Architecture Agent (current task)             |
 | Execution contact     | Execution Agent (current task)                |
-| Last updated          | 2026-10-29                                    |
+| Last updated          | 2026-10-30                                    |
 
 ## Scope
 
@@ -30,6 +30,15 @@ automatic compatibility checks or registry publication.
 - SGP: `SGP-0073`, `SGP-0074`.
 - Open discussion: none. No separate review agent requested.
 
+## Latest localization
+
+[Independent localization](plans/2026-10-30-localization.md) is completed under
+[ADR-0206](../../Documentation/SceneGIS/Decisions/ADR-0206-documentation-localization.md) and
+[reviewed](reviews/2026-10-30-localization.md). Generic translations/tools live outside Source
+and brand-specific directories. Chinese coverage is 3,150/17,631 fields (17.9%), including all
+73 extension entry descriptions. Missing text retains English with explicit coverage metadata.
+Each locale delivers 533 pages and 7,943 symbols. No source comments or SDK changes.
+
 ## Latest maintenance
 
 [Asset directory correction](plans/2026-10-29-asset-directories.md): completed and
@@ -40,7 +49,7 @@ shared asset stream. Rebuilt artifact has zero empty directories; 8 Node and 7 b
 
 D1 checkpoint: `99c7ce81ca`. [D2 review approved](reviews/2026-10-29-d2-documentation.md).
 Complete artifact is generated with `npx gulp buildSceneGIS`; docs-only with buildSceneGISDocs.
-533 HTML pages and 7,943 indexed symbols, all public SceneGIS roots, root/nested IIFE/ESM
+533 HTML pages per locale and 7,943 indexed symbols per locale, all public SceneGIS roots, root/nested IIFE/ESM
 resource loads and both World lifecycles verified. No unresolved new finding or active phase.
 
 [SDK handoff](../../Documentation/SceneGIS/Distribution.md) describes entries, global resource

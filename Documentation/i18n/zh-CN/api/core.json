@@ -1,0 +1,264 @@
+{
+  "schemaVersion": 1,
+  "locale": "zh-CN",
+  "entries": [
+    {
+      "id": "Viewer",
+      "field": "description",
+      "sourceHash": "sha256:21f2b073a60130f8f8753e7fdc900974f7c6c3c49c3fb8c2c8846492b2947965",
+      "text": "构建应用的基础 Widget，将全部标准 Cesium 控件组合为一个可复用组件。可通过 mixin 扩展，为不同应用增加功能。"
+    },
+    {
+      "id": "Scene",
+      "field": "description",
+      "sourceHash": "sha256:aa243aa4f3473471bb4ad35b421fba70f9ae62aaea73ad08fea39b10b9672e52",
+      "text": "Cesium 虚拟场景中全部三维图形对象与状态的容器。通常不直接创建 Scene，而由 {@link CesiumWidget} 隐式创建。"
+    },
+    {
+      "id": "Camera",
+      "field": "description",
+      "sourceHash": "sha256:475636b10815150e598abc5a6447dede0e616aeee9717cf3f0dc8d52c31ba61e",
+      "text": "相机由位置、朝向和视锥定义。<br /><br />朝向由 view、up 和 right = view x up 单位向量构成正交归一基。<br /><br />视锥由六个平面定义，每个平面使用 {@link Cartesian4} 表示：x、y、z 分量为平面单位法向量，w 为平面到原点/相机位置的距离。"
+    },
+    {
+      "id": "Cartesian3",
+      "field": "classdesc",
+      "sourceHash": "sha256:f22495d460423474e232348dbbc6442adab5e2fe6b7af41a07706a41d1ffd9b4",
+      "text": "三维笛卡尔坐标点。"
+    },
+    {
+      "id": "Cartographic",
+      "field": "classdesc",
+      "sourceHash": "sha256:288dc29c181a228277ab61b7c761d5bb5fd91b6520f55bf46fb4df706924abc0",
+      "text": "由经度、纬度和高度定义的位置。"
+    },
+    {
+      "id": "Rectangle",
+      "field": "classdesc",
+      "sourceHash": "sha256:d612fabd9cdeb331a4c129260a5209ccb666c08ea9b1d60bfc2079afbd699d2d",
+      "text": "由经纬度坐标指定的二维区域。"
+    },
+    {
+      "id": "CesiumWidget",
+      "field": "description",
+      "sourceHash": "sha256:1c62f4c46e101467dc97bbb57cdebd422c475db19f75adbaab4e79a7e77b1f8e",
+      "text": "包含 Cesium 场景的 Widget。"
+    },
+    {
+      "id": "Cesium3DTileset",
+      "field": "description",
+      "sourceHash": "sha256:b931e5817b14a818ea32497d68b38111d61cc1f82933e95b5a4cd19f8b91f1ed",
+      "text": "用于流式加载海量异构三维地理空间数据集的 {@link https://github.com/CesiumGS/3d-tiles/tree/main/specification|3D Tiles 瓦片集}。\n\n<div class=\"notice\">\n通常不直接实例化此对象，请使用 {@link Cesium3DTileset.fromUrl}。\n</div>"
+    },
+    {
+      "id": "I3SLayer",
+      "field": "description",
+      "sourceHash": "sha256:b650cbc065ff180a049cea4d2b0c5c5fddcfa81afba4b971b79a3e78c170af84",
+      "text": "实现 I3S 图层。在 CesiumJS 中，每个 I3SLayer 创建一个 Cesium3DTileset。<p>请通过 {@link I3SDataProvider} 访问图层，不要直接构造。</p>"
+    },
+    {
+      "id": "ImageryLayer",
+      "field": "description",
+      "sourceHash": "sha256:24a445f73adc2673e08d08cfdd0355053528ecf86d841b95f57f60cb685cd434",
+      "text": "将单个影像提供者的切片图像数据展示在 {@link Globe} 或 {@link Cesium3DTileset} 上的影像图层。"
+    },
+    {
+      "id": "Panorama",
+      "field": "description",
+      "sourceHash": "sha256:db9991f0b91e1c171074588f83fa99003f5cf0001c598ffe28d0a994f45d90d0",
+      "text": "在场景中显示全景影像。此类型描述接口，不应直接实例化。"
+    },
+    {
+      "id": "Entity",
+      "field": "description",
+      "sourceHash": "sha256:1b28f28dfdd6589f7af21fdcbcf6a4cf6be9a06d5bdeff574dc893504a4fc39e",
+      "text": "Entity 实例将多种可视化形式聚合为单个高层对象。可手动创建并加入 {@link Viewer#entities}，也可由 {@link CzmlDataSource} 或 {@link GeoJsonDataSource} 等数据源生成。"
+    },
+    {
+      "id": "PrimitiveCollection",
+      "field": "description",
+      "sourceHash": "sha256:aad70c6834e4ff77688f63ca3693c25b4a2684401c82fbcd91c3b93e30729b85",
+      "text": "图元集合，常通过 {@link Scene#primitives} 使用。<code>PrimitiveCollection</code> 自身也是图元，因此集合可以嵌套形成层次结构。"
+    },
+    {
+      "id": "Clock",
+      "field": "description",
+      "sourceHash": "sha256:abaa992cdaf05ba38d8374245649666a52d394c19476c3949fa0a0d18b9e32a7",
+      "text": "用于跟踪模拟时间的简单时钟。"
+    },
+    {
+      "id": "Color",
+      "field": "classdesc",
+      "sourceHash": "sha256:0b3b2e5d0e3c337c7fb8c66f6604cd568dd6663aff002ebdb165b66653e07a1e",
+      "text": "通过红、绿、蓝和 alpha 定义的颜色，各分量范围从 <code>0</code>（无强度）到 <code>1.0</code>（全强度）。"
+    },
+    {
+      "id": "CustomDataSource",
+      "field": "description",
+      "sourceHash": "sha256:f09f2ff0ae7327aecc785259149f6b5a5966feb8195e15f6b6d08d34b3e8173d",
+      "text": "可手动管理一组实体的 {@link DataSource} 实现。"
+    },
+    {
+      "id": "EntityCollection",
+      "field": "description",
+      "sourceHash": "sha256:b814de6f5ddb4a3e9f1bb581303b67927828c38b1dbb4bb526a7e106057c3094",
+      "text": "可观测的 {@link Entity} 实例集合，每个实体具有唯一 id。"
+    },
+    {
+      "id": "Event",
+      "field": "description",
+      "sourceHash": "sha256:60c94134070cb48d626ea8afee5c6d0425de953457bf2eea2ee66ab432b05a7d",
+      "text": "管理指定事件订阅者的通用工具类。通常在容器类内部实例化，再通过属性暴露给其他对象订阅。"
+    },
+    {
+      "id": "GeoJsonDataSource",
+      "field": "description",
+      "sourceHash": "sha256:d1fc7621d55165621b5ae002edcbc4ed66f63f7099b74e2c69f0f9dd289cecf3",
+      "text": "处理 {@link http://www.geojson.org/|GeoJSON} 和 {@link https://github.com/mbostock/topojson|TopoJSON} 数据的 {@link DataSource}。若存在 {@link https://github.com/mapbox/simplestyle-spec|simplestyle-spec} 属性，也会使用。"
+    },
+    {
+      "id": "ImageryLayerCollection",
+      "field": "description",
+      "sourceHash": "sha256:bae6f29c99e1aa07a5030e993b45dade6de06c3494b45ecd19dfd8cdcade3def",
+      "text": "在 {@link Globe} 或 {@link Cesium3DTileset} 上绘制栅格影像的有序图层集合。"
+    },
+    {
+      "id": "Matrix4",
+      "field": "classdesc",
+      "sourceHash": "sha256:d1048511699a6d1a079f258ac2ae5e9d5fba3b60c83ba009ae02600732bef87d",
+      "text": "4x4 矩阵，可按列主序数组索引。为便于阅读代码，构造参数采用行主序。"
+    },
+    {
+      "id": "Scene#pick",
+      "field": "description",
+      "sourceHash": "sha256:af2749df0e9f3eb0299a969caa5be8d183ed597e06337193d90bda9f083cdcc6",
+      "text": "返回包含 <code>primitive</code> 属性的对象，该属性指向指定窗口坐标处场景中最上层的图元；该位置没有对象时返回 <code>undefined</code>。不同图元类型可能附带其他属性，供进一步识别拾取对象。<p>拾取 3D Tiles 要素时，<code>pick</code> 返回 {@link Cesium3DTileFeature} 对象。</p>"
+    },
+    {
+      "id": "Scene#pickPosition",
+      "field": "description",
+      "sourceHash": "sha256:637b74dc0c98d2913516d0e3c9ac62bd903cbeb4027c1135d72dd76266debd6b",
+      "text": "从深度缓冲与窗口位置重建笛卡尔坐标。<p>二维模式从深度缓冲重建的位置可能与三维和哥伦布视图略有不同，原因是透视投影与正交投影的深度值分布不同。</p><p>将 {@link Scene#pickTranslucentDepth} 设为 <code>true</code> 可包含透明图元深度，否则会穿过透明图元进行拾取。</p>"
+    },
+    {
+      "id": "Scene#requestRender",
+      "field": "description",
+      "sourceHash": "sha256:0b1e59b64759609a5495ae303e3ca36cda490f4c670dc2334155b4032af1e62b",
+      "text": "当 {@link Scene#requestRenderMode} 为 <code>true</code> 时请求新的渲染帧。渲染速率不超过 {@link CesiumWidget#targetFrameRate}。"
+    },
+    {
+      "id": "Scene#primitives",
+      "field": "description",
+      "sourceHash": "sha256:962292cf1fa596a6999d0814591132369b696651f8481c70238c156bcd2b97c2",
+      "text": "获取图元集合。"
+    },
+    {
+      "id": "Scene#imageryLayers",
+      "field": "description",
+      "sourceHash": "sha256:6811377586b80a6a428c4e06e26fcff9954bd895436124da94819611c64f1dce",
+      "text": "获取将在球体上绘制的影像图层集合。"
+    },
+    {
+      "id": "Viewer#scene",
+      "field": "description",
+      "sourceHash": "sha256:859c70460a2e2157d7d2706c7a064e0f24437b7c1fcc2682b9893829947368f8",
+      "text": "获取场景。"
+    },
+    {
+      "id": "Viewer#camera",
+      "field": "description",
+      "sourceHash": "sha256:2e396c88538c45e553cc60e10b4fa0201eb38c2b18e877d79094160e1fd8045b",
+      "text": "获取相机。"
+    },
+    {
+      "id": "Viewer#entities",
+      "field": "description",
+      "sourceHash": "sha256:bc4ed5049683e389eafa0ab0837526c704d1720d2cfdf1d997e22c22d548500b",
+      "text": "获取未绑定特定数据源的实体集合。这是 [dataSourceDisplay.defaultDataSource.entities]{@link Viewer#dataSourceDisplay} 的快捷入口。"
+    },
+    {
+      "id": "Camera#setView",
+      "field": "description",
+      "sourceHash": "sha256:1cf1b7269912582a61b693040cc7a3e938037b2a6647b33309115755844feb3d",
+      "text": "设置相机位置、朝向和变换。"
+    },
+    {
+      "id": "Cartesian3.fromDegrees",
+      "field": "description",
+      "sourceHash": "sha256:f875b69a5b671d6c29836e80589b719ef4a32db1e6f1922b130822fabb8df881",
+      "text": "根据以度为单位的经度和纬度返回 Cartesian3 位置。"
+    },
+    {
+      "id": "Cartographic.fromDegrees",
+      "field": "description",
+      "sourceHash": "sha256:63813d73346eabf1c887cdfad71c3fe10cc89373efcc3a88c2c6421abd87313c",
+      "text": "根据以度为单位的经度和纬度创建 Cartographic 实例，结果对象中的角度以弧度表示。"
+    },
+    {
+      "id": "VERSION",
+      "field": "description",
+      "sourceHash": "sha256:d61928cf82203885babc2e3fe4729ce7227251d46235dd9e6a3762f1edd7d9b3",
+      "text": "此发行包的引擎版本字符串。"
+    },
+    {
+      "id": "Scene",
+      "field": "params/options.canvas/description",
+      "sourceHash": "sha256:0fdba2355190692712ad92a1ebaa2d13316f7bc0bf71fbf14e89c6a8185a8b44",
+      "text": "创建场景所用的 HTML canvas 元素。"
+    },
+    {
+      "id": "Scene",
+      "field": "params/options.contextOptions/description",
+      "sourceHash": "sha256:3a07d17e4f6338874a92949c17f352332b0d079f705e22d5b1d7164038798d4c",
+      "text": "Context 和 WebGL 创建属性。"
+    },
+    {
+      "id": "Scene",
+      "field": "params/options.creditContainer/description",
+      "sourceHash": "sha256:3a1b788f2c6557aa8dad4f32fc0d53b6dba3ef739ac04beeb2e2f718a6795e6b",
+      "text": "显示署名的 HTML 元素。未指定时创建署名容器，并作为 canvas 的兄弟节点加入。"
+    },
+    {
+      "id": "Scene",
+      "field": "params/options.creditViewport/description",
+      "sourceHash": "sha256:2c517e30ff341d43cfd85c0c8baf2e9e536fe6f8161c64b2f07b67258b3b929d",
+      "text": "显示署名弹窗的 HTML 元素。未指定时将弹窗视口作为 canvas 的兄弟节点加入。"
+    },
+    {
+      "id": "Scene",
+      "field": "params/options.ellipsoid/description",
+      "sourceHash": "sha256:3216dff1ce83f13c44ff38316958b3733d1494c3a831052673f24dff9b821973",
+      "text": "默认椭球。未指定时使用系统默认椭球。"
+    },
+    {
+      "id": "Scene",
+      "field": "params/options.mapMode2D/description",
+      "sourceHash": "sha256:bfc4d5ea2b5c659aaddd5f30de802cf171b832cc1cdd0a84c46a7c233dae6d70",
+      "text": "决定二维地图是否可旋转或在水平方向无限滚动。"
+    },
+    {
+      "id": "Scene",
+      "field": "params/options.mapProjection/description",
+      "sourceHash": "sha256:94be0214e0bd3a38ec9b889db2b1e3ebbc3219a5f1f9f12afcf7cc0c8fed1129",
+      "text": "二维和哥伦布视图模式使用的地图投影。"
+    },
+    {
+      "id": "Scene",
+      "field": "params/options.orderIndependentTranslucency/description",
+      "sourceHash": "sha256:9cc92a90d6c4821589c24d930c99ee69a24ceb9cd5f7271148cfa61a4e0f5b50",
+      "text": "为 true 且配置支持时，使用顺序无关透明。"
+    },
+    {
+      "id": "Scene",
+      "field": "params/options.scene3DOnly/description",
+      "sourceHash": "sha256:bf534ce94ba43dc034e29f95b40b1c2fb6ac2e3cff61dbfbf11b15aaaac424b1",
+      "text": "为 true 时优化三维模式内存与性能，同时禁用二维和哥伦布视图。"
+    },
+    {
+      "id": "Scene",
+      "field": "params/options.shadows/description",
+      "sourceHash": "sha256:b6e6ec9258f2a166c94cb0ddf7dc62eac250f23a5e89861b06e5f05e4b7b2d71",
+      "text": "决定光源是否投射阴影。"
+    }
+  ]
+}

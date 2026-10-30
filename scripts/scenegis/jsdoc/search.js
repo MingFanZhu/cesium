@@ -1,6 +1,17 @@
 /* global document, window */
 
 (function () {
+  const messages = JSON.parse(
+    document.getElementById("DocMessages").textContent,
+  );
+  const language = document.getElementById("DocLanguage");
+  const switched = new URL(
+    language.dataset.root + window.location.pathname.split("/").pop(),
+    window.location.href,
+  );
+  switched.search = window.location.search;
+  switched.hash = window.location.hash;
+  language.href = switched.href;
   const input = document.getElementById("ClassFilter");
   const navigation = document.getElementById("ClassList");
   const results = document.createElement("div");
@@ -23,16 +34,20 @@
     status.setAttribute("role", "status");
     results.append(status);
     if (!symbols) {
-      status.textContent = failure
-        ? "Search index could not be loaded."
-        : "Loading search index…";
+      status.textContent = failure ? messages.failed : messages.loading;
       return;
     }
     const terms = value.split(/\s+/);
     const matches = symbols.filter((symbol) =>
-      terms.every((term) => symbol.displayName.toLowerCase().includes(term)),
+      terms.every((term) =>
+        `${symbol.displayName} ${symbol.summary ?? ""}`
+          .toLowerCase()
+          .includes(term),
+      ),
     );
-    status.textContent = `${Math.min(matches.length, 80)} of ${matches.length} symbols`;
+    status.textContent = messages.results
+      .replace("{shown}", Math.min(matches.length, 80))
+      .replace("{total}", matches.length);
     const list = document.createElement("ul");
     for (const symbol of matches.slice(0, 80)) {
       const item = document.createElement("li");

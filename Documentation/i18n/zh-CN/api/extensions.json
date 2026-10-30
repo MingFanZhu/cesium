@@ -1,0 +1,570 @@
+{
+  "schemaVersion": 1,
+  "locale": "zh-CN",
+  "entries": [
+    {
+      "id": "SceneGIS3DTilesVoxelizer",
+      "field": "description",
+      "sourceHash": "sha256:ab0a91d0afc20fe975357b1327187f0609e4e70f67d2eb4df7b2c6701344ad78",
+      "text": "一次性、独立于显示相机的 3D Tiles 几何体素化任务。在源瓦片集之后将任务挂载到 Scene.primitives，并等待 resultPromise。快照完成前，源必须始终可通过同一 Scene 的原生 PrimitiveCollection 树访问，且几何与变换保持静态。任务只借用源，不改变其父集合，也不重复挂载。\n\n通过原生瓦片请求、缓存和解码管线主动加载格网区域。包含全部源三角形，不受样式、显隐、透明度或裁剪影响。支持由静态 Model 承载的 glTF/GLB、b3dm 和 i3dm TRIANGLES，以及原生实例化与解码。拒绝点云、非三角形模式、动画、蒙皮、变形目标、自定义着色器和垂直夸张；不重建真实建筑内部结构。\n\n任务拥有自己的 Worker，借用瓦片集。移除或销毁任务不会销毁源。结果归调用方所有，任务和源都销毁后仍然有效。捕获期间可能一次性读取 GPU 几何缓冲，单次大规模读取可能阻塞主线程；完成后不逐帧回读几何。"
+    },
+    {
+      "id": "SceneGISAutoExposure",
+      "field": "description",
+      "sourceHash": "sha256:cb699d4162b1e101275a4944f37ef7c738bbac0280ff22fd1593c920140fa7fd",
+      "text": "用于 HDR 球面和平面场景的全局直方图自动曝光。在原生泛光和色调映射之前进行有界 GPU 测光，不重绘几何。将相对亮度映射到中灰（0.18），不提供 EV100 标定。原生 postProcessStages.exposure 仍作为额外的正倍率。\n\n此控制器归 Scene 所有。禁用会释放 GPU 资源，并在下一次渲染帧恢复原生手动曝光。不自动请求额外收敛帧，按需渲染应用须控制自身刷新节奏。适应过程使用渲染帧之间的实际时间，不使用模拟时钟。相机跳变或内容替换后调用 reset 可立即重新测光。"
+    },
+    {
+      "id": "SceneGISColorGrading",
+      "field": "description",
+      "sourceHash": "sha256:415eeb9f7232a916115875273b3579e70e8fe68d960483dbd46c34df9c851c30",
+      "text": "在原生色调映射中提供可选的线性 HDR 白平衡和调色。控制器归 Scene 所有，不增加纹理、帧缓冲或渲染通道。处理顺序为曝光之后、原生色调曲线和输出 gamma 之前。自动测光、泛光生成、TAA 历史与场景光照保持不变。全局白平衡不能分别校正多个光源。"
+    },
+    {
+      "id": "SceneGISEnvironmentEffects",
+      "field": "description",
+      "sourceHash": "sha256:ce060cd01fa35c0c3d2507e9d1ea6f8c046e4b2251122ebef18f3873ff0e4f71",
+      "text": "控制原生 Globe 或 SceneGIS 平面世界的高级物理大气与空气透视管线。调用方安装的 scene.light DirectionalLight 驱动地表、模型和云的受光，不改变天空天体方向；安装 SunLight 可恢复自动日月光照。此控制器不拥有也不改写调用方的光源。\n\n显式构造的控制器归调用方所有。应注册到 Scene 控制器宿主，并在销毁宿主前移除。默认禁用，首次启用更新之前不请求资源或修改 Scene。Scene.environmentEffects 也可能返回 Scene 所有的轻量默认实例；直接修改其属性即可，无需注册或移除。显式注册的控制器优先。"
+    },
+    {
+      "id": "SceneGISFluidPrimitive",
+      "field": "description",
+      "sourceHash": "sha256:4d9740bc31082b82bc037d72cd5eee36426456b34ae1a0982ea825f525ed7968",
+      "text": "原生局部 GPU 流体图元，使用 PBF 密度约束并重建液面。加入 Scene.primitives。要求 WebGL2 浮点 MRT、HDR 和 SCENE3D，相机必须位于液体之外。场景不透明深度仅控制可见性，不作为物理碰撞；碰撞由封闭的局部轴对齐盒提供。运行时不进行 CPU 粒子回读。\n\n全部距离为局部米制单位。球面使用 ENU modelMatrix，平面使用米制刚体变换。修改 modelMatrix 会同时移动已有粒子和容器。布局选项不可变，可修改控制项在实例属性中说明。"
+    },
+    {
+      "id": "SceneGISGaussianSegmentedPrimitive",
+      "field": "description",
+      "sourceHash": "sha256:011c8f36314ed3b37c125f39fb1cfe0ed264c45b75f6db453fd434bf3ba8cb7d",
+      "text": "流式加载 MCI4 分段 Gaussian 产品，提供有预算的 CPU/GPU 驻留管理与逐实例异步排序。要求 WebGL2 和 HTTP Range 支持。源坐标单位为米，有效变换为 modelMatrix 乘以产品的 localToFixed，两者都必须是保向刚体变换。球面使用 ENU 矩阵，平面使用笛卡尔矩阵。\n图元拥有请求、Worker、显示资源和 GPU 页。按采集外观绘制，不进行 PBR 重新受光或逐高斯点拾取。验证后的页默认使用独立 IndexedDB 缓存；usePersistentCache=false 可关闭，maximumPersistentCacheBytes 和 maximumPersistentCacheStagingBytes 分别限制持久存储与 CPU 暂存。"
+    },
+    {
+      "id": "SceneGISGpuParticleSystem",
+      "field": "description",
+      "sourceHash": "sha256:d99c47567ee38585e6d26613e84221979bfc039f836265e1bb9223a84e2df808",
+      "text": "用于 WebGL2 SCENE3D 的可编程 GPU 粒子图元，支持球面和平面。加入 {@link Scene#primitives}，集合通常负责销毁。CPU 仅调度粒子出生；状态更新由一次四目标 GPU 通道完成，精灵以面向相机的实例化四边形接入原生透明/OIT。\n\nsimulationShader 必须定义两个 GLSL 函数：<code>void initializeParticle(inout SceneGISParticle particle)</code> 和 <code>void updateParticle(inout SceneGISParticle particle, float deltaTime)</code>。\nSceneGISParticle 包含 position/velocity（vec3，局部米和米/秒）、color（vec4，Cesium 风格的非预乘 alpha 颜色）、size（vec2，精灵全尺寸，米）、rotation（float，屏幕逆时针弧度）、life（float，秒）、age（float，秒）和 seed（float，[0,16777215] 内的整数）。age 与 seed 是只读着色器输入，其余字段持久保存并完全由着色器控制；引擎不积分速度或施加力。初始化默认位置、速度和旋转为零，颜色为白，尺寸为一，寿命为五秒。更新时 age 已推进，设置 life=0 可杀死粒子。\n<code>sceneGISParticleRandom(seed, stream)</code> 返回 [0,1) 内的确定性数值，不同非负整数 stream 提供独立样本。\n可选 renderShader 定义 <code>void styleParticle(inout SceneGISParticle p)</code>，修改仅用于本次绘制的副本，不改变已保存的模拟状态，在冻结时间和拾取时也如此。它共享 uniformMap 与原生顶点内置变量；调用方提供的包围体必须包含它可能造成的最大位置和尺寸变化。\n\n局部状态随 modelMatrix 移动。调用方须保证全部粒子位置与精灵范围位于 boundingSphere 内，属性有限，尺寸和颜色非负，alpha 在 [0,1]。不提供 CPU 回读、逐粒子拾取、光照、阴影、碰撞、自动包围体或 JavaScript updateCallback。无原生 OIT 时不逐实例排序；TAA 没有粒子运动向量。\n\n出生使用循环槽位，容量满时覆盖旧粒子。时钟向前跳变时，着色器接收实际 deltaTime，仅保留最新 capacity 次出生；没有隐式时间截断或子步。着色器源码、uniform-map 键、容量、seed 和 image 均不可变，uniform 值可通过所提供的回调更新。"
+    },
+    {
+      "id": "SceneGISLightCollection",
+      "field": "description",
+      "sourceHash": "sha256:e5c6c84b8fbcfeca17d5ab5d2aa7ec7df5eebf53f8d151144d1f6231ccc7718a",
+      "text": "绑定到单个 WebGL2 Scene 的分块局部光源集合，可在 Scene.light 之外添加最多 256 个局部光，不替换日月光源或其阴影。SCENE3D 下的受光 PBR 模型/3D Tiles、Phong 图元和球面/平面受光地形可接收；不改变 unlit 材质或自定义光照着色器。局部光不投影、不照亮参与介质，也不提供 GI；原生自发光材质与泛光独立。\n\n集合归 Scene 所有，在 Context 前销毁；显式提前 destroy 会解除绑定。光源描述对象仅借用，不会被销毁。集合拥有共享 GPU 光源表，不增加几何绘制通道。"
+    },
+    {
+      "id": "SceneGISModelFlatten",
+      "field": "classdesc",
+      "sourceHash": "sha256:4ad8eb652dce26362adc8d0af6d2f95c13968b5bb9b81a9a9d22effd7139679e",
+      "text": "将局部 XY 多边形内的已有网格顶点压到局部 Z 平面；inverse=true 时压平外部。将实例赋给 {@link Cesium3DTileset#customShader}。不可变多边形支持凹轮廓和直接孔洞，忽略其 Z 坐标。球面调用方提供 ENU 坐标系，恒定 ENU Z 不等于椭球高；平面调用方提供当前世界米制笛卡尔坐标系。\n\n这是可视化变形，不是多边形裁剪或网格编辑。跨边界三角形不切分，CPU 网格查询及导出数据保持原样。支持范围为 SCENE3D 静态网格 3D Tiles，不包含旧式 i3dm、分类、蒙皮、变形动画或其他自定义着色器。\n\n着色器归调用方所有。销毁前须从全部消费者解绑，并先于渲染 Context 销毁。每实例仅支持一个 Context。"
+    },
+    {
+      "id": "SceneGISPlanarBoxGeometry",
+      "field": "description",
+      "sourceHash": "sha256:443c22243d16456b10b70b959343895657a6b32d7b8812373900cea796cc8a8f",
+      "text": "以米制位置为中心的平面盒体不可变 CPU 几何描述。"
+    },
+    {
+      "id": "SceneGISPlanarCameraController",
+      "field": "description",
+      "sourceHash": "sha256:dfb9dae7efaeb2d98033907af36a6e899bb2ac8d14575bd89aaf5659e223779f",
+      "text": "用于 {@link SceneGISPlanarWorld} 的确定性鼠标相机控制器。调用方在注册前必须禁用旧控制器，并在销毁 Widget 前移除此控制器。"
+    },
+    {
+      "id": "SceneGISPlanarCoordinateSystem",
+      "field": "description",
+      "sourceHash": "sha256:acf2f6d4d64660b58e3a292be9b0e227672182e848a919109c22a7e920a0e2ec",
+      "text": "定义有界米制平面坐标系：X 向东，Y 向北，Z 向上。CRS 标识仅为不透明元数据，此类型不执行投影或重投影。"
+    },
+    {
+      "id": "SceneGISPlanarCylinderGeometry",
+      "field": "description",
+      "sourceHash": "sha256:9dacb921af5a4d6cf5b349caa9605587f31c6c745850e76b16bbaaa6b3be7855",
+      "text": "沿局部 Z 轴对齐的平面圆柱不可变 CPU 几何描述。"
+    },
+    {
+      "id": "SceneGISPlanarEllipsoidGeometry",
+      "field": "description",
+      "sourceHash": "sha256:5918cc822e2f77fa9da51bdd61370d869594ab62143c3c437a8468df27554a9b",
+      "text": "完整平面椭球体的不可变 CPU 几何描述。"
+    },
+    {
+      "id": "SceneGISPlanarEnvironment",
+      "field": "description",
+      "sourceHash": "sha256:fb32c44a204a0963fbcd4023d0f15c5b45596cfaf13576bd8b00e5efbabc1538",
+      "text": "为调用方所有的单个 {@link SceneGISPlanarWorld} 控制手动或基于项目原点星历的天体方向，以及平面场景光照。显式 scene.light DirectionalLight 优先于自动光源，安装 SunLight 可恢复自动光照。自定义光源生效时，天空及高级环境仍可使用天体方向。\n将实例注册到 CesiumWidget 或 Viewer 控制器宿主，并在销毁 Widget 前移除。World 不拥有此实例或其稳定光源对象。"
+    },
+    {
+      "id": "SceneGISPlanarExtent",
+      "field": "description",
+      "sourceHash": "sha256:01606a498d625e510195b7104bd8de0bfff3d45f1bd1689269ae5e2ced2787e2",
+      "text": "平面世界坐标系中的只读二维范围。"
+    },
+    {
+      "id": "SceneGISPlanarGroundPrimitive",
+      "field": "description",
+      "sourceHash": "sha256:50d82e2e8642eb20a83de59dad47b96a2f7572a9dddf15ba09a5048580cc4f7f",
+      "text": "绘制贴合当前平面地表的折线或非挤出多边形。静态批次共享一个原生 Primitive 及其顶点缓冲。线每个顶点数组使用一条命令，并根据地表深度裁剪片元；XY 范围不相交的面共用一对模板/颜色命令，拾取也如此。重叠面保留输入顺序；在模板计数容量内，兼容的不透明颜色范围也可合并。\n材质批次共享一个 Fabric 材质，仅合并空间兼容范围。面拾取按足迹判断，包括 alpha 为零的像素；面 Fabric 须用 alpha 而非 discard，以便清理模板。线拾取遵循材质的 alpha/discard 覆盖。线 Fabric 的 st.s 为累计 XY 距离，st.t 为像素宽度坐标，支持原生 Arrow 和 Dash。"
+    },
+    {
+      "id": "SceneGISPlanarHeightmapTerrainData",
+      "field": "description",
+      "sourceHash": "sha256:0a321e3fa739be58d01a119e48cd4d177cbaa28f050401b6b050026ee8dd7afe",
+      "text": "以矩形高度图表示的单个平面地形瓦片数据。样本按从北到南、从西到东的行主序存储，包含全部瓦片边界。构造函数接管输入缓冲和水面掩码，成功构造后调用方不得修改它们。"
+    },
+    {
+      "id": "SceneGISPlanarHomeButton",
+      "field": "description",
+      "sourceHash": "sha256:74ce3044968c8ecf0b8ffbabe773ba3648529ea11606220ed376ae0003cf2d60",
+      "text": "立即恢复平面世界初始视图的按钮。"
+    },
+    {
+      "id": "SceneGISPlanarHomeButtonViewModel",
+      "field": "description",
+      "sourceHash": "sha256:1d2b0382e775e900171c06a74450fbbab43de8bf003e372740772acbd44398ee",
+      "text": "{@link SceneGISPlanarHomeButton} 的视图模型。"
+    },
+    {
+      "id": "SceneGISPlanarImageryLayer",
+      "field": "description",
+      "sourceHash": "sha256:173892f66eadcbbd547278e14fdd0c5e5eba341c024017324daded3a40deaa1a",
+      "text": "按顺序组织的平面栅格影像图层。"
+    },
+    {
+      "id": "SceneGISPlanarImageryLayerCollection",
+      "field": "description",
+      "sourceHash": "sha256:68f1d207f15a79c1441f081997846d65dd3a0f12a9deac18b0280e729c09e33d",
+      "text": "从下到上排序的平面影像图层集合。集合拥有已挂载图层，不拥有图层的影像提供者。"
+    },
+    {
+      "id": "SceneGISPlanarImageryProvider",
+      "field": "classdesc",
+      "sourceHash": "sha256:e0b8056089b56925612210d36d8ef3a0c84ce71a6085935c9db8044a9765df35",
+      "text": "定义 {@link SceneGISPlanarWorld} 使用的影像提供者结构契约。实现须在西北原点的标准格网中声明连续层级区间，并按提供者声明的瓦片尺寸返回图像。此类型不应直接实例化。"
+    },
+    {
+      "id": "SceneGISPlanarLayerTerrainProvider",
+      "field": "description",
+      "sourceHash": "sha256:5c9299c8381fc72a574b448d1779b4fcb5a3b83b854551843ffe412bd7377e6a",
+      "text": "加载由 layer.json 描述的 SceneGIS 平面地形图层。使用 {@link SceneGISPlanarLayerTerrainProvider.fromUrl}，不要直接调用此构造函数。提供者仅拥有元数据，使用它的 World 拥有瓦片和 GPU 资源。"
+    },
+    {
+      "id": "SceneGISPlanarPolygonGeometry",
+      "field": "description",
+      "sourceHash": "sha256:989906f04e4d9ed12bf129739caf348ddedb145208caafc0c289c75306339ee3",
+      "text": "简单平面多边形的不可变纯 CPU 几何描述。"
+    },
+    {
+      "id": "SceneGISPlanarPolylineGeometry",
+      "field": "description",
+      "sourceHash": "sha256:1bdc2eb6440cc9f88cc822e29c5e02e5e528eace5cde39d8a0c1412da74689b9",
+      "text": "直线段平面折线的不可变纯 CPU 几何描述。材质 st.s 为累计 XYZ 长度除以总长度，贴地绘制则使用 XY 长度。st.t 从右侧 0 到左侧 1；普通线使用原生屏幕扩展，贴地线使用 XY 宽度。重复首位置可闭合斜接，产生一处 1 到 0 的 UV 接缝。每个批次实例独立设置 UV 起点。"
+    },
+    {
+      "id": "SceneGISPlanarPolylineVolumeGeometry",
+      "field": "description",
+      "sourceHash": "sha256:b04fd9e891e03c3ff0f671a0d815f407bd5cc863f2fea63e1e0b0ca1c36a4db5",
+      "text": "沿平面折线扫掠体的不可变纯 CPU 几何描述。"
+    },
+    {
+      "id": "SceneGISPlanarPrimitive",
+      "field": "description",
+      "sourceHash": "sha256:1248d723869bd9bb9706824c8b4f401721aa9927c5dfccbe277b3db980438ebb",
+      "text": "通过 Cesium 同步标准 Primitive 路径绘制平面几何或静态批次。批次拓扑与实例变换在构造时快照保存，修改须创建新图元。按空间及兼容外观分组，以限制同步构建和剔除成本。\n线支持 PolylineMaterialAppearance 与原生 Fabric（包括 Arrow/Dash）。非线几何支持 MaterialAppearance 和调用方所有的 Fabric 材质。每批共享一个材质，实例颜色属性仅由颜色外观读取。原生实体使用原生 UV；多边形、墙和扫掠表面使用归一化主轴面投影，主轴变化处存在接缝。材质和外观始终归调用方所有。"
+    },
+    {
+      "id": "SceneGISPlanarQuantizedMeshTerrainData",
+      "field": "description",
+      "sourceHash": "sha256:016514502def5322e53ed1c0b3474ab930c6b1a9f4641c109ca284aed7fd4fb9",
+      "text": "由平面 quantized-mesh 三角形承载的不可变 CPU 地形数据。"
+    },
+    {
+      "id": "SceneGISPlanarSingleTileImageryProvider",
+      "field": "classdesc",
+      "sourceHash": "sha256:36da339f7b47bd364da86e64bdf61b8bc0f98276e71464b63fe2beaf3e80c74b",
+      "text": "将单张图像映射到整个平面世界。图像像素宽高比可以不同于正方形世界；更高地形层级通过标准祖先纹理变换采样这张零级图像。"
+    },
+    {
+      "id": "SceneGISPlanarSkyBox",
+      "field": "description",
+      "sourceHash": "sha256:ea9314c2dfa00ac72af5d690eccd1164a508479d476fc9361d6a12e22fe45e7d",
+      "text": "调用方所有的平面世界固定轴立方体天空盒。各面方向为 positiveX 向东、positiveY 向北、positiveZ 向上。源必须预先加载，构造后不可变。"
+    },
+    {
+      "id": "SceneGISPlanarTerrainData",
+      "field": "classdesc",
+      "sourceHash": "sha256:f84c1258719c2895990bf6ca53dff14a97db7371a349e9b41cd303872eb651ff",
+      "text": "定义单个平面瓦片的只读 CPU 地形数据。具体数据须在未来网格消费者使用的相同表面三角形上插值。此接口不拥有 GPU、请求、Worker 或可销毁资源，不应直接实例化。"
+    },
+    {
+      "id": "SceneGISPlanarTerrainProvider",
+      "field": "classdesc",
+      "sourceHash": "sha256:3c5d201a79854a02d1d97e41d3b4e1952c989a6f2e3d4bf4fd505906c7b99b3a",
+      "text": "定义平面切片方案所用地形提供者的结构契约。实现须提供完整零级根瓦片，构造后同步就绪，全部高度与几何误差以米表示。此类型不应直接实例化。"
+    },
+    {
+      "id": "SceneGISPlanarTerrainSampler",
+      "field": "description",
+      "sourceHash": "sha256:8686bda9f9e34d947347c7f5c1e684a5effc31e047cdd2383c73b266bfb0bd92",
+      "text": "对平面地形提供者进行独立、显式层级的采样。此命名空间不可实例化。"
+    },
+    {
+      "id": "SceneGISPlanarTileMapServiceImageryProvider",
+      "field": "classdesc",
+      "sourceHash": "sha256:ad3cb0707b20ba5dab707a7cbc807807b1b75b4510c7c9d2cf0cca354c8a3dfd",
+      "text": "在标准平面格网中加载 TMS 金字塔。使用 fromUrl 读取并校验 tilemapresource.xml；同步构造函数则使用显式尺寸和层级配置，以及标准 z/x/y.extension 路径。服务行号向北递增，公开地址仍采用西北原点的 XYZ。"
+    },
+    {
+      "id": "SceneGISPlanarTilingScheme",
+      "field": "description",
+      "sourceHash": "sha256:a5ce8b3f17fcc69deb06c2884fba0ce3ea535cd206bba593fde96bd8f0550699",
+      "text": "平面坐标系的单根四叉树切片方案。零级仅有一个瓦片，瓦片 X 向东递增，瓦片 Y 从西北原点向南递增，不进行环绕。"
+    },
+    {
+      "id": "SceneGISPlanarUrlTemplateHeightmapTerrainProvider",
+      "field": "description",
+      "sourceHash": "sha256:fead0c2b12bec3409aa84811e4e212a39fa7232f07d7fe061b1e8d85b0eb87b0",
+      "text": "通过与坐标系无关的 URL 模板提供含边界采样的平面高度图，模板可包含 <code>{x}</code>、<code>{y}</code>、<code>{z}</code> 和 <code>{s}</code>。"
+    },
+    {
+      "id": "SceneGISPlanarUrlTemplateImageryProvider",
+      "field": "description",
+      "sourceHash": "sha256:2051633aac116fa5acdc26800b7e5b13c009f8a41a8470f258de4471f9b21dff",
+      "text": "通过 URL 模板提供平面栅格瓦片。支持 x、y、z、s、reverseX、reverseY、reverseZ、width、height、westProjected、southProjected、eastProjected 和 northProjected 标签。投影范围使用世界米制坐标，可通过 customTags 增加标签。"
+    },
+    {
+      "id": "SceneGISPlanarUrlTemplateQuantizedMeshTerrainProvider",
+      "field": "description",
+      "sourceHash": "sha256:cf8ffbd507f2ec22772bef621348891a341b3bffb0a96f51b53531f26b44140f",
+      "text": "与坐标系无关的平面 quantized-mesh URL 模板提供者。"
+    },
+    {
+      "id": "SceneGISPlanarWallGeometry",
+      "field": "description",
+      "sourceHash": "sha256:1e03766b272f88ff27cd79b4981b9fa934c7e4992e93556d91797e7de9416c4b",
+      "text": "沿平面 XY 路径生成竖直墙面的不可变纯 CPU 几何描述。"
+    },
+    {
+      "id": "SceneGISPlanarWebMapServiceImageryProvider",
+      "field": "classdesc",
+      "sourceHash": "sha256:ddad7619f0f358361b1503b5240a56bd010040e271b60882ad3c99f0c5a1d52b",
+      "text": "按平面瓦片范围加载 WMS GetMap 图像。坐标以米为单位，按配置的 CRS 发送，不执行投影或重投影。任意 CRS 标识不隐含坐标轴定义，因此 WMS 1.3.0 轴顺序须显式配置。"
+    },
+    {
+      "id": "SceneGISPlanarWebMapTileServiceImageryProvider",
+      "field": "classdesc",
+      "sourceHash": "sha256:78fa327672f6de946e0b6d63b349c80c57133be1ba2f9410623e438a947bac73",
+      "text": "在平面世界中通过 KVP 或 REST 资源模板加载 WMTS 影像。所选矩阵集须匹配世界的单根、北侧原点四叉树。矩阵标签将标准层级映射到服务标识，不进行 CRS 转换。"
+    },
+    {
+      "id": "SceneGISPlanarWorld",
+      "field": "description",
+      "sourceHash": "sha256:090843947cf89fb98ef36b066aeebf9d49bfcd49b186618515fa01a94ba40ead",
+      "text": "有界米制平面主世界，提供平坦或高度图地形表面，默认不透明，可选几何光照，以及有序的栅格影像图层集合。支持在 {@link SceneMode.SCENE3D} 中以程序设置透视或正交相机。"
+    },
+    {
+      "id": "SceneGISPointLight",
+      "field": "description",
+      "sourceHash": "sha256:d3734d58549245dacaeea1a7ea6ec0dcae9abf2f3d109769e8b06df7d3a11734",
+      "text": "用于 {@link SceneGISLightCollection} 的全向局部光源。球面位置使用 ECEF，平面使用世界笛卡尔坐标，距离单位为米。使用平滑有限范围的平方反比衰减，在光源半径内限制最大值。不产生阴影或可见几何。属性可修改；按需渲染模式修改后调用 Scene.requestRender。此 CPU 描述对象可由集合共享，无需销毁。"
+    },
+    {
+      "id": "SceneGISRainLensStage",
+      "field": "classdesc",
+      "sourceHash": "sha256:f833e4fe4966acdfda920026a311fed921f2a2d8ea3f82e46efb90670cb7e323",
+      "text": "可选的屏幕空间镜头雨珠与下落水痕。加入指定 Scene 的 postProcessStages 集合，集合通常负责销毁。在色调映射之后、FXAA 之前使用一个原生纯颜色阶段，不改变相机、曝光、天气、深度或输入 alpha。\n\n动画遵循 Scene 时间，冻结时雨滴冻结，时间回退具有确定性。随包提供的 256x256 雨滴折射/高度精灵定义液滴轮廓。原生图像 uniform 在首次启用时加载，并拥有纹理生命周期；后处理缓存拥有输出帧缓冲。用可见场景颜色近似广角反射，不另捕获场景。弯月面只有轻微衰减，没有固定白色高光。不请求额外帧、历史或碰撞通道。这是艺术化镜头效果，不是镜头液体模拟。"
+    },
+    {
+      "id": "SceneGISRectAreaLight",
+      "field": "description",
+      "sourceHash": "sha256:86c500a070c2542d2d5d374d4a975deadb90beea7311d264536ad14434684f4f",
+      "text": "用于 {@link SceneGISLightCollection} 的均匀发光矩形面光源。位置为球面 ECEF 或平面米制笛卡尔坐标中的矩形中心；direction 为出光法线，up 正交化后定义高度轴，宽度方向为 cross(direction, up)。输入会复制，属性仍可修改；按需渲染模式修改后调用 Scene.requestRender。\n\nintensity 为发射的线性 HDR 辐亮度：固定强度时增大面积会增加总出光量，不同于点光/聚光的一米处辐照度尺度。积分后按距中心距离进行平滑 range 衰减。漫反射使用多边形积分，镜面使用各向同性 GGX LTC 拟合，包含清漆层；Phong 镜面近似为匹配粗糙度的 GGX，各向异性材质也使用各向同性面光高光。不创建阴影、参与介质照明或可见几何。此借用的 CPU 描述对象可由集合共享，无需销毁。"
+    },
+    {
+      "id": "SceneGISReflectionProbe",
+      "field": "description",
+      "sourceHash": "sha256:df37562b7a15e68963f8856c80138933cc046eb1cac2da3bd1a5166776d3894b",
+      "text": "用于镜面辐亮度与方向性环境可见度的不可变局部盒探针。加入 {@link SceneGISReflectionProbeCollection}，显式捕获已加载模型。中心同时为捕获位置和盒原点，应置于空旷位置。可见度仅是在该位置的粗略方向近似，不是逐点 GI。"
+    },
+    {
+      "id": "SceneGISReflectionProbeCollection",
+      "field": "description",
+      "sourceHash": "sha256:9761dd03b84e6c9d18c38699fab0a9ed80b20b33b5aba1a1f9ab9ad15ecc1e57",
+      "text": "由 Scene 所有的局部反射探针集合，供球面和平面中使用原生物理天空的 PBR 模型消费。显式模型/场景 IBL 贴图优先。捕获包含不透明与 alpha 掩码的独立 glTF 模型、材质受光及可选原生方向光阴影，不包含透明表面、流式瓦片、地形、云或递归反射。默认天空漫反射按粗略方向可见度衰减，不增加漫反射反弹。SSR 对有效屏幕命中保持优先，干净探针不重绘几何。\n\nScene 在 Context 前销毁集合。移除探针释放其贴图；源模型和探针描述对象仅借用。内容或光照修改后须再次调用 capture。"
+    },
+    {
+      "id": "SceneGISRiverSurface",
+      "field": "description",
+      "sourceHash": "sha256:7e4b16d096dbc4b50ea2b235b40a9f974dec4fa7e5662ac1748bf3a64a9d2b88",
+      "text": "具有指定水位与水流的单条有向河流，加入 Scene.primitives。World 绑定精确且不可变。球面位置使用 ECEF 和椭球高，平面位置使用所绑定 World 的米制 XYZ，不自动投影。有序横断面插值位置高度、宽度和速度；正速度沿输入位置顺序，零速度停止水流平移。水位不等于地形高度。可选 polygonHierarchy 裁剪含孔洞的宽度包络，不决定水位。几何输入在构造时复制，修改剖面或边界须重建。\n\n球面河流使用区域水面图表与网格 LOD，远离原点存在投影畸变。相邻断面采用斜接，折叠或自接触河道会被拒绝。此能力是可视化水流平移，不提供水力学、分汊、瀑布或全球海洋。内部拥有沿河局部定向的两个随机 FFT 频带。流速独立搬运波浪，不改变自身演化；零流速不会冻结波浪。可选的调用方所有 windWaves 提供独立风浪，不受河流速度改写。要求 SCENE3D、HDR 和 WebGL2 浮点目标。共享 SceneGISWaterSurface 的不透明深度/颜色光学与可选有限水下观察，水域不得重叠。"
+    },
+    {
+      "id": "SceneGISS3MLayer",
+      "field": "description",
+      "sourceHash": "sha256:f838386402e7db9b892fe9d2e25b18e7835a618f202542e43d7544a8685de33b",
+      "text": "使用原生 Model 渲染、元数据拾取和 GPU 实例化的 S3M 1.0 网格图层。通过 {@link SceneGISS3MLayer.fromUrl} 创建后加入 scene.primitives，仅支持 SCENE3D。\n\n平面坐标是经显式 modelMatrix 变换的局部米制坐标，不进行 CRS 投影。图层拥有自身的 Model、Worker 和请求，不拥有 World。使用 camera.flyToBoundingSphere(layer.boundingSphere) 取景。拾取到的 ModelFeature 提供 s3mId、idKind 和 geometry，其 primitive.id 为此图层。缺失原始 ID 时使用 idKind=\"geometry\"。"
+    },
+    {
+      "id": "SceneGISScreenSpaceIndirectLighting",
+      "field": "description",
+      "sourceHash": "sha256:9701daded292dfcbff19ac6c9f9933bb87a86005dfae6f6c3cc84ee89197e266",
+      "text": "估算可见不透明 PBR 模型和 3D Tiles 之间的一次局部漫反射反弹。球面和平面共用视空间算法，不包含屏幕外几何、unlit 材质、地形接收者、透明表面或多次反弹。要求 HDR 及已验证的单视锥主通道 MRT 布局；清漆 SSR 与 SSIL 同开会超出原型的八附件预算。不额外绘制几何。稳定空间滤波没有独立历史，可选 TAA 仍归调用方控制。\n\n附加效果归 Scene 所有，提前 destroy 可解绑。禁用保留已分配资源；以禁用状态构造时不分配 GPU 资源。"
+    },
+    {
+      "id": "SceneGISScreenSpaceReflections",
+      "field": "description",
+      "sourceHash": "sha256:1d524b314aa716a8012b2811434f82899be1871dab1a34aef424c04499f162f6",
+      "text": "为不透明原生 PBR 模型和 3D Tiles 添加分层屏幕空间反射。球面和平面共用视空间追踪，未命中由已有镜面 IBL 补足。不包含透明对象、分类覆盖或屏幕外几何。必须显式开启 HDR。附加效果归 Scene 所有并随 Scene 销毁，提前 destroy 可解绑。禁用保留已分配目标以便复用。"
+    },
+    {
+      "id": "SceneGISSnowLensStage",
+      "field": "classdesc",
+      "sourceHash": "sha256:4ac86be05b89bbd352461abfd1ebfd0f8aa4908c14296c4a4011aa71b0cc1843",
+      "text": "可选的镜头边缘向内延伸的静态霜冻效果。加入指定 Scene 的 postProcessStages 集合，集合通常负责销毁。与 SceneGISRainLensStage 一样，在色调映射之后、FXAA 之前使用一个原生纯颜色阶段，并保留输入 alpha。\n\n随包的灰度冰晶纹理提供霜花图案，首次启用时加载，随原生阶段释放。没有动画、深度、历史、碰撞通道或额外帧请求。这是艺术化磨砂玻璃覆盖，不是结晶生长模拟。不修改雨、地表覆盖、光照、曝光、相机或粒子系统。"
+    },
+    {
+      "id": "SceneGISSpecularAntialiasing",
+      "field": "description",
+      "sourceHash": "sha256:c0c342c11a6fa35cd73b7b78ad12efc251acdc384154e3280afde256a4207955",
+      "text": "减少 PBR 模型和 3D Tiles 由几何引起的镜面锯齿。通过未扰动几何法线的屏幕导数展宽基础层与清漆高光，平面镜保持设定粗糙度。不处理法线贴图方差、轮廓、alpha 覆盖或 unlit 内容。球面和平面共用实现，独立于 MSAA/FXAA/TAA。不增加绘制、纹理或帧缓冲。附加设置归 Scene 所有，显式销毁可解绑。"
+    },
+    {
+      "id": "SceneGISSpotLight",
+      "field": "classdesc",
+      "sourceHash": "sha256:80a035340f56c41688ece95d262b38ebec07d69e3e1a842682f3a7b80b553ab9",
+      "text": "用于 {@link SceneGISLightCollection} 的平滑锥形局部光源。位置、颜色、强度、范围、半径、显隐和生命周期遵循 {@link SceneGISPointLight}。锥角为以弧度计的半角。"
+    },
+    {
+      "id": "SceneGISSurfaceWeather",
+      "field": "description",
+      "sourceHash": "sha256:2c10b9b7ec45580a8bd3ff85e39506e9a7c0e117c1c634b355be97520756fc85",
+      "text": "为不透明 PBR 模型/3D Tiles、受光 Phong 图元及球面/平面地形提供近似湿润和薄雪。使用已有法线与材质，不增加资源属性、纹理或几何通道。覆盖固定于世界，球面使用大地向上方向，平面使用固定 Z。地形保留漫反射光照，并增加近似湿润方向高光。unlit 模型、透明内容、分类和水面保持不变。\n\n湿润和雪量独立于粒子天气及场景时间。可选雨滴涟漪按 Scene 时间扰动湿润法线，不模拟遮雨、排水、水洼深度、雪厚或融化。影像没有地物语义，照片中的植被和水面也可能被覆盖。设置归 Scene 所有，提前 destroy 可解绑；ShaderCache 拥有派生程序。不分配纹理、帧缓冲或额外绘制。"
+    },
+    {
+      "id": "SceneGISTemporalAntialiasing",
+      "field": "description",
+      "sourceHash": "sha256:fa43cd87b4ea90e54cfcad9a25a7ad2f380489bef03168c483b2f9f394e4779b",
+      "text": "通过仅作用于渲染的亚像素采样，为 HDR 球面和平面场景提供时域抗锯齿。静态几何根据相机运动重投影，结合深度拒绝与颜色裁剪。没有物体运动向量，动画对象、透明内容和标注可能柔化或残留拖尾。背景像素使用当前颜色，原生覆盖内容保持清晰。附加效果归 Scene 所有，禁用释放历史，启用重新开始。按需渲染场景仅在请求的帧上积累；MSAA 和 FXAA 仍归调用方控制。"
+    },
+    {
+      "id": "SceneGISVectorTile",
+      "field": "description",
+      "sourceHash": "sha256:d9cd71c37d8ae2d07bf90a73c25748b7ce8f1b3b8ac1f7be766f641d4d526d24",
+      "text": "独立且与坐标系无关的 MVT 2.1 解码工具。"
+    },
+    {
+      "id": "SceneGISVectorTileCoordinates",
+      "field": "description",
+      "sourceHash": "sha256:1dae5b94f8cea33bfd7675054204d0c0f95fe591e05954a853a906d2223a3191",
+      "text": "将一个 MVT 图层的瓦片局部坐标映射到显式匹配的平面瓦片。不读取 CRS 元数据，不重投影、裁剪缓冲区或采样地形。"
+    },
+    {
+      "id": "SceneGISVectorTileLayer",
+      "field": "description",
+      "sourceHash": "sha256:1b6d269c1d37f033ed634eb1f8852fe8fe856f34b45fdb097b327c13a9fcb3c8",
+      "text": "将独立解码的矢量瓦片绘制到 SceneGIS 平面世界或 WGS84 Globe。加入 scene.primitives 后由集合拥有生命周期。构造时不请求数据或分配 GPU 资源。Scene、World、style 和 source 覆盖配置均为借用。规则 setter 生成图层所有的不可变样式，源配置保持固定。GPU 异步刷新并保留源缓存。\n无 terrainProvider 时使用平坦快速路径，有 provider 时直接贴地绘制。贴地路径要求 WebGL2、浮点纹理和深度纹理。在缓存预算内，已发布驻留的祖先或后代瓦片可覆盖等待中的目标瓦片；缓存无空余槽位时可能逐出该覆盖。"
+    },
+    {
+      "id": "SceneGISVectorTileSource",
+      "field": "description",
+      "sourceHash": "sha256:fc12980ed8b4d525d11f9a4eea19c6c31c4a0f4cc6bd61048007303c8ee4eddb",
+      "text": "独立解码、采用显式单根平面寻址的 MVT URL 数据源。构造时不发起请求，调用方拥有请求取消与瓦片缓存。传入的 Resource 会被复制，并保留显式 headers、proxy 和 retry 行为。此数据源不拥有 World、GPU 资源或需要销毁的运行时。"
+    },
+    {
+      "id": "SceneGISVectorTileStyle",
+      "field": "description",
+      "sourceHash": "sha256:13077e32ba4fa0f77a928b84172f5af3bd7046f438143a05910be6c2466e27f2",
+      "text": "使用独立 MapLibre 样式前端编译 Style v8 的 scenegis-vector-v1 子集。输入 JSON 会复制，此对象不拥有渲染器、请求或 GPU 资源。"
+    },
+    {
+      "id": "SceneGISVideoProjection",
+      "field": "classdesc",
+      "sourceHash": "sha256:40e048672305715b5c43a7b4ce6940f61ff90c71af9c6570cff4823bc2be6222",
+      "text": "将借用的 SDR 视频投射到观察者可见的不透明场景表面。加入所绑定 Scene 的 postProcessStages，由集合负责销毁。球面坐标为 ECEF，平面为当前 World 的米制 XYZ。源选择与深度捕获独立于显示相机及太阳阴影图；媒体或观察者覆盖缺失时保留原画面。\n\n视频等比例容纳于角度矩形内，不拉伸；留黑边区域保留场景颜色，视频黑色本身仍是内容。合成位于曝光和色调映射之后，是显示覆盖而非物理投影灯。不透明深度定义接收者，透明面既不接收也不阻挡，因此覆盖可能绘制在不透明接收点像素前的透明物体之上。多个投影和分析的叠加遵循原生后处理顺序。\n\n播放、音频、跳转、src 和 srcObject 均由调用方控制。此类不会暂停视频或停止流轨道。要求 WebGL2、SCENE3D 及视频帧回调支持。精度受有限深度分辨率与源 LOD 约束，此 API 为实验性。"
+    },
+    {
+      "id": "SceneGISViewshed",
+      "field": "classdesc",
+      "sourceHash": "sha256:65729710fe5dc5b4a94373a996760187d25686f870f678a28702af01960ef08d",
+      "text": "绑定单个 Scene 与 World、基于方向深度图的通视分析。加入对应 Scene 的 postProcessStages 后由集合负责销毁。position、direction 和 up 使用 World 原生坐标：Globe 为 ECEF，平面为米制笛卡尔坐标，不隐式投影。\n\n不透明和 alpha 掩码的显式源，以及可选 World 地形可遮挡；地形裙边、注记、分类与透明介质不遮挡。瓦片选择使用观察者视图，与 Scene 共享已加载几何。覆盖等待或失败时保持原画面。analysisReady 表示观察者覆盖，继承的 ready 仅表示后处理资源。精度受分辨率和源 LOD 限制，不是精确几何查询。不支持随相机缩放的模型（minimumPixelSize）、冻结瓦片遍历或立体渲染。此首版分析 API 为实验性。"
+    },
+    {
+      "id": "SceneGISVoxelizer",
+      "field": "description",
+      "sourceHash": "sha256:b981665449f0f4c27867a3f4a46ae7cf7cbdb32b298fd0e378f6501592e4b285",
+      "text": "在局部米制格网中进行异步、显式静态三角网格体素化。不要求 Scene 或图形上下文。每实例拥有一个延迟创建的 Worker，同一时刻仅运行一个任务。输入数组会复制，取消不会分离调用方缓冲。实例销毁后结果仍有效。"
+    },
+    {
+      "id": "SceneGISWaterSurface",
+      "field": "description",
+      "sourceHash": "sha256:8bef476533857d2c7159552d24212d32439b1b5f28893977f809b306d07932af",
+      "text": "湖泊、河流或水池表面，支持基于深度的透射、动画法线波浪、介电反射、浅水接触白沫及可选有限水下观察。加入 Scene.primitives。PolygonHierarchy 位置为 z=0 的局部 XY 米制坐标，modelMatrix 将平面放置到任一 World，球面通常使用 ENU。\n显式 geometryMode=\"ellipsoid\" 则接受 ECEF 位置及恒定椭球高，或在固定区域图表中插值的逐点高度。此模式要求 windWaves、单位 modelMatrix 和匹配的 Globe 椭球。轮廓须位于一个开放切向半球内，边在区域球心投影图表中为直线。它是存在投影畸变的区域可视化风浪合成，不是全球海洋或水力模拟。\n要求 SCENE3D、HDR 和 WebGL2 浮点目标，不改变原生 Water 材质。使用场景不透明深度/颜色。通过 underwaterDepth 显式开启局部几何、逐点高度椭球几何和有向河流剖面的水下观察；不支持重叠水层或水下透明对象。反射未命中时，物理天空启用则使用天空，否则使用 reflectionColor。散射色调与白沫在物理光照启用时随其受光。\n动画遵循 Scene 时间，不启动渲染循环。requestRenderMode 下修改属性后须请求一帧，规则与其他应用管理的图元相同。集合拥有图元，Scene 拥有共享捕获目标和白沫纹理。白沫细节从随包 Assets/SceneGIS/Water/Foam 异步加载；加载中水面几何仍可见，失败通过 Scene 渲染错误报告。"
+    },
+    {
+      "id": "SceneGISWeather",
+      "field": "description",
+      "sourceHash": "sha256:3f6862f6cb58222c10f37e4950800d3ebfe18427e1face2643ee3e0e08258e38",
+      "text": "用于 WebGL2 SCENE3D 鸟瞰 GIS 场景的相机局部雨雪。加入 {@link Scene#primitives}，集合通常负责销毁。两个有界 GPU 粒子池围绕观察者循环并淡出，相机移动时保留重叠粒子的世界运动，冻结时间时也如此。提供 scene 后还协调雾、地表湿润/薄雪及镜头雨滴/霜冻。雾借用调用方注册的 environmentEffects，不启用控制器或修改光照、曝光、云与时钟；未提供 scene 时只提供独立降水。\n\n雾、地表和镜头各组默认自动控制，雾须有绑定。在外部修改共享效果前，将对应组 automatic=false。手动组不接收天气写入，包括清除和隐藏；自动效果淡出时保留设定强度。绑定合成先于 Scene 消费者执行，应将图元加入所提供的 Scene，不再使用时销毁或移除。每 Scene 仅允许一个绑定天气系统。\n\nintensity 是艺术化密度，不是降雨测量值。不透明深度测试隐藏被几何挡住的粒子，不提供屋顶遮雨或碰撞。精灵不受光，没有物理积累或运动向量。球面高度与竖直方向使用区域相机局部切平面近似。quality/radius 改变会重置两个池，type/intensity/wind 过渡复用池。show=false 立即隐藏并暂停观测时间，intensity=0 淡出到晴天。向前时间步按原样使用，回退重置粒子序列。requestRenderMode 下不请求额外帧。"
+    },
+    {
+      "id": "SceneGISWindFieldSampling",
+      "field": "description",
+      "sourceHash": "sha256:3e267712d404e5a630d295f2d60bb69d6e35827ead9f780a2ffa2fdf87574f41",
+      "text": "格心风场图集的公开 GPU 消费适配器。将 shaderSource 追加到 GLSL 着色器，并将 createUniformMap(field) 合并到原生采样器回调。函数使用模拟局部米制坐标：sceneGISWindInside、sceneGISWindSolid、sceneGISWindSample（vec4，速度 m/s 与示踪量）。三线性插值忽略固体角点并重新归一化权重，固体内部或域外采样返回零。这是显示采样器，不是守恒输运算子。每次绘制须解析实时场 getter；不得销毁借用纹理，应先销毁消费者。"
+    },
+    {
+      "id": "SceneGISWindObstacleMask",
+      "field": "description",
+      "sourceHash": "sha256:d873afb961ab858e0bcfc45f1e837f38049e4a7e03c636a267e38217ac5bab2c",
+      "text": "为局部风场格网确定性、显式预处理静态障碍。不读取场景对象、地形、屏幕深度或模型私有几何。"
+    },
+    {
+      "id": "SceneGISWindSimulation",
+      "field": "description",
+      "sourceHash": "sha256:22590d9d49dc34e50c036296dc60d3ad3625a60c1fb9804ffe6918637505db1b",
+      "text": "常驻 GPU 的局部等温空气流动求解器，使用 D3Q19 MRT 和可选 Smagorinsky LES。在 GPU 场消费者之前挂载一次到 Scene.primitives。此对象不创建显示，集合通常负责销毁。球面和平面共用局部米制求解器，modelMatrix 必须为刚体。静态固体与无滑移面采用半格反弹；开放面位于最外层格心，墙面/滑移面位于域边界。入口采用非平衡外推，出口按指定法向风速进行一阶对流。应让回流远离出口，并验证下游缓冲区敏感性。这不是经过工程认证的 CFD 求解器。\n\n布局与物理选项在构造时快照保存，修改须重建。固定 dt 的换算为 uL=u*dt/dx，tau=0.5+3*nu*dt/dx^2。要求输入 Mach<=0.1 且 0.5000001<tau<=2。运行时加速可能超出低马赫数范围；不会隐式截断速度、修改黏度或遇到不稳定时自动重置。未解析的壁面与常系数 LES 须独立进行域和网格验证。状态使用 FP32 偏差分布（f-w）。\n\n正常 Scene 时间增量积累工作，maximumStepsPerFrame 只限制执行步数，不改变 dt 或丢弃欠账。暂停停止累计，已排队单步仍执行。拾取及同帧号重复更新不推进状态；时间回退会重置。按需渲染应用须显式请求帧。销毁顺序为先消费者、后生产者。"
+    },
+    {
+      "id": "SceneGISWindVisualization",
+      "field": "description",
+      "sourceHash": "sha256:c45822e39d55891bccffe938f3ca1dba423d8cdb0cfeffe257d1f7c10e2856dd",
+      "text": "GPU 风场体渲染、水平示踪切片和瞬时流线显示。在模拟之后加入 Scene.primitives。它拥有绘制命令、粒子状态/历史及一个后处理阶段，不拥有模拟。标记/线带尺寸与不透明度可实时调整。\n拖尾按已完成模拟时间的等间隔采样真实 RK2 位置，使用每个渲染批次最终速度快照；粒子重生断尾。隐藏期间丢弃历史且不补算，重置/回退清空历史，暂停保留位置和历史。体渲染/切片 alpha 仅来自计算得到的无量纲示踪量，颜色可表示风速或示踪量。不透明建筑和地形截断体积射线，透明表面不遮挡此后处理阶段。\n流线在当前场中以半格弧长进行中点积分，在固体或域边界终止；流线不是粒子历史轨迹，也不是额外湍流。此组件不按墙钟时间动画，不推进风场。应先于生产者销毁此消费者。"
+    },
+    {
+      "id": "SceneGISWindWaves",
+      "field": "description",
+      "sourceHash": "sha256:ec06f98a9c3e4b4ba12c9d06fee90657b28bd777b9fbf60e5b47cc5c368e63ec",
+      "text": "供 SceneGISWaterSurface 复用的三频带 FFT 风浪。使用带种子的 JONSWAP/TMA 频谱、有限水深色散和局部 XY 米制坐标。这是可视化波浪合成，不是水动力求解器，也不预测实测天气或水深。频谱分别以 patchLength、其四倍及其八分之一为周期，表示频带之外的波长被省略。风与吹程描述稳态风海，不包含岛屿绕射。\n通过 WaterSurface 的 windWaves 选项挂载。在同一 Scene Context 中，局部坐标对齐的多个水面可共享同一对象。对象归调用方所有，destroy() 前须移除借用水面。资源延迟分配，模拟遵循 Scene 时间。"
+    },
+    {
+      "id": "SceneGISWorld",
+      "field": "classdesc",
+      "sourceHash": "sha256:d5b3dab6e419387af1b687a637965d0e3a99277cf1b0c528c18dd1e2df7f59ef",
+      "text": "定义 {@link Scene} 所有的主世界生命周期契约。实现在场景构造时选择，并与此接口保持结构兼容。此类型不应直接实例化。"
+    },
+    {
+      "id": "SceneGISWindVisualization",
+      "field": "params/options.colorBy/description",
+      "sourceHash": "sha256:381944cb7ca3d6281b88e5da3d272ff149e1deeeb6cc551ea95ab58742cf9e1c",
+      "text": "颜色依据：\"speed\" 风速或 \"concentration\" 示踪浓度。"
+    },
+    {
+      "id": "SceneGISWindVisualization",
+      "field": "params/options.colorMaximum/description",
+      "sourceHash": "sha256:898782e0ce0c984faf7073f03ce387e964963cc031d9ddb19ec32147a5b2084f",
+      "text": "色标上限，单位为 m/s 或示踪量。"
+    },
+    {
+      "id": "SceneGISWindVisualization",
+      "field": "params/options.extinction/description",
+      "sourceHash": "sha256:e2b9a60db0e627431922b39ff8af07593ef0f322ac27f9f03a8982574e3e534e",
+      "text": "每米、每单位示踪量对应的可视化不透明度系数。"
+    },
+    {
+      "id": "SceneGISWindVisualization",
+      "field": "params/options.mode/description",
+      "sourceHash": "sha256:1770fe950c82f01bde4c8f99174705aecb2b4292cd4bfda6f0bbd964b4e71cb3",
+      "text": "显示模式：\"volume\" 体渲染、\"slice\" 切片或 \"none\"。"
+    },
+    {
+      "id": "SceneGISWindVisualization",
+      "field": "params/options.particleCount/description",
+      "sourceHash": "sha256:16c45df15a803c3a9aad3da110df230c729dda4ebe3c1152bd20a00c0cc967f3",
+      "text": "不可变粒子容量，整数 1..65536。"
+    },
+    {
+      "id": "SceneGISWindVisualization",
+      "field": "params/options.particleLength/description",
+      "sourceHash": "sha256:405ca6fdd7b1b09f2703930d83cd6b14c574bc59f07207bb0663bd98ead5dc44",
+      "text": "独立标记长度，单位为米，范围 (0,256]。"
+    },
+    {
+      "id": "SceneGISWindVisualization",
+      "field": "params/options.particleOpacity/description",
+      "sourceHash": "sha256:e8a961cde263d2e0a244ba36e67c8490fac16d374ed65ceb98782d351e18af45",
+      "text": "标记不透明度，范围 [0,1]，独立于示踪浓度。"
+    },
+    {
+      "id": "SceneGISWindVisualization",
+      "field": "params/options.particleWidth/description",
+      "sourceHash": "sha256:d4d68d119e870fb9e278568db209b97da9d6f1dc74698ee82167405b36cdc3d7",
+      "text": "独立标记/线带宽度，范围 (0,64]，单位由 particleWidthUnits 决定。"
+    },
+    {
+      "id": "SceneGISWindVisualization",
+      "field": "params/options.particleWidthUnits/description",
+      "sourceHash": "sha256:3a330aeb3f9dfb711d2de6a81fbfabc985e0d1459495d7b4d1859b674d65fdab",
+      "text": "宽度单位为绘制缓冲区 \"pixels\" 或 \"meters\"。像素宽度在近距离仍保持细窄。"
+    },
+    {
+      "id": "SceneGISWindVisualization",
+      "field": "params/options.scene/description",
+      "sourceHash": "sha256:28eccdb796928a4d03c1e54390f4d588afecf8b6ecbb3bec7906327873c9f34f",
+      "text": "拥有后处理集合的 Scene。"
+    },
+    {
+      "id": "SceneGISWindVisualization",
+      "field": "params/options.show/description",
+      "sourceHash": "sha256:757e2bb7ddda23c97b7ec2d731f717a78c69dd632be1f64592ddecf0f8aacd88",
+      "text": "是否启用显示。"
+    },
+    {
+      "id": "SceneGISWindVisualization",
+      "field": "params/options.showParticles/description",
+      "sourceHash": "sha256:a4550bd9e4775088c69620b3d991434df5cd3b6657ea13db526ce255f9eee099",
+      "text": "显示按已完成模拟时间驱动的 GPU 流动标记。每个渲染批次采样最新已完成速度场，不是守恒浓度输运。"
+    },
+    {
+      "id": "SceneGISWindVisualization",
+      "field": "params/options.showStreamlines/description",
+      "sourceHash": "sha256:16bdccef3e8278075cc418f460946eed79b482db2b3bbbcfeca69cdcdb92a0f6",
+      "text": "显示瞬时流线。"
+    },
+    {
+      "id": "SceneGISWindVisualization",
+      "field": "params/options.showTrails/description",
+      "sourceHash": "sha256:864dc63223c53253bb0db1d8f480701cc66b4a09d761d6ef8d7935641c5719fc",
+      "text": "绘制采样的三维粒子轨迹，不使用屏幕残影。"
+    },
+    {
+      "id": "SceneGISWindVisualization",
+      "field": "params/options.simulation/description",
+      "sourceHash": "sha256:3ec3470a95b7c0ec76ade8aa33e9f700a7c1f1585ed67255e291e69307f93f75",
+      "text": "已就绪或等待就绪的场生产者。"
+    },
+    {
+      "id": "SceneGISWindVisualization",
+      "field": "params/options.sliceHeight/description",
+      "sourceHash": "sha256:ed0a3185c7d62b51d8a29005b789709895f4197c27d59b6a1f5c1d540bf572f5",
+      "text": "模拟局部水平切片的 Z 高度，单位为米。"
+    },
+    {
+      "id": "SceneGISWindVisualization",
+      "field": "params/options.streamlineSeeds/description",
+      "sourceHash": "sha256:ad42a07e6fcf9eea948c39339edc2a9c87d5aa3d7a81a338cc3bb706bbd86fcb",
+      "text": "1..256 个局部米制种子，会复制；默认在最小 X 侧设置 32 个。"
+    },
+    {
+      "id": "SceneGISWindVisualization",
+      "field": "params/options.streamlineSegments/description",
+      "sourceHash": "sha256:c49a98213986e233d89343bab3e9caa6b438c7aaf48bc88703463ee7311844c5",
+      "text": "1..64 个半格段，在构造时快照保存。"
+    },
+    {
+      "id": "SceneGISWindVisualization",
+      "field": "params/options.trailDuration/description",
+      "sourceHash": "sha256:59482c89745f4f803eac5c2f4a56bfa37f2ba4ba735cedb90319c21b8da99df2",
+      "text": "保留已完成模拟历史的秒数，范围 (0,120]；修改仅重启历史。"
+    },
+    {
+      "id": "SceneGISWindVisualization",
+      "field": "params/options.trailFade/description",
+      "sourceHash": "sha256:78fd12881112993f2e49acb858a683298927ca70fcd5977e2e73867b543cb65e",
+      "text": "尾部不透明度指数，范围 [0,8]；零关闭按年龄淡出。particleOpacity 同时缩放标记与线带。"
+    },
+    {
+      "id": "SceneGISWindVisualization",
+      "field": "params/options.trailSegments/description",
+      "sourceHash": "sha256:1ef045f4c7e2a949d1ac80a9aad4ea6e6c262a3aa36fceda974488c252f2d4e1",
+      "text": "不可变历史容量，整数 1..128。包含填充后的粒子和历史纹理合计不得超过 64 MiB。"
+    }
+  ]
+}

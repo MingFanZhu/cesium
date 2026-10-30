@@ -173,3 +173,52 @@ test("standalone nested documentation searches members and follows type links", 
   ).toBe(true);
   expect(errors).toEqual([]);
 });
+
+test("Chinese documentation searches prose and switches the same symbol between languages", async ({
+  page,
+}, info) => {
+  const errors = [];
+  page.on("pageerror", (error) => errors.push(error.message));
+  page.on("response", (response) => {
+    if (response.status() >= 400) {
+      errors.push(`${response.status()} ${response.url()}`);
+    }
+  });
+  await page.route(/^https?:\/\/(?!127\.0\.0\.1:8104)/, (route) =>
+    route.abort(),
+  );
+  const prefix = "/deep/site/vendor/engine/Documentation/";
+  await page.goto(`${prefix}zh-CN/index.html`);
+  await expect(page.locator("html")).toHaveAttribute("lang", "zh-CN");
+  await page.locator("#ClassFilter").fill("风场体渲染");
+  const result = page
+    .locator("#SceneGISSearchResults a")
+    .filter({ hasText: "SceneGISWindVisualization" });
+  await expect(result).toHaveCount(1);
+  await result.click();
+  await expect(page.locator("#main")).toContainText("独立标记长度，单位为米");
+  await info.attach("chinese-api-documentation", {
+    body: await page.screenshot({
+      path: info.outputPath("chinese-api-documentation.png"),
+    }),
+    contentType: "image/png",
+  });
+  await page.goto(
+    `${prefix}zh-CN/SceneGISWindVisualization.html#trailDuration`,
+  );
+  await page.locator("#DocLanguage").click();
+  await expect(page).toHaveURL(
+    /\/Documentation\/SceneGISWindVisualization\.html#trailDuration$/,
+  );
+  await expect(page.locator("html")).toHaveAttribute("lang", "en-US");
+  await expect(page.locator('[id="trailDuration"]')).toBeVisible();
+  await page.locator("#DocLanguage").click();
+  await expect(page).toHaveURL(
+    /\/zh-CN\/SceneGISWindVisualization\.html#trailDuration$/,
+  );
+  await page.goto(`${prefix}zh-CN/Viewer.html`);
+  await page.locator('#main a[href="Scene.html"]').first().click();
+  await expect(page).toHaveURL(/\/zh-CN\/Scene\.html$/);
+  await expect(page.locator("#main")).toContainText("三维图形对象与状态的容器");
+  expect(errors).toEqual([]);
+});

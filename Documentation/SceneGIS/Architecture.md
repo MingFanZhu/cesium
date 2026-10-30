@@ -68,6 +68,8 @@ Documentation/SceneGIS/**
 AgentDocs/**
 .scenegis/**
 scripts/scenegis/**
+scripts/docs-i18n/**
+Documentation/i18n/**
 Tools/GaussianSplatTiler/**
 packages/engine/Source/Workers/SceneGISPlanarTerrainWorker.js
 packages/engine/Source/Workers/SceneGISVectorTileWorker.js
@@ -1614,3 +1616,16 @@ underwaterBoundaryByteLength 报告实际分配。预算不足报错，不简化
 引擎不依赖 SDK。SCENEGIS_BASE_URL 优先于 CESIUM_BASE_URL；直接 ESM 使用 import.meta.url，
 脚本识别 SceneGIS.js / Cesium.js。文档展示映射在生成期完成，保留原始符号标识；
 自有构建与文档生成器位于 scripts/scenegis，产物不入 Git。
+
+## 独立文档本地化
+
+[ADR-0206](Decisions/ADR-0206-documentation-localization.md) 批准两个自有目录：
+`Documentation/i18n/**` 保存语言词条、术语和文档 UI 文案，`scripts/docs-i18n/**`
+保存通用 JSDoc 翻译合并、原文提取及测试工具。它们不属于引擎源码、workspace、
+运行时资源或 SceneGIS 品牌命名空间，不进入 Source 扫描或运行时 bundle。
+
+翻译使用原始 doclet longname、字段选择器和原文 SHA-256，先合并自然语言，再做发行目标
+自己的品牌展示映射。类型、参数名、默认值、符号标识、链接目标和示例代码保持原样。
+缺失及原文已变的词条保留英文并进入覆盖/待复核报告；失效译文不得无提示套用。
+中英文 HTML 和 SDK 元数据共享同一解析与链接链路，生成到 Build，原 Cesium 文档目标不变。
+升级时复核字段提取规则、模板 UI 文案和待复核词条，不在源码中批量翻译注释。

@@ -21,6 +21,10 @@ SceneGIS/
 │   ├── index.html
 │   ├── api-doclets.json
 │   ├── api-index.json
+│   ├── locales.json        语言目录发现
+│   ├── translation-source.json  品牌映射前的英文翻译单元
+│   ├── zh-CN/             完整中文页面树及同结构的 API 元数据
+│   │   └── translation-report.json  字段覆盖及待复核报告
 │   └── ...                API 页面、图片、样式、搜索脚本
 ├── LICENSE.md
 ├── ThirdParty.json
@@ -119,6 +123,7 @@ engine/Widgets 源码经现有 JSDoc、自定义标签和模板生成，覆盖�
 
 两个 JSON 都具有 `schemaVersion: 1`、`namespace: "SceneGIS"`、`version` 和
 `generator: { name, version }`。版本仅描述发行内容，不参与运行时校验。
+另含 `locale` 与 `sourceLocale: "en-US"`。英文位于 Documentation 根目录，中文位于 zh-CN。
 
 api-doclets.json 的 `doclets` 是 JSDoc 语义对象数组。保留原生 `longname`、`name`、
 `kind`、`scope`、`memberof`、`params`、`returns`、`properties`、`type`、`augments`、
@@ -137,11 +142,28 @@ scope、memberof、exportName、url 和摘要，供 SDK 搜索。枚举索引 ki
 用自己的文档页面替换 url。参数中的 string/number 等内置类型无需 API 页面。
 示例中的 Cesium 命名空间仅在生成期映射到 SceneGIS，原生类名不变。
 
+### 中文文档与 SDK 语言选择
+
+读取 Documentation/locales.json 获取语言名称和相对路径，再消费对应目录的
+api-doclets.json 与 api-index.json。所有语言保留相同 id、类型、exportName 和相对页面/锚点，
+因此 SDK 可以复用自己的路由与类型链接映射。HTML 顶部可切换同一页面并保留查询词与锚点；
+搜索支持符号名称和对应语言的说明。
+
+翻译词条独立保存在 Documentation/i18n，通用工具位于 scripts/docs-i18n，
+不修改引擎源码注释，不参与运行时打包。按原始符号 ID、字段与原文摘要匹配，先合并翻译，
+再做 SceneGIS 品牌展示映射。UI 文案和术语表与 API 翻译分开维护。
+
+首批覆盖常用原生 API、重复通用字段、全部公开 SceneGIS 扩展入口说明及风场显示选项。
+中文尚未全部完成：缺失及原文已变化的字段保留完整英文。中文 doclet.i18n 的
+translatedFields/fallbackFields 列出字段覆盖状态，translation-report.json 给出准确覆盖、
+待复核和过期词条清单。翻译只作用于自然语言和示例 caption，签名与代码不变。
+词条增补在引擎仓库执行，维护协议与候选提取命令记录在 `Documentation/i18n/README.md`；SDK 只消费发行物。
+
 ## 验证命令
 
 ```powershell
 npx gulp buildSceneGIS
-node --test scripts/scenegis/distribution.test.mjs scripts/scenegis/documentation.test.mjs
+node --test scripts/docs-i18n/doclets.test.mjs scripts/scenegis/distribution.test.mjs scripts/scenegis/documentation.test.mjs scripts/scenegis/documentation-locales.test.mjs
 npx playwright test -c scripts/scenegis/playwright.distribution.config.mjs
 ```
 
