@@ -424,3 +424,33 @@ test("geometry documentation displays parameter time and encoded attribute layou
   });
   expect(errors).toEqual([]);
 });
+
+test("widget and input documentation displays cancellation and projected pan units", async ({
+  page,
+}, info) => {
+  const errors = [];
+  page.on("pageerror", (error) => errors.push(error.message));
+  page.on("response", (response) => {
+    if (response.status() >= 400) {
+      errors.push(`${response.status()} ${response.url()}`);
+    }
+  });
+  await page.route(/^https?:\/\/(?!127\.0\.0\.1:8104)/, (route) =>
+    route.abort(),
+  );
+  const prefix = "/deep/site/vendor/engine/Documentation/";
+  await page.goto(`${prefix}Command.html#beforeExecute`);
+  await expect(page.locator('[id="beforeExecute"]')).toBeVisible();
+  await expect(page.locator("#main")).toContainText("设为 true 可阻止命令执行");
+  await page.goto(`${prefix}ScreenSpaceElevatorCameraController.html#panSpeed`);
+  await expect(page.locator('[id="panSpeed"]')).toBeVisible();
+  await expect(page.locator("#main")).toContainText("像素尺寸换算为米");
+  await expect(page.locator("#main")).toContainText("再乘以此系数");
+  await info.attach("widget-input-documentation", {
+    body: await page.screenshot({
+      path: info.outputPath("widget-input-documentation.png"),
+    }),
+    contentType: "image/png",
+  });
+  expect(errors).toEqual([]);
+});

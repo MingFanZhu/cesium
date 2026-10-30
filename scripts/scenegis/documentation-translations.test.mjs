@@ -376,6 +376,75 @@ const roots = new Set([
   "VRTheWorldTerrainProvider",
   "WebMapServiceImageryProvider",
   "WebMapTileServiceImageryProvider",
+  "Animation",
+  "AnimationViewModel",
+  "BaseLayerPicker",
+  "BaseLayerPickerViewModel",
+  "CameraEventAggregator",
+  "CameraEventType",
+  "Cesium3DTilesInspector",
+  "Cesium3DTilesInspectorViewModel",
+  "CesiumInspector",
+  "CesiumInspectorViewModel",
+  "Command",
+  "Controller",
+  "ControllerHost",
+  "createCommand",
+  "Fullscreen",
+  "FullscreenButton",
+  "FullscreenButtonViewModel",
+  "Geocoder",
+  "GeocoderViewModel",
+  "HomeButton",
+  "HomeButtonViewModel",
+  "HybridScreenSpacePanCameraController",
+  "I3sBslExplorerViewModel",
+  "I3SBuildingSceneLayerExplorer",
+  "InfoBox",
+  "InfoBoxViewModel",
+  "KeyboardEventModifier",
+  "MapMode2D",
+  "MouseButton",
+  "NavigationHelpButton",
+  "NavigationHelpButtonViewModel",
+  "PerformanceWatchdog",
+  "PerformanceWatchdogViewModel",
+  "ProjectionPicker",
+  "ProjectionPickerViewModel",
+  "ProviderViewModel",
+  "SceneMode",
+  "SceneModePicker",
+  "SceneModePickerViewModel",
+  "SceneSnapResult",
+  "SceneTransforms",
+  "ScreenSpaceCameraController",
+  "ScreenSpaceElevatorCameraController",
+  "ScreenSpaceEventHandler",
+  "ScreenSpaceEventType",
+  "ScreenSpaceInputBindings",
+  "ScreenSpaceMapCameraController",
+  "ScreenSpaceTiltOrbitCameraController",
+  "ScreenSpaceZoomCameraController",
+  "SelectionIndicator",
+  "SelectionIndicatorViewModel",
+  "SvgPathBindingHandler",
+  "Timeline",
+  "ToggleButtonViewModel",
+  "VideoSynchronizer",
+  "viewerCesium3DTilesInspectorMixin",
+  "viewerCesiumInspectorMixin",
+  "viewerDragDropMixin",
+  "viewerPerformanceWatchdogMixin",
+  "viewerVoxelInspectorMixin",
+  "VoxelInspector",
+  "VoxelInspectorViewModel",
+  "VRButton",
+  "VRButtonViewModel",
+  "SceneGISModelFlatten",
+  "SceneGISRainLensStage",
+  "SceneGISSnowLensStage",
+  "SceneGISVideoProjection",
+  "SceneGISViewshed",
 ]);
 
 test("reviewed native API roots have complete source-bound prose translations", () => {
@@ -662,6 +731,72 @@ test("geometric prose preserves packing, winding, parameter time and verified li
       .description,
     /-1.*三个数/,
   );
+});
+
+test("widget input prose preserves cancellation, controller units and native inheritance", () => {
+  assert.match(
+    lookup.get("Command#beforeExecute").description,
+    /设为 true.*阻止/,
+  );
+  assert.match(
+    lookup.get("Command#beforeExecute").description,
+    /类数组 arguments/,
+  );
+  assert.match(
+    lookup
+      .get("ControllerHost#registerController")
+      .params.find((p) => p.name === "priority").description,
+    /最先更新.*之后更新/,
+  );
+  assert.match(
+    lookup.get("GeocoderViewModel#searchText").description,
+    /经纬度单位为度.*高度单位为米/,
+  );
+  assert.match(
+    lookup.get("ScreenSpaceEventHandler.mouseEmulationIgnoreMilliseconds")
+      .description,
+    /毫秒.*模拟产生的鼠标事件/,
+  );
+  assert.match(
+    lookup.get("ScreenSpaceElevatorCameraController#panSpeed").description,
+    /像素尺寸换算为米.*系数/,
+  );
+  assert.match(
+    lookup.get("ScreenSpaceTiltOrbitCameraController#maximumOrbitVelocity")
+      .description,
+    /弧度\/秒/,
+  );
+  assert.match(
+    lookup.get("ScreenSpaceZoomCameraController#maximumZoomVelocity")
+      .description,
+    /米\/秒/,
+  );
+  assert.match(
+    lookup.get("VideoSynchronizer#tolerance").description,
+    /单位为秒.*同步精度/,
+  );
+  assert.match(
+    lookup.get("BaseLayerPicker").description,
+    /直接创建时.*初始为空.*Viewer 默认/s,
+  );
+  assert.match(
+    lookup.get("viewerDragDropMixin").description,
+    /CZML 等受支持文件/,
+  );
+  for (const [id, parent] of [
+    ["SceneGISModelFlatten#uniforms", "CustomShader#uniforms"],
+    ["SceneGISRainLensStage#uniforms", "PostProcessStage#uniforms"],
+    ["SceneGISSnowLensStage#ready", "PostProcessStage#ready"],
+    ["SceneGISVideoProjection#enabled", "PostProcessStage#enabled"],
+    ["SceneGISViewshed#textureScale", "PostProcessStage#textureScale"],
+  ]) {
+    const inherited = lookup.get(id);
+    assert.equal(inherited.sourceLocale, "en-US");
+    assert.equal(inherited.inherits, parent);
+    assert.equal(inherited.description, lookup.get(parent).description);
+    assert.ok(inherited.i18n.translatedFields.includes("description"));
+  }
+  assert.equal(lookup.get("SceneGISModelFlatten").sourceLocale, "zh-CN");
 });
 
 test("spatial units, ownership, boundary conditions and callback limits reach metadata", () => {

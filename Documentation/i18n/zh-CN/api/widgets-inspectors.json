@@ -1,0 +1,942 @@
+{
+  "schemaVersion": 1,
+  "locale": "zh-CN",
+  "entries": [
+    {
+      "id": "Cesium3DTilesInspector",
+      "field": "description",
+      "sourceHash": "sha256:27f739ff811ed768c1f05f8f133053cf5c6ef042db99e73de88f216d6678e32b",
+      "text": "辅助调试 3D Tiles 的检查器控件。"
+    },
+    {
+      "id": "Cesium3DTilesInspector",
+      "field": "params/scene/description",
+      "sourceHash": "sha256:973a08abac2a32fbafb88f962b3b3d2441e09f37054422cba0a8888757e8c827",
+      "text": "使用的 Scene 实例。"
+    },
+    {
+      "id": "Cesium3DTilesInspectorViewModel.getStatistics",
+      "field": "description",
+      "sourceHash": "sha256:d102a94a59f43f000bb4fcc9fff745379688cb9f37a411ab622cc3338bd968dd",
+      "text": "生成统计信息的 HTML 字符串。"
+    },
+    {
+      "id": "Cesium3DTilesInspectorViewModel.getStatistics",
+      "field": "params/isPick/description",
+      "sourceHash": "sha256:fdcd5982c7ae3c01607e39f9c9d9ec0ebaa929c376dfae943f5fcaf36d6592dd",
+      "text": "是否获取拾取通道的统计信息。"
+    },
+    {
+      "id": "Cesium3DTilesInspectorViewModel.getStatistics",
+      "field": "params/tileset/description",
+      "sourceHash": "sha256:fe20999491d5fe33465037c10b9a68ea4739263a9f5b9d3087033cd270b02c3f",
+      "text": "瓦片集。"
+    },
+    {
+      "id": "Cesium3DTilesInspectorViewModel.getStatistics",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:19d29f37ffaf9f71c5dfb7365b266f44964b5095e408c9084bd2cbaf834dc47a",
+      "text": "格式化后的统计信息。"
+    },
+    {
+      "id": "Cesium3DTilesInspectorViewModel#baseResolution",
+      "field": "description",
+      "sourceHash": "sha256:139b27cc506211dee4e47458d08c544324bae1c852b6574263eb2e97ea361440",
+      "text": "获取或设置基础分辨率。此属性可观察。"
+    },
+    {
+      "id": "Cesium3DTilesInspectorViewModel#baseScreenSpaceError",
+      "field": "description",
+      "sourceHash": "sha256:10e780f90560e60f244237c5d04821bb0e09eb6e3e6ccab2ebb39ad3eb514757",
+      "text": "获取或设置跳过细节层级前必须达到的屏幕空间误差。此属性可观察。"
+    },
+    {
+      "id": "Cesium3DTilesInspectorViewModel#colorBlendMode",
+      "field": "description",
+      "sourceHash": "sha256:57a9054c345b130afb5d00b2297618f2b977458ccc6a57edcc48fd27295c42f7",
+      "text": "获取或设置颜色混合模式。此属性可观察。"
+    },
+    {
+      "id": "Cesium3DTilesInspectorViewModel#colorBlendModes",
+      "field": "description",
+      "sourceHash": "sha256:7beb320c6110c038a79338ad7c22db9affed84c3a7665249e1b327dac06eb98e",
+      "text": "获取可用的混合模式。"
+    },
+    {
+      "id": "Cesium3DTilesInspectorViewModel#colorize",
+      "field": "description",
+      "sourceHash": "sha256:a0e6d4a280358c633421113eac4242a1e655975ebf8a85ad9627390c4125dc7d",
+      "text": "获取或设置是否为瓦片着色。此属性可观察。"
+    },
+    {
+      "id": "Cesium3DTilesInspectorViewModel#compileStyle",
+      "field": "description",
+      "sourceHash": "sha256:c283bdfec42ad6c864b1681eb5509b926d1307d59784e668fa8770d7677b40cb",
+      "text": "编译样式编辑器中的样式。"
+    },
+    {
+      "id": "Cesium3DTilesInspectorViewModel#displayVisible",
+      "field": "description",
+      "sourceHash": "sha256:2f41ae50ecf12d0c84c0f6ea0b74748b16aac266d55f21b481f8f15c7436afb6",
+      "text": "获取或设置是否显示显示设置区。此属性可观察。"
+    },
+    {
+      "id": "Cesium3DTilesInspectorViewModel#dynamicScreenSpaceErrorDensity",
+      "field": "description",
+      "sourceHash": "sha256:98e92b95a844ab3dbc8a77624c6ba788260d9634aac57671f5f09cba93f47079",
+      "text": "获取或设置动态屏幕空间误差的密度参数。此属性可观察。"
+    },
+    {
+      "id": "Cesium3DTilesInspectorViewModel#dynamicScreenSpaceErrorDensitySliderValue",
+      "field": "description",
+      "sourceHash": "sha256:db5636b6a129fe27f9f77c6fc4a31bfa965ac2baddaa4bb47ffece33a67b6bba",
+      "text": "获取或设置动态屏幕空间误差密度滑块的值。由于实际值通常更接近 0 而非 1，滑块采用指数映射。此属性可观察。"
+    },
+    {
+      "id": "Cesium3DTilesInspectorViewModel#dynamicScreenSpaceError",
+      "field": "description",
+      "sourceHash": "sha256:a222ae5cdd1d9c8fca7513f19c9c822084103b341f093b5113c4c9039408b0da",
+      "text": "获取或设置是否启用动态屏幕空间误差。此属性可观察。"
+    },
+    {
+      "id": "Cesium3DTilesInspectorViewModel#dynamicScreenSpaceErrorFactor",
+      "field": "description",
+      "sourceHash": "sha256:1628c2ea1482e44620968c667dec8b5d2480d40d7d5594b651e2532a9655fb79",
+      "text": "获取或设置动态屏幕空间误差系数。此属性可观察。"
+    },
+    {
+      "id": "Cesium3DTilesInspectorViewModel#editorError",
+      "field": "description",
+      "sourceHash": "sha256:652697d24592ba4c3858c6f0f466676bfad8394a453ace15924b544991a00a7a",
+      "text": "获取编辑器错误信息。"
+    },
+    {
+      "id": "Cesium3DTilesInspectorViewModel#eyeDomeLighting",
+      "field": "description",
+      "sourceHash": "sha256:13d2b2c7a75a89db2b2581513ace810dcbfb065e90dfba1e5c93395038c63f80",
+      "text": "获取或设置是否启用 Eye Dome Lighting。此属性可观察。"
+    },
+    {
+      "id": "Cesium3DTilesInspectorViewModel#eyeDomeLightingRadius",
+      "field": "description",
+      "sourceHash": "sha256:d6e1161596589a22f2db5aeacecf6e72afd7c114e0d906f54c10165b2d2822a7",
+      "text": "获取或设置 Eye Dome Lighting 半径。此属性可观察。"
+    },
+    {
+      "id": "Cesium3DTilesInspectorViewModel#eyeDomeLightingStrength",
+      "field": "description",
+      "sourceHash": "sha256:5ca01c08af555863d203349942935ea115856668e67b603b9ff3157494094f94",
+      "text": "获取或设置 Eye Dome Lighting 强度。此属性可观察。"
+    },
+    {
+      "id": "Cesium3DTilesInspectorViewModel#feature",
+      "field": "description",
+      "sourceHash": "sha256:4b33db0103427de65c6c69a974fd3d32d18961da99585207ace9d445a7af031a",
+      "text": "获取视图模型的当前要素。"
+    },
+    {
+      "id": "Cesium3DTilesInspectorViewModel#freezeFrame",
+      "field": "description",
+      "sourceHash": "sha256:bbeaf2303010889007576d9cb2beb6275fc75f27581a0c208faf02e1fe39f99e",
+      "text": "获取或设置是否暂停更新。此属性可观察。"
+    },
+    {
+      "id": "Cesium3DTilesInspectorViewModel#geometricErrorScale",
+      "field": "description",
+      "sourceHash": "sha256:2f4b77eef301baa763f489970a5dae936ab9146333059df2aae498ddec141ebe",
+      "text": "获取或设置几何误差缩放系数。此属性可观察。"
+    },
+    {
+      "id": "Cesium3DTilesInspectorViewModel#hasEnabledWireframe",
+      "field": "description",
+      "sourceHash": "sha256:494914a6ab9805a28971cc146e7a1b6da6cfd63a29baecfc813ea4e6fe75fa20",
+      "text": "获取或设置瓦片集 enableDebugWireframe 属性的状态。此属性可观察。"
+    },
+    {
+      "id": "Cesium3DTilesInspectorViewModel#immediatelyLoadDesiredLevelOfDetail",
+      "field": "description",
+      "sourceHash": "sha256:b8b0eaa76d07fe0949b6b8f1ba830d633e7ce078434fbbe218606df8c3b38ccf",
+      "text": "获取或设置是否只下载满足最大屏幕空间误差的瓦片。此属性可观察。"
+    },
+    {
+      "id": "Cesium3DTilesInspectorViewModel#inspectorVisible",
+      "field": "description",
+      "sourceHash": "sha256:9cf89ef193acb63bea6d15d1e4e10f327232d41d130ad4da67b152560541df5d",
+      "text": "获取或设置是否显示检查器。此属性可观察。"
+    },
+    {
+      "id": "Cesium3DTilesInspectorViewModel#loadSiblings",
+      "field": "description",
+      "sourceHash": "sha256:10ace0c0c6ce2c60c392fc352dfe48947e9a84dc4d457717b58acf71a4ab121f",
+      "text": "获取或设置遍历时是否总是下载可见瓦片的兄弟瓦片。此属性可观察。"
+    },
+    {
+      "id": "Cesium3DTilesInspectorViewModel#loggingVisible",
+      "field": "description",
+      "sourceHash": "sha256:ec033a5a04ca9c33b81eba12562e7a3a4adb65e2226874a07f40d93a8a81bff9",
+      "text": "获取或设置是否显示日志区。此属性可观察。"
+    },
+    {
+      "id": "Cesium3DTilesInspectorViewModel#maximumAttenuation",
+      "field": "description",
+      "sourceHash": "sha256:9282f61bb3f742188750da76f148a68eda9dc508c0de10a276f554aa76768470",
+      "text": "获取或设置最大衰减值。此属性可观察。"
+    },
+    {
+      "id": "Cesium3DTilesInspectorViewModel#maximumScreenSpaceError",
+      "field": "description",
+      "sourceHash": "sha256:c352405026d38dac0a55d6b448f63b899b48d0e6613191b21c4128d526a07521",
+      "text": "获取或设置最大屏幕空间误差。此属性可观察。"
+    },
+    {
+      "id": "Cesium3DTilesInspectorViewModel#optimizationVisible",
+      "field": "description",
+      "sourceHash": "sha256:dab131cc5de01115840c7d7af5a3c414548f29918a78f71942ee98c09c369d80",
+      "text": "获取或设置是否显示优化信息区。此属性可观察。"
+    },
+    {
+      "id": "Cesium3DTilesInspectorViewModel#performanceContainer",
+      "field": "description",
+      "sourceHash": "sha256:80d0d15936e12f2a2b76b96c7f4e7f9f9b823b5f82eba7b75a6354ef1dc053a8",
+      "text": "获取性能显示容器。"
+    },
+    {
+      "id": "Cesium3DTilesInspectorViewModel#performance",
+      "field": "description",
+      "sourceHash": "sha256:dc469b7c19c40e924311353f459bdda3b85cd44450a37f7c49c31dfaeae1b7b8",
+      "text": "获取或设置是否启用性能显示。此属性可观察。"
+    },
+    {
+      "id": "Cesium3DTilesInspectorViewModel#pickActive",
+      "field": "description",
+      "sourceHash": "sha256:02ba9948c8e76a9cd877c9f004cc473e874aa96510b2df76f04032e95d10e5b5",
+      "text": "获取或设置拾取状态。"
+    },
+    {
+      "id": "Cesium3DTilesInspectorViewModel#picking",
+      "field": "description",
+      "sourceHash": "sha256:67ec3043344f77e66689b9d4919210095f8dfa456ae1e31a8c03419686f8b7e4",
+      "text": "获取或设置是否启用拾取。此属性可观察。"
+    },
+    {
+      "id": "Cesium3DTilesInspectorViewModel#pickStatisticsText",
+      "field": "description",
+      "sourceHash": "sha256:96b0b1e0020786ec81ad918d2b7c073f350ea0160946ce53f4e313c57f8f5738",
+      "text": "获取拾取统计文本。此属性可观察。"
+    },
+    {
+      "id": "Cesium3DTilesInspectorViewModel#pointCloudShading",
+      "field": "description",
+      "sourceHash": "sha256:bafdae670399346a1056689d0b647d58a8e44700dee4309afe8f1aaa9ae7a000",
+      "text": "获取或设置是否启用点云着色。此属性可观察。"
+    },
+    {
+      "id": "Cesium3DTilesInspectorViewModel#properties",
+      "field": "description",
+      "sourceHash": "sha256:bc2fab22a10fbed08d98abc330546aacba8407b7ef515a08338f91f7f7ef9b10",
+      "text": "获取瓦片集中属性的名称。此属性可观察。"
+    },
+    {
+      "id": "Cesium3DTilesInspectorViewModel#resourceCacheStatisticsText",
+      "field": "description",
+      "sourceHash": "sha256:b7f56808ba0a3ba308e02de08603c7ea2e9ebc329e2b28ddc7d5092f20b3f594",
+      "text": "获取资源缓存统计文本。此属性可观察。"
+    },
+    {
+      "id": "Cesium3DTilesInspectorViewModel#scene",
+      "field": "description",
+      "sourceHash": "sha256:26f86c4bc95f3a8f4c78b4534964d0987847382b405e5d842ed31537fcf013bc",
+      "text": "获取场景。"
+    },
+    {
+      "id": "Cesium3DTilesInspectorViewModel#showBoundingVolumes",
+      "field": "description",
+      "sourceHash": "sha256:f953dd55637fd11080cac4a99da126b27d0e14f931bea8d7fa8754553a6135a0",
+      "text": "获取或设置是否显示包围体。此属性可观察。"
+    },
+    {
+      "id": "Cesium3DTilesInspectorViewModel#showContentBoundingVolumes",
+      "field": "description",
+      "sourceHash": "sha256:eedda2e928ab2561a47528cd47d17aae80e3f5a29c8ca818e483873df4f75964",
+      "text": "获取或设置是否显示内容包围体。此属性可观察。"
+    },
+    {
+      "id": "Cesium3DTilesInspectorViewModel#showGeometricError",
+      "field": "description",
+      "sourceHash": "sha256:aad4ec5f9c65b26c99bfa9df4376b80f4a3e39822f3f0c05599413556e888ad4",
+      "text": "获取或设置是否显示瓦片几何误差。此属性可观察。"
+    },
+    {
+      "id": "Cesium3DTilesInspectorViewModel#showMemoryUsage",
+      "field": "description",
+      "sourceHash": "sha256:baafc5ae4bb99a75987fcbf7926852d5c43e1cfb669990c8f2967e3968f97162",
+      "text": "显示每个瓦片使用的内存。此属性可观察。"
+    },
+    {
+      "id": "Cesium3DTilesInspectorViewModel#showOnlyPickedTileDebugLabel",
+      "field": "description",
+      "sourceHash": "sha256:6b48d2b793288651a736b0f4cbb7facb4cfacaa4e69a835a731f146aaefd4f33",
+      "text": "获取或设置是否只显示当前拾取瓦片的调试标签。此属性可观察。"
+    },
+    {
+      "id": "Cesium3DTilesInspectorViewModel#showPickStatistics",
+      "field": "description",
+      "sourceHash": "sha256:efd88409d2ee96892ecf0f74e07f67bd5e60cb3e394b1941a56d1f683639958c",
+      "text": "获取或设置是否显示拾取统计。此属性可观察。"
+    },
+    {
+      "id": "Cesium3DTilesInspectorViewModel#showRenderingStatistics",
+      "field": "description",
+      "sourceHash": "sha256:62a0a084cac10f67b493966c3baaff431432765a291f743887051f4543a1e648",
+      "text": "显示每个瓦片的命令、点、三角形和要素数量。此属性可观察。"
+    },
+    {
+      "id": "Cesium3DTilesInspectorViewModel#showRequestVolumes",
+      "field": "description",
+      "sourceHash": "sha256:80d857833991f4edcef08abb6c29981d7bdbaeb7ca39272d07ce60af9a6a0bf5",
+      "text": "获取或设置是否显示请求体积。此属性可观察。"
+    },
+    {
+      "id": "Cesium3DTilesInspectorViewModel#showResourceCacheStatistics",
+      "field": "description",
+      "sourceHash": "sha256:7075b5d7e4a8f1ed9d3541e30a844895670fe63e5d3d285fbe17d4406c3e5c22",
+      "text": "获取或设置是否显示资源缓存统计。此属性可观察。"
+    },
+    {
+      "id": "Cesium3DTilesInspectorViewModel#showStatistics",
+      "field": "description",
+      "sourceHash": "sha256:395c9bfb42bc8d7154fdf6cf85a57aceaf75339bab549844d59110ffc228345c",
+      "text": "获取或设置是否显示统计信息。此属性可观察。"
+    },
+    {
+      "id": "Cesium3DTilesInspectorViewModel#showUrl",
+      "field": "description",
+      "sourceHash": "sha256:d0242f09a2a80d7571ef13064cd771627b52d0f4b4f12ab9bb62d29fcd4393f3",
+      "text": "获取或设置是否显示瓦片 URL。此属性可观察。"
+    },
+    {
+      "id": "Cesium3DTilesInspectorViewModel#skipLevelOfDetail",
+      "field": "description",
+      "sourceHash": "sha256:82f05717fcb4e7aa8729e744a4880ad3c3fc1da2d9f21112f31b5d292301ce6e",
+      "text": "获取或设置遍历时是否启用细节层级跳跃。此属性可观察。"
+    },
+    {
+      "id": "Cesium3DTilesInspectorViewModel#skipLevels",
+      "field": "description",
+      "sourceHash": "sha256:929fa6fb27b104a6927f724d340bfc6701e7afa35ea838764d6738733bed2236",
+      "text": "获取或设置加载瓦片时最少跳过的层级数。此属性可观察。"
+    },
+    {
+      "id": "Cesium3DTilesInspectorViewModel#skipScreenSpaceErrorFactor",
+      "field": "description",
+      "sourceHash": "sha256:845d13ed7fd958c8660a21ac86ec36eec130ceaab4c9303a6eaa25a1eeb095a5",
+      "text": "获取或设置用于确定跳级最低屏幕空间误差的倍率。此属性可观察。"
+    },
+    {
+      "id": "Cesium3DTilesInspectorViewModel#statisticsText",
+      "field": "description",
+      "sourceHash": "sha256:a1c5acf27f9d638d67f544c9b3855688a2a60ac8cb649c87d3651f94842882a9",
+      "text": "获取统计文本。此属性可观察。"
+    },
+    {
+      "id": "Cesium3DTilesInspectorViewModel#styleEditorKeyPress",
+      "field": "description",
+      "sourceHash": "sha256:419d26ea1c641b10c3303d27085bb487d7698172214e93966e5fd96a59ea9fda",
+      "text": "处理样式编辑器中的按键事件。"
+    },
+    {
+      "id": "Cesium3DTilesInspectorViewModel#styleString",
+      "field": "description",
+      "sourceHash": "sha256:dc71bee33a11fc2967f76775ad22fec473eab0f46e82acb4913ee3269f462d98",
+      "text": "获取或设置瓦片集样式的 JSON。此属性可观察。"
+    },
+    {
+      "id": "Cesium3DTilesInspectorViewModel#styleVisible",
+      "field": "description",
+      "sourceHash": "sha256:da1e0f01990b316fe560b2c84ac8205fa90d1e4a037b25cd337f78b3b4b24175",
+      "text": "获取或设置是否显示样式区。此属性可观察。"
+    },
+    {
+      "id": "Cesium3DTilesInspectorViewModel#tileDebugLabelsVisible",
+      "field": "description",
+      "sourceHash": "sha256:fb9c57d7195160afa778e2f9cf07c8c52b3900e80d03add0e02ece0fc9c71f9e",
+      "text": "获取或设置是否显示瓦片信息区。此属性可观察。"
+    },
+    {
+      "id": "Cesium3DTilesInspectorViewModel#tile",
+      "field": "description",
+      "sourceHash": "sha256:13215c634c97488fbf5cea43f7fab489b7d45467fc7f2b3eab6b8ae891e1ed05",
+      "text": "获取视图模型的当前瓦片。"
+    },
+    {
+      "id": "Cesium3DTilesInspectorViewModel#tileset",
+      "field": "description",
+      "sourceHash": "sha256:0ebacca960a3972c050f5188e2ea5f58cdb3e6b7f7b9c13107ee826039d15d8c",
+      "text": "获取或设置视图模型的瓦片集。"
+    },
+    {
+      "id": "Cesium3DTilesInspectorViewModel#tilesetVisible",
+      "field": "description",
+      "sourceHash": "sha256:d3ad67268f4944cb02a3b86a6d830d73eded0c65dc5cfa90f0beeafe97353873",
+      "text": "获取或设置是否显示瓦片集区。此属性可观察。"
+    },
+    {
+      "id": "Cesium3DTilesInspectorViewModel#toggleDisplay",
+      "field": "description",
+      "sourceHash": "sha256:4c9645a82fc1ac2447a5baafc058bdfc25ea8667fb2ddd49a14114e8a6455ecc",
+      "text": "切换显示设置区的可见性。"
+    },
+    {
+      "id": "Cesium3DTilesInspectorViewModel#toggleInspector",
+      "field": "description",
+      "sourceHash": "sha256:7bcc46f18ec4571440f58f791366eefb90d6efc4d824be6d2eb14c36a22fa735",
+      "text": "切换检查器的可见性。"
+    },
+    {
+      "id": "Cesium3DTilesInspectorViewModel#toggleLogging",
+      "field": "description",
+      "sourceHash": "sha256:6e4a88ff2b55bd3fe3deb00a2e79aab78112fc173d83e518c8e0f839824138c5",
+      "text": "切换日志区的可见性。"
+    },
+    {
+      "id": "Cesium3DTilesInspectorViewModel#toggleOptimization",
+      "field": "description",
+      "sourceHash": "sha256:644f92468701b6f73d118b9e1ea1be376df4facbbc194b6e20acc039a92f030f",
+      "text": "切换优化区的可见性。"
+    },
+    {
+      "id": "Cesium3DTilesInspectorViewModel#togglePickTileset",
+      "field": "description",
+      "sourceHash": "sha256:5b4448fa43ab0379cebbe24a5e25fb80c31ad73c99e45c98ed7ffea772dff072",
+      "text": "切换瓦片集拾取模式。"
+    },
+    {
+      "id": "Cesium3DTilesInspectorViewModel#toggleStyle",
+      "field": "description",
+      "sourceHash": "sha256:28f4871c109512518f46c00e8d851ed05a06d8b26be5c607534db76439e2ecf1",
+      "text": "切换样式区的可见性。"
+    },
+    {
+      "id": "Cesium3DTilesInspectorViewModel#toggleTileDebugLabels",
+      "field": "description",
+      "sourceHash": "sha256:d66dc18aa1d695d9e38dd022639deeba2e605508713fe250e75548bf2add5fa9",
+      "text": "切换瓦片调试信息区的可见性。"
+    },
+    {
+      "id": "Cesium3DTilesInspectorViewModel#toggleTileset",
+      "field": "description",
+      "sourceHash": "sha256:959068f21da40ff9e2054e54afb493bcf596b3c8c71124c4eecaa8399eadfc6f",
+      "text": "切换瓦片集区的可见性。"
+    },
+    {
+      "id": "Cesium3DTilesInspectorViewModel#toggleUpdate",
+      "field": "description",
+      "sourceHash": "sha256:8039202cf5769347d48ec0d63f6dce766fbb82438691a5565fa30ab3928d4ff1",
+      "text": "切换更新设置区的可见性。"
+    },
+    {
+      "id": "Cesium3DTilesInspectorViewModel#trimTilesCache",
+      "field": "description",
+      "sourceHash": "sha256:bb51e620f1f95ea73c16a62dd6b5e05bf4f424b72a38d1d49db5725eac638956",
+      "text": "清理瓦片缓存。"
+    },
+    {
+      "id": "Cesium3DTilesInspectorViewModel#updateVisible",
+      "field": "description",
+      "sourceHash": "sha256:087984e47569c66d6a27c21ed581e86f1c2169914e321bcb450098e51abe43ad",
+      "text": "获取或设置是否显示更新设置区。此属性可观察。"
+    },
+    {
+      "id": "Cesium3DTilesInspectorViewModel#wireframe",
+      "field": "description",
+      "sourceHash": "sha256:c9342dfb02e5841b84135acd4cb6ce69801d8f5f8c214d3e21cd21a10179fe96",
+      "text": "获取或设置是否以线框绘制。此属性可观察。"
+    },
+    {
+      "id": "Cesium3DTilesInspectorViewModel",
+      "field": "description",
+      "sourceHash": "sha256:d5b00bd7a35b0f2618c58242e9a86ccae71e818f834f54b922f6c6bd5dc1966a",
+      "text": "{@link Cesium3DTilesInspector} 的视图模型。"
+    },
+    {
+      "id": "Cesium3DTilesInspectorViewModel",
+      "field": "params/performanceContainer/description",
+      "sourceHash": "sha256:2abc17ba83a872745cb6c7e45ffb4fbd2323ac97db0024008063b3897bfd6b76",
+      "text": "显示性能信息的容器。"
+    },
+    {
+      "id": "Cesium3DTilesInspectorViewModel",
+      "field": "params/scene/description",
+      "sourceHash": "sha256:a8f2df730deb09d3a81564ef5e3e99f3d6348a0828fc1872e4fffe7cf5faf12c",
+      "text": "使用的场景实例。"
+    },
+    {
+      "id": "CesiumInspector",
+      "field": "description",
+      "sourceHash": "sha256:5df4a625edbae3e91b5e6484fb969e4886bb4d9aed2d56dbab725dab4f5a017d",
+      "text": "辅助调试的检查器控件。"
+    },
+    {
+      "id": "CesiumInspector",
+      "field": "params/scene/description",
+      "sourceHash": "sha256:13252abc5bf3944491cd068db78ca024b11b06570f8b07a770a8043fa10afc2d",
+      "text": "使用的 Scene 实例。"
+    },
+    {
+      "id": "CesiumInspectorViewModel#decrementDepthFrustum",
+      "field": "description",
+      "sourceHash": "sha256:193501e3f623ebd79dd3907a842a27f3c52c048242b8b63a752d55dbe4181e52",
+      "text": "获取减小待显示深度视锥索引的命令。"
+    },
+    {
+      "id": "CesiumInspectorViewModel#depthFrustum",
+      "field": "description",
+      "sourceHash": "sha256:2a8a180c0441054cc997f69d1eca13b5d23d4c5c43fdc13f0b3b8a326695dcf5",
+      "text": "获取或设置待显示深度视锥的索引。此属性可观察。"
+    },
+    {
+      "id": "CesiumInspectorViewModel#depthFrustumText",
+      "field": "description",
+      "sourceHash": "sha256:629a6b13cb78eab5a4121bf4e9d5a020ba77aa34b0d525cd6c7714171eed5914",
+      "text": "获取或设置深度视锥索引的文本。此属性可观察。"
+    },
+    {
+      "id": "CesiumInspectorViewModel#doFilterPrimitive",
+      "field": "description",
+      "sourceHash": "sha256:ce7ed3b5f91182502984dee26cf2f008b3739ef06906c27ff626a1c872f973b5",
+      "text": "获取切换过滤器的命令，该过滤器只渲染选中的图元。"
+    },
+    {
+      "id": "CesiumInspectorViewModel#doFilterTile",
+      "field": "description",
+      "sourceHash": "sha256:dd38065df828c17b76b32dbaf24a55b11ddf76cd9d6cb4eea50f094a95d13ec6",
+      "text": "获取切换过滤器的命令，该过滤器只渲染选中的瓦片。"
+    },
+    {
+      "id": "CesiumInspectorViewModel#dropDownVisible",
+      "field": "description",
+      "sourceHash": "sha256:f964892bbe39870e6716ab27972fc9a8299a0e7c9d4aaacc07251a13ab00ae68",
+      "text": "获取或设置 Cesium 检查器下拉面板是否可见。此属性可观察。"
+    },
+    {
+      "id": "CesiumInspectorViewModel#filterPrimitive",
+      "field": "description",
+      "sourceHash": "sha256:a351b9e799a855db354e92af21e50c8af09d3f208cf3273214b7e6ddb24f72c7",
+      "text": "获取或设置图元过滤状态。此属性可观察。"
+    },
+    {
+      "id": "CesiumInspectorViewModel#filterTile",
+      "field": "description",
+      "sourceHash": "sha256:127b2a1831eca468035390180459e913e5d92f05f975ae6acc2a017acc0ffb4e",
+      "text": "获取或设置瓦片过滤状态。此属性可观察。"
+    },
+    {
+      "id": "CesiumInspectorViewModel#frustumPlanes",
+      "field": "description",
+      "sourceHash": "sha256:79ca8411d8305f32a6b77eaf7ddc6b39c271ea1a85a512965b370c8dc411ec04",
+      "text": "获取或设置视锥平面的显示状态。此属性可观察。"
+    },
+    {
+      "id": "CesiumInspectorViewModel#frustums",
+      "field": "description",
+      "sourceHash": "sha256:46ceaeb095cc5df3adfceec21c3ef8887ef7b537bf18f530714d8342ef5c01f0",
+      "text": "获取或设置视锥的显示状态。此属性可观察。"
+    },
+    {
+      "id": "CesiumInspectorViewModel#frustumStatisticText",
+      "field": "description",
+      "sourceHash": "sha256:b3435fa5a1cadce1ae33613611ba734c2ea797969e0f7631d6f886dc65bd0a9e",
+      "text": "获取或设置视锥统计文本。此属性可观察。"
+    },
+    {
+      "id": "CesiumInspectorViewModel#generalVisible",
+      "field": "description",
+      "sourceHash": "sha256:e0f21e35da18fb8c13e8ed0ed5aac76c9049bae968d9a7056bb2a4d0bc98145f",
+      "text": "获取或设置常规区是否可见。此属性可观察。"
+    },
+    {
+      "id": "CesiumInspectorViewModel#hasPickedPrimitive",
+      "field": "description",
+      "sourceHash": "sha256:86dd861ac0483ebc244d5751cd31054033753eee12f0c88c9cf0d6a4a48047bd",
+      "text": "获取是否已选中图元。此属性可观察。"
+    },
+    {
+      "id": "CesiumInspectorViewModel#hasPickedTile",
+      "field": "description",
+      "sourceHash": "sha256:4cfd12a0abeda113b4f8a4cfffeb23cba8b6e53d4a979cea296795a6d41b03d6",
+      "text": "获取是否已选中瓦片。此属性可观察。"
+    },
+    {
+      "id": "CesiumInspectorViewModel#incrementDepthFrustum",
+      "field": "description",
+      "sourceHash": "sha256:eaefa77dbe411c766409046b5fc4b6630ab3deb8b03010cfb8fbeb9a9906dde9",
+      "text": "获取增大待显示深度视锥索引的命令。"
+    },
+    {
+      "id": "CesiumInspectorViewModel#performanceContainer",
+      "field": "description",
+      "sourceHash": "sha256:0a795ddab052fa2568104e6a812af7148d0978da7904e2d1d60c3d179e29c45d",
+      "text": "获取 PerformanceDisplay 的容器。"
+    },
+    {
+      "id": "CesiumInspectorViewModel#performance",
+      "field": "description",
+      "sourceHash": "sha256:8c95e4783f4f118cf68665c13acd68cc9b86e00c2ca78a743e2ca233df19fe65",
+      "text": "获取或设置性能信息的显示状态。此属性可观察。"
+    },
+    {
+      "id": "CesiumInspectorViewModel#pickPrimitiveActive",
+      "field": "description",
+      "sourceHash": "sha256:7222467e8a33f78cef29552760f2e652c5c80054d63eb846368d29cda371507c",
+      "text": "获取图元拾取命令是否处于活动状态。此属性可观察。"
+    },
+    {
+      "id": "CesiumInspectorViewModel#pickPrimitive",
+      "field": "description",
+      "sourceHash": "sha256:e2a15cc136b7784aa586e30e9de8e0629a5e2ed3d1babab4ea4cc194c96114c4",
+      "text": "获取拾取图元的命令。"
+    },
+    {
+      "id": "CesiumInspectorViewModel#pickTileActive",
+      "field": "description",
+      "sourceHash": "sha256:53474f6521f67af1b18cf9a5ff6b1b6d95bc08d2af21acd8c2574c765227bd34",
+      "text": "获取瓦片拾取命令是否处于活动状态。此属性可观察。"
+    },
+    {
+      "id": "CesiumInspectorViewModel#pickTile",
+      "field": "description",
+      "sourceHash": "sha256:922b71cf1cdf03b0ac2ac093ec2e201560eac51f5e7717a9b2940067920f6278",
+      "text": "获取拾取瓦片的命令。"
+    },
+    {
+      "id": "CesiumInspectorViewModel#primitiveBoundingSphere",
+      "field": "description",
+      "sourceHash": "sha256:94474d68d74c4753601b3233b028646687f77b2e4f6de031eba09da661e76dfd",
+      "text": "获取或设置图元包围球的显示状态。此属性可观察。"
+    },
+    {
+      "id": "CesiumInspectorViewModel#primitive",
+      "field": "description",
+      "sourceHash": "sha256:14cdcbad533eedb81f4e903bd36a07ed97d26e5054fd1898b0d0eb31114112db",
+      "text": "获取或设置当前选中的图元。"
+    },
+    {
+      "id": "CesiumInspectorViewModel#primitiveReferenceFrame",
+      "field": "description",
+      "sourceHash": "sha256:4a0f325b9191afa902b5189eaaf8f3b225957711c8d94bfdb015dcf90132cdbb",
+      "text": "获取或设置图元参考坐标系的显示状态。此属性可观察。"
+    },
+    {
+      "id": "CesiumInspectorViewModel#primitivesVisible",
+      "field": "description",
+      "sourceHash": "sha256:5e87c357aebf73ae1bfb3821b10b7fcc7f85b61568a936be04fc9ccbcd980ebd",
+      "text": "获取或设置图元区是否可见。此属性可观察。"
+    },
+    {
+      "id": "CesiumInspectorViewModel#scene",
+      "field": "description",
+      "sourceHash": "sha256:7b8bb1ef107c32031a473df5cf6770f205a7fd60f5c9f7346d7547d73f3886e2",
+      "text": "获取要控制的场景。"
+    },
+    {
+      "id": "CesiumInspectorViewModel#selectNE",
+      "field": "description",
+      "sourceHash": "sha256:922b71cf1cdf03b0ac2ac093ec2e201560eac51f5e7717a9b2940067920f6278",
+      "text": "获取选择东北子瓦片的命令。"
+    },
+    {
+      "id": "CesiumInspectorViewModel#selectNW",
+      "field": "description",
+      "sourceHash": "sha256:922b71cf1cdf03b0ac2ac093ec2e201560eac51f5e7717a9b2940067920f6278",
+      "text": "获取选择西北子瓦片的命令。"
+    },
+    {
+      "id": "CesiumInspectorViewModel#selectParent",
+      "field": "description",
+      "sourceHash": "sha256:922b71cf1cdf03b0ac2ac093ec2e201560eac51f5e7717a9b2940067920f6278",
+      "text": "获取选择父瓦片的命令。"
+    },
+    {
+      "id": "CesiumInspectorViewModel#selectSE",
+      "field": "description",
+      "sourceHash": "sha256:922b71cf1cdf03b0ac2ac093ec2e201560eac51f5e7717a9b2940067920f6278",
+      "text": "获取选择东南子瓦片的命令。"
+    },
+    {
+      "id": "CesiumInspectorViewModel#selectSW",
+      "field": "description",
+      "sourceHash": "sha256:922b71cf1cdf03b0ac2ac093ec2e201560eac51f5e7717a9b2940067920f6278",
+      "text": "获取选择西南子瓦片的命令。"
+    },
+    {
+      "id": "CesiumInspectorViewModel#shaderCacheText",
+      "field": "description",
+      "sourceHash": "sha256:8e49a0cca0c9afc55d2b8110c0844972e4ddc4a3c4f0489150e51c90d23572cd",
+      "text": "获取或设置着色器缓存文本。此属性可观察。"
+    },
+    {
+      "id": "CesiumInspectorViewModel#showPrimitiveBoundingSphere",
+      "field": "description",
+      "sourceHash": "sha256:9ff63ad011e27ab702009c9401469738ca044589aa9c4e961ecdba9e8f7640f1",
+      "text": "获取切换图元包围球可见性的命令。"
+    },
+    {
+      "id": "CesiumInspectorViewModel#showPrimitiveReferenceFrame",
+      "field": "description",
+      "sourceHash": "sha256:a0f507dca60be0304791f8d914ff09c3ed3daf14c61879649fb350b72bd783a3",
+      "text": "获取切换图元模型矩阵对应 {@link DebugModelMatrixPrimitive} 可见性的命令。"
+    },
+    {
+      "id": "CesiumInspectorViewModel#showTileBoundingSphere",
+      "field": "description",
+      "sourceHash": "sha256:ce21a9487d067201fda24e18e6b8b7fd1dc1ea93fd9c0b8ec08fbc2c54958d9a",
+      "text": "获取切换所选瓦片包围球可见性的命令。"
+    },
+    {
+      "id": "CesiumInspectorViewModel#showTileCoordinates",
+      "field": "description",
+      "sourceHash": "sha256:8cc0387356ca2140b31ba5770ffb83c131ec2b08556f13f87439689307ec10e3",
+      "text": "获取切换瓦片坐标可见性的命令。"
+    },
+    {
+      "id": "CesiumInspectorViewModel#suspendUpdates",
+      "field": "description",
+      "sourceHash": "sha256:32b8246c4be50522aa6bed1c6fd9130e1c9103bba3465c16ca5197c4b2541021",
+      "text": "获取或设置暂停更新状态。此属性可观察。"
+    },
+    {
+      "id": "CesiumInspectorViewModel#terrainVisible",
+      "field": "description",
+      "sourceHash": "sha256:f8cbb9cd5a28f82943f42b71f607f82a3b3c5a89b54c034dc743d9fac873493e",
+      "text": "获取或设置地形区是否可见。此属性可观察。"
+    },
+    {
+      "id": "CesiumInspectorViewModel#tileBoundingSphere",
+      "field": "description",
+      "sourceHash": "sha256:b7c28e4c1784709ec3f2d198fae4317ab1da4e3579c9e547ea9d5eaedffd09bd",
+      "text": "获取或设置瓦片包围球的显示状态。此属性可观察。"
+    },
+    {
+      "id": "CesiumInspectorViewModel#tileCoordinates",
+      "field": "description",
+      "sourceHash": "sha256:d5e8552d5d5dc5b29604d7bd1954f0d8fed06e62652e085cc210d26a938845ae",
+      "text": "获取或设置瓦片坐标的显示状态。此属性可观察。"
+    },
+    {
+      "id": "CesiumInspectorViewModel#tile",
+      "field": "description",
+      "sourceHash": "sha256:1543460e1f575311440687fd7379d504ed81044c4cb21fc3663cb8875341986f",
+      "text": "获取或设置当前选中的瓦片。"
+    },
+    {
+      "id": "CesiumInspectorViewModel#tileText",
+      "field": "description",
+      "sourceHash": "sha256:ebc5363c6a509809c89fae219eec00a3ccabf267b7ff10016d1e285a29475f95",
+      "text": "获取或设置所选瓦片的信息文本。此属性可观察。"
+    },
+    {
+      "id": "CesiumInspectorViewModel#toggleDropDown",
+      "field": "description",
+      "sourceHash": "sha256:18e3223859e0198813eff1c53a3ef540d31a6de7c12b6a3ab80c7710cac62e78",
+      "text": "获取切换下拉面板可见性的命令。"
+    },
+    {
+      "id": "CesiumInspectorViewModel#toggleGeneral",
+      "field": "description",
+      "sourceHash": "sha256:970adaef3c01a260f0aa7bb4ee997c66bf0b5f1f427a695ef97c572c448f0037",
+      "text": "获取展开或折叠常规区的命令。"
+    },
+    {
+      "id": "CesiumInspectorViewModel#togglePrimitives",
+      "field": "description",
+      "sourceHash": "sha256:9d09522f4231d397474e936584beca708558981311b0f8ec72140ba471fe0da3",
+      "text": "获取展开或折叠图元区的命令。"
+    },
+    {
+      "id": "CesiumInspectorViewModel#toggleTerrain",
+      "field": "description",
+      "sourceHash": "sha256:b4f9a97b6c4e91df084f462fc6ce280f7ff97837a467451c4bc4c44f3ab418d8",
+      "text": "获取展开或折叠地形区的命令。"
+    },
+    {
+      "id": "CesiumInspectorViewModel#wireframe",
+      "field": "description",
+      "sourceHash": "sha256:88311a437f0dae6837ec8ac2b551e2be70305527abc8c0adeba962707b726dd9",
+      "text": "获取或设置线框的显示状态。此属性可观察。"
+    },
+    {
+      "id": "CesiumInspectorViewModel",
+      "field": "description",
+      "sourceHash": "sha256:ec68f62616860f1f0154ec27487d71b081cfad6bfbae9f4ae6e35a582bf48bf5",
+      "text": "{@link CesiumInspector} 的视图模型。"
+    },
+    {
+      "id": "CesiumInspectorViewModel",
+      "field": "params/performanceContainer/description",
+      "sourceHash": "sha256:dc57f2265d9fe07f12ebf1861766d205358114ecb973472782981e392d97d5fa",
+      "text": "用作性能显示容器的实例。"
+    },
+    {
+      "id": "CesiumInspectorViewModel",
+      "field": "params/scene/description",
+      "sourceHash": "sha256:a8f2df730deb09d3a81564ef5e3e99f3d6348a0828fc1872e4fffe7cf5faf12c",
+      "text": "使用的场景实例。"
+    },
+    {
+      "id": "I3sBslExplorerViewModel",
+      "field": "description",
+      "sourceHash": "sha256:f5a516d91474a598706f89c5e064e747a8785054d5b18e0145d5bd49f5fac1b3",
+      "text": "{@link I3SBuildingSceneLayerExplorer} 的视图模型。"
+    },
+    {
+      "id": "I3sBslExplorerViewModel",
+      "field": "params/i3sProvider/description",
+      "sourceHash": "sha256:90b6bc068e841a929ff0f8b1f1abf513f670b065387bbcc9ad83e43ed4b77fca",
+      "text": "I3S 数据提供者实例。"
+    },
+    {
+      "id": "I3SBuildingSceneLayerExplorer",
+      "field": "description",
+      "sourceHash": "sha256:d24892b4c7299e1c4883335aae4eab916e161086338fea482c6ebf2c566fbcb8",
+      "text": "I3S 建筑场景图层浏览控件。"
+    },
+    {
+      "id": "I3SBuildingSceneLayerExplorer",
+      "field": "params/containerId/description",
+      "sourceHash": "sha256:54f8fe7abdeabe84e4506f599f86addaef108c13feec15c4920afbc4360ef8c4",
+      "text": "包含此控件的 DOM 元素 ID。"
+    },
+    {
+      "id": "I3SBuildingSceneLayerExplorer",
+      "field": "params/i3sProvider/description",
+      "sourceHash": "sha256:90b6bc068e841a929ff0f8b1f1abf513f670b065387bbcc9ad83e43ed4b77fca",
+      "text": "I3S 数据提供者实例。"
+    },
+    {
+      "id": "viewerCesium3DTilesInspectorMixin",
+      "field": "description",
+      "sourceHash": "sha256:8d572941f935630c314090249f307894c28bfe208433ab4a3c0a70613fbd428c",
+      "text": "向 {@link Viewer} 控件添加 {@link Cesium3DTilesInspector} 控件的混入函数。通常不直接调用，而是按下例作为参数传给 {@link Viewer#extend}。"
+    },
+    {
+      "id": "viewerCesium3DTilesInspectorMixin",
+      "field": "params/viewer/description",
+      "sourceHash": "sha256:0588eb71995416c4c2d29a74df270d09a62d071cfd51164f0a17f7866719df48",
+      "text": "Viewer 实例。"
+    },
+    {
+      "id": "viewerCesiumInspectorMixin",
+      "field": "description",
+      "sourceHash": "sha256:686e017e664d973db41f25454a35a55c5aab0d3de6df9ce69301b26d710f171d",
+      "text": "向 Viewer 控件添加 CesiumInspector 控件的混入函数。通常不直接调用，而是按下例作为参数传给 {@link Viewer#extend}。"
+    },
+    {
+      "id": "viewerCesiumInspectorMixin",
+      "field": "exceptions/0/description",
+      "sourceHash": "sha256:bc214cdba0a26595f5fd73cb914a1fa88db0ca344c02793e5b738d266b8e62ef",
+      "text": "必须提供 viewer。"
+    },
+    {
+      "id": "viewerCesiumInspectorMixin",
+      "field": "params/viewer/description",
+      "sourceHash": "sha256:0588eb71995416c4c2d29a74df270d09a62d071cfd51164f0a17f7866719df48",
+      "text": "Viewer 实例。"
+    },
+    {
+      "id": "viewerVoxelInspectorMixin",
+      "field": "description",
+      "sourceHash": "sha256:23f0470c13258190e16b84e298c3b3657c67ba99ea574f15b92109dca02d6766",
+      "text": "向 {@link Viewer} 控件添加 {@link VoxelInspector} 控件的混入函数。通常不直接调用，而是按下例作为参数传给 {@link Viewer#extend}。"
+    },
+    {
+      "id": "viewerVoxelInspectorMixin",
+      "field": "params/viewer/description",
+      "sourceHash": "sha256:0588eb71995416c4c2d29a74df270d09a62d071cfd51164f0a17f7866719df48",
+      "text": "Viewer 实例。"
+    },
+    {
+      "id": "VoxelInspector",
+      "field": "description",
+      "sourceHash": "sha256:df0e85019b511432be20a81c71bdc8aa8edf9f6dbbe50638630ab0ad8b764e72",
+      "text": "辅助调试体素的检查器控件。"
+    },
+    {
+      "id": "VoxelInspector",
+      "field": "params/scene/description",
+      "sourceHash": "sha256:973a08abac2a32fbafb88f962b3b3d2441e09f37054422cba0a8888757e8c827",
+      "text": "使用的 Scene 实例。"
+    },
+    {
+      "id": "VoxelInspectorViewModel#compileShader",
+      "field": "description",
+      "sourceHash": "sha256:c882194d28cc27b4b19b975bfd10047bf1e4f251c8812c18ba55d78da42d5aa7",
+      "text": "编译着色器编辑器中的着色器。"
+    },
+    {
+      "id": "VoxelInspectorViewModel#scene",
+      "field": "description",
+      "sourceHash": "sha256:26f86c4bc95f3a8f4c78b4534964d0987847382b405e5d842ed31537fcf013bc",
+      "text": "获取场景。"
+    },
+    {
+      "id": "VoxelInspectorViewModel#shaderEditorKeyPress",
+      "field": "description",
+      "sourceHash": "sha256:fe6a24459170e21e518024ce2ace4b2b5abd0cc32e2f3e3b2cdb981bc0005740",
+      "text": "处理着色器编辑器中的按键事件。"
+    },
+    {
+      "id": "VoxelInspectorViewModel#toggleBounds",
+      "field": "description",
+      "sourceHash": "sha256:0cebaffb5646e0620692f3b95d25c3b19d1989afec4fca71b9115f62d01a8549",
+      "text": "切换边界设置区的可见性。"
+    },
+    {
+      "id": "VoxelInspectorViewModel#toggleClipping",
+      "field": "description",
+      "sourceHash": "sha256:30d6ddbc0d7dc995dde724772ef2e0bf81c5b15527f2ad0a2b35e8da61f17419",
+      "text": "切换裁剪区的可见性。"
+    },
+    {
+      "id": "VoxelInspectorViewModel#toggleDisplay",
+      "field": "description",
+      "sourceHash": "sha256:4c9645a82fc1ac2447a5baafc058bdfc25ea8667fb2ddd49a14114e8a6455ecc",
+      "text": "切换显示设置区的可见性。"
+    },
+    {
+      "id": "VoxelInspectorViewModel#toggleInspector",
+      "field": "description",
+      "sourceHash": "sha256:7bcc46f18ec4571440f58f791366eefb90d6efc4d824be6d2eb14c36a22fa735",
+      "text": "切换检查器的可见性。"
+    },
+    {
+      "id": "VoxelInspectorViewModel#toggleShader",
+      "field": "description",
+      "sourceHash": "sha256:91fcab9d10c7fd937451c273754b935b96c8d73d3a8aaa128ecd87b64210411b",
+      "text": "切换着色器区的可见性。"
+    },
+    {
+      "id": "VoxelInspectorViewModel#toggleTransform",
+      "field": "description",
+      "sourceHash": "sha256:a9680afbe63adc13501c84bff9b2dd66143708437e32db8603eeecde1b2697eb",
+      "text": "切换变换区的可见性。"
+    },
+    {
+      "id": "VoxelInspectorViewModel#voxelPrimitive",
+      "field": "description",
+      "sourceHash": "sha256:1a94b16d65c71a42dcb3a6589510e125143c863a27a1c2dc0ed942973e257807",
+      "text": "获取或设置视图模型的图元。"
+    },
+    {
+      "id": "VoxelInspectorViewModel",
+      "field": "description",
+      "sourceHash": "sha256:8409fea5fa774e26a0090ae1bfd6fadbfca11ce42c3337dc36ace99f1f916805",
+      "text": "{@link VoxelInspector} 的视图模型。"
+    },
+    {
+      "id": "VoxelInspectorViewModel",
+      "field": "params/scene/description",
+      "sourceHash": "sha256:a8f2df730deb09d3a81564ef5e3e99f3d6348a0828fc1872e4fffe7cf5faf12c",
+      "text": "使用的场景实例。"
+    }
+  ]
+}

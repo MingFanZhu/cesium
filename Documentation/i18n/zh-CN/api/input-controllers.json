@@ -1,0 +1,1788 @@
+{
+  "schemaVersion": 1,
+  "locale": "zh-CN",
+  "entries": [
+    {
+      "id": "CameraEventAggregator#anyButtonDown",
+      "field": "description",
+      "sourceHash": "sha256:42e253efc2bf088d600432b5259f2cd4109e96853136179a06c8970dce58fe5a",
+      "text": "获取是否有鼠标按钮按下、触摸已开始或滚轮已滚动。"
+    },
+    {
+      "id": "CameraEventAggregator#currentMousePosition",
+      "field": "description",
+      "sourceHash": "sha256:0f261fce9abca87341f63c4de10598ba53cc61453db320b20464863d2b86eeaa",
+      "text": "获取当前鼠标位置。"
+    },
+    {
+      "id": "CameraEventAggregator#destroy",
+      "field": "description",
+      "sourceHash": "sha256:b02707f904ca8f8a93a89600c7c3b9454c409d50e0a725d8f6afe39de16faa84",
+      "text": "移除此对象持有的鼠标监听器。\n<br /><br />\n对象销毁后不应再使用；调用除 <code>isDestroyed</code> 以外的任何函数都会抛出 {@link DeveloperError}。因此，应像示例中那样将返回值（<code>undefined</code>）赋给该对象变量。"
+    },
+    {
+      "id": "CameraEventAggregator#getButtonPressTime",
+      "field": "description",
+      "sourceHash": "sha256:ed670c68e07ed5b50b478af10558d67e73dd244f892c368bc0e96f40ad7437b0",
+      "text": "获取按钮按下或触摸开始的时刻。"
+    },
+    {
+      "id": "CameraEventAggregator#getButtonPressTime",
+      "field": "params/modifier/description",
+      "sourceHash": "sha256:dd6d6eb3c9988e453653482f98376162dffbcae8ee83bc756ac2732665584437",
+      "text": "键盘修饰键。"
+    },
+    {
+      "id": "CameraEventAggregator#getButtonPressTime",
+      "field": "params/type/description",
+      "sourceHash": "sha256:58dc7a14649f786013c032f66924b206cba5a2f8b22f2fd7d751844fdc32bfab",
+      "text": "相机事件类型。"
+    },
+    {
+      "id": "CameraEventAggregator#getButtonPressTime",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:970d86e0ab214dfff32d179972c4608abf49ccb20ae1b9f396296d73b83d50f0",
+      "text": "按钮按下或触摸开始的时刻。"
+    },
+    {
+      "id": "CameraEventAggregator#getButtonReleaseTime",
+      "field": "description",
+      "sourceHash": "sha256:96efc7d7e56f52dbad5bafe8b7882d615b6f9c2b843b400b38a6aa5dd197ca00",
+      "text": "获取按钮松开或触摸结束的时刻。"
+    },
+    {
+      "id": "CameraEventAggregator#getButtonReleaseTime",
+      "field": "params/modifier/description",
+      "sourceHash": "sha256:dd6d6eb3c9988e453653482f98376162dffbcae8ee83bc756ac2732665584437",
+      "text": "键盘修饰键。"
+    },
+    {
+      "id": "CameraEventAggregator#getButtonReleaseTime",
+      "field": "params/type/description",
+      "sourceHash": "sha256:58dc7a14649f786013c032f66924b206cba5a2f8b22f2fd7d751844fdc32bfab",
+      "text": "相机事件类型。"
+    },
+    {
+      "id": "CameraEventAggregator#getButtonReleaseTime",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:6cbaac13f07373c50ab4ae1f878a8977431bb79591e9ef041cd9999a56e9a878",
+      "text": "按钮松开或触摸结束的时刻。"
+    },
+    {
+      "id": "CameraEventAggregator#getLastMovement",
+      "field": "description",
+      "sourceHash": "sha256:3f117f705239c3d1124a6339db23677921bbf3fb8d2df8d5c1a079f674afa383",
+      "text": "获取最近一次移动事件的起止位置，区别于聚合事件。"
+    },
+    {
+      "id": "CameraEventAggregator#getLastMovement",
+      "field": "params/modifier/description",
+      "sourceHash": "sha256:dd6d6eb3c9988e453653482f98376162dffbcae8ee83bc756ac2732665584437",
+      "text": "键盘修饰键。"
+    },
+    {
+      "id": "CameraEventAggregator#getLastMovement",
+      "field": "params/type/description",
+      "sourceHash": "sha256:58dc7a14649f786013c032f66924b206cba5a2f8b22f2fd7d751844fdc32bfab",
+      "text": "相机事件类型。"
+    },
+    {
+      "id": "CameraEventAggregator#getLastMovement",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:ed4aff8a3de5f30d9487d030259ffc535d23b5f7abf8728b3cd0562dbf421985",
+      "text": "具有 <code>startPosition</code> 和 <code>endPosition</code> 两个 {@link Cartesian2} 属性的对象，或 <code>undefined</code>。"
+    },
+    {
+      "id": "CameraEventAggregator#getMovement",
+      "field": "description",
+      "sourceHash": "sha256:0c975e345d240d22abcfb145e0fede4efde3466bbe994ae1152f3b3ae4312071",
+      "text": "获取当前事件聚合后的起止位置。"
+    },
+    {
+      "id": "CameraEventAggregator#getMovement",
+      "field": "params/modifier/description",
+      "sourceHash": "sha256:dd6d6eb3c9988e453653482f98376162dffbcae8ee83bc756ac2732665584437",
+      "text": "键盘修饰键。"
+    },
+    {
+      "id": "CameraEventAggregator#getMovement",
+      "field": "params/type/description",
+      "sourceHash": "sha256:58dc7a14649f786013c032f66924b206cba5a2f8b22f2fd7d751844fdc32bfab",
+      "text": "相机事件类型。"
+    },
+    {
+      "id": "CameraEventAggregator#getMovement",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:d17e09591b1a6f9505eb97b94d6830cb3a2e0bfd42453845631a0f9c7371c060",
+      "text": "具有 <code>startPosition</code> 和 <code>endPosition</code> 两个 {@link Cartesian2} 属性的对象。"
+    },
+    {
+      "id": "CameraEventAggregator#getStartMousePosition",
+      "field": "description",
+      "sourceHash": "sha256:6eec853a7d3e7ae5ea041000d5c135839e4d8545a372d2b189081a3864b5171d",
+      "text": "获取开始此次聚合时的鼠标位置。"
+    },
+    {
+      "id": "CameraEventAggregator#getStartMousePosition",
+      "field": "params/modifier/description",
+      "sourceHash": "sha256:dd6d6eb3c9988e453653482f98376162dffbcae8ee83bc756ac2732665584437",
+      "text": "键盘修饰键。"
+    },
+    {
+      "id": "CameraEventAggregator#getStartMousePosition",
+      "field": "params/type/description",
+      "sourceHash": "sha256:58dc7a14649f786013c032f66924b206cba5a2f8b22f2fd7d751844fdc32bfab",
+      "text": "相机事件类型。"
+    },
+    {
+      "id": "CameraEventAggregator#getStartMousePosition",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:eba6878a33564c97bb420cc86dc10067e28852d29d5c467942926680a70955ae",
+      "text": "鼠标位置。"
+    },
+    {
+      "id": "CameraEventAggregator#isButtonDown",
+      "field": "description",
+      "sourceHash": "sha256:832a96a4ec4537dab4dc48d8f57aa5553329f4d299189c0bfe5a83dbaec91e63",
+      "text": "获取鼠标按钮是否按下或触摸是否已开始。"
+    },
+    {
+      "id": "CameraEventAggregator#isButtonDown",
+      "field": "params/modifier/description",
+      "sourceHash": "sha256:dd6d6eb3c9988e453653482f98376162dffbcae8ee83bc756ac2732665584437",
+      "text": "键盘修饰键。"
+    },
+    {
+      "id": "CameraEventAggregator#isButtonDown",
+      "field": "params/type/description",
+      "sourceHash": "sha256:58dc7a14649f786013c032f66924b206cba5a2f8b22f2fd7d751844fdc32bfab",
+      "text": "相机事件类型。"
+    },
+    {
+      "id": "CameraEventAggregator#isButtonDown",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:87c4e1ea353f805ed3b7ae0fb17d2e90d632759c333d0dfccf9dae8e6ea47388",
+      "text": "鼠标按钮是否按下或触摸是否已开始。"
+    },
+    {
+      "id": "CameraEventAggregator#isDestroyed",
+      "field": "description",
+      "sourceHash": "sha256:aea7b697937631c90ae3fc0ec55b81ba0ddc7abe4d6045848b2031f9bed60091",
+      "text": "若此对象已销毁，返回 true；否则返回 false。<br /><br />对象销毁后不应再使用；调用除 <code>isDestroyed</code> 以外的任何函数都会抛出 {@link DeveloperError}。"
+    },
+    {
+      "id": "CameraEventAggregator#isMoving",
+      "field": "description",
+      "sourceHash": "sha256:d1c7a814b1764d04b2eca8a6f6a1156a9f7add9890d068bb49e55289969c7208",
+      "text": "获取鼠标按钮按下或触摸开始后是否发生过移动。"
+    },
+    {
+      "id": "CameraEventAggregator#isMoving",
+      "field": "params/modifier/description",
+      "sourceHash": "sha256:dd6d6eb3c9988e453653482f98376162dffbcae8ee83bc756ac2732665584437",
+      "text": "键盘修饰键。"
+    },
+    {
+      "id": "CameraEventAggregator#isMoving",
+      "field": "params/type/description",
+      "sourceHash": "sha256:58dc7a14649f786013c032f66924b206cba5a2f8b22f2fd7d751844fdc32bfab",
+      "text": "相机事件类型。"
+    },
+    {
+      "id": "CameraEventAggregator#isMoving",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:1542c317001d5398918c6332ad25e061ab0d99d614e9528cf555829359367fae",
+      "text": "鼠标按钮按下或触摸开始后已发生移动时返回 <code>true</code>，否则返回 <code>false</code>。"
+    },
+    {
+      "id": "CameraEventAggregator#reset",
+      "field": "description",
+      "sourceHash": "sha256:243558961c20ce38883f7bef3fb0ac9ab0fc9176008170994a54659a759ad916",
+      "text": "标记所有事件已处理，将聚合器重置为可接收新事件的状态。"
+    },
+    {
+      "id": "CameraEventAggregator",
+      "field": "description",
+      "sourceHash": "sha256:2e4b862ed72259257aba2fc871942f358c6059f5bca0b2df179618723b4f7ed0",
+      "text": "聚合输入事件。例如，两帧之间依次收到鼠标左键按下、移动、移动、松开，会被聚合为一个包含鼠标起止位置的事件。"
+    },
+    {
+      "id": "CameraEventAggregator",
+      "field": "params/canvas/description",
+      "sourceHash": "sha256:1c7a1c8ee8fe991520e33cf9bd41c64fb2ae88c807bafbac3e909ba5b16ceba6",
+      "text": "接收事件的元素。"
+    },
+    {
+      "id": "CameraEventType.LEFT_DRAG",
+      "field": "description",
+      "sourceHash": "sha256:ed3376985ce89e0098b0fa3a0c1b443189461919e533ddba95a6853a0933eb7c",
+      "text": "按下鼠标左键后移动鼠标，再松开按钮。"
+    },
+    {
+      "id": "CameraEventType.MIDDLE_DRAG",
+      "field": "description",
+      "sourceHash": "sha256:03182d12eb1ca3500da51ac644e79e96b483b40961315f775f09167ccebb3ad5",
+      "text": "按下鼠标中键后移动鼠标，再松开按钮。"
+    },
+    {
+      "id": "CameraEventType.PINCH",
+      "field": "description",
+      "sourceHash": "sha256:358d7ebb965d2011b4edcd2639e2d48b2a92723ee0a1ec7c16d48c36acac73d4",
+      "text": "在触摸表面上进行双指触摸。"
+    },
+    {
+      "id": "CameraEventType.RIGHT_DRAG",
+      "field": "description",
+      "sourceHash": "sha256:26c5fd3f112e52b79729594b080694494da691c9e52544fe7026e851ff010f60",
+      "text": "按下鼠标右键后移动鼠标，再松开按钮。"
+    },
+    {
+      "id": "CameraEventType.WHEEL",
+      "field": "description",
+      "sourceHash": "sha256:bc09c4afa67fb50de3e2657374074605c7dc60cf862c17a2868fa4c4c0b241ec",
+      "text": "滚动鼠标滚轮。"
+    },
+    {
+      "id": "CameraEventType",
+      "field": "description",
+      "sourceHash": "sha256:9440123412ddaabd15e448e5d569481c79251f9ef6477b5502d0b7b289aa496d",
+      "text": "枚举可用于与相机交互的输入类型。"
+    },
+    {
+      "id": "CameraEventType",
+      "field": "properties/LEFT_DRAG/description",
+      "sourceHash": "sha256:ed3376985ce89e0098b0fa3a0c1b443189461919e533ddba95a6853a0933eb7c",
+      "text": "按下鼠标左键后移动鼠标，再松开按钮。"
+    },
+    {
+      "id": "CameraEventType",
+      "field": "properties/MIDDLE_DRAG/description",
+      "sourceHash": "sha256:03182d12eb1ca3500da51ac644e79e96b483b40961315f775f09167ccebb3ad5",
+      "text": "按下鼠标中键后移动鼠标，再松开按钮。"
+    },
+    {
+      "id": "CameraEventType",
+      "field": "properties/PINCH/description",
+      "sourceHash": "sha256:358d7ebb965d2011b4edcd2639e2d48b2a92723ee0a1ec7c16d48c36acac73d4",
+      "text": "在触摸表面上进行双指触摸。"
+    },
+    {
+      "id": "CameraEventType",
+      "field": "properties/RIGHT_DRAG/description",
+      "sourceHash": "sha256:26c5fd3f112e52b79729594b080694494da691c9e52544fe7026e851ff010f60",
+      "text": "按下鼠标右键后移动鼠标，再松开按钮。"
+    },
+    {
+      "id": "CameraEventType",
+      "field": "properties/WHEEL/description",
+      "sourceHash": "sha256:bc09c4afa67fb50de3e2657374074605c7dc60cf862c17a2868fa4c4c0b241ec",
+      "text": "滚动鼠标滚轮。"
+    },
+    {
+      "id": "Controller#connectedCallback",
+      "field": "description",
+      "sourceHash": "sha256:8bfb40024e9815d6e88c6d70c4a089c48cd3d259e5b73f743c3e21dd52552a49",
+      "text": "控制器连接到 DOM 时调用。实现 <code>connectedCallback</code> 以安装 DOM 事件监听器。"
+    },
+    {
+      "id": "Controller#connectedCallback",
+      "field": "params/element/description",
+      "sourceHash": "sha256:cfa576e88fcdf608e146b15c606ecb638774368fa3fcf850fcf620bdabf3f8aa",
+      "text": "包含 Cesium 场景的 DOM 元素。"
+    },
+    {
+      "id": "Controller#disconnectedCallback",
+      "field": "description",
+      "sourceHash": "sha256:54b117e201f7ff5ca2e20ecc2b0a2f0364525c455e72c451ac1554530f3af159",
+      "text": "控制器与 DOM 断开连接时调用。实现 <code>disconnectedCallback</code> 以移除 DOM 事件监听器。"
+    },
+    {
+      "id": "Controller#disconnectedCallback",
+      "field": "params/element/description",
+      "sourceHash": "sha256:cfa576e88fcdf608e146b15c606ecb638774368fa3fcf850fcf620bdabf3f8aa",
+      "text": "包含 Cesium 场景的 DOM 元素。"
+    },
+    {
+      "id": "Controller#enabled",
+      "field": "description",
+      "sourceHash": "sha256:b221e54f06f11cd3a337dd60870953401d48ddc8f80d53da6981b24999741b88",
+      "text": "控制器是否启用，以及宿主场景是否应更新它。"
+    },
+    {
+      "id": "Controller#firstUpdate",
+      "field": "description",
+      "sourceHash": "sha256:d326e9056e826fa9c9281d1b7a62bebcafa3f38395d466948f59f42928e08019",
+      "text": "控制器首次更新时，在调用 <code>update</code> 前立即调用。实现 <code>firstUpdate</code>，在关联场景开始渲染循环后执行一次性操作，例如初始化模拟时间或向场景添加图元。"
+    },
+    {
+      "id": "Controller#update",
+      "field": "description",
+      "sourceHash": "sha256:264b144bc295a0865653608c29b3d3840ca43747cb8299534735117c5ad35871",
+      "text": "每帧调用一次。实现 <code>update</code> 以修改相机或场景其他部分。"
+    },
+    {
+      "id": "Controller",
+      "field": "classdesc",
+      "sourceHash": "sha256:0e1f4dfde6133bbccf25e944738f4fd21952879746a3829818c981565db07024",
+      "text": "可向场景注册的相机控制器接口，用于处理输入事件、相机动画和其他交互。实现应通过 {@link ControllerHost} 注册到场景。此类型描述接口，不应直接实例化。"
+    },
+    {
+      "id": "ControllerHost#controllerCount",
+      "field": "description",
+      "sourceHash": "sha256:0062c3671bf2247f6e8b9d6d8d459d3a5662f7fb5cfdc729badcbd37de53c4fb",
+      "text": "已向此宿主注册的控制器数量。"
+    },
+    {
+      "id": "ControllerHost#registerController",
+      "field": "description",
+      "sourceHash": "sha256:a235357c3a59f5fa871ab2c156e7c3adbc2a2698c7906eb95cd50e1771461244",
+      "text": "向此宿主注册控制器实现。"
+    },
+    {
+      "id": "ControllerHost#registerController",
+      "field": "params/controller/description",
+      "sourceHash": "sha256:2a79d704fa9fcd74983dd5fb613eb811e793be37b2c22212fed5c8786a495442",
+      "text": "要向此宿主注册的 Controller 接口实现。"
+    },
+    {
+      "id": "ControllerHost#registerController",
+      "field": "params/element/description",
+      "sourceHash": "sha256:cfa576e88fcdf608e146b15c606ecb638774368fa3fcf850fcf620bdabf3f8aa",
+      "text": "包含 Cesium 场景的 DOM 元素。"
+    },
+    {
+      "id": "ControllerHost#registerController",
+      "field": "params/priority/description",
+      "sourceHash": "sha256:d410795662323a51b604eab8ccb20717948f6a4e5ea3a40ed019adf3ce21a9ce",
+      "text": "决定新控制器相对于已有控制器执行顺序的索引，不能大于当前已注册数量。优先级为 <code>0</code> 时，新控制器最先更新；后续控制器的更新效果叠加在此前结果上。省略时，新控制器拥有最高优先级，即在所有其他控制器之后更新。"
+    },
+    {
+      "id": "ControllerHost#unregisterController",
+      "field": "description",
+      "sourceHash": "sha256:0014d8b134e115fad0d27e28723de674cd2dd40904e113a05cc23e62a6539a0a",
+      "text": "从此宿主注销控制器实现。"
+    },
+    {
+      "id": "ControllerHost#unregisterController",
+      "field": "params/controller/description",
+      "sourceHash": "sha256:fe4699a47c00de97f8ec1de4264e9af95ee862242d2d20fa3f544cb9a9a1d0cf",
+      "text": "要从此宿主注销的 Controller 接口实现。"
+    },
+    {
+      "id": "ControllerHost#unregisterController",
+      "field": "params/element/description",
+      "sourceHash": "sha256:cfa576e88fcdf608e146b15c606ecb638774368fa3fcf850fcf620bdabf3f8aa",
+      "text": "包含 Cesium 场景的 DOM 元素。"
+    },
+    {
+      "id": "ControllerHost#update",
+      "field": "description",
+      "sourceHash": "sha256:f6d3a709e6488d6184b4f4cf935ef505d929d03927abf12fb921b1e6232c542e",
+      "text": "宿主场景每帧调用一次，按优先级顺序更新所有已注册控制器。"
+    },
+    {
+      "id": "ControllerHost#update",
+      "field": "params/scene/description",
+      "sourceHash": "sha256:aba06cfec67b02107565dea0d9ea4819646a8327824cfe6de297e2a6f9b3a6b5",
+      "text": "宿主场景。"
+    },
+    {
+      "id": "ControllerHost",
+      "field": "classdesc",
+      "sourceHash": "sha256:6625c202d0dd87a9946d857bfc8f6d62006867980ceb0fb8ed1458c8057c9383",
+      "text": "管理可向场景注册的 Controller 对象数组，以处理输入事件、相机动画和其他交互。"
+    },
+    {
+      "id": "ControllerHost",
+      "field": "description",
+      "sourceHash": "sha256:19903858a28162cb2bfd2dd640ef4e9f26f72e40202fd1c573f1e8260964b3f6",
+      "text": "创建 <code>ControllerHost</code> 实例。通常由 Scene 构造函数创建 <code>ControllerHost</code>，并通过 {@link Scene#controllerHost} 访问。"
+    },
+    {
+      "id": "HybridScreenSpacePanCameraController#angleThreshold",
+      "field": "description",
+      "sourceHash": "sha256:d2f5c6b3a19707d34a3bf3b7d740d5daf3018dd3d828fd48dd351d2bea34cfca",
+      "text": "决定所用控制器的角度阈值，单位为弧度。相机视线与垂直向下方向的夹角在此阈值内时使用地图控制器，否则使用升降控制器。"
+    },
+    {
+      "id": "HybridScreenSpacePanCameraController#connectedCallback",
+      "field": "description",
+      "sourceHash": "sha256:8bfb40024e9815d6e88c6d70c4a089c48cd3d259e5b73f743c3e21dd52552a49",
+      "text": "控制器连接到 DOM 时调用。实现 <code>connectedCallback</code> 以安装 DOM 事件监听器。"
+    },
+    {
+      "id": "HybridScreenSpacePanCameraController#connectedCallback",
+      "field": "params/element/description",
+      "sourceHash": "sha256:cfa576e88fcdf608e146b15c606ecb638774368fa3fcf850fcf620bdabf3f8aa",
+      "text": "包含 Cesium 场景的 DOM 元素。"
+    },
+    {
+      "id": "HybridScreenSpacePanCameraController#disconnectedCallback",
+      "field": "description",
+      "sourceHash": "sha256:54b117e201f7ff5ca2e20ecc2b0a2f0364525c455e72c451ac1554530f3af159",
+      "text": "控制器与 DOM 断开连接时调用。实现 <code>disconnectedCallback</code> 以移除 DOM 事件监听器。"
+    },
+    {
+      "id": "HybridScreenSpacePanCameraController#disconnectedCallback",
+      "field": "params/element/description",
+      "sourceHash": "sha256:cfa576e88fcdf608e146b15c606ecb638774368fa3fcf850fcf620bdabf3f8aa",
+      "text": "包含 Cesium 场景的 DOM 元素。"
+    },
+    {
+      "id": "HybridScreenSpacePanCameraController#elevatorController",
+      "field": "description",
+      "sourceHash": "sha256:c8885cbf65185a69cb67315eaf9bc824e9ce408109a1883d68934b765d58af5e",
+      "text": "相机视线更接近水平方向、与垂直向下方向夹角超出 angleThreshold 时使用的控制器。"
+    },
+    {
+      "id": "HybridScreenSpacePanCameraController#enabled",
+      "field": "description",
+      "sourceHash": "sha256:b221e54f06f11cd3a337dd60870953401d48ddc8f80d53da6981b24999741b88",
+      "text": "控制器是否启用，以及宿主场景是否应更新它。"
+    },
+    {
+      "id": "HybridScreenSpacePanCameraController#firstUpdate",
+      "field": "description",
+      "sourceHash": "sha256:d326e9056e826fa9c9281d1b7a62bebcafa3f38395d466948f59f42928e08019",
+      "text": "控制器首次更新时，在调用 <code>update</code> 前立即调用。实现 <code>firstUpdate</code>，在关联场景开始渲染循环后执行一次性操作，例如初始化模拟时间或向场景添加图元。"
+    },
+    {
+      "id": "HybridScreenSpacePanCameraController#mapController",
+      "field": "description",
+      "sourceHash": "sha256:b068d51ccce352114b583e7997fdc1b6661c6f301239a81f83be5c00381b005d",
+      "text": "相机主要朝下、与垂直向下方向夹角在 angleThreshold 内时使用的控制器。"
+    },
+    {
+      "id": "HybridScreenSpacePanCameraController#update",
+      "field": "description",
+      "sourceHash": "sha256:264b144bc295a0865653608c29b3d3840ca43747cb8299534735117c5ad35871",
+      "text": "每帧调用一次。实现 <code>update</code> 以修改相机或场景其他部分。"
+    },
+    {
+      "id": "HybridScreenSpacePanCameraController",
+      "field": "classdesc",
+      "sourceHash": "sha256:9a8c0c780fbcc7267d53d6c9d35773cecc40d3b37399f0f450560588a778ec31",
+      "text": "结合屏幕空间地图平移与升降平移的自适应相机控制器。按相机视线与垂直向下方向的夹角自动切换：夹角在 angleThreshold 内时使用 <code>ScreenSpaceMapCameraController</code>；视线更接近地平线、超出 angleThreshold 时，使用 <code>ScreenSpaceElevatorCameraController</code>。"
+    },
+    {
+      "id": "KeyboardEventModifier.ALT",
+      "field": "description",
+      "sourceHash": "sha256:11465a42ab9709f0aed5018399da446ceca5d2741261b89abca0bdbaa8e43f14",
+      "text": "表示按住 Alt 键。"
+    },
+    {
+      "id": "KeyboardEventModifier.CTRL",
+      "field": "description",
+      "sourceHash": "sha256:54fc50744d6913542307e695d281b0e7a425204c7bccf640c0f9da8666ec5f96",
+      "text": "表示按住 Ctrl 键。"
+    },
+    {
+      "id": "KeyboardEventModifier.SHIFT",
+      "field": "description",
+      "sourceHash": "sha256:09b940e96c2754751078697724d5b5238411fccc4f6468653622493c8f4c6c4b",
+      "text": "表示按住 Shift 键。"
+    },
+    {
+      "id": "KeyboardEventModifier",
+      "field": "description",
+      "sourceHash": "sha256:54b3b50c9870788a23ec3f2151041024eb81ef3266eff86bd5135f4d3a9c8940",
+      "text": "表示键盘修饰键的枚举。修饰键是在发生其他类型事件时同时按住的键。"
+    },
+    {
+      "id": "KeyboardEventModifier",
+      "field": "properties/ALT/description",
+      "sourceHash": "sha256:11465a42ab9709f0aed5018399da446ceca5d2741261b89abca0bdbaa8e43f14",
+      "text": "表示按住 Alt 键。"
+    },
+    {
+      "id": "KeyboardEventModifier",
+      "field": "properties/CTRL/description",
+      "sourceHash": "sha256:54fc50744d6913542307e695d281b0e7a425204c7bccf640c0f9da8666ec5f96",
+      "text": "表示按住 Ctrl 键。"
+    },
+    {
+      "id": "KeyboardEventModifier",
+      "field": "properties/SHIFT/description",
+      "sourceHash": "sha256:09b940e96c2754751078697724d5b5238411fccc4f6468653622493c8f4c6c4b",
+      "text": "表示按住 Shift 键。"
+    },
+    {
+      "id": "MouseButton.LEFT",
+      "field": "description",
+      "sourceHash": "sha256:ea7d640fd5514056db10a3c95c6270055fbf61a7dc9c6703c61965e4f334cffd",
+      "text": "表示鼠标左键。"
+    },
+    {
+      "id": "MouseButton.MIDDLE",
+      "field": "description",
+      "sourceHash": "sha256:4c1e76cf0bcb1304f5b6caf509540b55598718708bdf4dc4ba8ee5d0dd952bed",
+      "text": "表示鼠标中键。"
+    },
+    {
+      "id": "MouseButton.RIGHT",
+      "field": "description",
+      "sourceHash": "sha256:68d5c1088d3c2b11f180e06d179b05a726def67947ad5232099e04788ee44758",
+      "text": "表示鼠标右键。"
+    },
+    {
+      "id": "MouseButton",
+      "field": "description",
+      "sourceHash": "sha256:eb07ad742edbbba53df92c44392e6e9a3af5b990e6646f5001d237660058bde2",
+      "text": "鼠标按钮分类枚举：左键、中键、右键。"
+    },
+    {
+      "id": "MouseButton",
+      "field": "properties/LEFT/description",
+      "sourceHash": "sha256:ea7d640fd5514056db10a3c95c6270055fbf61a7dc9c6703c61965e4f334cffd",
+      "text": "表示鼠标左键。"
+    },
+    {
+      "id": "MouseButton",
+      "field": "properties/MIDDLE/description",
+      "sourceHash": "sha256:4c1e76cf0bcb1304f5b6caf509540b55598718708bdf4dc4ba8ee5d0dd952bed",
+      "text": "表示鼠标中键。"
+    },
+    {
+      "id": "MouseButton",
+      "field": "properties/RIGHT/description",
+      "sourceHash": "sha256:68d5c1088d3c2b11f180e06d179b05a726def67947ad5232099e04788ee44758",
+      "text": "表示鼠标右键。"
+    },
+    {
+      "id": "SceneSnapResult",
+      "field": "description",
+      "sourceHash": "sha256:3f8f394785538bf10d5a8cbda357c9324185e3fcdd9601373d3f88b33ba1804e",
+      "text": "吸附操作的结果。参见 {@link Scene#snap}。"
+    },
+    {
+      "id": "SceneSnapResult",
+      "field": "properties/isEdge/description",
+      "sourceHash": "sha256:24cee5c731e0bb340bc1960bf716aed418b3cb1841d575c8218105e61793dba1",
+      "text": "吸附点位于边上时为 <code>true</code>，位于表面上时为 <code>false</code>。"
+    },
+    {
+      "id": "SceneSnapResult",
+      "field": "properties/object/description",
+      "sourceHash": "sha256:e74f1d7c7e2896393e30a0feabc9ef6aef2b6518c524f63cc3a4d89d31335e52",
+      "text": "吸附到的图元或要素。"
+    },
+    {
+      "id": "SceneSnapResult",
+      "field": "properties/position/description",
+      "sourceHash": "sha256:ca69c6e9c74bf411df5a6926ffa193750e92c42b7ca2b1950cdd092cf17172c2",
+      "text": "吸附点的世界空间位置，由吸附帧缓冲中的视空间深度反投影得到。"
+    },
+    {
+      "id": "SceneSnapResult",
+      "field": "properties/screenPosition/description",
+      "sourceHash": "sha256:06be742e37e31a397e42e71c86cf321a0d3ad42756591565db1335e02303e76a",
+      "text": "吸附点的窗口坐标。"
+    },
+    {
+      "id": "SceneTransforms.worldToDrawingBufferCoordinates",
+      "field": "description",
+      "sourceHash": "sha256:9762471b8a9e86486288eacb18c487974b11187c1344ec81093b587828a688fb",
+      "text": "将世界坐标位置转换为绘图缓冲坐标。浏览器缩放比例不是 100% 或使用高 DPI 显示器时，结果可能与 SceneTransforms.worldToWindowCoordinates 不同。"
+    },
+    {
+      "id": "SceneTransforms.worldToDrawingBufferCoordinates",
+      "field": "params/position/description",
+      "sourceHash": "sha256:5d283b5d772e75423128b2daee9bde9fecbff6f125cb970fc9a8811a66cdedb8",
+      "text": "世界坐标位置，使用 WGS84 或其他椭球。"
+    },
+    {
+      "id": "SceneTransforms.worldToDrawingBufferCoordinates",
+      "field": "params/result/description",
+      "sourceHash": "sha256:d8d66457e7a88c580672b192ec0e05fc58319fd9bf4961cb7a5cf5a448ff8761",
+      "text": "可选对象，用于返回转换后的坐标。"
+    },
+    {
+      "id": "SceneTransforms.worldToDrawingBufferCoordinates",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:778d71f4e72f8cbe4a8016d39087812ddf31eedd820a1bb0a197a0d512982743",
+      "text": "修改后的 result 参数；未提供时返回新建的 Cartesian2 实例。如果输入位置接近椭球中心，可能为 <code>undefined</code>。"
+    },
+    {
+      "id": "SceneTransforms.worldToWindowCoordinates",
+      "field": "description",
+      "sourceHash": "sha256:85fe0729fb1407a2f93d16d4d33dbe6416c7609f997d1b5c2946e0bf8e8c08e7",
+      "text": "将世界坐标位置（WGS84 或其他椭球）转换为窗口坐标。常用于将 HTML 元素放在与场景对象相同的屏幕位置。"
+    },
+    {
+      "id": "SceneTransforms.worldToWindowCoordinates",
+      "field": "params/position/description",
+      "sourceHash": "sha256:5d283b5d772e75423128b2daee9bde9fecbff6f125cb970fc9a8811a66cdedb8",
+      "text": "世界坐标位置，使用 WGS84 或其他椭球。"
+    },
+    {
+      "id": "SceneTransforms.worldToWindowCoordinates",
+      "field": "params/result/description",
+      "sourceHash": "sha256:d8d66457e7a88c580672b192ec0e05fc58319fd9bf4961cb7a5cf5a448ff8761",
+      "text": "可选对象，用于返回转换后的坐标。"
+    },
+    {
+      "id": "SceneTransforms.worldToWindowCoordinates",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:778d71f4e72f8cbe4a8016d39087812ddf31eedd820a1bb0a197a0d512982743",
+      "text": "修改后的 result 参数；未提供时返回新建的 Cartesian2 实例。如果输入位置接近椭球中心，可能为 <code>undefined</code>。"
+    },
+    {
+      "id": "SceneTransforms",
+      "field": "description",
+      "sourceHash": "sha256:70fdab609fd75cab272cfa708cd60829ef38b15c03a8506fa9e63a10f2f58171",
+      "text": "在渲染相关坐标系之间执行依赖场景的变换。"
+    },
+    {
+      "id": "ScreenSpaceCameraController#bounceAnimationTime",
+      "field": "description",
+      "sourceHash": "sha256:94f0afd1bc19c1bcbcd7b56515c0946672e7e8512a22f42ccd756e7ef7cd3269",
+      "text": "设置二维和 Columbus View 模式下回弹动画的时长，单位为秒。"
+    },
+    {
+      "id": "ScreenSpaceCameraController#destroy",
+      "field": "description",
+      "sourceHash": "sha256:b02707f904ca8f8a93a89600c7c3b9454c409d50e0a725d8f6afe39de16faa84",
+      "text": "移除此对象持有的鼠标监听器。\n<br /><br />\n对象销毁后不应再使用；调用除 <code>isDestroyed</code> 以外的任何函数都会抛出 {@link DeveloperError}。因此，应像示例中那样将返回值（<code>undefined</code>）赋给该对象变量。"
+    },
+    {
+      "id": "ScreenSpaceCameraController#enableCollisionDetection",
+      "field": "description",
+      "sourceHash": "sha256:f79dc8e720948ea195fa0f9c5bfa77467a42ad8feb2d33c983f799b72124def3",
+      "text": "禁用时忽略 <code>maximumZoomDistance</code> 和 <code>minimumZoomDistance</code>。与 {@link Cesium3DTileset#enableCollision} 配合使用，可防止相机穿入或进入 3D Tiles 表面下方。也可能影响 3D Tiles 上使用 {@link HeightReference.CLAMP_TO_GROUND} 时的贴地行为。"
+    },
+    {
+      "id": "ScreenSpaceCameraController#enableInputs",
+      "field": "description",
+      "sourceHash": "sha256:9dafbc4e40ec9da4bddab31a50cbc304159810ff3ffb640c89e750d78dc00932",
+      "text": "为 true 时，由 enableTranslate、enableZoom、enableRotate、enableTilt 和 enableLook 分别控制是否允许相应输入；为 false 时禁用所有输入。注意：此设置适合相机飞行、区域拖选等临时操作，通常在开始时设为 false，结束后恢复 true。如果需要在相机飞行结束后仍禁用输入，应使用上述各项独立布尔开关。"
+    },
+    {
+      "id": "ScreenSpaceCameraController#enableLook",
+      "field": "description",
+      "sourceHash": "sha256:b919b2370b17c824459b25d91bad0cf99be001cc445bf30e1861942f827c3f1e",
+      "text": "为 true 时允许自由观察；为 false 时只能通过平移或旋转改变视线方向。仅适用于三维和 Columbus View 模式。"
+    },
+    {
+      "id": "ScreenSpaceCameraController#enableRotate",
+      "field": "description",
+      "sourceHash": "sha256:8e65b3e0ba83b7e8b1291327eedb55c4c06ed75388226f4a2549c0393c91030e",
+      "text": "为 true 时允许旋转世界，从而改变用户观察位置。仅适用于二维和三维模式。"
+    },
+    {
+      "id": "ScreenSpaceCameraController#enableTilt",
+      "field": "description",
+      "sourceHash": "sha256:86eea81623e73802f5396635169cce4e3ac63d8ed9a97887a70a666c1ef61819",
+      "text": "为 true 时允许倾斜相机；为 false 时禁用倾斜操作。仅适用于三维和 Columbus View 模式。"
+    },
+    {
+      "id": "ScreenSpaceCameraController#enableTranslate",
+      "field": "description",
+      "sourceHash": "sha256:0733ebc89c675fcfbdfb1c2696053127da8e55bed5f006f99b07a7b29d5748a3",
+      "text": "为 true 时允许平移地图；为 false 时相机位置保持锁定。仅适用于二维和 Columbus View 模式。"
+    },
+    {
+      "id": "ScreenSpaceCameraController#enableZoom",
+      "field": "description",
+      "sourceHash": "sha256:7ce352a217cd0adc26a31c0b6dfe2a86607d11475ff93411abeddda767436f96",
+      "text": "为 true 时允许缩放；为 false 时锁定相机与椭球的当前距离。"
+    },
+    {
+      "id": "ScreenSpaceCameraController#inertiaSpin",
+      "field": "description",
+      "sourceHash": "sha256:dec5dfa838ebda573cf25d72faf99af4dd23620661f90ee6e449d8d10935a57e",
+      "text": "控制相机因惯性继续旋转时长的参数，范围为 <code>[0, 1)</code>。为零时没有旋转惯性。"
+    },
+    {
+      "id": "ScreenSpaceCameraController#inertiaTranslate",
+      "field": "description",
+      "sourceHash": "sha256:ca43689b33e305efb4aa58f67516e85f3cf74d1f8d3dd333023000edcae113f6",
+      "text": "控制相机因惯性继续平移时长的参数，范围为 <code>[0, 1)</code>。为零时没有平移惯性。"
+    },
+    {
+      "id": "ScreenSpaceCameraController#inertiaZoom",
+      "field": "description",
+      "sourceHash": "sha256:32dcd1c79b4d7d839bd752d0bf4f0b74fd74e7ef75d117700473d58002a86745",
+      "text": "控制相机因惯性继续缩放时长的参数，范围为 <code>[0, 1)</code>。为零时没有缩放惯性。"
+    },
+    {
+      "id": "ScreenSpaceCameraController#isDestroyed",
+      "field": "description",
+      "sourceHash": "sha256:aea7b697937631c90ae3fc0ec55b81ba0ddc7abe4d6045848b2031f9bed60091",
+      "text": "若此对象已销毁，返回 true；否则返回 false。<br /><br />对象销毁后不应再使用；调用除 <code>isDestroyed</code> 以外的任何函数都会抛出 {@link DeveloperError}。"
+    },
+    {
+      "id": "ScreenSpaceCameraController#lookEventTypes",
+      "field": "description",
+      "sourceHash": "sha256:02796a63f7aaf89ac24fc092b92e3a8e5ee35743ac0fe7ec5c0d1ced0cdeebf2",
+      "text": "用于改变相机视线方向的输入，仅适用于三维和 Columbus View 模式。\n<p>\n可以是 {@link CameraEventType}、<code>undefined</code>、包含 <code>eventType</code> 与 <code>modifier</code> 属性且类型分别为 <code>CameraEventType</code> 与 {@link KeyboardEventModifier} 的对象，或上述任意形式组成的数组。\n</p>"
+    },
+    {
+      "id": "ScreenSpaceCameraController#maximumMovementRatio",
+      "field": "description",
+      "sourceHash": "sha256:73fcc868fa0ee86be44132c738534619a59a5f12aabfa45d25116bc090593e51",
+      "text": "限制每个动画帧内各类用户输入位移占窗口宽高比例的参数，范围为 <code>[0, 1)</code>。用于在低帧率情况下保持相机可控。"
+    },
+    {
+      "id": "ScreenSpaceCameraController#maximumTiltAngle",
+      "field": "description",
+      "sourceHash": "sha256:06b054bbe00f5d8e311334364fa17c30e469b2c6d186b752f60505d2d5f3377d",
+      "text": "限制相机最大倾斜程度的角度，相对于椭球法线，单位为弧度。为 <code>undefined</code> 时不限制倾斜角度。"
+    },
+    {
+      "id": "ScreenSpaceCameraController#maximumZoomDistance",
+      "field": "description",
+      "sourceHash": "sha256:bc42d5d6687859851ad444be9695e1608442fb4e98d17b10c96499ea11661631",
+      "text": "缩放时允许的最大距离，单位为米，默认为正无穷。"
+    },
+    {
+      "id": "ScreenSpaceCameraController#minimumCollisionTerrainHeight",
+      "field": "description",
+      "sourceHash": "sha256:39001838022f70429da2b9a092b74b5443930928b638dbf298ea3cf4c7f2b4e0",
+      "text": "地形碰撞检测采用的相机高度阈值。使用非 WGS84 椭球时，默认值为 scene.ellipsoid.minimumRadius * 0.0025。"
+    },
+    {
+      "id": "ScreenSpaceCameraController#minimumPickingTerrainDistanceWithInertia",
+      "field": "description",
+      "sourceHash": "sha256:936c881e93ee5d877f349437ab0839958f7fe22bece0a083c548ffee831bf024",
+      "text": "惯性缩放时进行地形拾取的距离阈值。使用非 WGS84 椭球时，默认值为 scene.ellipsoid.minimumRadius * 0.00063。"
+    },
+    {
+      "id": "ScreenSpaceCameraController#minimumPickingTerrainHeight",
+      "field": "description",
+      "sourceHash": "sha256:6ed4c40c909a98a2c0428fa34d43436fb8e8c00c2c672cc52036662c8dcd1b39",
+      "text": "决定拾取地形或场景内容，而非仅拾取椭球的相机高度阈值。使用非 WGS84 椭球时，默认值为 scene.ellipsoid.minimumRadius * 0.025。"
+    },
+    {
+      "id": "ScreenSpaceCameraController#minimumTrackBallHeight",
+      "field": "description",
+      "sourceHash": "sha256:df16eafa3bb31eb0042817c4d027bde2fb37d7f245742a5f593e614551cc7321",
+      "text": "点击天空或外部空间时，决定从轨迹球旋转切换为自由观察的相机高度阈值。使用非 WGS84 椭球时，默认值为 ellipsoid.minimumRadius * 1.175。"
+    },
+    {
+      "id": "ScreenSpaceCameraController#minimumZoomDistance",
+      "field": "description",
+      "sourceHash": "sha256:58bfb3d8c0703054a94c90c69d659eaea5cfce418b000416527d0c0f32f1af71",
+      "text": "缩放时允许的最小距离，单位为米，默认为 1.0。"
+    },
+    {
+      "id": "ScreenSpaceCameraController#rotateEventTypes",
+      "field": "description",
+      "sourceHash": "sha256:d9490be3e2158e0ec8035780553f1b6f77fb0f53241443b66403915deb5b5948",
+      "text": "用于绕地球或其他对象旋转的输入，仅适用于三维和 Columbus View 模式。\n<p>\n可以是 {@link CameraEventType}、<code>undefined</code>、包含 <code>eventType</code> 与 <code>modifier</code> 属性且类型分别为 <code>CameraEventType</code> 与 {@link KeyboardEventModifier} 的对象，或上述任意形式组成的数组。\n</p>"
+    },
+    {
+      "id": "ScreenSpaceCameraController#tiltEventTypes",
+      "field": "description",
+      "sourceHash": "sha256:2656783992afb30ab9b1496eaae55ed4db428aada882e43449d393828c4893da",
+      "text": "用于三维和 Columbus View 中倾斜视角，或二维模式中扭转地图的输入。\n<p>\n可以是 {@link CameraEventType}、<code>undefined</code>、包含 <code>eventType</code> 与 <code>modifier</code> 属性且类型分别为 <code>CameraEventType</code> 与 {@link KeyboardEventModifier} 的对象，或上述任意形式组成的数组。\n</p>"
+    },
+    {
+      "id": "ScreenSpaceCameraController#translateEventTypes",
+      "field": "description",
+      "sourceHash": "sha256:af387ee944a636c6a17956c8f03a5ba3e98d50c0499225871a18d05f0e08696d",
+      "text": "用于平移地图的输入，仅适用于二维和 Columbus View 模式。\n<p>\n可以是 {@link CameraEventType}、<code>undefined</code>、包含 <code>eventType</code> 与 <code>modifier</code> 属性且类型分别为 <code>CameraEventType</code> 与 {@link KeyboardEventModifier} 的对象，或上述任意形式组成的数组。\n</p>"
+    },
+    {
+      "id": "ScreenSpaceCameraController#zoomEventTypes",
+      "field": "description",
+      "sourceHash": "sha256:90d54e094db3b472799dc642b5090bcdd7f8d38b8491bdb2d3dc3a6740783340",
+      "text": "用于放大或缩小的输入。\n<p>\n可以是 {@link CameraEventType}、<code>undefined</code>、包含 <code>eventType</code> 与 <code>modifier</code> 属性且类型分别为 <code>CameraEventType</code> 与 {@link KeyboardEventModifier} 的对象，或上述任意形式组成的数组。\n</p>"
+    },
+    {
+      "id": "ScreenSpaceCameraController#zoomFactor",
+      "field": "description",
+      "sourceHash": "sha256:a6035535c4414ca865c7404895b65fbf2585fbdb54ebedb3701b018e10d04cb3",
+      "text": "相机缩放速度的倍率。"
+    },
+    {
+      "id": "ScreenSpaceCameraController",
+      "field": "description",
+      "sourceHash": "sha256:a9458431d21876545dc59c835c0fd22c5f480ebfc28b6ceac11dac6686bb77c8",
+      "text": "根据画布上的鼠标输入修改相机位置与朝向。"
+    },
+    {
+      "id": "ScreenSpaceElevatorCameraController.ControllerOptions",
+      "field": "properties/dragInputs/description",
+      "sourceHash": "sha256:50b025a4c40f05ca0d0c1ad549da73df65b110f172f614721417565abe385106",
+      "text": "控制平移的拖动输入绑定。"
+    },
+    {
+      "id": "ScreenSpaceElevatorCameraController#connectedCallback",
+      "field": "description",
+      "sourceHash": "sha256:8bfb40024e9815d6e88c6d70c4a089c48cd3d259e5b73f743c3e21dd52552a49",
+      "text": "控制器连接到 DOM 时调用。实现 <code>connectedCallback</code> 以安装 DOM 事件监听器。"
+    },
+    {
+      "id": "ScreenSpaceElevatorCameraController#connectedCallback",
+      "field": "params/element/description",
+      "sourceHash": "sha256:cfa576e88fcdf608e146b15c606ecb638774368fa3fcf850fcf620bdabf3f8aa",
+      "text": "包含 Cesium 场景的 DOM 元素。"
+    },
+    {
+      "id": "ScreenSpaceElevatorCameraController#disconnectedCallback",
+      "field": "description",
+      "sourceHash": "sha256:54b117e201f7ff5ca2e20ecc2b0a2f0364525c455e72c451ac1554530f3af159",
+      "text": "控制器与 DOM 断开连接时调用。实现 <code>disconnectedCallback</code> 以移除 DOM 事件监听器。"
+    },
+    {
+      "id": "ScreenSpaceElevatorCameraController#disconnectedCallback",
+      "field": "params/element/description",
+      "sourceHash": "sha256:cfa576e88fcdf608e146b15c606ecb638774368fa3fcf850fcf620bdabf3f8aa",
+      "text": "包含 Cesium 场景的 DOM 元素。"
+    },
+    {
+      "id": "ScreenSpaceElevatorCameraController#dragInputs",
+      "field": "description",
+      "sourceHash": "sha256:8537497656139b78db1e088f2cd7ff4bfbc04dc18c62281cc1250acdcb6a7ac1",
+      "text": "控制垂直平移的拖动输入绑定。每项由鼠标按钮和可选键盘修饰键组成。"
+    },
+    {
+      "id": "ScreenSpaceElevatorCameraController#enabled",
+      "field": "description",
+      "sourceHash": "sha256:b221e54f06f11cd3a337dd60870953401d48ddc8f80d53da6981b24999741b88",
+      "text": "控制器是否启用，以及宿主场景是否应更新它。"
+    },
+    {
+      "id": "ScreenSpaceElevatorCameraController#firstUpdate",
+      "field": "description",
+      "sourceHash": "sha256:d326e9056e826fa9c9281d1b7a62bebcafa3f38395d466948f59f42928e08019",
+      "text": "控制器首次更新时，在调用 <code>update</code> 前立即调用。实现 <code>firstUpdate</code>，在关联场景开始渲染循环后执行一次性操作，例如初始化模拟时间或向场景添加图元。"
+    },
+    {
+      "id": "ScreenSpaceElevatorCameraController#inertiaEnabled",
+      "field": "description",
+      "sourceHash": "sha256:c2fe885958b49e4b31501e0f82a3523164ab4fe8ee9727b28858c1e38b924b2a",
+      "text": "启用或禁用平移惯性。启用后，用户停止拖动时相机会继续移动，并按惯性衰减率逐渐减速。参见 {@link ScreenSpaceMapCameraController#inertialDecay}。"
+    },
+    {
+      "id": "ScreenSpaceElevatorCameraController#inertialDecay",
+      "field": "description",
+      "sourceHash": "sha256:dd6a29181f965cfce4fba0962a2930b52f5fe39ce3856e061bc95468aadf3923",
+      "text": "相机平移速度随时间衰减的速率。"
+    },
+    {
+      "id": "ScreenSpaceElevatorCameraController#maximumMovementRatio",
+      "field": "description",
+      "sourceHash": "sha256:2ebfd843a7d2ca99d56508159087b0237f38e44c127f7b165aa9d302081078b6",
+      "text": "限制每个动画帧内输入位移占窗口宽高比例的参数，范围为 <code>[0, 1)</code>。用于在低帧率情况下保持相机可控。"
+    },
+    {
+      "id": "ScreenSpaceElevatorCameraController#panSpeed",
+      "field": "description",
+      "sourceHash": "sha256:ba35ff74d6a2d1eea03957474a01c1c3f4c091cad87868aa69404dd62ce6f1b7",
+      "text": "相机平移速度系数。拖动像素先按当前视锥在目标距离处的像素尺寸换算为米，再乘以此系数。"
+    },
+    {
+      "id": "ScreenSpaceElevatorCameraController#pickWorldPosition",
+      "field": "description",
+      "sourceHash": "sha256:8f5e09b716afa9f8d3f8fc607b6f5a47c6ea759346e6792f6e482c632691c3da",
+      "text": "用于拾取平移起点世界位置的回调。调用参数为 {@link Scene}、{@link Cartesian2} 屏幕位置及用于存放结果的 {@link Cartesian3} 实例。应返回平移起点的 {@link Cartesian3} 世界位置；无法拾取时返回 <code>undefined</code>。若返回 <code>undefined</code>，相机会相对于其下方椭球表面平移。"
+    },
+    {
+      "id": "ScreenSpaceElevatorCameraController#update",
+      "field": "description",
+      "sourceHash": "sha256:264b144bc295a0865653608c29b3d3840ca43747cb8299534735117c5ad35871",
+      "text": "每帧调用一次。实现 <code>update</code> 以修改相机或场景其他部分。"
+    },
+    {
+      "id": "ScreenSpaceElevatorCameraController",
+      "field": "classdesc",
+      "sourceHash": "sha256:70da082e5aed8b79f74a15dc73ee3be930d65fae632a29cf6f1d8bf5cb732755",
+      "text": "通过鼠标点击拖动，在屏幕空间控制相机水平平移与径向升降的控制器。水平移动沿相机右方向，升降沿拾取位置相对世界原点的径向方向。"
+    },
+    {
+      "id": "ScreenSpaceElevatorCameraController",
+      "field": "description",
+      "sourceHash": "sha256:f0cf0360d61a546bd1fc39453504d9a590bb14b9bbc5339564c48dedfd868d6f",
+      "text": "创建 ScreenSpaceElevatorCameraController 实例。"
+    },
+    {
+      "id": "ScreenSpaceElevatorCameraController",
+      "field": "params/options/description",
+      "sourceHash": "sha256:a1276bf1e607da41b425d949cf1e50bf1cc3c6abe6a5bfd9b24ca712a59a461f",
+      "text": "控制器配置选项。"
+    },
+    {
+      "id": "ScreenSpaceEventHandler.MotionEventCallback",
+      "field": "params/event/description",
+      "sourceHash": "sha256:a367362b3b53519cde802d1c9e91d3b539f265cb2e4ad9ec71fc0a416f08a052",
+      "text": "触发监听器的事件。"
+    },
+    {
+      "id": "ScreenSpaceEventHandler.MotionEvent",
+      "field": "description",
+      "sourceHash": "sha256:8f014e6721111a707d959ec374e95127ffe210b8699eaed0198dada8d41eea41",
+      "text": "从一个位置移动到另一个位置的事件。"
+    },
+    {
+      "id": "ScreenSpaceEventHandler.mouseEmulationIgnoreMilliseconds",
+      "field": "description",
+      "sourceHash": "sha256:5946b22e04569734654132bfbc4599a0d3472f947b3cccd7eebdf97e18b1d3e7",
+      "text": "接收触摸事件后禁用鼠标事件的时长，单位为毫秒，用于忽略模拟产生的鼠标事件。"
+    },
+    {
+      "id": "ScreenSpaceEventHandler.PositionedEventCallback",
+      "field": "params/event/description",
+      "sourceHash": "sha256:a367362b3b53519cde802d1c9e91d3b539f265cb2e4ad9ec71fc0a416f08a052",
+      "text": "触发监听器的事件。"
+    },
+    {
+      "id": "ScreenSpaceEventHandler.PositionedEvent",
+      "field": "description",
+      "sourceHash": "sha256:dabc7487262b39e4151230b0f93fe8cbd03865dba0e90c3cd11b6cd31e6068f9",
+      "text": "发生于单个屏幕位置的事件。"
+    },
+    {
+      "id": "ScreenSpaceEventHandler.touchHoldDelayMilliseconds",
+      "field": "description",
+      "sourceHash": "sha256:bbdff89bbd9ec4ae91c4b41200d9b9c4caa07dc9364f407e3596ee28065d8d21",
+      "text": "屏幕触摸变为长按所需的延迟，单位为毫秒。"
+    },
+    {
+      "id": "ScreenSpaceEventHandler.TwoPointEventCallback",
+      "field": "params/event/description",
+      "sourceHash": "sha256:a367362b3b53519cde802d1c9e91d3b539f265cb2e4ad9ec71fc0a416f08a052",
+      "text": "触发监听器的事件。"
+    },
+    {
+      "id": "ScreenSpaceEventHandler.TwoPointEvent",
+      "field": "description",
+      "sourceHash": "sha256:b1644f6ec048a4fbced07acaf202d1f731a5a16d5b2b3b7c60f1e15c8ddc36ee",
+      "text": "发生于两个屏幕位置的事件。"
+    },
+    {
+      "id": "ScreenSpaceEventHandler.TwoPointMotionEventCallback",
+      "field": "params/event/description",
+      "sourceHash": "sha256:a367362b3b53519cde802d1c9e91d3b539f265cb2e4ad9ec71fc0a416f08a052",
+      "text": "触发监听器的事件。"
+    },
+    {
+      "id": "ScreenSpaceEventHandler.TwoPointMotionEvent",
+      "field": "description",
+      "sourceHash": "sha256:8ea4000cac3e44622cc982834c729fc84c362181d3fb7b91a69bb3599c456c7f",
+      "text": "从两个屏幕位置开始，并移动至另外两个位置的事件。"
+    },
+    {
+      "id": "ScreenSpaceEventHandler.WheelEventCallback",
+      "field": "params/delta/description",
+      "sourceHash": "sha256:69892cd8ee7ffa5ba8bcc633e1dd9f75fce6902ea42b4bfaddfee48e4c279054",
+      "text": "鼠标滚轮的移动量。"
+    },
+    {
+      "id": "ScreenSpaceEventHandler#destroy",
+      "field": "description",
+      "sourceHash": "sha256:29ce8986f50e3660de2402a1b390f16f661e166877d8c3876cc990a88b147337",
+      "text": "移除此对象持有的监听器。\n<br /><br />\n对象销毁后不应再使用；调用除 <code>isDestroyed</code> 以外的任何函数都会抛出 {@link DeveloperError}。因此，应像示例中那样将返回值（<code>undefined</code>）赋给该对象变量。"
+    },
+    {
+      "id": "ScreenSpaceEventHandler#getInputAction",
+      "field": "description",
+      "sourceHash": "sha256:9cab3a29d76d53b5267c8b8adc5ff9f9687851759b3066e404b84c84fd46944a",
+      "text": "返回输入事件发生时执行的函数。"
+    },
+    {
+      "id": "ScreenSpaceEventHandler#getInputAction",
+      "field": "params/modifiers/description",
+      "sourceHash": "sha256:e99ae9ede3d7c747e137e52dbef4750f1174bb3f35ce1af332706909fa912b59",
+      "text": "<code>type</code> 事件发生时按住的 KeyboardEventModifier 修饰键。"
+    },
+    {
+      "id": "ScreenSpaceEventHandler#getInputAction",
+      "field": "params/type/description",
+      "sourceHash": "sha256:4be8b99c95da1df970bc8d8e26d37b8ad7306b800482f4aba10568820d25e615",
+      "text": "输入事件的 ScreenSpaceEventType。"
+    },
+    {
+      "id": "ScreenSpaceEventHandler#getInputAction",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:4fec76cc82abda80c35d8f30d7ad3fee5e8fa0c8b61bc536e0cc801da5c9d5e1",
+      "text": "输入事件发生时执行的函数。"
+    },
+    {
+      "id": "ScreenSpaceEventHandler#isDestroyed",
+      "field": "description",
+      "sourceHash": "sha256:aea7b697937631c90ae3fc0ec55b81ba0ddc7abe4d6045848b2031f9bed60091",
+      "text": "若此对象已销毁，返回 true；否则返回 false。<br /><br />对象销毁后不应再使用；调用除 <code>isDestroyed</code> 以外的任何函数都会抛出 {@link DeveloperError}。"
+    },
+    {
+      "id": "ScreenSpaceEventHandler#removeInputAction",
+      "field": "description",
+      "sourceHash": "sha256:78f312a2e0f0703d88e74192551228d58c7ee8cb8388823c49be5c1f18da69ee",
+      "text": "移除输入事件发生时执行的函数。"
+    },
+    {
+      "id": "ScreenSpaceEventHandler#removeInputAction",
+      "field": "params/modifiers/description",
+      "sourceHash": "sha256:e99ae9ede3d7c747e137e52dbef4750f1174bb3f35ce1af332706909fa912b59",
+      "text": "<code>type</code> 事件发生时按住的 KeyboardEventModifier 修饰键。"
+    },
+    {
+      "id": "ScreenSpaceEventHandler#removeInputAction",
+      "field": "params/type/description",
+      "sourceHash": "sha256:4be8b99c95da1df970bc8d8e26d37b8ad7306b800482f4aba10568820d25e615",
+      "text": "输入事件的 ScreenSpaceEventType。"
+    },
+    {
+      "id": "ScreenSpaceEventHandler#setInputAction",
+      "field": "description",
+      "sourceHash": "sha256:016aebd1d5b99afc41ef401ecdde9192856ca3ca78644f244fb74023e329331f",
+      "text": "设置输入事件发生时执行的函数。"
+    },
+    {
+      "id": "ScreenSpaceEventHandler#setInputAction",
+      "field": "params/action/description",
+      "sourceHash": "sha256:73b0c25837bab4408408a73d6b031ac461c2c7b8b02c66462e4d94cecf56392c",
+      "text": "输入事件发生时执行的函数。"
+    },
+    {
+      "id": "ScreenSpaceEventHandler#setInputAction",
+      "field": "params/modifiers/description",
+      "sourceHash": "sha256:e99ae9ede3d7c747e137e52dbef4750f1174bb3f35ce1af332706909fa912b59",
+      "text": "<code>type</code> 事件发生时按住的 KeyboardEventModifier 修饰键。"
+    },
+    {
+      "id": "ScreenSpaceEventHandler#setInputAction",
+      "field": "params/type/description",
+      "sourceHash": "sha256:4be8b99c95da1df970bc8d8e26d37b8ad7306b800482f4aba10568820d25e615",
+      "text": "输入事件的 ScreenSpaceEventType。"
+    },
+    {
+      "id": "ScreenSpaceEventHandler",
+      "field": "description",
+      "sourceHash": "sha256:3659b6fccc644df198f78f0c05975e118b01303e5af15d5c186d40445db12030",
+      "text": "处理用户输入事件。可以添加自定义函数，在用户输入时执行。"
+    },
+    {
+      "id": "ScreenSpaceEventHandler",
+      "field": "params/element/description",
+      "sourceHash": "sha256:3f3e5c638d621199ddb83aea073a0568a14e1f7ba1f61e8dffdcf946c59d95e2",
+      "text": "要添加事件的元素。"
+    },
+    {
+      "id": "ScreenSpaceEventType.LEFT_CLICK",
+      "field": "description",
+      "sourceHash": "sha256:81cf945cd2c91d679e46a614d012fb2850391619e5e5349d998fc4f8ff05f438",
+      "text": "表示鼠标左键单击事件。"
+    },
+    {
+      "id": "ScreenSpaceEventType.LEFT_DOUBLE_CLICK",
+      "field": "description",
+      "sourceHash": "sha256:3a204bfe685501b4ba5aa788106a1db3a3ad80162b565528b9cf1d2ff370ed1a",
+      "text": "表示鼠标左键双击事件。"
+    },
+    {
+      "id": "ScreenSpaceEventType.LEFT_DOWN",
+      "field": "description",
+      "sourceHash": "sha256:33966c496244e889b1c6cb6d181a13fd1f08619e0bc270a04a678349945293ea",
+      "text": "表示鼠标左键按下事件。"
+    },
+    {
+      "id": "ScreenSpaceEventType.LEFT_UP",
+      "field": "description",
+      "sourceHash": "sha256:acb6d7c490b1a323dd1a3a5501f74fef6e97d23f1294ec581a94efa8b0dca20f",
+      "text": "表示鼠标左键松开事件。"
+    },
+    {
+      "id": "ScreenSpaceEventType.MIDDLE_CLICK",
+      "field": "description",
+      "sourceHash": "sha256:60fbcb1284c474d39f9b342a76c1a798de2ea96cd75dfbd930272520f7837c1d",
+      "text": "表示鼠标中键单击事件。"
+    },
+    {
+      "id": "ScreenSpaceEventType.MIDDLE_DOWN",
+      "field": "description",
+      "sourceHash": "sha256:3db7859daf10098f1da851e6ab4ac853189a6e2e9adfe4ba46c105b05858952f",
+      "text": "表示鼠标中键按下事件。"
+    },
+    {
+      "id": "ScreenSpaceEventType.MIDDLE_UP",
+      "field": "description",
+      "sourceHash": "sha256:918f01b87f601c571496dfacb31ccc5e08412d5c440347218e8562561189197f",
+      "text": "表示鼠标中键松开事件。"
+    },
+    {
+      "id": "ScreenSpaceEventType.MOUSE_MOVE",
+      "field": "description",
+      "sourceHash": "sha256:d20d02cbe922099ce8e020a1ce56c3b992ce96de4930d5f60a259afa9886b1f1",
+      "text": "表示鼠标移动事件。"
+    },
+    {
+      "id": "ScreenSpaceEventType.PINCH_END",
+      "field": "description",
+      "sourceHash": "sha256:b0aaf8e0c4c39b82f1e13aa0e8ab2ebad32afc02a35a1f9d846e9401a0755ec9",
+      "text": "表示触摸表面上的双指操作结束。"
+    },
+    {
+      "id": "ScreenSpaceEventType.PINCH_MOVE",
+      "field": "description",
+      "sourceHash": "sha256:7bace95a9a6c8c28a6bc1f265ea11dce5a097e14ceebd2e00261686be6d174b4",
+      "text": "表示触摸表面上的双指操作发生移动。"
+    },
+    {
+      "id": "ScreenSpaceEventType.PINCH_START",
+      "field": "description",
+      "sourceHash": "sha256:d036e301d74a3eeb0d7df50f3cef70ef2daafc0cae886837f4e052898aee65ba",
+      "text": "表示触摸表面上的双指操作开始。"
+    },
+    {
+      "id": "ScreenSpaceEventType.RIGHT_CLICK",
+      "field": "description",
+      "sourceHash": "sha256:5081f91c24161f6f871331dbee6603e272a95ca736a8ce27a70910f9a8a6affc",
+      "text": "表示鼠标右键单击事件。"
+    },
+    {
+      "id": "ScreenSpaceEventType.RIGHT_DOWN",
+      "field": "description",
+      "sourceHash": "sha256:33966c496244e889b1c6cb6d181a13fd1f08619e0bc270a04a678349945293ea",
+      "text": "表示鼠标右键按下事件。"
+    },
+    {
+      "id": "ScreenSpaceEventType.RIGHT_UP",
+      "field": "description",
+      "sourceHash": "sha256:7e2c3d2be29beb7c6479b98e95c9c7951e1659f4075cc62d217664c5504e54df",
+      "text": "表示鼠标右键松开事件。"
+    },
+    {
+      "id": "ScreenSpaceEventType.WHEEL",
+      "field": "description",
+      "sourceHash": "sha256:35d1877af93e442aeb5a26ec5b38ca2c0079d40adf77ca54c9398c7ce20407de",
+      "text": "表示鼠标滚轮事件。"
+    },
+    {
+      "id": "ScreenSpaceEventType",
+      "field": "description",
+      "sourceHash": "sha256:65aab4bcc764fc14529b3dc875e6a62f10ea90564f8b8eefdc32e359e4184e86",
+      "text": "输入事件分类枚举，包括按钮按下、松开、单击、双击、移动及按住按钮时移动。"
+    },
+    {
+      "id": "ScreenSpaceEventType",
+      "field": "properties/LEFT_CLICK/description",
+      "sourceHash": "sha256:81cf945cd2c91d679e46a614d012fb2850391619e5e5349d998fc4f8ff05f438",
+      "text": "表示鼠标左键单击事件。"
+    },
+    {
+      "id": "ScreenSpaceEventType",
+      "field": "properties/LEFT_DOUBLE_CLICK/description",
+      "sourceHash": "sha256:3a204bfe685501b4ba5aa788106a1db3a3ad80162b565528b9cf1d2ff370ed1a",
+      "text": "表示鼠标左键双击事件。"
+    },
+    {
+      "id": "ScreenSpaceEventType",
+      "field": "properties/LEFT_DOWN/description",
+      "sourceHash": "sha256:33966c496244e889b1c6cb6d181a13fd1f08619e0bc270a04a678349945293ea",
+      "text": "表示鼠标左键按下事件。"
+    },
+    {
+      "id": "ScreenSpaceEventType",
+      "field": "properties/LEFT_UP/description",
+      "sourceHash": "sha256:acb6d7c490b1a323dd1a3a5501f74fef6e97d23f1294ec581a94efa8b0dca20f",
+      "text": "表示鼠标左键松开事件。"
+    },
+    {
+      "id": "ScreenSpaceEventType",
+      "field": "properties/MIDDLE_CLICK/description",
+      "sourceHash": "sha256:60fbcb1284c474d39f9b342a76c1a798de2ea96cd75dfbd930272520f7837c1d",
+      "text": "表示鼠标中键单击事件。"
+    },
+    {
+      "id": "ScreenSpaceEventType",
+      "field": "properties/MIDDLE_DOWN/description",
+      "sourceHash": "sha256:3db7859daf10098f1da851e6ab4ac853189a6e2e9adfe4ba46c105b05858952f",
+      "text": "表示鼠标中键按下事件。"
+    },
+    {
+      "id": "ScreenSpaceEventType",
+      "field": "properties/MIDDLE_UP/description",
+      "sourceHash": "sha256:918f01b87f601c571496dfacb31ccc5e08412d5c440347218e8562561189197f",
+      "text": "表示鼠标中键松开事件。"
+    },
+    {
+      "id": "ScreenSpaceEventType",
+      "field": "properties/MOUSE_MOVE/description",
+      "sourceHash": "sha256:d20d02cbe922099ce8e020a1ce56c3b992ce96de4930d5f60a259afa9886b1f1",
+      "text": "表示鼠标移动事件。"
+    },
+    {
+      "id": "ScreenSpaceEventType",
+      "field": "properties/PINCH_END/description",
+      "sourceHash": "sha256:b0aaf8e0c4c39b82f1e13aa0e8ab2ebad32afc02a35a1f9d846e9401a0755ec9",
+      "text": "表示触摸表面上的双指操作结束。"
+    },
+    {
+      "id": "ScreenSpaceEventType",
+      "field": "properties/PINCH_MOVE/description",
+      "sourceHash": "sha256:7bace95a9a6c8c28a6bc1f265ea11dce5a097e14ceebd2e00261686be6d174b4",
+      "text": "表示触摸表面上的双指操作发生移动。"
+    },
+    {
+      "id": "ScreenSpaceEventType",
+      "field": "properties/PINCH_START/description",
+      "sourceHash": "sha256:d036e301d74a3eeb0d7df50f3cef70ef2daafc0cae886837f4e052898aee65ba",
+      "text": "表示触摸表面上的双指操作开始。"
+    },
+    {
+      "id": "ScreenSpaceEventType",
+      "field": "properties/RIGHT_CLICK/description",
+      "sourceHash": "sha256:5081f91c24161f6f871331dbee6603e272a95ca736a8ce27a70910f9a8a6affc",
+      "text": "表示鼠标右键单击事件。"
+    },
+    {
+      "id": "ScreenSpaceEventType",
+      "field": "properties/RIGHT_DOWN/description",
+      "sourceHash": "sha256:33966c496244e889b1c6cb6d181a13fd1f08619e0bc270a04a678349945293ea",
+      "text": "表示鼠标右键按下事件。"
+    },
+    {
+      "id": "ScreenSpaceEventType",
+      "field": "properties/RIGHT_UP/description",
+      "sourceHash": "sha256:7e2c3d2be29beb7c6479b98e95c9c7951e1659f4075cc62d217664c5504e54df",
+      "text": "表示鼠标右键松开事件。"
+    },
+    {
+      "id": "ScreenSpaceEventType",
+      "field": "properties/WHEEL/description",
+      "sourceHash": "sha256:35d1877af93e442aeb5a26ec5b38ca2c0079d40adf77ca54c9398c7ce20407de",
+      "text": "表示鼠标滚轮事件。"
+    },
+    {
+      "id": "ScreenSpaceInputBindings.DragInputActions",
+      "field": "properties/change/description",
+      "sourceHash": "sha256:5b82ca9c5618ed4c557215674cc38353e7d9c832ceea373dff80fa8393a0ed18",
+      "text": "拖动移动时调用。"
+    },
+    {
+      "id": "ScreenSpaceInputBindings.DragInputActions",
+      "field": "properties/end/description",
+      "sourceHash": "sha256:7919565142de549d81ab85ef5d721300794ffa9dc3dbf88314652d2ca573f588",
+      "text": "拖动结束时调用。"
+    },
+    {
+      "id": "ScreenSpaceInputBindings.DragInputActions",
+      "field": "properties/start/description",
+      "sourceHash": "sha256:bbc039b3e026064840fdedea7274a9ea1b8ab3f71deae9e4ca01d7a378ddef01",
+      "text": "拖动开始时调用。"
+    },
+    {
+      "id": "ScreenSpaceInputBindings.DragInputState",
+      "field": "properties/isDragging/description",
+      "sourceHash": "sha256:ad92de51ca90c5e335702c6a2b6e1f4630184a59d6e6c50694fb5a0730bb4645",
+      "text": "正在拖动时为 true，否则为 false。"
+    },
+    {
+      "id": "ScreenSpaceInputBindings.InputBinding",
+      "field": "properties/button/description",
+      "sourceHash": "sha256:64b0d71a3c68a3d0949daa9ac9d0b3e4c1c8659093f10697aa2ca3358d25860b",
+      "text": "用于开始或结束拖动的鼠标按钮。"
+    },
+    {
+      "id": "ScreenSpaceInputBindings.InputBinding",
+      "field": "properties/modifier/description",
+      "sourceHash": "sha256:5bbdf5685f71aa34155c57d41d134961193a605406cd1ad229f3df5e973300ad",
+      "text": "要注册的可选键盘修饰键。"
+    },
+    {
+      "id": "ScreenSpaceInputBindings.registerDragInputBindings",
+      "field": "description",
+      "sourceHash": "sha256:1e185e51a1c463c70a2edb715174d7b67f422bc7124dd1b8b84d2ee9876d9716",
+      "text": "在屏幕空间事件处理器上注册拖动输入绑定。"
+    },
+    {
+      "id": "ScreenSpaceInputBindings.registerDragInputBindings",
+      "field": "params/dragInputActions/description",
+      "sourceHash": "sha256:6d15132ac80c90d24c1b14c27dcea383d4743378b0cc7a23202b11df7c284a6f",
+      "text": "拖动操作时调用的回调。"
+    },
+    {
+      "id": "ScreenSpaceInputBindings.registerDragInputBindings",
+      "field": "params/handler/description",
+      "sourceHash": "sha256:bfbb57a5077d8f6f2e255b48743e9794178d4e402119691e67ad8fedb811dece",
+      "text": "屏幕空间事件处理器。"
+    },
+    {
+      "id": "ScreenSpaceInputBindings.registerDragInputBindings",
+      "field": "params/inputBindings/description",
+      "sourceHash": "sha256:71700a1da237ded906de1a8f7e8a1ec5909bc5c8f3b3b904b87fccb7679ed0f0",
+      "text": "要注册的拖动绑定。"
+    },
+    {
+      "id": "ScreenSpaceInputBindings.registerDragInputBindings",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:507d6ad1a56f3905f4531f3ab511ff63e8f5de2c775807aaf777aeb23fa19d07",
+      "text": "拖动输入状态。"
+    },
+    {
+      "id": "ScreenSpaceMapCameraController.ControllerOptions",
+      "field": "properties/dragInputs/description",
+      "sourceHash": "sha256:50b025a4c40f05ca0d0c1ad549da73df65b110f172f614721417565abe385106",
+      "text": "控制平移的拖动输入绑定。"
+    },
+    {
+      "id": "ScreenSpaceMapCameraController#connectedCallback",
+      "field": "description",
+      "sourceHash": "sha256:8bfb40024e9815d6e88c6d70c4a089c48cd3d259e5b73f743c3e21dd52552a49",
+      "text": "控制器连接到 DOM 时调用。实现 <code>connectedCallback</code> 以安装 DOM 事件监听器。"
+    },
+    {
+      "id": "ScreenSpaceMapCameraController#connectedCallback",
+      "field": "params/element/description",
+      "sourceHash": "sha256:cfa576e88fcdf608e146b15c606ecb638774368fa3fcf850fcf620bdabf3f8aa",
+      "text": "包含 Cesium 场景的 DOM 元素。"
+    },
+    {
+      "id": "ScreenSpaceMapCameraController#disconnectedCallback",
+      "field": "description",
+      "sourceHash": "sha256:54b117e201f7ff5ca2e20ecc2b0a2f0364525c455e72c451ac1554530f3af159",
+      "text": "控制器与 DOM 断开连接时调用。实现 <code>disconnectedCallback</code> 以移除 DOM 事件监听器。"
+    },
+    {
+      "id": "ScreenSpaceMapCameraController#disconnectedCallback",
+      "field": "params/element/description",
+      "sourceHash": "sha256:cfa576e88fcdf608e146b15c606ecb638774368fa3fcf850fcf620bdabf3f8aa",
+      "text": "包含 Cesium 场景的 DOM 元素。"
+    },
+    {
+      "id": "ScreenSpaceMapCameraController#dragInputs",
+      "field": "description",
+      "sourceHash": "sha256:26756d9f87127194418795355327b9e0591fb4a71da702074b654e77e8b936cc",
+      "text": "控制地图平移的拖动输入绑定。每项由鼠标按钮和可选键盘修饰键组成。"
+    },
+    {
+      "id": "ScreenSpaceMapCameraController#enabled",
+      "field": "description",
+      "sourceHash": "sha256:b221e54f06f11cd3a337dd60870953401d48ddc8f80d53da6981b24999741b88",
+      "text": "控制器是否启用，以及宿主场景是否应更新它。"
+    },
+    {
+      "id": "ScreenSpaceMapCameraController#firstUpdate",
+      "field": "description",
+      "sourceHash": "sha256:d326e9056e826fa9c9281d1b7a62bebcafa3f38395d466948f59f42928e08019",
+      "text": "控制器首次更新时，在调用 <code>update</code> 前立即调用。实现 <code>firstUpdate</code>，在关联场景开始渲染循环后执行一次性操作，例如初始化模拟时间或向场景添加图元。"
+    },
+    {
+      "id": "ScreenSpaceMapCameraController#inertiaEnabled",
+      "field": "description",
+      "sourceHash": "sha256:c2fe885958b49e4b31501e0f82a3523164ab4fe8ee9727b28858c1e38b924b2a",
+      "text": "启用或禁用平移惯性。启用后，用户停止拖动时相机会继续移动，并按惯性衰减率逐渐减速。参见 {@link ScreenSpaceMapCameraController#inertialDecay}。"
+    },
+    {
+      "id": "ScreenSpaceMapCameraController#inertialDecay",
+      "field": "description",
+      "sourceHash": "sha256:dd6a29181f965cfce4fba0962a2930b52f5fe39ce3856e061bc95468aadf3923",
+      "text": "相机平移速度随时间衰减的速率。"
+    },
+    {
+      "id": "ScreenSpaceMapCameraController#maximumMovementRatio",
+      "field": "description",
+      "sourceHash": "sha256:2ebfd843a7d2ca99d56508159087b0237f38e44c127f7b165aa9d302081078b6",
+      "text": "限制每个动画帧内输入位移占窗口宽高比例的参数，范围为 <code>[0, 1)</code>。用于在低帧率情况下保持相机可控。"
+    },
+    {
+      "id": "ScreenSpaceMapCameraController#panSpeed",
+      "field": "description",
+      "sourceHash": "sha256:ba35ff74d6a2d1eea03957474a01c1c3f4c091cad87868aa69404dd62ce6f1b7",
+      "text": "相机平移速度系数。拖动像素先按当前视锥在目标距离处的像素尺寸换算为米，再乘以此系数。"
+    },
+    {
+      "id": "ScreenSpaceMapCameraController#pickWorldPosition",
+      "field": "description",
+      "sourceHash": "sha256:8f5e09b716afa9f8d3f8fc607b6f5a47c6ea759346e6792f6e482c632691c3da",
+      "text": "用于拾取平移起点世界位置的回调。调用参数为 {@link Scene}、{@link Cartesian2} 屏幕位置及用于存放结果的 {@link Cartesian3} 实例。应返回平移起点的 {@link Cartesian3} 世界位置；无法拾取时返回 <code>undefined</code>。若返回 <code>undefined</code>，相机会相对于其下方椭球表面平移。"
+    },
+    {
+      "id": "ScreenSpaceMapCameraController#update",
+      "field": "description",
+      "sourceHash": "sha256:264b144bc295a0865653608c29b3d3840ca43747cb8299534735117c5ad35871",
+      "text": "每帧调用一次。实现 <code>update</code> 以修改相机或场景其他部分。"
+    },
+    {
+      "id": "ScreenSpaceMapCameraController",
+      "field": "classdesc",
+      "sourceHash": "sha256:26c4c026cd55908ab61c9bf978bdf3c6b023e34c02ece87d5c46a0edb5f34847",
+      "text": "通过鼠标点击拖动，在屏幕空间使相机沿椭球切向平移的相机控制器。"
+    },
+    {
+      "id": "ScreenSpaceMapCameraController",
+      "field": "description",
+      "sourceHash": "sha256:3171dcf2fc9894a022811e52a858b8c45cd88e29017ff865334b7761552a0a4b",
+      "text": "创建 ScreenSpaceMapCameraController 实例。"
+    },
+    {
+      "id": "ScreenSpaceMapCameraController",
+      "field": "params/options/description",
+      "sourceHash": "sha256:a1276bf1e607da41b425d949cf1e50bf1cc3c6abe6a5bfd9b24ca712a59a461f",
+      "text": "控制器配置选项。"
+    },
+    {
+      "id": "ScreenSpaceTiltOrbitCameraController.ControllerOptions",
+      "field": "properties/dragInputs/description",
+      "sourceHash": "sha256:32b9b8bed360de09115e51c78a37e2f25afe0149e88352745a01a49da93092a3",
+      "text": "控制倾斜和环绕的拖动输入绑定。"
+    },
+    {
+      "id": "ScreenSpaceTiltOrbitCameraController#connectedCallback",
+      "field": "description",
+      "sourceHash": "sha256:8bfb40024e9815d6e88c6d70c4a089c48cd3d259e5b73f743c3e21dd52552a49",
+      "text": "控制器连接到 DOM 时调用。实现 <code>connectedCallback</code> 以安装 DOM 事件监听器。"
+    },
+    {
+      "id": "ScreenSpaceTiltOrbitCameraController#connectedCallback",
+      "field": "params/element/description",
+      "sourceHash": "sha256:cfa576e88fcdf608e146b15c606ecb638774368fa3fcf850fcf620bdabf3f8aa",
+      "text": "包含 Cesium 场景的 DOM 元素。"
+    },
+    {
+      "id": "ScreenSpaceTiltOrbitCameraController#dampingEnabled",
+      "field": "description",
+      "sourceHash": "sha256:c7a8d7fb718ef549854de643def091244d428f4c419b8407e0349b3240c601f4",
+      "text": "启用或禁用倾斜与环绕动画的阻尼。阻尼可平滑相机运动，使其更自然、更有惯性，但也可能稍微延迟相机响应。禁用阻尼后，相机会立即响应用户输入。"
+    },
+    {
+      "id": "ScreenSpaceTiltOrbitCameraController#disconnectedCallback",
+      "field": "description",
+      "sourceHash": "sha256:54b117e201f7ff5ca2e20ecc2b0a2f0364525c455e72c451ac1554530f3af159",
+      "text": "控制器与 DOM 断开连接时调用。实现 <code>disconnectedCallback</code> 以移除 DOM 事件监听器。"
+    },
+    {
+      "id": "ScreenSpaceTiltOrbitCameraController#disconnectedCallback",
+      "field": "params/element/description",
+      "sourceHash": "sha256:cfa576e88fcdf608e146b15c606ecb638774368fa3fcf850fcf620bdabf3f8aa",
+      "text": "包含 Cesium 场景的 DOM 元素。"
+    },
+    {
+      "id": "ScreenSpaceTiltOrbitCameraController#dragInputs",
+      "field": "description",
+      "sourceHash": "sha256:a306fb8daa9423d10495b7ef158dd72d0ac67b1609ed66304db8385b2603ed63",
+      "text": "控制倾斜的拖动输入绑定。每项由鼠标按钮和可选键盘修饰键组成。"
+    },
+    {
+      "id": "ScreenSpaceTiltOrbitCameraController#enabled",
+      "field": "description",
+      "sourceHash": "sha256:b221e54f06f11cd3a337dd60870953401d48ddc8f80d53da6981b24999741b88",
+      "text": "控制器是否启用，以及宿主场景是否应更新它。"
+    },
+    {
+      "id": "ScreenSpaceTiltOrbitCameraController#firstUpdate",
+      "field": "description",
+      "sourceHash": "sha256:d326e9056e826fa9c9281d1b7a62bebcafa3f38395d466948f59f42928e08019",
+      "text": "控制器首次更新时，在调用 <code>update</code> 前立即调用。实现 <code>firstUpdate</code>，在关联场景开始渲染循环后执行一次性操作，例如初始化模拟时间或向场景添加图元。"
+    },
+    {
+      "id": "ScreenSpaceTiltOrbitCameraController#maximumMovementRatio",
+      "field": "description",
+      "sourceHash": "sha256:2ebfd843a7d2ca99d56508159087b0237f38e44c127f7b165aa9d302081078b6",
+      "text": "限制每个动画帧内输入位移占窗口宽高比例的参数，范围为 <code>[0, 1)</code>。用于在低帧率情况下保持相机可控。"
+    },
+    {
+      "id": "ScreenSpaceTiltOrbitCameraController#maximumOrbitVelocity",
+      "field": "description",
+      "sourceHash": "sha256:34e6aa4993d3a6d80a3b51751b8ddcfd9c3ed7a2dc76892ea0edf883de05a09e",
+      "text": "最大环绕角速度，单位为弧度/秒。Number.POSITIVE_INFINITY 表示不限制最大环绕速度。"
+    },
+    {
+      "id": "ScreenSpaceTiltOrbitCameraController#maximumTiltVelocity",
+      "field": "description",
+      "sourceHash": "sha256:683cc585b1b9d2d136e1f505722e7669efd1dedc9f38aab2c0ab62294ab71b07",
+      "text": "最大倾斜角速度，单位为弧度/秒。Number.POSITIVE_INFINITY 表示不限制最大倾斜速度。"
+    },
+    {
+      "id": "ScreenSpaceTiltOrbitCameraController#orbitAnimationDuration",
+      "field": "description",
+      "sourceHash": "sha256:09761d4b8bae2e9f1291222b9ff32ac339d285cfcdb0b21c9712fc7d8f891c0c",
+      "text": "单次环绕动画完成的时长，单位为秒。"
+    },
+    {
+      "id": "ScreenSpaceTiltOrbitCameraController#orbit",
+      "field": "description",
+      "sourceHash": "sha256:09849571c9f68e42b7be3dbe17d20e6e195e592e0cf7269db07daadcf3da949a",
+      "text": "尝试使相机绕指定目标转动给定角度，单位为弧度。正值顺时针，负值逆时针。以传入的世界坐标目标及轴执行环绕。"
+    },
+    {
+      "id": "ScreenSpaceTiltOrbitCameraController#orbitEnabled",
+      "field": "description",
+      "sourceHash": "sha256:6fc4aed1ca41b15a8145ea1a8fdb9e2b5a8ca7cddff15a6993e07b4720e247f9",
+      "text": "启用通过拖动使相机环绕。"
+    },
+    {
+      "id": "ScreenSpaceTiltOrbitCameraController#orbitMagnitude",
+      "field": "description",
+      "sourceHash": "sha256:b0f1b6dd259c642cf8a8d43e6302d9ddd89e3b5cdb839ccc6e720798c9b200ed",
+      "text": "拖动像素位移对应的相机环绕幅度。值为 1.0 时，横跨整个画布的拖动使相机环绕 180 度。"
+    },
+    {
+      "id": "ScreenSpaceTiltOrbitCameraController#orbit",
+      "field": "params/amount/description",
+      "sourceHash": "sha256:563d9bf53b045b55f685c675ec63d6e32b82554eddfb07740095c9d904bb2ba4",
+      "text": "相机环绕角度，单位为弧度。正值顺时针，负值逆时针。"
+    },
+    {
+      "id": "ScreenSpaceTiltOrbitCameraController#orbit",
+      "field": "params/axis/description",
+      "sourceHash": "sha256:f1493c6c8a0c43960a757e6b05cdd40373085be8c485b229dc251d5c64c6fb65",
+      "text": "环绕轴，通常为目标位置表面法线的反方向。"
+    },
+    {
+      "id": "ScreenSpaceTiltOrbitCameraController#orbit",
+      "field": "params/camera/description",
+      "sourceHash": "sha256:5ef492f1b41bd6105615a904c99e4719bac6510d66a88cb86cae438004d42f32",
+      "text": "要执行环绕的相机。"
+    },
+    {
+      "id": "ScreenSpaceTiltOrbitCameraController#orbit",
+      "field": "params/dt/description",
+      "sourceHash": "sha256:8ee23cb3e96ed39c46e78df97f7e0d7bdcc8e39fe2cb0147a4e3efd9d6bc7ca2",
+      "text": "距上次更新的时间差，单位为秒。必须大于 0。"
+    },
+    {
+      "id": "ScreenSpaceTiltOrbitCameraController#orbit",
+      "field": "params/ellipsoid/description",
+      "sourceHash": "sha256:c3477ff32bbca6b4112155c6b862c41c4539db9d6d5465afbdbe6e6f889893ef",
+      "text": "用于拾取环绕起点的椭球。为 undefined 时使用默认椭球。"
+    },
+    {
+      "id": "ScreenSpaceTiltOrbitCameraController#orbit",
+      "field": "params/target/description",
+      "sourceHash": "sha256:1eb5cabc35c840cb3ef418bdec422bcdda9f48cb2d3a9eb20117b754cc5b1fcf",
+      "text": "环绕中心的世界坐标位置。"
+    },
+    {
+      "id": "ScreenSpaceTiltOrbitCameraController#pickWorldPosition",
+      "field": "description",
+      "sourceHash": "sha256:3e63885cce0fdeba0865af70621d51efe898549fc3415662924cb6477b387e9a",
+      "text": "用于拾取倾斜或环绕中心世界位置的回调。调用参数为 {@link Scene}、{@link Cartesian2} 屏幕位置及用于存放结果的 {@link Cartesian3} 实例。应返回倾斜或环绕中心的 {@link Cartesian3} 世界位置；无法拾取时返回 <code>undefined</code>。"
+    },
+    {
+      "id": "ScreenSpaceTiltOrbitCameraController#tiltAnimationDuration",
+      "field": "description",
+      "sourceHash": "sha256:aa6f8f74d730c82b2b7b09c3932901f5f9dfcdf535148d163253b566081415ee",
+      "text": "单次倾斜动画预期完成的时长，单位为秒。"
+    },
+    {
+      "id": "ScreenSpaceTiltOrbitCameraController#tilt",
+      "field": "description",
+      "sourceHash": "sha256:2e8727daccee0d4e0a0cdf1cd75bf5b4e1ff2424d5ec4db9c9834803b049e05b",
+      "text": "尝试使相机倾斜给定角度，单位为弧度。正值向下倾斜，负值向上倾斜。以传入的目标位置度量倾斜。"
+    },
+    {
+      "id": "ScreenSpaceTiltOrbitCameraController#tiltEnabled",
+      "field": "description",
+      "sourceHash": "sha256:f2ed02b1ed5bd99cd191bee324dad443c0b043bac41afd88695588bc372b5fd7",
+      "text": "启用通过拖动使相机倾斜。"
+    },
+    {
+      "id": "ScreenSpaceTiltOrbitCameraController#tiltMagnitude",
+      "field": "description",
+      "sourceHash": "sha256:d2e5e09a0f4a65a44de35ecd290ea295c774c3d050ad00d7e147becfc47464a4",
+      "text": "拖动像素位移对应的相机倾斜幅度。值为 1.0 时，纵跨整个画布的拖动使相机倾斜 90 度。"
+    },
+    {
+      "id": "ScreenSpaceTiltOrbitCameraController#tilt",
+      "field": "params/amount/description",
+      "sourceHash": "sha256:df447281281028a8742358ed456f171bce1a7eb5b68a737d433a2f55b5e24242",
+      "text": "相机倾斜角度，单位为弧度。正值向下倾斜，负值向上倾斜。"
+    },
+    {
+      "id": "ScreenSpaceTiltOrbitCameraController#tilt",
+      "field": "params/axis/description",
+      "sourceHash": "sha256:97304c396ddee04b4721260e5c1ab8d76a651279686ee79eb2cca895209616c4",
+      "text": "用于度量倾斜角的参考轴，通常为目标位置表面法线的反方向；实际旋转围绕相机右方向。"
+    },
+    {
+      "id": "ScreenSpaceTiltOrbitCameraController#tilt",
+      "field": "params/camera/description",
+      "sourceHash": "sha256:36ebe88d0f11682f790218c7633039d888c36e061141706b9d8ddf1751846532",
+      "text": "要执行倾斜的相机。"
+    },
+    {
+      "id": "ScreenSpaceTiltOrbitCameraController#tilt",
+      "field": "params/dt/description",
+      "sourceHash": "sha256:1ce6e08b861b790ed6f715348c43e6041bf69490bfd8dbf4c3d7743a6c649517",
+      "text": "距上次更新的时间差，单位为秒，必须大于 0。"
+    },
+    {
+      "id": "ScreenSpaceTiltOrbitCameraController#tilt",
+      "field": "params/ellipsoid/description",
+      "sourceHash": "sha256:e6649cff0bbee11b7020fec360a1170d1a106e3394d34bccca17a24051a1ccd3",
+      "text": "用于拾取倾斜起点的椭球。为 undefined 时使用默认椭球。"
+    },
+    {
+      "id": "ScreenSpaceTiltOrbitCameraController#tilt",
+      "field": "params/target/description",
+      "sourceHash": "sha256:b60fe90687827414cba50d0d7e7127401d7c81a01aad464c3e4cafb1eea4625c",
+      "text": "倾斜中心的世界坐标位置。"
+    },
+    {
+      "id": "ScreenSpaceTiltOrbitCameraController#update",
+      "field": "description",
+      "sourceHash": "sha256:264b144bc295a0865653608c29b3d3840ca43747cb8299534735117c5ad35871",
+      "text": "每帧调用一次。实现 <code>update</code> 以修改相机或场景其他部分。"
+    },
+    {
+      "id": "ScreenSpaceTiltOrbitCameraController#useDragPosition",
+      "field": "description",
+      "sourceHash": "sha256:116c086722cf00a98c9f3e9488d5b01f289c360e8a0ab3d6489bce6db76d3952",
+      "text": "为 false 时，相机绕屏幕中心对应位置环绕和倾斜；为 true 时，绕开始拖动时鼠标或触摸点下方的位置操作。"
+    },
+    {
+      "id": "ScreenSpaceTiltOrbitCameraController",
+      "field": "classdesc",
+      "sourceHash": "sha256:866bced6f68f308badd9634988c4ab9e1135ec07d727cc4c9201466be2c9ae79",
+      "text": "通过鼠标或触摸屏点击拖动，在屏幕空间使相机绕目标位置倾斜和环绕的相机控制器。"
+    },
+    {
+      "id": "ScreenSpaceTiltOrbitCameraController",
+      "field": "description",
+      "sourceHash": "sha256:7329dd91ce37d73adab370b0cef3dc607aabc15768f6424f4a7595144cd5a9a0",
+      "text": "创建新的 <code>ScreenSpaceTiltOrbitCameraController</code> 实例。"
+    },
+    {
+      "id": "ScreenSpaceTiltOrbitCameraController",
+      "field": "params/options/description",
+      "sourceHash": "sha256:a1276bf1e607da41b425d949cf1e50bf1cc3c6abe6a5bfd9b24ca712a59a461f",
+      "text": "控制器配置选项。"
+    },
+    {
+      "id": "ScreenSpaceZoomCameraController.ControllerOptions",
+      "field": "properties/dragInputs/description",
+      "sourceHash": "sha256:07e7d9d3dab0e649aaa7ea21dbdcda06e5545f754c2e3ea36230b3f6ecf330b1",
+      "text": "控制缩放的拖动输入绑定。"
+    },
+    {
+      "id": "ScreenSpaceZoomCameraController.ControllerOptions",
+      "field": "properties/scrollInputs/description",
+      "sourceHash": "sha256:36a4385da31901325ca699d667e467257de66cd51219adac117b96ab25be2304",
+      "text": "控制缩放的滚轮输入绑定。"
+    },
+    {
+      "id": "ScreenSpaceZoomCameraController#connectedCallback",
+      "field": "description",
+      "sourceHash": "sha256:8bfb40024e9815d6e88c6d70c4a089c48cd3d259e5b73f743c3e21dd52552a49",
+      "text": "控制器连接到 DOM 时调用。实现 <code>connectedCallback</code> 以安装 DOM 事件监听器。"
+    },
+    {
+      "id": "ScreenSpaceZoomCameraController#connectedCallback",
+      "field": "params/element/description",
+      "sourceHash": "sha256:cfa576e88fcdf608e146b15c606ecb638774368fa3fcf850fcf620bdabf3f8aa",
+      "text": "包含 Cesium 场景的 DOM 元素。"
+    },
+    {
+      "id": "ScreenSpaceZoomCameraController#dampingEnabled",
+      "field": "description",
+      "sourceHash": "sha256:a5a4c32df470d8855d79429814cd39edd34a6216266326a76eab9478368bb42c",
+      "text": "启用或禁用缩放阻尼。阻尼可平滑相机运动，使其更自然、更有惯性，但也可能稍微延迟相机响应。禁用阻尼后，相机会立即响应用户输入。"
+    },
+    {
+      "id": "ScreenSpaceZoomCameraController#disconnectedCallback",
+      "field": "description",
+      "sourceHash": "sha256:54b117e201f7ff5ca2e20ecc2b0a2f0364525c455e72c451ac1554530f3af159",
+      "text": "控制器与 DOM 断开连接时调用。实现 <code>disconnectedCallback</code> 以移除 DOM 事件监听器。"
+    },
+    {
+      "id": "ScreenSpaceZoomCameraController#disconnectedCallback",
+      "field": "params/element/description",
+      "sourceHash": "sha256:cfa576e88fcdf608e146b15c606ecb638774368fa3fcf850fcf620bdabf3f8aa",
+      "text": "包含 Cesium 场景的 DOM 元素。"
+    },
+    {
+      "id": "ScreenSpaceZoomCameraController#dragInputs",
+      "field": "description",
+      "sourceHash": "sha256:1e576c97d35adf17740635054aa037cd3e20c49f2dfe2076c5573276deeadebf",
+      "text": "控制缩放的拖动输入绑定。每项由鼠标按钮和可选键盘修饰键组成。"
+    },
+    {
+      "id": "ScreenSpaceZoomCameraController#enabled",
+      "field": "description",
+      "sourceHash": "sha256:b221e54f06f11cd3a337dd60870953401d48ddc8f80d53da6981b24999741b88",
+      "text": "控制器是否启用，以及宿主场景是否应更新它。"
+    },
+    {
+      "id": "ScreenSpaceZoomCameraController#firstUpdate",
+      "field": "description",
+      "sourceHash": "sha256:d326e9056e826fa9c9281d1b7a62bebcafa3f38395d466948f59f42928e08019",
+      "text": "控制器首次更新时，在调用 <code>update</code> 前立即调用。实现 <code>firstUpdate</code>，在关联场景开始渲染循环后执行一次性操作，例如初始化模拟时间或向场景添加图元。"
+    },
+    {
+      "id": "ScreenSpaceZoomCameraController#inertiaEnabled",
+      "field": "description",
+      "sourceHash": "sha256:431c88043808128f5256cb7e02f3468b31b87497d5db098d0e8307af1fa9eb0c",
+      "text": "启用或禁用缩放惯性。启用后，用户停止输入时相机会继续移动，并按 {@link ScreenSpaceZoomCameraController#inertialDecay} 逐渐减速。"
+    },
+    {
+      "id": "ScreenSpaceZoomCameraController#inertialDecay",
+      "field": "description",
+      "sourceHash": "sha256:0956d76fe92d09b51ed5150c95aefa9540e1b4e71a09e2b736cbd96d10282398",
+      "text": "相机缩放速度随时间衰减的速率。"
+    },
+    {
+      "id": "ScreenSpaceZoomCameraController#maximumZoomDistance",
+      "field": "description",
+      "sourceHash": "sha256:8582330323d1e74a77772e8a7f9101f86f3264d3fa7510c726b1e7dbc24a43c8",
+      "text": "允许相机远离缩放目标的最大距离。"
+    },
+    {
+      "id": "ScreenSpaceZoomCameraController#maximumZoomVelocity",
+      "field": "description",
+      "sourceHash": "sha256:706c6aec948c98236f693d8d280d3c90d4b548c53c6d85358cb58955fcdccd35",
+      "text": "最大缩放速度，单位为米/秒，用于限制相机拉近和拉远的速度。"
+    },
+    {
+      "id": "ScreenSpaceZoomCameraController#pickWorldPosition",
+      "field": "description",
+      "sourceHash": "sha256:73e68dbd0db4d18d8c431b41fd8f5aeb0b6c046a00d38fc59d6dbafedbb2589c",
+      "text": "用于拾取缩放目标世界位置的回调。调用参数为 {@link Scene}、{@link Cartesian2} 屏幕位置及用于存放结果的 {@link Cartesian3} 实例。应返回缩放目标的 {@link Cartesian3} 世界位置；无法拾取时返回 <code>undefined</code>。"
+    },
+    {
+      "id": "ScreenSpaceZoomCameraController#scrollInputs",
+      "field": "description",
+      "sourceHash": "sha256:36a4385da31901325ca699d667e467257de66cd51219adac117b96ab25be2304",
+      "text": "控制缩放的滚轮输入绑定。"
+    },
+    {
+      "id": "ScreenSpaceZoomCameraController#update",
+      "field": "description",
+      "sourceHash": "sha256:264b144bc295a0865653608c29b3d3840ca43747cb8299534735117c5ad35871",
+      "text": "每帧调用一次。实现 <code>update</code> 以修改相机或场景其他部分。"
+    },
+    {
+      "id": "ScreenSpaceZoomCameraController#usePointerPosition",
+      "field": "description",
+      "sourceHash": "sha256:09a89352d401092116823ce0576f96f27cfbd3f99a5b075b2b481c6de6cefe98",
+      "text": "为 false 时，相机向屏幕中心对应位置缩放；为 true 时，向开始拖动或滚动滚轮时鼠标或触摸点下方的位置缩放。"
+    },
+    {
+      "id": "ScreenSpaceZoomCameraController#zoomAnimationDuration",
+      "field": "description",
+      "sourceHash": "sha256:12bded91b79ffc82ec9a792cfe96d44b29163665a392f9ee64fad85c541c95ec",
+      "text": "单次缩放动画预期完成的时长，单位为秒。"
+    },
+    {
+      "id": "ScreenSpaceZoomCameraController#zoomDistanceRatio",
+      "field": "description",
+      "sourceHash": "sha256:9e9312e1ab3217d639627f68462f4d07dc8d9507831df73da79af520ae5ded3a",
+      "text": "相机与缩放目标之间的距离比例，用于确定每秒拉近或拉远的幅度。"
+    },
+    {
+      "id": "ScreenSpaceZoomCameraController#zoomSensitivity",
+      "field": "description",
+      "sourceHash": "sha256:9edbe62b215bcda9cd571cfff637a850dc237e0717a716e74009899f95480382",
+      "text": "根据鼠标滚轮增量调整相机缩放的灵敏度。"
+    },
+    {
+      "id": "ScreenSpaceZoomCameraController",
+      "field": "classdesc",
+      "sourceHash": "sha256:484b1d19a6ca6fce546e22f7ae6aedb06f1475f0c4a2205a57b50507584a538c",
+      "text": "基于指针屏幕位置使相机拉近或拉远的相机控制器。"
+    },
+    {
+      "id": "ScreenSpaceZoomCameraController",
+      "field": "description",
+      "sourceHash": "sha256:15fc53d62e5ee309e7e876ebcdca5fe4e45b9e9a142e3ad8254c7b7a2b287e7c",
+      "text": "创建新的 <code>ScreenSpaceZoomCameraController</code> 实例。"
+    },
+    {
+      "id": "ScreenSpaceZoomCameraController",
+      "field": "params/options/description",
+      "sourceHash": "sha256:a1276bf1e607da41b425d949cf1e50bf1cc3c6abe6a5bfd9b24ca712a59a461f",
+      "text": "控制器配置选项。"
+    }
+  ]
+}

@@ -1,0 +1,414 @@
+{
+  "schemaVersion": 1,
+  "locale": "zh-CN",
+  "entries": [
+    {
+      "id": "SceneGISModelFlatten#destroy",
+      "field": "description",
+      "sourceHash": "sha256:b385add820d9f47d540aad147f1cdf85f05e8c6cb81c3928a59c8fd5f7bd8d69",
+      "text": "销毁此对象持有的 WebGL 资源。显式销毁可确定地释放 WebGL 资源，而不依赖垃圾回收器回收此对象。<br /><br />对象销毁后不应再使用；调用除 <code>isDestroyed</code> 以外的任何函数都会抛出 {@link DeveloperError}。因此，应像示例中那样将返回值（<code>undefined</code>）赋给该对象变量。"
+    },
+    {
+      "id": "SceneGISModelFlatten#fragmentShaderText",
+      "field": "description",
+      "sourceHash": "sha256:b6b317cab3e705602c8463a2171e786b5c7304487b0a8b8081ebe66ecd3e0129",
+      "text": "用户自定义的片元着色器 GLSL 代码。"
+    },
+    {
+      "id": "SceneGISModelFlatten#isDestroyed",
+      "field": "description",
+      "sourceHash": "sha256:aea7b697937631c90ae3fc0ec55b81ba0ddc7abe4d6045848b2031f9bed60091",
+      "text": "若此对象已销毁，返回 true；否则返回 false。<br /><br />对象销毁后不应再使用；调用除 <code>isDestroyed</code> 以外的任何函数都会抛出 {@link DeveloperError}。"
+    },
+    {
+      "id": "SceneGISModelFlatten#lightingModel",
+      "field": "description",
+      "sourceHash": "sha256:bde41b6224edddb82960d715380743aa28ea349200bcc27a3b112300be78410d",
+      "text": "自定义着色器使用的光照模型，由 {@link CustomShaderPipelineStage} 使用。"
+    },
+    {
+      "id": "SceneGISModelFlatten#mode",
+      "field": "description",
+      "sourceHash": "sha256:b7d38d21b75fa7ce01956f557b203addea7014ee2f94e7d27651cd07e3f84789",
+      "text": "决定自定义着色器如何与完整片元着色器交互的值，由 {@link CustomShaderPipelineStage} 使用。"
+    },
+    {
+      "id": "SceneGISModelFlatten#setUniform",
+      "field": "description",
+      "sourceHash": "sha256:22e8c37f837632857b244d8f384eb98fe70c07b6fee4a7c550e3b22ece74a490",
+      "text": "更新着色器中已声明 uniform 的值。"
+    },
+    {
+      "id": "SceneGISModelFlatten#setUniform",
+      "field": "params/uniformName/description",
+      "sourceHash": "sha256:bc7a0c4ac5607c17976a77378bb26e162ad1f143c4d35418fd5a1674e1bb73b9",
+      "text": "uniform 的 GLSL 名称，必须与构造时声明的某个 uniform 一致。"
+    },
+    {
+      "id": "SceneGISModelFlatten#setUniform",
+      "field": "params/value/description",
+      "sourceHash": "sha256:c99495f1e676c46f52a2a288a460002ab54e47cac061f4516efa7b7632a68056",
+      "text": "uniform 的新值。"
+    },
+    {
+      "id": "SceneGISModelFlatten#translucencyMode",
+      "field": "description",
+      "sourceHash": "sha256:2f1f80c983e2c72ee1cc530db5f5719f21beab9408df2fa332ab49046fc36226",
+      "text": "半透明模式，决定如何应用自定义着色器。为 CustomShaderTranslucencyMode.OPAQUE 或 CustomShaderTranslucencyMode.TRANSLUCENT 时，覆盖模型材质设置；为 CustomShaderTranslucencyMode.INHERIT 时，根据图元材质设置选择不透明或半透明渲染。"
+    },
+    {
+      "id": "SceneGISModelFlatten#uniforms",
+      "field": "description",
+      "sourceHash": "sha256:4de97794e68bdb7d31d38a3949049b160ab91e815b83aa158f824302d02b6cb4",
+      "text": "用户声明的额外 uniform。"
+    },
+    {
+      "id": "SceneGISModelFlatten#varyings",
+      "field": "description",
+      "sourceHash": "sha256:9d4031149b173e11182a50e109b83a67d7d32cd1b39bf5fedc17489435cde8e2",
+      "text": "用户声明的额外 varying，由 {@link CustomShaderPipelineStage} 使用。"
+    },
+    {
+      "id": "SceneGISModelFlatten#vertexShaderText",
+      "field": "description",
+      "sourceHash": "sha256:674630a6a3c91bf1b6a3a1fce86326995e7ee3dad6ec4b57efeaa47c78f94c6f",
+      "text": "用户自定义的顶点着色器 GLSL 代码。"
+    },
+    {
+      "id": "SceneGISRainLensStage#clearColor",
+      "field": "description",
+      "sourceHash": "sha256:d32cd9a7c7963ab9043b70f44841be7a63cb0472da7c0b30946ddaca1f9faac9",
+      "text": "清空输出纹理时所用的颜色。"
+    },
+    {
+      "id": "SceneGISRainLensStage#enabled",
+      "field": "description",
+      "sourceHash": "sha256:3eb19eece264775a72ba95f493d678e3056c32092659186c0628ec761b8f8d23",
+      "text": "就绪后是否执行此后处理阶段。"
+    },
+    {
+      "id": "SceneGISRainLensStage#forcePowerOfTwo",
+      "field": "description",
+      "sourceHash": "sha256:290e4c1c2c4f746f9f4c0823d142da6d57f3eaec7ebbc0e38ea6e77e82f4b88f",
+      "text": "是否强制输出纹理宽高相等且均为 2 的幂。取原宽高较小值向上对应的 2 的幂。"
+    },
+    {
+      "id": "SceneGISRainLensStage#fragmentShader",
+      "field": "description",
+      "sourceHash": "sha256:eb7ca809b95ef422e4e284ef902687ab6afbb2b5a8d55718e4b41c1649c78b76",
+      "text": "执行此后处理阶段所用的片元着色器。\n<p>\n必须声明 <code>colorTexture</code>、<code>depthTexture</code> 中的一个或两个 sampler uniform。\n</p>\n<p>\n还必须声明名为 <code>v_textureCoordinates</code>、类型为 <code>vec2</code> 的 varying，用于采样纹理 uniform。\n</p>"
+    },
+    {
+      "id": "SceneGISRainLensStage#isDestroyed",
+      "field": "description",
+      "sourceHash": "sha256:8e0063c3cea634f0d58d690ac4d7a4fb34a488a5a13452889ede3a1d69c680e1",
+      "text": "若此对象已销毁，返回 true；否则返回 false。<p>对象销毁后不应再使用；调用除 <code>isDestroyed</code> 以外的任何函数都会抛出 {@link DeveloperError}。</p>"
+    },
+    {
+      "id": "SceneGISRainLensStage#name",
+      "field": "description",
+      "sourceHash": "sha256:4e5feb4b70b534b1ff400b960cfbbae1ee28afe9f4757d2e954fba68ad30a0c3",
+      "text": "此后处理阶段的唯一名称，供 {@link PostProcessStageComposite} 中的其他阶段引用。"
+    },
+    {
+      "id": "SceneGISRainLensStage#pixelDatatype",
+      "field": "description",
+      "sourceHash": "sha256:7c45a0534647cc98b2e9c5139299b2b3c6b02d594ef4c6f59a1b6f74a66bff4c",
+      "text": "输出纹理的像素数据类型。"
+    },
+    {
+      "id": "SceneGISRainLensStage#pixelFormat",
+      "field": "description",
+      "sourceHash": "sha256:c307611482e93374b4e65193ba73aa6e8e60d6066944ab247e5679243b7bf146",
+      "text": "输出纹理的颜色像素格式。"
+    },
+    {
+      "id": "SceneGISRainLensStage#ready",
+      "field": "description",
+      "sourceHash": "sha256:5ee61f26da71632cb779684e24e69205b1317673a0e7f5d018fc81e6ffce865c",
+      "text": "判断此后处理阶段是否可执行。仅当 <code>ready</code> 和 {@link PostProcessStage#enabled} 都为 <code>true</code> 时才会执行。等待纹理加载期间不会就绪。"
+    },
+    {
+      "id": "SceneGISRainLensStage#sampleMode",
+      "field": "description",
+      "sourceHash": "sha256:1260de92561b84a8157cbce084e753641f27092c3d3fe6f594a9e2fcf79aa4d1",
+      "text": "输入颜色纹理的采样方式。"
+    },
+    {
+      "id": "SceneGISRainLensStage#scissorRectangle",
+      "field": "description",
+      "sourceHash": "sha256:5e9ff6f194f7f6432c5c66adf758745f2e6bda3393e0c942141d826f944a0774",
+      "text": "裁剪测试所用的 {@link BoundingRectangle}。使用默认包围矩形会禁用裁剪测试。"
+    },
+    {
+      "id": "SceneGISRainLensStage#selected",
+      "field": "description",
+      "sourceHash": "sha256:78e9f5a5eb9786b3c70844449027adb0e68e05679f2d168c65c4d604cd0566ba",
+      "text": "选中并应用后处理的要素。\n<p>\n在片元着色器中使用 <code>czm_selected</code> 判断是否对当前片元应用此阶段。例如：\n<code>\rif (czm_selected(v_textureCoordinates)) {\r    // apply post-process stage\r} else {\r    out_FragColor = texture(colorTexture, v_textureCoordinates);\r}\r</code>\r</p>"
+    },
+    {
+      "id": "SceneGISRainLensStage#textureScale",
+      "field": "description",
+      "sourceHash": "sha256:130422b0d9fb0f1f067ecedd7b574dce2187b15b8076db7fddc8a1fa08d5e950",
+      "text": "用于缩放输出纹理尺寸的系数，范围为 (0.0, 1.0]。为 1.0 时，将此后处理阶段渲染到与视口尺寸相同的纹理。"
+    },
+    {
+      "id": "SceneGISRainLensStage#uniforms",
+      "field": "description",
+      "sourceHash": "sha256:f4bdbdff7072bf4ac43833dc6d6e69396669a6fa6857f03d773720a2afda0d24",
+      "text": "用于设置片元着色器 uniform 的属性对象。\n<p>\n属性值可以是常量或函数。函数在每帧执行此后处理阶段之前调用。\n</p>\n<p>\n常量也可以是图像 URI、data URI，或可用作纹理的 HTML 元素，例如 HTMLImageElement 或 HTMLCanvasElement。\n</p>\n<p>\n若此阶段属于一个非串行执行的 {@link PostProcessStageComposite}，常量还可以是组合中另一阶段的名称，此时 uniform 会引用该名称对应阶段的输出纹理。\n</p>"
+    },
+    {
+      "id": "SceneGISSnowLensStage#clearColor",
+      "field": "description",
+      "sourceHash": "sha256:d32cd9a7c7963ab9043b70f44841be7a63cb0472da7c0b30946ddaca1f9faac9",
+      "text": "清空输出纹理时所用的颜色。"
+    },
+    {
+      "id": "SceneGISSnowLensStage#enabled",
+      "field": "description",
+      "sourceHash": "sha256:3eb19eece264775a72ba95f493d678e3056c32092659186c0628ec761b8f8d23",
+      "text": "就绪后是否执行此后处理阶段。"
+    },
+    {
+      "id": "SceneGISSnowLensStage#forcePowerOfTwo",
+      "field": "description",
+      "sourceHash": "sha256:290e4c1c2c4f746f9f4c0823d142da6d57f3eaec7ebbc0e38ea6e77e82f4b88f",
+      "text": "是否强制输出纹理宽高相等且均为 2 的幂。取原宽高较小值向上对应的 2 的幂。"
+    },
+    {
+      "id": "SceneGISSnowLensStage#fragmentShader",
+      "field": "description",
+      "sourceHash": "sha256:eb7ca809b95ef422e4e284ef902687ab6afbb2b5a8d55718e4b41c1649c78b76",
+      "text": "执行此后处理阶段所用的片元着色器。\n<p>\n必须声明 <code>colorTexture</code>、<code>depthTexture</code> 中的一个或两个 sampler uniform。\n</p>\n<p>\n还必须声明名为 <code>v_textureCoordinates</code>、类型为 <code>vec2</code> 的 varying，用于采样纹理 uniform。\n</p>"
+    },
+    {
+      "id": "SceneGISSnowLensStage#isDestroyed",
+      "field": "description",
+      "sourceHash": "sha256:8e0063c3cea634f0d58d690ac4d7a4fb34a488a5a13452889ede3a1d69c680e1",
+      "text": "若此对象已销毁，返回 true；否则返回 false。<p>对象销毁后不应再使用；调用除 <code>isDestroyed</code> 以外的任何函数都会抛出 {@link DeveloperError}。</p>"
+    },
+    {
+      "id": "SceneGISSnowLensStage#name",
+      "field": "description",
+      "sourceHash": "sha256:4e5feb4b70b534b1ff400b960cfbbae1ee28afe9f4757d2e954fba68ad30a0c3",
+      "text": "此后处理阶段的唯一名称，供 {@link PostProcessStageComposite} 中的其他阶段引用。"
+    },
+    {
+      "id": "SceneGISSnowLensStage#pixelDatatype",
+      "field": "description",
+      "sourceHash": "sha256:7c45a0534647cc98b2e9c5139299b2b3c6b02d594ef4c6f59a1b6f74a66bff4c",
+      "text": "输出纹理的像素数据类型。"
+    },
+    {
+      "id": "SceneGISSnowLensStage#pixelFormat",
+      "field": "description",
+      "sourceHash": "sha256:c307611482e93374b4e65193ba73aa6e8e60d6066944ab247e5679243b7bf146",
+      "text": "输出纹理的颜色像素格式。"
+    },
+    {
+      "id": "SceneGISSnowLensStage#ready",
+      "field": "description",
+      "sourceHash": "sha256:5ee61f26da71632cb779684e24e69205b1317673a0e7f5d018fc81e6ffce865c",
+      "text": "判断此后处理阶段是否可执行。仅当 <code>ready</code> 和 {@link PostProcessStage#enabled} 都为 <code>true</code> 时才会执行。等待纹理加载期间不会就绪。"
+    },
+    {
+      "id": "SceneGISSnowLensStage#sampleMode",
+      "field": "description",
+      "sourceHash": "sha256:1260de92561b84a8157cbce084e753641f27092c3d3fe6f594a9e2fcf79aa4d1",
+      "text": "输入颜色纹理的采样方式。"
+    },
+    {
+      "id": "SceneGISSnowLensStage#scissorRectangle",
+      "field": "description",
+      "sourceHash": "sha256:5e9ff6f194f7f6432c5c66adf758745f2e6bda3393e0c942141d826f944a0774",
+      "text": "裁剪测试所用的 {@link BoundingRectangle}。使用默认包围矩形会禁用裁剪测试。"
+    },
+    {
+      "id": "SceneGISSnowLensStage#selected",
+      "field": "description",
+      "sourceHash": "sha256:78e9f5a5eb9786b3c70844449027adb0e68e05679f2d168c65c4d604cd0566ba",
+      "text": "选中并应用后处理的要素。\n<p>\n在片元着色器中使用 <code>czm_selected</code> 判断是否对当前片元应用此阶段。例如：\n<code>\rif (czm_selected(v_textureCoordinates)) {\r    // apply post-process stage\r} else {\r    out_FragColor = texture(colorTexture, v_textureCoordinates);\r}\r</code>\r</p>"
+    },
+    {
+      "id": "SceneGISSnowLensStage#textureScale",
+      "field": "description",
+      "sourceHash": "sha256:130422b0d9fb0f1f067ecedd7b574dce2187b15b8076db7fddc8a1fa08d5e950",
+      "text": "用于缩放输出纹理尺寸的系数，范围为 (0.0, 1.0]。为 1.0 时，将此后处理阶段渲染到与视口尺寸相同的纹理。"
+    },
+    {
+      "id": "SceneGISSnowLensStage#uniforms",
+      "field": "description",
+      "sourceHash": "sha256:f4bdbdff7072bf4ac43833dc6d6e69396669a6fa6857f03d773720a2afda0d24",
+      "text": "用于设置片元着色器 uniform 的属性对象。\n<p>\n属性值可以是常量或函数。函数在每帧执行此后处理阶段之前调用。\n</p>\n<p>\n常量也可以是图像 URI、data URI，或可用作纹理的 HTML 元素，例如 HTMLImageElement 或 HTMLCanvasElement。\n</p>\n<p>\n若此阶段属于一个非串行执行的 {@link PostProcessStageComposite}，常量还可以是组合中另一阶段的名称，此时 uniform 会引用该名称对应阶段的输出纹理。\n</p>"
+    },
+    {
+      "id": "SceneGISVideoProjection#clearColor",
+      "field": "description",
+      "sourceHash": "sha256:d32cd9a7c7963ab9043b70f44841be7a63cb0472da7c0b30946ddaca1f9faac9",
+      "text": "清空输出纹理时所用的颜色。"
+    },
+    {
+      "id": "SceneGISVideoProjection#enabled",
+      "field": "description",
+      "sourceHash": "sha256:3eb19eece264775a72ba95f493d678e3056c32092659186c0628ec761b8f8d23",
+      "text": "就绪后是否执行此后处理阶段。"
+    },
+    {
+      "id": "SceneGISVideoProjection#forcePowerOfTwo",
+      "field": "description",
+      "sourceHash": "sha256:290e4c1c2c4f746f9f4c0823d142da6d57f3eaec7ebbc0e38ea6e77e82f4b88f",
+      "text": "是否强制输出纹理宽高相等且均为 2 的幂。取原宽高较小值向上对应的 2 的幂。"
+    },
+    {
+      "id": "SceneGISVideoProjection#fragmentShader",
+      "field": "description",
+      "sourceHash": "sha256:eb7ca809b95ef422e4e284ef902687ab6afbb2b5a8d55718e4b41c1649c78b76",
+      "text": "执行此后处理阶段所用的片元着色器。\n<p>\n必须声明 <code>colorTexture</code>、<code>depthTexture</code> 中的一个或两个 sampler uniform。\n</p>\n<p>\n还必须声明名为 <code>v_textureCoordinates</code>、类型为 <code>vec2</code> 的 varying，用于采样纹理 uniform。\n</p>"
+    },
+    {
+      "id": "SceneGISVideoProjection#isDestroyed",
+      "field": "description",
+      "sourceHash": "sha256:8e0063c3cea634f0d58d690ac4d7a4fb34a488a5a13452889ede3a1d69c680e1",
+      "text": "若此对象已销毁，返回 true；否则返回 false。<p>对象销毁后不应再使用；调用除 <code>isDestroyed</code> 以外的任何函数都会抛出 {@link DeveloperError}。</p>"
+    },
+    {
+      "id": "SceneGISVideoProjection#name",
+      "field": "description",
+      "sourceHash": "sha256:4e5feb4b70b534b1ff400b960cfbbae1ee28afe9f4757d2e954fba68ad30a0c3",
+      "text": "此后处理阶段的唯一名称，供 {@link PostProcessStageComposite} 中的其他阶段引用。"
+    },
+    {
+      "id": "SceneGISVideoProjection#pixelDatatype",
+      "field": "description",
+      "sourceHash": "sha256:7c45a0534647cc98b2e9c5139299b2b3c6b02d594ef4c6f59a1b6f74a66bff4c",
+      "text": "输出纹理的像素数据类型。"
+    },
+    {
+      "id": "SceneGISVideoProjection#pixelFormat",
+      "field": "description",
+      "sourceHash": "sha256:c307611482e93374b4e65193ba73aa6e8e60d6066944ab247e5679243b7bf146",
+      "text": "输出纹理的颜色像素格式。"
+    },
+    {
+      "id": "SceneGISVideoProjection#ready",
+      "field": "description",
+      "sourceHash": "sha256:5ee61f26da71632cb779684e24e69205b1317673a0e7f5d018fc81e6ffce865c",
+      "text": "判断此后处理阶段是否可执行。仅当 <code>ready</code> 和 {@link PostProcessStage#enabled} 都为 <code>true</code> 时才会执行。等待纹理加载期间不会就绪。"
+    },
+    {
+      "id": "SceneGISVideoProjection#sampleMode",
+      "field": "description",
+      "sourceHash": "sha256:1260de92561b84a8157cbce084e753641f27092c3d3fe6f594a9e2fcf79aa4d1",
+      "text": "输入颜色纹理的采样方式。"
+    },
+    {
+      "id": "SceneGISVideoProjection#scissorRectangle",
+      "field": "description",
+      "sourceHash": "sha256:5e9ff6f194f7f6432c5c66adf758745f2e6bda3393e0c942141d826f944a0774",
+      "text": "裁剪测试所用的 {@link BoundingRectangle}。使用默认包围矩形会禁用裁剪测试。"
+    },
+    {
+      "id": "SceneGISVideoProjection#selected",
+      "field": "description",
+      "sourceHash": "sha256:78e9f5a5eb9786b3c70844449027adb0e68e05679f2d168c65c4d604cd0566ba",
+      "text": "选中并应用后处理的要素。\n<p>\n在片元着色器中使用 <code>czm_selected</code> 判断是否对当前片元应用此阶段。例如：\n<code>\rif (czm_selected(v_textureCoordinates)) {\r    // apply post-process stage\r} else {\r    out_FragColor = texture(colorTexture, v_textureCoordinates);\r}\r</code>\r</p>"
+    },
+    {
+      "id": "SceneGISVideoProjection#textureScale",
+      "field": "description",
+      "sourceHash": "sha256:130422b0d9fb0f1f067ecedd7b574dce2187b15b8076db7fddc8a1fa08d5e950",
+      "text": "用于缩放输出纹理尺寸的系数，范围为 (0.0, 1.0]。为 1.0 时，将此后处理阶段渲染到与视口尺寸相同的纹理。"
+    },
+    {
+      "id": "SceneGISVideoProjection#uniforms",
+      "field": "description",
+      "sourceHash": "sha256:f4bdbdff7072bf4ac43833dc6d6e69396669a6fa6857f03d773720a2afda0d24",
+      "text": "用于设置片元着色器 uniform 的属性对象。\n<p>\n属性值可以是常量或函数。函数在每帧执行此后处理阶段之前调用。\n</p>\n<p>\n常量也可以是图像 URI、data URI，或可用作纹理的 HTML 元素，例如 HTMLImageElement 或 HTMLCanvasElement。\n</p>\n<p>\n若此阶段属于一个非串行执行的 {@link PostProcessStageComposite}，常量还可以是组合中另一阶段的名称，此时 uniform 会引用该名称对应阶段的输出纹理。\n</p>"
+    },
+    {
+      "id": "SceneGISViewshed#clearColor",
+      "field": "description",
+      "sourceHash": "sha256:d32cd9a7c7963ab9043b70f44841be7a63cb0472da7c0b30946ddaca1f9faac9",
+      "text": "清空输出纹理时所用的颜色。"
+    },
+    {
+      "id": "SceneGISViewshed#enabled",
+      "field": "description",
+      "sourceHash": "sha256:3eb19eece264775a72ba95f493d678e3056c32092659186c0628ec761b8f8d23",
+      "text": "就绪后是否执行此后处理阶段。"
+    },
+    {
+      "id": "SceneGISViewshed#forcePowerOfTwo",
+      "field": "description",
+      "sourceHash": "sha256:290e4c1c2c4f746f9f4c0823d142da6d57f3eaec7ebbc0e38ea6e77e82f4b88f",
+      "text": "是否强制输出纹理宽高相等且均为 2 的幂。取原宽高较小值向上对应的 2 的幂。"
+    },
+    {
+      "id": "SceneGISViewshed#fragmentShader",
+      "field": "description",
+      "sourceHash": "sha256:eb7ca809b95ef422e4e284ef902687ab6afbb2b5a8d55718e4b41c1649c78b76",
+      "text": "执行此后处理阶段所用的片元着色器。\n<p>\n必须声明 <code>colorTexture</code>、<code>depthTexture</code> 中的一个或两个 sampler uniform。\n</p>\n<p>\n还必须声明名为 <code>v_textureCoordinates</code>、类型为 <code>vec2</code> 的 varying，用于采样纹理 uniform。\n</p>"
+    },
+    {
+      "id": "SceneGISViewshed#isDestroyed",
+      "field": "description",
+      "sourceHash": "sha256:8e0063c3cea634f0d58d690ac4d7a4fb34a488a5a13452889ede3a1d69c680e1",
+      "text": "若此对象已销毁，返回 true；否则返回 false。<p>对象销毁后不应再使用；调用除 <code>isDestroyed</code> 以外的任何函数都会抛出 {@link DeveloperError}。</p>"
+    },
+    {
+      "id": "SceneGISViewshed#name",
+      "field": "description",
+      "sourceHash": "sha256:4e5feb4b70b534b1ff400b960cfbbae1ee28afe9f4757d2e954fba68ad30a0c3",
+      "text": "此后处理阶段的唯一名称，供 {@link PostProcessStageComposite} 中的其他阶段引用。"
+    },
+    {
+      "id": "SceneGISViewshed#pixelDatatype",
+      "field": "description",
+      "sourceHash": "sha256:7c45a0534647cc98b2e9c5139299b2b3c6b02d594ef4c6f59a1b6f74a66bff4c",
+      "text": "输出纹理的像素数据类型。"
+    },
+    {
+      "id": "SceneGISViewshed#pixelFormat",
+      "field": "description",
+      "sourceHash": "sha256:c307611482e93374b4e65193ba73aa6e8e60d6066944ab247e5679243b7bf146",
+      "text": "输出纹理的颜色像素格式。"
+    },
+    {
+      "id": "SceneGISViewshed#ready",
+      "field": "description",
+      "sourceHash": "sha256:5ee61f26da71632cb779684e24e69205b1317673a0e7f5d018fc81e6ffce865c",
+      "text": "判断此后处理阶段是否可执行。仅当 <code>ready</code> 和 {@link PostProcessStage#enabled} 都为 <code>true</code> 时才会执行。等待纹理加载期间不会就绪。"
+    },
+    {
+      "id": "SceneGISViewshed#sampleMode",
+      "field": "description",
+      "sourceHash": "sha256:1260de92561b84a8157cbce084e753641f27092c3d3fe6f594a9e2fcf79aa4d1",
+      "text": "输入颜色纹理的采样方式。"
+    },
+    {
+      "id": "SceneGISViewshed#scissorRectangle",
+      "field": "description",
+      "sourceHash": "sha256:5e9ff6f194f7f6432c5c66adf758745f2e6bda3393e0c942141d826f944a0774",
+      "text": "裁剪测试所用的 {@link BoundingRectangle}。使用默认包围矩形会禁用裁剪测试。"
+    },
+    {
+      "id": "SceneGISViewshed#selected",
+      "field": "description",
+      "sourceHash": "sha256:78e9f5a5eb9786b3c70844449027adb0e68e05679f2d168c65c4d604cd0566ba",
+      "text": "选中并应用后处理的要素。\n<p>\n在片元着色器中使用 <code>czm_selected</code> 判断是否对当前片元应用此阶段。例如：\n<code>\rif (czm_selected(v_textureCoordinates)) {\r    // apply post-process stage\r} else {\r    out_FragColor = texture(colorTexture, v_textureCoordinates);\r}\r</code>\r</p>"
+    },
+    {
+      "id": "SceneGISViewshed#textureScale",
+      "field": "description",
+      "sourceHash": "sha256:130422b0d9fb0f1f067ecedd7b574dce2187b15b8076db7fddc8a1fa08d5e950",
+      "text": "用于缩放输出纹理尺寸的系数，范围为 (0.0, 1.0]。为 1.0 时，将此后处理阶段渲染到与视口尺寸相同的纹理。"
+    },
+    {
+      "id": "SceneGISViewshed#uniforms",
+      "field": "description",
+      "sourceHash": "sha256:f4bdbdff7072bf4ac43833dc6d6e69396669a6fa6857f03d773720a2afda0d24",
+      "text": "用于设置片元着色器 uniform 的属性对象。\n<p>\n属性值可以是常量或函数。函数在每帧执行此后处理阶段之前调用。\n</p>\n<p>\n常量也可以是图像 URI、data URI，或可用作纹理的 HTML 元素，例如 HTMLImageElement 或 HTMLCanvasElement。\n</p>\n<p>\n若此阶段属于一个非串行执行的 {@link PostProcessStageComposite}，常量还可以是组合中另一阶段的名称，此时 uniform 会引用该名称对应阶段的输出纹理。\n</p>"
+    }
+  ]
+}

@@ -60,15 +60,17 @@ phases, each reviewed and committed before the next begins. No new runtime or ge
 
 - [T1 foundation](2026-10-30-t1-foundation-translation.md): completed and reviewed;
   coordinate/vector/matrix/color/bounds/math APIs add 2,107 fields, reaching 41.8% native coverage.
-- [T2 loading and time](2026-10-30-t2-loading-time-translation.md): active after T1 checkpoint
+- [T2 loading and time](2026-10-30-t2-loading-time-translation.md): completed and reviewed after T1 checkpoint
   `7141d62015`; 60 resource/time/terrain/provider roots with 1,699 missing fields.
 - [T3 rendering](2026-10-30-t3-rendering-translation.md): completed and reviewed; 1,560 new
   records complete 80 roots and reach 63.1% coverage. Checkpoint `1b84d87298`.
 - [T4 entity data](2026-10-30-t4-data-translation.md): completed and reviewed; 1,471 new
   records complete 91 roots and reach 72.7% coverage. Checkpoint `e8224e7504`.
 - [T5 geometry/numerics](2026-10-30-t5-geometry-translation.md): completed and reviewed;
-  1,547 new records complete 95 roots and reach 82.8% coverage. Ready for its checkpoint.
-- Remaining widgets/input, metadata/providers and utilities will be elaborated after each checkpoint.
+  1,547 new records complete 95 roots and reach 82.8% coverage. Checkpoint `67269fc68a`.
+- [T6 widgets and input](2026-10-30-t6-widget-input-translation.md): completed and reviewed after T5 checkpoint;
+  832 new records complete 69 widget/input/controller roots and inherited native fields. Ready for checkpoint.
+- Remaining metadata/providers and utilities will be elaborated after each checkpoint.
 - Remainder and final gate: cover every remaining native field, resolve changed/unused
   catalog records, and verify missing/stale/unused are all zero. Preserve semantic metadata,
   code, links and Chinese owned-source separation throughout.

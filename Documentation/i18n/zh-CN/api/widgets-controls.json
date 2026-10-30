@@ -1,0 +1,1872 @@
+{
+  "schemaVersion": 1,
+  "locale": "zh-CN",
+  "entries": [
+    {
+      "id": "Animation#applyThemeChanges",
+      "field": "description",
+      "sourceHash": "sha256:8c6e9b3b338f2a877134f9ad0f6fbeab547c7f9cd4d0c823814ed589101e68fe",
+      "text": "更新控件，使其反映主题 CSS 规则的修改。"
+    },
+    {
+      "id": "Animation#destroy",
+      "field": "description",
+      "sourceHash": "sha256:72be107b35dcdba982f63e6e155c93d3f347e49fc2c2f53f60ae0854fb07ab6e",
+      "text": "销毁动画控件。从布局中永久移除控件时应调用。"
+    },
+    {
+      "id": "Animation#resize",
+      "field": "description",
+      "sourceHash": "sha256:1de7da27732c530c4c314ea90f5941297f3251fff234dc6e84d4f2c89848910b",
+      "text": "调整控件尺寸以匹配容器。容器尺寸变化时应调用此函数。"
+    },
+    {
+      "id": "Animation",
+      "field": "description",
+      "sourceHash": "sha256:0a5448a999fea0f4cdb07cbc2f57b075fff2ce95127997de11ecc2b1e6da2d4f",
+      "text": "<span style=\"display: block; text-align: center;\">\n<img src=\"Images/AnimationWidget.png\" width=\"211\" height=\"142\" alt=\"\" />\n<br />动画控件\n</span>\n<br /><br />\n动画控件提供播放、暂停和反向播放按钮，显示当前日期与时间，并通过周围的播放调速环控制动画速度。\n<br /><br />\n调速环借鉴视频编辑设备：微调轮用于缓慢逐帧移动，外侧调速环用于控制快速播放的方向和速度。Cesium 通常将时间视为连续量，而非预定义的动画帧，因此此控件不提供微调轮；调速环同时支持快速和极慢播放。可拖动环上的指针（上图绿色部分），或点击环内其他位置，将指针推至对应方向的下一个预设速度。\n<br /><br />\n左上角的实时按钮使动画时间与用户系统时钟同步，通常表示今天或此刻。在 {@link ClockRange.CLAMPED} 或 {@link ClockRange.LOOP_STOP} 模式下，如果当前时间超出 {@link Clock} 的 startTime 和 endTime，此模式不可用。"
+    },
+    {
+      "id": "Animation",
+      "field": "exceptions/0/description",
+      "sourceHash": "sha256:a32c282b167b77335c61e4f1422e007fbbef3c536b72457f3f99be4fdf0412f0",
+      "text": "文档中不存在 ID 为 \"container\" 的元素。"
+    },
+    {
+      "id": "Animation",
+      "field": "params/viewModel/description",
+      "sourceHash": "sha256:1008d5723061cee72742eb87d08bbad985480cf9674650b7ee867a6e48130b29",
+      "text": "此控件使用的视图模型。"
+    },
+    {
+      "id": "AnimationViewModel.DateFormatter",
+      "field": "description",
+      "sourceHash": "sha256:491ef297a8c6d9328579cc79fe663d0ff5538500f92f3911aa9a345c2d0c361c",
+      "text": "将日期格式化为显示文本的函数。"
+    },
+    {
+      "id": "AnimationViewModel.DateFormatter",
+      "field": "params/date/description",
+      "sourceHash": "sha256:ec19b1fcda774cfc42ca8ca151795732bdaf8e29270bd8574c4bb9692ae4744e",
+      "text": "待格式化的日期。"
+    },
+    {
+      "id": "AnimationViewModel.DateFormatter",
+      "field": "params/viewModel/description",
+      "sourceHash": "sha256:543c97b993b3f7287de480496e7a9521244fdf47056acb2270a993af908ce6ff",
+      "text": "请求格式化的 AnimationViewModel 实例。"
+    },
+    {
+      "id": "AnimationViewModel.DateFormatter",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:1f56aabc9099cb7987c2005bc31512f9bb8cad884a59e0c70eb3b95531cbc869",
+      "text": "所给日期中日历日期部分的字符串表示。"
+    },
+    {
+      "id": "AnimationViewModel.defaultDateFormatter",
+      "field": "description",
+      "sourceHash": "sha256:0a7e128805bccdc0bc333bbac1a52727e32410800c5033657a1441ca17af5f83",
+      "text": "获取或设置新实例使用的默认日期格式化函数。"
+    },
+    {
+      "id": "AnimationViewModel.defaultTicks",
+      "field": "description",
+      "sourceHash": "sha256:0cb6aec4f74f01b4f03230874882459d5ebdcac20fadcf3db9152363b6a66a6e",
+      "text": "获取或设置新建调速环实例使用的默认预设时钟倍率数组。"
+    },
+    {
+      "id": "AnimationViewModel.defaultTimeFormatter",
+      "field": "description",
+      "sourceHash": "sha256:599a5a749356192a003986962081b26da163ccda2641f8f56783f03d9d5bd0f9",
+      "text": "获取或设置新实例使用的默认时间格式化函数。"
+    },
+    {
+      "id": "AnimationViewModel.TimeFormatter",
+      "field": "description",
+      "sourceHash": "sha256:6a7a810b3072746c8f79865f578d60c5190e918119e67183cbc94ce423e4fb49",
+      "text": "将时间格式化为显示文本的函数。"
+    },
+    {
+      "id": "AnimationViewModel.TimeFormatter",
+      "field": "params/date/description",
+      "sourceHash": "sha256:ec19b1fcda774cfc42ca8ca151795732bdaf8e29270bd8574c4bb9692ae4744e",
+      "text": "待格式化的日期。"
+    },
+    {
+      "id": "AnimationViewModel.TimeFormatter",
+      "field": "params/viewModel/description",
+      "sourceHash": "sha256:543c97b993b3f7287de480496e7a9521244fdf47056acb2270a993af908ce6ff",
+      "text": "请求格式化的 AnimationViewModel 实例。"
+    },
+    {
+      "id": "AnimationViewModel.TimeFormatter",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:2d8a02fe113136d7bd9f72540cf74d13cd58c6904c97320fc61c9630528cd0c2",
+      "text": "所给日期中时间部分的字符串表示。"
+    },
+    {
+      "id": "AnimationViewModel#clockViewModel",
+      "field": "description",
+      "sourceHash": "sha256:ac103959880dcc477bfc9301739d1506c1f834cf71585d2622fc417fe78bec9f",
+      "text": "获取时钟视图模型。"
+    },
+    {
+      "id": "AnimationViewModel#dateFormatter",
+      "field": "description",
+      "sourceHash": "sha256:f3a99c5f53de6763a4bebe3f639793891e507c1d0d72709d8922c7ae1dd022ba",
+      "text": "获取或设置将日期格式化为显示文本的函数。"
+    },
+    {
+      "id": "AnimationViewModel#dateLabel",
+      "field": "description",
+      "sourceHash": "sha256:84c9551006f5a2fcc8fa051b5ce1528cf90b5c8b168bf0b3ed8c51790fadc72b",
+      "text": "获取当前日期的字符串表示。此属性可观察。"
+    },
+    {
+      "id": "AnimationViewModel#faster",
+      "field": "description",
+      "sourceHash": "sha256:099afa690fc5a33e97ade45e70e6d521d7702bd387467e200501ec80c2409e47",
+      "text": "获取提高动画播放速度的命令。"
+    },
+    {
+      "id": "AnimationViewModel#getShuttleRingTicks",
+      "field": "description",
+      "sourceHash": "sha256:81d5d43dfc4d51811d4385674b9903c6c21ce7b89d38cdd10cfb0222d8958da8",
+      "text": "获取调速环所用正数预设时钟倍率数组的副本。"
+    },
+    {
+      "id": "AnimationViewModel#getShuttleRingTicks",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:cadfe9299af259c88c6bd2f9db3100a0715d2d6da4a539790690ca1ace26823e",
+      "text": "调速环使用的预设时钟倍率数组。"
+    },
+    {
+      "id": "AnimationViewModel#multiplierLabel",
+      "field": "description",
+      "sourceHash": "sha256:f1175e9720c1cbfffb5ab74bec3c39f531bf95e93268bc7aed72a9d30387ec4f",
+      "text": "获取当前倍率的字符串表示。此属性可观察。"
+    },
+    {
+      "id": "AnimationViewModel#pauseViewModel",
+      "field": "description",
+      "sourceHash": "sha256:48bc2af588843f6277ce29331af3610c47c7443099ecde7984e7d651eb0cae2f",
+      "text": "获取暂停切换按钮的视图模型。"
+    },
+    {
+      "id": "AnimationViewModel#playForwardViewModel",
+      "field": "description",
+      "sourceHash": "sha256:d494a4189ac0ac548e585c7c194c23b2b78e19bd231de63ba007ddf496317981",
+      "text": "获取正向播放切换按钮的视图模型。"
+    },
+    {
+      "id": "AnimationViewModel#playRealtimeViewModel",
+      "field": "description",
+      "sourceHash": "sha256:8261f53c63c8e1fed2478656b99174e0d63f1dbe3e4a227ad09c54d385664c3c",
+      "text": "获取实时播放切换按钮的视图模型。"
+    },
+    {
+      "id": "AnimationViewModel#playReverseViewModel",
+      "field": "description",
+      "sourceHash": "sha256:5c4c8dd33ca27fcdd03208b34b7ca1bd62a037c06faf9dde67f2e6b2c91ab48b",
+      "text": "获取反向播放切换按钮的视图模型。"
+    },
+    {
+      "id": "AnimationViewModel#setShuttleRingTicks",
+      "field": "description",
+      "sourceHash": "sha256:d52629198d4b58c3e82c8cde67b08d606e9fb3a8569a648a3cb0b567e0b59363",
+      "text": "设置调速环使用的正数预设时钟倍率数组。会同时生成对应负值，用于确定调速环的最小、最大范围及单击时吸附的倍率。无需预先排序；会自动排序并去除重复值。"
+    },
+    {
+      "id": "AnimationViewModel#setShuttleRingTicks",
+      "field": "params/positiveTicks/description",
+      "sourceHash": "sha256:b10c4e38ee1fbc7960e3db6dacea3ccbcc5cac73c13281f1624320af3485ce1a",
+      "text": "调速环使用的正数预设时钟倍率列表。"
+    },
+    {
+      "id": "AnimationViewModel#shuttleRingAngle",
+      "field": "description",
+      "sourceHash": "sha256:bad5bd425930e05a1ccbcfd009ba31b026655bf7a36511341c1b1dcc548e6c3f",
+      "text": "获取或设置当前调速环角度。此属性可观察。"
+    },
+    {
+      "id": "AnimationViewModel#shuttleRingDragging",
+      "field": "description",
+      "sourceHash": "sha256:abc52cfa1c451bb308188ed4d1fe366e37df64d00303e0f50f8b70477c21ca0a",
+      "text": "获取或设置当前是否正在拖动调速环。此属性可观察。"
+    },
+    {
+      "id": "AnimationViewModel#slower",
+      "field": "description",
+      "sourceHash": "sha256:ee7e1ab59dc6b83bd1f3f760b09a8be17f4dd41af7a36bd30c9b7151168516e7",
+      "text": "获取降低动画播放速度的命令。"
+    },
+    {
+      "id": "AnimationViewModel#snapToTicks",
+      "field": "description",
+      "sourceHash": "sha256:7721c994fa062c1268f79f1460a5f669d9c35b1f17524f7736cfe7a31a5474e3",
+      "text": "获取或设置拖动调速环时，倍率是否吸附至定义的刻度值，而非在刻度之间插值。此属性可观察。"
+    },
+    {
+      "id": "AnimationViewModel#timeFormatter",
+      "field": "description",
+      "sourceHash": "sha256:b21238edbeabe7d2b4e620ebc205b8b7759fdbab9c634f6510d581d9bf16cdeb",
+      "text": "获取或设置将时间格式化为显示文本的函数。"
+    },
+    {
+      "id": "AnimationViewModel#timeLabel",
+      "field": "description",
+      "sourceHash": "sha256:3bc20ce45b2d3955db060a3c6146841a43007e74e4d8f9a3a2d83afedbde2269",
+      "text": "获取当前时间的字符串表示。此属性可观察。"
+    },
+    {
+      "id": "AnimationViewModel",
+      "field": "description",
+      "sourceHash": "sha256:19e774bb6f23ddbc98756a1e4e156505672f9fdfdd1d2f53c6e943056755bdca",
+      "text": "{@link Animation} 控件的视图模型。"
+    },
+    {
+      "id": "AnimationViewModel",
+      "field": "params/clockViewModel/description",
+      "sourceHash": "sha256:bfbfc07018c80436aa0732f919805e9212bf7adf02dd1f9ba32e1aaedb245c3f",
+      "text": "使用的 ClockViewModel 实例。"
+    },
+    {
+      "id": "BaseLayerPicker",
+      "field": "description",
+      "sourceHash": "sha256:56fb3708dd67d82d34017dc992fdad15e129ce9b7002abe714d7f85ada4d918f",
+      "text": "<span style=\"display: block; text-align: center;\">\n<img src=\"Images/BaseLayerPicker.png\" width=\"264\" alt=\"BaseLayerPicker\" />\n<br />展开选择面板的 BaseLayerPicker。\n</span>\n<br /><br />\nBaseLayerPicker 是一个按钮控件，用面板列出可用的影像和地形提供者。选择影像后，创建对应影像图层并将其插入影像集合的底层，同时移除原底图；选择地形后，替换当前地形提供者。每项包含名称、代表性图标和鼠标悬停时显示的提示信息。直接创建时，提供者列表初始为空，应按下例配置。\n<br /><br />\nViewer 默认向 BaseLayerPicker 提供用于演示的一组示例提供者。其中一些服务，如 <a href=\"https://developers.arcgis.com\" target=\"_blank\">Esri ArcGIS</a> 和 <a href=\"https://docs.stadiamaps.com/ target=\"_blank\">Stadia Maps</a>，具有各自的服务条款，生产使用需要认证。"
+    },
+    {
+      "id": "BaseLayerPicker",
+      "field": "exceptions/0/description",
+      "sourceHash": "sha256:a32c282b167b77335c61e4f1422e007fbbef3c536b72457f3f99be4fdf0412f0",
+      "text": "文档中不存在 ID 为 \"container\" 的元素。"
+    },
+    {
+      "id": "BaseLayerPicker",
+      "field": "params/container/description",
+      "sourceHash": "sha256:0a36e5f9cd110bfb05e4fce1d5cba13726a3289681d2c49c8f20f83cee28dd01",
+      "text": "此控件的父 HTML 容器节点或其 ID。"
+    },
+    {
+      "id": "BaseLayerPicker",
+      "field": "params/options.globe/description",
+      "sourceHash": "sha256:a45dc8afe00d556bb04c1f3775685efc06fc0658f585f03a6aea0134befab2e8",
+      "text": "使用的 Globe。"
+    },
+    {
+      "id": "BaseLayerPicker",
+      "field": "params/options.imageryProviderViewModels/description",
+      "sourceHash": "sha256:0c1cecda0c34550c6f4d95f7dfb6e4a1ef8d750ec2f833861a2b32e6de41a329",
+      "text": "影像选择使用的 ProviderViewModel 实例数组。"
+    },
+    {
+      "id": "BaseLayerPicker",
+      "field": "params/options.selectedImageryProviderViewModel/description",
+      "sourceHash": "sha256:1c8eb6658c4de192a7b33d9dbb9ebc0f4f5993dc75a08b7d11e1bf78520a5bfe",
+      "text": "当前底图影像的视图模型；未提供时使用第一个可用影像项。"
+    },
+    {
+      "id": "BaseLayerPicker",
+      "field": "params/options.selectedTerrainProviderViewModel/description",
+      "sourceHash": "sha256:4ef4fc164d0e169cfe30c2f344aca6aa92193770462d12f86027ef3e57250c20",
+      "text": "当前地形的视图模型；未提供时使用第一个可用地形项。"
+    },
+    {
+      "id": "BaseLayerPicker",
+      "field": "params/options.terrainProviderViewModels/description",
+      "sourceHash": "sha256:51252b2f3b2cc514140b8920afeb66554efe2bae42caf3138fa330dd3e8549f3",
+      "text": "地形选择使用的 ProviderViewModel 实例数组。"
+    },
+    {
+      "id": "BaseLayerPickerViewModel#buttonImageUrl",
+      "field": "description",
+      "sourceHash": "sha256:a24ec6eb8387d0aacfb525fa05208cfb3c507b855f33050c20d5f76865f82237",
+      "text": "获取按钮背景图像。此属性可观察。"
+    },
+    {
+      "id": "BaseLayerPickerViewModel#buttonTooltip",
+      "field": "description",
+      "sourceHash": "sha256:8da0b4d52a7d6458a6c5f5aa853281a45f23dc09b86ccecda5eac4118e437128",
+      "text": "获取按钮提示文本。此属性可观察。"
+    },
+    {
+      "id": "BaseLayerPickerViewModel#dropDownVisible",
+      "field": "description",
+      "sourceHash": "sha256:b9c671b38f35dbd979472cb6afe76f7c0075f0abb6d67cf7eaf52707494b300d",
+      "text": "获取或设置影像选择下拉面板当前是否可见。"
+    },
+    {
+      "id": "BaseLayerPickerViewModel#globe",
+      "field": "description",
+      "sourceHash": "sha256:87d93f94d94c4fa3742e987c44a349b921ddd4c1ec0d1f5fc8122bd1c2acbb26",
+      "text": "获取地球对象。"
+    },
+    {
+      "id": "BaseLayerPickerViewModel#imageryProviderViewModels",
+      "field": "description",
+      "sourceHash": "sha256:52d5b95015ef8e2f8588afb0ab6b9699f29df5bc16a2707c17bc06178fbe2ebe",
+      "text": "获取或设置可供影像选择的 ProviderViewModel 实例数组。此属性可观察。"
+    },
+    {
+      "id": "BaseLayerPickerViewModel#selectedImagery",
+      "field": "description",
+      "sourceHash": "sha256:b17888496808dccbd4f497f34ea12a710bd21078a5c573644fb935d4415381d5",
+      "text": "获取或设置当前选中的影像项。此属性可观察。"
+    },
+    {
+      "id": "BaseLayerPickerViewModel#selectedTerrain",
+      "field": "description",
+      "sourceHash": "sha256:45bd7c98f3c6249e721e66d9ee8598bbb3a2e6f14955c12a649f5be1959669e4",
+      "text": "获取或设置当前选中的地形项。此属性可观察。"
+    },
+    {
+      "id": "BaseLayerPickerViewModel#terrainProviderViewModels",
+      "field": "description",
+      "sourceHash": "sha256:3343417c57b09fa4b6d2342b9d13b3f8a8769f487318e56f2bb90c19bc3555e7",
+      "text": "获取或设置可供地形选择的 ProviderViewModel 实例数组。此属性可观察。"
+    },
+    {
+      "id": "BaseLayerPickerViewModel#toggleDropDown",
+      "field": "description",
+      "sourceHash": "sha256:18e3223859e0198813eff1c53a3ef540d31a6de7c12b6a3ab80c7710cac62e78",
+      "text": "获取切换下拉面板可见性的命令。"
+    },
+    {
+      "id": "BaseLayerPickerViewModel",
+      "field": "description",
+      "sourceHash": "sha256:c769c0f6e12842722de3633d75a8dd47992d358417d360f6b70e1f7d9a11df4f",
+      "text": "{@link BaseLayerPicker} 的视图模型。"
+    },
+    {
+      "id": "BaseLayerPickerViewModel",
+      "field": "exceptions/0/description",
+      "sourceHash": "sha256:91ed739929097005a08cb5280c6dd453fae93636b1ddc8214384bc5908486a69",
+      "text": "imageryProviderViewModels 必须为数组。"
+    },
+    {
+      "id": "BaseLayerPickerViewModel",
+      "field": "exceptions/1/description",
+      "sourceHash": "sha256:9d09f564f6a9aee71bd0517fc02d8769fd25669aa2bdbd9afacff69e86c01982",
+      "text": "terrainProviderViewModels 必须为数组。"
+    },
+    {
+      "id": "BaseLayerPickerViewModel",
+      "field": "params/options.globe/description",
+      "sourceHash": "sha256:a45dc8afe00d556bb04c1f3775685efc06fc0658f585f03a6aea0134befab2e8",
+      "text": "使用的 Globe。"
+    },
+    {
+      "id": "BaseLayerPickerViewModel",
+      "field": "params/options.imageryProviderViewModels/description",
+      "sourceHash": "sha256:0c1cecda0c34550c6f4d95f7dfb6e4a1ef8d750ec2f833861a2b32e6de41a329",
+      "text": "影像选择使用的 ProviderViewModel 实例数组。"
+    },
+    {
+      "id": "BaseLayerPickerViewModel",
+      "field": "params/options.selectedImageryProviderViewModel/description",
+      "sourceHash": "sha256:1c8eb6658c4de192a7b33d9dbb9ebc0f4f5993dc75a08b7d11e1bf78520a5bfe",
+      "text": "当前底图影像的视图模型；未提供时使用第一个可用影像项。"
+    },
+    {
+      "id": "BaseLayerPickerViewModel",
+      "field": "params/options.selectedTerrainProviderViewModel/description",
+      "sourceHash": "sha256:4ef4fc164d0e169cfe30c2f344aca6aa92193770462d12f86027ef3e57250c20",
+      "text": "当前地形的视图模型；未提供时使用第一个可用地形项。"
+    },
+    {
+      "id": "BaseLayerPickerViewModel",
+      "field": "params/options.terrainProviderViewModels/description",
+      "sourceHash": "sha256:51252b2f3b2cc514140b8920afeb66554efe2bae42caf3138fa330dd3e8549f3",
+      "text": "地形选择使用的 ProviderViewModel 实例数组。"
+    },
+    {
+      "id": "Command#afterExecute",
+      "field": "description",
+      "sourceHash": "sha256:9e2e697e635b853cd40f9f035c82414d685c19fd47d6016b7e72495be98ecab2",
+      "text": "获取命令执行后触发的事件，事件的唯一参数为命令返回值。"
+    },
+    {
+      "id": "Command#beforeExecute",
+      "field": "description",
+      "sourceHash": "sha256:d4c312bcd6250986e7808286c7cca552e07def06c60fc646919430c18c79804d",
+      "text": "获取命令执行前触发的事件。事件参数对象包含两个属性：监听器将 <code>cancel</code> 设为 true 可阻止命令执行；<code>args</code> 是传给命令的类数组 arguments 对象。"
+    },
+    {
+      "id": "Command#canExecute",
+      "field": "description",
+      "sourceHash": "sha256:b2cb11c7e946c2eb852c0b37992634d3c4839a85f38f07268961879cff912d2a",
+      "text": "获取命令当前是否可以执行。此属性可观察。"
+    },
+    {
+      "id": "Command",
+      "field": "description",
+      "sourceHash": "sha256:70361d22c385c8eaba0ba51df2c30fb12ac92204ad63af11cc8c8558d5226241",
+      "text": "Command 是带有额外可观察属性 <code>canExecute</code> 的函数，该属性决定命令能否执行。执行时会检查 <code>canExecute</code>，为 false 则抛出异常。此类型描述接口，不应直接实例化；参见 {@link createCommand}，从函数创建命令。"
+    },
+    {
+      "id": "createCommand",
+      "field": "description",
+      "sourceHash": "sha256:0fb30c7a88f3ffbe3df196b3459faad65f0e1f12729df48e4d59319f7d852c89",
+      "text": "从给定函数创建供视图模型使用的 Command。Command 是带有额外可观察属性 <code>canExecute</code> 的函数，该属性决定命令能否执行。执行时会检查 <code>canExecute</code>，为 false 则抛出异常。它还提供命令执行前、执行后的事件。"
+    },
+    {
+      "id": "createCommand",
+      "field": "params/canExecute/description",
+      "sourceHash": "sha256:e61ef14e24de488186780f73427716f04082b9241ab6fd47650fe643c7e2c7ef",
+      "text": "表示函数当前是否可以执行的布尔值。"
+    },
+    {
+      "id": "createCommand",
+      "field": "params/func/description",
+      "sourceHash": "sha256:2f6f515faf4116d5c059b03a280778d5ea47f262aed810a0063d455f84dc6f93",
+      "text": "待执行的函数。"
+    },
+    {
+      "id": "Fullscreen.changeEventName",
+      "field": "description",
+      "sourceHash": "sha256:6bce9985ac751decaab80c17a1bff77a470cf3f40282d8118254e629af8fb206",
+      "text": "文档进入或退出全屏时触发的事件名称，可用于 addEventListener。在事件处理函数中，通过 {@link Fullscreen#fullscreen} 判断浏览器是否处于全屏模式。"
+    },
+    {
+      "id": "Fullscreen.element",
+      "field": "description",
+      "sourceHash": "sha256:5004e95735f514056cd8d2be3440268a69c2dcacd5e4299d79ff472aa4b0b9a9",
+      "text": "当前全屏的元素，如有。仅需判断浏览器是否全屏时，请使用 {@link Fullscreen#fullscreen}。"
+    },
+    {
+      "id": "Fullscreen.enabled",
+      "field": "description",
+      "sourceHash": "sha256:6f16cd7c4b14ba32457ddb0fb26d6399c91be36079b86acaf27d5cc85b286060",
+      "text": "判断浏览器是否允许元素进入全屏。例如，iframe 默认不能全屏，除非外层页面添加 allowfullscreen 属性或其厂商前缀形式。"
+    },
+    {
+      "id": "Fullscreen.errorEventName",
+      "field": "description",
+      "sourceHash": "sha256:a00a7c297b44ef2c4972e6d3b4d45c0510f41823569f9503db8c47cfec45041d",
+      "text": "发生全屏错误时触发的事件名称，可用于 addEventListener。"
+    },
+    {
+      "id": "Fullscreen.exitFullscreen",
+      "field": "description",
+      "sourceHash": "sha256:11e664bdaf652c045e33488e1d95c5734f755657aca3d95e5a01ee60b9dfa901",
+      "text": "异步退出全屏。如果浏览器当前未全屏或不支持全屏，则不执行操作。"
+    },
+    {
+      "id": "Fullscreen.fullscreen",
+      "field": "description",
+      "sourceHash": "sha256:4bf503283a3cd23f654d978c6e170217d7b530fb3b2918a649ed072fb25a5b5f",
+      "text": "判断浏览器当前是否处于全屏模式。"
+    },
+    {
+      "id": "Fullscreen.requestFullscreen",
+      "field": "description",
+      "sourceHash": "sha256:5bcf601dceb1f2b93991884bf77949e6735f7f3e619b0da09532ff0ef287f1ba",
+      "text": "异步请求浏览器使给定元素进入全屏。如果浏览器不支持全屏，则不执行操作。"
+    },
+    {
+      "id": "Fullscreen.requestFullscreen",
+      "field": "params/element/description",
+      "sourceHash": "sha256:2aedc592e262c87b7cd925883c488e30625cff622db70223735ced83ef6c765a",
+      "text": "要进入全屏的 HTML 元素。"
+    },
+    {
+      "id": "Fullscreen.requestFullscreen",
+      "field": "params/vrDevice/description",
+      "sourceHash": "sha256:76d8c56552330dd2eb2e9233fda2d33f69e6ffbd1e7cb81882658174492a2a3e",
+      "text": "HMDVRDevice 设备。"
+    },
+    {
+      "id": "Fullscreen.supportsFullscreen",
+      "field": "description",
+      "sourceHash": "sha256:2c82bae8d414c7c21469b9912643e2853af6758fc7ac901ff9547104e1d5b6c6",
+      "text": "检测浏览器是否支持标准全屏 API。"
+    },
+    {
+      "id": "Fullscreen.supportsFullscreen",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:4ad14f2594eedd4694daa4db8d4fc509835e687b1bb575b1cdaa879f487b37ce",
+      "text": "浏览器支持标准全屏 API 时为 <code>true</code>，否则为 <code>false</code>。"
+    },
+    {
+      "id": "FullscreenButton",
+      "field": "description",
+      "sourceHash": "sha256:01c4fc6da170cf607e1dec42b9c20d97af55439dd3550315c315d82c0d06cbc0",
+      "text": "用于切换全屏模式的单按钮控件。"
+    },
+    {
+      "id": "FullscreenButton",
+      "field": "exceptions/0/description",
+      "sourceHash": "sha256:a32c282b167b77335c61e4f1422e007fbbef3c536b72457f3f99be4fdf0412f0",
+      "text": "文档中不存在 ID 为 \"container\" 的元素。"
+    },
+    {
+      "id": "FullscreenButton",
+      "field": "params/fullscreenElement/description",
+      "sourceHash": "sha256:ea4ce08f2d360439efb75c32a79c359c66afd6699f42fbc90781fcc4c57bb3d4",
+      "text": "要进入全屏的元素或其 ID。"
+    },
+    {
+      "id": "FullscreenButtonViewModel#command",
+      "field": "description",
+      "sourceHash": "sha256:1a05c8aef00e218d4eb51e7fa5e008fa9f6910f23d28d2ae6b2551a12003e8e5",
+      "text": "获取切换全屏模式的 Command。"
+    },
+    {
+      "id": "FullscreenButtonViewModel#destroy",
+      "field": "description",
+      "sourceHash": "sha256:017717985b95790039d72f3dd9a385b389d90406ac0eb6a78fadcc364723536c",
+      "text": "销毁视图模型。不再需要时应调用，以正确清理视图模型。"
+    },
+    {
+      "id": "FullscreenButtonViewModel#fullscreenElement",
+      "field": "description",
+      "sourceHash": "sha256:0cfaaee090384338247b56ff8a0d2cd21ee8d92ba37126ca509d47360c96f82c",
+      "text": "获取或设置按下对应按钮时要进入全屏的 HTML 元素。"
+    },
+    {
+      "id": "FullscreenButtonViewModel#isFullscreen",
+      "field": "description",
+      "sourceHash": "sha256:683a22b4d0709e4c35fbe0935a3f4e0f6576a82374ad01c99711a9589ca26ae4",
+      "text": "获取全屏模式是否启用。此属性可观察。"
+    },
+    {
+      "id": "FullscreenButtonViewModel#isFullscreenEnabled",
+      "field": "description",
+      "sourceHash": "sha256:f9b1b8e49408c0a6a31be6004a0bd1864f83c387a8049010365c3e5c6c7a89e5",
+      "text": "获取或设置是否启用全屏功能。此属性可观察。"
+    },
+    {
+      "id": "FullscreenButtonViewModel#tooltip",
+      "field": "description",
+      "sourceHash": "sha256:d30615fcd23d5a200ad6e31feb539278c1185da9fee1cb04edd732b77f1f9cbc",
+      "text": "获取提示文本。此属性可观察。"
+    },
+    {
+      "id": "FullscreenButtonViewModel",
+      "field": "description",
+      "sourceHash": "sha256:19aecb31c04f3d5f0f93982699ceb53f80a3c0f4fb870c49548e6671268f3fd6",
+      "text": "{@link FullscreenButton} 的视图模型。"
+    },
+    {
+      "id": "FullscreenButtonViewModel",
+      "field": "params/fullscreenElement/description",
+      "sourceHash": "sha256:ea4ce08f2d360439efb75c32a79c359c66afd6699f42fbc90781fcc4c57bb3d4",
+      "text": "要进入全屏的元素或其 ID。"
+    },
+    {
+      "id": "Fullscreen",
+      "field": "description",
+      "sourceHash": "sha256:b181a6bc2ab645328f7a4ced5c8f28f513414fb848045d4f12ac50562c86815a",
+      "text": "用于标准全屏 API 的跨浏览器函数。"
+    },
+    {
+      "id": "Geocoder.DestinationFoundFunction",
+      "field": "description",
+      "sourceHash": "sha256:ee22a7eaa4d2bea3b6f2e9e715ef74e3ba906855fcfc1256393c12238355577f",
+      "text": "处理成功地理编码结果的函数。"
+    },
+    {
+      "id": "Geocoder.DestinationFoundFunction",
+      "field": "params/destination/description",
+      "sourceHash": "sha256:d8f6c8fd2aa8f291f2f7dac6dcddeaeb0b664bc7e1669f9f80adaa80a16d628b",
+      "text": "地理编码结果中的目标位置。"
+    },
+    {
+      "id": "Geocoder.DestinationFoundFunction",
+      "field": "params/viewModel/description",
+      "sourceHash": "sha256:68a473abfea1461397875c23fc1f5aa78f41eaa608ec038efb8c92b39eee74d4",
+      "text": "视图模型。"
+    },
+    {
+      "id": "Geocoder",
+      "field": "description",
+      "sourceHash": "sha256:932c435582c34203d9a12113a4f20ae7c535d5e4ecad06d06f25d60925c3b142",
+      "text": "查找地址和地标，并使相机飞至目标位置的控件。默认通过 {@link https://cesium.com/cesium-ion/|Cesium ion} 进行地理编码。"
+    },
+    {
+      "id": "Geocoder",
+      "field": "params/options.autoComplete/description",
+      "sourceHash": "sha256:096a7d4892450ebf0bd453a98baaa0f585d74471614d1e5cfef338324e438068",
+      "text": "为 true 时，随用户输入发起查询以自动补全。"
+    },
+    {
+      "id": "Geocoder",
+      "field": "params/options.destinationFound/description",
+      "sourceHash": "sha256:dcfea6c6c2751f3bd4f467c1afef4385a1ace13b94f109fc6be665b154af7eac",
+      "text": "地理编码成功后调用的回调。未提供时，默认使相机飞至结果位置。"
+    },
+    {
+      "id": "Geocoder",
+      "field": "params/options.flightDuration/description",
+      "sourceHash": "sha256:07cf3899dfb06240f61b3fc130721846cba4b84c92d9ba641c5e5bdc7f5f4eff",
+      "text": "相机飞至所输入位置的时长，单位为秒。"
+    },
+    {
+      "id": "Geocoder",
+      "field": "params/options.geocoderServices/description",
+      "sourceHash": "sha256:a7022c279bb021c69fd20a6060ad9b35b4cf3dd5590ca2ce0a1d6c9fdce81511",
+      "text": "使用的地理编码服务。"
+    },
+    {
+      "id": "Geocoder",
+      "field": "params/options.scene/description",
+      "sourceHash": "sha256:13252abc5bf3944491cd068db78ca024b11b06570f8b07a770a8043fa10afc2d",
+      "text": "使用的 Scene 实例。"
+    },
+    {
+      "id": "GeocoderViewModel.flyToDestination",
+      "field": "description",
+      "sourceHash": "sha256:a86851737f057824876729179bde9d9b4219a4c348824f47084d704d079cf46f",
+      "text": "使相机飞至成功地理编码所得目标位置的函数。"
+    },
+    {
+      "id": "GeocoderViewModel#autoComplete",
+      "field": "description",
+      "sourceHash": "sha256:096a7d4892450ebf0bd453a98baaa0f585d74471614d1e5cfef338324e438068",
+      "text": "为 true 时，随用户输入发起查询以自动补全。"
+    },
+    {
+      "id": "GeocoderViewModel#complete",
+      "field": "description",
+      "sourceHash": "sha256:3b522796d478cf2d9f06313a94e7b9cd25e5f930d2524f55d863ef795f7a9419",
+      "text": "获取相机飞行完成时触发的事件。"
+    },
+    {
+      "id": "GeocoderViewModel#destinationFound",
+      "field": "description",
+      "sourceHash": "sha256:dc4af34e3330e6739920370aa14e4434ed2c908dc3dfe7cbed24e3a65fd08a51",
+      "text": "获取或设置找到地理编码目标位置时调用的命令。"
+    },
+    {
+      "id": "GeocoderViewModel#flightDuration",
+      "field": "description",
+      "sourceHash": "sha256:384e3ebca8b32f8c4e6a446afdcfdd4f61f2e03df7a661e8110b24db635eda23",
+      "text": "获取或设置相机飞行时长，单位为秒。为零时立即切换至地理编码位置；为 undefined 时根据距离计算时长。"
+    },
+    {
+      "id": "GeocoderViewModel#isSearchInProgress",
+      "field": "description",
+      "sourceHash": "sha256:07dbb714e82857287c9004783a33de24cd030b3670ff742e8ab15dd17e81b0f5",
+      "text": "获取当前是否正在搜索。此属性可观察。"
+    },
+    {
+      "id": "GeocoderViewModel#keepExpanded",
+      "field": "description",
+      "sourceHash": "sha256:241b6742f5a2d84c0c1506ebb533042af44180aa5ffed8e0c141ca75751828e3",
+      "text": "获取或设置此实例是否始终显示文本输入框。"
+    },
+    {
+      "id": "GeocoderViewModel#scene",
+      "field": "description",
+      "sourceHash": "sha256:7b8bb1ef107c32031a473df5cf6770f205a7fd60f5c9f7346d7547d73f3886e2",
+      "text": "获取要控制的场景。"
+    },
+    {
+      "id": "GeocoderViewModel#search",
+      "field": "description",
+      "sourceHash": "sha256:058987075a244bead405340219514f1fe775ed242427412954f0ef492c9d0217",
+      "text": "获取点击按钮时执行的 Command。"
+    },
+    {
+      "id": "GeocoderViewModel#searchText",
+      "field": "description",
+      "sourceHash": "sha256:d01f7ff85956ec0fe4250bf2129c2c67af7ce34e8be452279ea43ba13274283f",
+      "text": "获取或设置搜索文本。可以是地址，也可以是经度、纬度和可选高度；经纬度单位为度，高度单位为米。"
+    },
+    {
+      "id": "GeocoderViewModel#selectedSuggestion",
+      "field": "description",
+      "sourceHash": "sha256:a39e6268bddcd5cce563383b2d5cc10ff1e8c2eb39dd5c4bc86d95bb24adad87",
+      "text": "获取当前选中的地理编码搜索建议。"
+    },
+    {
+      "id": "GeocoderViewModel#suggestions",
+      "field": "description",
+      "sourceHash": "sha256:7c60feb8c5a42f2a11af463b7388e80e1459097b48cb5fbb03273eef81237f08",
+      "text": "获取地理编码搜索建议列表。"
+    },
+    {
+      "id": "GeocoderViewModel",
+      "field": "description",
+      "sourceHash": "sha256:4b923f5ee125c331a7399e55443a9c8b0f7673f58f764212378a49a35adbcf11",
+      "text": "{@link Geocoder} 控件的视图模型。"
+    },
+    {
+      "id": "GeocoderViewModel",
+      "field": "params/options.destinationFound/description",
+      "sourceHash": "sha256:dcfea6c6c2751f3bd4f467c1afef4385a1ace13b94f109fc6be665b154af7eac",
+      "text": "地理编码成功后调用的回调。未提供时，默认使相机飞至结果位置。"
+    },
+    {
+      "id": "GeocoderViewModel",
+      "field": "params/options.flightDuration/description",
+      "sourceHash": "sha256:07cf3899dfb06240f61b3fc130721846cba4b84c92d9ba641c5e5bdc7f5f4eff",
+      "text": "相机飞至所输入位置的时长，单位为秒。"
+    },
+    {
+      "id": "GeocoderViewModel",
+      "field": "params/options.geocoderServices/description",
+      "sourceHash": "sha256:7d95eccd5c3ee838541f81726e23f09ed21c55c318220dc53a919c62e334e248",
+      "text": "用于地理编码查询的服务。提供多个时，会从支持建议功能的服务收集建议；未选择建议时，按服务顺序查找结果。"
+    },
+    {
+      "id": "GeocoderViewModel",
+      "field": "params/options.scene/description",
+      "sourceHash": "sha256:13252abc5bf3944491cd068db78ca024b11b06570f8b07a770a8043fa10afc2d",
+      "text": "使用的 Scene 实例。"
+    },
+    {
+      "id": "HomeButton",
+      "field": "description",
+      "sourceHash": "sha256:7027461ebe15a80f9fee3f2287f7b4b479dc770a0267c0bf46d912fad9ee17cd",
+      "text": "使相机返回当前场景默认视图的单按钮控件。"
+    },
+    {
+      "id": "HomeButton",
+      "field": "params/duration/description",
+      "sourceHash": "sha256:e12010310145b5d6247bb2f036287a9c8a2f8146c23b2ce212bde77e0d19293b",
+      "text": "相机飞回初始视图所需时长，单位为秒。"
+    },
+    {
+      "id": "HomeButton",
+      "field": "params/scene/description",
+      "sourceHash": "sha256:13252abc5bf3944491cd068db78ca024b11b06570f8b07a770a8043fa10afc2d",
+      "text": "使用的 Scene 实例。"
+    },
+    {
+      "id": "HomeButtonViewModel#command",
+      "field": "description",
+      "sourceHash": "sha256:058987075a244bead405340219514f1fe775ed242427412954f0ef492c9d0217",
+      "text": "获取点击按钮时执行的 Command。"
+    },
+    {
+      "id": "HomeButtonViewModel#duration",
+      "field": "description",
+      "sourceHash": "sha256:5b4a5fb703c811417e8f4afdf283439a5273d8282bf6251c4dc44e80a6e5e9d2",
+      "text": "获取或设置相机飞行时长，单位为秒。为零时立即切换至初始视图；为 undefined 时根据距离计算时长。"
+    },
+    {
+      "id": "HomeButtonViewModel#scene",
+      "field": "description",
+      "sourceHash": "sha256:7b8bb1ef107c32031a473df5cf6770f205a7fd60f5c9f7346d7547d73f3886e2",
+      "text": "获取要控制的场景。"
+    },
+    {
+      "id": "HomeButtonViewModel#tooltip",
+      "field": "description",
+      "sourceHash": "sha256:457f2c08a01a85ad7ab0fbee3795aa4c6fa9291a3894210dc3aaf73e7a937c20",
+      "text": "获取或设置提示文本。此属性可观察。"
+    },
+    {
+      "id": "HomeButtonViewModel",
+      "field": "description",
+      "sourceHash": "sha256:20fa4d41275e56a63abe783b73b3f28ad57581c3aa863f796a1fe8fb21b80e1c",
+      "text": "{@link HomeButton} 的视图模型。"
+    },
+    {
+      "id": "HomeButtonViewModel",
+      "field": "params/duration/description",
+      "sourceHash": "sha256:048132908fce9d93497a9ccd6adf287da0065b88c23e7759fc5b8a468c77a1e6",
+      "text": "相机飞行时长，单位为秒。"
+    },
+    {
+      "id": "HomeButtonViewModel",
+      "field": "params/scene/description",
+      "sourceHash": "sha256:a8f2df730deb09d3a81564ef5e3e99f3d6348a0828fc1872e4fffe7cf5faf12c",
+      "text": "使用的场景实例。"
+    },
+    {
+      "id": "InfoBox#frame",
+      "field": "description",
+      "sourceHash": "sha256:bef6d4ae5d4ed32c3ff6bae02ee5aac9aa92a9bb359e58ff6ec595411689bebc",
+      "text": "获取用于显示说明的 iframe。"
+    },
+    {
+      "id": "InfoBox",
+      "field": "description",
+      "sourceHash": "sha256:464aef500633f5cb0591d726addeb54ef88fddb59ad2fc4ccbdd361b5a16d210",
+      "text": "用于显示信息或说明的控件。"
+    },
+    {
+      "id": "InfoBox",
+      "field": "exceptions/0/description",
+      "sourceHash": "sha256:a32c282b167b77335c61e4f1422e007fbbef3c536b72457f3f99be4fdf0412f0",
+      "text": "文档中不存在 ID 为 \"container\" 的元素。"
+    },
+    {
+      "id": "InfoBoxViewModel#cameraClicked",
+      "field": "description",
+      "sourceHash": "sha256:3ad6e9316f560565becfee7f1b0186d253262d494430688f3eab972c14536e33",
+      "text": "获取用户点击相机图标时触发的 {@link Event}。"
+    },
+    {
+      "id": "InfoBoxViewModel#cameraIconPath",
+      "field": "description",
+      "sourceHash": "sha256:df2c6d01f044e66badfdc7a69771270fc76c4171073fe1841f28346c627a2f23",
+      "text": "获取相机图标的 SVG 路径，可切换是否带有禁用划线。"
+    },
+    {
+      "id": "InfoBoxViewModel#closeClicked",
+      "field": "description",
+      "sourceHash": "sha256:93c5742b3a7b8200e927ce10db5231fac7d39e02698ed9914b962712ef6a8b94",
+      "text": "获取用户关闭信息框时触发的 {@link Event}。"
+    },
+    {
+      "id": "InfoBoxViewModel#description",
+      "field": "description",
+      "sourceHash": "sha256:1817c8e0a28a919e53e43c397d64bc53ba06bd05bca4d6698a369846054620fd",
+      "text": "获取或设置信息框说明的 HTML。"
+    },
+    {
+      "id": "InfoBoxViewModel#enableCamera",
+      "field": "description",
+      "sourceHash": "sha256:e7478e211a5420aad5b9e16ad7caaa4ef027007f1aec9de3bd24b7fc1cf19e0b",
+      "text": "获取或设置是否启用相机跟踪图标。"
+    },
+    {
+      "id": "InfoBoxViewModel#isCameraTracking",
+      "field": "description",
+      "sourceHash": "sha256:9a6cd6801360feb13f0597bc4f1815cd6311489a06a4ff67651f9c8af7f76688",
+      "text": "获取或设置当前相机对所选对象的跟踪状态。"
+    },
+    {
+      "id": "InfoBoxViewModel#maxHeight",
+      "field": "description",
+      "sourceHash": "sha256:2386f09139b822088057b30e2382ccce9eaf4be112816edbef3387d5f23babb3",
+      "text": "获取或设置信息框最大高度，单位为像素。此属性可观察。"
+    },
+    {
+      "id": "InfoBoxViewModel#maxHeightOffset",
+      "field": "description",
+      "sourceHash": "sha256:9cdbd533fe2d916d830dc88207d8e9f7c829fa047fab79683aa08dacfb34645c",
+      "text": "获取信息框内部区域的最大高度减去偏移量后的值，格式可直接用于 CSS。"
+    },
+    {
+      "id": "InfoBoxViewModel#maxHeightOffset",
+      "field": "params/offset/description",
+      "sourceHash": "sha256:f8f45a60dc823159dc37e67ad9304050e4a87eb266a852962107e5c0fe8dd690",
+      "text": "偏移量，单位为像素。"
+    },
+    {
+      "id": "InfoBoxViewModel#showInfo",
+      "field": "description",
+      "sourceHash": "sha256:5e219524054b7a97a00712138e5c3d60e4749a7c4bbd45f0f25de142d897a210",
+      "text": "获取或设置信息框的可见性。"
+    },
+    {
+      "id": "InfoBoxViewModel#titleText",
+      "field": "description",
+      "sourceHash": "sha256:ac1f02c355d2ee8225121d05114dcf1508c5b85345724680803c26b770f1a677",
+      "text": "获取或设置信息框的标题文本。"
+    },
+    {
+      "id": "InfoBoxViewModel",
+      "field": "description",
+      "sourceHash": "sha256:afae8539c97255eb3bc30c5eec6fe9fe58d98e2a67ad427f8432b82ec7e972b4",
+      "text": "{@link InfoBox} 的视图模型。"
+    },
+    {
+      "id": "MapMode2D.INFINITE_SCROLL",
+      "field": "description",
+      "sourceHash": "sha256:c60b0ccbc56fdf449e36b750ade463dc4af1dd0a05b1f81891f29f8e543cb6c4",
+      "text": "二维地图可在水平方向无限滚动。"
+    },
+    {
+      "id": "MapMode2D.ROTATE",
+      "field": "description",
+      "sourceHash": "sha256:2d1cdcb7a5a8b523f24b8fdd79355641c43c4f9207b1d7dc12e008fd4e6fc2f0",
+      "text": "二维地图可绕 z 轴旋转。"
+    },
+    {
+      "id": "MapMode2D",
+      "field": "description",
+      "sourceHash": "sha256:7eb8feba99250ed1c2b89176399e19f96dd2591991c86b3caa104be261fc709d",
+      "text": "描述地图在二维模式下的交互方式。"
+    },
+    {
+      "id": "MapMode2D",
+      "field": "properties/INFINITE_SCROLL/description",
+      "sourceHash": "sha256:c60b0ccbc56fdf449e36b750ade463dc4af1dd0a05b1f81891f29f8e543cb6c4",
+      "text": "二维地图可在水平方向无限滚动。"
+    },
+    {
+      "id": "MapMode2D",
+      "field": "properties/ROTATE/description",
+      "sourceHash": "sha256:2d1cdcb7a5a8b523f24b8fdd79355641c43c4f9207b1d7dc12e008fd4e6fc2f0",
+      "text": "二维地图可绕 z 轴旋转。"
+    },
+    {
+      "id": "NavigationHelpButton",
+      "field": "description",
+      "sourceHash": "sha256:28ef4ae559ac0a1ed75ee4385ea67c5d8d019f6422aaf7438b470e88d4d0c0f6",
+      "text": "<p>NavigationHelpButton 是一个单按钮控件，用于显示鼠标操作地球的导航说明。</p><p style=\"clear: both;\"></p><br/>"
+    },
+    {
+      "id": "NavigationHelpButton",
+      "field": "exceptions/0/description",
+      "sourceHash": "sha256:a32c282b167b77335c61e4f1422e007fbbef3c536b72457f3f99be4fdf0412f0",
+      "text": "文档中不存在 ID 为 \"container\" 的元素。"
+    },
+    {
+      "id": "NavigationHelpButton",
+      "field": "params/options.instructionsInitiallyVisible/description",
+      "sourceHash": "sha256:c3bfc984ffdfd9301c6e7a1283bfb3b434d6ba6b6aab705baa69108e618bb96e",
+      "text": "初始显示导航说明时为 true，否则为 false。"
+    },
+    {
+      "id": "NavigationHelpButtonViewModel#command",
+      "field": "description",
+      "sourceHash": "sha256:058987075a244bead405340219514f1fe775ed242427412954f0ef492c9d0217",
+      "text": "获取点击按钮时执行的 Command。"
+    },
+    {
+      "id": "NavigationHelpButtonViewModel#showClick",
+      "field": "description",
+      "sourceHash": "sha256:45f8e345a96da52cc546a622044006bf5875455762e2a626099210106a451994",
+      "text": "获取显示鼠标操作说明时执行的 Command。"
+    },
+    {
+      "id": "NavigationHelpButtonViewModel#showInstructions",
+      "field": "description",
+      "sourceHash": "sha256:95c00699fa7e2253e0ed318bce5ca8ee54f61fa83b22339ac5faa15757793224",
+      "text": "获取或设置当前是否显示操作说明。此属性可观察。"
+    },
+    {
+      "id": "NavigationHelpButtonViewModel#showTouch",
+      "field": "description",
+      "sourceHash": "sha256:3bcbc919a867438f74aa2798b9f95c550b251c614cacce80a22918fab8156b7c",
+      "text": "获取显示触摸操作说明时执行的 Command。"
+    },
+    {
+      "id": "NavigationHelpButtonViewModel#tooltip",
+      "field": "description",
+      "sourceHash": "sha256:457f2c08a01a85ad7ab0fbee3795aa4c6fa9291a3894210dc3aaf73e7a937c20",
+      "text": "获取或设置提示文本。此属性可观察。"
+    },
+    {
+      "id": "NavigationHelpButtonViewModel",
+      "field": "description",
+      "sourceHash": "sha256:14fe46c5249f2528364124227afed133cf66c081e83883288dc296e45d6aef7c",
+      "text": "{@link NavigationHelpButton} 的视图模型。"
+    },
+    {
+      "id": "PerformanceWatchdog",
+      "field": "description",
+      "sourceHash": "sha256:d0b8d89bb99e6349eacefd67522dbb55a0c3568be64932d26c560cdebeb15289",
+      "text": "监测应用性能，发现性能较差时显示提示。"
+    },
+    {
+      "id": "PerformanceWatchdog",
+      "field": "params/options.lowFrameRateMessage/description",
+      "sourceHash": "sha256:94d9754a7c0c565969d80ffd07e912af00ed828e3fb5117a2ff6f2a01acdbea3",
+      "text": "检测到低帧率时显示的消息。消息按 HTML 解析，因此必须来自可信来源，以免应用遭受跨站脚本攻击。"
+    },
+    {
+      "id": "PerformanceWatchdog",
+      "field": "params/options.scene/description",
+      "sourceHash": "sha256:7ef335bc967413859569b8b9e792cee0bcb1c49fb7d355986d60d86fa61876f4",
+      "text": "需要监测性能的 {@link Scene}。"
+    },
+    {
+      "id": "PerformanceWatchdogViewModel#dismissMessage",
+      "field": "description",
+      "sourceHash": "sha256:f36afdae464c32ce9c127e1ac67f133a1a797ef541bc6a9de8e952393897ba45",
+      "text": "获取关闭低帧率提示的命令。关闭后不再重新显示该提示。"
+    },
+    {
+      "id": "PerformanceWatchdogViewModel#lowFrameRateMessage",
+      "field": "description",
+      "sourceHash": "sha256:e0d161945bab8f28578f3be3ebd11342d31f0cc916df5f4f29a29552dab9bbe5",
+      "text": "获取或设置检测到低帧率时显示的消息。此字符串按 HTML 解析。"
+    },
+    {
+      "id": "PerformanceWatchdogViewModel#lowFrameRateMessageDismissed",
+      "field": "description",
+      "sourceHash": "sha256:1f1a490c41d0d466bef9cbc189958178f56ce516de0bb5814bf36f53459ac984",
+      "text": "获取或设置用户是否曾关闭低帧率提示。关闭后，无论帧率如何都不再重新显示。"
+    },
+    {
+      "id": "PerformanceWatchdogViewModel#scene",
+      "field": "description",
+      "sourceHash": "sha256:ab5ac30eafe14dc2e22aad185dfa99c23096f70c120d31b49a1e74a6d677d9c0",
+      "text": "获取需要监测性能的 {@link Scene} 实例。"
+    },
+    {
+      "id": "PerformanceWatchdogViewModel#showingLowFrameRateMessage",
+      "field": "description",
+      "sourceHash": "sha256:deac4686dcace25f3a8b1cf6bf5b8138a1650dff97774ebd1bd0af50f1bd85cd",
+      "text": "获取或设置当前是否正在显示低帧率提示。"
+    },
+    {
+      "id": "PerformanceWatchdogViewModel",
+      "field": "description",
+      "sourceHash": "sha256:7f6f8217f562f8fcfab1ba01bb9c9d1efff1c7643feb5c8a1d43722daf09d74d",
+      "text": "{@link PerformanceWatchdog} 的视图模型。"
+    },
+    {
+      "id": "PerformanceWatchdogViewModel",
+      "field": "params/options.lowFrameRateMessage/description",
+      "sourceHash": "sha256:94d9754a7c0c565969d80ffd07e912af00ed828e3fb5117a2ff6f2a01acdbea3",
+      "text": "检测到低帧率时显示的消息。消息按 HTML 解析，因此必须来自可信来源，以免应用遭受跨站脚本攻击。"
+    },
+    {
+      "id": "PerformanceWatchdogViewModel",
+      "field": "params/options.scene/description",
+      "sourceHash": "sha256:59261474ce09a018c8c55003bf1e094654600153eba30693a368882569412db8",
+      "text": "需要监测性能的 Scene 实例。"
+    },
+    {
+      "id": "ProjectionPicker",
+      "field": "description",
+      "sourceHash": "sha256:c085eea26237d1084999c42dcb35eb8efd72019aece9f9144673efa5c3dc6396",
+      "text": "ProjectionPicker 是在透视投影与正交投影之间切换的单按钮控件。"
+    },
+    {
+      "id": "ProjectionPicker",
+      "field": "exceptions/0/description",
+      "sourceHash": "sha256:a32c282b167b77335c61e4f1422e007fbbef3c536b72457f3f99be4fdf0412f0",
+      "text": "文档中不存在 ID 为 \"container\" 的元素。"
+    },
+    {
+      "id": "ProjectionPicker",
+      "field": "params/scene/description",
+      "sourceHash": "sha256:13252abc5bf3944491cd068db78ca024b11b06570f8b07a770a8043fa10afc2d",
+      "text": "使用的 Scene 实例。"
+    },
+    {
+      "id": "ProjectionPickerViewModel#destroy",
+      "field": "description",
+      "sourceHash": "sha256:db60157667f58e98b288af62a857a1d3d891989fd5a69e8b15edc3eb6825ee71",
+      "text": "销毁视图模型。"
+    },
+    {
+      "id": "ProjectionPickerViewModel#dropDownVisible",
+      "field": "description",
+      "sourceHash": "sha256:8be0d9f747b76a8562a4584b934e7adba8271ad44ebf5c47edd59c5d2f84eef5",
+      "text": "获取或设置按钮下拉面板当前是否可见。此属性可观察。"
+    },
+    {
+      "id": "ProjectionPickerViewModel#isOrthographicProjection",
+      "field": "description",
+      "sourceHash": "sha256:68485ea5d3181c852dba1fa957a2ad8a2f891e305c92f352de4e5b20e8503a7a",
+      "text": "获取场景当前是否使用正交投影。"
+    },
+    {
+      "id": "ProjectionPickerViewModel#scene",
+      "field": "description",
+      "sourceHash": "sha256:26f86c4bc95f3a8f4c78b4534964d0987847382b405e5d842ed31537fcf013bc",
+      "text": "获取场景。"
+    },
+    {
+      "id": "ProjectionPickerViewModel#sceneMode",
+      "field": "description",
+      "sourceHash": "sha256:f7e5603ed7c44490e15169614a6e330ee0b6f2bcccfea6b3ed22c7ae028d11ce",
+      "text": "获取或设置当前 SceneMode。此属性可观察。"
+    },
+    {
+      "id": "ProjectionPickerViewModel#selectedTooltip",
+      "field": "description",
+      "sourceHash": "sha256:7ff977d95e5228a8e0296e4c4891341e2a0923ec4b18bff5c1590ec2a3608d00",
+      "text": "获取当前生效的提示文本。此属性可观察。"
+    },
+    {
+      "id": "ProjectionPickerViewModel#switchToOrthographic",
+      "field": "description",
+      "sourceHash": "sha256:2380b73a5b5485204816d6fe953a95d9773efbc406293b60c399c3007ef6af65",
+      "text": "获取切换至正交投影的命令。"
+    },
+    {
+      "id": "ProjectionPickerViewModel#switchToPerspective",
+      "field": "description",
+      "sourceHash": "sha256:6070090f4e5aa82b850b64dbacf9dbc0ee2c30df3114cf4c9c099e85792f6647",
+      "text": "获取切换至透视投影的命令。"
+    },
+    {
+      "id": "ProjectionPickerViewModel#toggleDropDown",
+      "field": "description",
+      "sourceHash": "sha256:b374671a885500fc5fcf9753869bb615bfc45fc88927536578e4abc1a94fec4c",
+      "text": "获取切换下拉框的命令。"
+    },
+    {
+      "id": "ProjectionPickerViewModel#tooltipOrthographic",
+      "field": "description",
+      "sourceHash": "sha256:87ac5720841e9bb5c5d1278675c06e9408a4b1a414b376cb5689205ee40eb94f",
+      "text": "获取或设置正交投影的提示文本。此属性可观察。"
+    },
+    {
+      "id": "ProjectionPickerViewModel#tooltipPerspective",
+      "field": "description",
+      "sourceHash": "sha256:3fc65407832ee4d2f71b2b1f533b8a3f36a3626dd7c389f46ce6cc692a27f9e6",
+      "text": "获取或设置透视投影的提示文本。此属性可观察。"
+    },
+    {
+      "id": "ProjectionPickerViewModel",
+      "field": "description",
+      "sourceHash": "sha256:34d5b69db3721edacc2fabc7f028e18f815735cf9ae9b0adaafa4fbf083a3a6c",
+      "text": "{@link ProjectionPicker} 的视图模型。"
+    },
+    {
+      "id": "ProjectionPickerViewModel",
+      "field": "params/scene/description",
+      "sourceHash": "sha256:ffaf64b09977b80e2e08ffd5b8fe1d0a9f2e60d75dad4081903cb72f71360014",
+      "text": "要切换投影的 Scene。"
+    },
+    {
+      "id": "ProviderViewModel.CreationFunction",
+      "field": "description",
+      "sourceHash": "sha256:da6a55ede7e932cc09211a1a89eacbb97fd9790f5484fbf1e6152ae125718d89",
+      "text": "创建一个或多个提供者的函数。"
+    },
+    {
+      "id": "ProviderViewModel.CreationFunction",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:cfeaf7f01574a093fdda61743da007d4d9e3dffacb00ccac048429b7ec294b06",
+      "text": "要添加到地球的 ImageryProvider、TerrainProvider，或提供者数组。"
+    },
+    {
+      "id": "ProviderViewModel#category",
+      "field": "description",
+      "sourceHash": "sha256:4e78f2c11b2f991b386fa8337aebc39112e6e5214cbbc943d4a85e6b43a35151",
+      "text": "获取分类。"
+    },
+    {
+      "id": "ProviderViewModel#creationCommand",
+      "field": "description",
+      "sourceHash": "sha256:effed05af9a97f93665dae63d1062289a11ac20c67f59a88ca104dc05e562470",
+      "text": "获取创建一个或多个提供者的 Command；选中此项时，将创建的提供者添加到地球。"
+    },
+    {
+      "id": "ProviderViewModel#iconUrl",
+      "field": "description",
+      "sourceHash": "sha256:35b0f446e9dadc088d7456afb2b3f13c4725dd9bcf07925bbd6403c3d03bceb9",
+      "text": "获取图标。此属性可观察。"
+    },
+    {
+      "id": "ProviderViewModel#name",
+      "field": "description",
+      "sourceHash": "sha256:03c52b2a2d3cf8a274fddbd6ac0d956eb92efdc4291b5d932381b6cc79a9c3af",
+      "text": "获取显示名称。此属性可观察。"
+    },
+    {
+      "id": "ProviderViewModel#tooltip",
+      "field": "description",
+      "sourceHash": "sha256:d30615fcd23d5a200ad6e31feb539278c1185da9fee1cb04edd732b77f1f9cbc",
+      "text": "获取提示文本。此属性可观察。"
+    },
+    {
+      "id": "ProviderViewModel",
+      "field": "description",
+      "sourceHash": "sha256:b6b090a936a2e8822fa38de35f590ac8e7cdc1a65317353974aa4fce8bdee394",
+      "text": "表示 {@link BaseLayerPicker} 中单个选项的视图模型。"
+    },
+    {
+      "id": "ProviderViewModel",
+      "field": "params/options.category/description",
+      "sourceHash": "sha256:a6935b2ad843eaca502a670be30d51a40b36343024ecf96b8711c7cf0d5ef66c",
+      "text": "图层分类。"
+    },
+    {
+      "id": "ProviderViewModel",
+      "field": "params/options.creationFunction/description",
+      "sourceHash": "sha256:2bcf6b898a7a86e4e2dfbc448dfe6460fd3e9de4d612b8741f00bad67b2ce355",
+      "text": "创建一个或多个提供者的函数或 Command；选中此项时，将创建的提供者添加到地球。"
+    },
+    {
+      "id": "ProviderViewModel",
+      "field": "params/options.iconUrl/description",
+      "sourceHash": "sha256:8d53d5784ece3239015db11d4c0725d0a979591b70b8370bc2adcec7fedefb47",
+      "text": "代表图层的图标。"
+    },
+    {
+      "id": "ProviderViewModel",
+      "field": "params/options.name/description",
+      "sourceHash": "sha256:d9f767cc3058390696b5e3200f2aa4758314a6362b429d7772e08d12d1e55cb9",
+      "text": "图层名称。"
+    },
+    {
+      "id": "ProviderViewModel",
+      "field": "params/options.tooltip/description",
+      "sourceHash": "sha256:b2deecc9a367af69a9d8dff13a48fed9f503bbfc7a27be1ad2ad41279c90221f",
+      "text": "鼠标悬停在选项上时显示的提示。"
+    },
+    {
+      "id": "ProviderViewModel",
+      "field": "params/options/description",
+      "sourceHash": "sha256:bacde4d1a1927d546efe339bd5d657a79fec6a52352071111caa10f36487fb61",
+      "text": "包含所有参数的对象。"
+    },
+    {
+      "id": "SceneMode.COLUMBUS_VIEW",
+      "field": "description",
+      "sourceHash": "sha256:35c377f15b1321974211b76e8ab20dff379b2db691dfb145e4049fd68678196b",
+      "text": "Columbus View 模式：采用透视投影的 2.5D 视图，地图平铺，具有非零高度的对象绘制在地图上方。"
+    },
+    {
+      "id": "SceneMode.getMorphTime",
+      "field": "description",
+      "sourceHash": "sha256:b28859a1e6ad40bd3e1defbddea0431b966bdc586e673d3923940e31fa8c497f",
+      "text": "返回给定场景模式对应的形变时间参数。"
+    },
+    {
+      "id": "SceneMode.getMorphTime",
+      "field": "params/value/description",
+      "sourceHash": "sha256:2b2709a3b80581eef153e5562e9da159fa5f06a1956f80b938be1c04d225cadf",
+      "text": "场景模式。"
+    },
+    {
+      "id": "SceneMode.getMorphTime",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:84d97bcb6b8d875aa022232e33fc2f5ceb683f2199b458ecda79cc6bcb035065",
+      "text": "形变时间参数。"
+    },
+    {
+      "id": "SceneMode.MORPHING",
+      "field": "description",
+      "sourceHash": "sha256:30bd7e461c853e1280323c25cd7a29f0683f8a8b74cff1fdd4bed2a298067eca",
+      "text": "模式切换的形变过程，例如从三维切换至二维。"
+    },
+    {
+      "id": "SceneMode.SCENE2D",
+      "field": "description",
+      "sourceHash": "sha256:a62217fdacad0e25dc91e388fecfc383fc80a9678efe0d3365cd329ed5b8c0a9",
+      "text": "二维模式：采用正交投影，从上方俯视地图。"
+    },
+    {
+      "id": "SceneMode.SCENE3D",
+      "field": "description",
+      "sourceHash": "sha256:a1d2c9201de2294c82fbd5464a1f2c5f2bf4ce17f464d3478f8563ab15c82582",
+      "text": "三维模式：地球的传统三维透视视图。"
+    },
+    {
+      "id": "SceneMode",
+      "field": "description",
+      "sourceHash": "sha256:29dfe068e99134e25d6cf58f1de248f3f711f46bbf49cc28325f7aba2f0f983b",
+      "text": "指示场景采用三维、二维还是 2.5D Columbus View。"
+    },
+    {
+      "id": "SceneModePicker",
+      "field": "description",
+      "sourceHash": "sha256:b16183896908042b9787f130dcb500521852054347d359e5697772e2719183f7",
+      "text": "<img src=\"Images/sceneModePicker.png\" style=\"float: left; margin-right: 10px;\" width=\"44\" height=\"116\" />\n<p>SceneModePicker 是用于切换场景模式的单按钮控件，左图为展开状态。只要通过指定的 Scene 切换模式，以编程方式进行的切换也会自动反映到此控件。</p><p style=\"clear: both;\"></p><br/>"
+    },
+    {
+      "id": "SceneModePicker",
+      "field": "exceptions/0/description",
+      "sourceHash": "sha256:a32c282b167b77335c61e4f1422e007fbbef3c536b72457f3f99be4fdf0412f0",
+      "text": "文档中不存在 ID 为 \"container\" 的元素。"
+    },
+    {
+      "id": "SceneModePicker",
+      "field": "params/duration/description",
+      "sourceHash": "sha256:8c949bdd19fd63cfc095ec95101c2650c1eec07a6378cc6535985f7b173fe80a",
+      "text": "场景切换所需时长，单位为秒。"
+    },
+    {
+      "id": "SceneModePicker",
+      "field": "params/scene/description",
+      "sourceHash": "sha256:13252abc5bf3944491cd068db78ca024b11b06570f8b07a770a8043fa10afc2d",
+      "text": "使用的 Scene 实例。"
+    },
+    {
+      "id": "SceneModePickerViewModel#destroy",
+      "field": "description",
+      "sourceHash": "sha256:db60157667f58e98b288af62a857a1d3d891989fd5a69e8b15edc3eb6825ee71",
+      "text": "销毁视图模型。"
+    },
+    {
+      "id": "SceneModePickerViewModel#dropDownVisible",
+      "field": "description",
+      "sourceHash": "sha256:8be0d9f747b76a8562a4584b934e7adba8271ad44ebf5c47edd59c5d2f84eef5",
+      "text": "获取或设置按钮下拉面板当前是否可见。此属性可观察。"
+    },
+    {
+      "id": "SceneModePickerViewModel#duration",
+      "field": "description",
+      "sourceHash": "sha256:a292011e4d6a7511740915db8012c12dc3d172026c3f7418b788f73ac13cc9a4",
+      "text": "获取或设置场景模式切换动画的时长，单位为秒。为零时立即切换场景模式。"
+    },
+    {
+      "id": "SceneModePickerViewModel#morphTo2D",
+      "field": "description",
+      "sourceHash": "sha256:9cdb117f3dcc552e93b6d54b80ae306f3ceee57a866e5c3bba2c6b62c7e1c921",
+      "text": "获取形变切换至二维模式的命令。"
+    },
+    {
+      "id": "SceneModePickerViewModel#morphTo3D",
+      "field": "description",
+      "sourceHash": "sha256:8cb91be56720b206803bf3b494428daf26c2dd18455f912adbe46fdb9dfcb1cf",
+      "text": "获取形变切换至三维模式的命令。"
+    },
+    {
+      "id": "SceneModePickerViewModel#morphToColumbusView",
+      "field": "description",
+      "sourceHash": "sha256:1e1a4a11a062beaf7424d91847b84ad267fdd3d55b23725ef10c2ed2d7dba634",
+      "text": "获取形变切换至 Columbus View 的命令。"
+    },
+    {
+      "id": "SceneModePickerViewModel#scene",
+      "field": "description",
+      "sourceHash": "sha256:26f86c4bc95f3a8f4c78b4534964d0987847382b405e5d842ed31537fcf013bc",
+      "text": "获取场景。"
+    },
+    {
+      "id": "SceneModePickerViewModel#sceneMode",
+      "field": "description",
+      "sourceHash": "sha256:f7e5603ed7c44490e15169614a6e330ee0b6f2bcccfea6b3ed22c7ae028d11ce",
+      "text": "获取或设置当前 SceneMode。此属性可观察。"
+    },
+    {
+      "id": "SceneModePickerViewModel#selectedTooltip",
+      "field": "description",
+      "sourceHash": "sha256:7ff977d95e5228a8e0296e4c4891341e2a0923ec4b18bff5c1590ec2a3608d00",
+      "text": "获取当前生效的提示文本。此属性可观察。"
+    },
+    {
+      "id": "SceneModePickerViewModel#toggleDropDown",
+      "field": "description",
+      "sourceHash": "sha256:b374671a885500fc5fcf9753869bb615bfc45fc88927536578e4abc1a94fec4c",
+      "text": "获取切换下拉框的命令。"
+    },
+    {
+      "id": "SceneModePickerViewModel#tooltip2D",
+      "field": "description",
+      "sourceHash": "sha256:5fa121c50749f5978099d67a12eb447c25acf83ee0897f0b1b634e9d37b6c374",
+      "text": "获取或设置二维模式的提示文本。此属性可观察。"
+    },
+    {
+      "id": "SceneModePickerViewModel#tooltip3D",
+      "field": "description",
+      "sourceHash": "sha256:bf3babeb860c0860e04841375cb4f20a70836441f0c230a4f4c8ba9ebeb4127b",
+      "text": "获取或设置三维模式的提示文本。此属性可观察。"
+    },
+    {
+      "id": "SceneModePickerViewModel#tooltipColumbusView",
+      "field": "description",
+      "sourceHash": "sha256:0c3ce05a25bdd4c04b6b7dafcc867abaffd53f633d1decbd4f8f1df160a520dc",
+      "text": "获取或设置 Columbus View 的提示文本。此属性可观察。"
+    },
+    {
+      "id": "SceneModePickerViewModel",
+      "field": "description",
+      "sourceHash": "sha256:af84dc0652e7ef3442fdac4c0d59ea908b3bb53908b0b8f7ec7962cc24629546",
+      "text": "{@link SceneModePicker} 的视图模型。"
+    },
+    {
+      "id": "SceneModePickerViewModel",
+      "field": "params/duration/description",
+      "sourceHash": "sha256:5199012f9907c3a96d781e8041b8bbb6b545ff0723540e338b8310390687c127",
+      "text": "场景模式形变动画的时长，单位为秒。"
+    },
+    {
+      "id": "SceneModePickerViewModel",
+      "field": "params/scene/description",
+      "sourceHash": "sha256:7d20f03a04fb6b80fba6e690fd733fba9a7f6cf17706b0e76963987d9121649c",
+      "text": "要执行模式形变的 Scene。"
+    },
+    {
+      "id": "SceneMode",
+      "field": "properties/COLUMBUS_VIEW/description",
+      "sourceHash": "sha256:35c377f15b1321974211b76e8ab20dff379b2db691dfb145e4049fd68678196b",
+      "text": "Columbus View 模式：采用透视投影的 2.5D 视图，地图平铺，具有非零高度的对象绘制在地图上方。"
+    },
+    {
+      "id": "SceneMode",
+      "field": "properties/MORPHING/description",
+      "sourceHash": "sha256:30bd7e461c853e1280323c25cd7a29f0683f8a8b74cff1fdd4bed2a298067eca",
+      "text": "模式切换的形变过程，例如从三维切换至二维。"
+    },
+    {
+      "id": "SceneMode",
+      "field": "properties/SCENE2D/description",
+      "sourceHash": "sha256:a62217fdacad0e25dc91e388fecfc383fc80a9678efe0d3365cd329ed5b8c0a9",
+      "text": "二维模式：采用正交投影，从上方俯视地图。"
+    },
+    {
+      "id": "SceneMode",
+      "field": "properties/SCENE3D/description",
+      "sourceHash": "sha256:a1d2c9201de2294c82fbd5464a1f2c5f2bf4ce17f464d3478f8563ab15c82582",
+      "text": "三维模式：地球的传统三维透视视图。"
+    },
+    {
+      "id": "SelectionIndicator",
+      "field": "description",
+      "sourceHash": "sha256:2859e375cd87bc07f1c0d64ed1f4ed14a480c4970b1a00b289dc17f1d9465010",
+      "text": "在选中对象上显示指示器的控件。"
+    },
+    {
+      "id": "SelectionIndicator",
+      "field": "exceptions/0/description",
+      "sourceHash": "sha256:a32c282b167b77335c61e4f1422e007fbbef3c536b72457f3f99be4fdf0412f0",
+      "text": "文档中不存在 ID 为 \"container\" 的元素。"
+    },
+    {
+      "id": "SelectionIndicator",
+      "field": "params/scene/description",
+      "sourceHash": "sha256:13252abc5bf3944491cd068db78ca024b11b06570f8b07a770a8043fa10afc2d",
+      "text": "使用的 Scene 实例。"
+    },
+    {
+      "id": "SelectionIndicatorViewModel.ComputeScreenSpacePosition",
+      "field": "description",
+      "sourceHash": "sha256:28d00de3c57186082bcc40cb836b14cb21aff5f21e1e971fb7a1b327be5aa3bd",
+      "text": "将对象世界位置转换为屏幕空间位置的函数。"
+    },
+    {
+      "id": "SelectionIndicatorViewModel.ComputeScreenSpacePosition",
+      "field": "params/position/description",
+      "sourceHash": "sha256:0d12ca79cd10c0b2a11133fbbe0abc28093a1807133fb331479df6c0b202091a",
+      "text": "WGS84 世界坐标位置。"
+    },
+    {
+      "id": "SelectionIndicatorViewModel.ComputeScreenSpacePosition",
+      "field": "params/result/description",
+      "sourceHash": "sha256:31ecba72066c319681700ae7cd9f836d0f0e4717cd6432b241303e1e96abb725",
+      "text": "用于返回输入位置转换所得窗口坐标的对象。"
+    },
+    {
+      "id": "SelectionIndicatorViewModel#animateAppear",
+      "field": "description",
+      "sourceHash": "sha256:f580bcf357e250bbf1d93cf962a7633778c94df6e8e2ebf19078b0faccaefa75",
+      "text": "播放指示器出现动画，以突出选中项。"
+    },
+    {
+      "id": "SelectionIndicatorViewModel#animateDepart",
+      "field": "description",
+      "sourceHash": "sha256:20eea66ec6d80853a2cad3b3b5448f23775c0dc80dd49e0d164e34e0f877dcbc",
+      "text": "播放指示器消失动画，以取消选择提示。"
+    },
+    {
+      "id": "SelectionIndicatorViewModel#computeScreenSpacePosition",
+      "field": "description",
+      "sourceHash": "sha256:f201ca4fe2dcf4d329394a5e9f88df374b06ddf31ba98aae4e4898b2b3cb2561",
+      "text": "获取或设置将对象世界位置转换为屏幕位置的函数。"
+    },
+    {
+      "id": "SelectionIndicatorViewModel#container",
+      "field": "description",
+      "sourceHash": "sha256:0a5f8e82bb0fcc8311dbca331a61e740c4847c9179c3fc80bf1095b891727b25",
+      "text": "获取包含选择指示器的 HTML 元素。"
+    },
+    {
+      "id": "SelectionIndicatorViewModel#isVisible",
+      "field": "description",
+      "sourceHash": "sha256:88b9a3397f6146cada0a078d1960640ce8947614c6c216e80496470da164227d",
+      "text": "获取位置指示器的可见性。选中对象没有位置时，即使已有选中对象也可能为 false。"
+    },
+    {
+      "id": "SelectionIndicatorViewModel#position",
+      "field": "description",
+      "sourceHash": "sha256:e9633171914a7a9f65f6622f326f7d0de6bfe391878ea365cfdfcf23d03625f6",
+      "text": "获取或设置需要显示选择指示器的对象世界位置。"
+    },
+    {
+      "id": "SelectionIndicatorViewModel#scene",
+      "field": "description",
+      "sourceHash": "sha256:835c9a1c219a221a826d6604846c2d9c7a2336ef5629e87ac11db4f72cbf0652",
+      "text": "获取使用的场景。"
+    },
+    {
+      "id": "SelectionIndicatorViewModel#selectionIndicatorElement",
+      "field": "description",
+      "sourceHash": "sha256:dada052638bfb03447a3608ccc315176b40d60806cda1154d98945997cea1692",
+      "text": "获取承载选择指示器的 HTML 元素。"
+    },
+    {
+      "id": "SelectionIndicatorViewModel#showSelection",
+      "field": "description",
+      "sourceHash": "sha256:f1190ca4a9fb8d993e4f440671412b6e07ccd58a8be6db7f49850f0b905d4a32",
+      "text": "获取或设置选择指示器的可见性。"
+    },
+    {
+      "id": "SelectionIndicatorViewModel#update",
+      "field": "description",
+      "sourceHash": "sha256:d860dc54aba91202772718047bdceb37d30a4590aa6d360873aea66a40d7be8d",
+      "text": "更新选择指示器视图，使其与视图模型的位置和内容属性一致。应在渲染循环中调用此函数。"
+    },
+    {
+      "id": "SelectionIndicatorViewModel",
+      "field": "description",
+      "sourceHash": "sha256:32344a1c4e578c72a8043078a2dc00de50b3c6deb88a07cde8a50784f1f4266d",
+      "text": "{@link SelectionIndicator} 的视图模型。"
+    },
+    {
+      "id": "SelectionIndicatorViewModel",
+      "field": "params/container/description",
+      "sourceHash": "sha256:154ac3fc13d0215f230ccb34257ec853021f1caa6bf2ba991b4fdf0525a7fb89",
+      "text": "包含此控件的 DOM 元素。"
+    },
+    {
+      "id": "SelectionIndicatorViewModel",
+      "field": "params/scene/description",
+      "sourceHash": "sha256:295711ae48b0587bc1bbbaecda6be230324424ff29933f45f1c787772158fe10",
+      "text": "用于屏幕空间坐标转换的场景实例。"
+    },
+    {
+      "id": "SelectionIndicatorViewModel",
+      "field": "params/selectionIndicatorElement/description",
+      "sourceHash": "sha256:1cc3be3936c2646fb37a185d63c98efdbddc8671db08e51d1742792d8ce2bbf1",
+      "text": "包含构成选择指示器的所有元素的元素。"
+    },
+    {
+      "id": "SvgPathBindingHandler",
+      "field": "description",
+      "sourceHash": "sha256:beaea9e0af1a6d7ea7240bce07b485163e6127adbf3ace357312b8302bfcb2c6",
+      "text": "为单个 SVG 路径创建 DOM 元素的 Knockout 绑定处理器，注册名称为 cesiumSvgPath。\n<p>\n绑定参数为具有以下属性的对象：\n</p>\n<ul>\n<li>path：SVG 路径字符串。</li>\n<li>width：未施加变换时 SVG 路径的宽度。</li>\n<li>height：未施加变换时 SVG 路径的高度。</li>\n<li>css：可选，附加到 SVG 的 CSS 类名字符串。始终包含 cesium-svgPath-svg 类。</li>\n</ul>"
+    },
+    {
+      "id": "Timeline#resize",
+      "field": "description",
+      "sourceHash": "sha256:096a5d78507528140acf096ca0d591bacc74deb1c32d580aee6366dcffca9e24",
+      "text": "调整控件尺寸以匹配容器。"
+    },
+    {
+      "id": "Timeline#zoomTo",
+      "field": "description",
+      "sourceHash": "sha256:46736e86556a70296c064d0c90f640495b2e85ae00db5a56f50f345c5dd8cf8c",
+      "text": "将视图设置为给定时间范围。"
+    },
+    {
+      "id": "Timeline#zoomTo",
+      "field": "params/startTime/description",
+      "sourceHash": "sha256:61ef118a26be62c7d02ed13731fed9e9697b613b439e81886ffc5d4ed35a70ba",
+      "text": "开始时间。"
+    },
+    {
+      "id": "Timeline#zoomTo",
+      "field": "params/stopTime/description",
+      "sourceHash": "sha256:c7e606d3b740ae7fb5292fcde64a85e393a097986d33af28677aca6d6e20149e",
+      "text": "结束时间。"
+    },
+    {
+      "id": "Timeline",
+      "field": "description",
+      "sourceHash": "sha256:2b8d6a1cd2f4e6977caae8b47b5dbfa09b8b534d184da382418c8a3eb065af1d",
+      "text": "显示和控制当前场景时间的时间轴控件。"
+    },
+    {
+      "id": "Timeline",
+      "field": "params/clock/description",
+      "sourceHash": "sha256:bd84e2a3c103adc67452cd4682af54b5e64fdb48c8be128ef0d1f9ac5bcdf8b8",
+      "text": "使用的时钟。"
+    },
+    {
+      "id": "Timeline",
+      "field": "params/container/description",
+      "sourceHash": "sha256:4d7394948938b5638631520516dfd141f1b7cee13f7fd7bab50b0757704e40df",
+      "text": "此控件的父 HTML 容器节点。"
+    },
+    {
+      "id": "ToggleButtonViewModel#command",
+      "field": "description",
+      "sourceHash": "sha256:c62ce066dec4bd9b96525fab27365a1d52c625103c9ef8077d0b9ab326c7d98f",
+      "text": "获取切换按钮状态时执行的命令。"
+    },
+    {
+      "id": "ToggleButtonViewModel#toggled",
+      "field": "description",
+      "sourceHash": "sha256:419b22e09eefb0032d0edb3fecb3ba84bafa0f7b167acf65750c91a4956c9076",
+      "text": "获取或设置按钮当前是否处于选中状态。此属性可观察。"
+    },
+    {
+      "id": "ToggleButtonViewModel#tooltip",
+      "field": "description",
+      "sourceHash": "sha256:ad7b3ba5e2549803c8f7d373667167316374ca95810d68553fae78e5fa334a37",
+      "text": "获取或设置按钮提示文本。此属性可观察。"
+    },
+    {
+      "id": "ToggleButtonViewModel",
+      "field": "description",
+      "sourceHash": "sha256:1f3153a8c43be282fc31344c97f939670196adb84184a1728378a8ee8d758482",
+      "text": "公开切换按钮各项属性的视图模型。"
+    },
+    {
+      "id": "ToggleButtonViewModel",
+      "field": "params/command/description",
+      "sourceHash": "sha256:7c15e419501845fd0a970ceb5c472064fc2f3f8eb945fcae3050518ef42f206d",
+      "text": "切换按钮状态时执行的命令。"
+    },
+    {
+      "id": "ToggleButtonViewModel",
+      "field": "params/options.toggled/description",
+      "sourceHash": "sha256:f5171ef5ddd7c36df8ac0ff48c8550d4a092081aeb891a00a1bc008916719688",
+      "text": "表示按钮初始是否处于选中状态的布尔值。"
+    },
+    {
+      "id": "ToggleButtonViewModel",
+      "field": "params/options.tooltip/description",
+      "sourceHash": "sha256:05853abb76933bed8847d423acca9347d0113108f0c2bc92a50c673f2f38c655",
+      "text": "按钮提示文本字符串。"
+    },
+    {
+      "id": "VideoSynchronizer#clock",
+      "field": "description",
+      "sourceHash": "sha256:3a6df20bfaa6b23d470a5bdc5827f0113a7c32e28e8c83f641aee7718fb89d64",
+      "text": "获取或设置用于驱动视频元素的时钟。"
+    },
+    {
+      "id": "VideoSynchronizer#destroy",
+      "field": "description",
+      "sourceHash": "sha256:47df16be45a0a918c47ce4f56214efd2e94f422eb5b696da3b1fa633b9f7d6d4",
+      "text": "销毁此对象使用的资源。对象销毁后不应继续使用。"
+    },
+    {
+      "id": "VideoSynchronizer#element",
+      "field": "description",
+      "sourceHash": "sha256:5469898b031650e410b994ad50e190bce98179c2df139bf9505c2cb8882e73c4",
+      "text": "获取或设置需要同步的视频元素。"
+    },
+    {
+      "id": "VideoSynchronizer#epoch",
+      "field": "description",
+      "sourceHash": "sha256:9a23d9abb43db67829033d6d1d5ec8b32f1fa1737cdc132acefcbaf4d614cd3c",
+      "text": "获取或设置标记视频开始的模拟时间。"
+    },
+    {
+      "id": "VideoSynchronizer#tolerance",
+      "field": "description",
+      "sourceHash": "sha256:696778f3ac731ebaf7fb6957694eae50725f006cba466cf55685cdda6a66b19a",
+      "text": "获取或设置触发视频跳转定位前，视频 currentTime 与时钟 currentTime 允许偏离的时间，单位为秒。较小值同步更准确，但可能降低视频性能；较大值性能较好，但同步精度较低。"
+    },
+    {
+      "id": "VideoSynchronizer",
+      "field": "description",
+      "sourceHash": "sha256:e3148c96cdd25670695d6a2f5d1bc70fe775057b060b79a990e53d8a4ce55fd0",
+      "text": "使视频元素与模拟时钟同步。"
+    },
+    {
+      "id": "VideoSynchronizer",
+      "field": "params/options.clock/description",
+      "sourceHash": "sha256:6b120774ada3ce83188f53a08402b6d24f3c97e34692e8f88ae03baf59a985d5",
+      "text": "用于驱动视频的时钟实例。"
+    },
+    {
+      "id": "VideoSynchronizer",
+      "field": "params/options.element/description",
+      "sourceHash": "sha256:0a949eb495fcf9046a4f98cbe134f3b1ccadde89218a21485d6bad83cc2ed792",
+      "text": "需要同步的视频元素。"
+    },
+    {
+      "id": "VideoSynchronizer",
+      "field": "params/options.epoch/description",
+      "sourceHash": "sha256:e417770f3a22196f29cd51ea36af6217f9fbb33b11513a70f1a0ad0e4c7085fc",
+      "text": "标记视频开始的模拟时间。"
+    },
+    {
+      "id": "VideoSynchronizer",
+      "field": "params/options.tolerance/description",
+      "sourceHash": "sha256:0d2e61c3657012183949e649cb2d216577e47eacb339ada29da87fe8c75fd5a9",
+      "text": "时钟与视频允许偏离的最大时间，单位为秒。"
+    },
+    {
+      "id": "viewerDragDropMixin#clampToGround",
+      "field": "description",
+      "sourceHash": "sha256:5a9ba1a07d3b0b5607fff35195be2c3678e6ad0afc094d90469755f16b7e4974",
+      "text": "获取或设置是否将数据源贴地显示。"
+    },
+    {
+      "id": "viewerDragDropMixin#clearOnDrop",
+      "field": "description",
+      "sourceHash": "sha256:845ce370273d7086e5283cfd82a09ddef08170f41a26efcdd815a6c54c663484",
+      "text": "获取或设置添加新拖入的数据源前是否清空现有数据源。"
+    },
+    {
+      "id": "viewerDragDropMixin#dropEnabled",
+      "field": "description",
+      "sourceHash": "sha256:acc585327542b14e8b0ffd74c3ffe86b7c988183abc84f4595a9dbd62cc46c2a",
+      "text": "获取或设置是否启用拖放支持。"
+    },
+    {
+      "id": "viewerDragDropMixin#dropError",
+      "field": "description",
+      "sourceHash": "sha256:d6f4e97dac5a03472c64a178cf4fc3ea9261e6b5d025d3af2b415a408a8143a5",
+      "text": "获取拖放处理出错时触发的事件。"
+    },
+    {
+      "id": "viewerDragDropMixin#dropTarget",
+      "field": "description",
+      "sourceHash": "sha256:5316b50319fc13a2a8d20753f429f66d3a39f4ac40b57aba6409fc79a40e1a84",
+      "text": "获取或设置作为拖放目标的元素。"
+    },
+    {
+      "id": "viewerDragDropMixin#flyToOnDrop",
+      "field": "description",
+      "sourceHash": "sha256:4367fba7bab122176f6734f5b956d09c1a2b5af26b2a62fff4d116862d67cfe8",
+      "text": "获取或设置数据源加载完成后相机是否飞至该数据源。"
+    },
+    {
+      "id": "viewerDragDropMixin#proxy",
+      "field": "description",
+      "sourceHash": "sha256:fc49ea718ad283c523357d4d0d12cb9173937de943091846b49397f5707703ff",
+      "text": "获取或设置 KML 使用的代理。"
+    },
+    {
+      "id": "viewerDragDropMixin",
+      "field": "description",
+      "sourceHash": "sha256:cfc633227ffff01288158acf17d13555f5666cb8039b8b6111e88ee8a83b9b55",
+      "text": "向 Viewer 控件添加默认文件拖放支持的混入函数，可加载 CZML 等受支持文件。通常不直接调用，而是按下例作为参数传给 {@link Viewer#extend}。"
+    },
+    {
+      "id": "viewerDragDropMixin",
+      "field": "exceptions/0/description",
+      "sourceHash": "sha256:dce02e05892f439a6e0668e851417137e240675321b79d6bf1ff4168dbe7e567",
+      "text": "文档中不存在 ID 为 <options.dropTarget> 的元素。"
+    },
+    {
+      "id": "viewerDragDropMixin",
+      "field": "exceptions/1/description",
+      "sourceHash": "sha256:4215f01cbe5db6ecb16c17a03516eb7af19cd8bd61d602d2c72c70f9a69e697b",
+      "text": "dropTarget 已由其他混入定义。"
+    },
+    {
+      "id": "viewerDragDropMixin",
+      "field": "exceptions/2/description",
+      "sourceHash": "sha256:8b708d30f86d932c6feae6bdd0db5f63dacead7d741222bbd7c4e0c3bf6cf0db",
+      "text": "dropEnabled 已由其他混入定义。"
+    },
+    {
+      "id": "viewerDragDropMixin",
+      "field": "exceptions/3/description",
+      "sourceHash": "sha256:dbdd0d41e08bb77dc768a1c31355837ecc8d6594d4628544d80664cd7c7639f0",
+      "text": "dropError 已由其他混入定义。"
+    },
+    {
+      "id": "viewerDragDropMixin",
+      "field": "exceptions/4/description",
+      "sourceHash": "sha256:f4feae700e8c9876ca3d5857f8fa2e0638b6e18ea8f2a71f69edd5b8e10eebe3",
+      "text": "clearOnDrop 已由其他混入定义。"
+    },
+    {
+      "id": "viewerDragDropMixin",
+      "field": "params/options.clampToGround/description",
+      "sourceHash": "sha256:48421fd17712b4c11187d758a98f646c744c5e6d432ceb7872d08c485bc3adc7",
+      "text": "为 true 时，将数据源贴地显示。"
+    },
+    {
+      "id": "viewerDragDropMixin",
+      "field": "params/options.clearOnDrop/description",
+      "sourceHash": "sha256:46ab4594668e7d8b221c8c6ddbd9fe7693a53d6ab5b160ab7303e7c6833bfa8d",
+      "text": "为 true 时，拖入文件会先清空全部现有数据源；为 false 时，在现有数据源之后加载新数据源。"
+    },
+    {
+      "id": "viewerDragDropMixin",
+      "field": "params/options.dropTarget/description",
+      "sourceHash": "sha256:0b0af5a9d62ec7b1a1424094c2798dc326bb6444d72682098fc1d02095735e15",
+      "text": "作为拖放目标的 DOM 元素。"
+    },
+    {
+      "id": "viewerDragDropMixin",
+      "field": "params/options.flyToOnDrop/description",
+      "sourceHash": "sha256:b63d8c7c19a7045a25be8fd886df92b0e33c1e0ce684b669e249c50ce0fdd5f6",
+      "text": "为 true 时，拖入文件后在数据源加载完成时使相机飞至该数据源。"
+    },
+    {
+      "id": "viewerDragDropMixin",
+      "field": "params/options.proxy/description",
+      "sourceHash": "sha256:205b6ef33eadf5a3edf8d1b9aaf978f7be785ff6df376196cffb7bf2bde0ac04",
+      "text": "KML 网络链接使用的代理。"
+    },
+    {
+      "id": "viewerDragDropMixin",
+      "field": "params/viewer/description",
+      "sourceHash": "sha256:0588eb71995416c4c2d29a74df270d09a62d071cfd51164f0a17f7866719df48",
+      "text": "Viewer 实例。"
+    },
+    {
+      "id": "viewerPerformanceWatchdogMixin",
+      "field": "description",
+      "sourceHash": "sha256:205d9f269076a2b3b1e0fd47b1bb2203092b0f35549d8f52e8387992b53ffb92",
+      "text": "向 {@link Viewer} 控件添加 {@link PerformanceWatchdog} 控件的混入函数。通常不直接调用，而是按下例作为参数传给 {@link Viewer#extend}。"
+    },
+    {
+      "id": "viewerPerformanceWatchdogMixin",
+      "field": "exceptions/0/description",
+      "sourceHash": "sha256:bc214cdba0a26595f5fd73cb914a1fa88db0ca344c02793e5b738d266b8e62ef",
+      "text": "必须提供 viewer。"
+    },
+    {
+      "id": "viewerPerformanceWatchdogMixin",
+      "field": "params/options.lowFrameRateMessage/description",
+      "sourceHash": "sha256:94d9754a7c0c565969d80ffd07e912af00ed828e3fb5117a2ff6f2a01acdbea3",
+      "text": "检测到低帧率时显示的消息。消息按 HTML 解析，因此必须来自可信来源，以免应用遭受跨站脚本攻击。"
+    },
+    {
+      "id": "viewerPerformanceWatchdogMixin",
+      "field": "params/options/description",
+      "sourceHash": "sha256:0dbdf8766d919ff5491c6d88d0120afb96be2c4c82b924e8965dfca7e5f2c022",
+      "text": "包含各项属性的对象。"
+    },
+    {
+      "id": "viewerPerformanceWatchdogMixin",
+      "field": "params/viewer/description",
+      "sourceHash": "sha256:0588eb71995416c4c2d29a74df270d09a62d071cfd51164f0a17f7866719df48",
+      "text": "Viewer 实例。"
+    },
+    {
+      "id": "VRButton",
+      "field": "description",
+      "sourceHash": "sha256:a0497be9ca023c8f50e633429ec8030c6070d04a95dfc18db439b658671b642a",
+      "text": "切换 VR 模式的单按钮控件。"
+    },
+    {
+      "id": "VRButton",
+      "field": "exceptions/0/description",
+      "sourceHash": "sha256:a32c282b167b77335c61e4f1422e007fbbef3c536b72457f3f99be4fdf0412f0",
+      "text": "文档中不存在 ID 为 \"container\" 的元素。"
+    },
+    {
+      "id": "VRButton",
+      "field": "params/vrElement/description",
+      "sourceHash": "sha256:9f9d4318d88c400b5ea7bf8a2240ebfd9396e92d2f456438a7a9f22e2dd2ba4e",
+      "text": "要进入 VR 模式的元素或其 ID。"
+    },
+    {
+      "id": "VRButtonViewModel#command",
+      "field": "description",
+      "sourceHash": "sha256:cf929f6ea747e798d30c57725b3ebf07efc6eb0f1ca50cf2c595a52bef8539fd",
+      "text": "获取切换 VR 模式的 Command。"
+    },
+    {
+      "id": "VRButtonViewModel#destroy",
+      "field": "description",
+      "sourceHash": "sha256:017717985b95790039d72f3dd9a385b389d90406ac0eb6a78fadcc364723536c",
+      "text": "销毁视图模型。不再需要时应调用，以正确清理视图模型。"
+    },
+    {
+      "id": "VRButtonViewModel#isVREnabled",
+      "field": "description",
+      "sourceHash": "sha256:7d644d89055395b80dbf68a9c563d64e44437cabbbb1e7b4ba7799aceb2ff450",
+      "text": "获取或设置是否启用 VR 功能。"
+    },
+    {
+      "id": "VRButtonViewModel#isVRMode",
+      "field": "description",
+      "sourceHash": "sha256:a7071d7bcd85dad52ecdd3025b6d508e0252b5ac387f2150aef4adfe894f5b4a",
+      "text": "获取当前是否处于 VR 模式。"
+    },
+    {
+      "id": "VRButtonViewModel#tooltip",
+      "field": "description",
+      "sourceHash": "sha256:d30615fcd23d5a200ad6e31feb539278c1185da9fee1cb04edd732b77f1f9cbc",
+      "text": "获取提示文本。此属性可观察。"
+    },
+    {
+      "id": "VRButtonViewModel#vrElement",
+      "field": "description",
+      "sourceHash": "sha256:3d74a7fbfb4942377a28f1b72299c92665880762dc03d3c63e7fea2fb27b4dbc",
+      "text": "获取或设置按下对应按钮时要进入 VR 模式的 HTML 元素。"
+    },
+    {
+      "id": "VRButtonViewModel",
+      "field": "description",
+      "sourceHash": "sha256:bf4506632a83f192bdb616759e8597c7fa630f5640c54bc65aee40ea59a034a6",
+      "text": "{@link VRButton} 的视图模型。"
+    },
+    {
+      "id": "VRButtonViewModel",
+      "field": "params/vrElement/description",
+      "sourceHash": "sha256:4e51b558a182922072ce06c56bf4a0195bb3820b0e4454cbb58b3d33553d77e9",
+      "text": "要进入 VR 模式的元素或其 ID。"
+    }
+  ]
+}
