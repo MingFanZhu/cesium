@@ -485,3 +485,33 @@ test("utility documentation displays task backpressure and mip filtering", async
   });
   expect(errors).toEqual([]);
 });
+
+test("metadata documentation displays covariance units and tile child masks", async ({
+  page,
+}, info) => {
+  const errors = [];
+  page.on("pageerror", (error) => errors.push(error.message));
+  page.on("response", (response) => {
+    if (response.status() >= 400) {
+      errors.push(`${response.status()} ${response.url()}`);
+    }
+  });
+  await page.route(/^https?:\/\/(?!127\.0\.0\.1:8104)/, (route) =>
+    route.abort(),
+  );
+  const prefix = "/deep/site/vendor/engine/Documentation/";
+  await page.goto(`${prefix}CorrelationGroup.html#rotationThetas`);
+  await expect(page.locator('[id="rotationThetas"]')).toBeVisible();
+  await expect(page.locator("#main")).toContainText("单位为毫弧度");
+  await page.goto(`${prefix}TileAvailability.html#computeChildMaskForTile`);
+  await expect(page.locator('[id="computeChildMaskForTile"]')).toBeVisible();
+  await expect(page.locator("#main")).toContainText("西南");
+  await expect(page.locator("#main")).toContainText("东北");
+  await info.attach("metadata-documentation", {
+    body: await page.screenshot({
+      path: info.outputPath("metadata-documentation.png"),
+    }),
+    contentType: "image/png",
+  });
+  expect(errors).toEqual([]);
+});

@@ -1,0 +1,2142 @@
+{
+  "schemaVersion": 1,
+  "locale": "zh-CN",
+  "entries": [
+    {
+      "id": "ArcGisBaseMapType",
+      "field": "description",
+      "sourceHash": "sha256:12ef57280aecc115229face8f836284bd53924742a56aaf1e1d93b1d07e72beb",
+      "text": "枚举默认支持的 ArcGIS 影像瓦片图层。"
+    },
+    {
+      "id": "ArcGisMapService.defaultAccessToken",
+      "field": "description",
+      "sourceHash": "sha256:70f773de81cb7436b3bfb87c68b0d42c4d4ed37eae1ac14b94f4770a6c426d72",
+      "text": "获取或设置默认 ArcGIS 访问令牌。"
+    },
+    {
+      "id": "ArcGisMapService.defaultWorldHillshadeServer",
+      "field": "description",
+      "sourceHash": "sha256:1b747f19ed0f226e92ac0d61bad259997d0fa4347e7f9bcc59d3914fab2f85d6",
+      "text": "获取或设置 ArcGIS World Hillshade 瓦片服务 URL。"
+    },
+    {
+      "id": "ArcGisMapService.defaultWorldImageryServer",
+      "field": "description",
+      "sourceHash": "sha256:b23e40b428b1636f44ca941c5533481d5327323e1c5756cf246b765c3e98e73c",
+      "text": "获取或设置 ArcGIS World Imagery 瓦片服务 URL。"
+    },
+    {
+      "id": "ArcGisMapService.defaultWorldOceanServer",
+      "field": "description",
+      "sourceHash": "sha256:7269494776e5d8ece8042680fd7bb5151a0e81b24a73a50dc9cf4c88c3d72edc",
+      "text": "获取或设置 ArcGIS World Oceans 瓦片服务 URL。"
+    },
+    {
+      "id": "ArcGisMapService",
+      "field": "description",
+      "sourceHash": "sha256:1a02ee9f12e9cae469625b93966f184e6ccee520cc6f5c753e57dff56fa4b5ef",
+      "text": "访问 ArcGIS 影像瓦片服务的默认选项。访问图层需要 ArcGIS 访问令牌，随附的默认令牌仅供评估。可前往 {@link https://developers.arcgis.com} 创建免费账户并获取令牌。更多信息见 {@link https://developers.arcgis.com/documentation/mapping-apis-and-services/security/ | ArcGIS 开发者指南}。"
+    },
+    {
+      "id": "BingMapsGeocoderService#credit",
+      "field": "description",
+      "sourceHash": "sha256:95abd73c2b79a746c6be601d9185f1a3489aa129f406ff881536949dc994daa2",
+      "text": "获取执行地理编码后显示的署名，通常用于标明地理编码服务来源。"
+    },
+    {
+      "id": "BingMapsGeocoderService#geocode",
+      "field": "params/query/description",
+      "sourceHash": "sha256:9d80675b03c4f753e72f77404ba978b1ab58b53db7ee00a2eff5524e78c353a8",
+      "text": "发送给地理编码服务的查询。"
+    },
+    {
+      "id": "BingMapsGeocoderService#key",
+      "field": "description",
+      "sourceHash": "sha256:26689715c81f269d165fbc475ff389eb70a9a84ce62d81b40eef238b5c607ec8",
+      "text": "Bing 地理编码服务的密钥。"
+    },
+    {
+      "id": "BingMapsGeocoderService#url",
+      "field": "description",
+      "sourceHash": "sha256:1ceed330332d85dddb4bb6c03f039e77a5c73847ab2a6b17a61d0f3a786da403",
+      "text": "Bing 地理编码服务的 URL 端点。"
+    },
+    {
+      "id": "BingMapsGeocoderService",
+      "field": "description",
+      "sourceHash": "sha256:a0c803f569e9e18689b185901132f9966ddf322aaccc18e08fcbcc213f0ed876",
+      "text": "通过 Bing Maps 提供地理编码服务。"
+    },
+    {
+      "id": "BingMapsGeocoderService",
+      "field": "params/options.culture/description",
+      "sourceHash": "sha256:476c66f3201f502b2059f2d7f132cc46626933dab6f4d994882bfff1da5b2b2b",
+      "text": "用于返回指定文化及语言结果的 Bing Maps {@link https://docs.microsoft.com/en-us/bingmaps/rest-services/common-parameters-and-types/supported-culture-codes|文化代码}。"
+    },
+    {
+      "id": "BingMapsGeocoderService",
+      "field": "params/options.key/description",
+      "sourceHash": "sha256:03d2ffb8d2bbf4c9be493dc92bb88e562c4a3e5c709a13805077ccd1bc924747",
+      "text": "Bing Maps 地理编码服务使用的密钥。"
+    },
+    {
+      "id": "BingMapsStyle.AERIAL_WITH_LABELS_ON_DEMAND",
+      "field": "description",
+      "sourceHash": "sha256:2f31bc9b69075704292b76a12b43d94f66e58a0037977f7061d4787ce83477c7",
+      "text": "叠加道路的航空影像。"
+    },
+    {
+      "id": "BingMapsStyle.AERIAL_WITH_LABELS",
+      "field": "deprecated",
+      "sourceHash": "sha256:bac53f561d6471e662a649761ac86bf7837f4ee13b4a4e9f72d89bbf0947ec7e",
+      "text": "参见 https://github.com/CesiumGS/cesium/issues/7128. 请改用 `BingMapsStyle.AERIAL_WITH_LABELS_ON_DEMAND`。"
+    },
+    {
+      "id": "BingMapsStyle.AERIAL_WITH_LABELS",
+      "field": "description",
+      "sourceHash": "sha256:2f31bc9b69075704292b76a12b43d94f66e58a0037977f7061d4787ce83477c7",
+      "text": "叠加道路的航空影像。"
+    },
+    {
+      "id": "BingMapsStyle.AERIAL",
+      "field": "description",
+      "sourceHash": "sha256:5cc3682d177022647f0ab9c74eeee1307c0ccade9697b274bd09196fad0e0156",
+      "text": "航空影像。"
+    },
+    {
+      "id": "BingMapsStyle.CANVAS_DARK",
+      "field": "description",
+      "sourceHash": "sha256:7e5287853b6dbb8f7e689d7a4f9444d283c6e6579e6f1c9ae8c2d099544f08a9",
+      "text": "深色版道路地图。"
+    },
+    {
+      "id": "BingMapsStyle.CANVAS_GRAY",
+      "field": "description",
+      "sourceHash": "sha256:6ab37c0e6ac83d4b207c56b54d7db14703ca4349782cbd5aaa5c4284e8f5cd5a",
+      "text": "灰度版道路地图。"
+    },
+    {
+      "id": "BingMapsStyle.CANVAS_LIGHT",
+      "field": "description",
+      "sourceHash": "sha256:be91ce501dbbdb3514b0d62885c0743eee92f2ecaf927692d974c42eb9d1d327",
+      "text": "浅色版道路地图。"
+    },
+    {
+      "id": "BingMapsStyle.COLLINS_BART",
+      "field": "description",
+      "sourceHash": "sha256:aa3cd527cb41d4b14de1a21c113509fd02d4a7503b3ca929bde78925678f9ed5",
+      "text": "Collins Bart 影像。"
+    },
+    {
+      "id": "BingMapsStyle.ORDNANCE_SURVEY",
+      "field": "description",
+      "sourceHash": "sha256:360a6835a975ad21c1d1e35ade014c80b5f6ef5bd6484adfdc5c820fb3e8dae4",
+      "text": "Ordnance Survey 影像，仅在英国伦敦区域可见。"
+    },
+    {
+      "id": "BingMapsStyle.ROAD_ON_DEMAND",
+      "field": "description",
+      "sourceHash": "sha256:6a727ef74a8901d988233b6fca3f8e784ee1117809d5bea85289e0c8381f8e03",
+      "text": "仅显示道路，不叠加其他影像。"
+    },
+    {
+      "id": "BingMapsStyle.ROAD",
+      "field": "deprecated",
+      "sourceHash": "sha256:2bdd37a318f5f3c4b31fe1e390e8f90239157cc22df844bf7bf51720802421d6",
+      "text": "参见 https://github.com/CesiumGS/cesium/issues/7128. 请改用 `BingMapsStyle.ROAD_ON_DEMAND`。"
+    },
+    {
+      "id": "BingMapsStyle.ROAD",
+      "field": "description",
+      "sourceHash": "sha256:6a727ef74a8901d988233b6fca3f8e784ee1117809d5bea85289e0c8381f8e03",
+      "text": "仅显示道路，不叠加其他影像。"
+    },
+    {
+      "id": "BingMapsStyle",
+      "field": "description",
+      "sourceHash": "sha256:8721f781b96bd2f4ac24045b9b0e9f76b9b56a705d72fb5f195f803cb65c1781",
+      "text": "Bing Maps 提供的影像类型。"
+    },
+    {
+      "id": "BingMapsStyle",
+      "field": "properties/AERIAL_WITH_LABELS_ON_DEMAND/description",
+      "sourceHash": "sha256:2f31bc9b69075704292b76a12b43d94f66e58a0037977f7061d4787ce83477c7",
+      "text": "叠加道路的航空影像。"
+    },
+    {
+      "id": "BingMapsStyle",
+      "field": "properties/AERIAL_WITH_LABELS/description",
+      "sourceHash": "sha256:2f31bc9b69075704292b76a12b43d94f66e58a0037977f7061d4787ce83477c7",
+      "text": "叠加道路的航空影像。"
+    },
+    {
+      "id": "BingMapsStyle",
+      "field": "properties/AERIAL/description",
+      "sourceHash": "sha256:5cc3682d177022647f0ab9c74eeee1307c0ccade9697b274bd09196fad0e0156",
+      "text": "航空影像。"
+    },
+    {
+      "id": "BingMapsStyle",
+      "field": "properties/CANVAS_DARK/description",
+      "sourceHash": "sha256:7e5287853b6dbb8f7e689d7a4f9444d283c6e6579e6f1c9ae8c2d099544f08a9",
+      "text": "深色版道路地图。"
+    },
+    {
+      "id": "BingMapsStyle",
+      "field": "properties/CANVAS_GRAY/description",
+      "sourceHash": "sha256:6ab37c0e6ac83d4b207c56b54d7db14703ca4349782cbd5aaa5c4284e8f5cd5a",
+      "text": "灰度版道路地图。"
+    },
+    {
+      "id": "BingMapsStyle",
+      "field": "properties/CANVAS_LIGHT/description",
+      "sourceHash": "sha256:be91ce501dbbdb3514b0d62885c0743eee92f2ecaf927692d974c42eb9d1d327",
+      "text": "浅色版道路地图。"
+    },
+    {
+      "id": "BingMapsStyle",
+      "field": "properties/COLLINS_BART/description",
+      "sourceHash": "sha256:aa3cd527cb41d4b14de1a21c113509fd02d4a7503b3ca929bde78925678f9ed5",
+      "text": "Collins Bart 影像。"
+    },
+    {
+      "id": "BingMapsStyle",
+      "field": "properties/ORDNANCE_SURVEY/description",
+      "sourceHash": "sha256:360a6835a975ad21c1d1e35ade014c80b5f6ef5bd6484adfdc5c820fb3e8dae4",
+      "text": "Ordnance Survey 影像，仅在英国伦敦区域可见。"
+    },
+    {
+      "id": "BingMapsStyle",
+      "field": "properties/ROAD_ON_DEMAND/description",
+      "sourceHash": "sha256:6a727ef74a8901d988233b6fca3f8e784ee1117809d5bea85289e0c8381f8e03",
+      "text": "仅显示道路，不叠加其他影像。"
+    },
+    {
+      "id": "BingMapsStyle",
+      "field": "properties/ROAD/description",
+      "sourceHash": "sha256:6a727ef74a8901d988233b6fca3f8e784ee1117809d5bea85289e0c8381f8e03",
+      "text": "仅显示道路，不叠加其他影像。"
+    },
+    {
+      "id": "CartographicGeocoderService#credit",
+      "field": "description",
+      "sourceHash": "sha256:95abd73c2b79a746c6be601d9185f1a3489aa129f406ff881536949dc994daa2",
+      "text": "获取执行地理编码后显示的署名，通常用于标明地理编码服务来源。"
+    },
+    {
+      "id": "CartographicGeocoderService#geocode",
+      "field": "params/query/description",
+      "sourceHash": "sha256:9d80675b03c4f753e72f77404ba978b1ab58b53db7ee00a2eff5524e78c353a8",
+      "text": "发送给地理编码服务的查询。"
+    },
+    {
+      "id": "CartographicGeocoderService",
+      "field": "description",
+      "sourceHash": "sha256:4b7b3008b458aa9b9020c98930855884673ef435b746442a1f2f8789a12bec37",
+      "text": "解析包含经纬度及可选高度的地理编码查询。格式为 `longitude latitude (height)`，经纬度单位为度，高度单位为米。"
+    },
+    {
+      "id": "createGooglePhotorealistic3DTileset",
+      "field": "description",
+      "sourceHash": "sha256:cfdfa996a09f0d6c9007329210957950d40dfde1734f4705e2cb53fac9d79895",
+      "text": "为 Google Photorealistic 3D Tiles 瓦片集创建 {@link Cesium3DTileset} 实例。Google Photorealistic 3D Tiles 只应与 Google 地理编码服务配合使用。原文以 `usingOnlyWithGoogleGeocoder: true` 表示确认限制；当前实际配置名称见参数表 onlyUsingWithGoogleGeocoder。未确认时，调用此函数会显示一次警告。"
+    },
+    {
+      "id": "createGooglePhotorealistic3DTileset",
+      "field": "params/apiOptions.key/description",
+      "sourceHash": "sha256:d918f6020a4448c1ca38427b66cf8d4036111ac2dbc5a870558de6688a6f5f32",
+      "text": "访问 Google Photorealistic 3D Tiles 的 API 密钥。创建密钥的方法见 {@link https://developers.google.com/maps/documentation/javascript/get-api-key}。"
+    },
+    {
+      "id": "createGooglePhotorealistic3DTileset",
+      "field": "params/apiOptions.onlyUsingWithGoogleGeocoder/description",
+      "sourceHash": "sha256:511a2c6a5977c48b5b7f72ced8c2dd962b2c9cddf6134559ea858c1daa8f70c6",
+      "text": "确认此瓦片集只与 Google 地理编码服务配合使用。"
+    },
+    {
+      "id": "createGooglePhotorealistic3DTileset",
+      "field": "params/tilesetOptions/description",
+      "sourceHash": "sha256:7fd5e48c805a1ec2c19032658555e50e0c3ed2802396c9dafaafc8eb754198ee",
+      "text": "描述初始化选项的对象。"
+    },
+    {
+      "id": "createOsmBuildingsAsync",
+      "field": "description",
+      "sourceHash": "sha256:d755c8505d6a2d92b94f53a161830f84419570e41ceb6c65ff471c9a8590f25b",
+      "text": "为 {@link https://cesium.com/content/cesium-osm-buildings/|Cesium OSM Buildings} 瓦片集创建 {@link Cesium3DTileset} 实例。"
+    },
+    {
+      "id": "createOsmBuildingsAsync",
+      "field": "params/options.defaultColor/description",
+      "sourceHash": "sha256:bbbe7b883684f9153196b66ec2576c0244bb7d8354f3c0c9170526e343971f3a",
+      "text": "建筑没有颜色时使用的默认颜色。指定 <code>options.style</code> 时忽略此参数。"
+    },
+    {
+      "id": "createOsmBuildingsAsync",
+      "field": "params/options.enableShowOutline/description",
+      "sourceHash": "sha256:978d770e75a3a92f7626b1dc0ee20e01d15064b589b218de0cf83072aa987230",
+      "text": "为 true 时，启用轮廓渲染。设为 false 可避免加载时对几何进行额外处理。"
+    },
+    {
+      "id": "createOsmBuildingsAsync",
+      "field": "params/options.showOutline/description",
+      "sourceHash": "sha256:fcfc109ca0c9b90d9a8df8916c057210cee016cf3df024ba89fec1f80d71af39",
+      "text": "是否显示建筑轮廓。为 true 时显示，为 false 时不显示。"
+    },
+    {
+      "id": "createOsmBuildingsAsync",
+      "field": "params/options.style/description",
+      "sourceHash": "sha256:340e56fe751371a8c2bef7ef62ab97fcb2a33cb88dfe281ca33acff4bcc8838e",
+      "text": "瓦片集使用的样式。未指定时，默认根据建筑或建筑部分的 OpenStreetMap <code>tags</code> 推断颜色；无法推断时使用 <code>options.defaultColor</code>。"
+    },
+    {
+      "id": "createOsmBuildingsAsync",
+      "field": "params/options/description",
+      "sourceHash": "sha256:0721803a754182e8da8f2b047c327eb75466cf5376f2953cf00665945e378d7d",
+      "text": "构造选项，可指定 {@link Cesium3DTileset} 构造函数允许的任何选项。此外，还支持以下属性："
+    },
+    {
+      "id": "createWorldBathymetryAsync",
+      "field": "description",
+      "sourceHash": "sha256:90876191cbb59a515ab85fe0093824f0d3529ba9abaef573a5818a2cc3d0d50a",
+      "text": "为 {@link https://cesium.com/content/#cesium-world-bathymetry|Cesium World Bathymetry} 创建 {@link CesiumTerrainProvider} 实例。"
+    },
+    {
+      "id": "createWorldBathymetryAsync",
+      "field": "params/options.requestVertexNormals/description",
+      "sourceHash": "sha256:53c92dec8ae14bf3c8a2d1addf7fe56a3555f6501d801cb15480d65adb6fcda5",
+      "text": "指示客户端是否应向服务器请求可用的附加光照信息。"
+    },
+    {
+      "id": "createWorldBathymetryAsync",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:6b72d8c2051bfd1a07a1a0a7b45ef64bd2848416e079a98832f5009720c7c1a7",
+      "text": "兑现为所创建 CesiumTerrainProvider 的 Promise。"
+    },
+    {
+      "id": "DefaultProxy#getURL",
+      "field": "description",
+      "sourceHash": "sha256:963b053aa3a87c4af751134f8c3cc2af80f7fe7137f55568802ca730bea0b26a",
+      "text": "获取请求给定资源时使用的最终 URL。"
+    },
+    {
+      "id": "DefaultProxy#getURL",
+      "field": "params/resource/description",
+      "sourceHash": "sha256:37ae5b9f6a166729a6bcf679f8336b9354f6dcaa1ea4b7171d13ac76fa4bd5fe",
+      "text": "要请求的资源。"
+    },
+    {
+      "id": "DefaultProxy#getURL",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:48eba9b4853ded331954bf580ebc00f6e01a8ef9942747c856aeaf7d66a2d8f3",
+      "text": "代理后的资源地址。"
+    },
+    {
+      "id": "DefaultProxy",
+      "field": "description",
+      "sourceHash": "sha256:06484f66b745cf552a8087d18bf9f10c8ffdf0cefc188c1e7ce23d0bc074cb82",
+      "text": "简单代理，将所需资源作为唯一查询参数附加到给定代理 URL。"
+    },
+    {
+      "id": "DefaultProxy",
+      "field": "params/proxy/description",
+      "sourceHash": "sha256:99fd739bd3373d6b6095ce107ce112e5617e8ae57693b1d662c023c549d6fbfe",
+      "text": "用于请求所有资源的代理 URL。"
+    },
+    {
+      "id": "DiscardEmptyTileImagePolicy.EMPTY_IMAGE",
+      "field": "description",
+      "sourceHash": "sha256:20b163331de04bbd3e543ed09792fa0d5521057c3c894ce4039d36cc2bd743ca",
+      "text": "表示空图像的默认值。"
+    },
+    {
+      "id": "DiscardEmptyTileImagePolicy#isReady",
+      "field": "description",
+      "sourceHash": "sha256:6deeff1ba6b21eb4a240d23943c7b8abc8b32401ccfec29afb594bcdbefe298e",
+      "text": "判断丢弃策略是否已准备好处理图像。"
+    },
+    {
+      "id": "DiscardEmptyTileImagePolicy#isReady",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:da4b86e6072f64040c3a39fd7850098e00e149b1a62a4bf6b3ecc88dd1514a41",
+      "text": "丢弃策略已准备好处理图像时为 true，否则为 false。"
+    },
+    {
+      "id": "DiscardEmptyTileImagePolicy#shouldDiscardImage",
+      "field": "description",
+      "sourceHash": "sha256:03f3ad16cdc5f9ec91e4ba88c0140e5269a7c46279bd1e2be8fa73f3de3c9bc3",
+      "text": "判断是否应丢弃给定瓦片图像。"
+    },
+    {
+      "id": "DiscardEmptyTileImagePolicy#shouldDiscardImage",
+      "field": "params/image/description",
+      "sourceHash": "sha256:975953f24de0beeae36b134c7ddb654814609ae1d4f0bafd45c9929a24184058",
+      "text": "待检查的图像。"
+    },
+    {
+      "id": "DiscardEmptyTileImagePolicy#shouldDiscardImage",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:38401c5d776ea4175bb0a321a1ba054ed2e5cea56b95311b433bf72b1c8afc73",
+      "text": "应丢弃图像时为 true，否则为 false。"
+    },
+    {
+      "id": "DiscardEmptyTileImagePolicy",
+      "field": "description",
+      "sourceHash": "sha256:37b0589799e87552cca89a4f81b4818f30a05ff65ccfb19a236c1400e53b4850",
+      "text": "丢弃不含数据、并非实际图像的瓦片图像的策略。此策略丢弃 {@link DiscardEmptyTileImagePolicy.EMPTY_IMAGE}；图像加载代码应使用该值替代空瓦片图像。"
+    },
+    {
+      "id": "DiscardMissingTileImagePolicy#isReady",
+      "field": "description",
+      "sourceHash": "sha256:6deeff1ba6b21eb4a240d23943c7b8abc8b32401ccfec29afb594bcdbefe298e",
+      "text": "判断丢弃策略是否已准备好处理图像。"
+    },
+    {
+      "id": "DiscardMissingTileImagePolicy#isReady",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:da4b86e6072f64040c3a39fd7850098e00e149b1a62a4bf6b3ecc88dd1514a41",
+      "text": "丢弃策略已准备好处理图像时为 true，否则为 false。"
+    },
+    {
+      "id": "DiscardMissingTileImagePolicy#shouldDiscardImage",
+      "field": "description",
+      "sourceHash": "sha256:03f3ad16cdc5f9ec91e4ba88c0140e5269a7c46279bd1e2be8fa73f3de3c9bc3",
+      "text": "判断是否应丢弃给定瓦片图像。"
+    },
+    {
+      "id": "DiscardMissingTileImagePolicy#shouldDiscardImage",
+      "field": "exceptions/0/description",
+      "sourceHash": "sha256:de75b6e1fefb1110a8528fe08c0e7b8745d6b7f72e064205cf5449f1da1c2a06",
+      "text": "丢弃策略就绪前不得调用 <code>shouldDiscardImage</code>。"
+    },
+    {
+      "id": "DiscardMissingTileImagePolicy#shouldDiscardImage",
+      "field": "params/image/description",
+      "sourceHash": "sha256:975953f24de0beeae36b134c7ddb654814609ae1d4f0bafd45c9929a24184058",
+      "text": "待检查的图像。"
+    },
+    {
+      "id": "DiscardMissingTileImagePolicy#shouldDiscardImage",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:38401c5d776ea4175bb0a321a1ba054ed2e5cea56b95311b433bf72b1c8afc73",
+      "text": "应丢弃图像时为 true，否则为 false。"
+    },
+    {
+      "id": "DiscardMissingTileImagePolicy",
+      "field": "description",
+      "sourceHash": "sha256:d94ba913cfddf3598a553bb4a6943db93406364259e5b330baec8c2697fd0718",
+      "text": "通过与已知的缺失图像比较，丢弃匹配瓦片图像的策略。"
+    },
+    {
+      "id": "DiscardMissingTileImagePolicy",
+      "field": "params/options.disableCheckIfAllPixelsAreTransparent/description",
+      "sourceHash": "sha256:0150da8372e9b77742b08c3459365bb728856b6b1f107bf8629ad894a81379c6",
+      "text": "为 true 时，如果 missingImageUrl 中全部 pixelsToCheck 的 alpha 值均为 0，则禁用丢弃检查；为 false 时，无论这些像素的值如何都执行检查。"
+    },
+    {
+      "id": "DiscardMissingTileImagePolicy",
+      "field": "params/options.missingImageUrl/description",
+      "sourceHash": "sha256:719e1e979ee0a10ad56d7d5db2f93b312fac7498ddb3e16d6cb0b7c4669af953",
+      "text": "已知缺失图像的 URL。"
+    },
+    {
+      "id": "DiscardMissingTileImagePolicy",
+      "field": "params/options.pixelsToCheck/description",
+      "sourceHash": "sha256:943923914bfb682cfbe04f2e1e11474b71bbddb934d364cdee33c900896f0e07",
+      "text": "用于与缺失图像比较的 {@link Cartesian2} 像素位置数组。"
+    },
+    {
+      "id": "GeocoderService.getCreditsFromResult",
+      "field": "description",
+      "sourceHash": "sha256:75e8d6aba5ce644c44f20c4c5ce34268042454590dcb26ae921783fc3d7044b6",
+      "text": "从地理编码结果的来源信息中解析署名，如有。"
+    },
+    {
+      "id": "GeocoderService.getCreditsFromResult",
+      "field": "params/geocoderResult/description",
+      "sourceHash": "sha256:3cff9a5db228253713f5f426437f42f950a5a0336a0d35e5982eede9a5c8594a",
+      "text": "地理编码结果。"
+    },
+    {
+      "id": "GeocoderService.getCreditsFromResult",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:b22c4ada8b6bf2c377e05e01c5956580c90c04afcb9f447f9e74225b64e5f415",
+      "text": "结果中包含署名时返回署名列表，否则返回 undefined。"
+    },
+    {
+      "id": "GeocoderService.Result",
+      "field": "properties/destination/description",
+      "sourceHash": "sha256:c1271859560b126ae95b309fc5c75e77479263633bb5fd67a137d1dd7782a166",
+      "text": "目标位置的范围或位置坐标。"
+    },
+    {
+      "id": "GeocoderService.Result",
+      "field": "properties/displayName/description",
+      "sourceHash": "sha256:99e558f157fc9ad30032d6a5bcbbfd97c523d225b57d322989173a2a3b76e6ce",
+      "text": "位置的显示名称。"
+    },
+    {
+      "id": "GeocoderService#credit",
+      "field": "description",
+      "sourceHash": "sha256:95abd73c2b79a746c6be601d9185f1a3489aa129f406ff881536949dc994daa2",
+      "text": "获取执行地理编码后显示的署名，通常用于标明地理编码服务来源。"
+    },
+    {
+      "id": "GeocoderService#geocode",
+      "field": "params/query/description",
+      "sourceHash": "sha256:9d80675b03c4f753e72f77404ba978b1ab58b53db7ee00a2eff5524e78c353a8",
+      "text": "发送给地理编码服务的查询。"
+    },
+    {
+      "id": "GeocoderService#geocode",
+      "field": "params/type/description",
+      "sourceHash": "sha256:e71d0000eafba468fb29705ee49e14871e26a24b4448b3d5105ea2ec6594af5e",
+      "text": "要执行的地理编码类型。"
+    },
+    {
+      "id": "GeocoderService",
+      "field": "description",
+      "sourceHash": "sha256:8826fabd9a1c267679ecc7fa8acc18e14ec63b34f3570bf27dcfe75be95b3ddf",
+      "text": "通过外部服务提供地理编码的接口。此类型描述接口，不应直接实例化。"
+    },
+    {
+      "id": "GeocodeType.AUTOCOMPLETE",
+      "field": "description",
+      "sourceHash": "sha256:b48629373f87fcf6ead967605b0b40defa7f7f091329607e26f5671c3e817bef",
+      "text": "根据未完成的输入执行自动补全，通常在用户输入时提供候选结果。"
+    },
+    {
+      "id": "GeocodeType.SEARCH",
+      "field": "description",
+      "sourceHash": "sha256:7cdec978c37401994df3043507c68492f88b882ee573f036920c2be6625caaac",
+      "text": "将输入视为已完成内容并执行搜索。"
+    },
+    {
+      "id": "GeocodeType",
+      "field": "description",
+      "sourceHash": "sha256:c269813b532dba0ba4eee674b2a24f812d1d002344e7dcf4655385538cc9ae73",
+      "text": "{@link GeocoderService} 执行的地理编码类型。"
+    },
+    {
+      "id": "GeocodeType",
+      "field": "properties/AUTOCOMPLETE/description",
+      "sourceHash": "sha256:b48629373f87fcf6ead967605b0b40defa7f7f091329607e26f5671c3e817bef",
+      "text": "根据未完成的输入执行自动补全，通常在用户输入时提供候选结果。"
+    },
+    {
+      "id": "GeocodeType",
+      "field": "properties/SEARCH/description",
+      "sourceHash": "sha256:7cdec978c37401994df3043507c68492f88b882ee573f036920c2be6625caaac",
+      "text": "将输入视为已完成内容并执行搜索。"
+    },
+    {
+      "id": "GetFeatureInfoFormat",
+      "field": "description",
+      "sourceHash": "sha256:8eb535c0a70ac77bb93736cdf1bc8434a5a960b9e3b76ec98945172873d7946f",
+      "text": "描述向 Web Map Service（WMS）或 Web Map Tile Service（WMTS）服务器请求 GetFeatureInfo 时使用的格式。"
+    },
+    {
+      "id": "GetFeatureInfoFormat",
+      "field": "params/callback/description",
+      "sourceHash": "sha256:6c7216b9a48861dedfdc2edf70d63477ac1c8f51e0b33eac5e2e28e259910d9d",
+      "text": "接收服务器 GetFeatureInfo 响应并生成拾取的 {@link ImageryLayerFeatureInfo} 实例数组的函数。未指定时，使用对应响应类型的默认处理函数。"
+    },
+    {
+      "id": "GetFeatureInfoFormat",
+      "field": "params/format/description",
+      "sourceHash": "sha256:6d602332ab97c6802904a67e09354133fb2effa6b6e325322bc88e28dfb60727",
+      "text": "向服务器请求的信息格式，通常为 application/json 或 text/xml 等 MIME 类型。未指定时，json 对应 application/json，xml 对应 text/xml，html 对应 text/html，text 对应 text/plain。"
+    },
+    {
+      "id": "GetFeatureInfoFormat",
+      "field": "params/type/description",
+      "sourceHash": "sha256:22d70d013ad6370889915f4998b3e86002ad3864736c7ffa4778abd6b780fd5f",
+      "text": "GetFeatureInfo 请求预期的响应类型。有效值为 json、xml、html 或 text。"
+    },
+    {
+      "id": "GoogleEarthEnterpriseMapsProvider.ConstructorOptions",
+      "field": "description",
+      "sourceHash": "sha256:7ab8d49d23a0d10617fcb92bad982481449c7c29a57c312f000d6d1122280946",
+      "text": "GoogleEarthEnterpriseMapsProvider 构造函数的初始化选项。"
+    },
+    {
+      "id": "GoogleEarthEnterpriseMapsProvider.ConstructorOptions",
+      "field": "properties/channel/description",
+      "sourceHash": "sha256:d175f67a9f30d942233f6af97f896c57b024d44d8ac0738eb3de6571b0dd04df",
+      "text": "从服务器请求数据所用的通道 ID。可查看 earth.localdomain/default_map/query?request=Json&vars=geeServerDefs 返回的 JSON，查找 requestType 为 ImageryMaps 的条目所关联的 id，可能有多个可用 ID。/default_map 路径可能因 Google Earth Enterprise 服务器配置而异。例如：\n{\r         layers: [\r           {\r             id: 1002,\r             requestType: \"ImageryMaps\"\r           },\r           {\r             id: 1007,\r             requestType: \"VectorMapsRaster\"\r           }\r         ]\r       }"
+    },
+    {
+      "id": "GoogleEarthEnterpriseMapsProvider.ConstructorOptions",
+      "field": "properties/ellipsoid/description",
+      "sourceHash": "sha256:64ad4e5f7e94b06bc611c8429591da991fa88bdb2f4886136ea1dbbdb1d0b372",
+      "text": "椭球。若未指定，则使用默认椭球。"
+    },
+    {
+      "id": "GoogleEarthEnterpriseMapsProvider.ConstructorOptions",
+      "field": "properties/maximumLevel/description",
+      "sourceHash": "sha256:1480c7ca454365c69c1559823fd4c5d2dafb2b02a3d230da4af44912622b3e2e",
+      "text": "Google Earth Enterprise 服务器支持的最大细节级别；无限制时为 undefined。"
+    },
+    {
+      "id": "GoogleEarthEnterpriseMapsProvider.ConstructorOptions",
+      "field": "properties/path/description",
+      "sourceHash": "sha256:3ccfca36f97d53929b968b2f9daa85b417ff5a5c53f674dc9a6a0c0b146e5f64",
+      "text": "托管影像的 Google Earth 服务器路径。"
+    },
+    {
+      "id": "GoogleEarthEnterpriseMapsProvider.ConstructorOptions",
+      "field": "properties/tileDiscardPolicy/description",
+      "sourceHash": "sha256:1a8f6402cb097b99d7ad1977922fded698917d74318aa4ed11f9973f20689334",
+      "text": "判断瓦片是否无效并应丢弃的策略。若不希望丢弃任何瓦片，可创建并传入 {@link NeverTileDiscardPolicy}。"
+    },
+    {
+      "id": "GoogleEarthEnterpriseMapsProvider.fromUrl",
+      "field": "description",
+      "sourceHash": "sha256:a4b5a8265a23ec13308afe5f1b84fad1a7ca6390deb1f564150dfb81498a10c5",
+      "text": "使用 Google Earth Imagery API 创建瓦片影像提供者。"
+    },
+    {
+      "id": "GoogleEarthEnterpriseMapsProvider.fromUrl",
+      "field": "exceptions/0/description",
+      "sourceHash": "sha256:b6ab91e120b0820aa86ea37ad96bf2a18ab39659bd64b2e4b25142811cb14eb8",
+      "text": "未找到通道 ID 为 <code>options.channel</code> 的图层。"
+    },
+    {
+      "id": "GoogleEarthEnterpriseMapsProvider.fromUrl",
+      "field": "exceptions/1/description",
+      "sourceHash": "sha256:70dce86b7abd660e2ac64d117a59337d925beaef887845fca5fba0f3c5f013b6",
+      "text": "通道 ID <code>options.channel</code> 中未找到版本。"
+    },
+    {
+      "id": "GoogleEarthEnterpriseMapsProvider.fromUrl",
+      "field": "exceptions/2/description",
+      "sourceHash": "sha256:8863233a163da659ad0049c75ed59a4fde3effe45f51475fb67758a36955b9c2",
+      "text": "不支持投影 <code>data.projection</code>。"
+    },
+    {
+      "id": "GoogleEarthEnterpriseMapsProvider.fromUrl",
+      "field": "params/url/description",
+      "sourceHash": "sha256:6980b96ef0a0c17ccb1911a0a9966c86bc2b27ac649c0967ee3a10d4e11002d8",
+      "text": "托管影像的 Google Earth 服务器 URL。"
+    },
+    {
+      "id": "GoogleEarthEnterpriseMapsProvider.fromUrl",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:2499f1444f77007c819e255fcecf35d7d202730a09ff8f40a7c7d3e956c79b96",
+      "text": "创建的 GoogleEarthEnterpriseMapsProvider。"
+    },
+    {
+      "id": "GoogleEarthEnterpriseMapsProvider.logoUrl",
+      "field": "description",
+      "sourceHash": "sha256:eec1f5dbeb4853c45e59fca7e7718577ac1c8eb3c9cd9a3162183f99d9818cf9",
+      "text": "获取或设置用于署名显示的 Google Earth 标志 URL。"
+    },
+    {
+      "id": "GoogleEarthEnterpriseMapsProvider#channel",
+      "field": "description",
+      "sourceHash": "sha256:9d437db49c7fbcf0732217617fc7f482134391c8cb9c25cb0be5a80c82dea643",
+      "text": "获取当前使用的影像通道 ID。"
+    },
+    {
+      "id": "GoogleEarthEnterpriseMapsProvider#errorEvent",
+      "field": "description",
+      "sourceHash": "sha256:168588b191e452d1f54f99328d58f42f85709ab2e2ea5a765f7e9008a2a3e6b7",
+      "text": "获取影像提供者发生异步错误时触发的事件。订阅者可收到错误通知并尝试恢复。事件监听器接收 {@link TileProviderError} 实例。"
+    },
+    {
+      "id": "GoogleEarthEnterpriseMapsProvider#hasAlphaChannel",
+      "field": "description",
+      "sourceHash": "sha256:e3870c86bd94659a564595da867428a487ceb32cd34fc169bfbea2d25a4f6705",
+      "text": "获取影像提供者所提供图像是否包含 alpha 通道。为 false 时，即使存在 alpha 也会忽略；为 true 时，无 alpha 通道的图像按所有位置 alpha 为 1.0 处理。设为 false 可降低内存占用及纹理上传时间。"
+    },
+    {
+      "id": "GoogleEarthEnterpriseMapsProvider#minimumLevel",
+      "field": "description",
+      "sourceHash": "sha256:4a78868596bc8fe408c9db7aa6d4d98dc6f3a23b133abcecdfc614421b205ae5",
+      "text": "获取可请求的最小细节级别。"
+    },
+    {
+      "id": "GoogleEarthEnterpriseMapsProvider#path",
+      "field": "description",
+      "sourceHash": "sha256:62f5abad87b54dd6ab39f25aa90fb03bba2b213584d49cd93f03fc38508d8189",
+      "text": "获取 Google Earth 服务器上数据的 URL 路径。"
+    },
+    {
+      "id": "GoogleEarthEnterpriseMapsProvider#pickFeatures",
+      "field": "description",
+      "sourceHash": "sha256:2b97a73af512b27c778c361f7936f6752e2a990dc0bc2684fa4b6476c3ed878b",
+      "text": "此影像提供者目前不支持要素拾取，因此此函数直接返回 undefined。"
+    },
+    {
+      "id": "GoogleEarthEnterpriseMapsProvider#pickFeatures",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:215a8128a425c275bcb666e4547b27e7f19e68eab3dd5c3798f1a29c96eed73f",
+      "text": "不支持拾取，因此返回 undefined。"
+    },
+    {
+      "id": "GoogleEarthEnterpriseMapsProvider#rectangle",
+      "field": "description",
+      "sourceHash": "sha256:091c1a3d4f13ed7dc2a0b0675f7a3e3779d275be1d9f6684f9a2183da9f0e36a",
+      "text": "获取此实例所提供影像的弧度矩形范围。"
+    },
+    {
+      "id": "GoogleEarthEnterpriseMapsProvider#requestImage",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:1da8470d5e3428259b91d645dce869c8bd335c2d0e84dcfc487ba2dfc65f0d26",
+      "text": "图像可用时兑现的 Promise；若服务器活动请求过多，则返回 undefined，表示应稍后重试。"
+    },
+    {
+      "id": "GoogleEarthEnterpriseMapsProvider#requestType",
+      "field": "description",
+      "sourceHash": "sha256:a740af6ec29b3d8fcabb2d033b470f4e73da3ebd60728dc5b0bf27f179ba037d",
+      "text": "获取向提供者请求的数据类型。"
+    },
+    {
+      "id": "GoogleEarthEnterpriseMapsProvider#tileDiscardPolicy",
+      "field": "description",
+      "sourceHash": "sha256:d436e40b3239a33f8c07780a55528e392ee49f037f05a65c09722f8cbb51f7be",
+      "text": "获取瓦片丢弃策略。若不为 undefined，策略通过 shouldDiscardImage 过滤“缺失”瓦片；若此属性为 undefined，则不过滤任何瓦片。"
+    },
+    {
+      "id": "GoogleEarthEnterpriseMapsProvider#url",
+      "field": "description",
+      "sourceHash": "sha256:701ee38b461ae9dc9aa4198559916ef7005c1337763e250af17f0f2695628587",
+      "text": "获取 Google Earth MapServer 的 URL。"
+    },
+    {
+      "id": "GoogleEarthEnterpriseMapsProvider#version",
+      "field": "description",
+      "sourceHash": "sha256:729eb93779d94d06ee90b2411b068a2187dc80a13c7b2d2b29606f18ea8cf34c",
+      "text": "获取此提供者所用数据的版本。"
+    },
+    {
+      "id": "GoogleEarthEnterpriseMapsProvider",
+      "field": "description",
+      "sourceHash": "sha256:3443d071d3ba7380375c013410142594568288473e176f5c4ee6bbe046cf34a6",
+      "text": "<div class=\"notice\">\n应调用本类的 fromUrl 创建 GoogleEarthEnterpriseMapsProvider，不要直接调用构造函数。另一个影像入口为 {@link GoogleEarthEnterpriseImageryProvider.fromUrl}。\n</div>\n使用 Google Earth Imagery API 提供瓦片影像。此提供者适用于 Google Earth Enterprise Server，不适用于公共 Google Earth 服务器。默认情况下，Enterprise 服务器未设置 {@link http://www.w3.org/TR/cors/|跨源资源共享} 响应头。可通过代理添加这些响应头，或在 /opt/google/gehttpd/conf/gehttpd.conf 中，为 &lt;Directory /&gt; 和 &lt;Directory \"/opt/google/gehttpd/htdocs\"&gt; 指令添加 Header set Access-Control-Allow-Origin \"*\" 选项。此提供者用于 Enterprise 的二维 Maps API；三维 Earth API 应使用 {@link GoogleEarthEnterpriseImageryProvider}。"
+    },
+    {
+      "id": "GoogleEarthEnterpriseMapsProvider",
+      "field": "exceptions/0/description",
+      "sourceHash": "sha256:b6ab91e120b0820aa86ea37ad96bf2a18ab39659bd64b2e4b25142811cb14eb8",
+      "text": "未找到通道 ID 为 <code>options.channel</code> 的图层。"
+    },
+    {
+      "id": "GoogleEarthEnterpriseMapsProvider",
+      "field": "exceptions/1/description",
+      "sourceHash": "sha256:70dce86b7abd660e2ac64d117a59337d925beaef887845fca5fba0f3c5f013b6",
+      "text": "通道 ID <code>options.channel</code> 中未找到版本。"
+    },
+    {
+      "id": "GoogleEarthEnterpriseMapsProvider",
+      "field": "exceptions/2/description",
+      "sourceHash": "sha256:8863233a163da659ad0049c75ed59a4fde3effe45f51475fb67758a36955b9c2",
+      "text": "不支持投影 <code>data.projection</code>。"
+    },
+    {
+      "id": "GoogleEarthEnterpriseMetadata.fromUrl",
+      "field": "description",
+      "sourceHash": "sha256:3a03bb7ead8365272f3212e75109661fb06e51451e8882817803405aaaa51222",
+      "text": "通过 Google Earth Enterprise REST API 创建元数据对象，供 GoogleEarthEnterpriseImageryProvider 与 GoogleEarthEnterpriseTerrainProvider 共享元数据请求。"
+    },
+    {
+      "id": "GoogleEarthEnterpriseMetadata.fromUrl",
+      "field": "params/resourceOrUrl/description",
+      "sourceHash": "sha256:fc94e4d897261773265ba36fdada6af5254a0c96e9c2552d443f494892f904bc",
+      "text": "托管影像的 Google Earth Enterprise 服务器 URL。"
+    },
+    {
+      "id": "GoogleEarthEnterpriseMetadata.fromUrl",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:3ac730faf857233042f921baf5c87e9403a61f5722e71803309dfb931d8174fe",
+      "text": "兑现为创建的 GoogleEarthEnterpriseMetadata 实例的 Promise。"
+    },
+    {
+      "id": "GoogleEarthEnterpriseMetadata.quadKeyToTileXY",
+      "field": "description",
+      "sourceHash": "sha256:51015c9a41c608ca59d5740253208392bc2771a066ee3b0cd589fd17d3f824be",
+      "text": "将请求 Google Earth Enterprise 影像所用的瓦片四叉树键 quadkey，转换为 (x, y, level) 位置。"
+    },
+    {
+      "id": "GoogleEarthEnterpriseMetadata.quadKeyToTileXY",
+      "field": "params/quadkey/description",
+      "sourceHash": "sha256:2e21906af1b4c9347fc5e14473866d809c9cea073e66eddb379c22dcfc9a60e0",
+      "text": "瓦片的四叉树键 quadkey。"
+    },
+    {
+      "id": "GoogleEarthEnterpriseMetadata.tileXYToQuadKey",
+      "field": "description",
+      "sourceHash": "sha256:7910581629b58f4b94bb3d679555be36ac0f2ae22fa57b2a67d66b0311c226b4",
+      "text": "将瓦片的 (x, y, level) 位置转换为请求 Google Earth Enterprise 影像所用的四叉树键 quadkey。"
+    },
+    {
+      "id": "GoogleEarthEnterpriseMetadata.tileXYToQuadKey",
+      "field": "params/level/description",
+      "sourceHash": "sha256:98c2ad81b03d51887a8cd239f226b7f67d5843efce8c58d59c5eb029f9c1cf14",
+      "text": "瓦片缩放层级。"
+    },
+    {
+      "id": "GoogleEarthEnterpriseMetadata.tileXYToQuadKey",
+      "field": "params/x/description",
+      "sourceHash": "sha256:8092c681deba31ecbff9c63ed04fc2c5ba5833bc32f16fb4a2eccc6c80e340f4",
+      "text": "瓦片 x 坐标。"
+    },
+    {
+      "id": "GoogleEarthEnterpriseMetadata.tileXYToQuadKey",
+      "field": "params/y/description",
+      "sourceHash": "sha256:652fa744070e015d2a01e48fb3301532b7f93019c6d52571eb3f887354663d54",
+      "text": "瓦片 y 坐标。"
+    },
+    {
+      "id": "GoogleEarthEnterpriseMetadata#imageryPresent",
+      "field": "description",
+      "sourceHash": "sha256:f06c67376c6abaaaffa0033b9cb733f965c5a1888453f42b1e831c5ab9f6925d",
+      "text": "有可用影像时为 true。"
+    },
+    {
+      "id": "GoogleEarthEnterpriseMetadata#key",
+      "field": "description",
+      "sourceHash": "sha256:fc79b5042bf10ef28c4a229b0c2b01ebdc3937a6b49b1d3195940c81877bd2dc",
+      "text": "解码数据包使用的密钥。"
+    },
+    {
+      "id": "GoogleEarthEnterpriseMetadata#negativeAltitudeExponentBias",
+      "field": "description",
+      "sourceHash": "sha256:77ec03fb8e9d97b4c6f91d9732327509c0e912b0ce77e872b65a43b5951e2cbc",
+      "text": "计算负高度值转换常量所用的指数偏置。"
+    },
+    {
+      "id": "GoogleEarthEnterpriseMetadata#negativeAltitudeThreshold",
+      "field": "description",
+      "sourceHash": "sha256:5416f69e57f82569f2cec464d4de7b985db0e1d3f4684617284b2317bbab6d3a",
+      "text": "低于此阈值的数实际表示负值，需要乘以 -2^negativeAltitudeExponentBias。"
+    },
+    {
+      "id": "GoogleEarthEnterpriseMetadata#protoImagery",
+      "field": "description",
+      "sourceHash": "sha256:3f37f43885ef48b168c8ae4961313e9944a19ece4c3d654b6bb83901cb892a78",
+      "text": "影像以 Protocol Buffer 发送时为 true，以普通图像发送时为 false；为 undefined 时尝试两种方式。"
+    },
+    {
+      "id": "GoogleEarthEnterpriseMetadata#providers",
+      "field": "description",
+      "sourceHash": "sha256:f2f897531462a684db2e9861240540391e1e0aeee05ca7d5084dcf4e63ff3ac2",
+      "text": "从提供者 ID 到版权字符串的字典。"
+    },
+    {
+      "id": "GoogleEarthEnterpriseMetadata#proxy",
+      "field": "description",
+      "sourceHash": "sha256:b7b519cdd68e5f40fe479720bd6710ee7c848d3bcd3ebb40ed31c85ff4be207b",
+      "text": "获取元数据请求使用的代理。"
+    },
+    {
+      "id": "GoogleEarthEnterpriseMetadata#resource",
+      "field": "description",
+      "sourceHash": "sha256:24da657972a72d5510a48e848c0092c30cd3a8de7324dd3ca906bae93ee46cc3",
+      "text": "获取元数据请求使用的资源。"
+    },
+    {
+      "id": "GoogleEarthEnterpriseMetadata#terrainPresent",
+      "field": "description",
+      "sourceHash": "sha256:59abef6505c06d2e556bcb1ee3b9781d6f6e0b82afb4162b5bcd54ccfe780974",
+      "text": "有可用地形时为 true。"
+    },
+    {
+      "id": "GoogleEarthEnterpriseMetadata#url",
+      "field": "description",
+      "sourceHash": "sha256:e3b4bd577cd957db6d4c19e2ea90646a37a59f7af335e0af80fbb9b5cb9c7ffd",
+      "text": "获取 Google Earth Enterprise 服务器名称。"
+    },
+    {
+      "id": "GoogleEarthEnterpriseMetadata",
+      "field": "description",
+      "sourceHash": "sha256:03828d09a688e16e2a8d79a31a43d27d1d0c49455c351ce2fccd705af95958b8",
+      "text": "<div class=\"notice\">\n创建 GoogleEarthEnterpriseMetadata 请调用 {@link GoogleEarthEnterpriseMetadata.fromUrl}，不要直接调用构造函数。\n</div>\n通过 Google Earth Enterprise REST API 提供元数据，供 GoogleEarthEnterpriseImageryProvider 与 GoogleEarthEnterpriseTerrainProvider 共享元数据请求。"
+    },
+    {
+      "id": "GoogleGeocoderService#credit",
+      "field": "description",
+      "sourceHash": "sha256:95abd73c2b79a746c6be601d9185f1a3489aa129f406ff881536949dc994daa2",
+      "text": "获取执行地理编码后显示的署名，通常用于标明地理编码服务来源。"
+    },
+    {
+      "id": "GoogleGeocoderService#geocode",
+      "field": "description",
+      "sourceHash": "sha256:b22a5612da6da4e496dec9f29b36cd95ed34922ee5969cd5e87093128311cf46",
+      "text": "获取与搜索字符串匹配的候选位置列表。"
+    },
+    {
+      "id": "GoogleGeocoderService#geocode",
+      "field": "exceptions/0/description",
+      "sourceHash": "sha256:0c892b32c8aa44bc64bfad26c94dc1930a6f4331a68b9112e6913579c905a852",
+      "text": "服务返回的状态既不是 <code>OK</code> 也不是 <code>ZERO_RESULTS</code>。"
+    },
+    {
+      "id": "GoogleGeocoderService#geocode",
+      "field": "params/query/description",
+      "sourceHash": "sha256:9d80675b03c4f753e72f77404ba978b1ab58b53db7ee00a2eff5524e78c353a8",
+      "text": "发送给地理编码服务的查询。"
+    },
+    {
+      "id": "GoogleGeocoderService",
+      "field": "description",
+      "sourceHash": "sha256:833715b679358a6765a0ab30e4b2575bd02033f616b5b09684879e7e866b4dc3",
+      "text": "通过 Google 提供地理编码服务。"
+    },
+    {
+      "id": "GoogleGeocoderService",
+      "field": "params/options.key/description",
+      "sourceHash": "sha256:ee7d73fbde2f0bc7499da38245ae0d996b9606b6078ac4aec38a2475b9eb062d",
+      "text": "Google 地理编码服务使用的 API 密钥。"
+    },
+    {
+      "id": "GoogleMaps.defaultApiKey",
+      "field": "description",
+      "sourceHash": "sha256:39c2fa6feb722e5a7a27e3fba9d8cf7ee488bf118bd21a3ba051e464615caaba",
+      "text": "获取或设置默认 Google Maps API 密钥。"
+    },
+    {
+      "id": "GoogleMaps.defaultStreetViewStaticApiKey",
+      "field": "description",
+      "sourceHash": "sha256:e0789a45ddb32320b1789e1d45368ff022c317f4d9e2d880582d887aa6955dff",
+      "text": "获取或设置默认 Google Maps Street View Static API 密钥。"
+    },
+    {
+      "id": "GoogleMaps.mapTilesApiEndpoint",
+      "field": "description",
+      "sourceHash": "sha256:594a3eeb2ed8f137050afe8e10928661676209b00665025948be3414c708710c",
+      "text": "获取或设置默认 Google Map Tiles API 端点。"
+    },
+    {
+      "id": "GoogleMaps.streetViewStaticApiEndpoint",
+      "field": "description",
+      "sourceHash": "sha256:0eefadee77183a10671a16c8004ba697c346a1243831dce18ec0f78db3e438c2",
+      "text": "获取或设置默认 Google Street View Static API 端点。"
+    },
+    {
+      "id": "GoogleMaps",
+      "field": "description",
+      "sourceHash": "sha256:be1ba15efefe1bd51ee7b599596e55c2314c3ffa7844521667ca7fe281b14541",
+      "text": "访问 Google Maps API 的默认设置。\n<br/>\n直接调用 Google Maps API（例如通过 {@link createGooglePhotorealistic3DTileset}）时才需要 API 密钥。密钥管理方法见 {@link https://developers.google.com/maps/documentation/embed/get-api-key}。\n<br/>\n一个密钥可启用多个 Google Maps Platform API；如希望 Street View Static API 使用独立密钥，可设置 {@link GoogleMaps.defaultStreetViewStaticApiKey}。"
+    },
+    {
+      "id": "ImageryLayerFeatureInfo#configureDescriptionFromProperties",
+      "field": "description",
+      "sourceHash": "sha256:cd773a09cdf14db889ca330fa0865f897451d54aed03b083e2595c37d791e64a",
+      "text": "将要素属性及其值构造成 HTML 表格，作为要素说明。"
+    },
+    {
+      "id": "ImageryLayerFeatureInfo#configureDescriptionFromProperties",
+      "field": "params/properties/description",
+      "sourceHash": "sha256:f047d45d8b6dcc9e90fb9d997e8f4aac0d4a011c125c9b5cd137ba55775ce5c8",
+      "text": "包含要素属性的对象。"
+    },
+    {
+      "id": "ImageryLayerFeatureInfo#configureNameFromProperties",
+      "field": "description",
+      "sourceHash": "sha256:90051fe3c7c23363e918d9e8bc66deb3c3f63167c01cb94e4ed286fa9b83f3c8",
+      "text": "选择适当属性作为要素名称，依次查找：1）名称为 name 的属性；2）名称为 title 的属性；3）首个名称包含 name 的属性；4）首个名称包含 title 的属性。均未找到时保持原名称。"
+    },
+    {
+      "id": "ImageryLayerFeatureInfo#configureNameFromProperties",
+      "field": "params/properties/description",
+      "sourceHash": "sha256:f047d45d8b6dcc9e90fb9d997e8f4aac0d4a011c125c9b5cd137ba55775ce5c8",
+      "text": "包含要素属性的对象。"
+    },
+    {
+      "id": "ImageryLayerFeatureInfo#data",
+      "field": "description",
+      "sourceHash": "sha256:c6d66306d4dc69147d3d34d0821e9c0989d3b537a72f125bda91b11bc5050731",
+      "text": "获取或设置描述要素的原始数据，可采用 GeoJSON、KML 等格式。"
+    },
+    {
+      "id": "ImageryLayerFeatureInfo#description",
+      "field": "description",
+      "sourceHash": "sha256:b06fef261e5753aeecc38cf9d08def8c52f9411cfea9d7e80d87c4f508a45b55",
+      "text": "获取或设置要素的 HTML 说明。此 HTML 不可信，显示给用户前应清理。"
+    },
+    {
+      "id": "ImageryLayerFeatureInfo#imageryLayer",
+      "field": "description",
+      "sourceHash": "sha256:00b0bedcac09452a631cd4c86f8f14ab7e169f3c6c285c82111870d82c241f39",
+      "text": "获取或设置要素所属的影像图层。"
+    },
+    {
+      "id": "ImageryLayerFeatureInfo#name",
+      "field": "description",
+      "sourceHash": "sha256:b8d881ea206cedac8ca3c1bccc538d86d20bb9e0c5f71dfff4890fc27bec8b25",
+      "text": "获取或设置要素名称。"
+    },
+    {
+      "id": "ImageryLayerFeatureInfo#position",
+      "field": "description",
+      "sourceHash": "sha256:fe1f18fc20fe78eed1b412417250c1f3b28218aa7879d5b2c30629e2b6b84cee",
+      "text": "获取或设置要素位置；位置未知时为 undefined。"
+    },
+    {
+      "id": "ImageryLayerFeatureInfo",
+      "field": "description",
+      "sourceHash": "sha256:29d03f11fbf4c4e658157e842c3bb3dafc71b12beedfeba83327ad4f60e05a61",
+      "text": "描述影像图层中的栅格化要素，例如点、多边形或折线。"
+    },
+    {
+      "id": "ImageryTypes",
+      "field": "description",
+      "sourceHash": "sha256:b5590b07f8f3fd5030ee75030ad0f308cc54c023cc19e1452557e43f6cc25997",
+      "text": "{@link ImageryProvider} 返回的图像格式可能随提供者、配置或服务器设置而变化。常见格式为 <code>HTMLImageElement</code>、<code>HTMLCanvasElement</code>，以及受支持浏览器中的 <code>ImageBitmap</code>。具体图像返回方式参见各 ImageryProvider 类的文档。"
+    },
+    {
+      "id": "Ion.defaultAccessToken",
+      "field": "description",
+      "sourceHash": "sha256:0ba5134935e70704b31a6b6672112d28a459e5641daf6e81fb20e458bd58c78c",
+      "text": "获取或设置默认 Cesium ion 访问令牌。"
+    },
+    {
+      "id": "Ion.defaultServer",
+      "field": "description",
+      "sourceHash": "sha256:2d6e8c5f3f764589f3b8ba459fa30bfbccadf799dc87bcd5ec2b1f9d75396be7",
+      "text": "获取或设置默认 Cesium ion 服务器。"
+    },
+    {
+      "id": "Ion",
+      "field": "description",
+      "sourceHash": "sha256:5f003d52dc67463585aa7b5a08708c00a4a4e29359fc1df886830d6230658e8c",
+      "text": "访问 Cesium ion API 的默认设置。仅在使用 ion 相关 API 时才需要 ion 访问令牌。默认令牌仅供评估；可在 {@link https://cesium.com} 注册免费 ion 账户并获取自己的令牌。"
+    },
+    {
+      "id": "IonGeocodeProviderType.BING",
+      "field": "description",
+      "sourceHash": "sha256:c541a25b85e6081893b46ddc395da7a2bfb0f95e90a0bb421fa681061708dc70",
+      "text": "Bing 地理编码服务，用于 Bing 数据。"
+    },
+    {
+      "id": "IonGeocodeProviderType.DEFAULT",
+      "field": "description",
+      "sourceHash": "sha256:b1f5c04322016d4dde1bedf9c136f16af0cff76db40ac3d158bbd61406c89f9b",
+      "text": "使用服务器配置的默认地理编码服务，适用于未使用 Bing 或 Google 数据的情况。"
+    },
+    {
+      "id": "IonGeocodeProviderType.GOOGLE",
+      "field": "description",
+      "sourceHash": "sha256:44319af4299d8c05f7c8fec2927a6753e04b18ff4239e478058220837279d792",
+      "text": "Google 地理编码服务，用于 Google 数据。"
+    },
+    {
+      "id": "IonGeocodeProviderType",
+      "field": "description",
+      "sourceHash": "sha256:dc35c513380338efc8b1812847a2982886ca8b4551de7eb53420dd95c21884d6",
+      "text": "可通过 Cesium ion 使用的底层地理编码服务。"
+    },
+    {
+      "id": "IonGeocodeProviderType",
+      "field": "properties/BING/description",
+      "sourceHash": "sha256:c541a25b85e6081893b46ddc395da7a2bfb0f95e90a0bb421fa681061708dc70",
+      "text": "Bing 地理编码服务，用于 Bing 数据。"
+    },
+    {
+      "id": "IonGeocodeProviderType",
+      "field": "properties/DEFAULT/description",
+      "sourceHash": "sha256:b1f5c04322016d4dde1bedf9c136f16af0cff76db40ac3d158bbd61406c89f9b",
+      "text": "使用服务器配置的默认地理编码服务，适用于未使用 Bing 或 Google 数据的情况。"
+    },
+    {
+      "id": "IonGeocodeProviderType",
+      "field": "properties/GOOGLE/description",
+      "sourceHash": "sha256:44319af4299d8c05f7c8fec2927a6753e04b18ff4239e478058220837279d792",
+      "text": "Google 地理编码服务，用于 Google 数据。"
+    },
+    {
+      "id": "IonGeocoderService#credit",
+      "field": "description",
+      "sourceHash": "sha256:95abd73c2b79a746c6be601d9185f1a3489aa129f406ff881536949dc994daa2",
+      "text": "获取执行地理编码后显示的署名，通常用于标明地理编码服务来源。"
+    },
+    {
+      "id": "IonGeocoderService#geocode",
+      "field": "params/query/description",
+      "sourceHash": "sha256:9d80675b03c4f753e72f77404ba978b1ab58b53db7ee00a2eff5524e78c353a8",
+      "text": "发送给地理编码服务的查询。"
+    },
+    {
+      "id": "IonGeocoderService#geocode",
+      "field": "params/type/description",
+      "sourceHash": "sha256:e71d0000eafba468fb29705ee49e14871e26a24b4448b3d5105ea2ec6594af5e",
+      "text": "要执行的地理编码类型。"
+    },
+    {
+      "id": "IonGeocoderService#geocodeProviderType",
+      "field": "description",
+      "sourceHash": "sha256:633df9113767b8fdd077685c5d796852be9b56159e8929861bf8b6513b0e5096",
+      "text": "Cesium ion API 服务器用于完成地理编码请求的服务。"
+    },
+    {
+      "id": "IonGeocoderService",
+      "field": "description",
+      "sourceHash": "sha256:777ebe477995bd03e9bc62ff8171271baeda90d89382f7d07be483b6d5d03f08",
+      "text": "通过 Cesium ion 提供地理编码服务。"
+    },
+    {
+      "id": "IonGeocoderService",
+      "field": "params/options.accessToken/description",
+      "sourceHash": "sha256:70f79ad889a0d369c87cb0e042a4ea48c8e07670236d8e58766bae0336523115",
+      "text": "要使用的访问令牌。"
+    },
+    {
+      "id": "IonGeocoderService",
+      "field": "params/options.geocodeProviderType/description",
+      "sourceHash": "sha256:e1e5261ba698810e524ffeba5a1e9dc1e8c5ccb155773f958594cdd2c24598b8",
+      "text": "Cesium ion API 服务器用于完成此请求的地理编码服务。"
+    },
+    {
+      "id": "IonGeocoderService",
+      "field": "params/options.scene/description",
+      "sourceHash": "sha256:f137b6c6c85308adbc96b05267494160ddc040562a4c7a3af9236b0b049b08aa",
+      "text": "使用的场景。"
+    },
+    {
+      "id": "IonGeocoderService",
+      "field": "params/options.server/description",
+      "sourceHash": "sha256:f125ba6fa6e717bb5b80f2ac31eb4213154827378322f1f49277af972f88c32c",
+      "text": "指向 Cesium ion API 服务器的资源。"
+    },
+    {
+      "id": "IonWorldImageryStyle.AERIAL_WITH_LABELS",
+      "field": "description",
+      "sourceHash": "sha256:2f31bc9b69075704292b76a12b43d94f66e58a0037977f7061d4787ce83477c7",
+      "text": "叠加道路的航空影像。"
+    },
+    {
+      "id": "IonWorldImageryStyle.AERIAL",
+      "field": "description",
+      "sourceHash": "sha256:5cc3682d177022647f0ab9c74eeee1307c0ccade9697b274bd09196fad0e0156",
+      "text": "航空影像。"
+    },
+    {
+      "id": "IonWorldImageryStyle.ROAD",
+      "field": "description",
+      "sourceHash": "sha256:6a727ef74a8901d988233b6fca3f8e784ee1117809d5bea85289e0c8381f8e03",
+      "text": "仅显示道路，不叠加其他影像。"
+    },
+    {
+      "id": "IonWorldImageryStyle",
+      "field": "description",
+      "sourceHash": "sha256:29c49ba0f9ad80ff57c95bb539d67b70a9f2450f04180d9231c4a3e4de6b0fb0",
+      "text": "{@link createWorldImagery} 提供的影像类型。"
+    },
+    {
+      "id": "IonWorldImageryStyle",
+      "field": "properties/AERIAL_WITH_LABELS/description",
+      "sourceHash": "sha256:2f31bc9b69075704292b76a12b43d94f66e58a0037977f7061d4787ce83477c7",
+      "text": "叠加道路的航空影像。"
+    },
+    {
+      "id": "IonWorldImageryStyle",
+      "field": "properties/AERIAL/description",
+      "sourceHash": "sha256:5cc3682d177022647f0ab9c74eeee1307c0ccade9697b274bd09196fad0e0156",
+      "text": "航空影像。"
+    },
+    {
+      "id": "IonWorldImageryStyle",
+      "field": "properties/ROAD/description",
+      "sourceHash": "sha256:6a727ef74a8901d988233b6fca3f8e784ee1117809d5bea85289e0c8381f8e03",
+      "text": "仅显示道路，不叠加其他影像。"
+    },
+    {
+      "id": "ITwinData.createDataSourceForRealityDataId",
+      "field": "description",
+      "sourceHash": "sha256:bb32aa4fb76757e215a4b80cce55378d3b6331cc69971f49a7e4c213f6121ca6",
+      "text": "为指定实景数据 ID 创建相应类型的数据源，仅支持 KML 和 GeoJSON 数据。未提供 <code>type</code> 或 <code>rootDocument</code> 时，先请求该实景数据的完整元数据以补齐这些值。"
+    },
+    {
+      "id": "ITwinData.createDataSourceForRealityDataId",
+      "field": "exceptions/0/description",
+      "sourceHash": "sha256:b59d69c9249fb58e0c6d6298ef541b244d97e283f0ce43443a2b9d86fb8c9a1e",
+      "text": "实景数据类型不受此函数支持。"
+    },
+    {
+      "id": "ITwinData.createDataSourceForRealityDataId",
+      "field": "params/options.iTwinId/description",
+      "sourceHash": "sha256:363957df607a8e4a63167257fdc903715bf4a437436e0a3c36e1ba76a1084b74",
+      "text": "要加载数据的 iTwin ID。"
+    },
+    {
+      "id": "ITwinData.createDataSourceForRealityDataId",
+      "field": "params/options.realityDataId/description",
+      "sourceHash": "sha256:26cd1e2cde4c4153c41706f563602cb4552526d77abd459a749fca3cbe287cae",
+      "text": "要加载的实景数据 ID。"
+    },
+    {
+      "id": "ITwinData.createDataSourceForRealityDataId",
+      "field": "params/options.rootDocument/description",
+      "sourceHash": "sha256:ee8c75352d34552c51194422c096eeb4078918788752ccb8bfe7534ddd216c01",
+      "text": "此实景数据的根文档路径。"
+    },
+    {
+      "id": "ITwinData.createDataSourceForRealityDataId",
+      "field": "params/options.type/description",
+      "sourceHash": "sha256:57490a22859a97bcbe2c33c4f1bc1731ab753d4322a1c99be6f072aacf1d7078",
+      "text": "此实景数据的类型。"
+    },
+    {
+      "id": "ITwinData.createTilesetForRealityDataId",
+      "field": "description",
+      "sourceHash": "sha256:4dcf5dcc5f040b35d1371eb14a8cabb7bf2d18047bbd791d50c1e1ba8debcdc6",
+      "text": "为指定实景数据 ID 创建瓦片集，仅支持 3D Tiles 网格和点云。未提供 <code>type</code> 或 <code>rootDocument</code> 时，先请求完整元数据以补齐这些值。除非在瓦片集选项中显式覆盖，所得瓦片集的 <code>maximumScreenSpaceError</code> 默认为 4。"
+    },
+    {
+      "id": "ITwinData.createTilesetForRealityDataId",
+      "field": "exceptions/0/description",
+      "sourceHash": "sha256:b59d69c9249fb58e0c6d6298ef541b244d97e283f0ce43443a2b9d86fb8c9a1e",
+      "text": "实景数据类型不受此函数支持。"
+    },
+    {
+      "id": "ITwinData.createTilesetForRealityDataId",
+      "field": "params/options.iTwinId/description",
+      "sourceHash": "sha256:363957df607a8e4a63167257fdc903715bf4a437436e0a3c36e1ba76a1084b74",
+      "text": "要加载数据的 iTwin ID。"
+    },
+    {
+      "id": "ITwinData.createTilesetForRealityDataId",
+      "field": "params/options.realityDataId/description",
+      "sourceHash": "sha256:26cd1e2cde4c4153c41706f563602cb4552526d77abd459a749fca3cbe287cae",
+      "text": "要加载的实景数据 ID。"
+    },
+    {
+      "id": "ITwinData.createTilesetForRealityDataId",
+      "field": "params/options.rootDocument/description",
+      "sourceHash": "sha256:ee8c75352d34552c51194422c096eeb4078918788752ccb8bfe7534ddd216c01",
+      "text": "此实景数据的根文档路径。"
+    },
+    {
+      "id": "ITwinData.createTilesetForRealityDataId",
+      "field": "params/options.tilesetOptions/description",
+      "sourceHash": "sha256:a288bb05992f70a63e3f4d0499d190b9f41f4232848b24ed8211f42b20b5704c",
+      "text": "传给内部创建的 {@link Cesium3DTileset} 的选项对象。"
+    },
+    {
+      "id": "ITwinData.createTilesetForRealityDataId",
+      "field": "params/options.type/description",
+      "sourceHash": "sha256:57490a22859a97bcbe2c33c4f1bc1731ab753d4322a1c99be6f072aacf1d7078",
+      "text": "此实景数据的类型。"
+    },
+    {
+      "id": "ITwinData.createTilesetFromIModelId",
+      "field": "description",
+      "sourceHash": "sha256:c09cea5554a7d600524dddd413ecbc175d0bb22e694d332bf01fdf95e3c30bbb",
+      "text": "通过 iTwin Mesh Export API，为给定 iModel ID 创建 {@link Cesium3DTileset}。没有已完成的导出时，Promise 兑现为 <code>undefined</code>，建议等待 10～20 秒后再次尝试加载。若全部导出均为 Invalid，则抛出错误。请求参数的更多信息见 {@link https://developer.bentley.com/apis/mesh-export/overview/|iTwin Platform Mesh Export API 文档}。"
+    },
+    {
+      "id": "ITwinData.createTilesetFromIModelId",
+      "field": "exceptions/0/description",
+      "sourceHash": "sha256:d3b8d880d54c216e49cc8baca05972f85275e3f649e9ad5978d67122db2915a8",
+      "text": "指定 iModel 的全部导出均为 Invalid。"
+    },
+    {
+      "id": "ITwinData.createTilesetFromIModelId",
+      "field": "exceptions/1/description",
+      "sourceHash": "sha256:5099682aae10458f1a6cd2ce312b911431cd56e088f39e457e49c01cb3923924",
+      "text": "iTwin API 请求未成功。"
+    },
+    {
+      "id": "ITwinData.createTilesetFromIModelId",
+      "field": "params/options.changesetId/description",
+      "sourceHash": "sha256:407740c10606b9215791082e2be98ea81979061415f2c30bfbe11a1c6e4d41e7",
+      "text": "要加载的变更集 ID；未提供时使用最新变更集。"
+    },
+    {
+      "id": "ITwinData.createTilesetFromIModelId",
+      "field": "params/options.iModelId/description",
+      "sourceHash": "sha256:153f2dc48eec9cb99e05c7f029413abc51387fefe4cf83f4eef63edfec43753f",
+      "text": "要加载的 iModel ID。"
+    },
+    {
+      "id": "ITwinData.createTilesetFromIModelId",
+      "field": "params/options.tilesetOptions/description",
+      "sourceHash": "sha256:72fbc56add02307b5eeff773f8d8bb40fe4957c5b6a259d95571dfcbb3ada234",
+      "text": "传给内部创建的 {@link Cesium3DTileset} 的选项对象。"
+    },
+    {
+      "id": "ITwinData.createTilesetFromIModelId",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:6a3e88605fd5488a6b62016a4d958029b90d304f767e5e7b35db0e94dd0564db",
+      "text": "兑现为创建的 3D 瓦片集的 Promise；没有已完成的导出时兑现为 <code>undefined</code>。"
+    },
+    {
+      "id": "ITwinData.loadGeospatialFeatures",
+      "field": "description",
+      "sourceHash": "sha256:46dba44c89c6b91f1e5f79d476efdaacf0a39c67eb0102fc895a7f8224771b59",
+      "text": "从 Geospatial Features API 加载 GeoJSON 数据。"
+    },
+    {
+      "id": "ITwinData.loadGeospatialFeatures",
+      "field": "params/options.collectionId/description",
+      "sourceHash": "sha256:06ece1784092c5845c187b593192c06073a1ed09134e90639a0f9127fdccd01e",
+      "text": "要加载的数据集合 ID。"
+    },
+    {
+      "id": "ITwinData.loadGeospatialFeatures",
+      "field": "params/options.iTwinId/description",
+      "sourceHash": "sha256:363957df607a8e4a63167257fdc903715bf4a437436e0a3c36e1ba76a1084b74",
+      "text": "要加载数据的 iTwin ID。"
+    },
+    {
+      "id": "ITwinData.loadGeospatialFeatures",
+      "field": "params/options.limit/description",
+      "sourceHash": "sha256:2696b109c31224674fa59f8c84de8cd7e5291f0b0121d21f09c5e3e84de823c6",
+      "text": "每页条目数量，必须在 1～10,000 之间，包含两端。"
+    },
+    {
+      "id": "ITwinData",
+      "field": "description",
+      "sourceHash": "sha256:24d765d44ff42ea30c661275d772b5ee297a2fd52f1a9b13b55a7529214648b1",
+      "text": "将 iTwin 平台数据加载到 CesiumJS 的方法集合。"
+    },
+    {
+      "id": "ITwinPlatform.apiEndpoint",
+      "field": "description",
+      "sourceHash": "sha256:eac0033883d222ffc96cd24cc39b5e28053e9fdd72322b480b3167299347d382",
+      "text": "获取或设置默认 iTwin API 端点。"
+    },
+    {
+      "id": "ITwinPlatform.defaultAccessToken",
+      "field": "description",
+      "sourceHash": "sha256:df4cb54428c487424a01143a56994549c0b65923c53a4dfb6209b5bd5444001f",
+      "text": "获取或设置默认 iTwin 访问令牌，应具有 <code>itwin-platform</code> 作用域。定义 {@link ITwinPlatform.defaultShareKey} 时忽略此值。"
+    },
+    {
+      "id": "ITwinPlatform.defaultShareKey",
+      "field": "description",
+      "sourceHash": "sha256:a26f1edd5d87997d212aceb7bfcb79fc0d43401836a8d30048557474c2e9537a",
+      "text": "获取或设置默认 iTwin 共享密钥。提供后，在全部请求中优先于 {@link ITwinPlatform.defaultAccessToken}。可通过 iTwin Shares API 生成共享密钥：https://developer.bentley.com/apis/access-control-v2/operations/create-itwin-share/"
+    },
+    {
+      "id": "ITwinPlatform.ExportStatus",
+      "field": "description",
+      "sourceHash": "sha256:5830b42fe8d57c8fb686402e0597801e52ac6674edd0ea45114f98ad531fc388",
+      "text": "网格导出任务的状态。有效值为 <code>NotStarted</code>、<code>InProgress</code>、<code>Complete</code>、<code>Invalid</code>。"
+    },
+    {
+      "id": "ITwinPlatform.ExportType",
+      "field": "description",
+      "sourceHash": "sha256:1320338cc0df24a3c4f87b7a1179365349b63e255b93c3ffd51c7edacc802288",
+      "text": "网格导出类型。CesiumJS 仅支持加载 <code>3DTILES</code> 类型。有效值为 <code>IMODEL</code>、<code>CESIUM</code>、<code>3DTILES</code>。"
+    },
+    {
+      "id": "ITwinPlatform.RealityDataType",
+      "field": "description",
+      "sourceHash": "sha256:c3af352fe4cbec04862ae0c2e115b137e3bde007f16e561e52b2c89fb9f95442",
+      "text": "实景数据类型，此处列出已知可支持的部分类型。"
+    },
+    {
+      "id": "ITwinPlatform",
+      "field": "description",
+      "sourceHash": "sha256:d0022382cc18e05ec59054f189848a0570e4bc6ab120269654ab45efed3f3e8d",
+      "text": "访问 iTwin 平台的默认设置。"
+    },
+    {
+      "id": "MVTDataProvider.fromUrl",
+      "field": "description",
+      "sourceHash": "sha256:0e64d14404778d1f0cc35a4a88cf0778164afa933ea269c55f820482871744b9",
+      "text": "根据指定 URL 模板和选项创建 MVTDataProvider。"
+    },
+    {
+      "id": "MVTDataProvider.fromUrl",
+      "field": "params/options.extent/description",
+      "sourceHash": "sha256:648c95f48261ad127ca9235bd4028d24d2e69e42bd1228515a825c397dd839db",
+      "text": "约束所生成瓦片树的可选地理范围，单位为弧度。"
+    },
+    {
+      "id": "MVTDataProvider.fromUrl",
+      "field": "params/options.featureIdProperty/description",
+      "sourceHash": "sha256:1fbd8041ae782ca8615c01305753cc1d94549e5bbb226bbc744ad9a5356fc6a5",
+      "text": "用作要素 ID 的 MVT 属性名称。"
+    },
+    {
+      "id": "MVTDataProvider.fromUrl",
+      "field": "params/options.maxZoom/description",
+      "sourceHash": "sha256:1f17a1feb9de7affe88db27dc5d6bef1daff31444cc3e0d365229a03afc774fc",
+      "text": "所生成瓦片集中包含的最大缩放级别。"
+    },
+    {
+      "id": "MVTDataProvider.fromUrl",
+      "field": "params/options.minZoom/description",
+      "sourceHash": "sha256:b9f4b1998aefd9cfe03c4f9a229b666f6cef0dbb30daefa9d2aa7d3f6295494c",
+      "text": "所生成瓦片集中包含的最小缩放级别。"
+    },
+    {
+      "id": "MVTDataProvider.fromUrl",
+      "field": "params/options/description",
+      "sourceHash": "sha256:e59c69143b53aaf86621b89bc6b19bc47db933effad29fd6f06cdeb7f4ac7062",
+      "text": "提供者选项。"
+    },
+    {
+      "id": "MVTDataProvider.fromUrl",
+      "field": "params/url/description",
+      "sourceHash": "sha256:425d7e843a8019d417c8278bba5a85fe7bb1e12a1c2786710cdb40cb49383e95",
+      "text": "包含 {z}、{x}、{y} 占位符的 URL 模板。"
+    },
+    {
+      "id": "MVTDataProvider#extent",
+      "field": "description",
+      "sourceHash": "sha256:7bd78c42860e7c8e68e1fadaa68df77f777bd666f59ac2d86f9f6bae2f825253",
+      "text": "用于生成瓦片头的可选地理范围，单位为弧度。"
+    },
+    {
+      "id": "MVTDataProvider#resource",
+      "field": "description",
+      "sourceHash": "sha256:4f2fcdc8a4893f01f9a8facc0338e6300dbcd761e434143892d9fef59ab7a894",
+      "text": "由 URL 模板派生的 Resource。"
+    },
+    {
+      "id": "MVTDataProvider#show",
+      "field": "description",
+      "sourceHash": "sha256:699ded49cb797efcb87640ef3ab7243d4013c6992534dc7f49f33cbe28567781",
+      "text": "决定是否显示所生成的瓦片集。"
+    },
+    {
+      "id": "MVTDataProvider#tileset",
+      "field": "description",
+      "sourceHash": "sha256:1ad34f57fc04e7eb3289f6af58ccc4b9f1a7a3909a983d5e97837e228dd86257",
+      "text": "底层 3D 瓦片集。"
+    },
+    {
+      "id": "MVTDataProvider#urlTemplate",
+      "field": "description",
+      "sourceHash": "sha256:f6c09a40c77d9c74ce74b08745c39056e298a1dd7a25de3dc4602e86039df657",
+      "text": "包含 {z}/{x}/{y} 的 URL 模板。"
+    },
+    {
+      "id": "MVTDataProvider",
+      "field": "classdesc",
+      "sourceHash": "sha256:5a219b67f698cef7eacee7a458435d907514205d86d5bc666e627b2cba8a9600",
+      "text": "Mapbox Vector Tiles（MVT）数据提供者。加载 .mvt 或 .pbf 瓦片，并在运行时动态转换为 3D Tiles。\n<div class=\"notice\">\n通常不直接实例化此对象，请使用 {@link MVTDataProvider.fromUrl}。\n</div>"
+    },
+    {
+      "id": "NeverTileDiscardPolicy#isReady",
+      "field": "description",
+      "sourceHash": "sha256:6deeff1ba6b21eb4a240d23943c7b8abc8b32401ccfec29afb594bcdbefe298e",
+      "text": "判断丢弃策略是否已准备好处理图像。"
+    },
+    {
+      "id": "NeverTileDiscardPolicy#isReady",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:da4b86e6072f64040c3a39fd7850098e00e149b1a62a4bf6b3ecc88dd1514a41",
+      "text": "丢弃策略已准备好处理图像时为 true，否则为 false。"
+    },
+    {
+      "id": "NeverTileDiscardPolicy#shouldDiscardImage",
+      "field": "description",
+      "sourceHash": "sha256:03f3ad16cdc5f9ec91e4ba88c0140e5269a7c46279bd1e2be8fa73f3de3c9bc3",
+      "text": "判断是否应丢弃给定瓦片图像。"
+    },
+    {
+      "id": "NeverTileDiscardPolicy#shouldDiscardImage",
+      "field": "params/image/description",
+      "sourceHash": "sha256:975953f24de0beeae36b134c7ddb654814609ae1d4f0bafd45c9929a24184058",
+      "text": "待检查的图像。"
+    },
+    {
+      "id": "NeverTileDiscardPolicy#shouldDiscardImage",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:38401c5d776ea4175bb0a321a1ba054ed2e5cea56b95311b433bf72b1c8afc73",
+      "text": "应丢弃图像时为 true，否则为 false。"
+    },
+    {
+      "id": "NeverTileDiscardPolicy",
+      "field": "description",
+      "sourceHash": "sha256:ce0c893f2948c80f812270e0506b9418763866fb472f92409008db4a00f05655",
+      "text": "永不丢弃瓦片图像的 {@link TileDiscardPolicy}。"
+    },
+    {
+      "id": "OpenCageGeocoderService#credit",
+      "field": "description",
+      "sourceHash": "sha256:95abd73c2b79a746c6be601d9185f1a3489aa129f406ff881536949dc994daa2",
+      "text": "获取执行地理编码后显示的署名，通常用于标明地理编码服务来源。"
+    },
+    {
+      "id": "OpenCageGeocoderService#geocode",
+      "field": "params/query/description",
+      "sourceHash": "sha256:9d80675b03c4f753e72f77404ba978b1ab58b53db7ee00a2eff5524e78c353a8",
+      "text": "发送给地理编码服务的查询。"
+    },
+    {
+      "id": "OpenCageGeocoderService#params",
+      "field": "description",
+      "sourceHash": "sha256:460b285af104d277dd935af1a47d849566e37eb15ad5afd16a3aa73ee3e492dc",
+      "text": "传给 OpenCage 以定制地理编码的可选参数。"
+    },
+    {
+      "id": "OpenCageGeocoderService#url",
+      "field": "description",
+      "sourceHash": "sha256:7db934e0d66a7ea7ea35b50268105371f67fe4ed6f212b0f4874de4fc340580a",
+      "text": "访问 OpenCage 端点所用的 Resource。"
+    },
+    {
+      "id": "OpenCageGeocoderService",
+      "field": "description",
+      "sourceHash": "sha256:d1b7777d90b14e415ac77bcda8493e1365dd9c38133f3992ea1d5feb64156ab4",
+      "text": "通过 {@link https://opencagedata.com/|OpenCage} 服务器提供地理编码服务。"
+    },
+    {
+      "id": "OpenCageGeocoderService",
+      "field": "params/apiKey/description",
+      "sourceHash": "sha256:369a6fe6764e5f79117a970b2c9d1e6d079cf29e2741d7210ef4c6cdb37ead9f",
+      "text": "OpenCage API 密钥。"
+    },
+    {
+      "id": "OpenCageGeocoderService",
+      "field": "params/options.add_request/description",
+      "sourceHash": "sha256:d6e7b63fb1e7c4e27a2699b2db0a721af3438561146fbaa30f3c73b5ebe30c69",
+      "text": "设为 1 时，在响应中附加各项请求参数以便调试。"
+    },
+    {
+      "id": "OpenCageGeocoderService",
+      "field": "params/options.bounds/description",
+      "sourceHash": "sha256:ff8b2328764d21f005266db58829dc62a8480dc7393b251245df564f76188f48",
+      "text": "向地理编码服务提示查询所属区域。"
+    },
+    {
+      "id": "OpenCageGeocoderService",
+      "field": "params/options.countrycode/description",
+      "sourceHash": "sha256:77ac3a02a061daa2e0718d30dc5615f62c270c92f6709a4ce6f011c634e72c66",
+      "text": "将结果限制在指定国家，国家代码采用 ISO 3166-1 Alpha 2 标准。"
+    },
+    {
+      "id": "OpenCageGeocoderService",
+      "field": "params/options.jsonp/description",
+      "sourceHash": "sha256:ed2f28847b9b0f7c10366072beb7cf8cee6d65bbeb39f5fba28d6c75b5f8238b",
+      "text": "用指定函数名包裹返回的 JSON。"
+    },
+    {
+      "id": "OpenCageGeocoderService",
+      "field": "params/options.language/description",
+      "sourceHash": "sha256:afe293f341d755da494b6001378d0c6f187b78cab7d6dd9ba7b0eb93282f2c8c",
+      "text": "IETF 格式的语言代码。"
+    },
+    {
+      "id": "OpenCageGeocoderService",
+      "field": "params/options.limit/description",
+      "sourceHash": "sha256:2d7bc24e5a6e17eeec70489209d0afea491b232cba5374568b1caa31ecf2776b",
+      "text": "返回结果的最大数量。"
+    },
+    {
+      "id": "OpenCageGeocoderService",
+      "field": "params/options.min_confidence/description",
+      "sourceHash": "sha256:44f6c441e7ab1bec5fc98abf72c112bc996ca19ce3a7c20137290501d22e93f6",
+      "text": "1～10 之间的整数，仅返回置信度不低于此值的结果。"
+    },
+    {
+      "id": "OpenCageGeocoderService",
+      "field": "params/options.no_annotations/description",
+      "sourceHash": "sha256:6e994cbd68f8044e57c1de52ba8278674b57751e2b8b3263061707681c1adeff",
+      "text": "设为 1 时，结果不包含附加注释信息。"
+    },
+    {
+      "id": "OpenCageGeocoderService",
+      "field": "params/options.no_dedupe/description",
+      "sourceHash": "sha256:3e338aa2eadd8d1dee652048545c963639abaed0bcddfd2f1155f58ab5492261",
+      "text": "设为 1 时，不对结果去重。"
+    },
+    {
+      "id": "OpenCageGeocoderService",
+      "field": "params/options.no_record/description",
+      "sourceHash": "sha256:991a6ffb9868efe3b57529f13aa60e2347446fe218e5065782f01a91a393e738",
+      "text": "设为 1 时，不记录查询内容。"
+    },
+    {
+      "id": "OpenCageGeocoderService",
+      "field": "params/options.pretty/description",
+      "sourceHash": "sha256:39003047e9363ee40f91e97776cd9f5c9b88e43b802c1c48381d60bc81447523",
+      "text": "设为 1 时，以便于阅读的格式输出结果，适合调试。"
+    },
+    {
+      "id": "OpenCageGeocoderService",
+      "field": "params/options.proximity/description",
+      "sourceHash": "sha256:d9cb7a7308f040e4b72742461fea9156213465a17628daad1d5a90b21ce08699",
+      "text": "提示地理编码服务优先返回靠近指定位置的结果，例如 41.40139,2.12870。"
+    },
+    {
+      "id": "OpenCageGeocoderService",
+      "field": "params/params.abbrv/description",
+      "sourceHash": "sha256:908b9add1b1399c7d62a0367b2cd9e701bac0f05dee7ec77d30c2b93854e5d5e",
+      "text": "设为 1 时，尝试缩写并缩短返回的格式化字符串。"
+    },
+    {
+      "id": "OpenCageGeocoderService",
+      "field": "params/params/description",
+      "sourceHash": "sha256:62a6d912d5ef6d825ca31d2521908c7bd1fb9a2ac17014ed2c1f7cdaf97dde26",
+      "text": "包含以下属性的对象，参见 (https://opencagedata.com/api#forward-opt):"
+    },
+    {
+      "id": "OpenCageGeocoderService",
+      "field": "params/url/description",
+      "sourceHash": "sha256:5976ceda99ec4cae8f6fada305879be308c8be3f4e28442d56ff30d610fd9529",
+      "text": "OpenCage 服务器端点。"
+    },
+    {
+      "id": "PeliasGeocoderService#credit",
+      "field": "description",
+      "sourceHash": "sha256:95abd73c2b79a746c6be601d9185f1a3489aa129f406ff881536949dc994daa2",
+      "text": "获取执行地理编码后显示的署名，通常用于标明地理编码服务来源。"
+    },
+    {
+      "id": "PeliasGeocoderService#geocode",
+      "field": "params/query/description",
+      "sourceHash": "sha256:9d80675b03c4f753e72f77404ba978b1ab58b53db7ee00a2eff5524e78c353a8",
+      "text": "发送给地理编码服务的查询。"
+    },
+    {
+      "id": "PeliasGeocoderService#geocode",
+      "field": "params/type/description",
+      "sourceHash": "sha256:e71d0000eafba468fb29705ee49e14871e26a24b4448b3d5105ea2ec6594af5e",
+      "text": "要执行的地理编码类型。"
+    },
+    {
+      "id": "PeliasGeocoderService#url",
+      "field": "description",
+      "sourceHash": "sha256:3078b8e194f731868a9e29f00f6e7872660a4d2c5765f2acbfac63711a7f1814",
+      "text": "访问 Pelias 端点所用的 Resource。"
+    },
+    {
+      "id": "PeliasGeocoderService",
+      "field": "description",
+      "sourceHash": "sha256:e38ed4f674b87f38fed55eb607378affdd504157456ba8e8a8bab85e67fe8331",
+      "text": "通过 {@link https://pelias.io/|Pelias} 服务器提供地理编码服务。"
+    },
+    {
+      "id": "PeliasGeocoderService",
+      "field": "params/url/description",
+      "sourceHash": "sha256:1ea4ddf5af58991b83911989ab2c1360838df8cc4a546fbf1461e5e24b71cc9e",
+      "text": "Pelias 服务器端点。"
+    },
+    {
+      "id": "TileAvailability#addAvailableTileRange",
+      "field": "description",
+      "sourceHash": "sha256:b56f677bba2434eae0c46c0239fb8749b1ded770f017a596bc426f8dc631a593",
+      "text": "将指定层级的矩形瓦片范围标记为可用。为获得最佳性能，应按层级从低到高添加范围。"
+    },
+    {
+      "id": "TileAvailability#addAvailableTileRange",
+      "field": "params/endX/description",
+      "sourceHash": "sha256:6039f1443dcebe98cee81c6844de6993108791c5a273e2550d2a27869c79907b",
+      "text": "该层级最后一个可用瓦片的 X 坐标。"
+    },
+    {
+      "id": "TileAvailability#addAvailableTileRange",
+      "field": "params/endY/description",
+      "sourceHash": "sha256:f207ab14352a1a2ec1db3888d273470ce708d18f00113d4cfdba7eae88d115a3",
+      "text": "该层级最后一个可用瓦片的 Y 坐标。"
+    },
+    {
+      "id": "TileAvailability#addAvailableTileRange",
+      "field": "params/level/description",
+      "sourceHash": "sha256:e19a70b19130ef314aaf9165e61f4bb091d11152d95446358aef6a3fa08c3c9a",
+      "text": "瓦片层级。"
+    },
+    {
+      "id": "TileAvailability#addAvailableTileRange",
+      "field": "params/startX/description",
+      "sourceHash": "sha256:7ad001cc08cdeae58067dd68f400715e211b87cb25b0147ba881dbd6df9699ee",
+      "text": "该层级第一个可用瓦片的 X 坐标。"
+    },
+    {
+      "id": "TileAvailability#addAvailableTileRange",
+      "field": "params/startY/description",
+      "sourceHash": "sha256:a2490b4adaadd51739e5665015bf846df773bf8f8d550e33191648b5996f5759",
+      "text": "该层级第一个可用瓦片的 Y 坐标。"
+    },
+    {
+      "id": "TileAvailability#computeBestAvailableLevelOverRectangle",
+      "field": "description",
+      "sourceHash": "sha256:22a540157bf5d93535ea47d770946cdf03095eb4a9550366985e6aa9da4c9044",
+      "text": "查找给定矩形内所有位置均可用的最精细层级。矩形部分区域可能有更精细瓦片，但并非覆盖全部区域。返回值可安全用于矩形内任意位置的 {@link sampleTerrain}。通常耗时随通过 {@link TileAvailability#addAvailableTileRange} 添加的矩形数量呈对数增长。"
+    },
+    {
+      "id": "TileAvailability#computeBestAvailableLevelOverRectangle",
+      "field": "params/rectangle/description",
+      "sourceHash": "sha256:a140a5836fd354139f75cdc02a577cfbb3fd9e84f063870d6e00c917499981aa",
+      "text": "待检查的矩形。"
+    },
+    {
+      "id": "TileAvailability#computeBestAvailableLevelOverRectangle",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:54f63ae5f13bbd00e8e0d3f4200221ee1215bc12e9d9a56c404589e6e429a26c",
+      "text": "整个矩形范围都可用的最佳层级。"
+    },
+    {
+      "id": "TileAvailability#computeChildMaskForTile",
+      "field": "description",
+      "sourceHash": "sha256:b460b24b09a0bb8aedc696fdd699f8e6a6bdfc4cc1bcc1eb135a5373b9c64eef",
+      "text": "计算指示瓦片四个子瓦片是否存在的位掩码。某一位置位表示对应子瓦片可用，清零表示不可用。各位含义如下：\n<table>\n    <tr><th>位位置</th><th>位值</th><th>子瓦片</th></tr>\n    <tr><td>0</td><td>1</td><td>西南</td></tr>\n    <tr><td>1</td><td>2</td><td>东南</td></tr>\n    <tr><td>2</td><td>4</td><td>西北</td></tr>\n    <tr><td>3</td><td>8</td><td>东北</td></tr>\n</table>"
+    },
+    {
+      "id": "TileAvailability#computeChildMaskForTile",
+      "field": "params/level/description",
+      "sourceHash": "sha256:3a4d9387d0bbdbe43dfa0b70be7260be3e04db2fbc7130f9c8c79caae738e579",
+      "text": "父瓦片层级。"
+    },
+    {
+      "id": "TileAvailability#computeChildMaskForTile",
+      "field": "params/x/description",
+      "sourceHash": "sha256:16251d1cb8ca91bc0cf4ef010072a9b6bfd320d6c4828eb056d9a08957fda72c",
+      "text": "父瓦片 X 坐标。"
+    },
+    {
+      "id": "TileAvailability#computeChildMaskForTile",
+      "field": "params/y/description",
+      "sourceHash": "sha256:b33535159e75ae901ccdb82c00c777475c785e2e8accc9bd1dc5213e1d916f89",
+      "text": "父瓦片 Y 坐标。"
+    },
+    {
+      "id": "TileAvailability#computeChildMaskForTile",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:e14cd1716111dbcf35d39ab04bf786d3434d9fbc8a30d8ce59752c5d9f175361",
+      "text": "指示子瓦片可用性的位掩码。"
+    },
+    {
+      "id": "TileAvailability#computeMaximumLevelAtPosition",
+      "field": "description",
+      "sourceHash": "sha256:df0e11fb24660d24448b76ddf71e7ffefaec9e12a2d97f520c9bb55e83a0aa81",
+      "text": "确定覆盖给定位置的最精细瓦片层级。通常耗时随通过 {@link TileAvailability#addAvailableTileRange} 添加的矩形数量呈对数增长。"
+    },
+    {
+      "id": "TileAvailability#computeMaximumLevelAtPosition",
+      "field": "exceptions/0/description",
+      "sourceHash": "sha256:0d71588d73b9c2fcdd9dadc5dbbba6e9c66ed7047686f0e7c9518b1829fb7816",
+      "text": "位置在瓦片划分方案的全部瓦片范围之外。"
+    },
+    {
+      "id": "TileAvailability#computeMaximumLevelAtPosition",
+      "field": "params/position/description",
+      "sourceHash": "sha256:9120f3616dd00a7c558326f64647e0e46d320f7fe8e0fb03bacd051d4fcfc285",
+      "text": "要确定最大可用层级的位置，忽略高度分量。"
+    },
+    {
+      "id": "TileAvailability#computeMaximumLevelAtPosition",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:23bd501402b74760a2d61b5f03e8e0ec41c30248d7eafb7933f0c1378ba41a6c",
+      "text": "覆盖该位置的最精细瓦片层级。"
+    },
+    {
+      "id": "TileAvailability#isTileAvailable",
+      "field": "description",
+      "sourceHash": "sha256:185d55c90b6a8fe05f091bfc95db3d5377a4d63c074adbc0596bee73784bddaf",
+      "text": "判断指定瓦片是否可用。"
+    },
+    {
+      "id": "TileAvailability#isTileAvailable",
+      "field": "params/level/description",
+      "sourceHash": "sha256:63e7a8f63898920dc36caf94ad43853b6737d902a16857eed1b2d216849abf33",
+      "text": "要检查的瓦片层级。"
+    },
+    {
+      "id": "TileAvailability#isTileAvailable",
+      "field": "params/x/description",
+      "sourceHash": "sha256:2246be8e3483e4924ae7fe1597d01e4c55b0c30aa9eb7ab249bba0d92627a218",
+      "text": "要检查的瓦片 X 坐标。"
+    },
+    {
+      "id": "TileAvailability#isTileAvailable",
+      "field": "params/y/description",
+      "sourceHash": "sha256:4a1ea92272dc42292fb78a7006487d09d0116e2c2322c9b3bd4d36445014da9d",
+      "text": "要检查的瓦片 Y 坐标。"
+    },
+    {
+      "id": "TileAvailability#isTileAvailable",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:090e16c5f3d85fc548a1e02d80890a472d7f0ead49ca38f9968a510d6d85570f",
+      "text": "瓦片可用时为 true，否则为 false。"
+    },
+    {
+      "id": "TileAvailability",
+      "field": "description",
+      "sourceHash": "sha256:ff1809c726133c21d2c78107c8d55004cc5e2aa4ba0e707cea8ed30d8482576e",
+      "text": "报告 {@link TilingScheme} 中的瓦片可用性。"
+    },
+    {
+      "id": "TileAvailability",
+      "field": "params/maximumLevel/description",
+      "sourceHash": "sha256:5bbded1f0844cbfa5e0e5ce653c0bc910ffca0bc2956aba81e9dbad7feac9d88",
+      "text": "可能存在可用瓦片的最大层级。"
+    },
+    {
+      "id": "TileAvailability",
+      "field": "params/tilingScheme/description",
+      "sourceHash": "sha256:b9777a4169e846742fd477dd17bc506c668330ec00cc0cd2a6b1da3f54a98c8c",
+      "text": "用于报告可用性的瓦片划分方案。"
+    },
+    {
+      "id": "TileDiscardPolicy#isReady",
+      "field": "description",
+      "sourceHash": "sha256:6deeff1ba6b21eb4a240d23943c7b8abc8b32401ccfec29afb594bcdbefe298e",
+      "text": "判断丢弃策略是否已准备好处理图像。"
+    },
+    {
+      "id": "TileDiscardPolicy#isReady",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:da4b86e6072f64040c3a39fd7850098e00e149b1a62a4bf6b3ecc88dd1514a41",
+      "text": "丢弃策略已准备好处理图像时为 true，否则为 false。"
+    },
+    {
+      "id": "TileDiscardPolicy#shouldDiscardImage",
+      "field": "description",
+      "sourceHash": "sha256:03f3ad16cdc5f9ec91e4ba88c0140e5269a7c46279bd1e2be8fa73f3de3c9bc3",
+      "text": "判断是否应丢弃给定瓦片图像。"
+    },
+    {
+      "id": "TileDiscardPolicy#shouldDiscardImage",
+      "field": "params/image/description",
+      "sourceHash": "sha256:975953f24de0beeae36b134c7ddb654814609ae1d4f0bafd45c9929a24184058",
+      "text": "待检查的图像。"
+    },
+    {
+      "id": "TileDiscardPolicy#shouldDiscardImage",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:38401c5d776ea4175bb0a321a1ba054ed2e5cea56b95311b433bf72b1c8afc73",
+      "text": "应丢弃图像时为 true，否则为 false。"
+    },
+    {
+      "id": "TileDiscardPolicy",
+      "field": "description",
+      "sourceHash": "sha256:20db68127a5336f1fba20168616369374dcbd1e9c5776a9f4eb59aa694b9ccac",
+      "text": "按指定条件丢弃瓦片图像的策略接口。此类型描述接口，不应直接实例化。"
+    },
+    {
+      "id": "TileProviderError.reportError",
+      "field": "description",
+      "sourceHash": "sha256:ab690c8e840617cd55f02bbd0e15c6c016d1723e907fb346e104d1628d3d7e38",
+      "text": "通过事件报告 {@link ImageryProvider} 或 {@link TerrainProvider} 中的错误；没有事件监听器时，将错误记录到控制台。此方法还会跟踪操作重试次数。"
+    },
+    {
+      "id": "TileProviderError.reportError",
+      "field": "params/errorDetails/description",
+      "sourceHash": "sha256:48592d69bf83ce4562b62fb4e25562db00e712310e30598564940d9547a5e21c",
+      "text": "发生的错误或异常，如有。"
+    },
+    {
+      "id": "TileProviderError.reportError",
+      "field": "params/event/description",
+      "sourceHash": "sha256:43081d43a1db8ef756971e31cb9079ebce7425fb9824d42dc117767d46752614",
+      "text": "用于通知监听器发生错误的事件。"
+    },
+    {
+      "id": "TileProviderError.reportError",
+      "field": "params/level/description",
+      "sourceHash": "sha256:3497d1c1fdac0f128e0cb100228b00e2cc443f02c64adccc44cb006d56836f7c",
+      "text": "出错瓦片的细节级别；错误不针对特定瓦片时为 undefined。"
+    },
+    {
+      "id": "TileProviderError.reportError",
+      "field": "params/message/description",
+      "sourceHash": "sha256:31b4b4b018e02728c04d6d35b12080802ca0ad7c7df476a3f6adfd53fde867d9",
+      "text": "描述错误的消息。"
+    },
+    {
+      "id": "TileProviderError.reportError",
+      "field": "params/previousError/description",
+      "sourceHash": "sha256:b5f9108064ed2764be95aa500d348e3b7dcb3d1b2765b8718561363c34cdcd97",
+      "text": "上一次报告同一错误时此函数返回的错误实例；首次发生时为 undefined。"
+    },
+    {
+      "id": "TileProviderError.reportError",
+      "field": "params/provider/description",
+      "sourceHash": "sha256:db3801c82ac396a4dd9ca37b422421fbf9d2b3348bca650b5675449de092d839",
+      "text": "发生错误的影像或地形提供者。"
+    },
+    {
+      "id": "TileProviderError.reportError",
+      "field": "params/x/description",
+      "sourceHash": "sha256:6c7597ac6b5522a1900fbcfa8ae665c10499e4909cd64f54bf23c1dceb7046f2",
+      "text": "出错瓦片的 X 坐标；错误不针对特定瓦片时为 undefined。"
+    },
+    {
+      "id": "TileProviderError.reportError",
+      "field": "params/y/description",
+      "sourceHash": "sha256:09eb4ff32e0ae381fb1e314f16b35c12e6f1496f6250f91d9e4e401ec5f3c7f0",
+      "text": "出错瓦片的 Y 坐标；错误不针对特定瓦片时为 undefined。"
+    },
+    {
+      "id": "TileProviderError.reportError",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:e71a566255a7d0c1f353d0b36501000575fdb02ebb8e4e457e4ccadeba6fdf42",
+      "text": "传给事件监听器的错误实例。再次报告同一错误时，应将该实例传回此函数以跟踪重试次数。"
+    },
+    {
+      "id": "TileProviderError.reportSuccess",
+      "field": "description",
+      "sourceHash": "sha256:5b4a43f99472c3f77574f1921e90a552565ad5228b2273686597ff5b1daf01bb",
+      "text": "报告操作成功，重置已有错误的重试计数。以后再次发生此错误时，监听器会获知尚未进行重试。"
+    },
+    {
+      "id": "TileProviderError.reportSuccess",
+      "field": "params/previousError/description",
+      "sourceHash": "sha256:02578c79bde8a9ea1621c0d5ec3d4339f75166974abad6f7dd2b3600d3502290",
+      "text": "上一次错误；操作此前未出错时为 undefined。"
+    },
+    {
+      "id": "TileProviderError.RetryFunction",
+      "field": "description",
+      "sourceHash": "sha256:842042310aaf3cbcdeabeb4a18389eff3028e36653bcb6c3e51402e2d02f5260",
+      "text": "用于重试操作的函数。"
+    },
+    {
+      "id": "TileProviderError#error",
+      "field": "description",
+      "sourceHash": "sha256:48592d69bf83ce4562b62fb4e25562db00e712310e30598564940d9547a5e21c",
+      "text": "发生的错误或异常，如有。"
+    },
+    {
+      "id": "TileProviderError#level",
+      "field": "description",
+      "sourceHash": "sha256:ba01c4dab0b1542a6e378a4c03fd955b5125d51f1da76b839f66f18a454f4ed3",
+      "text": "出错瓦片的细节级别。错误不针对特定瓦片时，此属性为 undefined。"
+    },
+    {
+      "id": "TileProviderError#message",
+      "field": "description",
+      "sourceHash": "sha256:31b4b4b018e02728c04d6d35b12080802ca0ad7c7df476a3f6adfd53fde867d9",
+      "text": "描述错误的消息。"
+    },
+    {
+      "id": "TileProviderError#provider",
+      "field": "description",
+      "sourceHash": "sha256:2c81cb3b4b61ec2c250741d043615ad91043245ff01429da82523d5c64185bc4",
+      "text": "发生错误的 {@link ImageryProvider} 或 {@link TerrainProvider}。"
+    },
+    {
+      "id": "TileProviderError#retry",
+      "field": "description",
+      "sourceHash": "sha256:ecb9903d2704853093051012e25f11751c9613a5e129788e2831848c5b12d8e1",
+      "text": "应重试失败操作时为 true，否则为 false。影像或地形提供者会在触发事件前设置初始值，监听器可修改；最终采用最后一个监听器调用后的值。"
+    },
+    {
+      "id": "TileProviderError#timesRetried",
+      "field": "description",
+      "sourceHash": "sha256:d47004f96546ef47169e8dafda58143990ac8b032dac879c44cd9f0405fe5c18",
+      "text": "此操作已重试的次数。"
+    },
+    {
+      "id": "TileProviderError#x",
+      "field": "description",
+      "sourceHash": "sha256:3f6f3c113a8afc92e445517608e6200b6750f921d8217c024740b881923a4f79",
+      "text": "出错瓦片的 X 坐标。错误不针对特定瓦片时，此属性为 undefined。"
+    },
+    {
+      "id": "TileProviderError#y",
+      "field": "description",
+      "sourceHash": "sha256:6c8aead5cd14b27d71690cca5942845f48f8f8bcb65084468927a78225d7aeb2",
+      "text": "出错瓦片的 Y 坐标。错误不针对特定瓦片时，此属性为 undefined。"
+    },
+    {
+      "id": "TileProviderError",
+      "field": "description",
+      "sourceHash": "sha256:1df440f9b2df9716a1564cb25468e7541dc851e9c1f422c945dc97403070c7c3",
+      "text": "提供 {@link ImageryProvider} 或 {@link TerrainProvider} 中发生错误的详细信息。"
+    },
+    {
+      "id": "TileProviderError",
+      "field": "params/error/description",
+      "sourceHash": "sha256:48592d69bf83ce4562b62fb4e25562db00e712310e30598564940d9547a5e21c",
+      "text": "发生的错误或异常，如有。"
+    },
+    {
+      "id": "TileProviderError",
+      "field": "params/level/description",
+      "sourceHash": "sha256:bf783ca7f976bf4c860dcb382f689b0af94c9050311ff90adb1638d39c8b878d",
+      "text": "出错瓦片的层级；错误不针对特定瓦片时为 undefined。"
+    },
+    {
+      "id": "TileProviderError",
+      "field": "params/message/description",
+      "sourceHash": "sha256:5be1339fb57f9c00b18c7d7ce2fd54509878015d465b07017bec068915b6197b",
+      "text": "描述错误的消息。"
+    },
+    {
+      "id": "TileProviderError",
+      "field": "params/provider/description",
+      "sourceHash": "sha256:f25ec5be3d29c0708ec30d4c20f4d5df67f8d16eb1162ca430dcd990af508e41",
+      "text": "发生错误的影像或地形提供者。"
+    },
+    {
+      "id": "TileProviderError",
+      "field": "params/timesRetried/description",
+      "sourceHash": "sha256:d47004f96546ef47169e8dafda58143990ac8b032dac879c44cd9f0405fe5c18",
+      "text": "此操作已重试的次数。"
+    },
+    {
+      "id": "TileProviderError",
+      "field": "params/x/description",
+      "sourceHash": "sha256:be6a00b009f08efc5da56e7a04e96c167f1f80ae3dca0a8ecac9f9d873afb1b0",
+      "text": "出错瓦片的 X 坐标；错误不针对特定瓦片时为 undefined。"
+    },
+    {
+      "id": "TileProviderError",
+      "field": "params/y/description",
+      "sourceHash": "sha256:15801874427528008520c1c62d9d09d611f98297a9a9ec6a80fdad824e30ef51",
+      "text": "出错瓦片的 Y 坐标；错误不针对特定瓦片时为 undefined。"
+    },
+    {
+      "id": "TimeDynamicImagery#checkApproachingInterval",
+      "field": "description",
+      "sourceHash": "sha256:2dba18978fb5f1d696ec826104e3b8d9bcb91e96cff317fa72c2480198abe05e",
+      "text": "检查是否接近下一个时间区间，必要时开始预加载瓦片；否则，将瓦片加入列表，在接近下一个区间时预加载。"
+    },
+    {
+      "id": "TimeDynamicImagery#clock",
+      "field": "description",
+      "sourceHash": "sha256:82dcc2e510eeca69c2160197f024d3f032b1415ade32fa59b8d8312ccef12c71",
+      "text": "获取或设置用于跟踪动态时间参数所用时间的时钟。"
+    },
+    {
+      "id": "TimeDynamicImagery#currentInterval",
+      "field": "description",
+      "sourceHash": "sha256:13818bae6f37d9a5cfe80c4dfa30e2c44adf8d0ab191975d82ae1c7208cd9f47",
+      "text": "获取当前时间区间。"
+    },
+    {
+      "id": "TimeDynamicImagery#getFromCache",
+      "field": "description",
+      "sourceHash": "sha256:aa8896de7feb40cbf1ed8887b211f7409f78b8206abfb035cd09040b905a13b1",
+      "text": "如果可用，从缓存获取瓦片。"
+    },
+    {
+      "id": "TimeDynamicImagery#getFromCache",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:39d65e9003b152a1aeb9e97a2bc1ecc18beb8afc4b97dcaa1d440d89cf146c8f",
+      "text": "图像可用时兑现的 Promise；瓦片不在缓存中时为 undefined。"
+    },
+    {
+      "id": "TimeDynamicImagery#times",
+      "field": "description",
+      "sourceHash": "sha256:c59d171b3bfb3d414f9999c986e3ae16a11007b271addc6a1fe062e4898504bf",
+      "text": "获取或设置时间区间集合。"
+    },
+    {
+      "id": "TimeDynamicImagery",
+      "field": "description",
+      "sourceHash": "sha256:19c95430aebdf49194e773f03a149a2dfd286673e72202e36d7de2a40d116357",
+      "text": "为具有时变影像的 ImageryProvider 提供支持。"
+    },
+    {
+      "id": "TimeDynamicImagery",
+      "field": "params/options.clock/description",
+      "sourceHash": "sha256:6334f9ac15dc74c7d18ea48119dd607f76cc392f3d234f28db383762e38fc8e6",
+      "text": "确定时间维度取值的 Clock 实例。指定 <code>options.times</code> 时必须提供。"
+    },
+    {
+      "id": "TimeDynamicImagery",
+      "field": "params/options.reloadFunction/description",
+      "sourceHash": "sha256:d3af67f64cad59eb1b152be85b8a094a81c7f3f0da8d9d4d22adbebdc57d5c22",
+      "text": "需要重新加载全部影像瓦片时调用的函数。"
+    },
+    {
+      "id": "TimeDynamicImagery",
+      "field": "params/options.requestImageFunction/description",
+      "sourceHash": "sha256:c5381b6fa1ac4c62007ccd63c52c5577ad541a2fa0c681cd10f8afd0bccf4753",
+      "text": "请求影像瓦片的函数。"
+    },
+    {
+      "id": "TimeDynamicImagery",
+      "field": "params/options.times/description",
+      "sourceHash": "sha256:95c43590ca492795765d1db6804b653d4cedf2f917538a89d00a8948cbf20ccb",
+      "text": "TimeIntervalCollection，各时间区间的 <code>data</code> 属性为包含随时间变化的维度及其取值的对象。"
+    },
+    {
+      "id": "UrlTemplate3DTilesDataProvider.fromUrl",
+      "field": "description",
+      "sourceHash": "sha256:15d12b4c0ed5ec51df1a589184b989cbd0b6dcc0e3e415df93496d1271cb49db",
+      "text": "根据 URL 模板创建提供者。"
+    },
+    {
+      "id": "UrlTemplate3DTilesDataProvider.fromUrl",
+      "field": "params/options/description",
+      "sourceHash": "sha256:e59c69143b53aaf86621b89bc6b19bc47db933effad29fd6f06cdeb7f4ac7062",
+      "text": "提供者选项。"
+    },
+    {
+      "id": "UrlTemplate3DTilesDataProvider.fromUrl",
+      "field": "params/url/description",
+      "sourceHash": "sha256:8d2b6322ebbcebccb3177c2d5ef3abd14bcf4409097b3e8ce3552a69e202eeed",
+      "text": "包含 {z}、{x}、{y} 占位符的 URL 模板。"
+    },
+    {
+      "id": "UrlTemplate3DTilesDataProvider#_createCodec",
+      "field": "description",
+      "sourceHash": "sha256:74c6eff026a928620fe858d3e55713f6964bc6c89bb633483d21c10132c1e68a",
+      "text": "子类必须返回运行时内容编解码器，说明如何将下载的瓦片内容转换为 {@link Cesium3DTileContent}。预期结构见 {@link Cesium3DTileset#_runtimeContentCodec}。"
+    },
+    {
+      "id": "UrlTemplate3DTilesDataProvider#extent",
+      "field": "description",
+      "sourceHash": "sha256:7bd78c42860e7c8e68e1fadaa68df77f777bd666f59ac2d86f9f6bae2f825253",
+      "text": "用于生成瓦片头的可选地理范围，单位为弧度。"
+    },
+    {
+      "id": "UrlTemplate3DTilesDataProvider#resource",
+      "field": "description",
+      "sourceHash": "sha256:4f2fcdc8a4893f01f9a8facc0338e6300dbcd761e434143892d9fef59ab7a894",
+      "text": "由 URL 模板派生的 Resource。"
+    },
+    {
+      "id": "UrlTemplate3DTilesDataProvider#show",
+      "field": "description",
+      "sourceHash": "sha256:699ded49cb797efcb87640ef3ab7243d4013c6992534dc7f49f33cbe28567781",
+      "text": "决定是否显示所生成的瓦片集。"
+    },
+    {
+      "id": "UrlTemplate3DTilesDataProvider#tileset",
+      "field": "description",
+      "sourceHash": "sha256:1ad34f57fc04e7eb3289f6af58ccc4b9f1a7a3909a983d5e97837e228dd86257",
+      "text": "底层 3D 瓦片集。"
+    },
+    {
+      "id": "UrlTemplate3DTilesDataProvider#urlTemplate",
+      "field": "description",
+      "sourceHash": "sha256:f6c09a40c77d9c74ce74b08745c39056e298a1dd7a25de3dc4602e86039df657",
+      "text": "包含 {z}/{x}/{y} 的 URL 模板。"
+    },
+    {
+      "id": "UrlTemplate3DTilesDataProvider",
+      "field": "classdesc",
+      "sourceHash": "sha256:e1a4daaadbaa46a16898e732cbf0ca84c0b46b3103a5cb666676b941adaf5ca7",
+      "text": "URL 模板矢量源的提供者基类，通过运行时生成的 3D Tiles 瓦片集渲染。"
+    },
+    {
+      "id": "UrlTemplate3DTilesDataProvider",
+      "field": "params/options.extent/description",
+      "sourceHash": "sha256:648c95f48261ad127ca9235bd4028d24d2e69e42bd1228515a825c397dd839db",
+      "text": "约束所生成瓦片树的可选地理范围，单位为弧度。"
+    },
+    {
+      "id": "UrlTemplate3DTilesDataProvider",
+      "field": "params/options.featureIdProperty/description",
+      "sourceHash": "sha256:12c917c2a7a877c245fbb8daa1a4c161b67b008d1695d0cafff1e5e5266e0218",
+      "text": "内容解码支持时，用作要素 ID 的要素属性名称。"
+    },
+    {
+      "id": "UrlTemplate3DTilesDataProvider",
+      "field": "params/options.maxZoom/description",
+      "sourceHash": "sha256:1f17a1feb9de7affe88db27dc5d6bef1daff31444cc3e0d365229a03afc774fc",
+      "text": "所生成瓦片集中包含的最大缩放级别。"
+    },
+    {
+      "id": "UrlTemplate3DTilesDataProvider",
+      "field": "params/options.minZoom/description",
+      "sourceHash": "sha256:b9f4b1998aefd9cfe03c4f9a229b666f6cef0dbb30daefa9d2aa7d3f6295494c",
+      "text": "所生成瓦片集中包含的最小缩放级别。"
+    },
+    {
+      "id": "UrlTemplate3DTilesDataProvider",
+      "field": "params/options/description",
+      "sourceHash": "sha256:e59c69143b53aaf86621b89bc6b19bc47db933effad29fd6f06cdeb7f4ac7062",
+      "text": "提供者选项。"
+    },
+    {
+      "id": "UrlTemplate3DTilesDataProvider",
+      "field": "params/urlTemplate/description",
+      "sourceHash": "sha256:8d2b6322ebbcebccb3177c2d5ef3abd14bcf4409097b3e8ce3552a69e202eeed",
+      "text": "包含 {z}、{x}、{y} 占位符的 URL 模板。"
+    }
+  ]
+}

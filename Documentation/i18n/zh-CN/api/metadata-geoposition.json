@@ -1,0 +1,300 @@
+{
+  "schemaVersion": 1,
+  "locale": "zh-CN",
+  "entries": [
+    {
+      "id": "AnchorPointDirect.ConstructorOptions",
+      "field": "description",
+      "sourceHash": "sha256:3a1cffa90465f6f402278f6fea074968c4757246cbec6d4dd5f0d5df16f7dc00",
+      "text": "AnchorPointDirect 构造函数的初始化选项。"
+    },
+    {
+      "id": "AnchorPointDirect.ConstructorOptions",
+      "field": "properties/adjustmentParams/description",
+      "sourceHash": "sha256:bab8b63ef62a386341a55bce63150008b85361b6a6f6820e9017000fcc946f20",
+      "text": "调整值，单位为米。"
+    },
+    {
+      "id": "AnchorPointDirect.ConstructorOptions",
+      "field": "properties/position/description",
+      "sourceHash": "sha256:417d21b077b2493364c760bb7e0a7391b25da946fcd6a826ce1cb48147b43e35",
+      "text": "锚点的地理位置坐标。"
+    },
+    {
+      "id": "AnchorPointDirect#adjustmentParams",
+      "field": "description",
+      "sourceHash": "sha256:b394cf31f1f0f8985335ac82ee9cacd9923a781ccb2ef3740099176f46e681fd",
+      "text": "每个锚点的 delta-x、delta-y、delta-z 调整值，单位为米。"
+    },
+    {
+      "id": "AnchorPointDirect#position",
+      "field": "description",
+      "sourceHash": "sha256:d9e2ee855ea72270498766cfced1e548992e1eea839f6185abf028be360038b2",
+      "text": "锚点坐标，单位为米，分量为 X/东向、Y/北向、Z/椭球高（HAE）。"
+    },
+    {
+      "id": "AnchorPointDirect",
+      "field": "description",
+      "sourceHash": "sha256:66b915f700e7229891ffbc9721f574526937b3f249cb55c4a43cd7c9eba5c1b2",
+      "text": "采用直接存储方式保存的单个锚点元数据。对应 {@link https://nsgreg.nga.mil/csmwg.jsp|NGA_gpm_local} glTF 扩展中的 `anchronPointDirect` 定义。"
+    },
+    {
+      "id": "AnchorPointIndirect.ConstructorOptions",
+      "field": "description",
+      "sourceHash": "sha256:964ba6a0499b14fd49705cbf6b16f691803ec64ab2e97a34b9b1faa382ca0298",
+      "text": "AnchorPointIndirect 构造函数的初始化选项。"
+    },
+    {
+      "id": "AnchorPointIndirect.ConstructorOptions",
+      "field": "properties/adjustmentParams/description",
+      "sourceHash": "sha256:bab8b63ef62a386341a55bce63150008b85361b6a6f6820e9017000fcc946f20",
+      "text": "调整值，单位为米。"
+    },
+    {
+      "id": "AnchorPointIndirect.ConstructorOptions",
+      "field": "properties/covarianceMatrix/description",
+      "sourceHash": "sha256:767890a9f33cd0a7056c91314f126eb6366c1e1947fc62f4a86c92a1f8e1ae5f",
+      "text": "3×3 协方差矩阵。"
+    },
+    {
+      "id": "AnchorPointIndirect.ConstructorOptions",
+      "field": "properties/position/description",
+      "sourceHash": "sha256:417d21b077b2493364c760bb7e0a7391b25da946fcd6a826ce1cb48147b43e35",
+      "text": "锚点的地理位置坐标。"
+    },
+    {
+      "id": "AnchorPointIndirect#adjustmentParams",
+      "field": "description",
+      "sourceHash": "sha256:b394cf31f1f0f8985335ac82ee9cacd9923a781ccb2ef3740099176f46e681fd",
+      "text": "每个锚点的 delta-x、delta-y、delta-z 调整值，单位为米。"
+    },
+    {
+      "id": "AnchorPointIndirect#covarianceMatrix",
+      "field": "description",
+      "sourceHash": "sha256:6ba7a4201e560a4433fa153519c3ec9e309c9e8129e449d1849bccde9bbc5c6c",
+      "text": "3×3 协方差矩阵。"
+    },
+    {
+      "id": "AnchorPointIndirect#position",
+      "field": "description",
+      "sourceHash": "sha256:d9e2ee855ea72270498766cfced1e548992e1eea839f6185abf028be360038b2",
+      "text": "锚点坐标，单位为米，分量为 X/东向、Y/北向、Z/椭球高（HAE）。"
+    },
+    {
+      "id": "AnchorPointIndirect",
+      "field": "description",
+      "sourceHash": "sha256:ff99dffdc6c54b5143755cb196a76f3a10cea0f1d4a170a95aec8e1993e589e1",
+      "text": "单个已存储锚点的元数据。对应 {@link https://nsgreg.nga.mil/csmwg.jsp|NGA_gpm_local} glTF 扩展中的 `anchronPointIndirect` 定义。"
+    },
+    {
+      "id": "CorrelationGroup.ConstructorOptions",
+      "field": "description",
+      "sourceHash": "sha256:6711246f84e405965900adb7b38126bb51af26c42a7116558ac09103a55c198f",
+      "text": "CorrelationGroup 构造函数的初始化选项。"
+    },
+    {
+      "id": "CorrelationGroup.ConstructorOptions",
+      "field": "properties/groupFlags/description",
+      "sourceHash": "sha256:d47392126d9f5c0b4d0d4b7558ebae0711517ebeaa55a61e9543746d7759b78b",
+      "text": "三个布尔值的数组，分别指示相关组是否使用 delta-x、delta-y、delta-z 参数。"
+    },
+    {
+      "id": "CorrelationGroup.ConstructorOptions",
+      "field": "properties/params/description",
+      "sourceHash": "sha256:2661a059e62226853e247ce5d1bd505ba5f035d4faacdceb281919c86868b1c6",
+      "text": "分别对应 U、V、W 方向的 `Spdcf`（严格正定相关函数）参数数组。"
+    },
+    {
+      "id": "CorrelationGroup.ConstructorOptions",
+      "field": "properties/rotationThetas/description",
+      "sourceHash": "sha256:57751157ad2e293444b9717fccb04e110ea89014b721a6786919d15ca615b0d4",
+      "text": "分别绕 X、Y、Z 轴的旋转角，单位为毫弧度。"
+    },
+    {
+      "id": "CorrelationGroup#groupFlags",
+      "field": "description",
+      "sourceHash": "sha256:44dc2ac8a49b15fd2fb6b2fd612c9e44f2872d6948c4808197bae57cf70da854",
+      "text": "三个布尔值的数组，分别指示相关组是否使用 delta-x、delta-y、delta-z 参数。"
+    },
+    {
+      "id": "CorrelationGroup#params",
+      "field": "description",
+      "sourceHash": "sha256:dde8b0796fa890c960c86d7dcd56a637565bf6a19e8e24e9dcac603ffe1d618a",
+      "text": "分别对应 U、V、W 方向的三组 SPDCF 参数数组。"
+    },
+    {
+      "id": "CorrelationGroup#rotationThetas",
+      "field": "description",
+      "sourceHash": "sha256:7fe91259083f500c3705766939e5ab67bb959d46e2b8ae77d0595658794cbe61",
+      "text": "分别绕 X、Y、Z 轴的旋转角，单位为毫弧度。"
+    },
+    {
+      "id": "CorrelationGroup",
+      "field": "description",
+      "sourceHash": "sha256:697c5fd019184c71bcc1b238ba3b836a4c0a7b72a18939cb07c166b3cd2d8fd9",
+      "text": "标识使用相同相关性模型的参数及对应相关参数的元数据。对应 {@link https://nsgreg.nga.mil/csmwg.jsp|NGA_gpm_local} glTF 扩展中的 `correlationGroup` 定义。"
+    },
+    {
+      "id": "GltfGpmLocal.ConstructorOptions",
+      "field": "description",
+      "sourceHash": "sha256:666f07b7258c5411bf6849af9c19c3398a03bc6ac315ece67ecd0e645e5ad86d",
+      "text": "GltfGpmLocal 构造函数的初始化选项。"
+    },
+    {
+      "id": "GltfGpmLocal.ConstructorOptions",
+      "field": "properties/anchorPointsDirect/description",
+      "sourceHash": "sha256:af048bfbf1a037a5cc853eaa0ece8ce0e9802977a94a0cc2631d4b01cfd66a44",
+      "text": "直接存储的锚点。当且仅当存储类型为 `Direct` 时必须提供。"
+    },
+    {
+      "id": "GltfGpmLocal.ConstructorOptions",
+      "field": "properties/anchorPointsIndirect/description",
+      "sourceHash": "sha256:0bbea1bc07fa55cbbe25fd4ad15840518d90cfe10f79e8410bdc9e5dc3ce62ed",
+      "text": "间接存储的锚点。当且仅当存储类型为 `Indirect` 时必须提供。"
+    },
+    {
+      "id": "GltfGpmLocal.ConstructorOptions",
+      "field": "properties/covarianceDirect/description",
+      "sourceHash": "sha256:3d35a6125d6cb7826c8cdae9746bdd94bfb00a59d71db797bdad33d461051316",
+      "text": "锚点参数的协方差。当且仅当存储类型为 `Direct` 时必须提供。"
+    },
+    {
+      "id": "GltfGpmLocal.ConstructorOptions",
+      "field": "properties/intraTileCorrelationGroups/description",
+      "sourceHash": "sha256:9a82dee0a6efbc57c087a633b95ad53da1d848676944464c0659ed8b411e2dc4",
+      "text": "瓦片内部相关组。当且仅当存储类型为 `Indirect` 时必须提供。"
+    },
+    {
+      "id": "GltfGpmLocal.ConstructorOptions",
+      "field": "properties/storageType/description",
+      "sourceHash": "sha256:7f6e2648f1c1eca9454f40efb7a08d2129f046ac9d2ddc574d2209a9f4774fb7",
+      "text": "存储类型，必须为 `StorageType` 常量之一，即 `Direct` 或 `Indirect`。"
+    },
+    {
+      "id": "GltfGpmLocal#anchorPointsDirect",
+      "field": "description",
+      "sourceHash": "sha256:cef6163318e55579f40a1f3185e7ae8b0180cf7fb6c5504d0053084669479cc2",
+      "text": "直接存储的锚点数组。"
+    },
+    {
+      "id": "GltfGpmLocal#anchorPointsIndirect",
+      "field": "description",
+      "sourceHash": "sha256:4474603ef13513b3f5691acce830f8838b2e317023a5fcd8667d29744a5a677a",
+      "text": "间接存储的锚点数组。"
+    },
+    {
+      "id": "GltfGpmLocal#covarianceDirect",
+      "field": "description",
+      "sourceHash": "sha256:50b070ba309b7af367ae8590493bf018180ba69b85941ad8cbae977258e431e4",
+      "text": "锚点参数的完整协方差。"
+    },
+    {
+      "id": "GltfGpmLocal#intraTileCorrelationGroups",
+      "field": "description",
+      "sourceHash": "sha256:988d397d79910762c59596f2d4b76d24397d2c8219d54fbf221b1f8d07e6196b",
+      "text": "标识使用相同相关性模型的参数及对应相关参数的元数据。"
+    },
+    {
+      "id": "GltfGpmLocal#storageType",
+      "field": "description",
+      "sourceHash": "sha256:5107ca1c6b3cdd8113a0c4803fbf0ee86c3f926ceddda4f259d5fa9429e473f8",
+      "text": "指定协方差采用间接还是直接存储。"
+    },
+    {
+      "id": "GltfGpmLocal",
+      "field": "description",
+      "sourceHash": "sha256:d9e30ee3ecd3dec60b215b150cc4de263ad53f12546809afffd1c67419c997e7",
+      "text": "局部存储于瓦片或叶节点的地面—空间间接实现 GPM 元数据。对应 {@link https://nsgreg.nga.mil/csmwg.jsp|NGA_gpm_local} glTF 扩展的根对象。加载包含此扩展的模型后，可通过以下调用获取：\n```\rconst gltfGpmLocal = model.getExtension(\"NGA_gpm_local\");\r```\n存储类型决定可选属性是否存在：\n<ul>\n <li>\n 存储类型为 `StorageType.Indirect` 时，存在 `anchorPointsIndirect` 和 `intraTileCorrelationGroups`。\n </li>\n <li>\n 存储类型为 `StorageType.Direct` 时，存在 `anchorPointsDirect` 和 `covarianceDirect`。\n </li>\n</ul>"
+    },
+    {
+      "id": "Spdcf.ConstructorOptions",
+      "field": "description",
+      "sourceHash": "sha256:d3115c87e33cce32bff21d37918788e37bc5d282e3acfdcbb8fffb00dbf3e72a",
+      "text": "Spdcf 构造函数的初始化选项。"
+    },
+    {
+      "id": "Spdcf.ConstructorOptions",
+      "field": "properties/A/description",
+      "sourceHash": "sha256:11223bbb21b410577d340d5588aedaafef9a20dccc18ba558a0d28b347b2fe64",
+      "text": "系数 A，范围为 (0, 1]。"
+    },
+    {
+      "id": "Spdcf.ConstructorOptions",
+      "field": "properties/alpha/description",
+      "sourceHash": "sha256:89122bcad9989370d719933ca0cfcab6176acff7df1adeb1e2673a84ccd65fa4",
+      "text": "alpha 值，范围为 [0, 1)。"
+    },
+    {
+      "id": "Spdcf.ConstructorOptions",
+      "field": "properties/beta/description",
+      "sourceHash": "sha256:a710d37787226ac4d4da41021906b782c60c65d30a041d742a577450a0a16d7a",
+      "text": "beta 值，范围为 [0, 10]。"
+    },
+    {
+      "id": "Spdcf.ConstructorOptions",
+      "field": "properties/T/description",
+      "sourceHash": "sha256:ea820d9c3fea254f624201791413e8cbe9783e38f6b91603a7b339e57af843d6",
+      "text": "tau 值，范围为 (0, +inf)。"
+    },
+    {
+      "id": "Spdcf#A",
+      "field": "description",
+      "sourceHash": "sha256:5df9456a894f72622348a0ed2478982f20046ff91e43ebb558a0b7f1992cfda1",
+      "text": "取值范围为 (0, 1]。"
+    },
+    {
+      "id": "Spdcf#alpha",
+      "field": "description",
+      "sourceHash": "sha256:48e28055b31863497e2fe81dd19c71fdcfcdd49da6ab18aab88dc949e9d56b90",
+      "text": "取值范围为 [0, 1)。"
+    },
+    {
+      "id": "Spdcf#beta",
+      "field": "description",
+      "sourceHash": "sha256:5700854b279e6a3084ca0ba85565442aa449982ad85acd93ece5616192f48092",
+      "text": "取值范围为 [0, 10]。"
+    },
+    {
+      "id": "Spdcf#T",
+      "field": "description",
+      "sourceHash": "sha256:45f0f56907121809b191b1f8a7715bc35a0e8f197f986fe0465cff3c8e8af3af",
+      "text": "取值范围为 (0, +inf)。"
+    },
+    {
+      "id": "Spdcf",
+      "field": "description",
+      "sourceHash": "sha256:b4047d03352f7a813bdaf3d762a8c16956027c175d1e2af44cce43f9caf882c2",
+      "text": "严格正定相关函数的变量。对应 {@link https://nsgreg.nga.mil/csmwg.jsp|NGA_gpm_local} glTF 扩展中的 `spdcf` 定义。此类型实例作为参数存储在 `CorrelationGroup` 中。参数 (A, alpha, beta, T) 描述相关性随时间差的衰减：\n```\rspdcf(delta_t) = A_t * (alpha_t + ((1 - alpha_t)(1 + beta_t)) / (beta_t + e^(delta_t/T_t)))\r```"
+    },
+    {
+      "id": "StorageType.Direct",
+      "field": "description",
+      "sourceHash": "sha256:8ccb8c57e7767b3b9503bbbf8d9c56b6824886adfaa497f7539368dca04c90cc",
+      "text": "存储锚点的完整误差协方差，包括交叉协方差项。"
+    },
+    {
+      "id": "StorageType.Indirect",
+      "field": "description",
+      "sourceHash": "sha256:f8c90c7104e3bd19f3641912e7a655dbea0d5b11f895ed8d485437ac641904a6",
+      "text": "为每个锚点存储完整协方差矩阵，但不直接存储交叉协方差项；这些项可根据元数据中保存的一组空间相关函数参数计算。"
+    },
+    {
+      "id": "StorageType",
+      "field": "description",
+      "sourceHash": "sha256:a552b15bf34ef293d2d018b0c8c930f8189fea13aa9981d14c3046b442f80838",
+      "text": "协方差信息的存储类型枚举。对应 {@link https://nsgreg.nga.mil/csmwg.jsp|NGA_gpm_local} glTF 扩展中的 `gltfGpmLocal.storageType` 定义。"
+    },
+    {
+      "id": "StorageType",
+      "field": "properties/Direct/description",
+      "sourceHash": "sha256:8ccb8c57e7767b3b9503bbbf8d9c56b6824886adfaa497f7539368dca04c90cc",
+      "text": "存储锚点的完整误差协方差，包括交叉协方差项。"
+    },
+    {
+      "id": "StorageType",
+      "field": "properties/Indirect/description",
+      "sourceHash": "sha256:f8c90c7104e3bd19f3641912e7a655dbea0d5b11f895ed8d485437ac641904a6",
+      "text": "为每个锚点存储完整协方差矩阵，但不直接存储交叉协方差项；这些项可根据元数据中保存的一组空间相关函数参数计算。"
+    }
+  ]
+}

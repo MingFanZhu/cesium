@@ -500,6 +500,58 @@ const roots = new Set([
   "WebGLOptions",
   "ContextOptions",
   "CompressedTextureBuffer",
+  "AnchorPointDirect",
+  "AnchorPointIndirect",
+  "CorrelationGroup",
+  "ComponentReaderCallback",
+  "ComponentsReaderCallback",
+  "GltfGpmLocal",
+  "MetadataClass",
+  "MetadataClassProperty",
+  "MetadataComponentType",
+  "MetadataEnum",
+  "MetadataEnumValue",
+  "MetadataSchema",
+  "MetadataType",
+  "MetadataValue",
+  "PickedMetadataInfo",
+  "Spdcf",
+  "StorageType",
+  "ArcGisBaseMapType",
+  "ArcGisMapService",
+  "BingMapsGeocoderService",
+  "BingMapsStyle",
+  "CartographicGeocoderService",
+  "createGooglePhotorealistic3DTileset",
+  "createOsmBuildingsAsync",
+  "createWorldBathymetryAsync",
+  "DefaultProxy",
+  "DiscardEmptyTileImagePolicy",
+  "DiscardMissingTileImagePolicy",
+  "GeocoderService",
+  "GeocodeType",
+  "GetFeatureInfoFormat",
+  "GoogleEarthEnterpriseMapsProvider",
+  "GoogleEarthEnterpriseMetadata",
+  "GoogleGeocoderService",
+  "GoogleMaps",
+  "ImageryLayerFeatureInfo",
+  "ImageryTypes",
+  "Ion",
+  "IonGeocodeProviderType",
+  "IonGeocoderService",
+  "IonWorldImageryStyle",
+  "ITwinData",
+  "ITwinPlatform",
+  "MVTDataProvider",
+  "NeverTileDiscardPolicy",
+  "OpenCageGeocoderService",
+  "PeliasGeocoderService",
+  "TileAvailability",
+  "TileDiscardPolicy",
+  "TileProviderError",
+  "TimeDynamicImagery",
+  "UrlTemplate3DTilesDataProvider",
 ]);
 
 test("reviewed native API roots have complete source-bound prose translations", () => {
@@ -897,6 +949,75 @@ test("utility prose preserves task backpressure, live arrays and render formulas
   assert.match(
     lookup.get("TextureMinificationFilter.LINEAR_MIPMAP_LINEAR").description,
     /相邻两个 mip.*线性插值.*要求纹理具有 mipmap/s,
+  );
+});
+
+test("metadata and provider prose preserves storage units, bounds and retry contracts", () => {
+  assert.match(
+    lookup.get("CorrelationGroup#rotationThetas").description,
+    /毫弧度/,
+  );
+  assert.match(
+    lookup.get("AnchorPointDirect#position").description,
+    /单位为米.*椭球高/,
+  );
+  assert.match(
+    lookup.get("MetadataClassProperty#gpuBytesPerElement").description,
+    /字节数.*64 位.*32 位/s,
+  );
+  assert.match(lookup.get("MetadataType.MAT3").description, /列主序/);
+  assert.equal(
+    lookup.get("MetadataComponentType.UINT64").description,
+    "64 位无符号整数。",
+  );
+  assert.equal(
+    lookup
+      .get("MetadataComponentType")
+      .properties.find((p) => p.name === "UINT64").description,
+    "64 位无符号整数。",
+  );
+  assert.match(
+    lookup.get("MetadataValue").description,
+    /bigint.*INT64.*UINT64/s,
+  );
+  assert.match(
+    lookup.get("GltfGpmLocal").description,
+    /StorageType.Indirect.*anchorPointsIndirect.*StorageType.Direct.*covarianceDirect/s,
+  );
+  assert.match(lookup.get("Spdcf#alpha").description, /\[0, 1\)/);
+  assert.match(lookup.get("Spdcf#T").description, /\(0, \+inf\)/);
+  assert.match(
+    lookup.get("TileAvailability#computeChildMaskForTile").description,
+    /<td>1<\/td><td>西南<\/td>/,
+  );
+  assert.match(
+    lookup.get("TileAvailability#computeBestAvailableLevelOverRectangle")
+      .description,
+    /所有位置均可用/,
+  );
+  assert.match(
+    lookup.get("TileProviderError#retry").description,
+    /最后一个监听器/,
+  );
+  assert.match(
+    lookup.get("ITwinPlatform.defaultShareKey").description,
+    /优先于/,
+  );
+  assert.match(
+    lookup
+      .get("ITwinData.loadGeospatialFeatures")
+      .params.find((p) => p.name === "options.limit").description,
+    /1～10,000.*包含两端/,
+  );
+  assert.match(
+    lookup.get("createGooglePhotorealistic3DTileset").description,
+    /实际配置名称.*onlyUsingWithGoogleGeocoder/,
+  );
+  assert.match(
+    lookup
+      .get("MVTDataProvider.fromUrl")
+      .params.find((p) => p.name === "options.extent").description,
+    /单位为弧度/,
   );
 });
 

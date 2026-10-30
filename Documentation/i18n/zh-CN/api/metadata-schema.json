@@ -1,0 +1,1008 @@
+{
+  "schemaVersion": 1,
+  "locale": "zh-CN",
+  "entries": [
+    {
+      "id": "ComponentReaderCallback",
+      "field": "description",
+      "sourceHash": "sha256:75a7e8fc22fc5960413dbcba19cecc87b7756275a4dbde1e3a0ac31cf2a6ee3b",
+      "text": "从数据视图的给定字节偏移处，按小端字节序读取并返回指定类型的值。"
+    },
+    {
+      "id": "ComponentReaderCallback",
+      "field": "params/byteOffset/description",
+      "sourceHash": "sha256:0832d7a5b16432d25c69022031dac28c3e392b5eca00956dfa51d23b805f11b4",
+      "text": "相对于视图起点的读取偏移，单位为字节。"
+    },
+    {
+      "id": "ComponentReaderCallback",
+      "field": "params/dataView/description",
+      "sourceHash": "sha256:fa8312dbb114153c130cf52fed2add7388da1e0d3b7d89bc44f59d7b132b0d84",
+      "text": "指向二进制缓冲的类型化数据视图。"
+    },
+    {
+      "id": "ComponentReaderCallback",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:6909c01ea4b4511bef0b07c791e415f4718ece1eea25f2311ed7125632d657b4",
+      "text": "从 dataView 读取的值。"
+    },
+    {
+      "id": "ComponentsReaderCallback",
+      "field": "description",
+      "sourceHash": "sha256:75a7e8fc22fc5960413dbcba19cecc87b7756275a4dbde1e3a0ac31cf2a6ee3b",
+      "text": "从数据视图的给定字节偏移处，按小端字节序读取并返回指定类型的值。"
+    },
+    {
+      "id": "ComponentsReaderCallback",
+      "field": "params/byteOffset/description",
+      "sourceHash": "sha256:0832d7a5b16432d25c69022031dac28c3e392b5eca00956dfa51d23b805f11b4",
+      "text": "相对于视图起点的读取偏移，单位为字节。"
+    },
+    {
+      "id": "ComponentsReaderCallback",
+      "field": "params/dataView/description",
+      "sourceHash": "sha256:fa8312dbb114153c130cf52fed2add7388da1e0d3b7d89bc44f59d7b132b0d84",
+      "text": "指向二进制缓冲的类型化数据视图。"
+    },
+    {
+      "id": "ComponentsReaderCallback",
+      "field": "params/numberOfComponents/description",
+      "sourceHash": "sha256:7d004303c6d01c75802b0f6046f34b936ef42e4f5670312d1c665f9976d17cba",
+      "text": "要读取的分量数量。"
+    },
+    {
+      "id": "ComponentsReaderCallback",
+      "field": "params/result/description",
+      "sourceHash": "sha256:c87017013b323a07b567206222fb70163e507b238e08d8de92974a952c9b82d6",
+      "text": "存放读取结果的数组。"
+    },
+    {
+      "id": "MetadataClass#description",
+      "field": "description",
+      "sourceHash": "sha256:b25dd8b7b7955c11ab83ca14092d88ec2ee43008feed21d3ec3ecf62d5785926",
+      "text": "类的说明。"
+    },
+    {
+      "id": "MetadataClass#extensions",
+      "field": "description",
+      "sourceHash": "sha256:780cc3d08080dbbe657e853583cb80b1eafff79e762bc5ca5bb67721e6adc227",
+      "text": "包含扩展的对象。"
+    },
+    {
+      "id": "MetadataClass#extras",
+      "field": "description",
+      "sourceHash": "sha256:0aecf153d916646f4749c4e8c95a992ab3eba211bf166239c9d285fab9782083",
+      "text": "用户定义的附加属性。"
+    },
+    {
+      "id": "MetadataClass#id",
+      "field": "description",
+      "sourceHash": "sha256:426dda21be791d43544c4d5dc7d6feca40ae2cca7c6baad5eea9f13cd4e6cd4e",
+      "text": "类的 ID。"
+    },
+    {
+      "id": "MetadataClass#name",
+      "field": "description",
+      "sourceHash": "sha256:1f6f4002d135b5decc7ef864b10cc2ece5c8f182631bcd6cebc24f3e875f465d",
+      "text": "类的名称。"
+    },
+    {
+      "id": "MetadataClass#properties",
+      "field": "description",
+      "sourceHash": "sha256:2b5e49cc5dcf73d68148ae113415d72e3fb5665a4095e55cb21b598feaaeeebb",
+      "text": "类的属性。"
+    },
+    {
+      "id": "MetadataClass",
+      "field": "description",
+      "sourceHash": "sha256:2c5ef6328eece261c2c36314d1cdb7bea6fc371992359d2f7b2209d5b98a828a",
+      "text": "元数据类。\n<p>\n参见 3D Tiles 的 {@link https://github.com/CesiumGS/3d-tiles/tree/main/specification/Metadata|三维元数据规范}。\n</p>"
+    },
+    {
+      "id": "MetadataClass",
+      "field": "params/options.description/description",
+      "sourceHash": "sha256:b25dd8b7b7955c11ab83ca14092d88ec2ee43008feed21d3ec3ecf62d5785926",
+      "text": "类的说明。"
+    },
+    {
+      "id": "MetadataClass",
+      "field": "params/options.extensions/description",
+      "sourceHash": "sha256:780cc3d08080dbbe657e853583cb80b1eafff79e762bc5ca5bb67721e6adc227",
+      "text": "包含扩展的对象。"
+    },
+    {
+      "id": "MetadataClass",
+      "field": "params/options.extras/description",
+      "sourceHash": "sha256:0aecf153d916646f4749c4e8c95a992ab3eba211bf166239c9d285fab9782083",
+      "text": "用户定义的附加属性。"
+    },
+    {
+      "id": "MetadataClass",
+      "field": "params/options.id/description",
+      "sourceHash": "sha256:426dda21be791d43544c4d5dc7d6feca40ae2cca7c6baad5eea9f13cd4e6cd4e",
+      "text": "类的 ID。"
+    },
+    {
+      "id": "MetadataClass",
+      "field": "params/options.name/description",
+      "sourceHash": "sha256:1f6f4002d135b5decc7ef864b10cc2ece5c8f182631bcd6cebc24f3e875f465d",
+      "text": "类的名称。"
+    },
+    {
+      "id": "MetadataClass",
+      "field": "params/options.properties/description",
+      "sourceHash": "sha256:250ad872ed14f6d1e49efa5c25cffa72e361537cb19aa0a2e386eccf69322329",
+      "text": "类属性字典，键为属性 ID。"
+    },
+    {
+      "id": "MetadataClassProperty#arrayLength",
+      "field": "description",
+      "sourceHash": "sha256:4f532892dce6fbba8d7b6013626f9ea795a430ff3349ec79a101e78ff204dfd0",
+      "text": "数组元素数量，仅为定长数组定义。"
+    },
+    {
+      "id": "MetadataClassProperty#componentType",
+      "field": "description",
+      "sourceHash": "sha256:28cb2ac5a9e5b5efbe59e6dbaab864cf48ae428815364c9e9acaf44869dda52d",
+      "text": "属性分量类型，包括 INT8、UINT16 等整数，以及 FLOAT32、FLOAT64 浮点类型。"
+    },
+    {
+      "id": "MetadataClassProperty#default",
+      "field": "description",
+      "sourceHash": "sha256:7788d838779d9296737247a6d80d17ee45077868d5ea34f2dfe51b86065c136d",
+      "text": "实体属性值未定义时使用的默认值。"
+    },
+    {
+      "id": "MetadataClassProperty#description",
+      "field": "description",
+      "sourceHash": "sha256:2501e1b1cce0d3765185de110187c2a4dd53be49d3c576dac422314836966243",
+      "text": "属性说明。"
+    },
+    {
+      "id": "MetadataClassProperty#enumType",
+      "field": "description",
+      "sourceHash": "sha256:264cce620df35bffb10ad39f6aff5e5b82f31ab67951c1117591366ea5ee923f",
+      "text": "属性的枚举类型，仅在 type 为 ENUM 时定义。"
+    },
+    {
+      "id": "MetadataClassProperty#extensions",
+      "field": "description",
+      "sourceHash": "sha256:780cc3d08080dbbe657e853583cb80b1eafff79e762bc5ca5bb67721e6adc227",
+      "text": "包含扩展的对象。"
+    },
+    {
+      "id": "MetadataClassProperty#extras",
+      "field": "description",
+      "sourceHash": "sha256:0aecf153d916646f4749c4e8c95a992ab3eba211bf166239c9d285fab9782083",
+      "text": "用户定义的附加属性。"
+    },
+    {
+      "id": "MetadataClassProperty#gpuBytesPerElement",
+      "field": "description",
+      "sourceHash": "sha256:8b190f86d4c72bca0a68cc5dfb3497b9f270d0e66df57887f08b076e1d41a0c0",
+      "text": "确定存储在 GPU 上的单个属性元素占用的字节数。对于属性表创建的纹理，若 64 位元素降为 32 位以进行纹理打包，此值可能与 CPU 存储字节数不同。"
+    },
+    {
+      "id": "MetadataClassProperty#gpuBytesPerElement",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:b7402707079b4f9b005f721d0e4604e42f1c17e68db8def974810178dc57562c",
+      "text": "单个属性元素在 GPU 上占用的字节数。"
+    },
+    {
+      "id": "MetadataClassProperty#id",
+      "field": "description",
+      "sourceHash": "sha256:ad2819a46055fb0da4dbd25c40f5552fd79f5e5d9bab2871e4569fb6bec7fd66",
+      "text": "属性 ID。"
+    },
+    {
+      "id": "MetadataClassProperty#isArray",
+      "field": "description",
+      "sourceHash": "sha256:5df5784596ed0eac4cb1e4b04d717bc64841b5b802af7ba32bf39aa6aaa237d7",
+      "text": "属性为定长或变长数组时为 true，否则为 false。"
+    },
+    {
+      "id": "MetadataClassProperty#isVariableLengthArray",
+      "field": "description",
+      "sourceHash": "sha256:f55514f33e69125e07d526e2ad1a8da2f56d7f725e4b5fe2a58df5db47e799f7",
+      "text": "属性为变长数组时为 true，否则为 false。"
+    },
+    {
+      "id": "MetadataClassProperty#max",
+      "field": "description",
+      "sourceHash": "sha256:11c081dba35d622d6afd04ebbad64ad3c7fc6d61c20324fbdfe9cf040654dfd4",
+      "text": "声明属性最大值的数值或数值数组，仅为数值类型定义。"
+    },
+    {
+      "id": "MetadataClassProperty#min",
+      "field": "description",
+      "sourceHash": "sha256:49b86c3eaacf84a2aa2c167bca099ea7f429239881b4679460819124c56a50f3",
+      "text": "声明属性最小值的数值或数值数组，仅为数值类型定义。"
+    },
+    {
+      "id": "MetadataClassProperty#name",
+      "field": "description",
+      "sourceHash": "sha256:224998fcd9eae99cb077e38f813c293d93df2575aac8b804cd70281842b051a7",
+      "text": "属性名称。"
+    },
+    {
+      "id": "MetadataClassProperty#noData",
+      "field": "description",
+      "sourceHash": "sha256:821cfdf06e16f23b54fe6471a0af6a7565a4771a6e30b9c1579ad948dd61cb11",
+      "text": "表示空值的无数据哨兵值。"
+    },
+    {
+      "id": "MetadataClassProperty#normalized",
+      "field": "description",
+      "sourceHash": "sha256:063822d2e55a21322ee5a1795873c8358eff5e34ac23239ded0afd287d4e8c97",
+      "text": "属性是否进行归一化。"
+    },
+    {
+      "id": "MetadataClassProperty#offset",
+      "field": "description",
+      "sourceHash": "sha256:189bb10da4e28798a2506974526dd04c2fb8c1be8f2bfa90d7a546b63bcdb9df",
+      "text": "值变换中加到属性值上的偏移量。即使 `hasValueTransform` 为 `false`，此值也始终有定义；类属性 JSON 未指定时，初始化为默认值。"
+    },
+    {
+      "id": "MetadataClassProperty#required",
+      "field": "description",
+      "sourceHash": "sha256:136c3e24280658f6948e338239f008da4ff038c3196da79be237b6375fadfd05",
+      "text": "属性是否必需。"
+    },
+    {
+      "id": "MetadataClassProperty#scale",
+      "field": "description",
+      "sourceHash": "sha256:18109b93d8ad88f8a4442d705780c63ac679e9336299a54a69f59c405764fa70",
+      "text": "值变换中与属性值相乘的缩放系数。即使 `hasValueTransform` 为 `false`，此值也始终有定义；类属性 JSON 未指定时，初始化为默认值。"
+    },
+    {
+      "id": "MetadataClassProperty#semantic",
+      "field": "description",
+      "sourceHash": "sha256:e66bb503cea499308d84912cb42b622f6d33cfce4dc294156830035557e6a85b",
+      "text": "描述应如何解释此属性的语义标识符。"
+    },
+    {
+      "id": "MetadataClassProperty#type",
+      "field": "description",
+      "sourceHash": "sha256:06292c3fa57cb1642ce276f86336d0118537112266fcada3b9ac26902264de4d",
+      "text": "属性类型，例如 SCALAR、VEC2、VEC3。"
+    },
+    {
+      "id": "MetadataClassProperty",
+      "field": "description",
+      "sourceHash": "sha256:a6a18c8e0b24900a229f397824f403dfe3690a3c8bcd51762f088234405db14d",
+      "text": "属于 {@link MetadataClass} 的元数据属性。\n<p>\n参见 3D Tiles 的 {@link https://github.com/CesiumGS/3d-tiles/tree/main/specification/Metadata|三维元数据规范}。\n</p>"
+    },
+    {
+      "id": "MetadataClassProperty",
+      "field": "params/options.arrayLength/description",
+      "sourceHash": "sha256:73bbb2bfdd9a57b5bf8bf4f340a53aca67a1aa2fad8fc04c32614a50d4724827",
+      "text": "数组元素数量，仅为定长数组定义。"
+    },
+    {
+      "id": "MetadataClassProperty",
+      "field": "params/options.componentType/description",
+      "sourceHash": "sha256:50a6af8fbe1638c5819624b773c18d8edd5665752a7142a1bb2705ac5b33497e",
+      "text": "属性分量类型，包括 INT8、UINT16 等整数，以及 FLOAT32、FLOAT64 浮点类型。"
+    },
+    {
+      "id": "MetadataClassProperty",
+      "field": "params/options.default/description",
+      "sourceHash": "sha256:7788d838779d9296737247a6d80d17ee45077868d5ea34f2dfe51b86065c136d",
+      "text": "实体属性值未定义时使用的默认值。"
+    },
+    {
+      "id": "MetadataClassProperty",
+      "field": "params/options.description/description",
+      "sourceHash": "sha256:2501e1b1cce0d3765185de110187c2a4dd53be49d3c576dac422314836966243",
+      "text": "属性说明。"
+    },
+    {
+      "id": "MetadataClassProperty",
+      "field": "params/options.enumType/description",
+      "sourceHash": "sha256:264cce620df35bffb10ad39f6aff5e5b82f31ab67951c1117591366ea5ee923f",
+      "text": "属性的枚举类型，仅在 type 为 ENUM 时定义。"
+    },
+    {
+      "id": "MetadataClassProperty",
+      "field": "params/options.extensions/description",
+      "sourceHash": "sha256:780cc3d08080dbbe657e853583cb80b1eafff79e762bc5ca5bb67721e6adc227",
+      "text": "包含扩展的对象。"
+    },
+    {
+      "id": "MetadataClassProperty",
+      "field": "params/options.extras/description",
+      "sourceHash": "sha256:0aecf153d916646f4749c4e8c95a992ab3eba211bf166239c9d285fab9782083",
+      "text": "用户定义的附加属性。"
+    },
+    {
+      "id": "MetadataClassProperty",
+      "field": "params/options.id/description",
+      "sourceHash": "sha256:ad2819a46055fb0da4dbd25c40f5552fd79f5e5d9bab2871e4569fb6bec7fd66",
+      "text": "属性 ID。"
+    },
+    {
+      "id": "MetadataClassProperty",
+      "field": "params/options.isArray/description",
+      "sourceHash": "sha256:973af8c589da9ca0dd5c83012740e3dc72267ea3d59d652d916ca877e550b891",
+      "text": "属性为定长或变长数组时为 true，否则为 false。"
+    },
+    {
+      "id": "MetadataClassProperty",
+      "field": "params/options.isVariableLengthArray/description",
+      "sourceHash": "sha256:f55514f33e69125e07d526e2ad1a8da2f56d7f725e4b5fe2a58df5db47e799f7",
+      "text": "属性为变长数组时为 true，否则为 false。"
+    },
+    {
+      "id": "MetadataClassProperty",
+      "field": "params/options.max/description",
+      "sourceHash": "sha256:11c081dba35d622d6afd04ebbad64ad3c7fc6d61c20324fbdfe9cf040654dfd4",
+      "text": "声明属性最大值的数值或数值数组，仅为数值类型定义。"
+    },
+    {
+      "id": "MetadataClassProperty",
+      "field": "params/options.min/description",
+      "sourceHash": "sha256:49b86c3eaacf84a2aa2c167bca099ea7f429239881b4679460819124c56a50f3",
+      "text": "声明属性最小值的数值或数值数组，仅为数值类型定义。"
+    },
+    {
+      "id": "MetadataClassProperty",
+      "field": "params/options.name/description",
+      "sourceHash": "sha256:224998fcd9eae99cb077e38f813c293d93df2575aac8b804cd70281842b051a7",
+      "text": "属性名称。"
+    },
+    {
+      "id": "MetadataClassProperty",
+      "field": "params/options.noData/description",
+      "sourceHash": "sha256:05d837afb350c7cc58f679ed9fe32fc428df98fd039537e3b423011cc471b0ae",
+      "text": "表示空值的无数据哨兵值。"
+    },
+    {
+      "id": "MetadataClassProperty",
+      "field": "params/options.normalized/description",
+      "sourceHash": "sha256:063822d2e55a21322ee5a1795873c8358eff5e34ac23239ded0afd287d4e8c97",
+      "text": "属性是否进行归一化。"
+    },
+    {
+      "id": "MetadataClassProperty",
+      "field": "params/options.offset/description",
+      "sourceHash": "sha256:a5720e2dad9fff39f67737b909851cffd5ce6b5738621ecaae87e1b03800e231",
+      "text": "作为值变换的一部分，加到属性值上的偏移量。"
+    },
+    {
+      "id": "MetadataClassProperty",
+      "field": "params/options.required/description",
+      "sourceHash": "sha256:136c3e24280658f6948e338239f008da4ff038c3196da79be237b6375fadfd05",
+      "text": "属性是否必需。"
+    },
+    {
+      "id": "MetadataClassProperty",
+      "field": "params/options.scale/description",
+      "sourceHash": "sha256:9988d28e8f1d325c49ac78a8a6b1feeab73474ca8b4007e7407bd45c422bb01b",
+      "text": "作为值变换的一部分，与属性值相乘的缩放系数。"
+    },
+    {
+      "id": "MetadataClassProperty",
+      "field": "params/options.semantic/description",
+      "sourceHash": "sha256:e66bb503cea499308d84912cb42b622f6d33cfce4dc294156830035557e6a85b",
+      "text": "描述应如何解释此属性的语义标识符。"
+    },
+    {
+      "id": "MetadataClassProperty",
+      "field": "params/options.type/description",
+      "sourceHash": "sha256:d4d4d9e26f303ef9d3d83b3716890cbd05dd51244acb6d911f5952d0bfbf363d",
+      "text": "属性类型，例如 SCALAR、VEC2、VEC3。"
+    },
+    {
+      "id": "MetadataComponentType.category",
+      "field": "description",
+      "sourceHash": "sha256:e4c69a9020cc9d91c783aa4a169ecc97e62b6b482cbf75cce3c0c6842179dd12",
+      "text": "获取数值类型的类别：有符号整数、无符号整数或浮点数。"
+    },
+    {
+      "id": "MetadataComponentType.category",
+      "field": "params/type/description",
+      "sourceHash": "sha256:f0d7ca8a453b928d035409213c919e5529a9ba07d5841ed5ed615ac29429e973",
+      "text": "待处理的类型。"
+    },
+    {
+      "id": "MetadataComponentType.category",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:174e6e13803c440820e58ac84d6839c5d52feb3f25794cfd14b843ab7621f324",
+      "text": "类型类别。"
+    },
+    {
+      "id": "MetadataComponentType.FLOAT32",
+      "field": "description",
+      "sourceHash": "sha256:cc43123b62d9c54da254f5f1bc3c7297482b7b1b3dc81695133200e4c9832cd0",
+      "text": "32 位单精度浮点数。"
+    },
+    {
+      "id": "MetadataComponentType.FLOAT64",
+      "field": "description",
+      "sourceHash": "sha256:d94d35d94aea94190d85fdb6f49c887540338fde81a4bf08c653c3667acc1a81",
+      "text": "64 位双精度浮点数。"
+    },
+    {
+      "id": "MetadataComponentType.gpuComponentType",
+      "field": "description",
+      "sourceHash": "sha256:95a9b442b28d2a4558a623b96431d6ca1a4565f3ec2473e6376d577bad1134b6",
+      "text": "获取 GPU 表示所用的分量类型，包含降精度转换的影响。这仅针对单个分量，不是整个元数据属性对应的 GLSL 变量类型。"
+    },
+    {
+      "id": "MetadataComponentType.gpuComponentType",
+      "field": "params/type/description",
+      "sourceHash": "sha256:a4e3c11165b80ddf0e177fec8675134fdce255905d7e5890d1e96b649b6b57a4",
+      "text": "分量类型。"
+    },
+    {
+      "id": "MetadataComponentType.gpuComponentType",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:440efef53cf095488c73503d11ccdd56b73adb308ebbe74b55da6647c5f448d3",
+      "text": "GPU 分量类型。"
+    },
+    {
+      "id": "MetadataComponentType.INT16",
+      "field": "description",
+      "sourceHash": "sha256:9720d1e64f51dd2b79f347516f6d8f9bcaa10d48deb7f0150ba31b238ab6ba3f",
+      "text": "16 位有符号整数。"
+    },
+    {
+      "id": "MetadataComponentType.INT32",
+      "field": "description",
+      "sourceHash": "sha256:f99dfe189c220a5f4d01a3098bc0d603e01a37ff4a9b91d6dafd63526546800c",
+      "text": "32 位有符号整数。"
+    },
+    {
+      "id": "MetadataComponentType.INT64",
+      "field": "description",
+      "sourceHash": "sha256:bd539237936932762852806de57ea9ab45caf3fdd94e93db21c62943b141bb60",
+      "text": "64 位有符号整数。"
+    },
+    {
+      "id": "MetadataComponentType.INT8",
+      "field": "description",
+      "sourceHash": "sha256:70292f1f7f0a0e4ad233dc468e75677f923e1df7c0c18b5f0a15cbbd1723b336",
+      "text": "8 位有符号整数。"
+    },
+    {
+      "id": "MetadataComponentType.UINT16",
+      "field": "description",
+      "sourceHash": "sha256:749bf1ac21553165a94ed31d788cbf392eaaa91cb36450e6bc42e40f6936df0f",
+      "text": "16 位无符号整数。"
+    },
+    {
+      "id": "MetadataComponentType.UINT32",
+      "field": "description",
+      "sourceHash": "sha256:973f7723593bfbb7e235fcfac98e9c139c43c3e8e7a1d1773ae0deaa76706341",
+      "text": "32 位无符号整数。"
+    },
+    {
+      "id": "MetadataComponentType.UINT64",
+      "field": "description",
+      "sourceHash": "sha256:bd539237936932762852806de57ea9ab45caf3fdd94e93db21c62943b141bb60",
+      "text": "64 位无符号整数。"
+    },
+    {
+      "id": "MetadataComponentType.UINT8",
+      "field": "description",
+      "sourceHash": "sha256:25da5f32a80135d3e22e3166d15e555bfdac52a1a3b91234835203641a6a5c74",
+      "text": "8 位无符号整数。"
+    },
+    {
+      "id": "MetadataComponentType",
+      "field": "description",
+      "sourceHash": "sha256:e2ff4d59171cb5954cd6a89ece8b9743a4fb464fb4fdff086321b6d4bb448853",
+      "text": "元数据分量类型枚举。"
+    },
+    {
+      "id": "MetadataComponentType",
+      "field": "properties/FLOAT32/description",
+      "sourceHash": "sha256:cc43123b62d9c54da254f5f1bc3c7297482b7b1b3dc81695133200e4c9832cd0",
+      "text": "32 位单精度浮点数。"
+    },
+    {
+      "id": "MetadataComponentType",
+      "field": "properties/FLOAT64/description",
+      "sourceHash": "sha256:d94d35d94aea94190d85fdb6f49c887540338fde81a4bf08c653c3667acc1a81",
+      "text": "64 位双精度浮点数。"
+    },
+    {
+      "id": "MetadataComponentType",
+      "field": "properties/INT16/description",
+      "sourceHash": "sha256:9720d1e64f51dd2b79f347516f6d8f9bcaa10d48deb7f0150ba31b238ab6ba3f",
+      "text": "16 位有符号整数。"
+    },
+    {
+      "id": "MetadataComponentType",
+      "field": "properties/INT32/description",
+      "sourceHash": "sha256:f99dfe189c220a5f4d01a3098bc0d603e01a37ff4a9b91d6dafd63526546800c",
+      "text": "32 位有符号整数。"
+    },
+    {
+      "id": "MetadataComponentType",
+      "field": "properties/INT64/description",
+      "sourceHash": "sha256:bd539237936932762852806de57ea9ab45caf3fdd94e93db21c62943b141bb60",
+      "text": "64 位有符号整数。"
+    },
+    {
+      "id": "MetadataComponentType",
+      "field": "properties/INT8/description",
+      "sourceHash": "sha256:70292f1f7f0a0e4ad233dc468e75677f923e1df7c0c18b5f0a15cbbd1723b336",
+      "text": "8 位有符号整数。"
+    },
+    {
+      "id": "MetadataComponentType",
+      "field": "properties/UINT16/description",
+      "sourceHash": "sha256:749bf1ac21553165a94ed31d788cbf392eaaa91cb36450e6bc42e40f6936df0f",
+      "text": "16 位无符号整数。"
+    },
+    {
+      "id": "MetadataComponentType",
+      "field": "properties/UINT32/description",
+      "sourceHash": "sha256:973f7723593bfbb7e235fcfac98e9c139c43c3e8e7a1d1773ae0deaa76706341",
+      "text": "32 位无符号整数。"
+    },
+    {
+      "id": "MetadataComponentType",
+      "field": "properties/UINT64/description",
+      "sourceHash": "sha256:bd539237936932762852806de57ea9ab45caf3fdd94e93db21c62943b141bb60",
+      "text": "64 位无符号整数。"
+    },
+    {
+      "id": "MetadataComponentType",
+      "field": "properties/UINT8/description",
+      "sourceHash": "sha256:25da5f32a80135d3e22e3166d15e555bfdac52a1a3b91234835203641a6a5c74",
+      "text": "8 位无符号整数。"
+    },
+    {
+      "id": "MetadataEnum#description",
+      "field": "description",
+      "sourceHash": "sha256:52af46a849a577d6e60485fdf6e67af83aa516e1881ddbad3e3986f978c912ef",
+      "text": "枚举的说明。"
+    },
+    {
+      "id": "MetadataEnum#extensions",
+      "field": "description",
+      "sourceHash": "sha256:780cc3d08080dbbe657e853583cb80b1eafff79e762bc5ca5bb67721e6adc227",
+      "text": "包含扩展的对象。"
+    },
+    {
+      "id": "MetadataEnum#extras",
+      "field": "description",
+      "sourceHash": "sha256:0aecf153d916646f4749c4e8c95a992ab3eba211bf166239c9d285fab9782083",
+      "text": "用户定义的附加属性。"
+    },
+    {
+      "id": "MetadataEnum#id",
+      "field": "description",
+      "sourceHash": "sha256:49b42507dce828a20b7aa93e24ed90a52639df5f4727877faabbe55fe35a6bbc",
+      "text": "枚举 ID。"
+    },
+    {
+      "id": "MetadataEnum#name",
+      "field": "description",
+      "sourceHash": "sha256:390c1a04c527552c776b1f9815ef77c4e2930d16728919be93b41c1a495f933e",
+      "text": "枚举名称。"
+    },
+    {
+      "id": "MetadataEnum#values",
+      "field": "description",
+      "sourceHash": "sha256:b46209b26fd0984dfed8665cd2262f8f539ede784ece88e34d5c5555af0d0672",
+      "text": "枚举值。"
+    },
+    {
+      "id": "MetadataEnum#valueType",
+      "field": "description",
+      "sourceHash": "sha256:4026673a17de2fa915ad5b07a09e1e1a0e75ecc8556f54af5cc428cb83d36936",
+      "text": "枚举值的数据类型。"
+    },
+    {
+      "id": "MetadataEnum",
+      "field": "description",
+      "sourceHash": "sha256:11745f5e204d38d7565e8e175929f769e0d75a1ad314ae96d1d2f564fda474cb",
+      "text": "元数据枚举。\n<p>\n参见 3D Tiles 的 {@link https://github.com/CesiumGS/3d-tiles/tree/main/specification/Metadata|三维元数据规范}。\n</p>"
+    },
+    {
+      "id": "MetadataEnum",
+      "field": "params/options.description/description",
+      "sourceHash": "sha256:52af46a849a577d6e60485fdf6e67af83aa516e1881ddbad3e3986f978c912ef",
+      "text": "枚举的说明。"
+    },
+    {
+      "id": "MetadataEnum",
+      "field": "params/options.extensions/description",
+      "sourceHash": "sha256:780cc3d08080dbbe657e853583cb80b1eafff79e762bc5ca5bb67721e6adc227",
+      "text": "包含扩展的对象。"
+    },
+    {
+      "id": "MetadataEnum",
+      "field": "params/options.extras/description",
+      "sourceHash": "sha256:0aecf153d916646f4749c4e8c95a992ab3eba211bf166239c9d285fab9782083",
+      "text": "用户定义的附加属性。"
+    },
+    {
+      "id": "MetadataEnum",
+      "field": "params/options.id/description",
+      "sourceHash": "sha256:49b42507dce828a20b7aa93e24ed90a52639df5f4727877faabbe55fe35a6bbc",
+      "text": "枚举 ID。"
+    },
+    {
+      "id": "MetadataEnum",
+      "field": "params/options.name/description",
+      "sourceHash": "sha256:390c1a04c527552c776b1f9815ef77c4e2930d16728919be93b41c1a495f933e",
+      "text": "枚举名称。"
+    },
+    {
+      "id": "MetadataEnum",
+      "field": "params/options.values/description",
+      "sourceHash": "sha256:b46209b26fd0984dfed8665cd2262f8f539ede784ece88e34d5c5555af0d0672",
+      "text": "枚举值。"
+    },
+    {
+      "id": "MetadataEnum",
+      "field": "params/options.valueType/description",
+      "sourceHash": "sha256:4026673a17de2fa915ad5b07a09e1e1a0e75ecc8556f54af5cc428cb83d36936",
+      "text": "枚举值的数据类型。"
+    },
+    {
+      "id": "MetadataEnumValue#description",
+      "field": "description",
+      "sourceHash": "sha256:35f8d01560d8a4a8fd66baf2e3965497870d5fc8263a1b59d25f0bbc11f2f065",
+      "text": "枚举值的说明。"
+    },
+    {
+      "id": "MetadataEnumValue#extensions",
+      "field": "description",
+      "sourceHash": "sha256:780cc3d08080dbbe657e853583cb80b1eafff79e762bc5ca5bb67721e6adc227",
+      "text": "包含扩展的对象。"
+    },
+    {
+      "id": "MetadataEnumValue#extras",
+      "field": "description",
+      "sourceHash": "sha256:0aecf153d916646f4749c4e8c95a992ab3eba211bf166239c9d285fab9782083",
+      "text": "用户定义的附加属性。"
+    },
+    {
+      "id": "MetadataEnumValue#name",
+      "field": "description",
+      "sourceHash": "sha256:d7e83246bb2efdf4da37ceaea8fd9958aa6ef2cda63f20d14dd5c91f4cb13e5b",
+      "text": "枚举值的名称。"
+    },
+    {
+      "id": "MetadataEnumValue#value",
+      "field": "description",
+      "sourceHash": "sha256:50b083154ea1e91f02545a943d5259bb70c922049d59cd6d28f2f6e8f4fbe2e0",
+      "text": "整数值。"
+    },
+    {
+      "id": "MetadataEnumValue",
+      "field": "description",
+      "sourceHash": "sha256:85b9704c6b9670cf61792b95ab9d9629e5f965f4360e09823890657299105772",
+      "text": "元数据枚举值。\n<p>\n参见 3D Tiles 的 {@link https://github.com/CesiumGS/3d-tiles/tree/main/specification/Metadata|三维元数据规范}。\n</p>"
+    },
+    {
+      "id": "MetadataEnumValue",
+      "field": "params/options.description/description",
+      "sourceHash": "sha256:35f8d01560d8a4a8fd66baf2e3965497870d5fc8263a1b59d25f0bbc11f2f065",
+      "text": "枚举值的说明。"
+    },
+    {
+      "id": "MetadataEnumValue",
+      "field": "params/options.extensions/description",
+      "sourceHash": "sha256:780cc3d08080dbbe657e853583cb80b1eafff79e762bc5ca5bb67721e6adc227",
+      "text": "包含扩展的对象。"
+    },
+    {
+      "id": "MetadataEnumValue",
+      "field": "params/options.extras/description",
+      "sourceHash": "sha256:0aecf153d916646f4749c4e8c95a992ab3eba211bf166239c9d285fab9782083",
+      "text": "用户定义的附加属性。"
+    },
+    {
+      "id": "MetadataEnumValue",
+      "field": "params/options.name/description",
+      "sourceHash": "sha256:d7e83246bb2efdf4da37ceaea8fd9958aa6ef2cda63f20d14dd5c91f4cb13e5b",
+      "text": "枚举值的名称。"
+    },
+    {
+      "id": "MetadataEnumValue",
+      "field": "params/options.value/description",
+      "sourceHash": "sha256:50b083154ea1e91f02545a943d5259bb70c922049d59cd6d28f2f6e8f4fbe2e0",
+      "text": "整数值。"
+    },
+    {
+      "id": "MetadataSchema#classes",
+      "field": "description",
+      "sourceHash": "sha256:5a43bf132afebf715a819fe9d12eeece916405a863ad1f5d79ef99614e10d89f",
+      "text": "模式中定义的类。"
+    },
+    {
+      "id": "MetadataSchema#description",
+      "field": "description",
+      "sourceHash": "sha256:49b7986927e7724513a385d3a1bf7e3242740c3c8f655ada77c29e017d07883d",
+      "text": "模式的说明。"
+    },
+    {
+      "id": "MetadataSchema#enums",
+      "field": "description",
+      "sourceHash": "sha256:2007eadc5ed5e35ed94827844e03d60a09f3b814df1256d9bbb89942867cb1e1",
+      "text": "模式中定义的枚举。"
+    },
+    {
+      "id": "MetadataSchema#extensions",
+      "field": "description",
+      "sourceHash": "sha256:780cc3d08080dbbe657e853583cb80b1eafff79e762bc5ca5bb67721e6adc227",
+      "text": "包含扩展的对象。"
+    },
+    {
+      "id": "MetadataSchema#extras",
+      "field": "description",
+      "sourceHash": "sha256:0aecf153d916646f4749c4e8c95a992ab3eba211bf166239c9d285fab9782083",
+      "text": "用户定义的附加属性。"
+    },
+    {
+      "id": "MetadataSchema#id",
+      "field": "description",
+      "sourceHash": "sha256:f6f2be5225d68ff28b91cbc5af3c601188ff09d858d9bb7413980c982af3f974",
+      "text": "模式 ID。"
+    },
+    {
+      "id": "MetadataSchema#name",
+      "field": "description",
+      "sourceHash": "sha256:353ff5658ca70de07e3c763ccccd38799a87acb26ec5919159938c41d37b2bcd",
+      "text": "模式名称。"
+    },
+    {
+      "id": "MetadataSchema#version",
+      "field": "description",
+      "sourceHash": "sha256:f80fb3ed5406c31d0d216048fbf6d8498e4ee3123799c718530885d32551150d",
+      "text": "模式的应用专用版本号。"
+    },
+    {
+      "id": "MetadataSchema",
+      "field": "description",
+      "sourceHash": "sha256:e99a32d061e7743a8d2efcf3f691d587827ef9be87ed56a02efe1f562fb9cf17",
+      "text": "包含类和枚举的元数据模式。\n<p>\n参见 3D Tiles 的 {@link https://github.com/CesiumGS/3d-tiles/tree/main/specification/Metadata|三维元数据规范}。\n</p>"
+    },
+    {
+      "id": "MetadataSchema",
+      "field": "params/options.classes/description",
+      "sourceHash": "sha256:6bd61db1b1674fb74e7385e3df5fb05ca203f586ae3ae273bb7f718b177478b6",
+      "text": "模式中定义的类字典，键为类 ID。"
+    },
+    {
+      "id": "MetadataSchema",
+      "field": "params/options.description/description",
+      "sourceHash": "sha256:49b7986927e7724513a385d3a1bf7e3242740c3c8f655ada77c29e017d07883d",
+      "text": "模式的说明。"
+    },
+    {
+      "id": "MetadataSchema",
+      "field": "params/options.enums/description",
+      "sourceHash": "sha256:75e48e8a9bc7f58dd6d9d7e450bc8aff779a52b274eed6120fcdc95a07383bd5",
+      "text": "模式中定义的枚举字典，键为枚举 ID。"
+    },
+    {
+      "id": "MetadataSchema",
+      "field": "params/options.extensions/description",
+      "sourceHash": "sha256:780cc3d08080dbbe657e853583cb80b1eafff79e762bc5ca5bb67721e6adc227",
+      "text": "包含扩展的对象。"
+    },
+    {
+      "id": "MetadataSchema",
+      "field": "params/options.extras/description",
+      "sourceHash": "sha256:0aecf153d916646f4749c4e8c95a992ab3eba211bf166239c9d285fab9782083",
+      "text": "用户定义的附加属性。"
+    },
+    {
+      "id": "MetadataSchema",
+      "field": "params/options.id/description",
+      "sourceHash": "sha256:5c2b1c60ebece288a72270783b46064b5bb6f87ead28543a9467b220de205974",
+      "text": "模式 ID。"
+    },
+    {
+      "id": "MetadataSchema",
+      "field": "params/options.name/description",
+      "sourceHash": "sha256:353ff5658ca70de07e3c763ccccd38799a87acb26ec5919159938c41d37b2bcd",
+      "text": "模式名称。"
+    },
+    {
+      "id": "MetadataSchema",
+      "field": "params/options.version/description",
+      "sourceHash": "sha256:f80fb3ed5406c31d0d216048fbf6d8498e4ee3123799c718530885d32551150d",
+      "text": "模式的应用专用版本号。"
+    },
+    {
+      "id": "MetadataType.BOOLEAN",
+      "field": "description",
+      "sourceHash": "sha256:fb457c3590f8ca328314781448deb5f3d6c4bb3d62f95f3a2a344b2763273ab6",
+      "text": "布尔值，即 true 或 false。"
+    },
+    {
+      "id": "MetadataType.ENUM",
+      "field": "description",
+      "sourceHash": "sha256:d5fab37beaea12918a9d4c42d652f0efc6cc845ac3dc8a98f9019c2f8c8b6bb2",
+      "text": "枚举值，与 {@link MetadataEnum} 配合描述有效取值。"
+    },
+    {
+      "id": "MetadataType.MAT2",
+      "field": "description",
+      "sourceHash": "sha256:51712c2a4da49801c5dd6530a3087562188b1905841f892a8a14ca1a86b02f20",
+      "text": "按列主序存储的 2×2 矩阵。"
+    },
+    {
+      "id": "MetadataType.MAT3",
+      "field": "description",
+      "sourceHash": "sha256:627eba23015760cf04f54b0efdfaab08323f42b756f67fc9565ac185399023c7",
+      "text": "按列主序存储的 3×3 矩阵。"
+    },
+    {
+      "id": "MetadataType.MAT4",
+      "field": "description",
+      "sourceHash": "sha256:f2c741cb42ea6f2bd60f3aba894b67629f21c4b219304160e935da05bd2abec9",
+      "text": "按列主序存储的 4×4 矩阵。"
+    },
+    {
+      "id": "MetadataType.SCALAR",
+      "field": "description",
+      "sourceHash": "sha256:6d0a4762bdc0899ba5a04595c07a06625ad13f5c14aeeef02eeed460b6d226f8",
+      "text": "单个分量。"
+    },
+    {
+      "id": "MetadataType.STRING",
+      "field": "description",
+      "sourceHash": "sha256:279113f63e244024eea964d2aae2bd1468e73a7712cc5250f60327b535252b7c",
+      "text": "UTF-8 编码的字符串值。"
+    },
+    {
+      "id": "MetadataType.VEC2",
+      "field": "description",
+      "sourceHash": "sha256:ce7e972488a78490d3e08efc7c685159bc28e4644c88205f60f3aba1241f8211",
+      "text": "具有两个分量的向量。"
+    },
+    {
+      "id": "MetadataType.VEC3",
+      "field": "description",
+      "sourceHash": "sha256:9186086a55d2c10c1baa65f3b39a2573e7e793cf62da3dd9f050cf626932d243",
+      "text": "具有三个分量的向量。"
+    },
+    {
+      "id": "MetadataType.VEC4",
+      "field": "description",
+      "sourceHash": "sha256:afd28e44563b1199ab998090b62723e75470d55469243a6ad63daeea208cfebc",
+      "text": "具有四个分量的向量。"
+    },
+    {
+      "id": "MetadataType",
+      "field": "description",
+      "sourceHash": "sha256:6397302a2615e0e06bf5a2628e0d125265eb26c8971e06ca1cd0b1d99396cec7",
+      "text": "元数据类型枚举。这些类型是容器，包含一个或多个 {@link MetadataComponentType} 类型的分量。"
+    },
+    {
+      "id": "MetadataType",
+      "field": "properties/BOOLEAN/description",
+      "sourceHash": "sha256:fb457c3590f8ca328314781448deb5f3d6c4bb3d62f95f3a2a344b2763273ab6",
+      "text": "布尔值，即 true 或 false。"
+    },
+    {
+      "id": "MetadataType",
+      "field": "properties/ENUM/description",
+      "sourceHash": "sha256:d5fab37beaea12918a9d4c42d652f0efc6cc845ac3dc8a98f9019c2f8c8b6bb2",
+      "text": "枚举值，与 {@link MetadataEnum} 配合描述有效取值。"
+    },
+    {
+      "id": "MetadataType",
+      "field": "properties/MAT2/description",
+      "sourceHash": "sha256:51712c2a4da49801c5dd6530a3087562188b1905841f892a8a14ca1a86b02f20",
+      "text": "按列主序存储的 2×2 矩阵。"
+    },
+    {
+      "id": "MetadataType",
+      "field": "properties/MAT3/description",
+      "sourceHash": "sha256:627eba23015760cf04f54b0efdfaab08323f42b756f67fc9565ac185399023c7",
+      "text": "按列主序存储的 3×3 矩阵。"
+    },
+    {
+      "id": "MetadataType",
+      "field": "properties/MAT4/description",
+      "sourceHash": "sha256:f2c741cb42ea6f2bd60f3aba894b67629f21c4b219304160e935da05bd2abec9",
+      "text": "按列主序存储的 4×4 矩阵。"
+    },
+    {
+      "id": "MetadataType",
+      "field": "properties/SCALAR/description",
+      "sourceHash": "sha256:6d0a4762bdc0899ba5a04595c07a06625ad13f5c14aeeef02eeed460b6d226f8",
+      "text": "单个分量。"
+    },
+    {
+      "id": "MetadataType",
+      "field": "properties/STRING/description",
+      "sourceHash": "sha256:279113f63e244024eea964d2aae2bd1468e73a7712cc5250f60327b535252b7c",
+      "text": "UTF-8 编码的字符串值。"
+    },
+    {
+      "id": "MetadataType",
+      "field": "properties/VEC2/description",
+      "sourceHash": "sha256:ce7e972488a78490d3e08efc7c685159bc28e4644c88205f60f3aba1241f8211",
+      "text": "具有两个分量的向量。"
+    },
+    {
+      "id": "MetadataType",
+      "field": "properties/VEC3/description",
+      "sourceHash": "sha256:9186086a55d2c10c1baa65f3b39a2573e7e793cf62da3dd9f050cf626932d243",
+      "text": "具有三个分量的向量。"
+    },
+    {
+      "id": "MetadataType",
+      "field": "properties/VEC4/description",
+      "sourceHash": "sha256:afd28e44563b1199ab998090b62723e75470d55469243a6ad63daeea208cfebc",
+      "text": "具有四个分量的向量。"
+    },
+    {
+      "id": "MetadataValue",
+      "field": "description",
+      "sourceHash": "sha256:e1d16bdc8c020189e640d5375c8d2405667c9f15abaf37d18525eb1fc048b996",
+      "text": "元数据值实例。<br>\n<br>\n可为以下类型之一：\n<ul>\n  <li><code>number</code>：类型为 <code>SCALAR</code>，数值分量类型不是 <code>INT64</code> 或 <code>UINT64</code></li>\n  <li><code>bigint</code>：类型为 <code>SCALAR</code>，分量类型为 <code>INT64</code> 或 <code>UINT64</code></li>\n  <li><code>string</code>：类型为 <code>STRING</code> 或 <code>ENUM</code></li>\n  <li><code>boolean</code>：类型为 <code>BOOLEAN</code></li>\n  <li><code>Cartesian2</code>：类型为 <code>VEC2</code></li>\n  <li><code>Cartesian3</code>：类型为 <code>VEC3</code></li>\n  <li><code>Cartesian4</code>：类型为 <code>VEC4</code></li>\n  <li><code>Matrix2</code>：类型为 <code>MAT2</code></li>\n  <li><code>Matrix3</code>：类型为 <code>MAT3</code></li>\n  <li><code>Matrix4</code>：类型为 <code>MAT4</code></li>\n  <li>元数据值为数组时，使用上述类型的数组</li>\n</ul>"
+    },
+    {
+      "id": "PickedMetadataInfo#className",
+      "field": "description",
+      "sourceHash": "sha256:0a3534de173345a9b097ed2d99a7a361ad7aa1455f77f08f531d59b0fc940488",
+      "text": "元数据类名称。"
+    },
+    {
+      "id": "PickedMetadataInfo#classProperty",
+      "field": "description",
+      "sourceHash": "sha256:9bc546eba457fbbc8bccc4a1d4738946ce52cf4fdd0a538a824326326da94a13",
+      "text": "此结构描述的 `MetadataClassProperty`，从 `MetadataSchema` 获取。"
+    },
+    {
+      "id": "PickedMetadataInfo#metadataProperty",
+      "field": "description",
+      "sourceHash": "sha256:a10f5a8b6a8f3e18d8687f728a5523691833f0638ae2113cc1b6a3785f3666db",
+      "text": "此结构描述的 `PropertyTextureProperty` 或 `PropertyAttributeProperty`，从 `StructuralMetadata` 中匹配类名及属性名的属性纹理或属性特性获取。"
+    },
+    {
+      "id": "PickedMetadataInfo#propertyName",
+      "field": "description",
+      "sourceHash": "sha256:9512e9c795c990cc42833e2b92d3308fd9a4a2d58d154fb1b303145911c51820",
+      "text": "元数据属性名称。"
+    },
+    {
+      "id": "PickedMetadataInfo#schemaId",
+      "field": "description",
+      "sourceHash": "sha256:2231dac481182df5b30383de27616d844093c8e2550deb28522815914465d916",
+      "text": "可选的元数据模式 ID。"
+    },
+    {
+      "id": "PickedMetadataInfo",
+      "field": "description",
+      "sourceHash": "sha256:b15e53a0f23f936b04f742eb1759a4b4955135d5c971e9900c69a8f38cfd48cd",
+      "text": "待拾取的元数据信息。"
+    },
+    {
+      "id": "PickedMetadataInfo",
+      "field": "properties/className/description",
+      "sourceHash": "sha256:0a3534de173345a9b097ed2d99a7a361ad7aa1455f77f08f531d59b0fc940488",
+      "text": "元数据类名称。"
+    },
+    {
+      "id": "PickedMetadataInfo",
+      "field": "properties/classProperty/description",
+      "sourceHash": "sha256:7912f36a308a4bfe8bfc130227b732b788acdf635e0fcbd56d51468d270263fb",
+      "text": "元数据类属性。"
+    },
+    {
+      "id": "PickedMetadataInfo",
+      "field": "properties/propertyName/description",
+      "sourceHash": "sha256:9512e9c795c990cc42833e2b92d3308fd9a4a2d58d154fb1b303145911c51820",
+      "text": "元数据属性名称。"
+    },
+    {
+      "id": "PickedMetadataInfo",
+      "field": "properties/schemaId/description",
+      "sourceHash": "sha256:2231dac481182df5b30383de27616d844093c8e2550deb28522815914465d916",
+      "text": "可选的元数据模式 ID。"
+    }
+  ]
+}
