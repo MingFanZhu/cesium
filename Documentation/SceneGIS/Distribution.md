@@ -112,6 +112,22 @@ CSS 由应用单独加载。Worker/资源跨域须由服务端提供相应访问
 SDK 负责把发行资源复制到自己的部署产物，并配置唯一入口；引擎不访问 SDK 源码。
 SDK 与引擎的同名导出由 SDK 后续显式组合；引擎侧不增加别名层、版本锁或自动兼容校验。
 
+## 原生环境效果的支持边界
+
+当前 WebGL 延迟渲染路径由 SceneGISEnvironmentEffects 提供可见天空、太阳、可视雾与物理受光。
+原生 SkyAtmosphere、SkyBox、Sun / sunBloom、Fog 的可视雾、Globe.showGroundAtmosphere
+及 Globe.enableLighting 的旧视觉分支被跳过；原生对象仍可访问，其显隐和调色开关不会恢复旧效果。
+关闭高级环境也不会回退到原生视觉路径。绕过内部渲染门控强行启用旧路径不属于维护和验证范围。
+
+Fog 的瓦片裁剪和 LOD 调度仍使用原生参数；球面 Moon 与星历、Scene.light、Viewer.shadows
+及 Scene.shadowMap 等光照和几何阴影控制仍保留。平面的 SceneGISPlanarEnvironment
+仍提供天体方向与光源，但其轻量大气、天空盒及日月绘制同样被跳过。
+请通过 scene.environmentEffects 或显式注册的 SceneGISEnvironmentEffects 配置高级环境。
+
+相关原生 API 页面和 api-doclets.json 的 description 带有“SceneGIS 渲染限制”说明与替代入口。
+这些产品限制由 scripts/scenegis/documentation-notices.cjs 维护，在原生译文之后追加，
+不改写上游英文注释，也不计入原生翻译报告；自有 API 的限制直接维护在中文 JSDoc 中。
+
 ## 静态 API 与元数据
 
 将 Documentation 整个目录部署到任意 HTTP(S) 路径即可独立访问。它由本次发行的

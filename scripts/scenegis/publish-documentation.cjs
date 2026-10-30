@@ -5,6 +5,7 @@ const fs = require("node:fs");
 const path = require("node:path");
 const helper = require("jsdoc/lib/jsdoc/util/templateHelper");
 const translations = require("../docs-i18n/doclets.cjs");
+const appendDocumentationNotices = require("./documentation-notices.cjs");
 const annotationPrefix = "SCENEGIS_" + "PATCH_";
 const annotationPattern = new RegExp(
   `^[ \\t]*${annotationPrefix}(?:BEGIN|END) SGP-\\d{4}[^\\r\\n]*`,
@@ -191,6 +192,7 @@ exports.publish = function (data, opts, tutorials) {
   console.log(
     `Documentation ${locale}: ${report.counts.translated}/${report.counts.total} translated fields, ${report.counts.stale} stale, ${report.counts.unused} unused.`,
   );
+  appendDocumentationNotices(publicDoclets);
   publicDoclets.forEach(mapText);
   const doclets = publicDoclets.map(cleanDoclet);
   // Render through the native publisher with its actual prune/link/anchor allocation.

@@ -598,6 +598,39 @@ test("specialized documentation displays buffer mutation and voxel sampling layo
   expect(errors).toEqual([]);
 });
 
+test("environment support notes link native APIs to the maintained replacement", async ({
+  page,
+}, info) => {
+  for (const prefix of [
+    "/Documentation/",
+    "/deep/site/vendor/engine/Documentation/",
+  ]) {
+    await page.goto(`${prefix}SkyAtmosphere.html`);
+    const note = page.locator(".scenegis-api-note").first();
+    await expect(note).toBeVisible();
+    await expect(note).toContainText("关闭高级环境也不会恢复原生路径");
+    await note.locator('a[href="SceneGISEnvironmentEffects.html"]').click();
+    await expect(page).toHaveURL(
+      new RegExp(`${prefix}SceneGISEnvironmentEffects.html$`),
+    );
+    await expect(page.locator("#main")).toContainText("原生环境边界");
+    await expect(page.locator("#main")).toContainText(
+      "禁用不会恢复原生 Cesium 环境",
+    );
+    await page.goto(`${prefix}Fog.html`);
+    await expect(page.locator(".scenegis-api-note").first()).toContainText(
+      "仍参与原生地形瓦片裁剪与 LOD 调度",
+    );
+  }
+  await page.goto("/Documentation/SkyAtmosphere.html");
+  await info.attach("environment-support-note", {
+    body: await page.screenshot({
+      path: info.outputPath("environment-support-note.png"),
+    }),
+    contentType: "image/png",
+  });
+});
+
 test("reference and demo prose displays Chinese guidance with preserved link targets", async ({
   page,
 }, info) => {

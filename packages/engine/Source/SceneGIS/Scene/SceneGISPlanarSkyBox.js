@@ -67,6 +67,8 @@ function validateSources(sources) {
 /**
  * 调用方所有的平面世界固定轴立方体天空盒。各面方向为 positiveX 向东、positiveY 向北、positiveZ 向上。源必须预先加载，构造后不可变。
  *
+ * 当前 WebGL 延迟渲染路径跳过此轻量天空盒的绘制，关闭高级环境不会恢复它。可见天空请使用 {@link SceneGISEnvironmentEffects}；绕过内部渲染门控的旧绘制路径不属于维护和验证范围。
+ *
  * @alias SceneGISPlanarSkyBox
  * @constructor
  *

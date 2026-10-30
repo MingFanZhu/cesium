@@ -2,18 +2,18 @@
 
 ## Metadata
 
-| Field                  | Value                                                               |
-| ---------------------- | ------------------------------------------------------------------- |
-| Extension slug         | `engine-distribution`                                               |
-| Status                 | `completed`                                                         |
-| Planning model         | `extension`                                                         |
-| Active extension plan  | None; latest [Distribution](plans/2026-10-29-extension.md)          |
-| Current phase          | Reader layout cleanup completed                                     |
-| Active standalone plan | None; latest [Reader layout](plans/2026-10-30-doc-reader-layout.md) |
-| Active phase plan      | None; latest [T11](plans/2026-10-30-t11-reference-prose.md)         |
-| Architecture contact   | Architecture Agent (current task)                                   |
-| Execution contact      | Execution Agent (current task)                                      |
-| Last updated           | 2026-10-30                                                          |
+| Field                  | Value                                                                             |
+| ---------------------- | --------------------------------------------------------------------------------- |
+| Extension slug         | `engine-distribution`                                                             |
+| Status                 | `completed`                                                                       |
+| Planning model         | `extension`                                                                       |
+| Active extension plan  | None; latest [Distribution](plans/2026-10-29-extension.md)                        |
+| Current phase          | Environment API boundary documentation completed                                  |
+| Active standalone plan | None; latest [Environment boundary](plans/2026-10-30-environment-api-boundary.md) |
+| Active phase plan      | None; latest [T11](plans/2026-10-30-t11-reference-prose.md)                       |
+| Architecture contact   | Architecture Agent (current task)                                                 |
+| Execution contact      | Execution Agent (current task)                                                    |
+| Last updated           | 2026-10-30                                                                        |
 
 ## Scope
 
@@ -46,6 +46,16 @@ Missing/stale/unused are all zero; pure numeric/formula descriptions remain lite
 inventory/report without altering maintained catalogs. Historical bilingual delivery in
 [ADR-0206](../../Documentation/SceneGIS/Decisions/ADR-0206-documentation-localization.md) and
 [localization review](reviews/2026-10-30-localization.md) is superseded by C1/C2.
+
+## Latest environment support boundary
+
+[Environment boundary](plans/2026-10-30-environment-api-boundary.md) is completed and
+[reviewed](reviews/2026-10-30-environment-api-boundary.md). Owned public JSDoc and sixteen
+native symbol descriptions explain the deferred environment gates, retained Fog/lighting
+roles and maintained replacement. Product notices are appended after native translations,
+outside catalogs/upstream comments. Docs build, 37 Node checks and the root/nested browser
+case pass; translation inventory/report and executable source remain unchanged. No new SGP
+or runtime/SDK edit; historical atmosphere maintenance issues retain their original status.
 
 ## Latest reader layout
 

@@ -619,6 +619,9 @@ function validateAerialPerspectiveDistanceScale(mode, name, value) {
  *
  * 显式构造的控制器归调用方所有。应注册到 Scene 控制器宿主，并在销毁宿主前移除。默认禁用，首次启用更新之前不请求资源或修改 Scene。Scene.environmentEffects 也可能返回 Scene 所有的轻量默认实例；直接修改其属性即可，无需注册或移除。显式注册的控制器优先。
  *
+ * <p>原生环境边界：当前 WebGL 延迟渲染路径由高级环境统一提供天空、太阳、可视雾和物理受光。原生 SkyAtmosphere、SkyBox、Sun / sunBloom、Fog 可视雾、Globe.showGroundAtmosphere 和 Globe.enableLighting 的旧视觉分支不会执行；修改它们的显隐或调色参数不会恢复原生效果。设置 enabled=false 或关闭各显示项也不会回退到旧路径。绕过内部渲染门控强行启用旧路径不属于维护和验证范围。</p>
+ * <p>Fog 的瓦片裁剪与 LOD 调度、球面 Moon 与星历、scene.light 及几何阴影控制仍有各自用途。平面的 SceneGISPlanarEnvironment 仍可提供方向与光源，但其轻量天空、天空盒及天体绘制同样被跳过。</p>
+ *
  * @alias SceneGISEnvironmentEffects
  * @constructor
  *
@@ -942,7 +945,7 @@ Object.defineProperties(SceneGISEnvironmentEffects.prototype, {
     },
   },
   /**
-   * 获取或设置高级环境效果是否启用。
+   * 获取或设置高级环境效果是否启用。当前 WebGL 延迟渲染路径中，禁用不会恢复原生 Cesium 环境或平面轻量环境的视觉分支。
    *
    * @memberof SceneGISEnvironmentEffects.prototype
    * @type {boolean}

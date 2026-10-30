@@ -74,3 +74,15 @@ Shaders/SceneGIS trees even though their JS/GLSL files were correctly bundled an
 Only real files are copied; gulp.dest creates their parents. Existing resource selections,
 bytes, widget remapping and runtime URLs remain unchanged. This applies to native Cesium
 targets as well as SceneGIS and requires no post-build deletion or separate asset whitelist.
+
+## Product support notices
+
+Native source prose describes Cesium behavior, while ADR-0161 replaces specific native
+environment visuals in the SceneGIS WebGL deferred profile. The owned publisher appends
+explicit Chinese support notices by canonical symbol ID after native translation/report
+generation and before brand mapping, HTML and SDK metadata generation. Notices identify
+the affected path, retained roles, supported replacement and absence of native fallback.
+They are product annotations, not translations or deprecation of whole native types.
+Keep them in scripts/scenegis/documentation-notices.cjs; owned API constraints remain in
+source JSDoc. Preserve upstream comments, native buildDocs, source hashes and report counts.
+No runtime gate, compatibility checker, export or new SGP is introduced.

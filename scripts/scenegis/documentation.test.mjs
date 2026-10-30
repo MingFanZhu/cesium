@@ -93,6 +93,66 @@ test(`doclets contain semantic fields without AST, private entries or machine pa
   }
 });
 
+test("native environment notices document deferred gates without entering translation source", async () => {
+  const lookup = new Map(metadata.doclets.map((doclet) => [doclet.id, doclet]));
+  for (const id of [
+    "SkyAtmosphere",
+    "SkyAtmosphere#show",
+    "Scene#skyAtmosphere",
+    "SkyBox",
+    "SkyBox#show",
+    "Scene#skyBox",
+    "Sun",
+    "Sun#show",
+    "Scene#sun",
+    "Scene#sunBloom",
+    "Fog",
+    "Fog#renderable",
+    "Scene#fog",
+    "Globe",
+    "Globe#showGroundAtmosphere",
+    "Globe#enableLighting",
+  ]) {
+    const doclet = lookup.get(id);
+    assert.equal(doclet.sourceLocale, "en-US", id);
+    assert.match(doclet.description, /SceneGIS 渲染限制/, id);
+    assert.match(doclet.description, /WebGL 延迟渲染路径/, id);
+    assert.match(doclet.description, /关闭高级环境/, id);
+    assert.match(doclet.description, /不属于维护和验证范围/, id);
+    assert.match(
+      doclet.description,
+      /\{@link SceneGISEnvironmentEffects\}/,
+      id,
+    );
+    const page = await readFile(
+      path.join(root, doclet.url.split("#")[0]),
+      "utf8",
+    );
+    assert.match(page, /class="scenegis-api-note"/);
+    assert.match(page, /href="SceneGISEnvironmentEffects.html"/);
+  }
+  assert.match(lookup.get("Fog").description, /瓦片裁剪与 LOD 调度/);
+  assert.match(
+    lookup.get("Globe").description,
+    /Viewer.shadows、Scene.shadowMap/,
+  );
+  assert.match(lookup.get("Globe").description, /Moon 与星历基础设施仍保留/);
+  const source = await readFile(
+    path.join(root, "translation-source.json"),
+    "utf8",
+  );
+  assert.doesNotMatch(source, /scenegis-api-note|SceneGIS 渲染限制/);
+  for (const id of [
+    "SceneGISEnvironmentEffects",
+    "SceneGISEnvironmentEffects#enabled",
+    "SceneGISPlanarEnvironment",
+    "SceneGISPlanarSkyBox",
+  ]) {
+    assert.equal(lookup.get(id).sourceLocale, "zh-CN", id);
+    assert.match(lookup.get(id).description, /不会恢复/, id);
+  }
+});
+
 test(`every metadata page and anchor exists and the search index preserves canonical identities`, async () => {
   const pages = new Map();
   const failures = [];

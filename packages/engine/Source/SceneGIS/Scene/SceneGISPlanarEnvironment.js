@@ -413,6 +413,8 @@ function releaseAuthority(environment) {
  * 为调用方所有的单个 {@link SceneGISPlanarWorld} 控制手动或基于项目原点星历的天体方向，以及平面场景光照。显式 scene.light DirectionalLight 优先于自动光源，安装 SunLight 可恢复自动光照。自定义光源生效时，天空及高级环境仍可使用天体方向。
  * 将实例注册到 CesiumWidget 或 Viewer 控制器宿主，并在销毁 Widget 前移除。World 不拥有此实例或其稳定光源对象。
  *
+ * <p>当前 WebGL 延迟渲染路径保留本控制器的天体方向、星历与光源控制，但跳过轻量大气、skyBox、showSun 和 showMoon 的绘制及相应视觉参数。请使用 {@link SceneGISEnvironmentEffects} 配置可见天空和天体；关闭高级环境不会恢复轻量绘制。绕过内部渲染门控的旧视觉路径不属于维护和验证范围。</p>
+ *
  * @alias SceneGISPlanarEnvironment
  * @constructor
  * @implements Controller
