@@ -1,0 +1,1668 @@
+{
+  "schemaVersion": 1,
+  "locale": "zh-CN",
+  "entries": [
+    {
+      "id": "Cesium3DTile#boundingSphere",
+      "field": "description",
+      "sourceHash": "sha256:44cbc95ff23728aa872dc90eea0ab7c13e3dd5cd94efe46ffe348767c41f1c56",
+      "text": "获取由瓦片包围体推导的包围球。"
+    },
+    {
+      "id": "Cesium3DTile#children",
+      "field": "description",
+      "sourceHash": "sha256:8e2859ecdee1ac9f587a34f01001d8e9549c407ea265a3de68d85d0f8436e15f",
+      "text": "获取瓦片的子瓦片。"
+    },
+    {
+      "id": "Cesium3DTile#computedTransform",
+      "field": "description",
+      "sourceHash": "sha256:b86941bdf329ffafd2396d9eef06b32e49cb910a0218c06bd6539b7dc097d443",
+      "text": "此瓦片最终计算得到的变换。"
+    },
+    {
+      "id": "Cesium3DTile#content",
+      "field": "description",
+      "sourceHash": "sha256:ecb3ad72f0395e36c71ae89ad539b2590886454adcfd5d4d2affe8fa5d66da82",
+      "text": "瓦片的实际内容载荷，区别于 tileset JSON 文件中的内容元数据。"
+    },
+    {
+      "id": "Cesium3DTile#expireDate",
+      "field": "description",
+      "sourceHash": "sha256:af6c1b5196a322008a8ca7139ef1edc5b91105068d3382ef74689ebfbf3a3746",
+      "text": "内容过期并请求新内容的日期。"
+    },
+    {
+      "id": "Cesium3DTile#expireDuration",
+      "field": "description",
+      "sourceHash": "sha256:7ca3d4837ec49c5035e8bdd2503ca3313c93cdb4ced09a8f915d5ddfb3d6c7c9",
+      "text": "内容就绪后到过期并请求新内容的时长，单位为秒。"
+    },
+    {
+      "id": "Cesium3DTile#extras",
+      "field": "description",
+      "sourceHash": "sha256:0c7321052c66951986c1efa320490ac4b726ac6a7a9a7536b3d406a88b67110a",
+      "text": "返回 tileset JSON 中此瓦片的 <code>extras</code> 属性，包含应用专用元数据。不存在 <code>extras</code> 时返回 <code>undefined</code>。"
+    },
+    {
+      "id": "Cesium3DTile#geometricError",
+      "field": "description",
+      "sourceHash": "sha256:79492bf8dd2e08417ad9a69bb4e18a569829c70f619cea5d182ac3e1da917a4b",
+      "text": "只渲染此瓦片而不渲染其子瓦片时引入的误差，单位为米。用于计算屏幕空间误差，即以像素计的误差。"
+    },
+    {
+      "id": "Cesium3DTile#i3sNode",
+      "field": "description",
+      "sourceHash": "sha256:78bb5aac0af50aa7f84babc90ff2932b682337a411825d529cb4922db988d47f",
+      "text": "获取瓦片的 I3S 节点。"
+    },
+    {
+      "id": "Cesium3DTile#parent",
+      "field": "description",
+      "sourceHash": "sha256:a1db83ff35da56ff52b3200791c74f5f6cd9fedf6f81470c080a0b58f1679bdb",
+      "text": "此瓦片的父瓦片；若为根瓦片则为 <code>undefined</code>。\n<p>\n内容指向外部 tileset JSON 时，该外部瓦片集根瓦片的父级并非 <code>undefined</code>，而是指向引用此外部文件的瓦片，效果如同合并两个瓦片集。\n</p>"
+    },
+    {
+      "id": "Cesium3DTile#tileset",
+      "field": "description",
+      "sourceHash": "sha256:62489458808dc446d6c48ac9bc44e447a9608f3a939af9842071600d7374b206",
+      "text": "包含此瓦片的瓦片集。"
+    },
+    {
+      "id": "Cesium3DTile#transform",
+      "field": "description",
+      "sourceHash": "sha256:e541d0b0636784ca0e28fe70ede8adde81b06165ed02be3c890c1b8fa0b4393e",
+      "text": "此瓦片的局部变换。"
+    },
+    {
+      "id": "Cesium3DTileContent#batchTableByteLength",
+      "field": "description",
+      "sourceHash": "sha256:b03862a2acda1a206922e6b71806935426f8fe65a6baa3d2a0393b2768a0a830",
+      "text": "获取批次表纹理及未计入 geometryByteLength、texturesByteLength 的二进制元数据属性所用的内存。"
+    },
+    {
+      "id": "Cesium3DTileContent#featuresLength",
+      "field": "description",
+      "sourceHash": "sha256:4339e7e8fee03ccbf1ac9691808e859d350669dbe995d88b03b893abaad3fadc",
+      "text": "获取瓦片中的要素数量。"
+    },
+    {
+      "id": "Cesium3DTileContent#geometryByteLength",
+      "field": "description",
+      "sourceHash": "sha256:a97c5bf8cea5e9fd7d5ca9655b7f40e8aad266e948c44144b0f6d8c98399138a",
+      "text": "获取瓦片几何所用内存，单位为字节。"
+    },
+    {
+      "id": "Cesium3DTileContent#getFeature",
+      "field": "description",
+      "sourceHash": "sha256:ce565bed72aab360df772b89c3e8423b0c5cfa997b2a69c77f51e96cb5fc7142",
+      "text": "返回给定 <code>batchId</code> 对应的 {@link Cesium3DTileFeature} 对象，以读取和修改要素属性。\n<p>\n瓦片要素按 <code>batchId</code> 排序，此索引用于从批次表读取元数据。\n</p>"
+    },
+    {
+      "id": "Cesium3DTileContent#getFeature",
+      "field": "exceptions/0/description",
+      "sourceHash": "sha256:a3ad9e5fc4a8fc5723bb022df3a78a4aef7aad6f3987f1ffc865808c18212fc4",
+      "text": "batchId 必须在 0 到 {@link Cesium3DTileContent#featuresLength} - 1 之间。"
+    },
+    {
+      "id": "Cesium3DTileContent#getFeature",
+      "field": "params/batchId/description",
+      "sourceHash": "sha256:6919929f2f1f46bcd009855686378f0d24d0573606c95dd61479fa4ecab32d67",
+      "text": "要素的 batchId。"
+    },
+    {
+      "id": "Cesium3DTileContent#getFeature",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:2f91df432ffda5b8dab248b286987b280fe3b7ef660b5aad9a5921c53b56a16c",
+      "text": "对应的 {@link Cesium3DTileFeature} 对象。"
+    },
+    {
+      "id": "Cesium3DTileContent#hasProperty",
+      "field": "description",
+      "sourceHash": "sha256:b0a367443fa58edce2e2275477162448d1897ff24799bf29efc8542d87d035bb",
+      "text": "返回要素是否具有此属性。"
+    },
+    {
+      "id": "Cesium3DTileContent#hasProperty",
+      "field": "params/batchId/description",
+      "sourceHash": "sha256:6919929f2f1f46bcd009855686378f0d24d0573606c95dd61479fa4ecab32d67",
+      "text": "要素的 batchId。"
+    },
+    {
+      "id": "Cesium3DTileContent#hasProperty",
+      "field": "params/name/description",
+      "sourceHash": "sha256:1d563bfdab1974fb0a02ca01600b3df70346dd8d59e7280bd1db72e5105d382b",
+      "text": "区分大小写的属性名称。"
+    },
+    {
+      "id": "Cesium3DTileContent#hasProperty",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:1695880c08e74b2ae09f90c4eb7b50bf9dafdc6ec5bd07bee9695252eade22fd",
+      "text": "要素具有此属性时为 <code>true</code>，否则为 <code>false</code>。"
+    },
+    {
+      "id": "Cesium3DTileContent#innerContents",
+      "field": "description",
+      "sourceHash": "sha256:d8f25d6d552c8a8d58ca3c357e5f627aa87be7023342f9962018443204aea61d",
+      "text": "获取内部 {@link Cesium3DTileContent} 数组，适用于复合瓦片等包含其他内容的内容。内部内容还可继续嵌套，例如复合瓦片中包含另一个复合瓦片。"
+    },
+    {
+      "id": "Cesium3DTileContent#pointsLength",
+      "field": "description",
+      "sourceHash": "sha256:727a962605e0a691176872af7429ca320515f4e443c676f6bc8819bd21f835b5",
+      "text": "获取瓦片中的点数。\n<p>\n仅适用于点云内容。此值与 {@link Cesium3DTileContent#featuresLength} 不同，后者为按要素表 <code>BATCH_ID</code> 语义划分的点组数量。\n</p>"
+    },
+    {
+      "id": "Cesium3DTileContent#ready",
+      "field": "description",
+      "sourceHash": "sha256:f42221fc95bc8bb3ec477b7e07d5a3f06105d7e0e4043d24426ed52cf1c1c850",
+      "text": "瓦片内容已准备好渲染时返回 true，否则返回 false。"
+    },
+    {
+      "id": "Cesium3DTileContent#texturesByteLength",
+      "field": "description",
+      "sourceHash": "sha256:f17732120fdbbb6aebf7d052e6037af3e9ab9b95492a5972a4155133ca07cce1",
+      "text": "获取瓦片纹理所用内存，单位为字节。"
+    },
+    {
+      "id": "Cesium3DTileContent#tile",
+      "field": "description",
+      "sourceHash": "sha256:5bb7054936d3eb2f0ae13df8ec6ce1a8984d9ac6d7d7b2dc89eb594e0dea0319",
+      "text": "获取包含此内容的瓦片。"
+    },
+    {
+      "id": "Cesium3DTileContent#tileset",
+      "field": "description",
+      "sourceHash": "sha256:a654d570dd52fa7bab4390d3f9cb83a165bff915c0fec6dad47d73ef4b4f0ce2",
+      "text": "获取此瓦片所属的瓦片集。"
+    },
+    {
+      "id": "Cesium3DTileContent#trianglesLength",
+      "field": "description",
+      "sourceHash": "sha256:e2684b1274ae0d03c310c1d0d8bd324fdcc4a2cd4f91850844425a2639537876",
+      "text": "获取瓦片中的三角形数量。"
+    },
+    {
+      "id": "Cesium3DTileContent#url",
+      "field": "description",
+      "sourceHash": "sha256:4bdc065fbd65ca54b654e756eec84f224f854566232668fce4d56e93d3144e4f",
+      "text": "获取瓦片内容的 URL。"
+    },
+    {
+      "id": "Cesium3DTileContent",
+      "field": "classdesc",
+      "sourceHash": "sha256:89ce378a8d623ddb18eba3047dc7b921db5ca099e5caad12c9a567c8e235919a",
+      "text": "{@link Cesium3DTileset} 中瓦片的内容。\n<p>\n接口派生类提供对瓦片内各要素的访问，通过 {@link Cesium3DTile#content} 获取派生对象。\n</p>\n<p>\n此类型描述接口，不应直接实例化。\n</p>"
+    },
+    {
+      "id": "Cesium3DTile",
+      "field": "description",
+      "sourceHash": "sha256:656d1dc588e18d4081ffb6e3dea9da44502c8697c7ea71f1f560349b921a06d5",
+      "text": "{@link Cesium3DTileset} 中的瓦片。刚创建时尚未加载内容，之后根据视图需求按需加载。\n<p>不要直接构造，应通过 {@link Cesium3DTileset#tileVisible} 访问瓦片。\n</p>"
+    },
+    {
+      "id": "Cesium3DTile",
+      "field": "params/baseResource/description",
+      "sourceHash": "sha256:2c9f10a7432425b6a4a61d8a2d33ea19e0cc8d774411069f7c0a045add0405e5",
+      "text": "瓦片集的基础资源。"
+    },
+    {
+      "id": "Cesium3DTile",
+      "field": "params/header/description",
+      "sourceHash": "sha256:12e8fce1a0827af0526f0f25f5ccb1ce22f9f4c88fc2e3f066b6dcaa4623d010",
+      "text": "瓦片的 JSON 头。"
+    },
+    {
+      "id": "Cesium3DTile",
+      "field": "params/parent/description",
+      "sourceHash": "sha256:ff80b9272d37023b4dc9150cdaae46832713d14470de4abe4f5844a0eec5ec45",
+      "text": "新瓦片的父瓦片。"
+    },
+    {
+      "id": "Cesium3DTile",
+      "field": "params/tileset/description",
+      "sourceHash": "sha256:fe20999491d5fe33465037c10b9a68ea4739263a9f5b9d3087033cd270b02c3f",
+      "text": "瓦片集。"
+    },
+    {
+      "id": "Cesium3DTilePointFeature#anchorLineColor",
+      "field": "description",
+      "sourceHash": "sha256:3874bcc3a9d3301ccd3e936910a016efe72ba20c3516eb2979808e508ae14996",
+      "text": "获取或设置锚线颜色。\n<p>\n仅在定义 <code>heightOffset</code> 时生效。\n</p>"
+    },
+    {
+      "id": "Cesium3DTilePointFeature#anchorLineEnabled",
+      "field": "description",
+      "sourceHash": "sha256:d2040f305537a2aaf58152e233405177201f466566c77a111cac9fcb7762f7f3",
+      "text": "获取或设置是否显示锚线。\n<p>\n仅在定义 <code>heightOffset</code> 时生效。\n</p>"
+    },
+    {
+      "id": "Cesium3DTilePointFeature#backgroundColor",
+      "field": "description",
+      "sourceHash": "sha256:3f8712b2f4f3e68f7fdea4a534bbb1ecf403d62d5212072a9277191c2e424135",
+      "text": "获取或设置要素文本的背景颜色。\n<p>\n仅在定义 <code>labelText</code> 时生效。\n</p>"
+    },
+    {
+      "id": "Cesium3DTilePointFeature#backgroundEnabled",
+      "field": "description",
+      "sourceHash": "sha256:fd897f681de32c3a2a70de0aa5a23922e9294169092ec434daa333ce90e0754b",
+      "text": "获取或设置是否显示要素文本背景。\n<p>\n仅在定义 <code>labelText</code> 时生效。\n</p>"
+    },
+    {
+      "id": "Cesium3DTilePointFeature#backgroundPadding",
+      "field": "description",
+      "sourceHash": "sha256:50fd31f89904893f0d0b3fecd8f4422256eb67e5c6898762984191d2776580fa",
+      "text": "获取或设置要素文本的背景内边距。\n<p>\n仅在定义 <code>labelText</code> 时生效。\n</p>"
+    },
+    {
+      "id": "Cesium3DTilePointFeature#color",
+      "field": "description",
+      "sourceHash": "sha256:4105561ea259694c1bc4460891d7e2feea5910b95d58fa4e663d6c81f259bf3f",
+      "text": "获取或设置此要素的点颜色。\n<p>\n仅在 <code>image</code> 为 <code>undefined</code> 时生效。\n</p>"
+    },
+    {
+      "id": "Cesium3DTilePointFeature#disableDepthTestDistance",
+      "field": "description",
+      "sourceHash": "sha256:11235a0552c1f9a68e9caa9dcd138866b211602db3b1d7184c7bbfa18ece11ad",
+      "text": "获取或设置禁用深度测试的距离。"
+    },
+    {
+      "id": "Cesium3DTilePointFeature#distanceDisplayCondition",
+      "field": "description",
+      "sourceHash": "sha256:b75e1b3aedecd0edde4713a10ce26431f92b060f4d399e957cf86e4c1933fa02",
+      "text": "获取或设置此要素相对相机距离的显示条件。"
+    },
+    {
+      "id": "Cesium3DTilePointFeature#font",
+      "field": "description",
+      "sourceHash": "sha256:fdbaade1db4b3638b18c41c7286f32bdef302e7f92a8c082d78731b2cb2391cd",
+      "text": "获取或设置此要素的字体。\n<p>\n仅在定义 <code>labelText</code> 时生效。\n</p>"
+    },
+    {
+      "id": "Cesium3DTilePointFeature#getProperty",
+      "field": "description",
+      "sourceHash": "sha256:7c775d70ea3b66cba255bd2104d3d3a25bacebe3133772a84ebed5dee3e918e6",
+      "text": "返回给定名称的要素属性值副本。使用批次表层次结构时，也包含要素所属类和继承类的属性。"
+    },
+    {
+      "id": "Cesium3DTilePointFeature#getPropertyIds",
+      "field": "description",
+      "sourceHash": "sha256:91ceb191381fbb4646c05154feb611fc46e925eedbf1011e07de658d598407d0",
+      "text": "返回要素的属性 ID 数组。使用批次表层次结构时，也包含要素所属类和继承类的属性。"
+    },
+    {
+      "id": "Cesium3DTilePointFeature#getPropertyIds",
+      "field": "params/results/description",
+      "sourceHash": "sha256:0f1f582cfbcab738a0807be7a5a416b2e54e1e5f9471fa3ab4851b4b6025a9a9",
+      "text": "用于保存结果的数组。"
+    },
+    {
+      "id": "Cesium3DTilePointFeature#getPropertyIds",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:07b3bb19bf1cd34e983a9f64de3f836ad8bc8f7973e3efaf72461dc469ad2da2",
+      "text": "要素的属性 ID。"
+    },
+    {
+      "id": "Cesium3DTilePointFeature#getProperty",
+      "field": "params/name/description",
+      "sourceHash": "sha256:1d563bfdab1974fb0a02ca01600b3df70346dd8d59e7280bd1db72e5105d382b",
+      "text": "区分大小写的属性名称。"
+    },
+    {
+      "id": "Cesium3DTilePointFeature#getProperty",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:f75f480b4290acc6dc1f1a208cca56fa45ae3653fec3da384bd298dd80cdce15",
+      "text": "属性值；若要素没有此属性，则返回 <code>undefined</code>。"
+    },
+    {
+      "id": "Cesium3DTilePointFeature#hasProperty",
+      "field": "description",
+      "sourceHash": "sha256:2e1c2db0e93def31c0fa7220f1303965fbcba2ef6609c2681892b76ce9b0fa52",
+      "text": "返回要素是否包含此属性。使用批次表层次结构时，也包含要素所属类和继承类的属性。"
+    },
+    {
+      "id": "Cesium3DTilePointFeature#hasProperty",
+      "field": "params/name/description",
+      "sourceHash": "sha256:1d563bfdab1974fb0a02ca01600b3df70346dd8d59e7280bd1db72e5105d382b",
+      "text": "区分大小写的属性名称。"
+    },
+    {
+      "id": "Cesium3DTilePointFeature#hasProperty",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:cd256c2ab9781ac0aade19a4078af43fc69c89e4352aa0ddc76ce50989136ece",
+      "text": "要素是否包含此属性。"
+    },
+    {
+      "id": "Cesium3DTilePointFeature#heightOffset",
+      "field": "description",
+      "sourceHash": "sha256:01e41666b0419ae7d32be4bddfd3da45644730b0344a8dc79658f54b0ef8286e",
+      "text": "获取或设置要素高度偏移，单位为米。"
+    },
+    {
+      "id": "Cesium3DTilePointFeature#horizontalOrigin",
+      "field": "description",
+      "sourceHash": "sha256:6e5fbe6a80eebd8e0251d4eb1b81ff5eef4059d1cf67bdb4f0e32e060816c3c1",
+      "text": "获取或设置此点的水平原点，决定点位于锚点左侧、居中还是右侧。"
+    },
+    {
+      "id": "Cesium3DTilePointFeature#image",
+      "field": "description",
+      "sourceHash": "sha256:4a982fccad045faaa4a7daca6264b3be9c5bb3eaca96accbcfc466e543a74109",
+      "text": "获取或设置此要素的图像。"
+    },
+    {
+      "id": "Cesium3DTilePointFeature#labelColor",
+      "field": "description",
+      "sourceHash": "sha256:a08d00ce3a8baece1cec22b643789705037fc014bf00da7a5bb8f3d873c951f6",
+      "text": "获取或设置此要素的标注颜色。\n<p>\n定义 <code>labelText</code> 时应用于标注。\n</p>"
+    },
+    {
+      "id": "Cesium3DTilePointFeature#labelHorizontalOrigin",
+      "field": "description",
+      "sourceHash": "sha256:1b71b68da549b2eabddc2daea093ab268ee20675b40f41bbfe4b786c6ec7a2a3",
+      "text": "获取或设置此点文本的水平原点，决定文本位于锚点左侧、居中还是右侧。"
+    },
+    {
+      "id": "Cesium3DTilePointFeature#labelOutlineColor",
+      "field": "description",
+      "sourceHash": "sha256:590b7ece1e67d7c8b810539947024aaf9f3ddca0a29c8248e9862699d51ac8c7",
+      "text": "获取或设置此要素的标注轮廓颜色。\n<p>\n定义 <code>labelText</code> 时应用于标注。\n</p>"
+    },
+    {
+      "id": "Cesium3DTilePointFeature#labelOutlineWidth",
+      "field": "description",
+      "sourceHash": "sha256:f9759b5b75a60dac640603e45991276f263e8a68d264493a3245ee241f5177b1",
+      "text": "获取或设置此要素的标注轮廓宽度，单位为像素。\n<p>\n定义 <code>labelText</code> 时应用于标注。\n</p>"
+    },
+    {
+      "id": "Cesium3DTilePointFeature#labelStyle",
+      "field": "description",
+      "sourceHash": "sha256:df0ae49998ee3282cc98626cceb916b9478c13a0eacbfeb183bcb81f61e90564",
+      "text": "获取或设置此要素的填充和轮廓样式。\n<p>\n仅在定义 <code>labelText</code> 时生效。\n</p>"
+    },
+    {
+      "id": "Cesium3DTilePointFeature#labelText",
+      "field": "description",
+      "sourceHash": "sha256:8709c81cf4c2689ba9bcb53f9e84bb63d6e089eef8a4fdeb16a9d23d00a8e528",
+      "text": "获取或设置此要素的文本。"
+    },
+    {
+      "id": "Cesium3DTilePointFeature#labelVerticalOrigin",
+      "field": "description",
+      "sourceHash": "sha256:d2d0ff3fcbd879f1314b39a53ae4a502cf5bc9014a4ea09d4508ddf8564891cb",
+      "text": "获取或设置此点文本的垂直原点，决定文本位于锚点下方、居中、上方还是基线位置。"
+    },
+    {
+      "id": "Cesium3DTilePointFeature#pointOutlineColor",
+      "field": "description",
+      "sourceHash": "sha256:1d3e3de2ac95c7b505c711b22df6fb5cc8ada4aaeffaab76fd5d5840737b0a74",
+      "text": "获取或设置此要素的点轮廓颜色。\n<p>\n仅在 <code>image</code> 为 <code>undefined</code> 时生效。\n</p>"
+    },
+    {
+      "id": "Cesium3DTilePointFeature#pointOutlineWidth",
+      "field": "description",
+      "sourceHash": "sha256:7b53369fc9ed4fb372ea4440f8b431496b3996791d4d88714f95d5277151e27f",
+      "text": "获取或设置此要素的点轮廓宽度，单位为像素。\n<p>\n仅在 <code>image</code> 为 <code>undefined</code> 时生效。\n</p>"
+    },
+    {
+      "id": "Cesium3DTilePointFeature#pointSize",
+      "field": "description",
+      "sourceHash": "sha256:d64ea774c191eb42dbade2a9b04210aabd4c53e2415cc1307d9737ad9ec59d24",
+      "text": "获取或设置此要素的点尺寸。\n<p>\n仅在 <code>image</code> 为 <code>undefined</code> 时生效。\n</p>"
+    },
+    {
+      "id": "Cesium3DTilePointFeature#primitive",
+      "field": "description",
+      "sourceHash": "sha256:1825a01b93d71741115ab793c59f6da8877780641af78d10d60fa357f22bf265",
+      "text": "{@link Scene#pick} 返回的全部对象都具有 <code>primitive</code> 属性。此属性返回包含该要素的瓦片集。"
+    },
+    {
+      "id": "Cesium3DTilePointFeature#scaleByDistance",
+      "field": "description",
+      "sourceHash": "sha256:9d9ba1fb209d94d3cde4d5529baeca9592a041a146106fd852e51221d6204f75",
+      "text": "获取或设置要素在近、远距离处的缩放属性。"
+    },
+    {
+      "id": "Cesium3DTilePointFeature#setProperty",
+      "field": "description",
+      "sourceHash": "sha256:ffabcc13e8f5fc211b693c13c65412fc8747f71533e65b63aeaeb04f8be78e1a",
+      "text": "设置给定名称的要素属性值。<p>若该名称的属性不存在，则创建它。</p>"
+    },
+    {
+      "id": "Cesium3DTilePointFeature#setProperty",
+      "field": "exceptions/0/description",
+      "sourceHash": "sha256:62ad3d79724a85ade450969f2aec59b06b2b657e17f3455b211a04638f5f4436",
+      "text": "从批次表层次结构继承的属性是只读的。"
+    },
+    {
+      "id": "Cesium3DTilePointFeature#setProperty",
+      "field": "params/name/description",
+      "sourceHash": "sha256:1d563bfdab1974fb0a02ca01600b3df70346dd8d59e7280bd1db72e5105d382b",
+      "text": "区分大小写的属性名称。"
+    },
+    {
+      "id": "Cesium3DTilePointFeature#setProperty",
+      "field": "params/value/description",
+      "sourceHash": "sha256:d7c84e0f1a5a99e586972a02ef155f4eb94505f412a973fddba330e37901eecc",
+      "text": "要复制的属性值。"
+    },
+    {
+      "id": "Cesium3DTilePointFeature#show",
+      "field": "description",
+      "sourceHash": "sha256:798f9c3403a98333fde5a1d10a7f7222f374401f6865c7168842a0968ae4b097",
+      "text": "获取或设置是否显示要素。计算样式的 show 时，会为全部要素设置此属性。"
+    },
+    {
+      "id": "Cesium3DTilePointFeature#tileset",
+      "field": "description",
+      "sourceHash": "sha256:fe6c4a32c9ac1fbd7e8f057296a6230898c47a177812bf4a6adca5b8964ac6fa",
+      "text": "获取包含此要素的瓦片集。"
+    },
+    {
+      "id": "Cesium3DTilePointFeature#translucencyByDistance",
+      "field": "description",
+      "sourceHash": "sha256:48e312c73840d6a0513f54d0e2b1313a21f5b01d78f89a854b0ed3883632e427",
+      "text": "获取或设置要素在近、远距离处的半透明属性。"
+    },
+    {
+      "id": "Cesium3DTilePointFeature#verticalOrigin",
+      "field": "description",
+      "sourceHash": "sha256:a1053409739fb4d98096c7dff0cfc4b09c08b48dd6451013bdfd43f89702e327",
+      "text": "获取或设置此点的垂直原点，决定点位于锚点下方、居中还是上方。"
+    },
+    {
+      "id": "Cesium3DTilePointFeature",
+      "field": "classdesc",
+      "sourceHash": "sha256:c5e3cbe9dacc438eece409ac9fa6beda2a625be005ec73d83b3d6d91d397191a",
+      "text": "{@link Cesium3DTileset} 中的点要素。\n<p>\n可访问瓦片批次表中存储的要素属性，显示或隐藏要素，并修改点属性。\n</p>\n<p>\n对 <code>Cesium3DTilePointFeature</code> 的修改仅在瓦片内容的生命周期内有效。内容因离开视野、为可见瓦片腾出缓存等原因卸载时，可监听 {@link Cesium3DTileset#tileUnload} 保存修改，再监听 {@link Cesium3DTileset#tileVisible} 重新应用。\n</p>\n<p>\n不要直接构造，应通过 {@link Cesium3DTileContent#getFeature}，或使用 {@link Scene#pick} 和 {@link Scene#pickPosition} 拾取访问。\n</p>"
+    },
+    {
+      "id": "ConditionsExpression#conditionsExpression",
+      "field": "description",
+      "sourceHash": "sha256:b6f1038aa2ac3c1ab4ea9f3f93c6fe26419950ce51f4525638d41df1edce3559",
+      "text": "获取采用 3D Tiles 样式语言定义的条件表达式。"
+    },
+    {
+      "id": "ConditionsExpression#evaluateColor",
+      "field": "description",
+      "sourceHash": "sha256:f86b2110004ec2b091a541681b4c696c8651f2dc2c43a5c77ea181fb373530ce",
+      "text": "使用要素定义的值对颜色表达式求值。\n<p>\n对应 {@link ConditionsExpression#evaluate} 的颜色结果。条件匹配时返回 {@link Color} 对象；没有匹配条件时返回 undefined。\n</p>"
+    },
+    {
+      "id": "ConditionsExpression#evaluateColor",
+      "field": "params/feature/description",
+      "sourceHash": "sha256:b0e6bf996a4b3fa6e73b4f8273ecd7af394346a9646fd941863691e72d211d2f",
+      "text": "其属性可作为表达式变量的要素。"
+    },
+    {
+      "id": "ConditionsExpression#evaluateColor",
+      "field": "params/result/description",
+      "sourceHash": "sha256:02b70060948de9a066d3481476d30da7ebd64767c90a70bb7572d4f480a6a3c7",
+      "text": "存放结果的对象。"
+    },
+    {
+      "id": "ConditionsExpression#evaluateColor",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:318efef230a969c6ecc9f93d4f017ce48838f346a86f7af827b46fbfb9725220",
+      "text": "修改后的 result 参数；未提供时返回新建的 Color 实例。没有匹配条件时返回 undefined。"
+    },
+    {
+      "id": "ConditionsExpression#evaluate",
+      "field": "description",
+      "sourceHash": "sha256:e901f4e3b3c8d5c00e88996163fe1c6ce0491a9d03ee8c80e131a823342c779a",
+      "text": "求值表达式，可使用给定要素的属性。在 {@link https://github.com/CesiumGS/3d-tiles/tree/main/specification/Styling|3D Tiles 样式语言} 中，结果为 <code>Boolean</code>、<code>Number</code> 或 <code>String</code> 时，返回相应 JavaScript 原始类型；结果为 <code>RegExp</code> 时，返回 JavaScript <code>RegExp</code> 对象；结果为 <code>Cartesian2</code>、<code>Cartesian3</code> 或 <code>Cartesian4</code> 时，返回 {@link Cartesian2}、{@link Cartesian3} 或 {@link Cartesian4} 对象。若 <code>result</code> 为 {@link Color}，则将 {@link Cartesian4} 值转换为 {@link Color} 后返回。"
+    },
+    {
+      "id": "ConditionsExpression#evaluate",
+      "field": "params/feature/description",
+      "sourceHash": "sha256:b0e6bf996a4b3fa6e73b4f8273ecd7af394346a9646fd941863691e72d211d2f",
+      "text": "其属性可作为表达式变量的要素。"
+    },
+    {
+      "id": "ConditionsExpression#evaluate",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:d5f1c745fdf50634fc98bb0d42ede6c99b7e3947d600e170f4da3f41bcf8d910",
+      "text": "表达式求值结果。"
+    },
+    {
+      "id": "ConditionsExpression",
+      "field": "description",
+      "sourceHash": "sha256:bfc763a8d6e696b7fd106e07b2293a17638de96c985f35171d5e7c659b9e555a",
+      "text": "应用于 {@link Cesium3DTileset} 的样式表达式。\n<p>\n求值的条件表达式采用 {@link https://github.com/CesiumGS/3d-tiles/tree/main/specification/Styling|3D Tiles 样式语言} 定义。\n</p>\n<p>\n实现 {@link StyleExpression} 接口。\n</p>"
+    },
+    {
+      "id": "ConditionsExpression",
+      "field": "params/conditionsExpression/description",
+      "sourceHash": "sha256:6de75a661d4a662d5eb6d9c91b046aad02c3a83364138f038ea281d1f4f50e39",
+      "text": "采用 3D Tiles 样式语言定义的条件表达式。"
+    },
+    {
+      "id": "ConditionsExpression",
+      "field": "params/defines/description",
+      "sourceHash": "sha256:713c7f428f4e96ee75c0944b543b8e046120cf84dc1f9fa1697e585ebb77f209",
+      "text": "样式中的变量定义。"
+    },
+    {
+      "id": "createElevationBandMaterialBand",
+      "field": "properties/entries/description",
+      "sourceHash": "sha256:1ef0a340c479ba9a390991566ce34fd962e3fc22aa583b169a95080c52817ffb",
+      "text": "高度条目列表，自动按高度从低到高排序。若只有一个条目，向下延伸（原文标为 <code>extendsDownards</code>，实际参数名为 extendDownwards）与 <code>extendUpwards</code> 均为 <code>false</code> 时，两者都设为 <code>true</code>。"
+    },
+    {
+      "id": "createElevationBandMaterialBand",
+      "field": "properties/extendDownwards/description",
+      "sourceHash": "sha256:392e29c588b94a44fae00dd8254246125e50f788d45f80ae747f2cba63efa0c8",
+      "text": "为 <code>true</code> 时，色带最低高度的颜色向下无限延伸。"
+    },
+    {
+      "id": "createElevationBandMaterialBand",
+      "field": "properties/extendUpwards/description",
+      "sourceHash": "sha256:a3debdf6e724ea84f1429ce1a861783a703d94f94caf5f07fce6be12eaa8aa52",
+      "text": "为 <code>true</code> 时，色带最高高度的颜色向上无限延伸。"
+    },
+    {
+      "id": "createElevationBandMaterial",
+      "field": "description",
+      "sourceHash": "sha256:735ab26c1fc006a0f5413d5439e89263d3941c182696164b3a83cbb939d0b8a8",
+      "text": "创建 {@link Material}，组合多层颜色或渐变带，并映射到地形高度。着色器对全部高度进行二分查找，确定给定高度上下的颜色，再插值得到最终颜色。即使包含数百个条目，开销也较低。"
+    },
+    {
+      "id": "createElevationBandMaterialEntry",
+      "field": "properties/color/description",
+      "sourceHash": "sha256:30a5bf427363efcbcf5faed3be10770447d2af73c6ffe5c4141f303cab0e60c0",
+      "text": "此高度处的颜色。"
+    },
+    {
+      "id": "createElevationBandMaterialEntry",
+      "field": "properties/height/description",
+      "sourceHash": "sha256:098374175f007adcdd595cb145ab45fd2fcceb2b12ff22d33703108a5a9bdf0f",
+      "text": "高度。"
+    },
+    {
+      "id": "createElevationBandMaterial",
+      "field": "params/options.layers/description",
+      "sourceHash": "sha256:a6e0d58a53ef02ea15a3c7de4e5c230e9de4ba7866f41feabf899fb3f4ddd05c",
+      "text": "按优先级从低到高排列的色带列表。"
+    },
+    {
+      "id": "createElevationBandMaterial",
+      "field": "params/options.scene/description",
+      "sourceHash": "sha256:eb7ead2148fe26c324a363d08450fc008bf346070aa33894f1def19bb86fbe9b",
+      "text": "进行可视化的场景。"
+    },
+    {
+      "id": "createElevationBandMaterial",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:6871204116c3b05c623c8b6d9eee0abeff1589ffec3118b0d64743fc75fb537a",
+      "text": "新建的 {@link Material} 实例。"
+    },
+    {
+      "id": "createTangentSpaceDebugPrimitive",
+      "field": "description",
+      "sourceHash": "sha256:db9aaa12ddc38dde38dc77279ca5c83ddc5fb4e1b9e135f87df8bf5c2de791f8",
+      "text": "创建 {@link Primitive}，可视化常用顶点向量属性：<code>normal</code>、<code>tangent</code> 和 <code>bitangent</code>。法线为红色，切线为绿色，副切线为蓝色；不存在的属性不绘制。"
+    },
+    {
+      "id": "createTangentSpaceDebugPrimitive",
+      "field": "params/options.geometry/description",
+      "sourceHash": "sha256:c0b1863c5aed38f86cced875ef8f09d0e6ceb3b3d937083896c20cb745e38238",
+      "text": "包含该属性的 <code>Geometry</code> 实例。"
+    },
+    {
+      "id": "createTangentSpaceDebugPrimitive",
+      "field": "params/options.length/description",
+      "sourceHash": "sha256:7eabb54926ee62e8880dd3e5a0f4cab85aae556e4bf1b07f483abff06ccbc95a",
+      "text": "每条线段的长度，单位为米。可使用负值，使向量指向相反方向。"
+    },
+    {
+      "id": "createTangentSpaceDebugPrimitive",
+      "field": "params/options.modelMatrix/description",
+      "sourceHash": "sha256:af750835b9c8c352dd78657e027bf8b9f56d6d93e0793b9bbe61c674a36f92ec",
+      "text": "将几何体从模型坐标变换到世界坐标的模型矩阵。"
+    },
+    {
+      "id": "createTangentSpaceDebugPrimitive",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:67c7c84fc3bd4f3a4e24b7871385bf46d208ade2976f24c643cd10ecb18f4fb8",
+      "text": "包含向量几何的新 <code>Primitive</code> 实例。"
+    },
+    {
+      "id": "Credit.clone",
+      "field": "description",
+      "sourceHash": "sha256:31f974af826a1e59c088f1660611e344444c6eccda3eba2d836cd42325d03213",
+      "text": "复制 Credit 实例。"
+    },
+    {
+      "id": "Credit.clone",
+      "field": "params/credit/description",
+      "sourceHash": "sha256:186706b76cf57fd836b9f47f600c4689157201c54b8bb55f2d0c8a5aa5e6b740",
+      "text": "要复制的 Credit。"
+    },
+    {
+      "id": "Credit.clone",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:03261cdc34feb605be61b66b282638b27df9dc27abaacdbd06dfcbc7e274a20a",
+      "text": "给定 Credit 的新副本；输入为 undefined 时返回 undefined。"
+    },
+    {
+      "id": "Credit.equals",
+      "field": "description",
+      "sourceHash": "sha256:973734b75300f90c0c53876300d327dc112cae35a5ec47ade79750058d2ca0bb",
+      "text": "两项署名相等时返回 true。"
+    },
+    {
+      "id": "Credit.equals",
+      "field": "params/left/description",
+      "sourceHash": "sha256:0b212f4e16d0c909d95667d7ae7a374012ded7e5cb7228481558a4fb3256f409",
+      "text": "第一项署名。"
+    },
+    {
+      "id": "Credit.equals",
+      "field": "params/right/description",
+      "sourceHash": "sha256:c0c8b653721123660c315645caca17c372e25904847197ed993559c75ebafef2",
+      "text": "第二项署名。"
+    },
+    {
+      "id": "Credit#element",
+      "field": "description",
+      "sourceHash": "sha256:b8b74cf14c09a5a168784c4003e7de2eac4c489a02b2f283e09823b30e0a7a1e",
+      "text": "获取署名元素。"
+    },
+    {
+      "id": "Credit#equals",
+      "field": "description",
+      "sourceHash": "sha256:973734b75300f90c0c53876300d327dc112cae35a5ec47ade79750058d2ca0bb",
+      "text": "两项署名相等时返回 true。"
+    },
+    {
+      "id": "Credit#equals",
+      "field": "params/credit/description",
+      "sourceHash": "sha256:46d388f3f83d2c9f3219b6cb1a0158a59ce0b0024dbe482094c50922ef8583fc",
+      "text": "用于比较的署名。"
+    },
+    {
+      "id": "Credit#html",
+      "field": "description",
+      "sourceHash": "sha256:6ced0853db22c02753f66f7a2068cad9a9d49c5563e25536a51f634c51cb6318",
+      "text": "署名内容。"
+    },
+    {
+      "id": "Credit#showOnScreen",
+      "field": "description",
+      "sourceHash": "sha256:863e31c13becdd7cf739b4e705e1662d0d6f12d8d237d1e63de7a22ee3e3d90b",
+      "text": "署名应直接显示在屏幕上，还是显示在灯箱面板中。"
+    },
+    {
+      "id": "Credit",
+      "field": "classdesc",
+      "sourceHash": "sha256:ee97b6fac4f6799cb25b0f819bd98f536d9d834a3f4ec51f5cfdf678334a671a",
+      "text": "包含如何在屏幕上显示内容署名或来源信息的数据。"
+    },
+    {
+      "id": "CreditDisplay.cesiumCredit",
+      "field": "description",
+      "sourceHash": "sha256:08010ee079221bf5b0c7bb60c8d4e7c245e6cfcfeaca4aad8e7480824f43e164",
+      "text": "获取或设置 Cesium 标志署名。"
+    },
+    {
+      "id": "CreditDisplay#addCreditToNextFrame",
+      "field": "description",
+      "sourceHash": "sha256:1c65cc13e13365215a10176ca55fdf31edfbf505169e90bb0b100f0c477d4b31",
+      "text": "添加显示至下一帧的 {@link Credit}，可位于屏幕或灯箱面板中，主要供内部使用。需要持续显示时，使用 {@link CreditDisplay.addStaticCredit}。"
+    },
+    {
+      "id": "CreditDisplay#addCreditToNextFrame",
+      "field": "params/credit/description",
+      "sourceHash": "sha256:b2db64a0b744c11bd3e9befe9feb7c7fd39e722b215323ca0dd84d1b6e5bb791",
+      "text": "下一帧显示的署名。"
+    },
+    {
+      "id": "CreditDisplay#addStaticCredit",
+      "field": "description",
+      "sourceHash": "sha256:51e140ed1bc555624977f4cc2111e038248f4d5dda0b0d14c173b6c9488c32c4",
+      "text": "添加持续显示在屏幕或灯箱面板中的 {@link Credit}，直到调用 {@link CreditDisplay.removeStaticCredit} 移除。"
+    },
+    {
+      "id": "CreditDisplay#addStaticCredit",
+      "field": "params/credit/description",
+      "sourceHash": "sha256:deb6321e8849cf567a56abae5126b1759526475ca7dcd45ef81e22e704f861c8",
+      "text": "要添加的署名。"
+    },
+    {
+      "id": "CreditDisplay#beginFrame",
+      "field": "description",
+      "sourceHash": "sha256:24ca649e2a33f67b99085d1ecc90e8d4c5eadfed653fddd3b8f0b6f5bb3810f0",
+      "text": "将署名显示重置到帧开始状态，清空当前署名。"
+    },
+    {
+      "id": "CreditDisplay#container",
+      "field": "description",
+      "sourceHash": "sha256:a59aee264e98dd5da949211e01ac9fbb17c836f5e1b7896028b16b462d5b65b7",
+      "text": "显示署名的 HTML 元素。"
+    },
+    {
+      "id": "CreditDisplay#destroy",
+      "field": "description",
+      "sourceHash": "sha256:71acdf7062a9a2c836a68a1948fac22084278c68dec28ec3361375a96a9a9e04",
+      "text": "销毁此对象持有的资源。显式销毁可确定地释放资源，而不依赖垃圾回收器回收此对象。\n<br /><br />\n对象销毁后不应再使用；调用除 <code>isDestroyed</code> 以外的任何函数都会抛出 {@link DeveloperError}。因此，应像示例中那样将返回值（<code>undefined</code>）赋给该对象变量。"
+    },
+    {
+      "id": "CreditDisplay#endFrame",
+      "field": "description",
+      "sourceHash": "sha256:c9dcd2efe196fea13dbfda70558af3e1af5b2fc0b9305c3542c7075ca12ec82b",
+      "text": "将署名显示设置到帧结束状态，在容器中显示本帧收集的署名。"
+    },
+    {
+      "id": "CreditDisplay#isDestroyed",
+      "field": "description",
+      "sourceHash": "sha256:769e26cade086a4fa0ffdae616334374fb59170b915b7812cefed2ae12f9b59d",
+      "text": "此对象已销毁时返回 true，否则返回 false。\n<br /><br />"
+    },
+    {
+      "id": "CreditDisplay#removeStaticCredit",
+      "field": "description",
+      "sourceHash": "sha256:4c4a1e3c45a8e78ea3ab34d8d5413cb871fcb5a43b9da8db5aa8984caa793dfc",
+      "text": "移除屏幕或灯箱面板中显示的静态署名。"
+    },
+    {
+      "id": "CreditDisplay#removeStaticCredit",
+      "field": "params/credit/description",
+      "sourceHash": "sha256:97eb048395fc79d39726a8de813bb7584ed2b745d6bbc83a73c9156acb0264f4",
+      "text": "要移除的署名。"
+    },
+    {
+      "id": "CreditDisplay#update",
+      "field": "description",
+      "sourceHash": "sha256:00035740aabd92880371e4c5941297423e5912960723620963b35ef68eee373c",
+      "text": "渲染新帧前更新署名显示。"
+    },
+    {
+      "id": "CreditDisplay",
+      "field": "description",
+      "sourceHash": "sha256:d95adb4806b72ef51220286648849f6b18abfdec935750e36e21fbe6599b0b0f",
+      "text": "负责在屏幕上显示署名信息。"
+    },
+    {
+      "id": "CreditDisplay",
+      "field": "params/container/description",
+      "sourceHash": "sha256:2866c6a598af6a2ff2ec40602ebb19ba2815e2d4f28af62e4d86bb669f30c3be",
+      "text": "显示署名的 HTML 元素。"
+    },
+    {
+      "id": "CreditDisplay",
+      "field": "params/delimiter/description",
+      "sourceHash": "sha256:2d594e176e6b2f8c1ca8629c04284851ab9562903863974d57773ca3fa1299e5",
+      "text": "分隔文本署名的字符串。"
+    },
+    {
+      "id": "CreditDisplay",
+      "field": "params/viewport/description",
+      "sourceHash": "sha256:f359dae0a9707e02d1076f3de48cb7617495466108ecca58a87ec9ec4ae6ade4",
+      "text": "容纳署名弹出面板的 HTML 元素。"
+    },
+    {
+      "id": "Credit",
+      "field": "exceptions/0/description",
+      "sourceHash": "sha256:8eaef8436b845c2b60b5613f343195bfc4f1fbfb0d5dcecc8e5868da1e992460",
+      "text": "必须提供 html。"
+    },
+    {
+      "id": "Credit",
+      "field": "params/html/description",
+      "sourceHash": "sha256:69f506a3a86a3dd3614261826fada63640e94ca1b00a4d6bee7b273193644f44",
+      "text": "表示 HTML 代码片段的字符串。"
+    },
+    {
+      "id": "Credit",
+      "field": "params/showOnScreen/description",
+      "sourceHash": "sha256:f9c72d157c388cfd861532ab7a88adcaa047f359fe3a1ff472ef33c4aba313ad",
+      "text": "为 true 时，在主署名容器中显示；否则显示在弹出面板中。全部署名均以 `inline` 方式显示；包含图像时，建议调整其尺寸以匹配文本，或通过 CSS `vertical-align` 对齐。"
+    },
+    {
+      "id": "DebugCameraPrimitive#destroy",
+      "field": "description",
+      "sourceHash": "sha256:754b790bbc590a83b107df65f4ba03313464d9514314d03e7fb307567d712e2b",
+      "text": "销毁此对象持有的 WebGL 资源。显式销毁可确定地释放 WebGL 资源，而不依赖垃圾回收器回收此对象。<p>对象销毁后不应再使用；调用除 <code>isDestroyed</code> 以外的任何函数都会抛出 {@link DeveloperError}。因此，应像示例中那样将返回值（<code>undefined</code>）赋给该对象变量。</p>"
+    },
+    {
+      "id": "DebugCameraPrimitive#id",
+      "field": "description",
+      "sourceHash": "sha256:f60add638fa55a5a6657aaa10420ef52b70ff66fb4911f854c4230bf6233da94",
+      "text": "拾取此图元时返回的用户自定义值。"
+    },
+    {
+      "id": "DebugCameraPrimitive#isDestroyed",
+      "field": "description",
+      "sourceHash": "sha256:8e0063c3cea634f0d58d690ac4d7a4fb34a488a5a13452889ede3a1d69c680e1",
+      "text": "若此对象已销毁，返回 true；否则返回 false。<p>对象销毁后不应再使用；调用除 <code>isDestroyed</code> 以外的任何函数都会抛出 {@link DeveloperError}。</p>"
+    },
+    {
+      "id": "DebugCameraPrimitive#show",
+      "field": "description",
+      "sourceHash": "sha256:b83bd9ba98171d041c1a967a7f3df81b98fed4b822e9f456856716a2cba0bf6b",
+      "text": "决定是否显示此图元。"
+    },
+    {
+      "id": "DebugCameraPrimitive",
+      "field": "description",
+      "sourceHash": "sha256:8de9a5b54c909451df4721d754277cf2360de035dd1ce6f76444c25ea95880e1",
+      "text": "绘制相机视锥轮廓。"
+    },
+    {
+      "id": "DebugCameraPrimitive",
+      "field": "params/options.camera/description",
+      "sourceHash": "sha256:6f407138d8bfb5bf03b13ca3fa438de96cf0b8cbc91adc0080680ccf1e6cc900",
+      "text": "要显示视锥的相机。"
+    },
+    {
+      "id": "DebugCameraPrimitive",
+      "field": "params/options.color/description",
+      "sourceHash": "sha256:3cc7ea6611a23316b2603f3b88e36eb799b46850aaba12d9d42eea4cedd18f26",
+      "text": "调试轮廓颜色。"
+    },
+    {
+      "id": "DebugCameraPrimitive",
+      "field": "params/options.frustumSplits/description",
+      "sourceHash": "sha256:5a2da4a37bd62ac5ebe5f4480a72904f7f3811f8842f08f34de01eec7316ef30",
+      "text": "相机各视锥近、远平面的距离，覆盖相机原有视锥的 near 和 far 值。"
+    },
+    {
+      "id": "DebugCameraPrimitive",
+      "field": "params/options.id/description",
+      "sourceHash": "sha256:3dfd352f278881808e53bf01c055388b52a8ab8f75915af91f8b6a196560fc84",
+      "text": "通过 {@link Scene#pick} 拾取此实例时返回的用户自定义对象。"
+    },
+    {
+      "id": "DebugCameraPrimitive",
+      "field": "params/options.show/description",
+      "sourceHash": "sha256:b83bd9ba98171d041c1a967a7f3df81b98fed4b822e9f456856716a2cba0bf6b",
+      "text": "决定是否显示此图元。"
+    },
+    {
+      "id": "DebugCameraPrimitive",
+      "field": "params/options.updateOnChange/description",
+      "sourceHash": "sha256:ccf8b7e6072ae14f0e9936e678ef899023a23391a39dfe1202a02fe6de5bdaee",
+      "text": "底层相机变化时是否更新图元。"
+    },
+    {
+      "id": "DebugModelMatrixPrimitive#destroy",
+      "field": "description",
+      "sourceHash": "sha256:754b790bbc590a83b107df65f4ba03313464d9514314d03e7fb307567d712e2b",
+      "text": "销毁此对象持有的 WebGL 资源。显式销毁可确定地释放 WebGL 资源，而不依赖垃圾回收器回收此对象。<p>对象销毁后不应再使用；调用除 <code>isDestroyed</code> 以外的任何函数都会抛出 {@link DeveloperError}。因此，应像示例中那样将返回值（<code>undefined</code>）赋给该对象变量。</p>"
+    },
+    {
+      "id": "DebugModelMatrixPrimitive#id",
+      "field": "description",
+      "sourceHash": "sha256:f60add638fa55a5a6657aaa10420ef52b70ff66fb4911f854c4230bf6233da94",
+      "text": "拾取此图元时返回的用户自定义值。"
+    },
+    {
+      "id": "DebugModelMatrixPrimitive#isDestroyed",
+      "field": "description",
+      "sourceHash": "sha256:8e0063c3cea634f0d58d690ac4d7a4fb34a488a5a13452889ede3a1d69c680e1",
+      "text": "若此对象已销毁，返回 true；否则返回 false。<p>对象销毁后不应再使用；调用除 <code>isDestroyed</code> 以外的任何函数都会抛出 {@link DeveloperError}。</p>"
+    },
+    {
+      "id": "DebugModelMatrixPrimitive#length",
+      "field": "description",
+      "sourceHash": "sha256:5124b3e1809ef10d2c8baacf93063fedeb4a60c17d19bc8176bb6c67738cea34",
+      "text": "坐标轴长度，单位为米。"
+    },
+    {
+      "id": "DebugModelMatrixPrimitive#modelMatrix",
+      "field": "description",
+      "sourceHash": "sha256:47f1902011478e93e6ee2e7df6b1dc903a223a5ee2fd40797a7fbc4367c956d5",
+      "text": "定义待显示参考坐标系（原点和各轴）的 4×4 矩阵。"
+    },
+    {
+      "id": "DebugModelMatrixPrimitive#show",
+      "field": "description",
+      "sourceHash": "sha256:b83bd9ba98171d041c1a967a7f3df81b98fed4b822e9f456856716a2cba0bf6b",
+      "text": "决定是否显示此图元。"
+    },
+    {
+      "id": "DebugModelMatrixPrimitive#width",
+      "field": "description",
+      "sourceHash": "sha256:dc98535bceb5a65265fb13fd2a775279c59d58dcd5e5f73b50787e1258ed7868",
+      "text": "坐标轴宽度，单位为像素。"
+    },
+    {
+      "id": "DebugModelMatrixPrimitive",
+      "field": "description",
+      "sourceHash": "sha256:be913b4f12cc68b9f2ed441b0841228c6a52b0d8613961fb05afbf10605194f2",
+      "text": "绘制由矩阵定义、可变换到世界坐标的参考坐标系轴。地球场景中世界坐标通常为 WGS84，例如图元的 <code>modelMatrix</code>。\n<p>\nX 轴为红色，Y 轴为绿色，Z 轴为蓝色。\n</p>\n<p>\n仅供调试，未针对生产使用优化。\n</p>"
+    },
+    {
+      "id": "DebugModelMatrixPrimitive",
+      "field": "params/options.id/description",
+      "sourceHash": "sha256:e8fa6cf5fa4dcb412ebcdeaad36ea2402cf6d13871b9cf5e62da9dde4fd58466",
+      "text": "通过 {@link Scene#pick} 拾取此实例时返回的用户自定义对象。"
+    },
+    {
+      "id": "DebugModelMatrixPrimitive",
+      "field": "params/options.length/description",
+      "sourceHash": "sha256:5124b3e1809ef10d2c8baacf93063fedeb4a60c17d19bc8176bb6c67738cea34",
+      "text": "坐标轴长度，单位为米。"
+    },
+    {
+      "id": "DebugModelMatrixPrimitive",
+      "field": "params/options.modelMatrix/description",
+      "sourceHash": "sha256:47f1902011478e93e6ee2e7df6b1dc903a223a5ee2fd40797a7fbc4367c956d5",
+      "text": "定义待显示参考坐标系（原点和各轴）的 4×4 矩阵。"
+    },
+    {
+      "id": "DebugModelMatrixPrimitive",
+      "field": "params/options.show/description",
+      "sourceHash": "sha256:b83bd9ba98171d041c1a967a7f3df81b98fed4b822e9f456856716a2cba0bf6b",
+      "text": "决定是否显示此图元。"
+    },
+    {
+      "id": "DebugModelMatrixPrimitive",
+      "field": "params/options.width/description",
+      "sourceHash": "sha256:dc98535bceb5a65265fb13fd2a775279c59d58dcd5e5f73b50787e1258ed7868",
+      "text": "坐标轴宽度，单位为像素。"
+    },
+    {
+      "id": "EdgeDisplayMode.EDGES_ONLY",
+      "field": "description",
+      "sourceHash": "sha256:b18a4d0acb48f3be10b6621f16e2c58eca0385c0bc931ae55946f3f2cbabe0f5",
+      "text": "仅渲染边。对包含边可见性数据的图元隐藏表面几何，近似 CAD 线框效果；不含该扩展的图元不受影响。"
+    },
+    {
+      "id": "EdgeDisplayMode.SURFACES_AND_EDGES",
+      "field": "description",
+      "sourceHash": "sha256:bbe1956b341eb67a9bef43fe2dde61c47bdf3b5cc9d04e3542c89ffa7d44e4c3",
+      "text": "同时渲染表面和边，将 {@link https://github.com/KhronosGroup/glTF/pull/2479|EXT_mesh_primitive_edge_visibility} 扩展中的边叠加在表面几何上。"
+    },
+    {
+      "id": "EdgeDisplayMode.SURFACES_ONLY",
+      "field": "description",
+      "sourceHash": "sha256:639ad561342af67686411ac272b485a6c2d6b8da57f35408330d11e972e08b6c",
+      "text": "仅渲染表面，隐藏 {@link https://github.com/KhronosGroup/glTF/pull/2479|EXT_mesh_primitive_edge_visibility} 扩展中的边。"
+    },
+    {
+      "id": "EdgeDisplayMode",
+      "field": "description",
+      "sourceHash": "sha256:248e01c29f41ab1766b3f8995b926422805f27926b31be7266bd41720e3895fd",
+      "text": "定义 {@link https://github.com/KhronosGroup/glTF/pull/2479|EXT_mesh_primitive_edge_visibility} glTF 扩展提供的边与表面几何的相对渲染方式。\n<p>\n不含此扩展的图元不受影响，始终正常渲染。\n</p>"
+    },
+    {
+      "id": "EdgeDisplayMode",
+      "field": "experimental/0",
+      "sourceHash": "sha256:460e31793a0efaefeb54f7cc7c444baaa9285a7f864a724e6670fa3b1fe7bd5e",
+      "text": "此功能使用尚未定稿的 glTF 规范内容，可能不遵循 Cesium 标准弃用政策而发生变化。"
+    },
+    {
+      "id": "EdgeDisplayMode",
+      "field": "properties/EDGES_ONLY/description",
+      "sourceHash": "sha256:b18a4d0acb48f3be10b6621f16e2c58eca0385c0bc931ae55946f3f2cbabe0f5",
+      "text": "仅渲染边。对包含边可见性数据的图元隐藏表面几何，近似 CAD 线框效果；不含该扩展的图元不受影响。"
+    },
+    {
+      "id": "EdgeDisplayMode",
+      "field": "properties/SURFACES_AND_EDGES/description",
+      "sourceHash": "sha256:bbe1956b341eb67a9bef43fe2dde61c47bdf3b5cc9d04e3542c89ffa7d44e4c3",
+      "text": "同时渲染表面和边，将 {@link https://github.com/KhronosGroup/glTF/pull/2479|EXT_mesh_primitive_edge_visibility} 扩展中的边叠加在表面几何上。"
+    },
+    {
+      "id": "EdgeDisplayMode",
+      "field": "properties/SURFACES_ONLY/description",
+      "sourceHash": "sha256:639ad561342af67686411ac272b485a6c2d6b8da57f35408330d11e972e08b6c",
+      "text": "仅渲染表面，隐藏 {@link https://github.com/KhronosGroup/glTF/pull/2479|EXT_mesh_primitive_edge_visibility} 扩展中的边。"
+    },
+    {
+      "id": "Expression#evaluateColor",
+      "field": "description",
+      "sourceHash": "sha256:02423349c803017e1b05f0bcdcef96fd773da49df6fb1c20d1623758ddd6bb3b",
+      "text": "对颜色表达式求值，可使用给定要素的属性。\n<p>\n等价于 {@link Expression#evaluate}，但始终返回 {@link Color} 对象。\n</p>"
+    },
+    {
+      "id": "Expression#evaluateColor",
+      "field": "params/feature/description",
+      "sourceHash": "sha256:b0e6bf996a4b3fa6e73b4f8273ecd7af394346a9646fd941863691e72d211d2f",
+      "text": "其属性可作为表达式变量的要素。"
+    },
+    {
+      "id": "Expression#evaluateColor",
+      "field": "params/result/description",
+      "sourceHash": "sha256:02b70060948de9a066d3481476d30da7ebd64767c90a70bb7572d4f480a6a3c7",
+      "text": "存放结果的对象。"
+    },
+    {
+      "id": "Expression#evaluateColor",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:318efef230a969c6ecc9f93d4f017ce48838f346a86f7af827b46fbfb9725220",
+      "text": "修改后的 result 参数；未提供时返回新建的 Color 实例。"
+    },
+    {
+      "id": "Expression#evaluate",
+      "field": "description",
+      "sourceHash": "sha256:e901f4e3b3c8d5c00e88996163fe1c6ce0491a9d03ee8c80e131a823342c779a",
+      "text": "求值表达式，可使用给定要素的属性。在 {@link https://github.com/CesiumGS/3d-tiles/tree/main/specification/Styling|3D Tiles 样式语言} 中，结果为 <code>Boolean</code>、<code>Number</code> 或 <code>String</code> 时，返回相应 JavaScript 原始类型；结果为 <code>RegExp</code> 时，返回 JavaScript <code>RegExp</code> 对象；结果为 <code>Cartesian2</code>、<code>Cartesian3</code> 或 <code>Cartesian4</code> 时，返回 {@link Cartesian2}、{@link Cartesian3} 或 {@link Cartesian4} 对象。若 <code>result</code> 为 {@link Color}，则将 {@link Cartesian4} 值转换为 {@link Color} 后返回。"
+    },
+    {
+      "id": "Expression#evaluate",
+      "field": "params/feature/description",
+      "sourceHash": "sha256:b0e6bf996a4b3fa6e73b4f8273ecd7af394346a9646fd941863691e72d211d2f",
+      "text": "其属性可作为表达式变量的要素。"
+    },
+    {
+      "id": "Expression#evaluate",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:d5f1c745fdf50634fc98bb0d42ede6c99b7e3947d600e170f4da3f41bcf8d910",
+      "text": "表达式求值结果。"
+    },
+    {
+      "id": "Expression#expression",
+      "field": "description",
+      "sourceHash": "sha256:e57e37b02d0452c89e5b86c8c5bb8b9d71334256a3bcccf090c7a20ff05ae4d2",
+      "text": "获取采用 3D Tiles 样式语言定义的表达式。"
+    },
+    {
+      "id": "Expression",
+      "field": "description",
+      "sourceHash": "sha256:b586cacc7bd129caab719d55d87c7a1bb222a607fba457dbf9d341ab34eca196",
+      "text": "应用于 {@link Cesium3DTileset} 的样式表达式。\n<p>\n求值的表达式采用 {@link https://github.com/CesiumGS/3d-tiles/tree/main/specification/Styling|3D Tiles 样式语言} 定义。\n</p>\n<p>\n实现 {@link StyleExpression} 接口。\n</p>"
+    },
+    {
+      "id": "Expression",
+      "field": "params/defines/description",
+      "sourceHash": "sha256:713c7f428f4e96ee75c0944b543b8e046120cf84dc1f9fa1697e585ebb77f209",
+      "text": "样式中的变量定义。"
+    },
+    {
+      "id": "Expression",
+      "field": "params/expression/description",
+      "sourceHash": "sha256:ca2d67ecb7c811f53127ec55433ba51ed17fa55656a650ea7f07afdcfc300fcb",
+      "text": "采用 3D Tiles 样式语言定义的表达式。"
+    },
+    {
+      "id": "GaussianSplat3DTileContent.tilesetRequiresGaussianSplattingExt",
+      "field": "description",
+      "sourceHash": "sha256:427a4a8e8d207e875cfd3b966ba37df378264f641e19c18f50eeedb9ed88fb72",
+      "text": "检查给定瓦片集是否包含所需高斯泼溅扩展。"
+    },
+    {
+      "id": "GaussianSplat3DTileContent.tilesetRequiresGaussianSplattingExt",
+      "field": "params/tileset/description",
+      "sourceHash": "sha256:90603abe52b31683d9c6afa957e107759202dcbb64d1b3a8bdec8b85f76ca775",
+      "text": "要检查扩展的瓦片集。"
+    },
+    {
+      "id": "GaussianSplat3DTileContent.tilesetRequiresGaussianSplattingExt",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:d1415b4fec0864817dc960f080475c91e68a203cc7a9f090bad10044e17c5e2b",
+      "text": "瓦片集包含所需扩展时返回 <code>true</code>。"
+    },
+    {
+      "id": "GaussianSplat3DTileContent#batchTableByteLength",
+      "field": "description",
+      "sourceHash": "sha256:cd3615cdcd07163adca85648e1b988e467bfa1d8a3e784d2bdfad2c3f974fe5b",
+      "text": "获取批次表纹理及未计入 geometryByteLength、texturesByteLength 的二进制元数据属性所用的内存。\n<p>"
+    },
+    {
+      "id": "GaussianSplat3DTileContent#featuresLength",
+      "field": "description",
+      "sourceHash": "sha256:1adad9b5ef4f425a09a95497ae262b948c0f9b1f2fd67997233fbb317a6475ba",
+      "text": "获取瓦片中的要素数量，当前始终为零。"
+    },
+    {
+      "id": "GaussianSplat3DTileContent#geometryByteLength",
+      "field": "description",
+      "sourceHash": "sha256:7c3f9304762e87118a05c62a8ee44bfc4ca56b88bac63f82eeb7233b51f592e7",
+      "text": "此内容几何属性所用的字节数。\n<p>"
+    },
+    {
+      "id": "GaussianSplat3DTileContent#getFeature",
+      "field": "description",
+      "sourceHash": "sha256:ce565bed72aab360df772b89c3e8423b0c5cfa997b2a69c77f51e96cb5fc7142",
+      "text": "返回给定 <code>batchId</code> 对应的 {@link Cesium3DTileFeature} 对象，以读取和修改要素属性。\n<p>\n瓦片要素按 <code>batchId</code> 排序，此索引用于从批次表读取元数据。\n</p>"
+    },
+    {
+      "id": "GaussianSplat3DTileContent#getFeature",
+      "field": "exceptions/0/description",
+      "sourceHash": "sha256:a3ad9e5fc4a8fc5723bb022df3a78a4aef7aad6f3987f1ffc865808c18212fc4",
+      "text": "batchId 必须在 0 到 {@link Cesium3DTileContent#featuresLength} - 1 之间。"
+    },
+    {
+      "id": "GaussianSplat3DTileContent#getFeature",
+      "field": "params/batchId/description",
+      "sourceHash": "sha256:6919929f2f1f46bcd009855686378f0d24d0573606c95dd61479fa4ecab32d67",
+      "text": "要素的 batchId。"
+    },
+    {
+      "id": "GaussianSplat3DTileContent#getFeature",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:2f91df432ffda5b8dab248b286987b280fe3b7ef660b5aad9a5921c53b56a16c",
+      "text": "对应的 {@link Cesium3DTileFeature} 对象。"
+    },
+    {
+      "id": "GaussianSplat3DTileContent#hasProperty",
+      "field": "description",
+      "sourceHash": "sha256:b0a367443fa58edce2e2275477162448d1897ff24799bf29efc8542d87d035bb",
+      "text": "返回要素是否具有此属性。"
+    },
+    {
+      "id": "GaussianSplat3DTileContent#hasProperty",
+      "field": "params/batchId/description",
+      "sourceHash": "sha256:6919929f2f1f46bcd009855686378f0d24d0573606c95dd61479fa4ecab32d67",
+      "text": "要素的 batchId。"
+    },
+    {
+      "id": "GaussianSplat3DTileContent#hasProperty",
+      "field": "params/name/description",
+      "sourceHash": "sha256:1d563bfdab1974fb0a02ca01600b3df70346dd8d59e7280bd1db72e5105d382b",
+      "text": "区分大小写的属性名称。"
+    },
+    {
+      "id": "GaussianSplat3DTileContent#hasProperty",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:1695880c08e74b2ae09f90c4eb7b50bf9dafdc6ec5bd07bee9695252eade22fd",
+      "text": "要素具有此属性时为 <code>true</code>，否则为 <code>false</code>。"
+    },
+    {
+      "id": "GaussianSplat3DTileContent#innerContents",
+      "field": "description",
+      "sourceHash": "sha256:d8f25d6d552c8a8d58ca3c357e5f627aa87be7023342f9962018443204aea61d",
+      "text": "获取内部 {@link Cesium3DTileContent} 数组，适用于复合瓦片等包含其他内容的内容。内部内容还可继续嵌套，例如复合瓦片中包含另一个复合瓦片。"
+    },
+    {
+      "id": "GaussianSplat3DTileContent#pointsLength",
+      "field": "description",
+      "sourceHash": "sha256:d5bf8991850f8f1d0a8b9e5b96e87090f7e65a070c25dbe5c67a010d78951d1e",
+      "text": "等于瓦片中的高斯泼溅数量。每个泼溅由中心点和一组属性表示，因此可视为瓦片点数。"
+    },
+    {
+      "id": "GaussianSplat3DTileContent#ready",
+      "field": "description",
+      "sourceHash": "sha256:f42221fc95bc8bb3ec477b7e07d5a3f06105d7e0e4043d24426ed52cf1c1c850",
+      "text": "瓦片内容已准备好渲染时返回 true，否则返回 false。"
+    },
+    {
+      "id": "GaussianSplat3DTileContent#texturesByteLength",
+      "field": "description",
+      "sourceHash": "sha256:7ee7a20ba8370c26f916d8316854cf594fadf4679c53111b78f9bcb37678d03e",
+      "text": "此内容纹理所用的字节数。\n<p>"
+    },
+    {
+      "id": "GaussianSplat3DTileContent#tile",
+      "field": "description",
+      "sourceHash": "sha256:fdfacc1e97f9405e36b71d2584a33386f0b937e05c49cc36f5036091c46e8a92",
+      "text": "此内容所属的瓦片。\n<p>"
+    },
+    {
+      "id": "GaussianSplat3DTileContent#tileset",
+      "field": "description",
+      "sourceHash": "sha256:e94cb93353b516f5fc0f6ea5df95ebabe37dfdb89fb7ce6f5bae903d12fe8acc",
+      "text": "此内容所属的瓦片集。\n<p>"
+    },
+    {
+      "id": "GaussianSplat3DTileContent#transformed",
+      "field": "description",
+      "sourceHash": "sha256:8758901df3f5f4fdc9063bf1923623e97796e1ceaaff392137c0efc11ee16eaf",
+      "text": "内容已变换到世界坐标时返回 true，否则返回 false。\n<p>"
+    },
+    {
+      "id": "GaussianSplat3DTileContent#trianglesLength",
+      "field": "description",
+      "sourceHash": "sha256:73a99fbf2455ad61553807aef9bfd4c66c73f8bcb6534ef2db75968240287e6d",
+      "text": "获取瓦片中的三角形数量。高斯泼溅内容不以三角形表示，当前始终为零。\n<p>"
+    },
+    {
+      "id": "GaussianSplat3DTileContent#url",
+      "field": "description",
+      "sourceHash": "sha256:e680c2f8216930adc043c3e0776bb1ffbf1fee15059657d8fb2c77a53a28a9fd",
+      "text": "加载此内容所用的资源。\n<p>"
+    },
+    {
+      "id": "GaussianSplat3DTileContent",
+      "field": "classdesc",
+      "sourceHash": "sha256:0518a3817c389b8046f9dd124356be2f32449acdf54045b514fc646e7bbeff1a",
+      "text": "表示使用 {@link https://github.com/CesiumGS/glTF/tree/draft-splat-spz/extensions/2.0/Khronos/KHR_gaussian_splatting | KHR_gaussian_splatting} 和 {@link https://github.com/CesiumGS/glTF/tree/draft-splat-spz/extensions/2.0/Khronos/KHR_gaussian_splatting_compression_spz_2 | KHR_gaussian_splatting_compression_spz_2} 扩展的 glTF 或 GLB 内容。\n<p>\n实现 {@link Cesium3DTileContent} 接口。\n</p>"
+    },
+    {
+      "id": "GeoJson",
+      "field": "description",
+      "sourceHash": "sha256:f880cea443d8b7acdb954ec668cb78fdddd688969145a6e017a721ddd55741d4",
+      "text": "顶层 GeoJSON 对象，可以是 Geometry、Feature 或 FeatureCollection。"
+    },
+    {
+      "id": "GeoJsonFeatureCollection",
+      "field": "description",
+      "sourceHash": "sha256:7cd8672c309d9ceb3890e8b64b743e444819787e818be31d17711e513e3c33fe",
+      "text": "GeoJSON 要素集合对象。"
+    },
+    {
+      "id": "GeoJsonFeature",
+      "field": "description",
+      "sourceHash": "sha256:349f8b77a30985e656676ac96c406d44a2433fc81645a9802b43c13adb446cb2",
+      "text": "GeoJSON 要素对象。"
+    },
+    {
+      "id": "GeoJsonPosition",
+      "field": "description",
+      "sourceHash": "sha256:547b6874b8dd722df32b8f03ea0823a64099a7a4657fb851721843161171214c",
+      "text": "GeoJSON 位置，以 [经度, 纬度] 或 [经度, 纬度, 高度] 表示。"
+    },
+    {
+      "id": "GeoJsonPrimitive.fromGeoJson",
+      "field": "description",
+      "sourceHash": "sha256:214bb215e323f250b2cbc9af396be752928b4ce43faf6909ee34383d2b0922c4",
+      "text": "直接从已解析的 GeoJSON 对象创建加载器。"
+    },
+    {
+      "id": "GeoJsonPrimitive.fromUrl",
+      "field": "description",
+      "sourceHash": "sha256:6e11b042d2b60a193d72e308d55cbf020d14853838de3e289f2da12c585eaffc",
+      "text": "从 URL 或 {@link Resource} 加载 GeoJSON。"
+    },
+    {
+      "id": "GeoJsonPrimitive#featureCount",
+      "field": "description",
+      "sourceHash": "sha256:00ea93c9a86b79c1785d4340982e22d481ffbd266248826d46f146295bab321f",
+      "text": "加载后各集合表示的要素数量。"
+    },
+    {
+      "id": "GeoJsonPrimitive#ids",
+      "field": "description",
+      "sourceHash": "sha256:03ffddf1412d39b3fac5d4fe1667e6f41c765bb1c81f2b99f9ea26a2d6b61eb7",
+      "text": "查找表，将 GeoJsonPrimitive 生成的整数 ID 映射到源 GeoJSON 中的整数或字符串要素 ID。"
+    },
+    {
+      "id": "GeoJsonPrimitive#points",
+      "field": "description",
+      "sourceHash": "sha256:85f062ca8c03e09cb728a34f54a15aea8bb160ddcf22c4f8abd0ca70126d9959",
+      "text": "承载点几何的缓冲点集合。"
+    },
+    {
+      "id": "GeoJsonPrimitive#polygons",
+      "field": "description",
+      "sourceHash": "sha256:a1313739c73222f753f172bb70560ae15920b719a63a0f3d5a096babdf7c8873",
+      "text": "承载多边形几何的缓冲多边形集合。"
+    },
+    {
+      "id": "GeoJsonPrimitive#polylines",
+      "field": "description",
+      "sourceHash": "sha256:cec0d6180d8e2df04381207b8f5f0ed41ba3f8f705f868441a4a925427938309",
+      "text": "承载线串几何的缓冲折线集合。"
+    },
+    {
+      "id": "GeoJsonPrimitive#properties",
+      "field": "description",
+      "sourceHash": "sha256:9e4bc55168c6baf5a73e80cad13f094c63e98f01cc28b1d41863986365831483",
+      "text": "源 GeoJSON 属性，按生成的整数 ID 索引。"
+    },
+    {
+      "id": "GeoJsonPrimitive#url",
+      "field": "description",
+      "sourceHash": "sha256:45d25dd7dccc4571abeb48b8c637d335d13bb2d2c27da592c9084c93f213cd9a",
+      "text": "通过 {@link GeoJsonPrimitive.fromUrl} 创建时的加载器源 URL。"
+    },
+    {
+      "id": "GeoJsonPrimitive",
+      "field": "classdesc",
+      "sourceHash": "sha256:fc36d4fa6a26f85d5d2a7dacef353ff66f5841f145071e88039af67fb41ea153",
+      "text": "轻量 GeoJSON 加载器，将要素直接转换为 {@link BufferPointCollection}、{@link BufferPolylineCollection} 和 {@link BufferPolygonCollection}。此路径不创建 {@link GeoJsonDataSource} 所用的实体，而是提供可直接添加到 {@link Scene#primitives} 的高吞吐缓冲图元集合。"
+    },
+    {
+      "id": "PathMode.PORTIONS",
+      "field": "description",
+      "sourceHash": "sha256:a42955bcb08b1606be59325b6eede7b0eba2ec4f67af28d37cb1b454afc344bb",
+      "text": "根据随时间变化的位置信息分段应用材质，使用基于时间区间的材质属性。"
+    },
+    {
+      "id": "PathMode.WHOLE",
+      "field": "description",
+      "sourceHash": "sha256:d3e2c8ddf6725ad4a7ed1ae30d51278da234550f9ebb036669eb213cd146f0fc",
+      "text": "将材质应用于整条路径。"
+    },
+    {
+      "id": "PathMode",
+      "field": "description",
+      "sourceHash": "sha256:e522e3d02e9dc3fc02fa3f0375bfc40b3229092c5acfdf33bee31f610e352a4a",
+      "text": "定义沿路径应用材质属性的方式。"
+    },
+    {
+      "id": "PathMode",
+      "field": "properties/PORTIONS/description",
+      "sourceHash": "sha256:a42955bcb08b1606be59325b6eede7b0eba2ec4f67af28d37cb1b454afc344bb",
+      "text": "根据随时间变化的位置信息分段应用材质，使用基于时间区间的材质属性。"
+    },
+    {
+      "id": "PathMode",
+      "field": "properties/WHOLE/description",
+      "sourceHash": "sha256:d3e2c8ddf6725ad4a7ed1ae30d51278da234550f9ebb036669eb213cd146f0fc",
+      "text": "将材质应用于整条路径。"
+    },
+    {
+      "id": "PolygonHierarchy#holes",
+      "field": "description",
+      "sourceHash": "sha256:bb684af91d002466ab1b46559d8600278bacabdfcd9e4df9f67e7fdab0721e6b",
+      "text": "定义多边形孔洞的 PolygonHierarchy 数组。"
+    },
+    {
+      "id": "PolygonHierarchy#positions",
+      "field": "description",
+      "sourceHash": "sha256:63089723e192c54c81c923a409beb93b3e80816b2ee8d1e108873fe40e86e5f0",
+      "text": "定义多边形或孔洞外边界的线性环。"
+    },
+    {
+      "id": "PolygonHierarchy",
+      "field": "description",
+      "sourceHash": "sha256:bcb14efe5ebf8bc183124f801771f120a38243adeb811bb84fad19ee9dbe048c",
+      "text": "定义多边形及其孔洞的线性环层级。孔洞也可包含孔洞，形成嵌套的内部多边形。"
+    },
+    {
+      "id": "PolygonHierarchy",
+      "field": "params/holes/description",
+      "sourceHash": "sha256:bb684af91d002466ab1b46559d8600278bacabdfcd9e4df9f67e7fdab0721e6b",
+      "text": "定义多边形孔洞的 PolygonHierarchy 数组。"
+    },
+    {
+      "id": "PolygonHierarchy",
+      "field": "params/positions/description",
+      "sourceHash": "sha256:63089723e192c54c81c923a409beb93b3e80816b2ee8d1e108873fe40e86e5f0",
+      "text": "定义多边形或孔洞外边界的线性环。"
+    },
+    {
+      "id": "SensorVolumePortionToDisplay.ABOVE_ELLIPSOID_HORIZON",
+      "field": "description",
+      "sourceHash": "sha256:c6387598bfef41397008af405109e249d25c37b73af5c5a6796772ba1e7300a3",
+      "text": "0x0002，显示位于椭球真实地平线上方的传感器体积部分。"
+    },
+    {
+      "id": "SensorVolumePortionToDisplay.BELOW_ELLIPSOID_HORIZON",
+      "field": "description",
+      "sourceHash": "sha256:63fa2139f345a494bf33d44537a50b7b4a7f55dfbdbb0dab3745ccc38cd1f9d9",
+      "text": "0x0001，显示位于椭球真实地平线下方的传感器体积部分。"
+    },
+    {
+      "id": "SensorVolumePortionToDisplay.COMPLETE",
+      "field": "description",
+      "sourceHash": "sha256:58f55e742ff11d090e5c2ccc18af33e2cdaff9daf3b43473f38a49bfe20140ad",
+      "text": "0x0000，显示完整传感器体积。"
+    },
+    {
+      "id": "SensorVolumePortionToDisplay.toString",
+      "field": "description",
+      "sourceHash": "sha256:a70a5f6e8b7fca4b426c0c84d2a8254158df37ebf8911c654f73a000dc5ba7a0",
+      "text": "将给定值转换为对应枚举字符串。"
+    },
+    {
+      "id": "SensorVolumePortionToDisplay.toString",
+      "field": "params/portionToDisplay/description",
+      "sourceHash": "sha256:48ba96f719562af7692b5ce5bfd659f27c123aea41e9e0400a89eab3bcbd0d4e",
+      "text": "要转换为对应枚举字符串的值。"
+    },
+    {
+      "id": "SensorVolumePortionToDisplay.toString",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:5de2499257b37a93febbe729bad65062ef960ee24c339829163877289fb5fdbb",
+      "text": "与给定值对应的枚举字符串。"
+    },
+    {
+      "id": "SensorVolumePortionToDisplay.validate",
+      "field": "description",
+      "sourceHash": "sha256:6c4254fa9281ab38ee44dce0de7a9b235f274df2edd3b92cf0a3b05079d58db4",
+      "text": "检查给定值是否为有效的 {@link SensorVolumePortionToDisplay} 枚举值。"
+    },
+    {
+      "id": "SensorVolumePortionToDisplay.validate",
+      "field": "params/portionToDisplay/description",
+      "sourceHash": "sha256:555a0cf05842ef02fdabe245a17ac1d631067f8fe014afbe90a19acb5c2fb024",
+      "text": "待检查的值。"
+    },
+    {
+      "id": "SensorVolumePortionToDisplay.validate",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:f6eecebf0c1d8c4b566c697e5a8b0a8109e44a0699fc156fafc0fd9ec0f963a6",
+      "text": "给定值是有效枚举值时为 <code>true</code>，否则为 <code>false</code>。"
+    },
+    {
+      "id": "SensorVolumePortionToDisplay",
+      "field": "description",
+      "sourceHash": "sha256:83f5f6b3a3e50bac07142ecf914700af18ddf467dd701851ee7fb9498c48b61c",
+      "text": "指定显示传感器体积哪一部分的常量。"
+    },
+    {
+      "id": "SensorVolumePortionToDisplay",
+      "field": "properties/ABOVE_ELLIPSOID_HORIZON/description",
+      "sourceHash": "sha256:c6387598bfef41397008af405109e249d25c37b73af5c5a6796772ba1e7300a3",
+      "text": "0x0002，显示位于椭球真实地平线上方的传感器体积部分。"
+    },
+    {
+      "id": "SensorVolumePortionToDisplay",
+      "field": "properties/BELOW_ELLIPSOID_HORIZON/description",
+      "sourceHash": "sha256:63fa2139f345a494bf33d44537a50b7b4a7f55dfbdbb0dab3745ccc38cd1f9d9",
+      "text": "0x0001，显示位于椭球真实地平线下方的传感器体积部分。"
+    },
+    {
+      "id": "SensorVolumePortionToDisplay",
+      "field": "properties/COMPLETE/description",
+      "sourceHash": "sha256:58f55e742ff11d090e5c2ccc18af33e2cdaff9daf3b43473f38a49bfe20140ad",
+      "text": "0x0000，显示完整传感器体积。"
+    },
+    {
+      "id": "Simon1994PlanetaryPositions.computeMoonPositionInEarthInertialFrame",
+      "field": "description",
+      "sourceHash": "sha256:bf9142cffbf2b5819eb0d9f7da10ebf1678abd799e6e0671c0cb7ce8237b5dc2",
+      "text": "计算月球在地心惯性坐标系中的位置。"
+    },
+    {
+      "id": "Simon1994PlanetaryPositions.computeMoonPositionInEarthInertialFrame",
+      "field": "params/julianDate/description",
+      "sourceHash": "sha256:ae4dfd2165f0afe215196d7ef0aec44db37d59d4e20185dbb1cf41f73ccde504",
+      "text": "计算月球位置的时间；未提供时使用当前系统时间。"
+    },
+    {
+      "id": "Simon1994PlanetaryPositions.computeMoonPositionInEarthInertialFrame",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:6dc7234be7fe5e7d37d60021bb427eae2d712a30c4c8e2762774ccbf015a4297",
+      "text": "计算得到的月球位置。"
+    },
+    {
+      "id": "Simon1994PlanetaryPositions.computeSunPositionInEarthInertialFrame",
+      "field": "description",
+      "sourceHash": "sha256:f6624a2fc1e73809ffc74cf21aa7b7e925cd9afca1b21c9bf4f9a03ffc200b4d",
+      "text": "计算太阳在地心惯性坐标系中的位置。"
+    },
+    {
+      "id": "Simon1994PlanetaryPositions.computeSunPositionInEarthInertialFrame",
+      "field": "params/julianDate/description",
+      "sourceHash": "sha256:7b72e1f71a229890ac1655da857328ff845a68d73430c1bfa2e8af10170dc5b9",
+      "text": "计算太阳位置的时间；未提供时使用当前系统时间。"
+    },
+    {
+      "id": "Simon1994PlanetaryPositions.computeSunPositionInEarthInertialFrame",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:1baa7547391dca78174732cfb4b11f674bd5ec9c6e14c61ad0daf142f95c7849",
+      "text": "计算得到的太阳位置。"
+    },
+    {
+      "id": "Simon1994PlanetaryPositions",
+      "field": "description",
+      "sourceHash": "sha256:a2598df94c3512aaa38e3e6a73aaf385eccade6ab8613a86b2f7c487c8e6075a",
+      "text": "用于计算太阳和月球在地心惯性坐标系中笛卡尔坐标的函数集合。"
+    },
+    {
+      "id": "SplitDirection.BOTTOM",
+      "field": "description",
+      "sourceHash": "sha256:83d055813d4923fa80b037f446b67e4f61da9d91f018cf68bac85e80e0858552",
+      "text": "在 {@link Scene#splitPosition} 下方显示图元或 ImageryLayer。分割位置从视口顶部测量。"
+    },
+    {
+      "id": "SplitDirection.LEFT",
+      "field": "description",
+      "sourceHash": "sha256:ccd4cd272be74f295754265c0b0233bf41d7356df732c7c3c5c5112eeee46380",
+      "text": "在 {@link Scene#splitPosition} 左侧显示图元或 ImageryLayer。"
+    },
+    {
+      "id": "SplitDirection.NONE",
+      "field": "description",
+      "sourceHash": "sha256:3567aded56a3f5d571d5c38fb79b17423771de09e39856fbb08150118db3ef3e",
+      "text": "始终显示图元或 ImageryLayer。"
+    },
+    {
+      "id": "SplitDirection.RIGHT",
+      "field": "description",
+      "sourceHash": "sha256:2e008fc8458ee163a3dc0ba0350ec0b04afaf619beb320badbc6affabde76598",
+      "text": "在 {@link Scene#splitPosition} 右侧显示图元或 ImageryLayer。"
+    },
+    {
+      "id": "SplitDirection.TOP",
+      "field": "description",
+      "sourceHash": "sha256:4edf13c5114a591f499c2284ee1d269f6d946e82983915b4c5f7c0ce77b73176",
+      "text": "在 {@link Scene#splitPosition} 上方显示图元或 ImageryLayer。分割位置从视口顶部测量。"
+    },
+    {
+      "id": "SplitDirection",
+      "field": "description",
+      "sourceHash": "sha256:0901ebc993fd80505e5d9b0131fba848b200407bcf0e3453c76332a6c28d9a26",
+      "text": "图元或 ImageryLayer 相对于 {@link Scene#splitPosition} 的显示方向。"
+    },
+    {
+      "id": "SplitDirection",
+      "field": "properties/BOTTOM/description",
+      "sourceHash": "sha256:83d055813d4923fa80b037f446b67e4f61da9d91f018cf68bac85e80e0858552",
+      "text": "在 {@link Scene#splitPosition} 下方显示图元或 ImageryLayer。分割位置从视口顶部测量。"
+    },
+    {
+      "id": "SplitDirection",
+      "field": "properties/LEFT/description",
+      "sourceHash": "sha256:ccd4cd272be74f295754265c0b0233bf41d7356df732c7c3c5c5112eeee46380",
+      "text": "在 {@link Scene#splitPosition} 左侧显示图元或 ImageryLayer。"
+    },
+    {
+      "id": "SplitDirection",
+      "field": "properties/NONE/description",
+      "sourceHash": "sha256:3567aded56a3f5d571d5c38fb79b17423771de09e39856fbb08150118db3ef3e",
+      "text": "始终显示图元或 ImageryLayer。"
+    },
+    {
+      "id": "SplitDirection",
+      "field": "properties/RIGHT/description",
+      "sourceHash": "sha256:2e008fc8458ee163a3dc0ba0350ec0b04afaf619beb320badbc6affabde76598",
+      "text": "在 {@link Scene#splitPosition} 右侧显示图元或 ImageryLayer。"
+    },
+    {
+      "id": "SplitDirection",
+      "field": "properties/TOP/description",
+      "sourceHash": "sha256:4edf13c5114a591f499c2284ee1d269f6d946e82983915b4c5f7c0ce77b73176",
+      "text": "在 {@link Scene#splitPosition} 上方显示图元或 ImageryLayer。分割位置从视口顶部测量。"
+    },
+    {
+      "id": "StyleExpression#evaluateColor",
+      "field": "description",
+      "sourceHash": "sha256:a65c567874f0b0bd5f69ea0e9a4baf1db219933b64de3ff2387fb80fc76e7681",
+      "text": "对颜色表达式求值，可使用给定要素的属性。\n<p>\n等价于 {@link StyleExpression#evaluate}，但始终返回 {@link Color} 对象。\n</p>"
+    },
+    {
+      "id": "StyleExpression#evaluateColor",
+      "field": "params/feature/description",
+      "sourceHash": "sha256:b0e6bf996a4b3fa6e73b4f8273ecd7af394346a9646fd941863691e72d211d2f",
+      "text": "其属性可作为表达式变量的要素。"
+    },
+    {
+      "id": "StyleExpression#evaluateColor",
+      "field": "params/result/description",
+      "sourceHash": "sha256:33426d59d0185d3e9ae5aa6f6107cce5b2a5996d77940b48db901f1698c13ad0",
+      "text": "用于存储结果的对象。"
+    },
+    {
+      "id": "StyleExpression#evaluateColor",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:318efef230a969c6ecc9f93d4f017ce48838f346a86f7af827b46fbfb9725220",
+      "text": "修改后的 result 参数；未提供时返回新建的 Color 实例。"
+    },
+    {
+      "id": "StyleExpression#evaluate",
+      "field": "description",
+      "sourceHash": "sha256:e901f4e3b3c8d5c00e88996163fe1c6ce0491a9d03ee8c80e131a823342c779a",
+      "text": "求值表达式，可使用给定要素的属性。在 {@link https://github.com/CesiumGS/3d-tiles/tree/main/specification/Styling|3D Tiles 样式语言} 中，结果为 <code>Boolean</code>、<code>Number</code> 或 <code>String</code> 时，返回相应 JavaScript 原始类型；结果为 <code>RegExp</code> 时，返回 JavaScript <code>RegExp</code> 对象；结果为 <code>Cartesian2</code>、<code>Cartesian3</code> 或 <code>Cartesian4</code> 时，返回 {@link Cartesian2}、{@link Cartesian3} 或 {@link Cartesian4} 对象。若 <code>result</code> 为 {@link Color}，则将 {@link Cartesian4} 值转换为 {@link Color} 后返回。"
+    },
+    {
+      "id": "StyleExpression#evaluate",
+      "field": "params/feature/description",
+      "sourceHash": "sha256:b0e6bf996a4b3fa6e73b4f8273ecd7af394346a9646fd941863691e72d211d2f",
+      "text": "其属性可作为表达式变量的要素。"
+    },
+    {
+      "id": "StyleExpression#evaluate",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:d5f1c745fdf50634fc98bb0d42ede6c99b7e3947d600e170f4da3f41bcf8d910",
+      "text": "表达式求值结果。"
+    },
+    {
+      "id": "StyleExpression",
+      "field": "description",
+      "sourceHash": "sha256:06b9bffe6f7f288df5ebbf96886f6a52bb0f82f8e312e4910e8bd7563361a064",
+      "text": "应用于 {@link Cesium3DTileset} 的样式表达式接口。\n<p>\n派生类对 {@link https://github.com/CesiumGS/3d-tiles/tree/main/specification/Styling|3D Tiles 样式语言} 中的表达式求值。\n</p>\n<p>\n此类型描述接口，不应直接实例化。\n</p>"
+    },
+    {
+      "id": "ViewportQuad#destroy",
+      "field": "description",
+      "sourceHash": "sha256:b385add820d9f47d540aad147f1cdf85f05e8c6cb81c3928a59c8fd5f7bd8d69",
+      "text": "销毁此对象持有的 WebGL 资源。显式销毁可确定地释放 WebGL 资源，而不依赖垃圾回收器回收此对象。<br /><br />对象销毁后不应再使用；调用除 <code>isDestroyed</code> 以外的任何函数都会抛出 {@link DeveloperError}。因此，应像示例中那样将返回值（<code>undefined</code>）赋给该对象变量。"
+    },
+    {
+      "id": "ViewportQuad#isDestroyed",
+      "field": "description",
+      "sourceHash": "sha256:aea7b697937631c90ae3fc0ec55b81ba0ddc7abe4d6045848b2031f9bed60091",
+      "text": "若此对象已销毁，返回 true；否则返回 false。<br /><br />对象销毁后不应再使用；调用除 <code>isDestroyed</code> 以外的任何函数都会抛出 {@link DeveloperError}。"
+    },
+    {
+      "id": "ViewportQuad#material",
+      "field": "description",
+      "sourceHash": "sha256:43ba6629a43658d9a29aad9c17d4c2ba32cf64f1d71145d8cbd6c055296080a5",
+      "text": "视口四边形的表面外观，可为内置 {@link Material}，或通过 {@link https://github.com/CesiumGS/cesium/wiki/Fabric|Fabric} 定义的自定义材质。\n<p>\n默认材质为 <code>Material.ColorType</code>。\n</p>"
+    },
+    {
+      "id": "ViewportQuad#rectangle",
+      "field": "description",
+      "sourceHash": "sha256:38ffd5858bf2b24eb9ac2681e935b042fd8691e071e0bba5c3a134e7993ed3f5",
+      "text": "定义四边形在视口内位置的 BoundingRectangle。"
+    },
+    {
+      "id": "ViewportQuad#show",
+      "field": "description",
+      "sourceHash": "sha256:4f8abcde75652c1555d2569e0593e0556c36f2183bb3b888356f01c816b97613",
+      "text": "决定是否显示视口四边形图元。"
+    },
+    {
+      "id": "ViewportQuad#update",
+      "field": "description",
+      "sourceHash": "sha256:c5cc5fb756479265000e8f5e05ef6b5630397b1880c9ff3316fe45c545c6b022",
+      "text": "由 {@link Viewer} 或 {@link CesiumWidget} 在渲染场景时调用，以获取渲染此图元所需的绘制命令。<p>不要直接调用。此处记录此函数，仅为列出场景渲染期间可能向上传播的异常：</p>"
+    },
+    {
+      "id": "ViewportQuad#update",
+      "field": "exceptions/0/description",
+      "sourceHash": "sha256:39fb5c013c3850f42beff6d0f803e5fce2fa6938fe5561045bf5bb6da8f787b8",
+      "text": "必须定义 this.material。"
+    },
+    {
+      "id": "ViewportQuad#update",
+      "field": "exceptions/1/description",
+      "sourceHash": "sha256:90c37f0d8970be57848480742be8c4f676cbdb7e0ccc9959bcea3d9288f142f9",
+      "text": "必须定义 this.rectangle。"
+    },
+    {
+      "id": "ViewportQuad",
+      "field": "description",
+      "sourceHash": "sha256:0c9e50411a3065ca50eda243e8e2c4896fff9e01ba86b3a34db6e83d60b7a51c",
+      "text": "与视口对齐的四边形。"
+    },
+    {
+      "id": "ViewportQuad",
+      "field": "params/material/description",
+      "sourceHash": "sha256:d3f6c50bdc44a9032c78216e3ab67c9147170f9e7171439fbb2da7616fae46c6",
+      "text": "定义视口四边形表面外观的 {@link Material}。"
+    },
+    {
+      "id": "ViewportQuad",
+      "field": "params/rectangle/description",
+      "sourceHash": "sha256:c2f6083a5a3c4b5c7b338612401530b174fa4b4a6ce0379288180a47ba39d8d3",
+      "text": "定义四边形在视口内位置的 {@link BoundingRectangle}。"
+    }
+  ]
+}

@@ -552,6 +552,72 @@ const roots = new Set([
   "TileProviderError",
   "TimeDynamicImagery",
   "UrlTemplate3DTilesDataProvider",
+  "BufferPoint",
+  "BufferPointCollection",
+  "BufferPointMaterial",
+  "BufferPointMaterialOptions",
+  "BufferPointOptions",
+  "BufferPolygon",
+  "BufferPolygonCollection",
+  "BufferPolygonMaterial",
+  "BufferPolygonMaterialOptions",
+  "BufferPolygonOptions",
+  "BufferPolyline",
+  "BufferPolylineCollection",
+  "BufferPolylineMaterial",
+  "BufferPolylineMaterialOptions",
+  "BufferPolylineOptions",
+  "BufferPrimitive",
+  "BufferPrimitiveCollection",
+  "BufferPrimitiveMaterial",
+  "BufferPrimitiveMaterialOptions",
+  "BufferPrimitiveOptions",
+  "Cesium3DTile",
+  "Cesium3DTileContent",
+  "Cesium3DTilePointFeature",
+  "Cesium3DTilesVoxelProvider",
+  "ConditionsExpression",
+  "createElevationBandMaterial",
+  "createElevationBandMaterialBand",
+  "createElevationBandMaterialEntry",
+  "createTangentSpaceDebugPrimitive",
+  "Credit",
+  "CreditDisplay",
+  "CubeMapPanorama",
+  "DebugCameraPrimitive",
+  "DebugModelMatrixPrimitive",
+  "EdgeDisplayMode",
+  "EquirectangularPanorama",
+  "Expression",
+  "GaussianSplat3DTileContent",
+  "GeoJson",
+  "GeoJsonFeature",
+  "GeoJsonFeatureCollection",
+  "GeoJsonPosition",
+  "GeoJsonPrimitive",
+  "GoogleStreetViewCubeMapPanoramaProvider",
+  "I3SDataProvider",
+  "I3SFeature",
+  "I3SField",
+  "I3SLayer",
+  "I3SNode",
+  "I3SStatistics",
+  "I3SSublayer",
+  "I3SSymbology",
+  "Panorama",
+  "PanoramaProvider",
+  "PathMode",
+  "PolygonHierarchy",
+  "SensorVolumePortionToDisplay",
+  "Simon1994PlanetaryPositions",
+  "SplitDirection",
+  "StyleExpression",
+  "ViewportQuad",
+  "VoxelCell",
+  "VoxelContent",
+  "VoxelPrimitive",
+  "VoxelProvider",
+  "VoxelShapeType",
 ]);
 
 test("reviewed native API roots have complete source-bound prose translations", () => {
@@ -1018,6 +1084,100 @@ test("metadata and provider prose preserves storage units, bounds and retry cont
       .get("MVTDataProvider.fromUrl")
       .params.find((p) => p.name === "options.extent").description,
     /单位为弧度/,
+  );
+});
+
+test("all current native prose has a reviewed Chinese catalog record", () => {
+  assert.equal(report.counts.total, source.units.length);
+  assert.equal(report.counts.translated, report.counts.total);
+  assert.equal(report.counts.missing, 0);
+  assert.equal(report.counts.stale, 0);
+  assert.equal(report.counts.unused, 0);
+  const catalog = translations.readCatalog(
+    "Documentation/i18n/zh-CN/api",
+    "zh-CN",
+  );
+  for (const entry of catalog.entries) {
+    if (!/[\u3400-\u9fff]/.test(entry.text)) {
+      // Pure numeric/formula descriptions are language neutral and stay literal.
+      assert.ok(entry.id.startsWith("module:Math."), entry.id);
+      assert.match(entry.text, /^(?:[\d\s.*\/+-]|pi)+$/);
+      const original = source.units.find(
+        (unit) =>
+          unit.id === entry.id &&
+          unit.field === entry.field &&
+          unit.sourceHash === entry.sourceHash,
+      );
+      assert.equal(entry.text, original.source);
+    }
+    assert.ok(
+      !entry.text.includes("__EXAMPLE__") && !entry.text.includes("__JSON__"),
+    );
+  }
+});
+
+test("specialized prose preserves buffer updates, voxel layout and geoid conversion", () => {
+  assert.match(
+    lookup.get("BufferPolygon#getPositions").description,
+    /不会触发渲染更新.*setPositions/,
+  );
+  assert.match(
+    lookup.get("BufferPrimitiveCollection#sort").description,
+    /旧索引到新索引/,
+  );
+  assert.match(
+    lookup
+      .get("BufferPrimitiveMaterial.unpack")
+      .params.find((p) => p.name === "byteOffset").description,
+    /字节偏移/,
+  );
+  assert.match(
+    lookup
+      .get("BufferPrimitiveMaterial.unpack")
+      .params.find((p) => p.name === "view").description,
+    /DataView/,
+  );
+  assert.match(
+    lookup.get("BufferPointMaterial").classdesc,
+    /再次调用 setMaterial/,
+  );
+  assert.match(
+    lookup.get("VoxelContent#metadata").description,
+    /X 索引变化最快/,
+  );
+  assert.match(
+    lookup.get("VoxelPrimitive#dimensions").description,
+    /不含填充体素/,
+  );
+  assert.match(
+    lookup.get("VoxelPrimitive#inputDimensions").description,
+    /包含填充体素/,
+  );
+  assert.match(
+    lookup.get("VoxelPrimitive#screenSpaceError").description,
+    /单位为像素/,
+  );
+  assert.match(lookup.get("VoxelPrimitive#stepSize").description, /步长倍率/);
+  assert.match(
+    lookup.get("VoxelPrimitive#tileLoad").description,
+    /不要在监听器中创建或修改/,
+  );
+  assert.match(
+    lookup.get("I3SDataProvider#geoidTiledTerrainProvider").description,
+    /正高转换为椭球高/,
+  );
+  assert.match(
+    lookup.get("PanoramaProvider").description,
+    /在全景中显示的影像/,
+  );
+  assert.doesNotMatch(lookup.get("PanoramaProvider").description, /椭球表面/);
+  assert.match(
+    lookup.get("Cesium3DTilePointFeature#labelOutlineWidth").description,
+    /应用于标注/,
+  );
+  assert.match(
+    lookup.get("ConditionsExpression#evaluateColor").description,
+    /没有匹配条件时返回 undefined/,
   );
 });
 

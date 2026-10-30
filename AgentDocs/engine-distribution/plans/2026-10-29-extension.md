@@ -73,8 +73,9 @@ phases, each reviewed and committed before the next begins. No new runtime or ge
 - [T7 utilities](2026-10-30-t7-utility-translation.md): completed and reviewed; 509 new records across
   55 utility and rendering-constant roots after T6 checkpoint. Checkpoint `9af3d7e757`.
 - [T8 metadata/providers](2026-10-30-t8-metadata-provider-translation.md): completed and reviewed;
-  572 new records complete 52 roots after T7 checkpoint. Ready for local checkpoint.
-- Remaining specialized scene APIs will be elaborated after this checkpoint.
+  572 new records complete 52 roots after T7 checkpoint. Checkpoint `1910049d45`.
+- [T9 specialized APIs](2026-10-30-t9-specialized-translation.md): completed and reviewed; 710 final
+  records complete 66 roots after T8 checkpoint. Final delivery audit follows its checkpoint.
 - Remainder and final gate: cover every remaining native field, resolve changed/unused
   catalog records, and verify missing/stale/unused are all zero. Preserve semantic metadata,
   code, links and Chinese owned-source separation throughout.

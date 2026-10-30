@@ -1,0 +1,918 @@
+{
+  "schemaVersion": 1,
+  "locale": "zh-CN",
+  "entries": [
+    {
+      "id": "CubeMapPanorama.ConstructorOptions",
+      "field": "description",
+      "sourceHash": "sha256:02d45aab404bad7318a44e88c3ee5e663b621634dd69f79e1066dd6abccb2583",
+      "text": "CubeMapPanorama 构造函数的初始化选项。"
+    },
+    {
+      "id": "CubeMapPanorama.ConstructorOptions",
+      "field": "properties/options.credit/description",
+      "sourceHash": "sha256:9b3e9eb6f71f53272d5f17ae91bff43cc2574352be7fe8ba1df7acaafae9d9dc",
+      "text": "在画布上显示的全景署名。"
+    },
+    {
+      "id": "CubeMapPanorama.ConstructorOptions",
+      "field": "properties/options.show/description",
+      "sourceHash": "sha256:b83bd9ba98171d041c1a967a7f3df81b98fed4b822e9f456856716a2cba0bf6b",
+      "text": "决定是否显示此图元。"
+    },
+    {
+      "id": "CubeMapPanorama.ConstructorOptions",
+      "field": "properties/options.sources/description",
+      "sourceHash": "sha256:a06b10decea8085e663ccbde34ebae41c3d62e54af0e5eba0565fb546421d9ef",
+      "text": "立方体贴图六个面的源 URL 或 <code>Image</code> 对象，参见下方示例。"
+    },
+    {
+      "id": "CubeMapPanorama.ConstructorOptions",
+      "field": "properties/options.transform/description",
+      "sourceHash": "sha256:4c377a85fa2ede4206b1a87335f4d6c9be0785276f731f9afd32ae0983b74f38",
+      "text": "定义全景朝向的 3×3 变换矩阵。未指定时，默认使用真赤道平春分点（TEME）坐标轴。"
+    },
+    {
+      "id": "CubeMapPanorama#credit",
+      "field": "description",
+      "sourceHash": "sha256:bcd3144f593b07b3c6f9d12af369e5f03e4e075616802fa38fa03eeaa8bc5227",
+      "text": "获取全景署名。"
+    },
+    {
+      "id": "CubeMapPanorama#destroy",
+      "field": "description",
+      "sourceHash": "sha256:b385add820d9f47d540aad147f1cdf85f05e8c6cb81c3928a59c8fd5f7bd8d69",
+      "text": "销毁此对象持有的 WebGL 资源。显式销毁可确定地释放 WebGL 资源，而不依赖垃圾回收器回收此对象。<br /><br />对象销毁后不应再使用；调用除 <code>isDestroyed</code> 以外的任何函数都会抛出 {@link DeveloperError}。因此，应像示例中那样将返回值（<code>undefined</code>）赋给该对象变量。"
+    },
+    {
+      "id": "CubeMapPanorama#isDestroyed",
+      "field": "description",
+      "sourceHash": "sha256:aea7b697937631c90ae3fc0ec55b81ba0ddc7abe4d6045848b2031f9bed60091",
+      "text": "若此对象已销毁，返回 true；否则返回 false。<br /><br />对象销毁后不应再使用；调用除 <code>isDestroyed</code> 以外的任何函数都会抛出 {@link DeveloperError}。"
+    },
+    {
+      "id": "CubeMapPanorama#show",
+      "field": "description",
+      "sourceHash": "sha256:9f9ddab6b598ce5fe0da35253b8e6aec4a8dffe3496d0af7366aab93db207ba0",
+      "text": "决定是否显示立方体贴图全景。"
+    },
+    {
+      "id": "CubeMapPanorama#sources",
+      "field": "description",
+      "sourceHash": "sha256:2ab1837535ea037aeb1e7848d202394f9123a155384e7ecbaa114fa10c061eaf",
+      "text": "创建立方体各面的源对象，包含 <code>positiveX</code>、<code>negativeX</code>、<code>positiveY</code>、<code>negativeY</code>、<code>positiveZ</code>、<code>negativeZ</code> 属性，各值可以是 URL 或 <code>Image</code> 对象。"
+    },
+    {
+      "id": "CubeMapPanorama#transform",
+      "field": "description",
+      "sourceHash": "sha256:b88244ea5218b357c4e2f5ca1da90e932341cdbfd6ba5e2be180bf0f546f24cf",
+      "text": "获取全景变换。为 undefined 时，默认朝向使用真赤道平春分点（TEME）坐标轴。"
+    },
+    {
+      "id": "CubeMapPanorama#update",
+      "field": "description",
+      "sourceHash": "sha256:c5cc5fb756479265000e8f5e05ef6b5630397b1880c9ff3316fe45c545c6b022",
+      "text": "由 {@link Viewer} 或 {@link CesiumWidget} 在渲染场景时调用，以获取渲染此图元所需的绘制命令。<p>不要直接调用。此处记录此函数，仅为列出场景渲染期间可能向上传播的异常：</p>"
+    },
+    {
+      "id": "CubeMapPanorama#update",
+      "field": "exceptions/0/description",
+      "sourceHash": "sha256:3e6209105b398730395ae76086219dfba7c81014e01568180392e268ee66ae41",
+      "text": "必须提供 this.sources，且须包含 positiveX、negativeX、positiveY、negativeY、positiveZ 和 negativeZ 属性。"
+    },
+    {
+      "id": "CubeMapPanorama#update",
+      "field": "exceptions/1/description",
+      "sourceHash": "sha256:ed70a676f47092bf099ad848c8ca06093dd9ea28cc25d038633404271f0ba71b",
+      "text": "this.sources 的全部属性必须为相同类型。"
+    },
+    {
+      "id": "CubeMapPanorama",
+      "field": "description",
+      "sourceHash": "sha256:ef685100e75a27adcccd3c4e47f40ff4fc336e16a37ee09ede0447bcb9e3f9ad",
+      "text": "在场景中显示立方体贴图影像的 {@link Panorama}。\n<p>\n仅支持三维模式。切换到二维或 Columbus View 的形变过程中逐渐淡出。立方体全景尺寸不能超过 {@link Scene#maximumSkyBoxSize}。\n</p>"
+    },
+    {
+      "id": "EquirectangularPanorama.ConstructorOptions",
+      "field": "description",
+      "sourceHash": "sha256:f38fac0c6972558c76db3fecb09316767e175b00fe589a1f1dee6c99865aed1f",
+      "text": "EquirectangularPanorama 构造函数的初始化选项。"
+    },
+    {
+      "id": "EquirectangularPanorama.ConstructorOptions",
+      "field": "properties/options.credit/description",
+      "sourceHash": "sha256:9b3e9eb6f71f53272d5f17ae91bff43cc2574352be7fe8ba1df7acaafae9d9dc",
+      "text": "在画布上显示的全景署名。"
+    },
+    {
+      "id": "EquirectangularPanorama.ConstructorOptions",
+      "field": "properties/options.image/description",
+      "sourceHash": "sha256:22f0b4a437ad784ff5b400ce778e63143406f1aad7a11db860a147b0ec848bbd",
+      "text": "图像资源 URL，或已预加载的图像对象。"
+    },
+    {
+      "id": "EquirectangularPanorama.ConstructorOptions",
+      "field": "properties/options.radius/description",
+      "sourceHash": "sha256:2d63d029aa1c8b3ab8d860e7c1dd4a7d6e177f4b8554a5c706a107d0e7d0efa0",
+      "text": "全景半径，单位为米。"
+    },
+    {
+      "id": "EquirectangularPanorama.ConstructorOptions",
+      "field": "properties/options.repeatHorizontal/description",
+      "sourceHash": "sha256:d0f3cc229ffb8221da0d3dd862c4c6b44283dd34c7ec64ea717ecfe4e0db9557",
+      "text": "纹理水平方向重复次数。"
+    },
+    {
+      "id": "EquirectangularPanorama.ConstructorOptions",
+      "field": "properties/options.repeatVertical/description",
+      "sourceHash": "sha256:51ed32cefc666ea4dfbf850fc73a0bf9f121cecca7ad6c88ddb6cd49e7c812b6",
+      "text": "纹理垂直方向重复次数。"
+    },
+    {
+      "id": "EquirectangularPanorama.ConstructorOptions",
+      "field": "properties/options.transform/description",
+      "sourceHash": "sha256:6655a936d654c67c6d901ffbe1e42a42ab64365ce92049043dd1f31d68592bad",
+      "text": "定义全景位置与朝向的 4×4 变换矩阵，例如由位置和 heading-pitch-roll 生成。"
+    },
+    {
+      "id": "EquirectangularPanorama#credit",
+      "field": "description",
+      "sourceHash": "sha256:bcd3144f593b07b3c6f9d12af369e5f03e4e075616802fa38fa03eeaa8bc5227",
+      "text": "获取全景署名。"
+    },
+    {
+      "id": "EquirectangularPanorama#destroy",
+      "field": "description",
+      "sourceHash": "sha256:b385add820d9f47d540aad147f1cdf85f05e8c6cb81c3928a59c8fd5f7bd8d69",
+      "text": "销毁此对象持有的 WebGL 资源。显式销毁可确定地释放 WebGL 资源，而不依赖垃圾回收器回收此对象。<br /><br />对象销毁后不应再使用；调用除 <code>isDestroyed</code> 以外的任何函数都会抛出 {@link DeveloperError}。因此，应像示例中那样将返回值（<code>undefined</code>）赋给该对象变量。"
+    },
+    {
+      "id": "EquirectangularPanorama#image",
+      "field": "description",
+      "sourceHash": "sha256:a0268df58fca62dc7cadb89477b3057b582d4cedee69d94ea11dcb7801d8aca4",
+      "text": "获取全景源图像。"
+    },
+    {
+      "id": "EquirectangularPanorama#isDestroyed",
+      "field": "description",
+      "sourceHash": "sha256:aea7b697937631c90ae3fc0ec55b81ba0ddc7abe4d6045848b2031f9bed60091",
+      "text": "若此对象已销毁，返回 true；否则返回 false。<br /><br />对象销毁后不应再使用；调用除 <code>isDestroyed</code> 以外的任何函数都会抛出 {@link DeveloperError}。"
+    },
+    {
+      "id": "EquirectangularPanorama#radius",
+      "field": "description",
+      "sourceHash": "sha256:36ceb4ce12c37481d73414531b76c7770bdbc5ded80f540cb0fc2f8ffdf30843",
+      "text": "获取全景半径。"
+    },
+    {
+      "id": "EquirectangularPanorama#show",
+      "field": "description",
+      "sourceHash": "sha256:c903cfc065f8305342a7e3812dab923701d128577491f542f82833a2d4e8ea41",
+      "text": "决定是否显示等距柱状全景。"
+    },
+    {
+      "id": "EquirectangularPanorama#transform",
+      "field": "description",
+      "sourceHash": "sha256:058cf9e76665892a63b59c3949389c4d37c046296652716ce91fce012819c7a5",
+      "text": "获取全景变换。"
+    },
+    {
+      "id": "EquirectangularPanorama#update",
+      "field": "description",
+      "sourceHash": "sha256:c5cc5fb756479265000e8f5e05ef6b5630397b1880c9ff3316fe45c545c6b022",
+      "text": "由 {@link Viewer} 或 {@link CesiumWidget} 在渲染场景时调用，以获取渲染此图元所需的绘制命令。<p>不要直接调用。此处记录此函数，仅为列出场景渲染期间可能向上传播的异常：</p>"
+    },
+    {
+      "id": "EquirectangularPanorama",
+      "field": "description",
+      "sourceHash": "sha256:edb8b5392663326a98c052fe462c9deabc159a0c0284ff6d52cca1d37b3e7a68",
+      "text": "在场景中显示等距柱状格式影像的 {@link Panorama}。"
+    },
+    {
+      "id": "GoogleStreetViewCubeMapPanoramaProvider.fromUrl",
+      "field": "description",
+      "sourceHash": "sha256:845f94cbed9c97e947f19b88ae48d3cf7cb80b9245f40783d353355a14f4d6a8",
+      "text": "创建从 {@link https://developers.google.com/maps/documentation/streetview|Google Street View Static API} 提供立方体各面图像的 {@link PanoramaProvider}。"
+    },
+    {
+      "id": "GoogleStreetViewCubeMapPanoramaProvider.fromUrl",
+      "field": "params/options.key/description",
+      "sourceHash": "sha256:32cbece098a41bef2d9f2079c4e98bcb41ea379e18ad4c209dbb2976cb684aeb",
+      "text": "访问 Google Street View Static API 的 API 密钥，创建方法见 {@link https://developers.google.com/maps/documentation/javascript/get-api-key}。为 undefined 时使用 {@link GoogleMaps.defaultStreetViewStaticApiKey}；该值不可用时，使用 {@link GoogleMaps.defaultApiKey}。"
+    },
+    {
+      "id": "GoogleStreetViewCubeMapPanoramaProvider.fromUrl",
+      "field": "params/options.tileSize/description",
+      "sourceHash": "sha256:7024ab878e5a55eea6f00f08a4d6df2856dc06030e6f5f99f091d05bd9219fae",
+      "text": "每个正方形瓦片默认的宽和高，单位为像素。"
+    },
+    {
+      "id": "GoogleStreetViewCubeMapPanoramaProvider.fromUrl",
+      "field": "params/options.url/description",
+      "sourceHash": "sha256:742fdc249180c2bdc7becef3bdf864ae56d24b80682537f88c3bb39e51d0fbf1",
+      "text": "访问 Google Street View Static API 的 URL。更多信息见 {@link https://developers.google.com/maps/documentation/streetview/overview}。"
+    },
+    {
+      "id": "GoogleStreetViewCubeMapPanoramaProvider.fromUrl",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:8ff14b6a1dde22e9aaeb249d400704e956bab465c4dd9e6b26d5f97b55989a8c",
+      "text": "兑现为创建的 GoogleStreetViewCubeMapPanoramaProvider 的 Promise。"
+    },
+    {
+      "id": "GoogleStreetViewCubeMapPanoramaProvider#getNearestPanoId",
+      "field": "description",
+      "sourceHash": "sha256:735a41ffe6f5a10afee62ae6ce3b6ca46a3aa13248bb46d39b1f4757c70a50d7",
+      "text": "获取给定地理位置对应的 panoId，参见 {@link https://developers.google.com/maps/documentation/tile/streetview#panoid-search}。"
+    },
+    {
+      "id": "GoogleStreetViewCubeMapPanoramaProvider#getNearestPanoId",
+      "field": "params/position/description",
+      "sourceHash": "sha256:818107752c64708a79b34530728a51b40e565414cfd15be9dd94c554ab462972",
+      "text": "用于搜索最近 panoId 的位置。"
+    },
+    {
+      "id": "GoogleStreetViewCubeMapPanoramaProvider#getNearestPanoId",
+      "field": "params/radius/description",
+      "sourceHash": "sha256:92c65ca7f75be8721fe8f712418d006e3b333f461e6e9958e2d264ee829f187d",
+      "text": "搜索最近 panoId 的半径，单位为米。"
+    },
+    {
+      "id": "GoogleStreetViewCubeMapPanoramaProvider#getNearestPanoId",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:3e09394416cec2d192c8bcf3ee2c08fe64d7bbe9e9479482c4d7e12d7a7b1984",
+      "text": "包含最近全景的 panoId、纬度和经度的对象。"
+    },
+    {
+      "id": "GoogleStreetViewCubeMapPanoramaProvider#getPanoIdMetadata",
+      "field": "description",
+      "sourceHash": "sha256:a0788adb1886c854757438bc74a4983a66e9d3c420ca529d703bd6e78c0c0394",
+      "text": "获取 panoId 的元数据。响应对象参见 {@link https://developers.google.com/maps/documentation/tile/streetview#metadata_response}。"
+    },
+    {
+      "id": "GoogleStreetViewCubeMapPanoramaProvider#getPanoIdMetadata",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:4e4e46103f88759d617b7509b55aab023c59b65c916bd67a60be83c26c511df4",
+      "text": "包含此 panoId 元数据的对象。"
+    },
+    {
+      "id": "GoogleStreetViewCubeMapPanoramaProvider#loadPanorama",
+      "field": "description",
+      "sourceHash": "sha256:a1d721ed7927cf0462ac58b4026349d938a21a070125d47c9be51c4790e2a255",
+      "text": "获取指定位置和朝向的全景图元。"
+    },
+    {
+      "id": "GoogleStreetViewCubeMapPanoramaProvider#loadPanorama",
+      "field": "params/options.cartographic/description",
+      "sourceHash": "sha256:6f0aa258036bd5938b3e80729b8928b8990d43d0eaa8c9a8936b2aee19f859fa",
+      "text": "全景在场景中的放置位置。"
+    },
+    {
+      "id": "GoogleStreetViewCubeMapPanoramaProvider#loadPanorama",
+      "field": "params/options.panoId/description",
+      "sourceHash": "sha256:cb4a10e0e300ffa5b0da668f71bf27c8fb297418b9c5224c72c0d7fce116c27f",
+      "text": "Google API 中的 panoramaId 图像标识符。未提供时，根据给定地理位置查询。"
+    },
+    {
+      "id": "GoogleStreetViewCubeMapPanoramaProvider#loadPanorama",
+      "field": "params/options.signature/description",
+      "sourceHash": "sha256:c4381ad3c3f9aa80751ef5b24c2cbe62949f87121139d0ba243979352ae6221a",
+      "text": "用于签名 URL 的可选签名，参见 {@link https://developers.google.com/maps/documentation/streetview/digital-signature}。"
+    },
+    {
+      "id": "GoogleStreetViewCubeMapPanoramaProvider#loadPanorama",
+      "field": "params/options.tileSize/description",
+      "sourceHash": "sha256:03746f5ce173fd1b31100bc98a9745bce94d192184aead9a0ae6b7114b310317",
+      "text": "覆盖默认值的可选正方形瓦片尺寸。"
+    },
+    {
+      "id": "GoogleStreetViewCubeMapPanoramaProvider#loadPanorama",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:55eb246236ba7d520eadbfa0405fa514fe79a3e2287cf2dfa90486d2e37791f8",
+      "text": "已贴上影像的全景图元。"
+    },
+    {
+      "id": "GoogleStreetViewCubeMapPanoramaProvider",
+      "field": "description",
+      "sourceHash": "sha256:44e255d57fc13eb0c855c148b7a4bf2f7144d53157515d2641dc7da7c44deb04",
+      "text": "<div class=\"notice\">\n通常不直接实例化此对象，请使用 {@link GoogleStreetViewCubeMapPanoramaProvider.fromUrl}。\n</div>\n创建 {@link PanoramaProvider}，从 {@link https://developers.google.com/maps/documentation/streetview|Google Street View Static API} 提供在全景中显示的影像。"
+    },
+    {
+      "id": "I3SDataProvider.ConstructorOptions",
+      "field": "description",
+      "sourceHash": "sha256:977ccfef236e221bf500727e8f2de85397baac4bb4ff18e196c211dc0a21018e",
+      "text": "I3SDataProvider 构造函数的初始化选项。"
+    },
+    {
+      "id": "I3SDataProvider.ConstructorOptions",
+      "field": "properties/adjustMaterialAlphaMode/description",
+      "sourceHash": "sha256:a515e86e4c7c5d731625a370cd78fc26f469f192ca3058b1f2df7159964c3d10",
+      "text": "是否根据顶点颜色透明度调整材质 alpha 模式。为 <code>true</code> 时，若颜色顶点属性中存在透明度且材质尚未定义 alpha 模式，则设为 BLEND。"
+    },
+    {
+      "id": "I3SDataProvider.ConstructorOptions",
+      "field": "properties/applySymbology/description",
+      "sourceHash": "sha256:0cb7d338b5b0926bb23c9036cbc6f9a713c908769a3da11ddb4598f9b3776334",
+      "text": "决定是否解析并应用图层的 I3S 符号系统。"
+    },
+    {
+      "id": "I3SDataProvider.ConstructorOptions",
+      "field": "properties/calculateNormals/description",
+      "sourceHash": "sha256:d5328cfdd35d0a78211afe1e72be4db7497ad8bda54167919530f6a50a32cb06",
+      "text": "决定是否为没有法线的 I3S 几何生成平面法线。"
+    },
+    {
+      "id": "I3SDataProvider.ConstructorOptions",
+      "field": "properties/cesium3dTilesetOptions/description",
+      "sourceHash": "sha256:decb807bc11615b138a702f094c7de6fde4839f53cda11a3a68987f131855ccb",
+      "text": "传给内部创建的 {@link Cesium3DTileset} 的选项对象，有效属性见 {@link Cesium3DTileset}。除 <code>url</code> 与 <code>show</code> 外可使用全部选项，这两项由 I3SDataProvider 的值覆盖。"
+    },
+    {
+      "id": "I3SDataProvider.ConstructorOptions",
+      "field": "properties/geoidTiledTerrainProvider/description",
+      "sourceHash": "sha256:e2997b3a37a701a66bcd253d7dc1b9306ce3e86826727fac07aba273b4e63b37",
+      "text": "描述地球重力模型的瓦片高程提供者。指定后，根据其偏移调整几何。正确定位采用重力相关高程的 I3S 数据集时需要此项。"
+    },
+    {
+      "id": "I3SDataProvider.ConstructorOptions",
+      "field": "properties/name/description",
+      "sourceHash": "sha256:299da39e48673818a92a4a5046ae874e051ec69ebb3e9a047a4987cd2af82ea3",
+      "text": "I3S 数据集名称。"
+    },
+    {
+      "id": "I3SDataProvider.ConstructorOptions",
+      "field": "properties/show/description",
+      "sourceHash": "sha256:44f16527865c532012289b9e57bb6c78b7c3e908c4100703817326ebda42c16d",
+      "text": "决定是否显示数据集。"
+    },
+    {
+      "id": "I3SDataProvider.ConstructorOptions",
+      "field": "properties/showFeatures/description",
+      "sourceHash": "sha256:5e12af58883fdcf6448556fb0e6c22b1568b34b12567a17fdad476766b920cbf",
+      "text": "决定是否显示要素。"
+    },
+    {
+      "id": "I3SDataProvider.fromUrl",
+      "field": "description",
+      "sourceHash": "sha256:8cbe48ea0dfdb592a2af32a8611b0638ebbf71ec6263e8faeaee53b07e8ade24",
+      "text": "创建 I3SDataProvider。当前支持 I3S 1.6 和 1.7/1.8（OGC I3S 1.2）。"
+    },
+    {
+      "id": "I3SDataProvider.fromUrl",
+      "field": "params/url/description",
+      "sourceHash": "sha256:1177935c426a09bc51eaf392134215a233a720418a615a753bca9bac773ff7d2",
+      "text": "I3S 数据集 URL，应返回 I3S 场景对象。"
+    },
+    {
+      "id": "I3SDataProvider#adjustMaterialAlphaMode",
+      "field": "description",
+      "sourceHash": "sha256:4667c4d2b8799fb334f926d41bb528c16c3c7af8a5d9235103362958d00f4fc7",
+      "text": "决定是否根据颜色顶点属性调整材质 alpha 模式。"
+    },
+    {
+      "id": "I3SDataProvider#applySymbology",
+      "field": "description",
+      "sourceHash": "sha256:0cb7d338b5b0926bb23c9036cbc6f9a713c908769a3da11ddb4598f9b3776334",
+      "text": "决定是否解析并应用图层的 I3S 符号系统。"
+    },
+    {
+      "id": "I3SDataProvider#calculateNormals",
+      "field": "description",
+      "sourceHash": "sha256:d5328cfdd35d0a78211afe1e72be4db7497ad8bda54167919530f6a50a32cb06",
+      "text": "决定是否为没有法线的 I3S 几何生成平面法线。"
+    },
+    {
+      "id": "I3SDataProvider#data",
+      "field": "description",
+      "sourceHash": "sha256:baac6f2b1d63bccfad9798bd34b6a0bccb91112ab6605474e89e198051beaf86",
+      "text": "获取此对象的 I3S 数据。"
+    },
+    {
+      "id": "I3SDataProvider#destroy",
+      "field": "description",
+      "sourceHash": "sha256:559e5bbdaaa490eec268a6e8ea71eddd7c1b6454a046c4a212aa880fbd8050d4",
+      "text": "销毁此对象持有的 WebGL 资源。显式销毁可确定地释放 WebGL 资源，而不依赖垃圾回收器回收此对象。\n<p>\n对象销毁后不应再使用；调用除 <code>isDestroyed</code> 以外的任何函数都会抛出 {@link DeveloperError}。因此，应像示例中那样将返回值（<code>undefined</code>）赋给该对象变量。\n</p>"
+    },
+    {
+      "id": "I3SDataProvider#extent",
+      "field": "description",
+      "sourceHash": "sha256:812d50b49459a3f31aeb10084d80f3621d4a5f2ee4980386411b5193d60bad1b",
+      "text": "获取此 I3S 数据覆盖的范围。"
+    },
+    {
+      "id": "I3SDataProvider#filterByAttributes",
+      "field": "description",
+      "sourceHash": "sha256:faefc0082e1e9eee69cb8cfcd8bdf96d75884fb712fdfe884ffc068622f83ca9",
+      "text": "按指定属性名称和值过滤场景中绘制的元素。"
+    },
+    {
+      "id": "I3SDataProvider#filterByAttributes",
+      "field": "params/filters/description",
+      "sourceHash": "sha256:7d5e92369555148ac4b633232f3ed599add4e21d71e38a3964965478a368272c",
+      "text": "属性过滤器集合。"
+    },
+    {
+      "id": "I3SDataProvider#filterByAttributes",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:fed77f9ed066adac00c184f62ee9a0aa63c53d5170973b06f5f28b2b314fffb1",
+      "text": "过滤器应用完成时兑现的 Promise。"
+    },
+    {
+      "id": "I3SDataProvider#geoidTiledTerrainProvider",
+      "field": "description",
+      "sourceHash": "sha256:7aac844d37756d51a6eb35b8740d2390a8c49774e4987e77c723be6704ec5f12",
+      "text": "引用 GEOID 服务的地形提供者，用于将正高转换为椭球高。"
+    },
+    {
+      "id": "I3SDataProvider#getAttributeNames",
+      "field": "description",
+      "sourceHash": "sha256:45b56dc0b85df4c13a75a653b546f7884fc7ba9f49991907b36c2fae664ce0fa",
+      "text": "返回全部可用属性名称的集合。"
+    },
+    {
+      "id": "I3SDataProvider#getAttributeNames",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:141dab159e57d9ebd1ee077e2068f76b318b03981002c5b3fd7c2266d895e488",
+      "text": "属性名称集合。"
+    },
+    {
+      "id": "I3SDataProvider#getAttributeValues",
+      "field": "description",
+      "sourceHash": "sha256:773dd87dd70cabc9fcb5054695d467eb07fd7e8de2f9d50d8bca307ec2dd4f72",
+      "text": "返回给定名称属性的取值集合。"
+    },
+    {
+      "id": "I3SDataProvider#getAttributeValues",
+      "field": "params/name/description",
+      "sourceHash": "sha256:5758f2dab35346a861dd280ead2cbd3ef09dc9877c93a3bcdca38cfa9b5519f2",
+      "text": "属性名称。"
+    },
+    {
+      "id": "I3SDataProvider#getAttributeValues",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:d78b1ce40c51124e501865c81d767da4cf8fb7ae6d9bd6cedf87c77daeb813a0",
+      "text": "属性取值集合。"
+    },
+    {
+      "id": "I3SDataProvider#isDestroyed",
+      "field": "description",
+      "sourceHash": "sha256:8e0063c3cea634f0d58d690ac4d7a4fb34a488a5a13452889ede3a1d69c680e1",
+      "text": "若此对象已销毁，返回 true；否则返回 false。<p>对象销毁后不应再使用；调用除 <code>isDestroyed</code> 以外的任何函数都会抛出 {@link DeveloperError}。</p>"
+    },
+    {
+      "id": "I3SDataProvider#layers",
+      "field": "description",
+      "sourceHash": "sha256:a69599f09ac4efbbbf9deaccae2c81d215c3b4c3b6f819a85e1b4d3c5d590bba",
+      "text": "获取图层集合。"
+    },
+    {
+      "id": "I3SDataProvider#name",
+      "field": "description",
+      "sourceHash": "sha256:7d707cf2052b9b0d8acd725db747417afd848765f187bb40a21b8d0cf9f704a8",
+      "text": "获取数据集的可读名称。"
+    },
+    {
+      "id": "I3SDataProvider#resource",
+      "field": "description",
+      "sourceHash": "sha256:caceece29b8aab18b7af4cc4cf2a24ca923426289764d619b9548ee9fdfc9949",
+      "text": "获取 I3S 数据集所用的资源。"
+    },
+    {
+      "id": "I3SDataProvider#show",
+      "field": "description",
+      "sourceHash": "sha256:44f16527865c532012289b9e57bb6c78b7c3e908c4100703817326ebda42c16d",
+      "text": "决定是否显示数据集。"
+    },
+    {
+      "id": "I3SDataProvider#showFeatures",
+      "field": "description",
+      "sourceHash": "sha256:5e12af58883fdcf6448556fb0e6c22b1568b34b12567a17fdad476766b920cbf",
+      "text": "决定是否显示要素。"
+    },
+    {
+      "id": "I3SDataProvider#sublayers",
+      "field": "description",
+      "sourceHash": "sha256:4933c141f3b5cae62aaf66c96b71e09fb879e355a1daa17762f586f28a5e3875",
+      "text": "获取建筑子图层集合。"
+    },
+    {
+      "id": "I3SDataProvider",
+      "field": "description",
+      "sourceHash": "sha256:c683b55e567eeaa6ae71a536e3305fedda3a9ac16d46e190cbd59daa32990be7",
+      "text": "I3S 支持的主要公开类。url 选项应返回场景对象。当前支持 I3S 1.6 和 1.7/1.8（OGC I3S 1.2）。I3SFeature 与 I3SNode 通过公开接口实现 I3S 实体对象模型。\n<div class=\"notice\">\n通常不直接实例化此对象，请使用 {@link I3SDataProvider.fromUrl}。\n</div>"
+    },
+    {
+      "id": "I3SFeature#data",
+      "field": "description",
+      "sourceHash": "sha256:baac6f2b1d63bccfad9798bd34b6a0bccb91112ab6605474e89e198051beaf86",
+      "text": "获取此对象的 I3S 数据。"
+    },
+    {
+      "id": "I3SFeature#resource",
+      "field": "description",
+      "sourceHash": "sha256:6204471866b33e5c5f9c29b9d74f9b8735b6bceb6daa5af5fb43f8788a42cdee",
+      "text": "获取要素的资源。"
+    },
+    {
+      "id": "I3SFeature",
+      "field": "description",
+      "sourceHash": "sha256:bf794d78a3527add0e99d884cbaa6ac10fb7b6a1ca2d7b416c14b9df94f34c95",
+      "text": "实现 I3S 要素。\n<p>\n不要直接构造，应通过 {@link I3SNode} 访问。\n</p>"
+    },
+    {
+      "id": "I3SField#header",
+      "field": "description",
+      "sourceHash": "sha256:3ec6644e62bcd13aec9cb63a18dbbdb71ac6e49b65d3de00db26c1ecf7c86167",
+      "text": "获取此字段的头信息。"
+    },
+    {
+      "id": "I3SField#load",
+      "field": "description",
+      "sourceHash": "sha256:8d5a76a086fd78aa51a8cf40b6ac57a6e243c873f87816dc749063d9fe68e7e7",
+      "text": "加载内容。"
+    },
+    {
+      "id": "I3SField#load",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:37d47c4bb41dfc3bd2eb69b2c4065b8f4b7f21432d9f9b2f6a04f2e9de8a3b76",
+      "text": "字段数据加载完成时兑现的 Promise。"
+    },
+    {
+      "id": "I3SField#name",
+      "field": "description",
+      "sourceHash": "sha256:29ed4dfedaf6daa57155a0f47fe325d462464b9c0668cdcb1ddedbdf094ad750",
+      "text": "获取字段名称。"
+    },
+    {
+      "id": "I3SField#resource",
+      "field": "description",
+      "sourceHash": "sha256:424ae56dadc517178c7d8e6ff67301e91b14232a848a7762169ec6a4f1303510",
+      "text": "获取字段的资源。"
+    },
+    {
+      "id": "I3SField#values",
+      "field": "description",
+      "sourceHash": "sha256:2451fa23a98a22df90673627e41bf91125ee86651895bc6bed897a6f763df9c9",
+      "text": "获取字段值。"
+    },
+    {
+      "id": "I3SField",
+      "field": "description",
+      "sourceHash": "sha256:98840bd281948306a44c4285ca4317ee1812af202fa5118c627286fa3864d9a4",
+      "text": "实现附加到节点的自定义数据字段 I3S Field。"
+    },
+    {
+      "id": "I3SLayer#data",
+      "field": "description",
+      "sourceHash": "sha256:baac6f2b1d63bccfad9798bd34b6a0bccb91112ab6605474e89e198051beaf86",
+      "text": "获取此对象的 I3S 数据。"
+    },
+    {
+      "id": "I3SLayer#filterByAttributes",
+      "field": "description",
+      "sourceHash": "sha256:7a488b7b7ab53d99a647bc65d63ed974aae4903b2b7d0d835f4859729b2f5265",
+      "text": "按指定属性名称和值过滤图层中绘制的元素。"
+    },
+    {
+      "id": "I3SLayer#filterByAttributes",
+      "field": "params/filters/description",
+      "sourceHash": "sha256:7d5e92369555148ac4b633232f3ed599add4e21d71e38a3964965478a368272c",
+      "text": "属性过滤器集合。"
+    },
+    {
+      "id": "I3SLayer#filterByAttributes",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:fed77f9ed066adac00c184f62ee9a0aa63c53d5170973b06f5f28b2b314fffb1",
+      "text": "过滤器应用完成时兑现的 Promise。"
+    },
+    {
+      "id": "I3SLayer#legacyVersion16",
+      "field": "description",
+      "sourceHash": "sha256:3ad73c536cbb6911b79c772ff93c27f49878d5c5e2e49e1ea40bc1aa47cb5435",
+      "text": "加载的 I3S 版本为 1.6 或更早版本时为 <code>true</code>。"
+    },
+    {
+      "id": "I3SLayer#majorVersion",
+      "field": "description",
+      "sourceHash": "sha256:f78be21fc4894968d68750241ee6b752b10d62e0d8ea93b2e6cbd9a21030b1a1",
+      "text": "已加载 I3S 数据集的主版本号。"
+    },
+    {
+      "id": "I3SLayer#minorVersion",
+      "field": "description",
+      "sourceHash": "sha256:53cca2aa77c69b51c3593999ac7913d1cf013ecd6296070ec0d1816a72f68d2b",
+      "text": "已加载 I3S 数据集的次版本号。"
+    },
+    {
+      "id": "I3SLayer#resource",
+      "field": "description",
+      "sourceHash": "sha256:07bb9d1be4df92d5c1b94c35119d96a76a602b0983175a06baccdf2d201c3d0b",
+      "text": "获取图层的资源。"
+    },
+    {
+      "id": "I3SLayer#rootNode",
+      "field": "description",
+      "sourceHash": "sha256:0255b26fa9a322117e19c8f67736b6f1c6cc093246cd02455b69a9b465b6dca2",
+      "text": "获取此图层的根节点。"
+    },
+    {
+      "id": "I3SLayer#tileset",
+      "field": "description",
+      "sourceHash": "sha256:16bcf7df94471716df731787226287a6898eb8eaf016a49983075575e76d44a0",
+      "text": "获取此图层的 Cesium3DTileset。"
+    },
+    {
+      "id": "I3SLayer#version",
+      "field": "description",
+      "sourceHash": "sha256:b07a4c7425b4ac7e519536e7046d97971e026e4f5a3376bbffd0059f45430c45",
+      "text": "已加载 I3S 数据集的版本字符串。"
+    },
+    {
+      "id": "I3SNode.AttributeFilter",
+      "field": "description",
+      "sourceHash": "sha256:c9e2222f35126acbf309b393d079071fd2c22da28034c0d9c7f548d6b4fc82d9",
+      "text": "由属性名称和取值集合定义的过滤器。三维要素的该属性值不在集合中时，应隐藏该要素。"
+    },
+    {
+      "id": "I3SNode.AttributeFilter",
+      "field": "properties/name/description",
+      "sourceHash": "sha256:1203de3fba96b9c1335e8ccf0eafc9bcacc771cd4ec92bb19328915219b529b1",
+      "text": "属性名称。"
+    },
+    {
+      "id": "I3SNode.AttributeFilter",
+      "field": "properties/values/description",
+      "sourceHash": "sha256:db8ea4de11cf02d2c7dad8a9b5191be57dbc30e6b368f7a22368cef30f98cddd",
+      "text": "属性取值集合。"
+    },
+    {
+      "id": "I3SNode#children",
+      "field": "description",
+      "sourceHash": "sha256:760af03648c7dce7b5ec4bfaa690a3e2dc17ea91aba1b5a723a4fea05095297c",
+      "text": "获取子节点。"
+    },
+    {
+      "id": "I3SNode#data",
+      "field": "description",
+      "sourceHash": "sha256:baac6f2b1d63bccfad9798bd34b6a0bccb91112ab6605474e89e198051beaf86",
+      "text": "获取此对象的 I3S 数据。"
+    },
+    {
+      "id": "I3SNode#featureData",
+      "field": "description",
+      "sourceHash": "sha256:2d68c8a8cd68b9f805eeaed87bcd9e3877f3f68f6d51263a387d40ce4cfe4a6e",
+      "text": "获取要素集合。"
+    },
+    {
+      "id": "I3SNode#fields",
+      "field": "description",
+      "sourceHash": "sha256:cb243da9ad0cd78c98176454df41c4225478c9ec31270ab1f870f7e5ae874f0f",
+      "text": "获取字段集合。"
+    },
+    {
+      "id": "I3SNode#geometryData",
+      "field": "description",
+      "sourceHash": "sha256:03098bf686df7d9f0d4c84309814fd756f94a394af83767306a84b5197637aa8",
+      "text": "获取几何集合。"
+    },
+    {
+      "id": "I3SNode#getFieldsForFeature",
+      "field": "description",
+      "sourceHash": "sha256:51c06a298ea0ac3801e9be6534f830d638fae372d51ca3f02f0669775ddcbad7",
+      "text": "返回给定要素的字段。"
+    },
+    {
+      "id": "I3SNode#getFieldsForFeature",
+      "field": "params/featureIndex/description",
+      "sourceHash": "sha256:a7da2586330bf0670323f08a6d1868655068f3ca902a3b8779bc8ef152e95c68",
+      "text": "要获取属性的要素索引。"
+    },
+    {
+      "id": "I3SNode#getFieldsForFeature",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:ae6361fd84a54eae4a309ac98bd7f45e59b25b1531b87063917d1fbc249d8708",
+      "text": "包含字段名称及其值的对象。"
+    },
+    {
+      "id": "I3SNode#getFieldsForPickedPosition",
+      "field": "description",
+      "sourceHash": "sha256:5d870c6db1810d20cafc548855fa9c05dd8875213ba4d722d277d97c5de94a91",
+      "text": "返回给定拾取位置对应的字段。"
+    },
+    {
+      "id": "I3SNode#getFieldsForPickedPosition",
+      "field": "params/pickedPosition/description",
+      "sourceHash": "sha256:b5619fe7577312ce38d2716615bd73671ca846c039b52c92574905df0eaa0434",
+      "text": "拾取的位置。"
+    },
+    {
+      "id": "I3SNode#getFieldsForPickedPosition",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:ae6361fd84a54eae4a309ac98bd7f45e59b25b1531b87063917d1fbc249d8708",
+      "text": "包含字段名称及其值的对象。"
+    },
+    {
+      "id": "I3SNode#layer",
+      "field": "description",
+      "sourceHash": "sha256:9fb4bec0c1001207dd0ecd9bae7315dc975ca0df0cff14d36b0c3db22a1bc0c7",
+      "text": "获取所属图层。"
+    },
+    {
+      "id": "I3SNode#loadField",
+      "field": "description",
+      "sourceHash": "sha256:c29ae9f9028125747cd825ebd5431b9188af0c2bef7c8e5460008db58a6263c0",
+      "text": "加载节点字段。"
+    },
+    {
+      "id": "I3SNode#loadField",
+      "field": "params/name/description",
+      "sourceHash": "sha256:50fe928ed912a20c3ca75059b40102ed1e45ebdf06629edcf2f0d068ee825d7d",
+      "text": "字段名称。"
+    },
+    {
+      "id": "I3SNode#loadField",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:640ff3d5912e4b7dd7fa513db8c9edcf8b2896f792826defc3c426ce8fb0e1ae",
+      "text": "I3S 节点字段加载完成时兑现的 Promise。"
+    },
+    {
+      "id": "I3SNode#loadFields",
+      "field": "description",
+      "sourceHash": "sha256:d915cbb4214e1994b54381b11fb792685364246bd99de92b0982270e42bf429a",
+      "text": "加载节点的各个字段。"
+    },
+    {
+      "id": "I3SNode#loadFields",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:43fb282ea1fa5bf8ca1095ee9919294239e0fb802245eca3b88454475bcdecc9",
+      "text": "I3S 节点各字段加载完成时兑现的 Promise。"
+    },
+    {
+      "id": "I3SNode#parent",
+      "field": "description",
+      "sourceHash": "sha256:d7b7b687e96500120af089bd665dd68169a8dd55f7209c95b404dc43dae6c6b6",
+      "text": "获取父节点。"
+    },
+    {
+      "id": "I3SNode#resource",
+      "field": "description",
+      "sourceHash": "sha256:30fc6b324813467bbba086f846346851f61acc7445d224b7ccbbb86f7547aea1",
+      "text": "获取节点的资源。"
+    },
+    {
+      "id": "I3SNode#tile",
+      "field": "description",
+      "sourceHash": "sha256:5f10e27f6c48278a0af5ac11b716dc87d99258c4a9363772396b0a0917681258",
+      "text": "获取此节点的 Cesium3DTile。"
+    },
+    {
+      "id": "I3SNode",
+      "field": "description",
+      "sourceHash": "sha256:22460ece5b17950cd9006d4e081060ffe45efdf3e4ea8b6e8fcf6fd5995885ed",
+      "text": "实现 I3S 节点。在 CesiumJS 中，每个 I3SNode 创建一个 Cesium3DTile。\n<p>\n不要直接构造，应通过 {@link I3SLayer} 访问。\n</p>"
+    },
+    {
+      "id": "I3SStatistics#data",
+      "field": "description",
+      "sourceHash": "sha256:baac6f2b1d63bccfad9798bd34b6a0bccb91112ab6605474e89e198051beaf86",
+      "text": "获取此对象的 I3S 数据。"
+    },
+    {
+      "id": "I3SStatistics#names",
+      "field": "description",
+      "sourceHash": "sha256:45406e32cf7127a03e2c0ba84cf116c46605b0ca1b321b8f1fd2ac8db5a52199",
+      "text": "获取属性名称集合。"
+    },
+    {
+      "id": "I3SStatistics#resource",
+      "field": "description",
+      "sourceHash": "sha256:8f5f5100ac4ef6ed78a2b84bfa6abcbda0047acfdac8817387480a4c1eb729b0",
+      "text": "获取统计信息的资源。"
+    },
+    {
+      "id": "I3SStatistics",
+      "field": "description",
+      "sourceHash": "sha256:e02b2f5fee106299c8707786b68b4128e3221e22a9f9499a207f02d9f430cd15",
+      "text": "实现建筑场景图层的 I3S 统计信息。\n<p>\n不要直接构造，应通过 {@link I3SDataProvider} 访问统计信息。\n</p>"
+    },
+    {
+      "id": "I3SSublayer#data",
+      "field": "description",
+      "sourceHash": "sha256:baac6f2b1d63bccfad9798bd34b6a0bccb91112ab6605474e89e198051beaf86",
+      "text": "获取此对象的 I3S 数据。"
+    },
+    {
+      "id": "I3SSublayer#modelName",
+      "field": "description",
+      "sourceHash": "sha256:30df658073c6712a35f3786c1cc5fa1c4a2f6fddcca251f8abf15b0bb954a204",
+      "text": "获取子图层的模型名称。"
+    },
+    {
+      "id": "I3SSublayer#name",
+      "field": "description",
+      "sourceHash": "sha256:f8d9ee555779208faacdde8137ffa37908b5a9d9bfb85cfe98fa9377c6dee4a4",
+      "text": "获取子图层名称。"
+    },
+    {
+      "id": "I3SSublayer#resource",
+      "field": "description",
+      "sourceHash": "sha256:a409565fd5b29939ee4a1cb5a8c12ed71bf8ccebafdf75b9dcbe996e54908ca9",
+      "text": "获取子图层的资源。"
+    },
+    {
+      "id": "I3SSublayer#show",
+      "field": "description",
+      "sourceHash": "sha256:0eeb9779b3e1e827ff1338ca6ab414c740f825544d144aab37004a56211e2b37",
+      "text": "决定是否显示子图层。"
+    },
+    {
+      "id": "I3SSublayer#sublayers",
+      "field": "description",
+      "sourceHash": "sha256:5c38f7d21f5d43ee13386d41d19f3136a7d36f8860338e7bb108513338b642f3",
+      "text": "获取子图层的子级集合。"
+    },
+    {
+      "id": "I3SSublayer#visibility",
+      "field": "description",
+      "sourceHash": "sha256:cd07e0d58a5063d9ee70300a64c5501eff74ee4270c73cba42bc70f2d3b72966",
+      "text": "获取或设置子图层可见性。"
+    },
+    {
+      "id": "I3SSublayer",
+      "field": "description",
+      "sourceHash": "sha256:d61bea421d4d26289f2962a55e8afd28dd8b7d54ec8131b79d2d307b436769d4",
+      "text": "实现建筑场景图层的 I3S 子图层。\n<p>\n通常不直接实例化此对象，请使用 {@link I3SSublayer.fromData}。\n</p>"
+    },
+    {
+      "id": "I3SSymbology#defaultSymbology",
+      "field": "description",
+      "sourceHash": "sha256:5b4a889cace5e91ea662bb1acfba6c9a8e4a14f1357b080eaef248439fdccc50",
+      "text": "获取默认符号数据。"
+    },
+    {
+      "id": "I3SSymbology",
+      "field": "description",
+      "sourceHash": "sha256:4486575802145a73a5bcc1a7e215d7bfd7a7468ddf14dd1ba2a432ad7fd8d452",
+      "text": "实现 I3S 图层的符号系统。\n<p>\n不要直接构造，应通过 {@link I3SLayer} 访问。\n</p>"
+    },
+    {
+      "id": "Panorama#credit",
+      "field": "description",
+      "sourceHash": "sha256:bcd3144f593b07b3c6f9d12af369e5f03e4e075616802fa38fa03eeaa8bc5227",
+      "text": "获取全景署名。"
+    },
+    {
+      "id": "Panorama#show",
+      "field": "description",
+      "sourceHash": "sha256:92c0eaf2da15ca4299a75521f3714df8349bcd99f9649fd9d0e5b4a64fd77555",
+      "text": "决定是否显示全景。"
+    },
+    {
+      "id": "Panorama#transform",
+      "field": "description",
+      "sourceHash": "sha256:058cf9e76665892a63b59c3949389c4d37c046296652716ce91fce012819c7a5",
+      "text": "获取全景变换。"
+    },
+    {
+      "id": "PanoramaProvider.fromUrl",
+      "field": "description",
+      "sourceHash": "sha256:4fc2359ca849ccce7aa8c7420b0083b50a41df40995c39ad49435273f0e77464",
+      "text": "返回全景提供者。"
+    },
+    {
+      "id": "PanoramaProvider.fromUrl",
+      "field": "params/options/description",
+      "sourceHash": "sha256:fa87584bf76b2b4caaeb24c601671805a1930cc2e3ff03275a8a3393b3e17c8d",
+      "text": "创建全景提供者的输入选项。"
+    },
+    {
+      "id": "PanoramaProvider.fromUrl",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:7e3dd5a52eb933d3f3cf29d676390138b3497c770e1c248993450daa7db24d85",
+      "text": "用于将全景加载到场景中的全景提供者。"
+    },
+    {
+      "id": "PanoramaProvider#loadPanorama",
+      "field": "description",
+      "sourceHash": "sha256:dd1522fa3e707dc6797b480c8c4fb087366f1210390594e366cae6e31779981d",
+      "text": "返回全景图元。"
+    },
+    {
+      "id": "PanoramaProvider#loadPanorama",
+      "field": "params/options/description",
+      "sourceHash": "sha256:a68beb56ce9cbf9fbf937fcbde7c162508a297dc586e30e85663d07188de8464",
+      "text": "创建全景图元的输入选项。"
+    },
+    {
+      "id": "PanoramaProvider#loadPanorama",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:108f7f4d787636e0ab43a4503398e4739d6698107dacd9b83fd6e4527ba2c522",
+      "text": "用于在场景中显示全景的图元。"
+    },
+    {
+      "id": "PanoramaProvider",
+      "field": "description",
+      "sourceHash": "sha256:258c968785cc5e851f2a18a5b84890c4fc151d2b9e976bd85fd89a18c00576e1",
+      "text": "提供在全景中显示的影像。此类型描述接口，不应直接实例化。"
+    }
+  ]
+}

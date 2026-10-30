@@ -39,15 +39,15 @@ test("one Chinese edition retains explicit provenance without locale discovery o
   }
 });
 
-test("native inventory is captured before branding and missing prose retains the source text", () => {
+test("native inventory precedes branding and complete translations retain source provenance", () => {
   assert.equal(source.sourceLocale, "en-US");
   assert.equal(report.counts.total, source.units.length);
   assert.equal(
     report.counts.total,
     report.counts.translated + report.counts.missing + report.counts.stale,
   );
-  assert.ok(report.counts.translated > 2900);
-  assert.ok(report.counts.missing > 0);
+  assert.equal(report.counts.translated, report.counts.total);
+  assert.equal(report.counts.missing, 0);
   assert.equal(report.counts.stale, 0);
   assert.equal(report.counts.unused, 0);
   for (const unit of source.units) {
@@ -58,17 +58,14 @@ test("native inventory is captured before branding and missing prose retains the
     );
   }
   assert.ok(source.units.some((unit) => /\bCesium\./.test(unit.source)));
-  const untranslated = report.units.find(
-    (unit) =>
-      unit.status === "missing" &&
-      unit.field === "description" &&
-      !/Cesium|\{@/.test(unit.source),
-  );
-  const doclet = metadata.doclets.find(
-    (doclet) => doclet.id === untranslated.id,
-  );
-  assert.equal(doclet.description, untranslated.source);
-  assert.ok(doclet.i18n.fallbackFields.includes("description"));
+  for (const doclet of metadata.doclets) {
+    if (
+      doclet.sourceLocale === "en-US" &&
+      translations.collectUnits([doclet]).length > 0
+    ) {
+      assert.deepEqual(doclet.i18n.fallbackFields, [], doclet.id);
+    }
+  }
 });
 
 test("Chinese source and native translations both reach localized HTML tables", async () => {

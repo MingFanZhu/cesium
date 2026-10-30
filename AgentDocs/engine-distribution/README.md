@@ -8,9 +8,9 @@
 | Status                 | `active`                                                                  |
 | Planning model         | `extension`                                                               |
 | Active extension plan  | [Distribution](plans/2026-10-29-extension.md)                             |
-| Current phase          | T8 completed; final inventory pending                                     |
+| Current phase          | T9 completed; final delivery audit pending                                |
 | Active standalone plan | None; latest [Native batch](plans/2026-10-30-native-translation-batch.md) |
-| Active phase plan      | None; latest [T8](plans/2026-10-30-t8-metadata-provider-translation.md)   |
+| Active phase plan      | None; latest [T9](plans/2026-10-30-t9-specialized-translation.md)         |
 | Architecture contact   | Architecture Agent (current task)                                         |
 | Execution contact      | Execution Agent (current task)                                            |
 | Last updated           | 2026-10-30                                                                |
@@ -58,6 +58,14 @@ No upstream or runtime changes.
 [Asset directory correction](plans/2026-10-29-asset-directories.md): completed and
 [reviewed](reviews/2026-10-29-asset-directories.md). SGP-0074 filters directory entries in the
 shared asset stream. Rebuilt artifact has zero empty directories; 8 Node and 7 browser tests pass.
+
+## Latest specialized phase
+
+[T9](plans/2026-10-30-t9-specialized-translation.md) is completed and
+[reviewed](reviews/2026-10-30-t9-specialized-translation.md): 710 new records complete all
+778 fields of 66 specialized roots. Native coverage is complete; 32 Node checks and a focused
+browser case pass. Final full-distribution/type/browser acceptance remains pending after the
+T9 checkpoint. No runtime, source, generator, upstream or SDK changes.
 
 ## Latest metadata-provider phase
 

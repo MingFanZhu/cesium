@@ -624,7 +624,7 @@
       "id": "JulianDate.fromDate",
       "field": "params/date/description",
       "sourceHash": "sha256:81c4a3e9dc72963b38bbff60a1445d7f86179cd53fdc429fefe69b3e3a7400c4",
-      "text": "JavaScript Date。"
+      "text": "JavaScript Date 对象。"
     },
     {
       "id": "JulianDate.fromDate",
@@ -648,7 +648,7 @@
       "id": "JulianDate.fromGregorianDate",
       "field": "params/date/description",
       "sourceHash": "sha256:dc602f0cf16419bc6e976e898a97b51ec2a21c1a80f751f76548fa07c41d12d4",
-      "text": "GregorianDate。"
+      "text": "GregorianDate 对象。"
     },
     {
       "id": "JulianDate.fromGregorianDate",

@@ -1,0 +1,864 @@
+{
+  "schemaVersion": 1,
+  "locale": "zh-CN",
+  "entries": [
+    {
+      "id": "Cesium3DTilesVoxelProvider.ConstructorOptions",
+      "field": "description",
+      "sourceHash": "sha256:d8a360cd89243bdbac2eae2d0ca16fb114e3cf7bfbc9e998e2941225e938e766",
+      "text": "Cesium3DTilesVoxelProvider 构造函数的初始化选项。"
+    },
+    {
+      "id": "Cesium3DTilesVoxelProvider.ConstructorOptions",
+      "field": "properties/className/description",
+      "sourceHash": "sha256:6de97013e6789aa3f927bddd36579f489cb4daa1d43f6d60a3af01f4f607341a",
+      "text": "瓦片集模式中描述体素元数据的类。"
+    },
+    {
+      "id": "Cesium3DTilesVoxelProvider.ConstructorOptions",
+      "field": "properties/componentTypes/description",
+      "sourceHash": "sha256:1b3ba631b39b4d36cc5e34fdbb5d7299fed87a4ddf0c99fc227f08ef4dbd7150",
+      "text": "元数据分量类型。"
+    },
+    {
+      "id": "Cesium3DTilesVoxelProvider.ConstructorOptions",
+      "field": "properties/dimensions/description",
+      "sourceHash": "sha256:18b98df090f14eb1b65a884bfd7fbb95a880b332a56b73d36c6e333adf78e0f8",
+      "text": "瓦片每个维度的体素数量，数据集中全部瓦片相同。"
+    },
+    {
+      "id": "Cesium3DTilesVoxelProvider.ConstructorOptions",
+      "field": "properties/globalTransform/description",
+      "sourceHash": "sha256:9237e35122f16dfe5da9ed3770b825d7710fc7116448627b8f43e086488e22e2",
+      "text": "从局部空间到全局空间的变换。"
+    },
+    {
+      "id": "Cesium3DTilesVoxelProvider.ConstructorOptions",
+      "field": "properties/maxBounds/description",
+      "sourceHash": "sha256:e89b7bac6d25de44a5b85f8d7c5a60d161eb518fea36ee6944594a03b3a9cd70",
+      "text": "最大边界。"
+    },
+    {
+      "id": "Cesium3DTilesVoxelProvider.ConstructorOptions",
+      "field": "properties/maximumTileCount/description",
+      "sourceHash": "sha256:1f1e88adccedc7c6be95fa8227b2951843a25557816be1edea1fde2a287ffb97",
+      "text": "此提供者中可能存在的最大瓦片数量，用于提示体素渲染器分配适量 GPU 内存。未知时可为 undefined。"
+    },
+    {
+      "id": "Cesium3DTilesVoxelProvider.ConstructorOptions",
+      "field": "properties/maximumValues/description",
+      "sourceHash": "sha256:5e08d90781755ae503ce1aec3eb93d3e0f7ab35f5c7cbe0b1c4def8cf4c6f638",
+      "text": "元数据最大值。"
+    },
+    {
+      "id": "Cesium3DTilesVoxelProvider.ConstructorOptions",
+      "field": "properties/minBounds/description",
+      "sourceHash": "sha256:d42d30125489305a53e299d036d793aec8d4294be1c960804c1bdcf3b1f093f2",
+      "text": "最小边界。"
+    },
+    {
+      "id": "Cesium3DTilesVoxelProvider.ConstructorOptions",
+      "field": "properties/minimumValues/description",
+      "sourceHash": "sha256:5a5943a21d769e13f675fa7b01212dc7ba7c7c547512856bfd83accf3f67452a",
+      "text": "元数据最小值。"
+    },
+    {
+      "id": "Cesium3DTilesVoxelProvider.ConstructorOptions",
+      "field": "properties/names/description",
+      "sourceHash": "sha256:b24e9f10ea9685f957df20ecdd1d46a7f3803b953170c2ea41078415413af3a8",
+      "text": "元数据名称。"
+    },
+    {
+      "id": "Cesium3DTilesVoxelProvider.ConstructorOptions",
+      "field": "properties/paddingAfter/description",
+      "sourceHash": "sha256:b7abcf364045d126a2c137008f1c50f142e1592f2828ffae2e8ddd0ac2a255bc",
+      "text": "瓦片各维度末端的填充体素数量。可改善瓦片边缘采样质量，但会增加内存占用。"
+    },
+    {
+      "id": "Cesium3DTilesVoxelProvider.ConstructorOptions",
+      "field": "properties/paddingBefore/description",
+      "sourceHash": "sha256:bf73e6fdf9ffcbecb928760e08a5fcf26fa6ff9eb5d28ceefb256dd254dd2f05",
+      "text": "瓦片各维度前端的填充体素数量。可改善瓦片边缘采样质量，但会增加内存占用。"
+    },
+    {
+      "id": "Cesium3DTilesVoxelProvider.ConstructorOptions",
+      "field": "properties/shape/description",
+      "sourceHash": "sha256:f92afe3bc8d93f55e5744679cebc29967d77606fae08ecf13927a6ca2987437c",
+      "text": "体素形状 {@link VoxelShapeType}。"
+    },
+    {
+      "id": "Cesium3DTilesVoxelProvider.ConstructorOptions",
+      "field": "properties/shapeTransform/description",
+      "sourceHash": "sha256:6591128b3be9a71514033a040b2129b1378c9e35e4732c60e6c538530efaab0c",
+      "text": "从形状空间到局部空间的变换。"
+    },
+    {
+      "id": "Cesium3DTilesVoxelProvider.ConstructorOptions",
+      "field": "properties/types/description",
+      "sourceHash": "sha256:40efa85ca1d648e8335470dedfba2e0cf149b6fff9f29064fe5f3f8f12ba89bd",
+      "text": "元数据类型。"
+    },
+    {
+      "id": "Cesium3DTilesVoxelProvider.fromUrl",
+      "field": "description",
+      "sourceHash": "sha256:c780a66efb706e4ab0b86c600f21c928777cc667cc5e51629778c652fa0db78e",
+      "text": "创建从 3D Tiles 瓦片集获取体素数据的 {@link Cesium3DTilesVoxelProvider}。"
+    },
+    {
+      "id": "Cesium3DTilesVoxelProvider.fromUrl",
+      "field": "exceptions/0/description",
+      "sourceHash": "sha256:2a7a421587992dd8adb6e4bbb59ddfd5a1638fd967b78e75b361b73f85be5605",
+      "text": "根瓦片必须包含内容。"
+    },
+    {
+      "id": "Cesium3DTilesVoxelProvider.fromUrl",
+      "field": "exceptions/1/description",
+      "sourceHash": "sha256:a0c832b5b73ee5cdea3cfde7e03c567f54850fe4feee02635ff9ea2da8101554",
+      "text": "根瓦片内容必须包含 3DTILES_content_voxels 扩展。"
+    },
+    {
+      "id": "Cesium3DTilesVoxelProvider.fromUrl",
+      "field": "exceptions/2/description",
+      "sourceHash": "sha256:63639308ef82516c8b4ebae4b2be5006252e6b8c2cba372fb10764c1f835742d",
+      "text": "根瓦片必须使用隐式瓦片划分。"
+    },
+    {
+      "id": "Cesium3DTilesVoxelProvider.fromUrl",
+      "field": "exceptions/3/description",
+      "sourceHash": "sha256:0a2df87cb6794218dae01ff72b40e793c9725cd7a5b5446edef1e7ec58a1d11d",
+      "text": "瓦片集必须具有元数据模式。"
+    },
+    {
+      "id": "Cesium3DTilesVoxelProvider.fromUrl",
+      "field": "exceptions/4/description",
+      "sourceHash": "sha256:a80250bd4c277686e395ec698683331529ee54201f4566aba0d54627d20cb130",
+      "text": "Cesium3DTilesVoxelProvider 仅支持 box、region 和 3DTILES_bounding_volume_cylinder。"
+    },
+    {
+      "id": "Cesium3DTilesVoxelProvider.fromUrl",
+      "field": "params/url/description",
+      "sourceHash": "sha256:e117d9fb349f1084df5b45785e0dee873b4e664b9865ba6b070b97a87d834980",
+      "text": "tileset JSON 文件的 URL。"
+    },
+    {
+      "id": "Cesium3DTilesVoxelProvider.fromUrl",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:a249dcf34fe4706f59c19a3a06d7d46454e97aa716d48996fdb795478f61707a",
+      "text": "创建的提供者。"
+    },
+    {
+      "id": "Cesium3DTilesVoxelProvider#availableLevels",
+      "field": "description",
+      "sourceHash": "sha256:b12c5c0f9ab39fa7f811eaa22217d9231be83f60ad514b78ad30ac66ca8a09a6",
+      "text": "瓦片集中包含可用瓦片的细节层级数量。"
+    },
+    {
+      "id": "Cesium3DTilesVoxelProvider#className",
+      "field": "description",
+      "sourceHash": "sha256:b3722ce663c36de6959ccdab0430a0a447451a0659c1464f8711fea2fdd65858",
+      "text": "此瓦片集的元数据类。"
+    },
+    {
+      "id": "Cesium3DTilesVoxelProvider#componentTypes",
+      "field": "description",
+      "sourceHash": "sha256:f60175ea66193e27bf4b82ce2b9e6c65d96e5851f68191618f1a8fac13ee4260",
+      "text": "获取元数据分量类型。"
+    },
+    {
+      "id": "Cesium3DTilesVoxelProvider#dimensions",
+      "field": "description",
+      "sourceHash": "sha256:c6f6b4df25ac21efdd3970600f90883e254e99e30fe94da1a9be1b8796caa1ff",
+      "text": "获取瓦片每个维度的体素数量，数据集中全部瓦片相同。"
+    },
+    {
+      "id": "Cesium3DTilesVoxelProvider#globalTransform",
+      "field": "description",
+      "sourceHash": "sha256:9237e35122f16dfe5da9ed3770b825d7710fc7116448627b8f43e086488e22e2",
+      "text": "从局部空间到全局空间的变换。"
+    },
+    {
+      "id": "Cesium3DTilesVoxelProvider#maxBounds",
+      "field": "description",
+      "sourceHash": "sha256:a2666f1209f64ecc7e9dcd795e5ac9d9d40323d72db36f8dd3c3e5cc6322602a",
+      "text": "获取最大边界。为 undefined 时，使用形状的默认最大边界。"
+    },
+    {
+      "id": "Cesium3DTilesVoxelProvider#maximumTileCount",
+      "field": "description",
+      "sourceHash": "sha256:2c3ec4e8c1c50528bd313629235a163ce143ea694189950042c4c53655f348d9",
+      "text": "此提供者中可能存在的最大瓦片数量，用于提示体素渲染器分配适量 GPU 内存。未知时可为 undefined。"
+    },
+    {
+      "id": "Cesium3DTilesVoxelProvider#maximumValues",
+      "field": "description",
+      "sourceHash": "sha256:998498fc21dc1d0bf3c8f227e2b567415c883726743aaeca267688c21c25ce15",
+      "text": "获取元数据最大值。"
+    },
+    {
+      "id": "Cesium3DTilesVoxelProvider#minBounds",
+      "field": "description",
+      "sourceHash": "sha256:1378d41ba8661590104135e42f125f821f882d73cd85a3b7fd7987d4d14ddf9a",
+      "text": "获取最小边界。为 undefined 时，使用形状的默认最小边界。"
+    },
+    {
+      "id": "Cesium3DTilesVoxelProvider#minimumValues",
+      "field": "description",
+      "sourceHash": "sha256:8b692bfd9dd2eb784d7dbd2cd1e4242448cff76130fe1ca051779d3f4e912315",
+      "text": "获取元数据最小值。"
+    },
+    {
+      "id": "Cesium3DTilesVoxelProvider#names",
+      "field": "description",
+      "sourceHash": "sha256:3b511aa025f1ba8fc8043913667046c7cb9b1750b46eb2a86f7acfd91aac3cb9",
+      "text": "获取元数据名称。"
+    },
+    {
+      "id": "Cesium3DTilesVoxelProvider#paddingAfter",
+      "field": "description",
+      "sourceHash": "sha256:68b573cede46cef8e769d9506c4c80f95bc49f59398520571cae2115016bbb43",
+      "text": "获取瓦片各维度末端的填充体素数量。可改善瓦片边缘采样质量，但会增加内存占用。"
+    },
+    {
+      "id": "Cesium3DTilesVoxelProvider#paddingBefore",
+      "field": "description",
+      "sourceHash": "sha256:8d6b0795143cf43d0084728c2309050fbc05f21bd3edc621de561ca3499d5f64",
+      "text": "获取瓦片各维度前端的填充体素数量。可改善瓦片边缘采样质量，但会增加内存占用。"
+    },
+    {
+      "id": "Cesium3DTilesVoxelProvider#requestData",
+      "field": "description",
+      "sourceHash": "sha256:17ed0054b018a0f65e6263694e330184b8db55fdc11b430b08fd9d0c6ab071fb",
+      "text": "请求给定瓦片的数据。"
+    },
+    {
+      "id": "Cesium3DTilesVoxelProvider#requestData",
+      "field": "params/options.tileLevel/description",
+      "sourceHash": "sha256:1725fe01c70e4095b28f10874acf67bced5e929bdd79657f7328f7e10aedbbcd",
+      "text": "瓦片层级。"
+    },
+    {
+      "id": "Cesium3DTilesVoxelProvider#requestData",
+      "field": "params/options.tileX/description",
+      "sourceHash": "sha256:27b751c092f0aa9d0332a3ea24a1bfea37dec60ce5d674c316fdff873985d787",
+      "text": "瓦片 X 坐标。"
+    },
+    {
+      "id": "Cesium3DTilesVoxelProvider#requestData",
+      "field": "params/options.tileY/description",
+      "sourceHash": "sha256:832ba9832c4fdd2725c6eb21c41eff8f20c183f21ce06136a3901bcb5a5be6ae",
+      "text": "瓦片 Y 坐标。"
+    },
+    {
+      "id": "Cesium3DTilesVoxelProvider#requestData",
+      "field": "params/options.tileZ/description",
+      "sourceHash": "sha256:d157a6ee89a15c8ac9c8a082658954a389d7deba915b2e42feb3e68367edafb5",
+      "text": "瓦片 Z 坐标。"
+    },
+    {
+      "id": "Cesium3DTilesVoxelProvider#requestData",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:720f5145cecdfcd062714d2ac2cb878aae31c38f9dd1c0607722e86439ebf202",
+      "text": "兑现为包含瓦片数据的 VoxelContent 的 Promise；本帧无法调度请求时返回 undefined。"
+    },
+    {
+      "id": "Cesium3DTilesVoxelProvider#shape",
+      "field": "description",
+      "sourceHash": "sha256:ab06feeabe384ffd6c5c297bead730ab8f3db691a90967eb9a874cdf7796e7a7",
+      "text": "获取体素形状 {@link VoxelShapeType}。"
+    },
+    {
+      "id": "Cesium3DTilesVoxelProvider#shapeTransform",
+      "field": "description",
+      "sourceHash": "sha256:6591128b3be9a71514033a040b2129b1378c9e35e4732c60e6c538530efaab0c",
+      "text": "从形状空间到局部空间的变换。"
+    },
+    {
+      "id": "Cesium3DTilesVoxelProvider#types",
+      "field": "description",
+      "sourceHash": "sha256:92ca46553ab1c4c6db6be9e7bcb48f706832280858910187372e304dcc7ae3d5",
+      "text": "获取元数据类型。"
+    },
+    {
+      "id": "Cesium3DTilesVoxelProvider",
+      "field": "description",
+      "sourceHash": "sha256:edacaa8fadd6ebb6370c9b0fb08f2181562506c407cb94866703cfc7f790c84f",
+      "text": "从 3D Tiles 瓦片集获取体素数据的 {@link VoxelProvider}。\n<p>\n实现 {@link VoxelProvider} 接口。\n</p>\n<div class=\"notice\">\n通常不直接实例化此对象，请使用 {@link Cesium3DTilesVoxelProvider.fromUrl}。\n</div>"
+    },
+    {
+      "id": "VoxelCell#getNames",
+      "field": "description",
+      "sourceHash": "sha256:a0bd6de63a2df53a01407b869addaf1aa6e3191ce0109eee26ceeb9d572bdad4",
+      "text": "返回此单元的元数据属性名称数组。"
+    },
+    {
+      "id": "VoxelCell#getNames",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:07b3bb19bf1cd34e983a9f64de3f836ad8bc8f7973e3efaf72461dc469ad2da2",
+      "text": "此单元的元数据属性名称。"
+    },
+    {
+      "id": "VoxelCell#getProperty",
+      "field": "description",
+      "sourceHash": "sha256:a385044163fe4360b39811afb5ee8f3c4abe95d60224e0d9ed300d3313e7a6f0",
+      "text": "返回此单元中给定名称元数据值的副本。"
+    },
+    {
+      "id": "VoxelCell#getProperty",
+      "field": "params/name/description",
+      "sourceHash": "sha256:1d563bfdab1974fb0a02ca01600b3df70346dd8d59e7280bd1db72e5105d382b",
+      "text": "区分大小写的属性名称。"
+    },
+    {
+      "id": "VoxelCell#getProperty",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:f75f480b4290acc6dc1f1a208cca56fa45ae3653fec3da384bd298dd80cdce15",
+      "text": "属性值；单元没有此属性时返回 <code>undefined</code>。"
+    },
+    {
+      "id": "VoxelCell#hasProperty",
+      "field": "description",
+      "sourceHash": "sha256:6a47d414dd89cbf04edb72fc02790c436ba2a4a59b6e7dd78b15bb27dab0fc1e",
+      "text": "此单元包含该属性时返回 <code>true</code>。"
+    },
+    {
+      "id": "VoxelCell#hasProperty",
+      "field": "params/name/description",
+      "sourceHash": "sha256:1d563bfdab1974fb0a02ca01600b3df70346dd8d59e7280bd1db72e5105d382b",
+      "text": "区分大小写的属性名称。"
+    },
+    {
+      "id": "VoxelCell#hasProperty",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:cd256c2ab9781ac0aade19a4078af43fc69c89e4352aa0ddc76ce50989136ece",
+      "text": "此单元是否包含该属性。"
+    },
+    {
+      "id": "VoxelCell#orientedBoundingBox",
+      "field": "description",
+      "sourceHash": "sha256:4abc7f0d5f22cbec91e89249a3f1a49e6086b904a4072810d030ec2957f3b9f9",
+      "text": "获取包围此单元的有向包围盒副本。"
+    },
+    {
+      "id": "VoxelCell#primitive",
+      "field": "description",
+      "sourceHash": "sha256:31a5c168058a0a587765be85d37ab89f15c273da97ecbc522d172b3d5919a847",
+      "text": "{@link Scene#pick} 返回的对象均具有 <code>primitive</code> 属性。此处返回包含该单元的 VoxelPrimitive。"
+    },
+    {
+      "id": "VoxelCell#sampleIndex",
+      "field": "description",
+      "sourceHash": "sha256:731b3bc551cb873e9dc045300022c6fae5b0afe1a688958ab156916e54e73d7a",
+      "text": "获取此单元的采样索引。"
+    },
+    {
+      "id": "VoxelCell#tileIndex",
+      "field": "description",
+      "sourceHash": "sha256:94f983e8c225be18adbc28128d9fb751bb1a24f817abe1b9c675ddfb516fbc65",
+      "text": "获取包含此单元的瓦片索引。"
+    },
+    {
+      "id": "VoxelCell",
+      "field": "description",
+      "sourceHash": "sha256:8f93a4a081784c84cba5338b4847cb5e6bcaf8dafc6c97de423f35c03e5e5a01",
+      "text": "{@link VoxelPrimitive} 中的单元。\n<p>\n可访问与单个体素单元关联的属性。\n</p>\n<p>\n不要直接构造，应通过 {@link Scene#pickVoxel} 拾取访问。\n</p>"
+    },
+    {
+      "id": "VoxelCell",
+      "field": "params/primitive/description",
+      "sourceHash": "sha256:9d0cf76d115c4f2a578a482c9328ceac88a23f95b005c735a37499367aff395e",
+      "text": "包含此单元的体素图元。"
+    },
+    {
+      "id": "VoxelCell",
+      "field": "params/sampleIndex/description",
+      "sourceHash": "sha256:c5f49a907493e1537d1b16572dfe562e0dfe5606eb9bf4816e413577070b0181",
+      "text": "瓦片内包含此单元元数据的采样索引。"
+    },
+    {
+      "id": "VoxelCell",
+      "field": "params/tileIndex/description",
+      "sourceHash": "sha256:2975eb6eebe80f4d9918db7e04decb108ec4e70e300c3655f8b4f78d0764f410",
+      "text": "瓦片索引。"
+    },
+    {
+      "id": "VoxelContent.fromMetadataArray",
+      "field": "description",
+      "sourceHash": "sha256:4e9ec5aa6e7693aa723fb647bfeb448ce14458767b00f539d74cb0b7c42859e8",
+      "text": "从元数据数组构造 VoxelContent。"
+    },
+    {
+      "id": "VoxelContent.fromMetadataArray",
+      "field": "params/metadata/description",
+      "sourceHash": "sha256:bc9a521256963e867f3f19cd879cd28839d2833114d7ef2687a89126c4d90c2a",
+      "text": "此体素内容使用的元数据。"
+    },
+    {
+      "id": "VoxelContent.fromMetadataArray",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:8f8d5374ee20576a51f5162d5dc66c350626109f2adeb35308a79401c905cd0a",
+      "text": "包含给定元数据的 VoxelContent。"
+    },
+    {
+      "id": "VoxelContent#metadata",
+      "field": "description",
+      "sourceHash": "sha256:44ace61639538847d5f97eb504f55cef3377f4f872abc2b01fbc6d6abfd951ee",
+      "text": "此体素内容的元数据，为类型化数组组成的数组，每个字段对应一个类型化数组。单个字段的数据为展平的三维数组，按 X、Y、Z 顺序排列。X 索引变化最快，其次为 Y，最后为 Z。"
+    },
+    {
+      "id": "VoxelContent",
+      "field": "description",
+      "sourceHash": "sha256:572a81adb74a8930db5d18c0ec27d6875a5849ca04d182b7b8d4aade04e64d0a",
+      "text": "<div class=\"notice\">\n创建 VoxelContent 请调用 {@link VoxelContent.fromMetadataArray} 或 {@link VoxelContent.fromGltf}，不要直接调用构造函数。\n</div>\n表示 {@link Cesium3DTilesVoxelProvider} 体素内容的对象。"
+    },
+    {
+      "id": "VoxelContent",
+      "field": "exceptions/0/description",
+      "sourceHash": "sha256:6e1d7ecce995651407009eb2a81dddf78e17ab239c41693ce53fb4dfc42bdabc",
+      "text": "必须定义 loader 或 metadata 之一。"
+    },
+    {
+      "id": "VoxelContent",
+      "field": "exceptions/1/description",
+      "sourceHash": "sha256:ebe4b6ee4429a8607f4e33269025b11bcc09ea3094ea5da48f4ab4c31dd21ebb",
+      "text": "metadata 必须为 TypedArray 数组。"
+    },
+    {
+      "id": "VoxelPrimitive#allTilesLoaded",
+      "field": "description",
+      "sourceHash": "sha256:20e048ba1df6565d771bd8e93870ca5eccd4bdeca9e14db8834f695a701788bf",
+      "text": "当前帧中全部满足屏幕空间误差要求的瓦片加载完成时触发，表示当前视图下体素图元已完全加载。\n<p>\n在场景完成渲染后的帧末触发。\n</p>"
+    },
+    {
+      "id": "VoxelPrimitive#boundingSphere",
+      "field": "description",
+      "sourceHash": "sha256:bf5146159cbbd7cd5e0e160e675a60cf104b03e77a6969db3fb83058b3b277d9",
+      "text": "获取包围球。"
+    },
+    {
+      "id": "VoxelPrimitive#clippingPlanes",
+      "field": "description",
+      "sourceHash": "sha256:2c8090a9028f0d2fcdf85b34d2f03da41e55b518af19e5e48a8375adb30b9dce",
+      "text": "选择性裁剪图元渲染所用的 {@link ClippingPlaneCollection}。"
+    },
+    {
+      "id": "VoxelPrimitive#customShaderCompilationEvent",
+      "field": "description",
+      "sourceHash": "sha256:5306b03c46c8ab12b19a680dc950e9906f418cbc0aa9cd2547a7debce74902df",
+      "text": "获取每次编译自定义着色器时触发的事件。"
+    },
+    {
+      "id": "VoxelPrimitive#customShader",
+      "field": "description",
+      "sourceHash": "sha256:ac949c8ec21fa8d72515d1e28f04ba7af83dce053c9120eb87bc536ca464c434",
+      "text": "获取或设置自定义着色器。为 undefined 时，尝试按元数据类型构建默认着色器；失败时使用 {@link VoxelPrimitive.DefaultCustomShader}。"
+    },
+    {
+      "id": "VoxelPrimitive#debugDraw",
+      "field": "description",
+      "sourceHash": "sha256:0455c5afde8201346643ffaaf0a5b6cb28929652eda43bb9fac8f80920a10a89",
+      "text": "获取或设置是否渲染调试可视化。"
+    },
+    {
+      "id": "VoxelPrimitive#depthTest",
+      "field": "description",
+      "sourceHash": "sha256:8eed868b53b19dcf4d2c506aa2014f60dd4482dd715bced7e7c46666f01ff23d",
+      "text": "获取或设置渲染时是否执行深度测试。"
+    },
+    {
+      "id": "VoxelPrimitive#destroy",
+      "field": "description",
+      "sourceHash": "sha256:b385add820d9f47d540aad147f1cdf85f05e8c6cb81c3928a59c8fd5f7bd8d69",
+      "text": "销毁此对象持有的 WebGL 资源。显式销毁可确定地释放 WebGL 资源，而不依赖垃圾回收器回收此对象。<br /><br />对象销毁后不应再使用；调用除 <code>isDestroyed</code> 以外的任何函数都会抛出 {@link DeveloperError}。因此，应像示例中那样将返回值（<code>undefined</code>）赋给该对象变量。"
+    },
+    {
+      "id": "VoxelPrimitive#dimensions",
+      "field": "description",
+      "sourceHash": "sha256:5c51fdfb25be1011adaab8e31c39f352d20101bfab16be6b55757ce5be3d07a3",
+      "text": "获取每个体素瓦片在 Z 向上朝向下的尺寸，即各轴体素数量，不含填充体素。"
+    },
+    {
+      "id": "VoxelPrimitive#disableUpdate",
+      "field": "description",
+      "sourceHash": "sha256:90fb3e84a8eae75ea9bb5e7d2026db84effdf9599f969eff794e87b5307e803e",
+      "text": "获取或设置视图变化时是否禁止更新图元。"
+    },
+    {
+      "id": "VoxelPrimitive#initialTilesLoaded",
+      "field": "description",
+      "sourceHash": "sha256:fc24685d763f1354dd529699b9cbefe53a47594203b6d4018889f526ea4bc954",
+      "text": "当前帧中所有满足屏幕空间误差要求的瓦片加载完成时触发的事件。仅在初始视图的全部瓦片加载完成时触发一次。<p>此事件在场景完成渲染后的帧末触发。</p>"
+    },
+    {
+      "id": "VoxelPrimitive#inputDimensions",
+      "field": "description",
+      "sourceHash": "sha256:856bccc2f79860fc61bf8fe72342686c33d2494daa20768d71e94955bd7d5e5f",
+      "text": "获取输入体素数据单个瓦片在输入朝向下的尺寸，即各轴体素数量，包含填充体素。"
+    },
+    {
+      "id": "VoxelPrimitive#isDestroyed",
+      "field": "description",
+      "sourceHash": "sha256:aea7b697937631c90ae3fc0ec55b81ba0ddc7abe4d6045848b2031f9bed60091",
+      "text": "若此对象已销毁，返回 true；否则返回 false。<br /><br />对象销毁后不应再使用；调用除 <code>isDestroyed</code> 以外的任何函数都会抛出 {@link DeveloperError}。"
+    },
+    {
+      "id": "VoxelPrimitive#loadProgress",
+      "field": "description",
+      "sourceHash": "sha256:335cacb5f998f4092b286b0de8437be4191f9a511e29e82ca9e0d761e0afef19",
+      "text": "表示新瓦片加载进度的事件。在请求新瓦片、请求下载完成及下载的瓦片处理完成并可渲染时触发。\n<p>\n监听器收到待处理请求数 <code>numberOfPendingRequests</code> 和正在处理的瓦片数 <code>numberOfTilesProcessing</code>。\n</p>\n<p>\n在场景完成渲染后的帧末触发。\n</p>"
+    },
+    {
+      "id": "VoxelPrimitive#maxBounds",
+      "field": "description",
+      "sourceHash": "sha256:7f1775dc257b4341d4571ac64a36214d85720a4a1c0128bea4f9c912249eaf21",
+      "text": "获取或设置形状局部坐标系中的最大边界。体素数据会拉伸或压缩以适应边界。"
+    },
+    {
+      "id": "VoxelPrimitive#maxClippingBounds",
+      "field": "description",
+      "sourceHash": "sha256:9a75c8c328314b9009763641d131c88884fde1b4b57988173650554324d685fa",
+      "text": "获取或设置形状局部坐标系中的最大裁剪位置，范围外的体素内容会被裁剪。"
+    },
+    {
+      "id": "VoxelPrimitive#maximumValues",
+      "field": "description",
+      "sourceHash": "sha256:eda6b1a71cc8281a18d9b84c368b736738dcd582585ea63a2ab514a711392a6f",
+      "text": "获取体素数据各通道的最大值。"
+    },
+    {
+      "id": "VoxelPrimitive#minBounds",
+      "field": "description",
+      "sourceHash": "sha256:2fa81dbfab7039c6f70fb7b107b12b6eb18eeeea95ff8cfb8673e9991bae2034",
+      "text": "获取或设置形状局部坐标系中的最小边界。体素数据会拉伸或压缩以适应边界。"
+    },
+    {
+      "id": "VoxelPrimitive#minClippingBounds",
+      "field": "description",
+      "sourceHash": "sha256:0eb6f02a187bc9a7749cfd9b0585a386c426052e341d0fcb34061e6f2a8e07c6",
+      "text": "获取或设置形状局部坐标系中的最小裁剪位置，范围外的体素内容会被裁剪。"
+    },
+    {
+      "id": "VoxelPrimitive#minimumValues",
+      "field": "description",
+      "sourceHash": "sha256:5ad1fe929fb935d7ee161f740385159a35537bdbcea6d034942e5c20ab541696",
+      "text": "获取体素数据各通道的最小值。"
+    },
+    {
+      "id": "VoxelPrimitive#modelMatrix",
+      "field": "description",
+      "sourceHash": "sha256:455f697d6094f7d235edb9e95b5e31159382048898e701a61c004d2759316f94",
+      "text": "获取模型矩阵。"
+    },
+    {
+      "id": "VoxelPrimitive#nearestSampling",
+      "field": "description",
+      "sourceHash": "sha256:63be356d45ee08b48dec6319836e0cbf4e248d456a91e1ddb7066559edc9130e",
+      "text": "获取或设置是否使用最近邻采样。"
+    },
+    {
+      "id": "VoxelPrimitive#orientedBoundingBox",
+      "field": "description",
+      "sourceHash": "sha256:f171d3a5daf67a59d09829693257507019bafa9acd037f329dc34c2ab97d3bd2",
+      "text": "获取有向包围盒。"
+    },
+    {
+      "id": "VoxelPrimitive#paddingAfter",
+      "field": "description",
+      "sourceHash": "sha256:f7e29e9aaf4ff15f38c41238eb1af0fae95f9b701f363fffaf100eef22a9fd22",
+      "text": "获取体素数据末端的填充量。"
+    },
+    {
+      "id": "VoxelPrimitive#paddingBefore",
+      "field": "description",
+      "sourceHash": "sha256:09fa22e3ebc32e1803f6132dc3a8f7343caa55b9781a81214b25c00d3b197d7c",
+      "text": "获取体素数据前端的填充量。"
+    },
+    {
+      "id": "VoxelPrimitive#provider",
+      "field": "description",
+      "sourceHash": "sha256:351a69f49b7902446175569d457268cfec33d7e7fe870ab421f0e5825fb97333",
+      "text": "获取与此图元关联的 {@link VoxelProvider}。"
+    },
+    {
+      "id": "VoxelPrimitive#ready",
+      "field": "description",
+      "sourceHash": "sha256:3bb76631373d5fa4e2b5843e8055ebdc17ab2ddbfc4153ae0b8d96c7d0370cc4",
+      "text": "获取图元是否已准备好使用。"
+    },
+    {
+      "id": "VoxelPrimitive#screenSpaceError",
+      "field": "description",
+      "sourceHash": "sha256:82882eb8fb945d7565afe5ce20dad66ad0e9d566cf78eab4ee27bb47ace489d0",
+      "text": "获取或设置屏幕空间误差，单位为像素。体素在屏幕空间的尺寸大于此值时，细分瓦片。较低误差对应更高细节，但可能降低性能并增加内存占用。"
+    },
+    {
+      "id": "VoxelPrimitive#shape",
+      "field": "description",
+      "sourceHash": "sha256:13192d2eee3c00e2d99fc5b564c6c7d863dd4794e69c6be5d73c98531eabf526",
+      "text": "获取形状类型。"
+    },
+    {
+      "id": "VoxelPrimitive#show",
+      "field": "description",
+      "sourceHash": "sha256:e86f3ff11d819d678fb56a21cfaa358cbdc34a3ac9b04609a228482c5f9e438c",
+      "text": "获取或设置是否显示此图元。"
+    },
+    {
+      "id": "VoxelPrimitive#stepSize",
+      "field": "description",
+      "sourceHash": "sha256:ec27697983197362a6f1a83a694291542410c5055fa42914d686af49834538a0",
+      "text": "获取或设置光线步进的步长倍率。值越小，渲染质量越高，但性能越低。"
+    },
+    {
+      "id": "VoxelPrimitive#tileFailed",
+      "field": "description",
+      "sourceHash": "sha256:6d882553dac9da9ba8ea44668f3a76ef929dfba02c6e45658a5fbe001f2cd9f3",
+      "text": "瓦片内容加载失败时触发的事件。"
+    },
+    {
+      "id": "VoxelPrimitive#tileLoad",
+      "field": "description",
+      "sourceHash": "sha256:a205cbcb0dbb3247ece265208c9ba2042d228a0ceddf0088c74fa1887d89eb7e",
+      "text": "瓦片内容加载完成时触发的事件。\n<p>\n在渲染帧的瓦片集遍历期间触发，使瓦片更新在同一帧生效。不要在监听器中创建或修改 Cesium 实体或图元。\n</p>"
+    },
+    {
+      "id": "VoxelPrimitive#tileUnload",
+      "field": "description",
+      "sourceHash": "sha256:a30b9789544327f6933775ae25ebc3501f036fb94ec1ca8adb556c37edafa8d7",
+      "text": "瓦片内容卸载时触发的事件。"
+    },
+    {
+      "id": "VoxelPrimitive#tileVisible",
+      "field": "description",
+      "sourceHash": "sha256:138e903d6a1eaa73178cbc14156c329e90e50820232af3cfe6a2235a0b83a5cb",
+      "text": "每帧对每个可见瓦片触发一次。\n<p>\n在帧渲染期间的遍历过程中触发。"
+    },
+    {
+      "id": "VoxelPrimitive",
+      "field": "description",
+      "sourceHash": "sha256:17661e062e3bfbecc54304b183824f0540906be127b40ce4808a86ab3b86f3ca",
+      "text": "渲染 {@link VoxelProvider} 所提供体素数据的图元。"
+    },
+    {
+      "id": "VoxelPrimitive",
+      "field": "params/options.calculateStatistics/description",
+      "sourceHash": "sha256:77c6a4f217d0c7f259016a90df0b3a3212ebcf33e7f9482bee301c144fe470d2",
+      "text": "为性能分析生成统计信息。"
+    },
+    {
+      "id": "VoxelPrimitive",
+      "field": "params/options.clock/description",
+      "sourceHash": "sha256:0c5441ba3a890843352ec26754b9a0ab5ce2f8f7a6bb95228c46c2f7c3d8aca6",
+      "text": "控制时变行为的时钟。"
+    },
+    {
+      "id": "VoxelPrimitive",
+      "field": "params/options.customShader/description",
+      "sourceHash": "sha256:6fd9b404d0f0af99781ef7f858c1f7312a6d431d06f6786b545ce0da24a69de8",
+      "text": "用于设置图元样式的自定义着色器。"
+    },
+    {
+      "id": "VoxelPrimitive",
+      "field": "params/options.modelMatrix/description",
+      "sourceHash": "sha256:5a4be184529ee29f003e70174f56eb874789af1ebafea54f6cc8298e0f5e9c28",
+      "text": "用于变换图元的模型矩阵。"
+    },
+    {
+      "id": "VoxelPrimitive",
+      "field": "params/options.provider/description",
+      "sourceHash": "sha256:7d655f83ebcf149c1cde4e6b6e665adc1e24e959072187bfd71fdf1f09be1a8f",
+      "text": "向图元提供瓦片数据的体素提供者。"
+    },
+    {
+      "id": "VoxelProvider#availableLevels",
+      "field": "description",
+      "sourceHash": "sha256:b12c5c0f9ab39fa7f811eaa22217d9231be83f60ad514b78ad30ac66ca8a09a6",
+      "text": "瓦片集中包含可用瓦片的细节层级数量。"
+    },
+    {
+      "id": "VoxelProvider#componentTypes",
+      "field": "description",
+      "sourceHash": "sha256:f60175ea66193e27bf4b82ce2b9e6c65d96e5851f68191618f1a8fac13ee4260",
+      "text": "获取元数据分量类型。"
+    },
+    {
+      "id": "VoxelProvider#dimensions",
+      "field": "description",
+      "sourceHash": "sha256:c6f6b4df25ac21efdd3970600f90883e254e99e30fe94da1a9be1b8796caa1ff",
+      "text": "获取瓦片每个维度的体素数量，数据集中全部瓦片相同。"
+    },
+    {
+      "id": "VoxelProvider#globalTransform",
+      "field": "description",
+      "sourceHash": "sha256:9237e35122f16dfe5da9ed3770b825d7710fc7116448627b8f43e086488e22e2",
+      "text": "从局部空间到全局空间的变换。"
+    },
+    {
+      "id": "VoxelProvider#maxBounds",
+      "field": "description",
+      "sourceHash": "sha256:a2666f1209f64ecc7e9dcd795e5ac9d9d40323d72db36f8dd3c3e5cc6322602a",
+      "text": "获取最大边界。为 undefined 时，使用形状的默认最大边界。"
+    },
+    {
+      "id": "VoxelProvider#maximumTileCount",
+      "field": "description",
+      "sourceHash": "sha256:2c3ec4e8c1c50528bd313629235a163ce143ea694189950042c4c53655f348d9",
+      "text": "此提供者中可能存在的最大瓦片数量，用于提示体素渲染器分配适量 GPU 内存。未知时可为 undefined。"
+    },
+    {
+      "id": "VoxelProvider#maximumValues",
+      "field": "description",
+      "sourceHash": "sha256:998498fc21dc1d0bf3c8f227e2b567415c883726743aaeca267688c21c25ce15",
+      "text": "获取元数据最大值。"
+    },
+    {
+      "id": "VoxelProvider#minBounds",
+      "field": "description",
+      "sourceHash": "sha256:1378d41ba8661590104135e42f125f821f882d73cd85a3b7fd7987d4d14ddf9a",
+      "text": "获取最小边界。为 undefined 时，使用形状的默认最小边界。"
+    },
+    {
+      "id": "VoxelProvider#minimumValues",
+      "field": "description",
+      "sourceHash": "sha256:8b692bfd9dd2eb784d7dbd2cd1e4242448cff76130fe1ca051779d3f4e912315",
+      "text": "获取元数据最小值。"
+    },
+    {
+      "id": "VoxelProvider#names",
+      "field": "description",
+      "sourceHash": "sha256:3b511aa025f1ba8fc8043913667046c7cb9b1750b46eb2a86f7acfd91aac3cb9",
+      "text": "获取元数据名称。"
+    },
+    {
+      "id": "VoxelProvider#paddingAfter",
+      "field": "description",
+      "sourceHash": "sha256:68b573cede46cef8e769d9506c4c80f95bc49f59398520571cae2115016bbb43",
+      "text": "获取瓦片各维度末端的填充体素数量。可改善瓦片边缘采样质量，但会增加内存占用。"
+    },
+    {
+      "id": "VoxelProvider#paddingBefore",
+      "field": "description",
+      "sourceHash": "sha256:8d6b0795143cf43d0084728c2309050fbc05f21bd3edc621de561ca3499d5f64",
+      "text": "获取瓦片各维度前端的填充体素数量。可改善瓦片边缘采样质量，但会增加内存占用。"
+    },
+    {
+      "id": "VoxelProvider#requestData",
+      "field": "description",
+      "sourceHash": "sha256:17ed0054b018a0f65e6263694e330184b8db55fdc11b430b08fd9d0c6ab071fb",
+      "text": "请求给定瓦片的数据。"
+    },
+    {
+      "id": "VoxelProvider#requestData",
+      "field": "params/options.tileLevel/description",
+      "sourceHash": "sha256:1725fe01c70e4095b28f10874acf67bced5e929bdd79657f7328f7e10aedbbcd",
+      "text": "瓦片层级。"
+    },
+    {
+      "id": "VoxelProvider#requestData",
+      "field": "params/options.tileX/description",
+      "sourceHash": "sha256:27b751c092f0aa9d0332a3ea24a1bfea37dec60ce5d674c316fdff873985d787",
+      "text": "瓦片 X 坐标。"
+    },
+    {
+      "id": "VoxelProvider#requestData",
+      "field": "params/options.tileY/description",
+      "sourceHash": "sha256:832ba9832c4fdd2725c6eb21c41eff8f20c183f21ce06136a3901bcb5a5be6ae",
+      "text": "瓦片 Y 坐标。"
+    },
+    {
+      "id": "VoxelProvider#requestData",
+      "field": "params/options.tileZ/description",
+      "sourceHash": "sha256:d157a6ee89a15c8ac9c8a082658954a389d7deba915b2e42feb3e68367edafb5",
+      "text": "瓦片 Z 坐标。"
+    },
+    {
+      "id": "VoxelProvider#requestData",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:720f5145cecdfcd062714d2ac2cb878aae31c38f9dd1c0607722e86439ebf202",
+      "text": "兑现为包含瓦片数据的 VoxelContent 的 Promise；本帧无法调度请求时返回 undefined。"
+    },
+    {
+      "id": "VoxelProvider#shape",
+      "field": "description",
+      "sourceHash": "sha256:ab06feeabe384ffd6c5c297bead730ab8f3db691a90967eb9a874cdf7796e7a7",
+      "text": "获取体素形状 {@link VoxelShapeType}。"
+    },
+    {
+      "id": "VoxelProvider#shapeTransform",
+      "field": "description",
+      "sourceHash": "sha256:6591128b3be9a71514033a040b2129b1378c9e35e4732c60e6c538530efaab0c",
+      "text": "从形状空间到局部空间的变换。"
+    },
+    {
+      "id": "VoxelProvider#types",
+      "field": "description",
+      "sourceHash": "sha256:92ca46553ab1c4c6db6be9e7bcb48f706832280858910187372e304dcc7ae3d5",
+      "text": "获取元数据类型。"
+    },
+    {
+      "id": "VoxelProvider",
+      "field": "classdesc",
+      "sourceHash": "sha256:3a00c5b415a6bacb8f26fb761e6f69a14280469be27ca0ca4482ef4d8c6acfe7",
+      "text": "提供体素数据，与 {@link VoxelPrimitive} 配合使用。此类型描述接口，不应直接实例化。"
+    },
+    {
+      "id": "VoxelShapeType.getMaxBounds",
+      "field": "description",
+      "sourceHash": "sha256:46ba64064a742e62c221fe35ad87ac24ff9630c386dffcf35caeaf740ac2fa7d",
+      "text": "获取最大边界。"
+    },
+    {
+      "id": "VoxelShapeType.getMaxBounds",
+      "field": "params/shapeType/description",
+      "sourceHash": "sha256:b68af83bd29069c29e2a445204867e114119250b57493a7b45d6c7dbe623f7ee",
+      "text": "体素形状类型。"
+    },
+    {
+      "id": "VoxelShapeType.getMaxBounds",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:e89b7bac6d25de44a5b85f8d7c5a60d161eb518fea36ee6944594a03b3a9cd70",
+      "text": "最大边界。"
+    },
+    {
+      "id": "VoxelShapeType.getMinBounds",
+      "field": "description",
+      "sourceHash": "sha256:b0e79d5d26173648a53108fe1ebdadf6406f069633156dfda865e80e599acc25",
+      "text": "获取最小边界。"
+    },
+    {
+      "id": "VoxelShapeType.getMinBounds",
+      "field": "params/shapeType/description",
+      "sourceHash": "sha256:b68af83bd29069c29e2a445204867e114119250b57493a7b45d6c7dbe623f7ee",
+      "text": "体素形状类型。"
+    },
+    {
+      "id": "VoxelShapeType.getMinBounds",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:d42d30125489305a53e299d036d793aec8d4294be1c960804c1bdcf3b1f093f2",
+      "text": "最小边界。"
+    },
+    {
+      "id": "VoxelShapeType",
+      "field": "description",
+      "sourceHash": "sha256:30b3fb94891894d274192f7da831d4f4a58cbec987bc718b84fd461c7764f4f9",
+      "text": "体素形状枚举。形状控制体素网格如何映射到三维空间。"
+    },
+    {
+      "id": "VoxelShapeType",
+      "field": "properties/BOX/description",
+      "sourceHash": "sha256:2a0ec20f2fe3002fd6bb9d4ff796460d1e77849dffd4a93b71250f6bbcf77302",
+      "text": "盒形。"
+    },
+    {
+      "id": "VoxelShapeType",
+      "field": "properties/CYLINDER/description",
+      "sourceHash": "sha256:9683bce1fbea6eab2da86f0d55f984c39bea2bca0bb1c12d9d589348b164cb5b",
+      "text": "圆柱形。"
+    },
+    {
+      "id": "VoxelShapeType",
+      "field": "properties/ELLIPSOID/description",
+      "sourceHash": "sha256:07e15f497ad4f361aecd26ce52673e6e711518ad2f66fefc79aa87bef6346cb7",
+      "text": "椭球形。"
+    }
+  ]
+}

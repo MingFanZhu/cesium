@@ -252,7 +252,7 @@
       "id": "ComponentDatatype.fromName",
       "field": "returns/0/description",
       "sourceHash": "sha256:8cb1c14b6bd344fb7b6e4a6a5622177b6bae0c2a39bddfc2814ab3589cd0ce5d",
-      "text": "ComponentDatatype。"
+      "text": "ComponentDatatype 类型。"
     },
     {
       "id": "ComponentDatatype.fromTypedArray",

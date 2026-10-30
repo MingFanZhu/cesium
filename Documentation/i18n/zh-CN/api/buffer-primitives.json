@@ -1,0 +1,834 @@
+{
+  "schemaVersion": 1,
+  "locale": "zh-CN",
+  "entries": [
+    {
+      "id": "BufferPoint.clone",
+      "field": "description",
+      "sourceHash": "sha256:509c74ecda18db32daf3e8c9677aa5b06fa20aab8750be890202ebe7f1bbe6a3",
+      "text": "将源点的数据复制到 result。"
+    },
+    {
+      "id": "BufferPoint#featureId",
+      "field": "description",
+      "sourceHash": "sha256:802bcb9cd1068dfff9ea3eed90c52b8e86e1ef78099062247a82861e35d78a09",
+      "text": "与图元关联的要素 ID，无需唯一。"
+    },
+    {
+      "id": "BufferPoint#getPosition",
+      "field": "description",
+      "sourceHash": "sha256:0ea7226288df7fc0a28f55971ea1cb6aecaaf1ce62bbad92cb3dfa059ec48070",
+      "text": "获取此点的位置。"
+    },
+    {
+      "id": "BufferPoint#setPosition",
+      "field": "description",
+      "sourceHash": "sha256:8d59763d04da33a011a775ac4fc561c1ffedbf401f38184c3185e23a30981d75",
+      "text": "设置此点的位置。"
+    },
+    {
+      "id": "BufferPoint#show",
+      "field": "description",
+      "sourceHash": "sha256:3bf601cfd6b731bed0a629e4628d36b5ec1b1852f633787b1272f05f7866aff2",
+      "text": "是否显示图元。"
+    },
+    {
+      "id": "BufferPoint#toJSON",
+      "field": "description",
+      "sourceHash": "sha256:57ac7a760d0ea7a306a660a80c469a7563c936c08e449e65d4b712c7ea0cbc9f",
+      "text": "返回表示此点的可 JSON 序列化对象。这种编码内存效率较低，通常仅用于调试和测试。"
+    },
+    {
+      "id": "BufferPoint#toJSON",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:38ce205350a51431dad373a20e64971e370f07ce01ccbec8481ed4f8bfc08e63",
+      "text": "可 JSON 序列化的对象。"
+    },
+    {
+      "id": "BufferPoint#vertexCount",
+      "field": "description",
+      "sourceHash": "sha256:bdd8905c40f4a63be469c5353ba48efa44089e5fa2a6ecdebcef68b5ffc9ef2f",
+      "text": "此图元的位置（顶点）数量，始终为 1。"
+    },
+    {
+      "id": "BufferPoint",
+      "field": "classdesc",
+      "sourceHash": "sha256:d807b7083764445a5f3f601631f44ff01f699704cf19d646dc09a85990417544",
+      "text": "绑定 {@link BufferPointCollection} 底层缓冲数据的视图。\n<p>BufferPoint 实例采用{@link https://en.wikipedia.org/wiki/Flyweight_pattern|享元模式}：同一实例可临时绑定到集合中的任意概念点，从而以很低的内存开销遍历和更新大型集合。</p>\n一个点由一个位置表示。"
+    },
+    {
+      "id": "BufferPointCollection#add",
+      "field": "description",
+      "sourceHash": "sha256:6996322b12c94d617c0155e01f8585338954ae353b1e800030913e5d347c986d",
+      "text": "按给定选项向集合添加点，并将 {@link BufferPoint} 实例绑定到该点。提供 result 时使用该实例，否则新建实例。重复调用时，建议复用同一个 BufferPoint，避免每次分配新对象。"
+    },
+    {
+      "id": "BufferPointCollection",
+      "field": "classdesc",
+      "sourceHash": "sha256:11832353d8d31d80ef0180fd45c2961883d5417ada45ac18abeefebfe40c40bd",
+      "text": "采用 ArrayBuffer 存储的点集合，以优化性能和内存。\n<p>默认缓冲分配量为任意预设值，集合不可扩容；已知所需容量时，应在构造函数中指定各缓冲的容量。</p>"
+    },
+    {
+      "id": "BufferPointCollection",
+      "field": "params/options.allowPicking/description",
+      "sourceHash": "sha256:9ce763ef285c13b875762085c046766a054ebffdc7a7bd643de4592301d030ff",
+      "text": "为 <code>true</code> 时，可通过 {@link Scene#pick} 拾取图元；为 <code>false</code> 时可降低内存与初始化开销。"
+    },
+    {
+      "id": "BufferPointCollection",
+      "field": "params/options.boundingVolume/description",
+      "sourceHash": "sha256:d6451397396b58cc25178ab6bffa5a9069b8112fbf76ec15dde8b1b9aa6b8a88",
+      "text": "集合的世界空间包围体。未指定时，自动计算并在图元位置变化时更新；已指定时，由用户按需更新。大型动态集合可通过预先计算包围体并仅在必要时更新来提高性能。"
+    },
+    {
+      "id": "BufferPointCollection",
+      "field": "params/options.modelMatrix/description",
+      "sourceHash": "sha256:dafdae78f13684907f6f9a43b6291a8d915022921f941ea13135302a75c734e9",
+      "text": "将几何从模型坐标变换到世界坐标。"
+    },
+    {
+      "id": "BufferPointMaterial#color",
+      "field": "description",
+      "sourceHash": "sha256:f7f6c0ff79d3408a0ceca0bc3732fc5efaa8c4b7c51b1b4172da2d90635b6624",
+      "text": "填充颜色。"
+    },
+    {
+      "id": "BufferPointMaterial#outlineColor",
+      "field": "description",
+      "sourceHash": "sha256:30dadf850fbc29c6cb8e0e400c078e754d013e201323ef252ee541a14a94a97e",
+      "text": "轮廓颜色。"
+    },
+    {
+      "id": "BufferPointMaterial#outlineWidth",
+      "field": "description",
+      "sourceHash": "sha256:33cfe440d84a5908f42d6db2a1a0c681a8788501462caff5a9b9246e1e01bbe4",
+      "text": "轮廓宽度，范围为 0～255 像素。"
+    },
+    {
+      "id": "BufferPointMaterial#size",
+      "field": "description",
+      "sourceHash": "sha256:198cecc871eef8dae1114217ff9c59b652191b3db01b229ca66de3eb0202cbee",
+      "text": "点尺寸，范围为 0～255 像素。"
+    },
+    {
+      "id": "BufferPointMaterial#toJSON",
+      "field": "description",
+      "sourceHash": "sha256:f1e91e8bd3ebdaef4b4115a45b8fec2a7492a7142fb6184587b109df436f097e",
+      "text": "返回表示此材质的可 JSON 序列化对象。这种编码内存效率较低，通常仅用于调试和测试。"
+    },
+    {
+      "id": "BufferPointMaterial#toJSON",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:38ce205350a51431dad373a20e64971e370f07ce01ccbec8481ed4f8bfc08e63",
+      "text": "可 JSON 序列化的对象。"
+    },
+    {
+      "id": "BufferPointMaterial",
+      "field": "classdesc",
+      "sourceHash": "sha256:9dd9cafaf84518ff86cb6a4fb93dc2a35cf44fa24a6ec8cf530bfd66d379c198",
+      "text": "{@link BufferPoint} 的材质说明。\n<p>BufferPointMaterial 对象可{@link Packable|打包}，在调用 {@link BufferPoint#setMaterial} 时存储。之后修改材质对象不会影响点，须再次调用 setMaterial() 才会生效。</p>"
+    },
+    {
+      "id": "BufferPointMaterialOptions",
+      "field": "properties/color/description",
+      "sourceHash": "sha256:f7f6c0ff79d3408a0ceca0bc3732fc5efaa8c4b7c51b1b4172da2d90635b6624",
+      "text": "填充颜色。"
+    },
+    {
+      "id": "BufferPointMaterialOptions",
+      "field": "properties/outlineColor/description",
+      "sourceHash": "sha256:30dadf850fbc29c6cb8e0e400c078e754d013e201323ef252ee541a14a94a97e",
+      "text": "轮廓颜色。"
+    },
+    {
+      "id": "BufferPointMaterialOptions",
+      "field": "properties/outlineWidth/description",
+      "sourceHash": "sha256:33cfe440d84a5908f42d6db2a1a0c681a8788501462caff5a9b9246e1e01bbe4",
+      "text": "轮廓宽度，范围为 0～255 像素。"
+    },
+    {
+      "id": "BufferPointMaterialOptions",
+      "field": "properties/size/description",
+      "sourceHash": "sha256:198cecc871eef8dae1114217ff9c59b652191b3db01b229ca66de3eb0202cbee",
+      "text": "点尺寸，范围为 0～255 像素。"
+    },
+    {
+      "id": "BufferPointOptions",
+      "field": "properties/modelMatrix/description",
+      "sourceHash": "sha256:dafdae78f13684907f6f9a43b6291a8d915022921f941ea13135302a75c734e9",
+      "text": "将几何从模型坐标变换到世界坐标。"
+    },
+    {
+      "id": "BufferPolygon.clone",
+      "field": "description",
+      "sourceHash": "sha256:706cc11884fee2ca0bde4844c0309c8ab42edd1ccf45528b877040fccf18768f",
+      "text": "将源多边形数据复制到 result。如果结果多边形不是集合末尾的新多边形，则源与结果必须具有相同的顶点数、孔洞数和三角形数。"
+    },
+    {
+      "id": "BufferPolygon#featureId",
+      "field": "description",
+      "sourceHash": "sha256:802bcb9cd1068dfff9ea3eed90c52b8e86e1ef78099062247a82861e35d78a09",
+      "text": "与图元关联的要素 ID，无需唯一。"
+    },
+    {
+      "id": "BufferPolygon#getHolePositions",
+      "field": "description",
+      "sourceHash": "sha256:2d3260c6925ff442661f972272934443c2cf96ad515c8555a0e2c70df90acbac",
+      "text": "返回指定孔洞内环顶点位置的数组视图。提供 result 时，将顶点位置写入该数组并返回；否则返回集合内存上的 ArrayView。直接修改此数组不会触发渲染更新，须调用 `.setPositions()`。"
+    },
+    {
+      "id": "BufferPolygon#getHolePositions",
+      "field": "params/result/description",
+      "sourceHash": "sha256:2df27ce78f7397a409896ac0cfd6ddf8185c84a3924df886d0b4f877ca4d3959",
+      "text": "用于接收结果的数组，结果类型为 TypedArray。"
+    },
+    {
+      "id": "BufferPolygon#getHoles",
+      "field": "description",
+      "sourceHash": "sha256:54967ee4451b0424f840b25ca1bf81cad8e12968e0ee8f5223e5fe6d16527d80",
+      "text": "获取多边形的孔洞索引。每个孔洞用相对此多边形位置数组的起始偏移表示，并沿内环延续至下一个孔洞偏移或位置数组末尾。提供 result 时，将索引写入该数组并返回；否则返回集合内存上的 ArrayView。直接修改此数组不会触发渲染更新，须调用 `.setHoles()`。"
+    },
+    {
+      "id": "BufferPolygon#getHoleVertexCount",
+      "field": "description",
+      "sourceHash": "sha256:edf0b800beb5991adb82578203e3f8de35cdec76d126a17f9fa04300e3cc7f10",
+      "text": "返回指定孔洞的 VEC3 顶点数量。"
+    },
+    {
+      "id": "BufferPolygon#getOuterPositions",
+      "field": "description",
+      "sourceHash": "sha256:f73e55fbf45b405a05671a03c3f9501206210fa09de806a5d7d5060a9aa5a304",
+      "text": "返回多边形外环顶点位置的数组视图。提供 result 时，将顶点位置写入该数组并返回；否则返回集合内存上的 ArrayView。直接修改此数组不会触发渲染更新，须调用 `.setPositions()`。"
+    },
+    {
+      "id": "BufferPolygon#getPositions",
+      "field": "description",
+      "sourceHash": "sha256:08914254daea353008559bbf0b1040190e19d9cabaf1ef1fb79aefdd9fbeae9f",
+      "text": "返回多边形顶点位置的数组视图。提供 result 时，将顶点位置写入该数组并返回；否则返回集合内存上的 ArrayView。直接修改此数组不会触发渲染更新，须调用 `.setPositions()`。"
+    },
+    {
+      "id": "BufferPolygon#getPositions",
+      "field": "params/result/description",
+      "sourceHash": "sha256:2df27ce78f7397a409896ac0cfd6ddf8185c84a3924df886d0b4f877ca4d3959",
+      "text": "用于接收结果的数组，结果类型为 TypedArray。"
+    },
+    {
+      "id": "BufferPolygon#getTriangles",
+      "field": "description",
+      "sourceHash": "sha256:909e68dc8f4a74555c83752264d0c5cddec9f25f90a41ee38ea5c20b2187d895",
+      "text": "返回多边形三角形索引的数组视图，每个三角形由三个顶点索引表示。提供 result 时，将索引写入该数组并返回；否则返回集合内存上的 ArrayView。直接修改此数组不会触发渲染更新，须调用 `.setTriangles()`。"
+    },
+    {
+      "id": "BufferPolygon#holeCount",
+      "field": "description",
+      "sourceHash": "sha256:1132f13334e75e0bcb8db94688c872cf7b5f3f749a20a5dab168b43e0b0fe827",
+      "text": "多边形的孔洞数量，即孔洞索引数。"
+    },
+    {
+      "id": "BufferPolygon#outerVertexCount",
+      "field": "description",
+      "sourceHash": "sha256:582dfe35dbd7e5f5f95f82552b1ce840441eeb69cc7032da283d7ac4b7e842eb",
+      "text": "多边形外环的位置（顶点）数量，以 VEC3 元素计。"
+    },
+    {
+      "id": "BufferPolygon#outerVertexOffset",
+      "field": "description",
+      "sourceHash": "sha256:35415fb89555aeeb28e4c9d371d74b3e39a92c8b6c01f14becb495216244761a",
+      "text": "多边形外环首顶点在集合位置数组中的偏移，以 VEC3 元素计。"
+    },
+    {
+      "id": "BufferPolygon#setHoles",
+      "field": "description",
+      "sourceHash": "sha256:057eafb9729e55c577c1df47821ea03e5355ed6d2c55bb8ff7405876ac638512",
+      "text": "设置多边形孔洞索引。每个孔洞用相对此多边形位置数组的起始偏移表示，并沿内环延续至下一个孔洞偏移或位置数组末尾。"
+    },
+    {
+      "id": "BufferPolygon#setTriangles",
+      "field": "description",
+      "sourceHash": "sha256:247f0d6ed8d1503f87f73b79038c83ee242ebf94508c3256268da0306a6be347",
+      "text": "设置多边形三角形索引，每个三角形由三个顶点索引表示。"
+    },
+    {
+      "id": "BufferPolygon#show",
+      "field": "description",
+      "sourceHash": "sha256:3bf601cfd6b731bed0a629e4628d36b5ec1b1852f633787b1272f05f7866aff2",
+      "text": "是否显示图元。"
+    },
+    {
+      "id": "BufferPolygon#toJSON",
+      "field": "description",
+      "sourceHash": "sha256:4ff2e03a530bab81c199a8404e786a9da87ba8747f69bbf9ba64799e5ed3987e",
+      "text": "返回表示此多边形的可 JSON 序列化对象。这种编码内存效率较低，通常仅用于调试和测试。"
+    },
+    {
+      "id": "BufferPolygon#toJSON",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:38ce205350a51431dad373a20e64971e370f07ce01ccbec8481ed4f8bfc08e63",
+      "text": "可 JSON 序列化的对象。"
+    },
+    {
+      "id": "BufferPolygon#triangleCount",
+      "field": "description",
+      "sourceHash": "sha256:dc3ee1251d4c3a79b3919901da2a54fcee247057aad22f0a5b53c34bc62fa368",
+      "text": "多边形三角形数量，以 VEC3 索引元素计。"
+    },
+    {
+      "id": "BufferPolygon#vertexCount",
+      "field": "description",
+      "sourceHash": "sha256:0a1f79abd520fe52f5a31720e59a06e9a3580eabcc249aa8fddebb4b654d4645",
+      "text": "多边形的位置（顶点）数量，包括外环及所有内环孔洞，以 VEC3 元素计。"
+    },
+    {
+      "id": "BufferPolygon",
+      "field": "classdesc",
+      "sourceHash": "sha256:c195bc2c6f3a2d33f750bfd323ccf1eeefc3c661997ddd0269d5b53dfb26a207",
+      "text": "绑定 {@link BufferPolygonCollection} 底层缓冲数据的视图。\n<p>BufferPolygon 实例采用{@link https://en.wikipedia.org/wiki/Flyweight_pattern|享元模式}：同一实例可临时绑定到集合中的任意概念多边形，从而以很低的内存开销遍历和更新大型集合。</p>\n<p>多边形包含一个由至少三个位置组成的外线性环，并可包含一个或多个内线性环（孔洞）。每个孔洞用位置数组中的起始顶点索引表示，从该顶点延续至下一个孔洞起点或顶点列表末尾。还存储预先计算的三角剖分，每个三角形由三个顶点索引表示。</p>"
+    },
+    {
+      "id": "BufferPolygonCollection.clone",
+      "field": "description",
+      "sourceHash": "sha256:95d10ce958a601853f96dead9377596917b27482217fccde93c88c95690d702a",
+      "text": "将集合内容复制到结果集合。结果集合不会扩容，必须有足够空间容纳源集合全部图元；已有多边形将被覆盖。\n<p>适合在集合达到容量后分配更大集合，并高效地将多边形转移到新集合。</p>"
+    },
+    {
+      "id": "BufferPolygonCollection#add",
+      "field": "description",
+      "sourceHash": "sha256:e4269324860f7a51ca3780c62a5ef415c6b1fa7fcc09ad7b0d0e3d0586e4c02e",
+      "text": "按给定选项向集合添加多边形，并将 {@link BufferPolygon} 实例绑定到该多边形。提供 result 时使用该实例，否则新建实例。重复调用时，建议复用同一个 BufferPolygon，避免每次分配新对象。"
+    },
+    {
+      "id": "BufferPolygonCollection#byteLength",
+      "field": "description",
+      "sourceHash": "sha256:b9b07c9e8a7dd074162f7d0a0111e908be5a71eb1d5807a2015ab0d1c98cfe4b",
+      "text": "集合拥有的全部缓冲的总字节数，包括 {@link primitiveCountMax} 分配的尚未使用空间，即使尚未在该空间添加多边形。"
+    },
+    {
+      "id": "BufferPolygonCollection#holeCount",
+      "field": "description",
+      "sourceHash": "sha256:3bb8cec7976ce418868d28ebff949156d761fd802765ffc0b576810433f097ab",
+      "text": "集合中的孔洞数量，必须小于等于 {@link holeCountMax}。"
+    },
+    {
+      "id": "BufferPolygonCollection#holeCountMax",
+      "field": "description",
+      "sourceHash": "sha256:d3b0e1e545d09d713d4fad3c4f60b557202a8945627a9a069575dd62ce09ec24",
+      "text": "集合可容纳的最大孔洞数量，必须大于等于 {@link holeCount}。"
+    },
+    {
+      "id": "BufferPolygonCollection#triangleCount",
+      "field": "description",
+      "sourceHash": "sha256:09e0b9a82e89b6b5753f2f4618a07f8d8bebe99f8b7f63533a5c0de76391f9d8",
+      "text": "集合中的三角形数量，必须小于等于 {@link triangleCountMax}。"
+    },
+    {
+      "id": "BufferPolygonCollection#triangleCountMax",
+      "field": "description",
+      "sourceHash": "sha256:50e0012842b519a523b4b8db45db01882108e7e9e0a3a993901bc1b30ef82126",
+      "text": "集合可容纳的最大三角形数量，必须大于等于 {@link triangleCount}。"
+    },
+    {
+      "id": "BufferPolygonCollection",
+      "field": "classdesc",
+      "sourceHash": "sha256:ca1c15c97b1a044647c8a7f4927589009120b3f9b2b2021bb3ebea7b252a0f61",
+      "text": "采用 ArrayBuffer 存储的多边形集合，以优化性能和内存。\n<p>默认缓冲分配量为任意预设值，集合不可扩容；已知所需容量时，应在构造函数中指定各缓冲的容量。</p>"
+    },
+    {
+      "id": "BufferPolygonCollection",
+      "field": "params/options.allowPicking/description",
+      "sourceHash": "sha256:9ce763ef285c13b875762085c046766a054ebffdc7a7bd643de4592301d030ff",
+      "text": "为 <code>true</code> 时，可通过 {@link Scene#pick} 拾取图元；为 <code>false</code> 时可降低内存与初始化开销。"
+    },
+    {
+      "id": "BufferPolygonCollection",
+      "field": "params/options.boundingVolume/description",
+      "sourceHash": "sha256:d6451397396b58cc25178ab6bffa5a9069b8112fbf76ec15dde8b1b9aa6b8a88",
+      "text": "集合的世界空间包围体。未指定时，自动计算并在图元位置变化时更新；已指定时，由用户按需更新。大型动态集合可通过预先计算包围体并仅在必要时更新来提高性能。"
+    },
+    {
+      "id": "BufferPolygonMaterial#color",
+      "field": "description",
+      "sourceHash": "sha256:f7f6c0ff79d3408a0ceca0bc3732fc5efaa8c4b7c51b1b4172da2d90635b6624",
+      "text": "填充颜色。"
+    },
+    {
+      "id": "BufferPolygonMaterial#outlineColor",
+      "field": "description",
+      "sourceHash": "sha256:30dadf850fbc29c6cb8e0e400c078e754d013e201323ef252ee541a14a94a97e",
+      "text": "轮廓颜色。"
+    },
+    {
+      "id": "BufferPolygonMaterial#outlineWidth",
+      "field": "description",
+      "sourceHash": "sha256:33cfe440d84a5908f42d6db2a1a0c681a8788501462caff5a9b9246e1e01bbe4",
+      "text": "轮廓宽度，范围为 0～255 像素。"
+    },
+    {
+      "id": "BufferPolygonMaterial#toJSON",
+      "field": "description",
+      "sourceHash": "sha256:f1e91e8bd3ebdaef4b4115a45b8fec2a7492a7142fb6184587b109df436f097e",
+      "text": "返回表示此材质的可 JSON 序列化对象。这种编码内存效率较低，通常仅用于调试和测试。"
+    },
+    {
+      "id": "BufferPolygonMaterial#toJSON",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:38ce205350a51431dad373a20e64971e370f07ce01ccbec8481ed4f8bfc08e63",
+      "text": "可 JSON 序列化的对象。"
+    },
+    {
+      "id": "BufferPolygonMaterial",
+      "field": "classdesc",
+      "sourceHash": "sha256:18e118188f0452169972922c63897740c1133b1449b794b96579749136421a2d",
+      "text": "{@link BufferPolygon} 的材质说明。\n<p>BufferPolygonMaterial 对象可{@link Packable|打包}，在调用 {@link BufferPolygon#setMaterial} 时存储。之后修改材质对象不会影响多边形，须再次调用 setMaterial() 才会生效。</p>"
+    },
+    {
+      "id": "BufferPolygonMaterialOptions",
+      "field": "properties/color/description",
+      "sourceHash": "sha256:f7f6c0ff79d3408a0ceca0bc3732fc5efaa8c4b7c51b1b4172da2d90635b6624",
+      "text": "填充颜色。"
+    },
+    {
+      "id": "BufferPolygonMaterialOptions",
+      "field": "properties/outlineColor/description",
+      "sourceHash": "sha256:30dadf850fbc29c6cb8e0e400c078e754d013e201323ef252ee541a14a94a97e",
+      "text": "轮廓颜色。"
+    },
+    {
+      "id": "BufferPolygonMaterialOptions",
+      "field": "properties/outlineWidth/description",
+      "sourceHash": "sha256:33cfe440d84a5908f42d6db2a1a0c681a8788501462caff5a9b9246e1e01bbe4",
+      "text": "轮廓宽度，范围为 0～255 像素。"
+    },
+    {
+      "id": "BufferPolygonOptions",
+      "field": "properties/modelMatrix/description",
+      "sourceHash": "sha256:dafdae78f13684907f6f9a43b6291a8d915022921f941ea13135302a75c734e9",
+      "text": "将几何从模型坐标变换到世界坐标。"
+    },
+    {
+      "id": "BufferPolyline.clone",
+      "field": "description",
+      "sourceHash": "sha256:e5a4e8090c27890f4617a0ae4d14b0086d041f6c4901c9ab939244bbabe2870a",
+      "text": "将源折线数据复制到 result。如果结果折线不是集合末尾的新折线，则源与结果必须具有相同的顶点数。"
+    },
+    {
+      "id": "BufferPolyline#featureId",
+      "field": "description",
+      "sourceHash": "sha256:802bcb9cd1068dfff9ea3eed90c52b8e86e1ef78099062247a82861e35d78a09",
+      "text": "与图元关联的要素 ID，无需唯一。"
+    },
+    {
+      "id": "BufferPolyline#getPositions",
+      "field": "description",
+      "sourceHash": "sha256:74bc81ac6453992ac3022fe813faf3ff7b7262b65de61c6194ccebe876e8539d",
+      "text": "返回折线顶点位置的数组视图。提供 result 时，将顶点位置写入该数组并返回；否则返回集合内存上的 ArrayView。直接修改此数组不会触发渲染更新，须调用 `.setPositions()`。"
+    },
+    {
+      "id": "BufferPolyline#getPositions",
+      "field": "params/result/description",
+      "sourceHash": "sha256:2df27ce78f7397a409896ac0cfd6ddf8185c84a3924df886d0b4f877ca4d3959",
+      "text": "用于接收结果的数组，结果类型为 TypedArray。"
+    },
+    {
+      "id": "BufferPolyline#show",
+      "field": "description",
+      "sourceHash": "sha256:3bf601cfd6b731bed0a629e4628d36b5ec1b1852f633787b1272f05f7866aff2",
+      "text": "是否显示图元。"
+    },
+    {
+      "id": "BufferPolyline#toJSON",
+      "field": "description",
+      "sourceHash": "sha256:07d96dae0f9d283406bfb265b5f7f94d3ce87014c1e6fc1f771b94e0906fa666",
+      "text": "返回表示此折线的可 JSON 序列化对象。这种编码内存效率较低，通常仅用于调试和测试。"
+    },
+    {
+      "id": "BufferPolyline#toJSON",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:38ce205350a51431dad373a20e64971e370f07ce01ccbec8481ed4f8bfc08e63",
+      "text": "可 JSON 序列化的对象。"
+    },
+    {
+      "id": "BufferPolyline#vertexCount",
+      "field": "description",
+      "sourceHash": "sha256:da411d1e8496da2d3b6c27a951dfae9ad34d385adcd3e37491d5e5de9a142eae",
+      "text": "折线的位置（顶点）数量，以 VEC3 元素计。"
+    },
+    {
+      "id": "BufferPolyline",
+      "field": "classdesc",
+      "sourceHash": "sha256:aa164fa12908346382bf8a4775dbe9dbed200393a54d77e095b5ff5f505e9710",
+      "text": "绑定 {@link BufferPolylineCollection} 底层缓冲数据的视图。\n<p>BufferPolyline 实例采用{@link https://en.wikipedia.org/wiki/Flyweight_pattern|享元模式}：同一实例可临时绑定到集合中的任意概念折线，从而以很低的内存开销遍历和更新大型集合。</p>\n折线由至少两个位置表示。"
+    },
+    {
+      "id": "BufferPolylineCollection#add",
+      "field": "description",
+      "sourceHash": "sha256:6255bbde517dc060d6062a5ce9cbdc34ea28061acab48f66d76d494412e40515",
+      "text": "按给定选项向集合添加折线，并将 {@link BufferPolyline} 实例绑定到该折线。提供 result 时使用该实例，否则新建实例。重复调用时，建议复用同一个 BufferPolyline，避免每次分配新对象。"
+    },
+    {
+      "id": "BufferPolylineCollection",
+      "field": "classdesc",
+      "sourceHash": "sha256:0a71f4a3ca64b694baa86ce98d0b27a6b6589a9e420a1a7edc8b56a00254309d",
+      "text": "采用 ArrayBuffer 存储的折线集合，以优化性能和内存。\n<p>默认缓冲分配量为任意预设值，集合不可扩容；已知所需容量时，应在构造函数中指定各缓冲的容量。</p>"
+    },
+    {
+      "id": "BufferPolylineMaterial#color",
+      "field": "description",
+      "sourceHash": "sha256:f7f6c0ff79d3408a0ceca0bc3732fc5efaa8c4b7c51b1b4172da2d90635b6624",
+      "text": "填充颜色。"
+    },
+    {
+      "id": "BufferPolylineMaterial#outlineColor",
+      "field": "description",
+      "sourceHash": "sha256:30dadf850fbc29c6cb8e0e400c078e754d013e201323ef252ee541a14a94a97e",
+      "text": "轮廓颜色。"
+    },
+    {
+      "id": "BufferPolylineMaterial#outlineWidth",
+      "field": "description",
+      "sourceHash": "sha256:33cfe440d84a5908f42d6db2a1a0c681a8788501462caff5a9b9246e1e01bbe4",
+      "text": "轮廓宽度，范围为 0～255 像素。"
+    },
+    {
+      "id": "BufferPolylineMaterial#toJSON",
+      "field": "description",
+      "sourceHash": "sha256:f1e91e8bd3ebdaef4b4115a45b8fec2a7492a7142fb6184587b109df436f097e",
+      "text": "返回表示此材质的可 JSON 序列化对象。这种编码内存效率较低，通常仅用于调试和测试。"
+    },
+    {
+      "id": "BufferPolylineMaterial#toJSON",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:38ce205350a51431dad373a20e64971e370f07ce01ccbec8481ed4f8bfc08e63",
+      "text": "可 JSON 序列化的对象。"
+    },
+    {
+      "id": "BufferPolylineMaterial#width",
+      "field": "description",
+      "sourceHash": "sha256:53d22f12d60f398f95215905517aa7a6e0c954a49ae62e1fb5301875586a5bc0",
+      "text": "折线宽度，范围为 0～255 像素。"
+    },
+    {
+      "id": "BufferPolylineMaterial",
+      "field": "classdesc",
+      "sourceHash": "sha256:6bcc63572302b7034ff93f7062a819668c8dd5d408cbfe6c1ddeef56a1d8d8f9",
+      "text": "{@link BufferPolyline} 的材质说明。\n<p>BufferPolylineMaterial 对象可{@link Packable|打包}，在调用 {@link BufferPolyline#setMaterial} 时存储。之后修改材质对象不会影响折线，须再次调用 setMaterial() 才会生效。</p>"
+    },
+    {
+      "id": "BufferPolylineMaterialOptions",
+      "field": "properties/color/description",
+      "sourceHash": "sha256:f7f6c0ff79d3408a0ceca0bc3732fc5efaa8c4b7c51b1b4172da2d90635b6624",
+      "text": "填充颜色。"
+    },
+    {
+      "id": "BufferPolylineMaterialOptions",
+      "field": "properties/outlineColor/description",
+      "sourceHash": "sha256:30dadf850fbc29c6cb8e0e400c078e754d013e201323ef252ee541a14a94a97e",
+      "text": "轮廓颜色。"
+    },
+    {
+      "id": "BufferPolylineMaterialOptions",
+      "field": "properties/outlineWidth/description",
+      "sourceHash": "sha256:33cfe440d84a5908f42d6db2a1a0c681a8788501462caff5a9b9246e1e01bbe4",
+      "text": "轮廓宽度，范围为 0～255 像素。"
+    },
+    {
+      "id": "BufferPolylineMaterialOptions",
+      "field": "properties/width/description",
+      "sourceHash": "sha256:b99ae3a098adee13dc7717249c4c646e0882bf70517c053d171e2d5eb3643cb0",
+      "text": "线宽，范围为 0～255 像素。"
+    },
+    {
+      "id": "BufferPolylineOptions",
+      "field": "properties/modelMatrix/description",
+      "sourceHash": "sha256:dafdae78f13684907f6f9a43b6291a8d915022921f941ea13135302a75c734e9",
+      "text": "将几何从模型坐标变换到世界坐标。"
+    },
+    {
+      "id": "BufferPrimitive.clone",
+      "field": "description",
+      "sourceHash": "sha256:37ade2d71f8ef1eecb7bc23ac65a4a61fa477210ade4cae9e0ee2d767de2b937",
+      "text": "将源图元数据复制到 result。如果结果图元不是集合末尾的新图元，则源与结果必须具有相同的顶点数。"
+    },
+    {
+      "id": "BufferPrimitive#featureId",
+      "field": "description",
+      "sourceHash": "sha256:802bcb9cd1068dfff9ea3eed90c52b8e86e1ef78099062247a82861e35d78a09",
+      "text": "与图元关联的要素 ID，无需唯一。"
+    },
+    {
+      "id": "BufferPrimitive#show",
+      "field": "description",
+      "sourceHash": "sha256:3bf601cfd6b731bed0a629e4628d36b5ec1b1852f633787b1272f05f7866aff2",
+      "text": "是否显示图元。"
+    },
+    {
+      "id": "BufferPrimitive#toJSON",
+      "field": "description",
+      "sourceHash": "sha256:b85df0d45f5b3ed3839caa391a7bd05a17621968aae39924d005eb51900694f8",
+      "text": "返回表示此图元的可 JSON 序列化对象。这种编码内存效率较低，通常仅用于调试和测试。"
+    },
+    {
+      "id": "BufferPrimitive#toJSON",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:38ce205350a51431dad373a20e64971e370f07ce01ccbec8481ed4f8bfc08e63",
+      "text": "可 JSON 序列化的对象。"
+    },
+    {
+      "id": "BufferPrimitive",
+      "field": "classdesc",
+      "sourceHash": "sha256:a7ab081070217b4609a116a4b59f5ef4cfe7c596c1d557d647b967cd53332503",
+      "text": "绑定 {@link BufferPrimitiveCollection} 底层缓冲数据的抽象视图。\n<p>遍历大型集合时，应复用 BufferPrimitive 实例：在读写某图元前将实例临时绑定到该图元索引，之后再绑定到下一个图元。这采用了{@link https://en.wikipedia.org/wiki/Flyweight_pattern|享元模式}。</p>"
+    },
+    {
+      "id": "BufferPrimitiveCollection.clone",
+      "field": "description",
+      "sourceHash": "sha256:842c7532224f9aad2ab19c65ed08f878a70a6c319f904f5dbebd75db7c8a81ee",
+      "text": "将集合内容复制到结果集合。结果集合不会扩容，必须有足够空间容纳源集合全部图元；已有图元将被覆盖。\n<p>适合在集合达到容量后分配更大集合，并高效地将要素转移到新集合。</p>"
+    },
+    {
+      "id": "BufferPrimitiveCollection.DEFAULT_CAPACITY",
+      "field": "description",
+      "sourceHash": "sha256:42af33c676f68b5336bf12ecfd0d1fc580560826e4adec568243fcf9b3341a33",
+      "text": "新集合各缓冲的默认容量，按元素数量计，例如顶点缓冲中的顶点数、图元缓冲中的图元数。此值为任意预设量，集合不可扩容；已知所需容量时，应在构造函数中指定各缓冲容量。"
+    },
+    {
+      "id": "BufferPrimitiveCollection#_modelMatrix",
+      "field": "description",
+      "sourceHash": "sha256:dafdae78f13684907f6f9a43b6291a8d915022921f941ea13135302a75c734e9",
+      "text": "将几何从模型坐标变换到世界坐标。"
+    },
+    {
+      "id": "BufferPrimitiveCollection#add",
+      "field": "description",
+      "sourceHash": "sha256:de1c719b6abb30b2efe4ae8656aaf23c15691ba73a67f2293daba1a29c386970",
+      "text": "按给定选项向集合添加图元，并将 {@link BufferPrimitive} 实例绑定到该图元。提供 result 时使用该实例，否则新建实例。重复调用时，建议复用同一个 BufferPrimitive，避免每次分配新对象。"
+    },
+    {
+      "id": "BufferPrimitiveCollection#boundingVolume",
+      "field": "description",
+      "sourceHash": "sha256:fdd04cf4caeae6f98627faeb44a2c03b4156b6d6cb8645a9dc547d4aa9ea8540",
+      "text": "集合中全部图元的世界空间包围体，包含显示和隐藏的图元。"
+    },
+    {
+      "id": "BufferPrimitiveCollection#byteLength",
+      "field": "description",
+      "sourceHash": "sha256:f4cadb12110fb3c8ea477940d60ce90e3b3ebf83d1d23b549872fad429c6a1de",
+      "text": "集合拥有的全部缓冲的总字节数，包括 {@link primitiveCountMax} 分配的尚未使用空间，即使尚未在该空间添加图元。"
+    },
+    {
+      "id": "BufferPrimitiveCollection#debugShowBoundingVolume",
+      "field": "description",
+      "sourceHash": "sha256:aada12c696fc8726817165d04c2ff7f8bc646a5a40f35a419053259d53655a5a",
+      "text": "此属性仅供调试，不应在生产环境中使用，也未做性能优化。<p>绘制图元中每条绘制命令的包围球。</p>"
+    },
+    {
+      "id": "BufferPrimitiveCollection#destroy",
+      "field": "description",
+      "sourceHash": "sha256:de0deb7647b5080f3609f0b974e385ad570091d056eb2b1999b8ab471e645b6e",
+      "text": "销毁集合及其 GPU 资源。"
+    },
+    {
+      "id": "BufferPrimitiveCollection#get",
+      "field": "description",
+      "sourceHash": "sha256:bad50747c7311aca3cedf2d39eb0e8bf7e5257b176594b5fbf385d054b123fb0",
+      "text": "将给定 {@link BufferPrimitive} 绑定为此集合中指定索引图元的视图，以读写图元属性。遍历大型集合时，应在循环中复用同一个 BufferPrimitive；将已有实例绑定到不同图元开销很低，可避免为每个图元分配对象。"
+    },
+    {
+      "id": "BufferPrimitiveCollection#get",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:f553f4eaeb499b7ac928500423749cb960f9396c79a2fe8a4096dfe4f1628ab2",
+      "text": "作为 result 参数传入的 BufferPrimitive 实例，现已绑定到指定图元索引。"
+    },
+    {
+      "id": "BufferPrimitiveCollection#modelMatrix",
+      "field": "description",
+      "sourceHash": "sha256:dafdae78f13684907f6f9a43b6291a8d915022921f941ea13135302a75c734e9",
+      "text": "将几何从模型坐标变换到世界坐标。"
+    },
+    {
+      "id": "BufferPrimitiveCollection#positionDatatype",
+      "field": "description",
+      "sourceHash": "sha256:0b1d4e54ffd91eec6ea89fcc13dd5a1d5765acef0dfc22295c5d6985fd2bbd60",
+      "text": "存储位置值所用的分量数据类型。"
+    },
+    {
+      "id": "BufferPrimitiveCollection#positionNormalized",
+      "field": "description",
+      "sourceHash": "sha256:8212cf7d0a9b57444c4491524d968179abbeb3630e549b4015b0c100251facd0",
+      "text": "为 <code>true</code> 时，将整数位置值归一化，使完整整数范围映射至有符号的 [-1, 1] 或无符号的 [0, 1]。"
+    },
+    {
+      "id": "BufferPrimitiveCollection#primitiveCount",
+      "field": "description",
+      "sourceHash": "sha256:2cf066b84fbd6aa61a524d2e4f2850ea10a1b7dc5beb6ec8ca2a728d25553584",
+      "text": "集合中的图元数量，必须小于等于 {@link primitiveCountMax}。"
+    },
+    {
+      "id": "BufferPrimitiveCollection#primitiveCountMax",
+      "field": "description",
+      "sourceHash": "sha256:8c03f08146529a1f7719c17594cd7c1b7f7204dd1e775e3ac8af9070328e9590",
+      "text": "集合可容纳的最大图元数量，必须大于等于 {@link primitiveCount}。"
+    },
+    {
+      "id": "BufferPrimitiveCollection#show",
+      "field": "description",
+      "sourceHash": "sha256:3647cf81e0e7096802170b04c1c8b4ad40bbb866adbb8fbb807d55ce8dee17aa",
+      "text": "决定是否显示此集合中的图元。"
+    },
+    {
+      "id": "BufferPrimitiveCollection#sort",
+      "field": "description",
+      "sourceHash": "sha256:917261a833fb1c8d1d9d4eb3cdaa5ec09fca7c0c1ae8806d039fe72e6c07199a",
+      "text": "对集合图元排序。排序会改变图元索引，但不会改变要素 ID，因此还返回旧索引到新索引的映射数组。重复排序时，可将同一数组作为 result 参数复用。"
+    },
+    {
+      "id": "BufferPrimitiveCollection#sort",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:1d74c3d1df3e7a99ebfc6f13dbe0a3594d184068320bd8097b6a749570691f43",
+      "text": "旧索引到新索引的映射。"
+    },
+    {
+      "id": "BufferPrimitiveCollection#toJSON",
+      "field": "description",
+      "sourceHash": "sha256:d674f67eb0841c971961cdeccf3c81f1000120d5d37cce6b5f02318193cb2ee0",
+      "text": "返回表示集合的可 JSON 序列化数组。这种编码内存效率较低，通常仅用于调试和测试。"
+    },
+    {
+      "id": "BufferPrimitiveCollection#toJSON",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:206f2419f97a6473e06a8b05c8b768d7ba60eb9345777ce9da4f65b3a4e12f64",
+      "text": "可 JSON 序列化对象的列表，每个对象对应一个集合图元。"
+    },
+    {
+      "id": "BufferPrimitiveCollection#vertexCount",
+      "field": "description",
+      "sourceHash": "sha256:cd8b40699ed58374ee92fde84a62dd5cbc52294ace7d2d7ed29df061c1f7fd0f",
+      "text": "集合中的顶点数量，必须小于等于 {@link vertexCountMax}。"
+    },
+    {
+      "id": "BufferPrimitiveCollection#vertexCountMax",
+      "field": "description",
+      "sourceHash": "sha256:69286268edb0784e3fd32e63e4d244a80c4ebd54a87e5b859fe4b3125fac57a1",
+      "text": "集合可容纳的最大顶点数量，必须大于等于 {@link vertexCount}。"
+    },
+    {
+      "id": "BufferPrimitiveCollection",
+      "field": "classdesc",
+      "sourceHash": "sha256:1b3b723cb683fef95fda25407d15ae2412e1a01aec1374b7ad62bbd2b11bbf77",
+      "text": "采用 ArrayBuffer 存储的图元集合，以优化性能和内存。\n<p>若集合包含 N 个图元，为充分发挥性能优势，应避免同时分配 N 个关联 JavaScript 对象。处理大型集合时，可复用 {@link BufferPrimitive}、{@link Color}、{@link Cartesian3} 等对象，采用{@link https://en.wikipedia.org/wiki/Flyweight_pattern|享元模式}。</p>"
+    },
+    {
+      "id": "BufferPrimitiveCollection",
+      "field": "params/options.allowPicking/description",
+      "sourceHash": "sha256:9ce763ef285c13b875762085c046766a054ebffdc7a7bd643de4592301d030ff",
+      "text": "为 <code>true</code> 时，可通过 {@link Scene#pick} 拾取图元；为 <code>false</code> 时可降低内存与初始化开销。"
+    },
+    {
+      "id": "BufferPrimitiveCollection",
+      "field": "params/options.boundingVolume/description",
+      "sourceHash": "sha256:d6451397396b58cc25178ab6bffa5a9069b8112fbf76ec15dde8b1b9aa6b8a88",
+      "text": "集合的世界空间包围体。未指定时，自动计算并在图元位置变化时更新；已指定时，由用户按需更新。大型动态集合可通过预先计算包围体并仅在必要时更新来提高性能。"
+    },
+    {
+      "id": "BufferPrimitiveCollection",
+      "field": "params/options.modelMatrix/description",
+      "sourceHash": "sha256:dafdae78f13684907f6f9a43b6291a8d915022921f941ea13135302a75c734e9",
+      "text": "将几何从模型坐标变换到世界坐标。"
+    },
+    {
+      "id": "BufferPrimitiveCollection",
+      "field": "params/options.positionNormalized/description",
+      "sourceHash": "sha256:66c4c10161a61283dcb64fc298ee6300e23c71658147b0ac8d6a6af7b5e24f67",
+      "text": "为 <code>true</code> 时，将整数位置值归一化，使完整整数范围映射至有符号的 [-1, 1] 或无符号的 [0, 1]。仅对 BYTE、UNSIGNED_BYTE、SHORT、UNSIGNED_SHORT 整数位置数据类型有效。"
+    },
+    {
+      "id": "BufferPrimitiveMaterial.pack",
+      "field": "description",
+      "sourceHash": "sha256:4b956736771460bc70360de3c8cd58293506a12e7808b01de7f2ed54857c513c",
+      "text": "将给定材质按字节偏移写入给定 DataView。"
+    },
+    {
+      "id": "BufferPrimitiveMaterial.unpack",
+      "field": "description",
+      "sourceHash": "sha256:f64f6ab7857e89f5312af6ba0a32c2959c760104d4c05e933fbe2f622e13a1f6",
+      "text": "从已打包的 DataView 中读取材质。"
+    },
+    {
+      "id": "BufferPrimitiveMaterial.unpack",
+      "field": "params/byteOffset/description",
+      "sourceHash": "sha256:38e5f0af980cb7c60559f1341e3c1b6d87b09b5372da47f80349c45bce191c6d",
+      "text": "开始解包的字节偏移。"
+    },
+    {
+      "id": "BufferPrimitiveMaterial.unpack",
+      "field": "params/result/description",
+      "sourceHash": "sha256:913ed489f7f7352ace87219931860ecd6691d2dfd2ca1553e764f0a0b3f84061",
+      "text": "接收解包结果的材质对象。"
+    },
+    {
+      "id": "BufferPrimitiveMaterial.unpack",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:a54b0f30c2aa731c189258f0859d3be8de1d34d05d1b1b0643a318eda001ed78",
+      "text": "接收解包结果后修改的 result 材质。"
+    },
+    {
+      "id": "BufferPrimitiveMaterial#color",
+      "field": "description",
+      "sourceHash": "sha256:f7f6c0ff79d3408a0ceca0bc3732fc5efaa8c4b7c51b1b4172da2d90635b6624",
+      "text": "填充颜色。"
+    },
+    {
+      "id": "BufferPrimitiveMaterial#outlineColor",
+      "field": "description",
+      "sourceHash": "sha256:30dadf850fbc29c6cb8e0e400c078e754d013e201323ef252ee541a14a94a97e",
+      "text": "轮廓颜色。"
+    },
+    {
+      "id": "BufferPrimitiveMaterial#outlineWidth",
+      "field": "description",
+      "sourceHash": "sha256:33cfe440d84a5908f42d6db2a1a0c681a8788501462caff5a9b9246e1e01bbe4",
+      "text": "轮廓宽度，范围为 0～255 像素。"
+    },
+    {
+      "id": "BufferPrimitiveMaterial#toJSON",
+      "field": "description",
+      "sourceHash": "sha256:f1e91e8bd3ebdaef4b4115a45b8fec2a7492a7142fb6184587b109df436f097e",
+      "text": "返回表示此材质的可 JSON 序列化对象。这种编码内存效率较低，通常仅用于调试和测试。"
+    },
+    {
+      "id": "BufferPrimitiveMaterial#toJSON",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:38ce205350a51431dad373a20e64971e370f07ce01ccbec8481ed4f8bfc08e63",
+      "text": "可 JSON 序列化的对象。"
+    },
+    {
+      "id": "BufferPrimitiveMaterial",
+      "field": "classdesc",
+      "sourceHash": "sha256:7842362e25d8e9121d810ef9c9fe35313557db19fd009634828131ddffb90d07",
+      "text": "{@link BufferPrimitive} 的抽象材质说明。\n<p>BufferPrimitiveMaterial 对象可{@link Packable|打包}，在调用 {@link BufferPrimitive#setMaterial} 时存储。之后修改材质对象不会影响图元，须再次调用 setMaterial() 才会生效。</p>"
+    },
+    {
+      "id": "BufferPrimitiveMaterialOptions",
+      "field": "properties/color/description",
+      "sourceHash": "sha256:f7f6c0ff79d3408a0ceca0bc3732fc5efaa8c4b7c51b1b4172da2d90635b6624",
+      "text": "填充颜色。"
+    },
+    {
+      "id": "BufferPrimitiveMaterialOptions",
+      "field": "properties/outlineColor/description",
+      "sourceHash": "sha256:30dadf850fbc29c6cb8e0e400c078e754d013e201323ef252ee541a14a94a97e",
+      "text": "轮廓颜色。"
+    },
+    {
+      "id": "BufferPrimitiveMaterialOptions",
+      "field": "properties/outlineWidth/description",
+      "sourceHash": "sha256:33cfe440d84a5908f42d6db2a1a0c681a8788501462caff5a9b9246e1e01bbe4",
+      "text": "轮廓宽度，范围为 0～255 像素。"
+    },
+    {
+      "id": "BufferPrimitiveOptions",
+      "field": "properties/modelMatrix/description",
+      "sourceHash": "sha256:dafdae78f13684907f6f9a43b6291a8d915022921f941ea13135302a75c734e9",
+      "text": "将几何从模型坐标变换到世界坐标。"
+    }
+  ]
+}

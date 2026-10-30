@@ -515,3 +515,32 @@ test("metadata documentation displays covariance units and tile child masks", as
   });
   expect(errors).toEqual([]);
 });
+
+test("specialized documentation displays buffer mutation and voxel sampling layout", async ({
+  page,
+}, info) => {
+  const errors = [];
+  page.on("pageerror", (error) => errors.push(error.message));
+  page.on("response", (response) => {
+    if (response.status() >= 400) {
+      errors.push(`${response.status()} ${response.url()}`);
+    }
+  });
+  await page.route(/^https?:\/\/(?!127\.0\.0\.1:8104)/, (route) =>
+    route.abort(),
+  );
+  const prefix = "/deep/site/vendor/engine/Documentation/";
+  await page.goto(`${prefix}BufferPolygon.html#getPositions`);
+  await expect(page.locator('[id="getPositions"]')).toBeVisible();
+  await expect(page.locator("#main")).toContainText("不会触发渲染更新");
+  await page.goto(`${prefix}VoxelContent.html#metadata`);
+  await expect(page.locator('[id="metadata"]')).toBeVisible();
+  await expect(page.locator("#main")).toContainText("X 索引变化最快");
+  await info.attach("specialized-documentation", {
+    body: await page.screenshot({
+      path: info.outputPath("specialized-documentation.png"),
+    }),
+    contentType: "image/png",
+  });
+  expect(errors).toEqual([]);
+});
