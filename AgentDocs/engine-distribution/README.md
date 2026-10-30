@@ -5,12 +5,12 @@
 | Field                  | Value                                                                     |
 | ---------------------- | ------------------------------------------------------------------------- |
 | Extension slug         | `engine-distribution`                                                     |
-| Status                 | `active`                                                                  |
+| Status                 | `completed`                                                               |
 | Planning model         | `extension`                                                               |
-| Active extension plan  | [Distribution](plans/2026-10-29-extension.md)                             |
-| Current phase          | T10 audit found required reference/demo follow-up                         |
+| Active extension plan  | None; latest [Distribution](plans/2026-10-29-extension.md)                |
+| Current phase          | All phases completed                                                      |
 | Active standalone plan | None; latest [Native batch](plans/2026-10-30-native-translation-batch.md) |
-| Active phase plan      | None; latest [T10](plans/2026-10-30-t10-translation-delivery-audit.md)    |
+| Active phase plan      | None; latest [T11](plans/2026-10-30-t11-reference-prose.md)               |
 | Architecture contact   | Architecture Agent (current task)                                         |
 | Execution contact      | Execution Agent (current task)                                            |
 | Last updated           | 2026-10-30                                                                |
@@ -41,7 +41,7 @@ and committed as `05362428b6`; [C2](plans/2026-10-30-c2-chinese-edition.md) is
 
 All 73 owned API source files maintain Chinese prose directly. The 2,337 published owned
 fields include synthetic VERSION and bypass external translation. Native English comments
-remain intact; independent catalogs cover all 15,294 native fields.
+remain intact; independent catalogs cover all 15,523 native fields.
 Missing/stale/unused are all zero; pure numeric/formula descriptions remain literal. Each build overwrites source
 inventory/report without altering maintained catalogs. Historical bilingual delivery in
 [ADR-0206](../../Documentation/SceneGIS/Decisions/ADR-0206-documentation-localization.md) and
@@ -59,13 +59,15 @@ No upstream or runtime changes.
 [reviewed](reviews/2026-10-29-asset-directories.md). SGP-0074 filters directory entries in the
 shared asset stream. Rebuilt artifact has zero empty directories; 8 Node and 7 browser tests pass.
 
-## Delivery audit finding
+## Final translation delivery
 
-[T10](plans/2026-10-30-t10-translation-delivery-audit.md) completed the full artifact check:
-35 Node checks and 18 browser cases pass, including strict declarations, both Worlds and resources.
-Its [review](reviews/2026-10-30-t10-translation-delivery-audit.md) finds P1: see/demo prose is
-missing from the translation inventory. All 15,294 currently tracked fields are covered, but
-the continuous goal remains active pending T11 extraction/translation and final audit.
+[T11](plans/2026-10-30-t11-reference-prose.md) and its
+[final review](reviews/2026-10-30-t11-reference-prose.md) complete the continuous goal:
+15,523 native fields covered, zero missing/stale/unused, 2,337 owned Chinese source fields,
+533 pages and 7,943 symbols. Full branded build, 38 Node checks and 19 browser cases pass.
+The retained [T10 finding](reviews/2026-10-30-t10-translation-delivery-audit.md) is resolved
+by adding 229 see/demo prose fields to the same independent source-hash route.
+No unresolved new review, SDK/runtime/upstream edit or generated artifact commit remains.
 
 ## Latest specialized phase
 
@@ -157,9 +159,9 @@ SDK consumes root api-doclets.json/api-index.json with output locale and per-sym
 sourceFields identify direct Chinese prose and translatedFields/fallbackFields identify native
 translation coverage. No locale discovery or duplicate English tree remains.
 
-Full build, strict declarations, 35 Node checks and 18 browser cases pass, including root/nested
+Full build, strict declarations, 38 Node checks and 19 browser cases pass, including root/nested
 resources, both Worlds, Chinese docs, name-only filtering, links and lifecycle.
 [SDK guide](../../Documentation/SceneGIS/Distribution.md) and
-[translation maintenance](../../Documentation/i18n/README.md) cover consumption and native updates.
-T1 through T9 are checkpointed. T10 found omitted see/demo prose; its open P1 requires T11.
-The continuous goal is active and must not close on the current tracked-field count alone.
+[translation maintenance](../../Documentation/i18n/README.md) cover consumption and source-hash
+updates. T1–T11 are reviewed and independently checkpointed. The current-source translation
+program is complete; future source changes must satisfy the complete-coverage checks again.

@@ -1,0 +1,1380 @@
+{
+  "schemaVersion": 1,
+  "locale": "zh-CN",
+  "entries": [
+    {
+      "id": "Appearance",
+      "field": "demo/0",
+      "sourceHash": "sha256:3933335fe55f111aa3d992c52b454831c095d189a039fd3d9d2cb38e03828835",
+      "text": "{@link https://sandcastle.cesium.com/index.html?id=geometry-and-appearances|几何与外观示例}"
+    },
+    {
+      "id": "Geometry",
+      "field": "demo/0",
+      "sourceHash": "sha256:3933335fe55f111aa3d992c52b454831c095d189a039fd3d9d2cb38e03828835",
+      "text": "{@link https://sandcastle.cesium.com/index.html?id=geometry-and-appearances|几何与外观示例}"
+    },
+    {
+      "id": "Appearance#material",
+      "field": "see/0",
+      "sourceHash": "sha256:1babc5cb0508782cea9ebb42b2d49e9bff048e59b0cbe673893ca0b0e87d52d5",
+      "text": "{@link https://github.com/CesiumGS/cesium/wiki/Fabric|Fabric 材质系统}"
+    },
+    {
+      "id": "EllipsoidSurfaceAppearance",
+      "field": "see/0",
+      "sourceHash": "sha256:1babc5cb0508782cea9ebb42b2d49e9bff048e59b0cbe673893ca0b0e87d52d5",
+      "text": "{@link https://github.com/CesiumGS/cesium/wiki/Fabric|Fabric 材质系统}"
+    },
+    {
+      "id": "EllipsoidSurfaceAppearance#material",
+      "field": "see/0",
+      "sourceHash": "sha256:1babc5cb0508782cea9ebb42b2d49e9bff048e59b0cbe673893ca0b0e87d52d5",
+      "text": "{@link https://github.com/CesiumGS/cesium/wiki/Fabric|Fabric 材质系统}"
+    },
+    {
+      "id": "MaterialAppearance",
+      "field": "see/0",
+      "sourceHash": "sha256:1babc5cb0508782cea9ebb42b2d49e9bff048e59b0cbe673893ca0b0e87d52d5",
+      "text": "{@link https://github.com/CesiumGS/cesium/wiki/Fabric|Fabric 材质系统}"
+    },
+    {
+      "id": "MaterialAppearance#material",
+      "field": "see/0",
+      "sourceHash": "sha256:1babc5cb0508782cea9ebb42b2d49e9bff048e59b0cbe673893ca0b0e87d52d5",
+      "text": "{@link https://github.com/CesiumGS/cesium/wiki/Fabric|Fabric 材质系统}"
+    },
+    {
+      "id": "PolylineMaterialAppearance",
+      "field": "see/0",
+      "sourceHash": "sha256:1babc5cb0508782cea9ebb42b2d49e9bff048e59b0cbe673893ca0b0e87d52d5",
+      "text": "{@link https://github.com/CesiumGS/cesium/wiki/Fabric|Fabric 材质系统}"
+    },
+    {
+      "id": "PolylineMaterialAppearance#material",
+      "field": "see/0",
+      "sourceHash": "sha256:1babc5cb0508782cea9ebb42b2d49e9bff048e59b0cbe673893ca0b0e87d52d5",
+      "text": "{@link https://github.com/CesiumGS/cesium/wiki/Fabric|Fabric 材质系统}"
+    },
+    {
+      "id": "ViewportQuad#material",
+      "field": "see/0",
+      "sourceHash": "sha256:1babc5cb0508782cea9ebb42b2d49e9bff048e59b0cbe673893ca0b0e87d52d5",
+      "text": "{@link https://github.com/CesiumGS/cesium/wiki/Fabric|Fabric 材质系统}"
+    },
+    {
+      "id": "ArcGisMapServerImageryProvider",
+      "field": "see/2",
+      "sourceHash": "sha256:1b748c24e1bb39e2cc355f992e5deeb2e276cdf75ce024530fa1cba348adfa8d",
+      "text": "{@link https://developers.arcgis.com/rest/|ArcGIS Server REST 接口}"
+    },
+    {
+      "id": "ArcGisMapServerImageryProvider",
+      "field": "see/3",
+      "sourceHash": "sha256:bfce8cf7b3631e5d9bd2240d0c57a01675826e8adaf063beef38a3d5d1fd2510",
+      "text": "{@link https://developers.arcgis.com/documentation/mapping-apis-and-services/security|ArcGIS 访问令牌}"
+    },
+    {
+      "id": "Billboard",
+      "field": "demo/0",
+      "sourceHash": "sha256:924f945cd23f07684f0958f3a39a387546f5f00c1de30e5f4c972eb8ff81c593",
+      "text": "{@link https://sandcastle.cesium.com/index.html?id=billboards|Cesium Sandcastle 广告牌示例}"
+    },
+    {
+      "id": "BillboardCollection",
+      "field": "demo/0",
+      "sourceHash": "sha256:924f945cd23f07684f0958f3a39a387546f5f00c1de30e5f4c972eb8ff81c593",
+      "text": "{@link https://sandcastle.cesium.com/index.html?id=billboards|Cesium Sandcastle 广告牌示例}"
+    },
+    {
+      "id": "BillboardGraphics",
+      "field": "demo/0",
+      "sourceHash": "sha256:924f945cd23f07684f0958f3a39a387546f5f00c1de30e5f4c972eb8ff81c593",
+      "text": "{@link https://sandcastle.cesium.com/index.html?id=billboards|Cesium Sandcastle 广告牌示例}"
+    },
+    {
+      "id": "BillboardCollection#threePointDepthTestDistance",
+      "field": "see/0",
+      "sourceHash": "sha256:99fd6be6262ef472b683e542443457fe0778f695964990cab21e65ddbaa08433",
+      "text": "{@link https://cesium.com/blog/2018/07/30/billboards-on-terrain-improvements/|地形上广告牌与标注的改进}"
+    },
+    {
+      "id": "LabelCollection#threePointDepthTestDistance",
+      "field": "see/0",
+      "sourceHash": "sha256:99fd6be6262ef472b683e542443457fe0778f695964990cab21e65ddbaa08433",
+      "text": "{@link https://cesium.com/blog/2018/07/30/billboards-on-terrain-improvements/|地形上广告牌与标注的改进}"
+    },
+    {
+      "id": "BingMapsGeocoderService",
+      "field": "see/0",
+      "sourceHash": "sha256:302e194e432237afeb859aa27f3633da532d2ad66709e3cb3b3823400d689416",
+      "text": "{@link https://www.microsoft.com/en-us/maps/bing-maps/product|Microsoft Bing Maps 平台 API 使用条款}"
+    },
+    {
+      "id": "BingMapsImageryProvider.quadKeyToTileXY",
+      "field": "see/0",
+      "sourceHash": "sha256:53c0d5dbea51e96a43eba175c745ce893e530dc26c2ad0cf1ac3197a01f2318c",
+      "text": "{@link http://msdn.microsoft.com/en-us/library/bb259689.aspx|Bing Maps 瓦片系统}"
+    },
+    {
+      "id": "BingMapsImageryProvider.tileXYToQuadKey",
+      "field": "see/0",
+      "sourceHash": "sha256:53c0d5dbea51e96a43eba175c745ce893e530dc26c2ad0cf1ac3197a01f2318c",
+      "text": "{@link http://msdn.microsoft.com/en-us/library/bb259689.aspx|Bing Maps 瓦片系统}"
+    },
+    {
+      "id": "BingMapsImageryProvider",
+      "field": "see/10",
+      "sourceHash": "sha256:d6b2ecb437a781369d2c5aa636cff3c3efaf63b4a5a444699f86efca61ff59e8",
+      "text": "{@link http://www.w3.org/TR/cors/|跨源资源共享}"
+    },
+    {
+      "id": "GoogleEarthEnterpriseImageryProvider",
+      "field": "see/10",
+      "sourceHash": "sha256:d6b2ecb437a781369d2c5aa636cff3c3efaf63b4a5a444699f86efca61ff59e8",
+      "text": "{@link http://www.w3.org/TR/cors/|跨源资源共享}"
+    },
+    {
+      "id": "GoogleEarthEnterpriseMapsProvider",
+      "field": "see/8",
+      "sourceHash": "sha256:d6b2ecb437a781369d2c5aa636cff3c3efaf63b4a5a444699f86efca61ff59e8",
+      "text": "{@link http://www.w3.org/TR/cors/|跨源资源共享}"
+    },
+    {
+      "id": "GoogleEarthEnterpriseTerrainProvider",
+      "field": "see/4",
+      "sourceHash": "sha256:d6b2ecb437a781369d2c5aa636cff3c3efaf63b4a5a444699f86efca61ff59e8",
+      "text": "{@link http://www.w3.org/TR/cors/|跨源资源共享}"
+    },
+    {
+      "id": "IonResource#delete",
+      "field": "see/0",
+      "sourceHash": "sha256:d6b2ecb437a781369d2c5aa636cff3c3efaf63b4a5a444699f86efca61ff59e8",
+      "text": "{@link http://www.w3.org/TR/cors/|跨源资源共享}"
+    },
+    {
+      "id": "IonResource#fetch",
+      "field": "see/0",
+      "sourceHash": "sha256:d6b2ecb437a781369d2c5aa636cff3c3efaf63b4a5a444699f86efca61ff59e8",
+      "text": "{@link http://www.w3.org/TR/cors/|跨源资源共享}"
+    },
+    {
+      "id": "IonResource#fetchArrayBuffer",
+      "field": "see/0",
+      "sourceHash": "sha256:d6b2ecb437a781369d2c5aa636cff3c3efaf63b4a5a444699f86efca61ff59e8",
+      "text": "{@link http://www.w3.org/TR/cors/|跨源资源共享}"
+    },
+    {
+      "id": "IonResource#fetchBlob",
+      "field": "see/0",
+      "sourceHash": "sha256:d6b2ecb437a781369d2c5aa636cff3c3efaf63b4a5a444699f86efca61ff59e8",
+      "text": "{@link http://www.w3.org/TR/cors/|跨源资源共享}"
+    },
+    {
+      "id": "IonResource#fetchImage",
+      "field": "see/0",
+      "sourceHash": "sha256:d6b2ecb437a781369d2c5aa636cff3c3efaf63b4a5a444699f86efca61ff59e8",
+      "text": "{@link http://www.w3.org/TR/cors/|跨源资源共享}"
+    },
+    {
+      "id": "IonResource#fetchJson",
+      "field": "see/0",
+      "sourceHash": "sha256:d6b2ecb437a781369d2c5aa636cff3c3efaf63b4a5a444699f86efca61ff59e8",
+      "text": "{@link http://www.w3.org/TR/cors/|跨源资源共享}"
+    },
+    {
+      "id": "IonResource#fetchText",
+      "field": "see/1",
+      "sourceHash": "sha256:d6b2ecb437a781369d2c5aa636cff3c3efaf63b4a5a444699f86efca61ff59e8",
+      "text": "{@link http://www.w3.org/TR/cors/|跨源资源共享}"
+    },
+    {
+      "id": "IonResource#fetchXML",
+      "field": "see/1",
+      "sourceHash": "sha256:d6b2ecb437a781369d2c5aa636cff3c3efaf63b4a5a444699f86efca61ff59e8",
+      "text": "{@link http://www.w3.org/TR/cors/|跨源资源共享}"
+    },
+    {
+      "id": "IonResource#head",
+      "field": "see/0",
+      "sourceHash": "sha256:d6b2ecb437a781369d2c5aa636cff3c3efaf63b4a5a444699f86efca61ff59e8",
+      "text": "{@link http://www.w3.org/TR/cors/|跨源资源共享}"
+    },
+    {
+      "id": "IonResource#options",
+      "field": "see/0",
+      "sourceHash": "sha256:d6b2ecb437a781369d2c5aa636cff3c3efaf63b4a5a444699f86efca61ff59e8",
+      "text": "{@link http://www.w3.org/TR/cors/|跨源资源共享}"
+    },
+    {
+      "id": "IonResource#patch",
+      "field": "see/0",
+      "sourceHash": "sha256:d6b2ecb437a781369d2c5aa636cff3c3efaf63b4a5a444699f86efca61ff59e8",
+      "text": "{@link http://www.w3.org/TR/cors/|跨源资源共享}"
+    },
+    {
+      "id": "IonResource#post",
+      "field": "see/0",
+      "sourceHash": "sha256:d6b2ecb437a781369d2c5aa636cff3c3efaf63b4a5a444699f86efca61ff59e8",
+      "text": "{@link http://www.w3.org/TR/cors/|跨源资源共享}"
+    },
+    {
+      "id": "IonResource#put",
+      "field": "see/0",
+      "sourceHash": "sha256:d6b2ecb437a781369d2c5aa636cff3c3efaf63b4a5a444699f86efca61ff59e8",
+      "text": "{@link http://www.w3.org/TR/cors/|跨源资源共享}"
+    },
+    {
+      "id": "OpenStreetMapImageryProvider",
+      "field": "see/9",
+      "sourceHash": "sha256:d6b2ecb437a781369d2c5aa636cff3c3efaf63b4a5a444699f86efca61ff59e8",
+      "text": "{@link http://www.w3.org/TR/cors/|跨源资源共享}"
+    },
+    {
+      "id": "Resource#delete",
+      "field": "see/0",
+      "sourceHash": "sha256:d6b2ecb437a781369d2c5aa636cff3c3efaf63b4a5a444699f86efca61ff59e8",
+      "text": "{@link http://www.w3.org/TR/cors/|跨源资源共享}"
+    },
+    {
+      "id": "Resource#fetch",
+      "field": "see/0",
+      "sourceHash": "sha256:d6b2ecb437a781369d2c5aa636cff3c3efaf63b4a5a444699f86efca61ff59e8",
+      "text": "{@link http://www.w3.org/TR/cors/|跨源资源共享}"
+    },
+    {
+      "id": "Resource#fetchArrayBuffer",
+      "field": "see/0",
+      "sourceHash": "sha256:d6b2ecb437a781369d2c5aa636cff3c3efaf63b4a5a444699f86efca61ff59e8",
+      "text": "{@link http://www.w3.org/TR/cors/|跨源资源共享}"
+    },
+    {
+      "id": "Resource#fetchBlob",
+      "field": "see/0",
+      "sourceHash": "sha256:d6b2ecb437a781369d2c5aa636cff3c3efaf63b4a5a444699f86efca61ff59e8",
+      "text": "{@link http://www.w3.org/TR/cors/|跨源资源共享}"
+    },
+    {
+      "id": "Resource#fetchImage",
+      "field": "see/0",
+      "sourceHash": "sha256:d6b2ecb437a781369d2c5aa636cff3c3efaf63b4a5a444699f86efca61ff59e8",
+      "text": "{@link http://www.w3.org/TR/cors/|跨源资源共享}"
+    },
+    {
+      "id": "Resource#fetchJson",
+      "field": "see/0",
+      "sourceHash": "sha256:d6b2ecb437a781369d2c5aa636cff3c3efaf63b4a5a444699f86efca61ff59e8",
+      "text": "{@link http://www.w3.org/TR/cors/|跨源资源共享}"
+    },
+    {
+      "id": "Resource#fetchText",
+      "field": "see/1",
+      "sourceHash": "sha256:d6b2ecb437a781369d2c5aa636cff3c3efaf63b4a5a444699f86efca61ff59e8",
+      "text": "{@link http://www.w3.org/TR/cors/|跨源资源共享}"
+    },
+    {
+      "id": "Resource#fetchXML",
+      "field": "see/1",
+      "sourceHash": "sha256:d6b2ecb437a781369d2c5aa636cff3c3efaf63b4a5a444699f86efca61ff59e8",
+      "text": "{@link http://www.w3.org/TR/cors/|跨源资源共享}"
+    },
+    {
+      "id": "Resource#head",
+      "field": "see/0",
+      "sourceHash": "sha256:d6b2ecb437a781369d2c5aa636cff3c3efaf63b4a5a444699f86efca61ff59e8",
+      "text": "{@link http://www.w3.org/TR/cors/|跨源资源共享}"
+    },
+    {
+      "id": "Resource#options",
+      "field": "see/0",
+      "sourceHash": "sha256:d6b2ecb437a781369d2c5aa636cff3c3efaf63b4a5a444699f86efca61ff59e8",
+      "text": "{@link http://www.w3.org/TR/cors/|跨源资源共享}"
+    },
+    {
+      "id": "Resource#patch",
+      "field": "see/0",
+      "sourceHash": "sha256:d6b2ecb437a781369d2c5aa636cff3c3efaf63b4a5a444699f86efca61ff59e8",
+      "text": "{@link http://www.w3.org/TR/cors/|跨源资源共享}"
+    },
+    {
+      "id": "Resource#post",
+      "field": "see/0",
+      "sourceHash": "sha256:d6b2ecb437a781369d2c5aa636cff3c3efaf63b4a5a444699f86efca61ff59e8",
+      "text": "{@link http://www.w3.org/TR/cors/|跨源资源共享}"
+    },
+    {
+      "id": "Resource#put",
+      "field": "see/0",
+      "sourceHash": "sha256:d6b2ecb437a781369d2c5aa636cff3c3efaf63b4a5a444699f86efca61ff59e8",
+      "text": "{@link http://www.w3.org/TR/cors/|跨源资源共享}"
+    },
+    {
+      "id": "TrustedServers",
+      "field": "see/0",
+      "sourceHash": "sha256:d6b2ecb437a781369d2c5aa636cff3c3efaf63b4a5a444699f86efca61ff59e8",
+      "text": "{@link http://www.w3.org/TR/cors/|跨源资源共享}"
+    },
+    {
+      "id": "WebMapServiceImageryProvider",
+      "field": "see/9",
+      "sourceHash": "sha256:d6b2ecb437a781369d2c5aa636cff3c3efaf63b4a5a444699f86efca61ff59e8",
+      "text": "{@link http://www.w3.org/TR/cors/|跨源资源共享}"
+    },
+    {
+      "id": "BingMapsImageryProvider",
+      "field": "see/9",
+      "sourceHash": "sha256:23a1371547f287ed43d3659f00f2dbbd8cad7c6c81695cddce289d65baace07c",
+      "text": "{@link http://msdn.microsoft.com/en-us/library/ff701713.aspx|Bing Maps REST 服务}"
+    },
+    {
+      "id": "BoundingSphere.fromEncodedCartesianVertices",
+      "field": "see/0",
+      "sourceHash": "sha256:234c429fb12062d15d4ba2d7fa1d5c6f56e493386de4e4a2508341328efed772",
+      "text": "{@link http://blogs.agi.com/insight3d/index.php/2008/02/04/a-bounding/|包围球计算文章}"
+    },
+    {
+      "id": "BoundingSphere.fromVertices",
+      "field": "see/0",
+      "sourceHash": "sha256:234c429fb12062d15d4ba2d7fa1d5c6f56e493386de4e4a2508341328efed772",
+      "text": "{@link http://blogs.agi.com/insight3d/index.php/2008/02/04/a-bounding/|包围球计算文章}"
+    },
+    {
+      "id": "BoundingSphere.fromPoints",
+      "field": "see/0",
+      "sourceHash": "sha256:4de5cadd3e94c0c64b568fa7388b34a13e59e045399660fa5c644b70f21a247e",
+      "text": "{@link http://help.agi.com/AGIComponents/html/BlogBoundingSphere.htm|包围球计算文章}"
+    },
+    {
+      "id": "BoxGeometry",
+      "field": "demo/0",
+      "sourceHash": "sha256:4c6b10d6442d77eeceb458fdbeaa993a06724a824afca40f3d7a1fd4d8966001",
+      "text": "{@link https://sandcastle.cesium.com/index.html?id=box|Cesium Sandcastle 长方体示例}"
+    },
+    {
+      "id": "BoxGraphics",
+      "field": "demo/0",
+      "sourceHash": "sha256:4c6b10d6442d77eeceb458fdbeaa993a06724a824afca40f3d7a1fd4d8966001",
+      "text": "{@link https://sandcastle.cesium.com/index.html?id=box|Cesium Sandcastle 长方体示例}"
+    },
+    {
+      "id": "CallbackPositionProperty",
+      "field": "demo/0",
+      "sourceHash": "sha256:df6798d48a6aa0bbb3fcc3fb05d1c3c908197842980cea8808d71c66e4d16aa3",
+      "text": "{@link https://sandcastle.cesium.com/index.html?id=callback-position-property|Cesium Sandcastle 回调位置属性示例}"
+    },
+    {
+      "id": "Camera",
+      "field": "demo/0",
+      "sourceHash": "sha256:95eb5daa138101f9e8eff6e6db1633f37948cee3632cf93eb43df92791ab8e6f",
+      "text": "{@link https://sandcastle.cesium.com/index.html?id=camera|Cesium Sandcastle 相机示例}"
+    },
+    {
+      "id": "Camera",
+      "field": "demo/1",
+      "sourceHash": "sha256:70be802b707230a333527e727a14bf4514be3316b231e48e7c281bc9d6a07dd2",
+      "text": "{@link https://sandcastle.cesium.com/index.html?id=camera-tutorial|Cesium Sandcastle 相机教程示例}"
+    },
+    {
+      "id": "Camera",
+      "field": "demo/2",
+      "sourceHash": "sha256:ec3e00ea73637658506cc9f892747d656db225b5923fc6f99450c4a2103869ba",
+      "text": "{@link https://cesium.com/learn/cesiumjs-learn/cesiumjs-camera|相机教程}"
+    },
+    {
+      "id": "Cesium3DTile#extras",
+      "field": "see/0",
+      "sourceHash": "sha256:ba71c69bc3b4dcf990ace9d94b35806e94abdf15485a17c027d3f47172912969",
+      "text": "{@link https://github.com/CesiumGS/3d-tiles/tree/main/specification#specifying-extensions-and-application-specific-extras|3D Tiles 规范中的附加数据}"
+    },
+    {
+      "id": "Cesium3DTileset#extras",
+      "field": "see/0",
+      "sourceHash": "sha256:ba71c69bc3b4dcf990ace9d94b35806e94abdf15485a17c027d3f47172912969",
+      "text": "{@link https://github.com/CesiumGS/3d-tiles/tree/main/specification#specifying-extensions-and-application-specific-extras|3D Tiles 规范中的附加数据}"
+    },
+    {
+      "id": "Cesium3DTileContent#innerContents",
+      "field": "see/0",
+      "sourceHash": "sha256:0b5e8b203abe14ffd0eb53cf4d752bfea2b5edb1aa15a5469ebc5e96e28e7a7e",
+      "text": "{@link https://github.com/CesiumGS/3d-tiles/tree/main/specification/TileFormats/Composite|复合瓦片规范}"
+    },
+    {
+      "id": "GaussianSplat3DTileContent#innerContents",
+      "field": "see/0",
+      "sourceHash": "sha256:0b5e8b203abe14ffd0eb53cf4d752bfea2b5edb1aa15a5469ebc5e96e28e7a7e",
+      "text": "{@link https://github.com/CesiumGS/3d-tiles/tree/main/specification/TileFormats/Composite|复合瓦片规范}"
+    },
+    {
+      "id": "Cesium3DTileset",
+      "field": "see/0",
+      "sourceHash": "sha256:301666ae703684090e2e11bbcd97926beb52fcbdb6f158e86c76c424295900ce",
+      "text": "{@link https://github.com/CesiumGS/3d-tiles/tree/main/specification|3D Tiles 规范}"
+    },
+    {
+      "id": "Cesium3DTileset#style",
+      "field": "see/0",
+      "sourceHash": "sha256:b5b01569b3987138f0f4f7362035ca9a6bacdced5c966af8b57f9db33d731de7",
+      "text": "{@link https://github.com/CesiumGS/3d-tiles/tree/main/specification/Styling|3D Tiles 样式语言}"
+    },
+    {
+      "id": "Cesium3DTileStyle",
+      "field": "see/0",
+      "sourceHash": "sha256:b5b01569b3987138f0f4f7362035ca9a6bacdced5c966af8b57f9db33d731de7",
+      "text": "{@link https://github.com/CesiumGS/3d-tiles/tree/main/specification/Styling|3D Tiles 样式语言}"
+    },
+    {
+      "id": "TimeDynamicPointCloud#style",
+      "field": "see/0",
+      "sourceHash": "sha256:b5b01569b3987138f0f4f7362035ca9a6bacdced5c966af8b57f9db33d731de7",
+      "text": "{@link https://github.com/CesiumGS/3d-tiles/tree/main/specification/Styling|3D Tiles 样式语言}"
+    },
+    {
+      "id": "CesiumInspector",
+      "field": "demo/0",
+      "sourceHash": "sha256:ee0aa6829237da03ec2fea5f5385e8f81324f5f169d6c984d83e0901b19002a8",
+      "text": "{@link https://sandcastle.cesium.com/index.html?id=cesium-inspector|Cesium Sandcastle 检查器示例}"
+    },
+    {
+      "id": "viewerCesiumInspectorMixin",
+      "field": "demo/0",
+      "sourceHash": "sha256:ee0aa6829237da03ec2fea5f5385e8f81324f5f169d6c984d83e0901b19002a8",
+      "text": "{@link https://sandcastle.cesium.com/index.html?id=cesium-inspector|Cesium Sandcastle 检查器示例}"
+    },
+    {
+      "id": "CesiumWidget",
+      "field": "demo/0",
+      "sourceHash": "sha256:27c986b5b5ca54e334df65c5d76701fee93adc2d8c0334be57d3b367d44d54a3",
+      "text": "{@link https://sandcastle.cesium.com/index.html?id=cesium-widget|Cesium Sandcastle CesiumWidget 控件示例}"
+    },
+    {
+      "id": "ClippingPlaneCollection",
+      "field": "demo/0",
+      "sourceHash": "sha256:0768f66958994ab4f1801b1ab33d3ca957cb4953147e0ac3e32339c9a826b6be",
+      "text": "{@link https://sandcastle.cesium.com/?id=3d-tiles-clipping-planes|裁剪 3D Tiles 和 glTF 模型}"
+    },
+    {
+      "id": "ClippingPlaneCollection",
+      "field": "demo/1",
+      "sourceHash": "sha256:d9280fb07078a01dcfe3838f61ce9e226a97d11cd9f6eb3f117844019f2008bd",
+      "text": "{@link https://sandcastle.cesium.com/?id=terrain-clipping-planes|裁剪地球}"
+    },
+    {
+      "id": "CloudCollection",
+      "field": "demo/0",
+      "sourceHash": "sha256:c11b6f636f72fdcec30f923d7d1a304b29f09b2c633070524af1f61289719b18",
+      "text": "{@link https://sandcastle.cesium.com/index.html?id=clouds|Cesium Sandcastle 云示例}"
+    },
+    {
+      "id": "CloudCollection",
+      "field": "demo/1",
+      "sourceHash": "sha256:ec17e5830e1a54ad3b691f4cd56cebbbbf276d0f7baca289f9a7fd887b88a542",
+      "text": "{@link https://sandcastle.cesium.com/index.html?id=cloud-parameters|Cesium Sandcastle 云参数示例}"
+    },
+    {
+      "id": "CumulusCloud",
+      "field": "demo/0",
+      "sourceHash": "sha256:ec17e5830e1a54ad3b691f4cd56cebbbbf276d0f7baca289f9a7fd887b88a542",
+      "text": "{@link https://sandcastle.cesium.com/index.html?id=cloud-parameters|Cesium Sandcastle 云参数示例}"
+    },
+    {
+      "id": "Color.fromCssColorString",
+      "field": "see/0",
+      "sourceHash": "sha256:14c26c1eb0ffb663ba19dd8bfe5a6f974d56bde963636f15543b6219d60dc95d",
+      "text": "{@link http://www.w3.org/TR/css3-color|CSS 颜色值}"
+    },
+    {
+      "id": "Color.fromHsl",
+      "field": "see/0",
+      "sourceHash": "sha256:e416d04e213e5918a1af48552ed4db63bb807c2456b9f4a2a67ebbd19dbdc72f",
+      "text": "{@link http://www.w3.org/TR/css3-color/#hsl-color|CSS 颜色值}"
+    },
+    {
+      "id": "Color#toCssColorString",
+      "field": "see/0",
+      "sourceHash": "sha256:bb82aad63b78ce623a15fdadcefa0bcf2d1168a98055a98d5468c4b679d60600",
+      "text": "{@link http://www.w3.org/TR/css3-color/#rgba-color|CSS RGB 或 RGBA 颜色值}"
+    },
+    {
+      "id": "Controller#update",
+      "field": "see/0",
+      "sourceHash": "sha256:9c591309018b47b5154e94b83d021dee9632f3e5ef81493c82ab39f4dda3ee9b",
+      "text": "{@link https://cesium.com/blog/2018/01/24/cesium-scene-rendering-performance/#updaterender-cycle-events|更新与渲染周期事件}"
+    },
+    {
+      "id": "HybridScreenSpacePanCameraController#update",
+      "field": "see/0",
+      "sourceHash": "sha256:9c591309018b47b5154e94b83d021dee9632f3e5ef81493c82ab39f4dda3ee9b",
+      "text": "{@link https://cesium.com/blog/2018/01/24/cesium-scene-rendering-performance/#updaterender-cycle-events|更新与渲染周期事件}"
+    },
+    {
+      "id": "ScreenSpaceElevatorCameraController#update",
+      "field": "see/0",
+      "sourceHash": "sha256:9c591309018b47b5154e94b83d021dee9632f3e5ef81493c82ab39f4dda3ee9b",
+      "text": "{@link https://cesium.com/blog/2018/01/24/cesium-scene-rendering-performance/#updaterender-cycle-events|更新与渲染周期事件}"
+    },
+    {
+      "id": "ScreenSpaceMapCameraController#update",
+      "field": "see/0",
+      "sourceHash": "sha256:9c591309018b47b5154e94b83d021dee9632f3e5ef81493c82ab39f4dda3ee9b",
+      "text": "{@link https://cesium.com/blog/2018/01/24/cesium-scene-rendering-performance/#updaterender-cycle-events|更新与渲染周期事件}"
+    },
+    {
+      "id": "ScreenSpaceTiltOrbitCameraController#update",
+      "field": "see/0",
+      "sourceHash": "sha256:9c591309018b47b5154e94b83d021dee9632f3e5ef81493c82ab39f4dda3ee9b",
+      "text": "{@link https://cesium.com/blog/2018/01/24/cesium-scene-rendering-performance/#updaterender-cycle-events|更新与渲染周期事件}"
+    },
+    {
+      "id": "ScreenSpaceZoomCameraController#update",
+      "field": "see/0",
+      "sourceHash": "sha256:9c591309018b47b5154e94b83d021dee9632f3e5ef81493c82ab39f4dda3ee9b",
+      "text": "{@link https://cesium.com/blog/2018/01/24/cesium-scene-rendering-performance/#updaterender-cycle-events|更新与渲染周期事件}"
+    },
+    {
+      "id": "CornerType",
+      "field": "demo/0",
+      "sourceHash": "sha256:84e3839934d467a5ab658f31e0a5711ccc20a49e917a309e168aac7003846108",
+      "text": "{@link https://sandcastle.cesium.com/index.html?id=corridor|走廊示例}展示了 {@link CorridorGraphics} 使用的三种转角类型。"
+    },
+    {
+      "id": "CorridorGeometry",
+      "field": "demo/0",
+      "sourceHash": "sha256:a698c7f162797c2b716c2fdba8606f88cd1fb8d5e556031b5d6191fd2134c232",
+      "text": "{@link https://sandcastle.cesium.com/index.html?id=corridor|Cesium Sandcastle 走廊示例}"
+    },
+    {
+      "id": "CorridorGraphics",
+      "field": "demo/0",
+      "sourceHash": "sha256:a698c7f162797c2b716c2fdba8606f88cd1fb8d5e556031b5d6191fd2134c232",
+      "text": "{@link https://sandcastle.cesium.com/index.html?id=corridor|Cesium Sandcastle 走廊示例}"
+    },
+    {
+      "id": "createElevationBandMaterial",
+      "field": "demo/0",
+      "sourceHash": "sha256:b84c02273fa1434e60941bf8013eeb39bd858629a282f5156a6a4ae820b64e7a",
+      "text": "{@link https://sandcastle.cesium.com/index.html?id=elevation-band-material|Cesium Sandcastle 高程色带示例}"
+    },
+    {
+      "id": "createGuid",
+      "field": "see/0",
+      "sourceHash": "sha256:1b542f8ca6b570647eabfa889d97605fef4372f7c17ad16f69153b65a586b345",
+      "text": "{@link http://www.ietf.org/rfc/rfc4122.txt|RFC 4122：通用唯一标识符（UUID）的 URN 命名空间}"
+    },
+    {
+      "id": "CubeMapPanorama",
+      "field": "demo/0",
+      "sourceHash": "sha256:356c1b00d35ad967b54b9224e1e0a6c3f91336423b92c2c2ec79f7a8fa05334e",
+      "text": "{@link https://sandcastle.cesium.com/index.html?id=panorama|Cesium Sandcastle 全景示例}"
+    },
+    {
+      "id": "EquirectangularPanorama",
+      "field": "demo/0",
+      "sourceHash": "sha256:356c1b00d35ad967b54b9224e1e0a6c3f91336423b92c2c2ec79f7a8fa05334e",
+      "text": "{@link https://sandcastle.cesium.com/index.html?id=panorama|Cesium Sandcastle 全景示例}"
+    },
+    {
+      "id": "Panorama",
+      "field": "demo/0",
+      "sourceHash": "sha256:356c1b00d35ad967b54b9224e1e0a6c3f91336423b92c2c2ec79f7a8fa05334e",
+      "text": "{@link https://sandcastle.cesium.com/index.html?id=panorama|Cesium Sandcastle 全景示例}"
+    },
+    {
+      "id": "PanoramaProvider",
+      "field": "demo/0",
+      "sourceHash": "sha256:356c1b00d35ad967b54b9224e1e0a6c3f91336423b92c2c2ec79f7a8fa05334e",
+      "text": "{@link https://sandcastle.cesium.com/index.html?id=panorama|Cesium Sandcastle 全景示例}"
+    },
+    {
+      "id": "CzmlDataSource",
+      "field": "demo/0",
+      "sourceHash": "sha256:cf8998ec2191d77730e4cd366b57d555a13c13066ce5a7390b8bc9c6eadb9f0e",
+      "text": "{@link https://sandcastle.cesium.com/index.html?id=czml|Cesium Sandcastle CZML 示例}"
+    },
+    {
+      "id": "DynamicEnvironmentMapManager.DEFAULT_SPHERICAL_HARMONIC_COEFFICIENTS",
+      "field": "see/0",
+      "sourceHash": "sha256:4f6f5b0da8bffd376ca7b536c6f7388b355e2925c87adf63ff2a3513ad73730e",
+      "text": "{@link https://graphics.stanford.edu/papers/envmap/envmap.pdf|辐照度环境贴图的高效表示方法}"
+    },
+    {
+      "id": "ImageBasedLighting#sphericalHarmonicCoefficients",
+      "field": "see/0",
+      "sourceHash": "sha256:4f6f5b0da8bffd376ca7b536c6f7388b355e2925c87adf63ff2a3513ad73730e",
+      "text": "{@link https://graphics.stanford.edu/papers/envmap/envmap.pdf|辐照度环境贴图的高效表示方法}"
+    },
+    {
+      "id": "EllipseGraphics",
+      "field": "demo/0",
+      "sourceHash": "sha256:ba623aaf711043035576a0ea7567f6ce05ad0fb24342043404338c173b48f701",
+      "text": "{@link https://sandcastle.cesium.com/index.html?id=circles-and-ellipses|Cesium Sandcastle 圆与椭圆示例}"
+    },
+    {
+      "id": "EllipsoidGraphics",
+      "field": "demo/0",
+      "sourceHash": "sha256:7b246a8577cc095c09eeaaf73c69165addfa2483971ba9d4b70296ae0e115421",
+      "text": "{@link https://sandcastle.cesium.com/index.html?id=spheres-and-ellipsoids|Cesium Sandcastle 球与椭球示例}"
+    },
+    {
+      "id": "Entity",
+      "field": "see/0",
+      "sourceHash": "sha256:3dc62e08f7be4efa1357726e66b528d99acf068b296118fd0fd059a54d0a1297",
+      "text": "{@link https://cesium.com/learn/cesiumjs-learn/cesiumjs-creating-entities/|创建实体}"
+    },
+    {
+      "id": "Entity#trackingReferenceFrame",
+      "field": "demo/0",
+      "sourceHash": "sha256:9983ab6f9b97662265bc011c9fbac27e123f3cc96c4cede0925a92addc272d32",
+      "text": "{@link https://sandcastle.cesium.com/index.html?id=entity-tracking|Cesium Sandcastle 实体跟踪示例}"
+    },
+    {
+      "id": "EntityCluster",
+      "field": "demo/0",
+      "sourceHash": "sha256:68722c68649ad4ae0754c5ef620967b0ad401867a0018e8a0f7d2fdbc7d68dc6",
+      "text": "{@link https://sandcastle.cesium.com/index.html?id=clustering|Cesium Sandcastle 聚合示例}"
+    },
+    {
+      "id": "exportKml",
+      "field": "demo/0",
+      "sourceHash": "sha256:7397227b16edfa0d93235952f0f42bf0a2f32055de1297d9e73b3b876dfd4270",
+      "text": "{@link https://sandcastle.cesium.com/index.html?id=export-kml|Cesium Sandcastle KML 导出示例}"
+    },
+    {
+      "id": "FeatureDetection.supportsBigInt",
+      "field": "see/0",
+      "sourceHash": "sha256:bc86beca4fd2359e639b21b271744e4da605d1e08df938a4446225210ab5fdc3",
+      "text": "{@link https://tc39.es/ecma262/#sec-bigint-objects|BigInt 规范}"
+    },
+    {
+      "id": "FeatureDetection.supportsBigInt64Array",
+      "field": "see/0",
+      "sourceHash": "sha256:ca283bbc69446d797fcfceb8d485e726ca5c649645f2976cfbe2271c7fce708c",
+      "text": "{@link https://tc39.es/ecma262/#sec-typedarray-objects|类型化数组规范}"
+    },
+    {
+      "id": "FeatureDetection.supportsBigUint64Array",
+      "field": "see/0",
+      "sourceHash": "sha256:ca283bbc69446d797fcfceb8d485e726ca5c649645f2976cfbe2271c7fce708c",
+      "text": "{@link https://tc39.es/ecma262/#sec-typedarray-objects|类型化数组规范}"
+    },
+    {
+      "id": "FeatureDetection.supportsTypedArrays",
+      "field": "see/0",
+      "sourceHash": "sha256:ca283bbc69446d797fcfceb8d485e726ca5c649645f2976cfbe2271c7fce708c",
+      "text": "{@link https://tc39.es/ecma262/#sec-typedarray-objects|类型化数组规范}"
+    },
+    {
+      "id": "FeatureDetection.supportsEsmWebWorkers",
+      "field": "see/0",
+      "sourceHash": "sha256:c5bdc43c8b672a54e00a9e7e73b8ff22f225777db1a9e356f174ce9510c02dd5",
+      "text": "{@link https://developer.mozilla.org/en-US/docs/Web/API/Worker|Worker 接口}"
+    },
+    {
+      "id": "FeatureDetection.supportsFullscreen",
+      "field": "see/1",
+      "sourceHash": "sha256:b7d85e2f7a7273d702363fe66c432ee20e91281e8f770beba18203770c95314d",
+      "text": "{@link http://dvcs.w3.org/hg/fullscreen/raw-file/tip/Overview.html|W3C 全屏动态规范}"
+    },
+    {
+      "id": "Fullscreen",
+      "field": "see/0",
+      "sourceHash": "sha256:b7d85e2f7a7273d702363fe66c432ee20e91281e8f770beba18203770c95314d",
+      "text": "{@link http://dvcs.w3.org/hg/fullscreen/raw-file/tip/Overview.html|W3C 全屏动态规范}"
+    },
+    {
+      "id": "FeatureDetection.supportsWebgl2",
+      "field": "see/0",
+      "sourceHash": "sha256:d3f996623cb10c016a63781badcef0de0039c4b3d3b44cf05c4ab5e4ee466a94",
+      "text": "{@link https://developer.mozilla.org/en-US/docs/Web/API/WebGL2RenderingContext|WebGL2RenderingContext 接口}"
+    },
+    {
+      "id": "Fog",
+      "field": "demo/0",
+      "sourceHash": "sha256:989a5ce9c8e19d79fd162cf48f633509bd34675375e29d0c780c9237e34f8de3",
+      "text": "{@link https://sandcastle.cesium.com/index.html?id=fog|Cesium Sandcastle 雾示例}"
+    },
+    {
+      "id": "GeoJsonDataSource",
+      "field": "demo/0",
+      "sourceHash": "sha256:4b4033b5e6604e6580a4347bec2bee2c0bf7e2eeff65c5432ede32b2e4712826",
+      "text": "{@link https://sandcastle.cesium.com/index.html?id=geojson-and-topojson|Cesium Sandcastle GeoJSON 与 TopoJSON 示例}"
+    },
+    {
+      "id": "GeoJsonDataSource",
+      "field": "demo/1",
+      "sourceHash": "sha256:fe34904904259b1d21c818c474524fff014f5a558dbbb9d3b4acfc29163342e4",
+      "text": "{@link https://sandcastle.cesium.com/index.html?id=geojson-simplestyle|Cesium Sandcastle GeoJSON 简单样式示例}"
+    },
+    {
+      "id": "GeometryPipeline.reorderForPostVertexCache",
+      "field": "see/1",
+      "sourceHash": "sha256:7979df8e4f24e2ec7741c1a10e6779aa7ee9e926233dd5a24216e814c14d33f0",
+      "text": "{@link http://gfx.cs.princ0eton.edu/pubs/Sander_2007_%3ETR/tipsy.pdf|面向顶点局部性与减少过度绘制的快速三角形重排}，作者为 Sander、Nehab 和 Barczak。"
+    },
+    {
+      "id": "Google2DImageryProvider",
+      "field": "see/2",
+      "sourceHash": "sha256:4e914c22136a3f535610380718f14f0f23bb1ed38a10a8b606a810ea94e3610f",
+      "text": "{@link https://en.wikipedia.org/wiki/IETF_language_tag|IETF 语言标签}"
+    },
+    {
+      "id": "Google2DImageryProvider",
+      "field": "see/3",
+      "sourceHash": "sha256:03c09824878187cd608fc4e1f5a5ad70d810f9376b4b053426587788d9321667",
+      "text": "{@link https://cldr.unicode.org/|通用区域数据存储库的区域标识符}"
+    },
+    {
+      "id": "GoogleGeocoderService",
+      "field": "see/0",
+      "sourceHash": "sha256:a27c7fd9885d6bb50bd130bfa772bfd81174b5444530d581b5406d2b00807c27",
+      "text": "{@link https://developers.google.com/maps/documentation/geocoding/policies|Google 地理编码政策}"
+    },
+    {
+      "id": "GoogleStreetViewCubeMapPanoramaProvider",
+      "field": "demo/0",
+      "sourceHash": "sha256:6dc2024bd2033823d399d832fc7d3c02411d7c1c9707e5a19d9cb5d43b4dbc14",
+      "text": "{@link https://sandcastle.cesium.com/index.html?id=google-streetview-panorama|Cesium Sandcastle Google 街景全景示例}"
+    },
+    {
+      "id": "GpxDataSource",
+      "field": "see/0",
+      "sourceHash": "sha256:1d2b091b0c5bda475f62751256678869d044d08f3b00fdbd518d59e3de2881af",
+      "text": "{@link http://www.topografix.com/gpx.asp|Topografix GPX 标准}"
+    },
+    {
+      "id": "GpxDataSource",
+      "field": "see/1",
+      "sourceHash": "sha256:82ed0ac1e7d6f45f4d2c936f229054fcb244dd7d509320dc26bcc1c52acbe1bb",
+      "text": "{@link http://www.topografix.com/gpx/1/1/|Topografix GPX 文档}"
+    },
+    {
+      "id": "HeightmapEncoding.LERC",
+      "field": "see/0",
+      "sourceHash": "sha256:3b713b8d13d378f7203b79a0a75e70737b2a9123abf7f62616de024366c0447b",
+      "text": "{@link https://github.com/Esri/lerc|LERC 规范}"
+    },
+    {
+      "id": "I3SBuildingSceneLayerExplorer",
+      "field": "demo/0",
+      "sourceHash": "sha256:b162714deded20b5928d6b4cef1f282cba47ce613461828214bceeaa29b862e9",
+      "text": "{@link https://sandcastle.cesium.com/index.html?id=i3s-building-scene-layer|I3S 建筑场景图层}"
+    },
+    {
+      "id": "ImageBasedLighting#specularEnvironmentMaps",
+      "field": "demo/0",
+      "sourceHash": "sha256:f6130155a8676fba088db41c45af7f3a8e326c3585c2bc913fe4bcbd549b374c",
+      "text": "{@link https://sandcastle.cesium.com/index.html?id=image-based-lighting|Sandcastle 基于图像的光照示例}"
+    },
+    {
+      "id": "ImageBasedLighting#sphericalHarmonicCoefficients",
+      "field": "demo/0",
+      "sourceHash": "sha256:f6130155a8676fba088db41c45af7f3a8e326c3585c2bc913fe4bcbd549b374c",
+      "text": "{@link https://sandcastle.cesium.com/index.html?id=image-based-lighting|Sandcastle 基于图像的光照示例}"
+    },
+    {
+      "id": "ImageryLayer",
+      "field": "see/0",
+      "sourceHash": "sha256:5da37cb5adfcec9eb473d841dd3747cd0c360878098abc7dfa2c2d0f29582ff3",
+      "text": "{@link ImageryLayer.fromProviderAsync}：从异步影像提供者创建图层。"
+    },
+    {
+      "id": "ImageryLayer",
+      "field": "see/1",
+      "sourceHash": "sha256:1953202816df8863b330967c8bb0464c2d38681b7d4ca776a2c30ff6e5c45305",
+      "text": "{@link ImageryLayer.fromWorldImagery}：为 Cesium ion 默认全球底图创建影像图层。"
+    },
+    {
+      "id": "ImageryLayer",
+      "field": "see/2",
+      "sourceHash": "sha256:6e15d2d6ac208f5ee155cdd75e7c699db5dea6a4b8e93d8aa90b3b834f38fcd3",
+      "text": "{@link Scene#imageryLayers}：向地球添加影像图层。"
+    },
+    {
+      "id": "ImageryLayer",
+      "field": "see/3",
+      "sourceHash": "sha256:feb42d37c495899c4a34359a7705267f45f2cb6a57f903c2cffa74c262e551a0",
+      "text": "{@link Cesium3DTileset#imageryLayers}：向 3D 瓦片集添加影像图层。"
+    },
+    {
+      "id": "ImageryLayerCollection",
+      "field": "demo/0",
+      "sourceHash": "sha256:60e94bb79581c675108d0c5bd2c7b7b7ea72a00e15b11b3a5522be6dadf03ebd",
+      "text": "{@link https://sandcastle.cesium.com/index.html?id=imagery-adjustment|Cesium Sandcastle 影像调整示例}"
+    },
+    {
+      "id": "ImageryLayerCollection",
+      "field": "demo/1",
+      "sourceHash": "sha256:ad3f207f358c0204675bca460feffb87451a60fdd7004c5b5708d1fb399d2c5b",
+      "text": "{@link https://sandcastle.cesium.com/index.html?id=imagery-layers-manipulation|Cesium Sandcastle 影像图层操作示例}"
+    },
+    {
+      "id": "ImageryProvider",
+      "field": "demo/1",
+      "sourceHash": "sha256:ad3f207f358c0204675bca460feffb87451a60fdd7004c5b5708d1fb399d2c5b",
+      "text": "{@link https://sandcastle.cesium.com/index.html?id=imagery-layers-manipulation|Cesium Sandcastle 影像图层操作示例}"
+    },
+    {
+      "id": "ImageryLayerCollection",
+      "field": "see/0",
+      "sourceHash": "sha256:1ba45f42fb2a132511c48454c71a6707ef912894d55e9d410e9e09d80f85e935",
+      "text": "{@link Scene#imageryLayers}：操作地球上的影像图层。"
+    },
+    {
+      "id": "ImageryLayerCollection",
+      "field": "see/1",
+      "sourceHash": "sha256:1fadec93e6c566efcae01871d4d1a19f0066af5c7c0e0a08c8bf6af4b57bb540",
+      "text": "{@link Cesium3DTileset#imageryLayers}：操作 3D 瓦片集上的影像图层。"
+    },
+    {
+      "id": "ImageryProvider",
+      "field": "demo/0",
+      "sourceHash": "sha256:af1798e069b7dcd3a7f3771a0b4d9de173c3c4bf09565b3f7f8a1e49d75a5ef7",
+      "text": "{@link https://sandcastle.cesium.com/index.html?id=imagery-layers|Cesium Sandcastle 影像图层示例}"
+    },
+    {
+      "id": "IonResource#delete",
+      "field": "see/1",
+      "sourceHash": "sha256:eecbc5a15a3fd7569f67e6cbe7c3c17f3bea0bf7085c6f0379330faf89c5ec9b",
+      "text": "{@link http://wiki.commonjs.org/wiki/Promises/A|CommonJS Promises/A 规范}"
+    },
+    {
+      "id": "IonResource#fetch",
+      "field": "see/1",
+      "sourceHash": "sha256:eecbc5a15a3fd7569f67e6cbe7c3c17f3bea0bf7085c6f0379330faf89c5ec9b",
+      "text": "{@link http://wiki.commonjs.org/wiki/Promises/A|CommonJS Promises/A 规范}"
+    },
+    {
+      "id": "IonResource#fetchArrayBuffer",
+      "field": "see/1",
+      "sourceHash": "sha256:eecbc5a15a3fd7569f67e6cbe7c3c17f3bea0bf7085c6f0379330faf89c5ec9b",
+      "text": "{@link http://wiki.commonjs.org/wiki/Promises/A|CommonJS Promises/A 规范}"
+    },
+    {
+      "id": "IonResource#fetchBlob",
+      "field": "see/1",
+      "sourceHash": "sha256:eecbc5a15a3fd7569f67e6cbe7c3c17f3bea0bf7085c6f0379330faf89c5ec9b",
+      "text": "{@link http://wiki.commonjs.org/wiki/Promises/A|CommonJS Promises/A 规范}"
+    },
+    {
+      "id": "IonResource#fetchImage",
+      "field": "see/1",
+      "sourceHash": "sha256:eecbc5a15a3fd7569f67e6cbe7c3c17f3bea0bf7085c6f0379330faf89c5ec9b",
+      "text": "{@link http://wiki.commonjs.org/wiki/Promises/A|CommonJS Promises/A 规范}"
+    },
+    {
+      "id": "IonResource#fetchJson",
+      "field": "see/1",
+      "sourceHash": "sha256:eecbc5a15a3fd7569f67e6cbe7c3c17f3bea0bf7085c6f0379330faf89c5ec9b",
+      "text": "{@link http://wiki.commonjs.org/wiki/Promises/A|CommonJS Promises/A 规范}"
+    },
+    {
+      "id": "IonResource#fetchJsonp",
+      "field": "see/0",
+      "sourceHash": "sha256:eecbc5a15a3fd7569f67e6cbe7c3c17f3bea0bf7085c6f0379330faf89c5ec9b",
+      "text": "{@link http://wiki.commonjs.org/wiki/Promises/A|CommonJS Promises/A 规范}"
+    },
+    {
+      "id": "IonResource#fetchText",
+      "field": "see/2",
+      "sourceHash": "sha256:eecbc5a15a3fd7569f67e6cbe7c3c17f3bea0bf7085c6f0379330faf89c5ec9b",
+      "text": "{@link http://wiki.commonjs.org/wiki/Promises/A|CommonJS Promises/A 规范}"
+    },
+    {
+      "id": "IonResource#fetchXML",
+      "field": "see/2",
+      "sourceHash": "sha256:eecbc5a15a3fd7569f67e6cbe7c3c17f3bea0bf7085c6f0379330faf89c5ec9b",
+      "text": "{@link http://wiki.commonjs.org/wiki/Promises/A|CommonJS Promises/A 规范}"
+    },
+    {
+      "id": "IonResource#head",
+      "field": "see/1",
+      "sourceHash": "sha256:eecbc5a15a3fd7569f67e6cbe7c3c17f3bea0bf7085c6f0379330faf89c5ec9b",
+      "text": "{@link http://wiki.commonjs.org/wiki/Promises/A|CommonJS Promises/A 规范}"
+    },
+    {
+      "id": "IonResource#options",
+      "field": "see/1",
+      "sourceHash": "sha256:eecbc5a15a3fd7569f67e6cbe7c3c17f3bea0bf7085c6f0379330faf89c5ec9b",
+      "text": "{@link http://wiki.commonjs.org/wiki/Promises/A|CommonJS Promises/A 规范}"
+    },
+    {
+      "id": "IonResource#patch",
+      "field": "see/1",
+      "sourceHash": "sha256:eecbc5a15a3fd7569f67e6cbe7c3c17f3bea0bf7085c6f0379330faf89c5ec9b",
+      "text": "{@link http://wiki.commonjs.org/wiki/Promises/A|CommonJS Promises/A 规范}"
+    },
+    {
+      "id": "IonResource#post",
+      "field": "see/1",
+      "sourceHash": "sha256:eecbc5a15a3fd7569f67e6cbe7c3c17f3bea0bf7085c6f0379330faf89c5ec9b",
+      "text": "{@link http://wiki.commonjs.org/wiki/Promises/A|CommonJS Promises/A 规范}"
+    },
+    {
+      "id": "IonResource#put",
+      "field": "see/1",
+      "sourceHash": "sha256:eecbc5a15a3fd7569f67e6cbe7c3c17f3bea0bf7085c6f0379330faf89c5ec9b",
+      "text": "{@link http://wiki.commonjs.org/wiki/Promises/A|CommonJS Promises/A 规范}"
+    },
+    {
+      "id": "Resource#delete",
+      "field": "see/1",
+      "sourceHash": "sha256:eecbc5a15a3fd7569f67e6cbe7c3c17f3bea0bf7085c6f0379330faf89c5ec9b",
+      "text": "{@link http://wiki.commonjs.org/wiki/Promises/A|CommonJS Promises/A 规范}"
+    },
+    {
+      "id": "Resource#fetch",
+      "field": "see/1",
+      "sourceHash": "sha256:eecbc5a15a3fd7569f67e6cbe7c3c17f3bea0bf7085c6f0379330faf89c5ec9b",
+      "text": "{@link http://wiki.commonjs.org/wiki/Promises/A|CommonJS Promises/A 规范}"
+    },
+    {
+      "id": "Resource#fetchArrayBuffer",
+      "field": "see/1",
+      "sourceHash": "sha256:eecbc5a15a3fd7569f67e6cbe7c3c17f3bea0bf7085c6f0379330faf89c5ec9b",
+      "text": "{@link http://wiki.commonjs.org/wiki/Promises/A|CommonJS Promises/A 规范}"
+    },
+    {
+      "id": "Resource#fetchBlob",
+      "field": "see/1",
+      "sourceHash": "sha256:eecbc5a15a3fd7569f67e6cbe7c3c17f3bea0bf7085c6f0379330faf89c5ec9b",
+      "text": "{@link http://wiki.commonjs.org/wiki/Promises/A|CommonJS Promises/A 规范}"
+    },
+    {
+      "id": "Resource#fetchImage",
+      "field": "see/1",
+      "sourceHash": "sha256:eecbc5a15a3fd7569f67e6cbe7c3c17f3bea0bf7085c6f0379330faf89c5ec9b",
+      "text": "{@link http://wiki.commonjs.org/wiki/Promises/A|CommonJS Promises/A 规范}"
+    },
+    {
+      "id": "Resource#fetchJson",
+      "field": "see/1",
+      "sourceHash": "sha256:eecbc5a15a3fd7569f67e6cbe7c3c17f3bea0bf7085c6f0379330faf89c5ec9b",
+      "text": "{@link http://wiki.commonjs.org/wiki/Promises/A|CommonJS Promises/A 规范}"
+    },
+    {
+      "id": "Resource#fetchJsonp",
+      "field": "see/0",
+      "sourceHash": "sha256:eecbc5a15a3fd7569f67e6cbe7c3c17f3bea0bf7085c6f0379330faf89c5ec9b",
+      "text": "{@link http://wiki.commonjs.org/wiki/Promises/A|CommonJS Promises/A 规范}"
+    },
+    {
+      "id": "Resource#fetchText",
+      "field": "see/2",
+      "sourceHash": "sha256:eecbc5a15a3fd7569f67e6cbe7c3c17f3bea0bf7085c6f0379330faf89c5ec9b",
+      "text": "{@link http://wiki.commonjs.org/wiki/Promises/A|CommonJS Promises/A 规范}"
+    },
+    {
+      "id": "Resource#fetchXML",
+      "field": "see/2",
+      "sourceHash": "sha256:eecbc5a15a3fd7569f67e6cbe7c3c17f3bea0bf7085c6f0379330faf89c5ec9b",
+      "text": "{@link http://wiki.commonjs.org/wiki/Promises/A|CommonJS Promises/A 规范}"
+    },
+    {
+      "id": "Resource#head",
+      "field": "see/1",
+      "sourceHash": "sha256:eecbc5a15a3fd7569f67e6cbe7c3c17f3bea0bf7085c6f0379330faf89c5ec9b",
+      "text": "{@link http://wiki.commonjs.org/wiki/Promises/A|CommonJS Promises/A 规范}"
+    },
+    {
+      "id": "Resource#options",
+      "field": "see/1",
+      "sourceHash": "sha256:eecbc5a15a3fd7569f67e6cbe7c3c17f3bea0bf7085c6f0379330faf89c5ec9b",
+      "text": "{@link http://wiki.commonjs.org/wiki/Promises/A|CommonJS Promises/A 规范}"
+    },
+    {
+      "id": "Resource#patch",
+      "field": "see/1",
+      "sourceHash": "sha256:eecbc5a15a3fd7569f67e6cbe7c3c17f3bea0bf7085c6f0379330faf89c5ec9b",
+      "text": "{@link http://wiki.commonjs.org/wiki/Promises/A|CommonJS Promises/A 规范}"
+    },
+    {
+      "id": "Resource#post",
+      "field": "see/1",
+      "sourceHash": "sha256:eecbc5a15a3fd7569f67e6cbe7c3c17f3bea0bf7085c6f0379330faf89c5ec9b",
+      "text": "{@link http://wiki.commonjs.org/wiki/Promises/A|CommonJS Promises/A 规范}"
+    },
+    {
+      "id": "Resource#put",
+      "field": "see/1",
+      "sourceHash": "sha256:eecbc5a15a3fd7569f67e6cbe7c3c17f3bea0bf7085c6f0379330faf89c5ec9b",
+      "text": "{@link http://wiki.commonjs.org/wiki/Promises/A|CommonJS Promises/A 规范}"
+    },
+    {
+      "id": "IonResource#fetchText",
+      "field": "see/0",
+      "sourceHash": "sha256:8146cb82a3d583c20e7080fcc5cd3e031292c1b5960110b0cbe8e762e1e310ad",
+      "text": "{@link https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest|XMLHttpRequest 接口}"
+    },
+    {
+      "id": "IonResource#fetchXML",
+      "field": "see/0",
+      "sourceHash": "sha256:8146cb82a3d583c20e7080fcc5cd3e031292c1b5960110b0cbe8e762e1e310ad",
+      "text": "{@link https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest|XMLHttpRequest 接口}"
+    },
+    {
+      "id": "Resource#fetchText",
+      "field": "see/0",
+      "sourceHash": "sha256:8146cb82a3d583c20e7080fcc5cd3e031292c1b5960110b0cbe8e762e1e310ad",
+      "text": "{@link https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest|XMLHttpRequest 接口}"
+    },
+    {
+      "id": "Resource#fetchXML",
+      "field": "see/0",
+      "sourceHash": "sha256:8146cb82a3d583c20e7080fcc5cd3e031292c1b5960110b0cbe8e762e1e310ad",
+      "text": "{@link https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest|XMLHttpRequest 接口}"
+    },
+    {
+      "id": "Iso8601",
+      "field": "see/0",
+      "sourceHash": "sha256:9147ed442257e877f0c6fcdaddf058aa47560010b2d6496782be64406f45f0b7",
+      "text": "{@link http://en.wikipedia.org/wiki/ISO_8601|维基百科：ISO 8601}"
+    },
+    {
+      "id": "KmlDataSource",
+      "field": "demo/0",
+      "sourceHash": "sha256:17ad95b0cb2730adfa2e7a890d9a7b1e72746031f889783be148674bd6ac610f",
+      "text": "{@link https://sandcastle.cesium.com/index.html?id=kml|Cesium Sandcastle KML 示例}"
+    },
+    {
+      "id": "KmlDataSource",
+      "field": "see/0",
+      "sourceHash": "sha256:36325e98ffe8ca78c010000803893d69d553295cdeb94b8be4d8157cee413756",
+      "text": "{@link http://www.opengeospatial.org/standards/kml/|开放地理空间联盟 KML 标准}"
+    },
+    {
+      "id": "KmlDataSource",
+      "field": "see/1",
+      "sourceHash": "sha256:f23820855f1b9f3a1b7749300206717812780cd6935e117ca73381d10bbd9083",
+      "text": "{@link https://developers.google.com/kml/|Google KML 文档}"
+    },
+    {
+      "id": "KmlTour",
+      "field": "demo/0",
+      "sourceHash": "sha256:d666fbcc7ce98af4bb934051c1fb4dab13fba00ae0d9899b2cb5c5b65a7d0bef",
+      "text": "{@link https://sandcastle.cesium.com/?id=kml-tours|KML 漫游}"
+    },
+    {
+      "id": "Label",
+      "field": "demo/0",
+      "sourceHash": "sha256:97933c88db2239cb25d624d7a124078f040b9e0c71255fbc2f7e1baea9a3af2e",
+      "text": "{@link https://sandcastle.cesium.com/index.html?id=labels|Cesium Sandcastle 标注示例}"
+    },
+    {
+      "id": "LabelCollection",
+      "field": "demo/0",
+      "sourceHash": "sha256:97933c88db2239cb25d624d7a124078f040b9e0c71255fbc2f7e1baea9a3af2e",
+      "text": "{@link https://sandcastle.cesium.com/index.html?id=labels|Cesium Sandcastle 标注示例}"
+    },
+    {
+      "id": "LabelGraphics",
+      "field": "demo/0",
+      "sourceHash": "sha256:97933c88db2239cb25d624d7a124078f040b9e0c71255fbc2f7e1baea9a3af2e",
+      "text": "{@link https://sandcastle.cesium.com/index.html?id=labels|Cesium Sandcastle 标注示例}"
+    },
+    {
+      "id": "Label#fillColor",
+      "field": "see/0",
+      "sourceHash": "sha256:ada0bfd8b00ef96b9ee2ace0b6b594818bc811766697bb92b48cd2cfbe80967f",
+      "text": "{@link http://www.whatwg.org/specs/web-apps/current-work/multipage/the-canvas-element.html#fill-and-stroke-styles|HTML 画布二维上下文填充与描边样式}"
+    },
+    {
+      "id": "Label#outlineColor",
+      "field": "see/0",
+      "sourceHash": "sha256:ada0bfd8b00ef96b9ee2ace0b6b594818bc811766697bb92b48cd2cfbe80967f",
+      "text": "{@link http://www.whatwg.org/specs/web-apps/current-work/multipage/the-canvas-element.html#fill-and-stroke-styles|HTML 画布二维上下文填充与描边样式}"
+    },
+    {
+      "id": "Label#outlineWidth",
+      "field": "see/0",
+      "sourceHash": "sha256:ada0bfd8b00ef96b9ee2ace0b6b594818bc811766697bb92b48cd2cfbe80967f",
+      "text": "{@link http://www.whatwg.org/specs/web-apps/current-work/multipage/the-canvas-element.html#fill-and-stroke-styles|HTML 画布二维上下文填充与描边样式}"
+    },
+    {
+      "id": "Label#font",
+      "field": "see/0",
+      "sourceHash": "sha256:9b5e364d9332b9a0bf994a41d2eb2efd06eabbbd31e1ef655336b3865208653f",
+      "text": "{@link http://www.whatwg.org/specs/web-apps/current-work/multipage/the-canvas-element.html#text-styles|HTML 画布二维上下文文本样式}"
+    },
+    {
+      "id": "LabelGraphics#font",
+      "field": "see/0",
+      "sourceHash": "sha256:7709e4fd84dd57499dd7ff6919b32498c2c6fa7c28d753a20633001cd44b3c6c",
+      "text": "{@link https://developer.mozilla.org/en-US/docs/Web/CSS/font|MDN：CSS 字体}"
+    },
+    {
+      "id": "Material",
+      "field": "demo/0",
+      "sourceHash": "sha256:8ec5fb1f00ee0b921d19e2e4386d890bcf5e260355f64ef3074ddbf938457c83",
+      "text": "{@link https://sandcastle.cesium.com/index.html?id=materials|Cesium Sandcastle 材质示例}"
+    },
+    {
+      "id": "Material",
+      "field": "see/0",
+      "sourceHash": "sha256:580c7bd441c79d98652dd1eee5cf914763f93712a9aa6f3653b6a361950a9303",
+      "text": "Fabric 选项的更详细说明见 {@link https://github.com/CesiumGS/cesium/wiki/Fabric|Fabric 维基页面}。"
+    },
+    {
+      "id": "MaterialAppearance",
+      "field": "demo/0",
+      "sourceHash": "sha256:8968010facd602a2b8d32b61d9e266ce5d4f40fbc789bbada2a4996aefcf62be",
+      "text": "{@link https://sandcastle.cesium.com/index.html?id=materials|Cesium Sandcastle 材质外观示例}"
+    },
+    {
+      "id": "Model",
+      "field": "demo/0",
+      "sourceHash": "sha256:3d6e411f03238eb4f281f025b6ebc914556ba10b7fae88dbbc88006f93f469df",
+      "text": "{@link https://sandcastle.cesium.com/index.html?id=3d-models|Cesium Sandcastle 模型示例}"
+    },
+    {
+      "id": "ModelGraphics",
+      "field": "demo/0",
+      "sourceHash": "sha256:2a22d510939239fd667815175241701b21d8edb37bb98e1c93ee92090f3745ea",
+      "text": "{@link https://sandcastle.cesium.com/index.html?id=3d-models|Cesium Sandcastle 三维模型示例}"
+    },
+    {
+      "id": "module:Math.factorial",
+      "field": "see/0",
+      "sourceHash": "sha256:a4b074e606df075b3582c87ccbf959c5f91b7f4f0274f253253762ca2bce7827",
+      "text": "{@link http://en.wikipedia.org/wiki/Factorial|维基百科：阶乘}"
+    },
+    {
+      "id": "module:Math.nextRandomNumber",
+      "field": "see/1",
+      "sourceHash": "sha256:7b17c3b1c3cfc48ff1d885ce31fed6d499fafd6431ee3f284ce37dd4f16f1de3",
+      "text": "{@link http://en.wikipedia.org/wiki/Mersenne_twister|维基百科：梅森旋转算法}"
+    },
+    {
+      "id": "OpenStreetMapImageryProvider",
+      "field": "see/8",
+      "sourceHash": "sha256:c22e0ec70286750ffb4d670dbb971c54a3411362ed252dddaac6753edd1f59d0",
+      "text": "{@link http://wiki.openstreetmap.org/wiki/Main_Page|OpenStreetMap 维基}"
+    },
+    {
+      "id": "ParticleSystem",
+      "field": "demo/0",
+      "sourceHash": "sha256:705eb61c0e3b2766f2bf427d455068235e6c8430e62b20a7f4324d0441e6b738",
+      "text": "{@link https://cesium.com/learn/cesiumjs-learn/cesiumjs-particle-systems/|粒子系统教程}"
+    },
+    {
+      "id": "ParticleSystem",
+      "field": "demo/1",
+      "sourceHash": "sha256:a2d987d433303fb26f5443cb01b6cf5c7e733606e20939d1a91f31569c979f96",
+      "text": "{@link https://sandcastle.cesium.com/?id=particle-system|粒子系统教程示例}"
+    },
+    {
+      "id": "ParticleSystem",
+      "field": "demo/2",
+      "sourceHash": "sha256:b246e213cfbe52804a92e9ece5ede680515f9760800db53cd9c2e92f73396f78",
+      "text": "{@link https://sandcastle.cesium.com/?id=particle-system-fireworks|粒子系统烟花示例}"
+    },
+    {
+      "id": "PinBuilder",
+      "field": "demo/0",
+      "sourceHash": "sha256:f87dba5e5210661b247a2074fc871d606900e42753e349024881990bf380d828",
+      "text": "{@link https://sandcastle.cesium.com/index.html?id=map-pins|Cesium Sandcastle 图钉生成示例}"
+    },
+    {
+      "id": "PlaneGraphics",
+      "field": "demo/0",
+      "sourceHash": "sha256:5ac3ddba53b1581560a20d76780f2ee0d34b9c3286be6609d74f417c1b205f23",
+      "text": "{@link https://sandcastle.cesium.com/index.html?id=plane|Cesium Sandcastle 平面示例}"
+    },
+    {
+      "id": "PointPrimitive",
+      "field": "demo/0",
+      "sourceHash": "sha256:5f89a46eef1a21cf2d2ee591e12a9c77c3a92aaccb754197a7f25a28c1e1bd97",
+      "text": "{@link https://sandcastle.cesium.com/index.html?id=points|Cesium Sandcastle 点示例}"
+    },
+    {
+      "id": "PolygonGeometry",
+      "field": "demo/0",
+      "sourceHash": "sha256:b949dcba4156648565fb116549cdab87c389cc228372f64e54d7dfac124cd560",
+      "text": "{@link https://sandcastle.cesium.com/index.html?id=polygon|Cesium Sandcastle 多边形示例}"
+    },
+    {
+      "id": "PolygonGraphics",
+      "field": "demo/0",
+      "sourceHash": "sha256:b949dcba4156648565fb116549cdab87c389cc228372f64e54d7dfac124cd560",
+      "text": "{@link https://sandcastle.cesium.com/index.html?id=polygon|Cesium Sandcastle 多边形示例}"
+    },
+    {
+      "id": "PolylineGeometry",
+      "field": "demo/0",
+      "sourceHash": "sha256:fa5bd50c86efb29eeb6121267f5340eed790e23c4b930c9180cba6d944f097f6",
+      "text": "{@link https://sandcastle.cesium.com/index.html?id=polyline|Cesium Sandcastle 折线示例}"
+    },
+    {
+      "id": "PolylineGraphics",
+      "field": "demo/0",
+      "sourceHash": "sha256:fa5bd50c86efb29eeb6121267f5340eed790e23c4b930c9180cba6d944f097f6",
+      "text": "{@link https://sandcastle.cesium.com/index.html?id=polyline|Cesium Sandcastle 折线示例}"
+    },
+    {
+      "id": "PolylineVolumeGeometry",
+      "field": "demo/0",
+      "sourceHash": "sha256:176126a7b2ae2443ef9d036a7706e075af2205d24bb639a0e168c876f2d0d6d5",
+      "text": "{@link https://sandcastle.cesium.com/index.html?id=polyline-volume|Cesium Sandcastle 折线体积示例}"
+    },
+    {
+      "id": "PolylineVolumeGraphics",
+      "field": "demo/0",
+      "sourceHash": "sha256:176126a7b2ae2443ef9d036a7706e075af2205d24bb639a0e168c876f2d0d6d5",
+      "text": "{@link https://sandcastle.cesium.com/index.html?id=polyline-volume|Cesium Sandcastle 折线体积示例}"
+    },
+    {
+      "id": "PostProcessStageLibrary.isAmbientOcclusionSupported",
+      "field": "see/1",
+      "sourceHash": "sha256:7c29e9b23b902013ecc7a8de673df936905b62e5bf800ddb549da82bfa150a9d",
+      "text": "{@link http://www.khronos.org/registry/webgl/extensions/WEBGL_depth_texture/|WEBGL_depth_texture 扩展}"
+    },
+    {
+      "id": "PostProcessStageLibrary.isDepthOfFieldSupported",
+      "field": "see/1",
+      "sourceHash": "sha256:7c29e9b23b902013ecc7a8de673df936905b62e5bf800ddb549da82bfa150a9d",
+      "text": "{@link http://www.khronos.org/registry/webgl/extensions/WEBGL_depth_texture/|WEBGL_depth_texture 扩展}"
+    },
+    {
+      "id": "PostProcessStageLibrary.isEdgeDetectionSupported",
+      "field": "see/1",
+      "sourceHash": "sha256:7c29e9b23b902013ecc7a8de673df936905b62e5bf800ddb549da82bfa150a9d",
+      "text": "{@link http://www.khronos.org/registry/webgl/extensions/WEBGL_depth_texture/|WEBGL_depth_texture 扩展}"
+    },
+    {
+      "id": "PostProcessStageLibrary.isSilhouetteSupported",
+      "field": "see/1",
+      "sourceHash": "sha256:7c29e9b23b902013ecc7a8de673df936905b62e5bf800ddb549da82bfa150a9d",
+      "text": "{@link http://www.khronos.org/registry/webgl/extensions/WEBGL_depth_texture/|WEBGL_depth_texture 扩展}"
+    },
+    {
+      "id": "RectangleGeometry",
+      "field": "demo/0",
+      "sourceHash": "sha256:266e95fbca67b54d1b8cb451a4a74cfec475a319f0b5dd0d6292f30f1610d921",
+      "text": "{@link https://sandcastle.cesium.com/index.html?id=rectangle|Cesium Sandcastle 矩形示例}"
+    },
+    {
+      "id": "RectangleGraphics",
+      "field": "demo/0",
+      "sourceHash": "sha256:266e95fbca67b54d1b8cb451a4a74cfec475a319f0b5dd0d6292f30f1610d921",
+      "text": "{@link https://sandcastle.cesium.com/index.html?id=rectangle|Cesium Sandcastle 矩形示例}"
+    },
+    {
+      "id": "Scene",
+      "field": "see/1",
+      "sourceHash": "sha256:d5869053099f2d8c28a75adf31b8bd99bbd8018d90ef2af7537dde918cb92919",
+      "text": "{@link http://www.khronos.org/registry/webgl/specs/latest/#5.2|WebGLContextAttributes 上下文属性}"
+    },
+    {
+      "id": "Scene#drawingBufferHeight",
+      "field": "see/0",
+      "sourceHash": "sha256:27146a35cd7b591cf2a1fcea18cd2e6711626186448abbb11230217058be4769",
+      "text": "{@link https://www.khronos.org/registry/webgl/specs/1.0/#DOM-WebGLRenderingContext-drawingBufferHeight|drawingBufferHeight 绘图缓冲高度}"
+    },
+    {
+      "id": "Scene#drawingBufferWidth",
+      "field": "see/0",
+      "sourceHash": "sha256:1ba19f7b0ed0352da9012d781d6d48dc1cdcfb90229a894a5d1ef44d6209a09c",
+      "text": "{@link https://www.khronos.org/registry/webgl/specs/1.0/#DOM-WebGLRenderingContext-drawingBufferWidth|drawingBufferWidth 绘图缓冲宽度}"
+    },
+    {
+      "id": "Scene#maximumAliasedLineWidth",
+      "field": "see/0",
+      "sourceHash": "sha256:bada59be165587e0bbcc1dd11212ace9fdb25b18f2709bb232a4ebdf6da529b9",
+      "text": "使用 <code>ALIASED_LINE_WIDTH_RANGE</code> 参数调用 {@link https://www.khronos.org/opengles/sdk/docs/man/xhtml/glGet.xml|glGet 查询函数}。"
+    },
+    {
+      "id": "Scene#maximumCubeMapSize",
+      "field": "see/0",
+      "sourceHash": "sha256:fb10f25e5770ee6e80efc8e4326c102ac86a421740ae7ecc1f942a2d431cd4b7",
+      "text": "使用 <code>GL_MAX_CUBE_MAP_TEXTURE_SIZE</code> 参数调用 {@link https://www.khronos.org/opengles/sdk/docs/man/xhtml/glGet.xml|glGet 查询函数}。"
+    },
+    {
+      "id": "Scene#maximumRenderTimeChange",
+      "field": "see/0",
+      "sourceHash": "sha256:d9b2a26fc5606501c468856ad6349f8214ec54d6f9a9eb1b2a494db2f06cf6bb",
+      "text": "{@link https://cesium.com/blog/2018/01/24/cesium-scene-rendering-performance/|通过显式渲染提高性能}"
+    },
+    {
+      "id": "Scene#postRender",
+      "field": "see/0",
+      "sourceHash": "sha256:d9b2a26fc5606501c468856ad6349f8214ec54d6f9a9eb1b2a494db2f06cf6bb",
+      "text": "{@link https://cesium.com/blog/2018/01/24/cesium-scene-rendering-performance/|通过显式渲染提高性能}"
+    },
+    {
+      "id": "Scene#postUpdate",
+      "field": "see/0",
+      "sourceHash": "sha256:d9b2a26fc5606501c468856ad6349f8214ec54d6f9a9eb1b2a494db2f06cf6bb",
+      "text": "{@link https://cesium.com/blog/2018/01/24/cesium-scene-rendering-performance/|通过显式渲染提高性能}"
+    },
+    {
+      "id": "Scene#preRender",
+      "field": "see/0",
+      "sourceHash": "sha256:d9b2a26fc5606501c468856ad6349f8214ec54d6f9a9eb1b2a494db2f06cf6bb",
+      "text": "{@link https://cesium.com/blog/2018/01/24/cesium-scene-rendering-performance/|通过显式渲染提高性能}"
+    },
+    {
+      "id": "Scene#preUpdate",
+      "field": "see/0",
+      "sourceHash": "sha256:d9b2a26fc5606501c468856ad6349f8214ec54d6f9a9eb1b2a494db2f06cf6bb",
+      "text": "{@link https://cesium.com/blog/2018/01/24/cesium-scene-rendering-performance/|通过显式渲染提高性能}"
+    },
+    {
+      "id": "Scene#requestRenderMode",
+      "field": "see/0",
+      "sourceHash": "sha256:d9b2a26fc5606501c468856ad6349f8214ec54d6f9a9eb1b2a494db2f06cf6bb",
+      "text": "{@link https://cesium.com/blog/2018/01/24/cesium-scene-rendering-performance/|通过显式渲染提高性能}"
+    },
+    {
+      "id": "ShadowMap",
+      "field": "demo/0",
+      "sourceHash": "sha256:8205119e9a2b7a904959fcb0c06e2ad7f8fe8234733c8e2ac2c4bbdc631dcf85",
+      "text": "{@link https://sandcastle.cesium.com/index.html?id=shadows|Cesium Sandcastle 阴影示例}"
+    },
+    {
+      "id": "VideoSynchronizer",
+      "field": "demo/0",
+      "sourceHash": "sha256:27c69e0da2b7040ead3edbfeb2f615486af8a4115838dada2c875d4bf6a93e1f",
+      "text": "{@link https://sandcastle.cesium.com/index.html?id=video|视频材质示例}"
+    },
+    {
+      "id": "Viewer",
+      "field": "demo/0",
+      "sourceHash": "sha256:a3088d2f37f5b591a2cc4b25c5fb7e8300f3ab920aa7bc8efc08f535e00f5283",
+      "text": "{@link https://sandcastle.cesium.com/index.html?id=hello-world|Cesium Sandcastle 入门示例}"
+    },
+    {
+      "id": "VoxelPrimitive",
+      "field": "see/3",
+      "sourceHash": "sha256:b8680329ea30b3fef563eef040eb7d6a803e6d4414f54f373d01fda34feed8c1",
+      "text": "{@link https://github.com/CesiumGS/cesium/tree/main/Documentation/CustomShaderGuide|自定义着色器指南}"
+    },
+    {
+      "id": "VoxelPrimitive#customShader",
+      "field": "see/0",
+      "sourceHash": "sha256:b8680329ea30b3fef563eef040eb7d6a803e6d4414f54f373d01fda34feed8c1",
+      "text": "{@link https://github.com/CesiumGS/cesium/tree/main/Documentation/CustomShaderGuide|自定义着色器指南}"
+    },
+    {
+      "id": "WallGeometry",
+      "field": "demo/0",
+      "sourceHash": "sha256:4a8d9f7730d7afaa113f9ec7c6cdd50804d23cb682b638bb5ee9fad8f56964e6",
+      "text": "{@link https://sandcastle.cesium.com/index.html?id=wall|Cesium Sandcastle 墙体示例}"
+    },
+    {
+      "id": "WallGraphics",
+      "field": "demo/0",
+      "sourceHash": "sha256:4a8d9f7730d7afaa113f9ec7c6cdd50804d23cb682b638bb5ee9fad8f56964e6",
+      "text": "{@link https://sandcastle.cesium.com/index.html?id=wall|Cesium Sandcastle 墙体示例}"
+    },
+    {
+      "id": "WebMapServiceImageryProvider",
+      "field": "see/8",
+      "sourceHash": "sha256:6c2cd6906e63ff4f36eacea800be8d2bc78d93173fe38bc305f0d0007723b5a8",
+      "text": "{@link https://enterprise.arcgis.com/en/server/latest/publish-services/linux/wms-services.htm|ArcGIS Server WMS 服务}"
+    },
+    {
+      "id": "WebMapTileServiceImageryProvider",
+      "field": "demo/0",
+      "sourceHash": "sha256:dc52951319526de3984f993578057b5fd7ebc48bde5c6d76c6c00433380b93f2",
+      "text": "{@link https://sandcastle.cesium.com/index.html?id=web-map-tile-service-with-time|Cesium Sandcastle 时变 Web 地图瓦片服务示例}"
+    }
+  ]
+}

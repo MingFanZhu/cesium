@@ -1116,6 +1116,25 @@ test("all current native prose has a reviewed Chinese catalog record", () => {
   }
 });
 
+test("reference and demo guidance reaches metadata without changing literal references", () => {
+  assert.match(lookup.get("CornerType").demo[0], /展示了.*三种转角类型/);
+  assert.match(lookup.get("ImageryLayer").see[0], /从异步影像提供者创建图层/);
+  assert.match(lookup.get("Camera").demo[2], /相机教程/);
+  assert.equal(lookup.get("AxisAlignedBoundingBox").see[0], "BoundingSphere");
+  const original = source.units.find(
+    (unit) => unit.id === "CornerType" && unit.field === "demo/0",
+  );
+  assert.match(original.source, /demonstrates the three corner types/);
+  assert.ok(lookup.get("CornerType").i18n.translatedFields.includes("demo/0"));
+  assert.ok(lookup.get("ImageryLayer").i18n.translatedFields.includes("see/0"));
+  assert.ok(
+    !source.units.some(
+      (unit) =>
+        unit.id === "Cesium3DTilesTerrainProvider" && unit.field === "see/2",
+    ),
+  );
+});
+
 test("specialized prose preserves buffer updates, voxel layout and geoid conversion", () => {
   assert.match(
     lookup.get("BufferPolygon#getPositions").description,

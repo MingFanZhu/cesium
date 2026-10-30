@@ -45,6 +45,14 @@ smoke cases. Keep metadata semantic/custom fields and canonical IDs throughout.
 Neither phase edits SDK, renames runtime classes, changes runtime behavior, modifies native
 comments or hand-edits generated output. Existing native translation gaps remain reported.
 
+## Reference and demo prose amendment
+
+The complete-coverage audit found English see/demo guidance omitted from the original prose
+visitor. Treat natural-language see/demo entries and explicit link display labels as prose,
+using see/index and demo/index source-hash selectors. Pure symbol/URL references, links without
+labels and code remain literal. Preserve targets and clone mutable tag arrays before changing
+text. This extends the same independent build-time route; it adds no engine/SDK runtime API.
+
 ## Outcome
 
 C1 checkpoint is `05362428b6`. C2 delivers 533 pages and 7,943 symbols in one Chinese tree.

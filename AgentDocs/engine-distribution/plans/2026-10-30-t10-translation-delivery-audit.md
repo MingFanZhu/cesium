@@ -1,7 +1,7 @@
 # T10 Complete translation delivery audit
 
 - Type: phase plan
-- Status: completed; overall completion gate requires T11
+- Status: completed; required T11 follow-up resolved
 - Date: 2026-10-30
 - Owner: Architecture Agent; execution/review: current task
 - Parent: [translation program](2026-10-29-extension.md)
@@ -51,3 +51,6 @@ Full branded build, 35 Node checks and 18 browser cases pass. Pre-T1 comparison 
 7,943 symbols; bundled guide is current. Final prose-field audit finds omitted see/demo prose.
 The [review](../reviews/2026-10-30-t10-translation-delivery-audit.md) carries P1 into T11.
 The continuous goal remains active; this audit checkpoint does not approve completion.
+
+T11 now resolves the retained finding and passes the expanded final acceptance; see its
+[review](../reviews/2026-10-30-t11-reference-prose.md).

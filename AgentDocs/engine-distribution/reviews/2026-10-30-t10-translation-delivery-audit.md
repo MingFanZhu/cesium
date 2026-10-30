@@ -1,7 +1,7 @@
 # T10 Translation delivery audit
 
 - Type: phase review
-- Status: changes requested; required follow-up T11
+- Status: resolved by T11; original audit finding retained
 - Date: 2026-10-30
 - Owner: Architecture Agent (current task); execution: same task
 - Target: [T10](../plans/2026-10-30-t10-translation-delivery-audit.md)
@@ -20,7 +20,8 @@ examples and canonical URLs. Bundled README matches current SDK handoff source.
 
 ## P1: reference/demo prose omitted from translation inventory
 
-- Status: open; owner: current task; required corrective phase T11 before goal completion.
+- Status: resolved; owner: current task; [T11 review](2026-10-30-t11-reference-prose.md) verifies
+  229 added units, zero expanded gaps, 38 Node checks and 19 browser cases.
 - Evidence: native CornerType.demo contains a full English sentence explaining corner types;
   ImageryLayer.see contains English usage guidance. These fields reach public metadata/HTML but
   visitProse currently omits see/demo. Link labels also retain untranslated human text.
@@ -34,7 +35,8 @@ examples and canonical URLs. Bundled README matches current SDK handoff source.
 
 ## Audit disposition
 
-The audit operation is complete; the overall completion gate is **not passed**. Accept this
+At the T10 checkpoint the audit operation was complete, but the overall completion gate was
+**not passed**. T11 now resolves the retained finding and passes its final gate. Accept this
 local audit/handoff checkpoint with the explicit open finding carried forward to T11. Existing
 TSD-JSDoc source warnings and inherited native formatting/link limitations remain unchanged.
 Scoped Markdown/Prettier checks pass; whole-tree AgentDocs retains 623 inherited format warnings.

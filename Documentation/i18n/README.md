@@ -44,7 +44,8 @@ SceneGIS 自有公开 API 的自然语言直接维护在源码中文 JSDoc 中�
 `id` 是原始 JSDoc longname，不包含发行品牌前缀。字段选择器包括 description、classdesc、
 summary、deprecated；params/参数名/description、properties/属性名/description；
 returns/序号/description、exceptions/序号/description、yields/序号/description；
-performance/序号、experimental/序号及 examples/序号/caption。
+performance/序号、experimental/序号、see/序号、demo/序号及 examples/序号/caption。
+see/demo 只提取说明和显式链接显示文字；纯符号、URL、无显示文字引用及代码保持原样。
 参数名和属性名保留完整点号名称；选择器内部的 `~`、`/` 分别转义为 `~0`、`~1`。
 
 原文摘要仅规范化 CRLF，再计算 SHA-256。相同 longname 和字段的重载通过原文摘要区分。
@@ -84,7 +85,7 @@ UI 文案位于对应语言的 ui.json，只在复制到 Build 的模板中进�
 translatedFields/fallbackFields 指明翻译或保留原文的字段。示例代码与签名保持不变。
 覆盖以自然语言字段计数，不能以页面数量或中文界面代替翻译完成度。
 
-当前源码的 15,294 个 Cesium 原生字段已全部覆盖，missing/stale/unused 均为零。
+当前源码的 15,523 个 Cesium 原生字段已全部覆盖，missing/stale/unused 均为零。
 纯数值和数学公式保持原样，其余字段使用中文说明；标识符、类型和示例代码不翻译。
 SceneGIS 自有的 2,337 个中文字段直接来自源码，不计入原生翻译报告。
 后续源码变化仍须重新构建并复核报告；完整覆盖测试会阻止新增缺口被当作完成版本交付。

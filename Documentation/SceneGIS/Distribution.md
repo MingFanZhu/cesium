@@ -156,7 +156,7 @@ scripts/docs-i18n，不参与运行时打包。按原始符号 ID、字段与原
 每个 doclet.sourceLocale 标识原始语言：自有为 zh-CN，原生为 en-US。
 自有 doclet.i18n.sourceFields 列出直接维护的中文字段，不计入翻译缺失。
 原生 doclet.i18n.translatedFields/fallbackFields 列出翻译及保留英文的字段。
-当前源码对应的 15,294 个原生字段已全部覆盖，missing/stale/unused 均为零。
+当前源码对应的 15,523 个原生字段已全部覆盖，missing/stale/unused 均为零。
 其中纯数值和数学公式保持原文。以后新增或原文已变化的字段会保留英文，等待复核补齐。
 translation-source.json 与 translation-report.json 只含原生英文内容，每次构建覆盖生成，
 记录原文、覆盖、待复核和过期词条。翻译仅作用于自然语言和示例 caption，签名与代码不变。

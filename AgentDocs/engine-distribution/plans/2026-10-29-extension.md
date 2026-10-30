@@ -1,7 +1,7 @@
 # SceneGIS distribution extension plan
 
 - Type: extension plan
-- Status: active
+- Status: completed
 - Owner: Architecture Agent
 - Date: 2026-10-29
 - ADR: [0205](../../../Documentation/SceneGIS/Decisions/ADR-0205-scenegis-distribution.md)
@@ -79,9 +79,21 @@ phases, each reviewed and committed before the next begins. No new runtime or ge
 - [T10 final audit](2026-10-30-t10-translation-delivery-audit.md): completed with required P1 follow-up; full branded
   artifact, declaration/resource/browser checks pass. Inventory omits see/demo prose;
   T11 will correct extraction/translation before the goal can close.
+- [T11 reference prose](2026-10-30-t11-reference-prose.md): completed and reviewed after T10 checkpoint;
+  correct omitted see/demo prose in the owned extractor, translate new units and repeat final
+  acceptance. This confirmed build-time gap amends the earlier catalog-only scope.
 - Remainder and final gate: cover every remaining native field, resolve changed/unused
   catalog records, and verify missing/stale/unused are all zero. Preserve semantic metadata,
   code, links and Chinese owned-source separation throughout.
 
 The final acceptance is complete current-source coverage, faithful units/constraints and
 reviewed editorial quality. Counts do not replace reading the source and translation.
+
+## Translation program final gate
+
+T11 closes T10 P1 with 229 reference/demo fields added to the same source-hash route. Fresh full
+artifact covers all 15,523 native fields; missing/stale/unused are zero, with 2,337 independent
+Chinese source fields. Full build, strict declarations, 38 Node checks and 19 browser cases pass.
+All 7,943 symbols preserve signatures/types/example bodies/canonical URLs; 533 pages remain.
+The [final review](../reviews/2026-10-30-t11-reference-prose.md) approves completion. Future
+source changes use the maintained hash reports and complete-coverage tests; no SDK/runtime edits.

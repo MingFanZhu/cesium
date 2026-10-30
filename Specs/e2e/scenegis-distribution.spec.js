@@ -544,3 +544,42 @@ test("specialized documentation displays buffer mutation and voxel sampling layo
   });
   expect(errors).toEqual([]);
 });
+
+test("reference and demo prose displays Chinese guidance with preserved link targets", async ({
+  page,
+}, info) => {
+  const errors = [];
+  page.on("pageerror", (error) => errors.push(error.message));
+  page.on("response", (response) => {
+    if (response.status() >= 400) {
+      errors.push(`${response.status()} ${response.url()}`);
+    }
+  });
+  await page.route(/^https?:\/\/(?!127\.0\.0\.1:8104)/, (route) =>
+    route.abort(),
+  );
+  const prefix = "/deep/site/vendor/engine/Documentation/";
+  await page.goto(`${prefix}global.html#CornerType`);
+  await expect(page.locator("#main")).toContainText("三种转角类型");
+  await expect(
+    page
+      .locator('a[href="https://sandcastle.cesium.com/index.html?id=corridor"]')
+      .first(),
+  ).toContainText("走廊示例");
+  await page.goto(`${prefix}ImageryLayer.html`);
+  await expect(page.locator("#main")).toContainText("从异步影像提供者创建图层");
+  await expect(
+    page.locator('a[href="ImageryLayer.html#.fromProviderAsync"]').first(),
+  ).toBeVisible();
+  await page
+    .getByText("从异步影像提供者创建图层。", { exact: false })
+    .first()
+    .scrollIntoViewIfNeeded();
+  await info.attach("reference-prose-documentation", {
+    body: await page.screenshot({
+      path: info.outputPath("reference-prose-documentation.png"),
+    }),
+    contentType: "image/png",
+  });
+  expect(errors).toEqual([]);
+});

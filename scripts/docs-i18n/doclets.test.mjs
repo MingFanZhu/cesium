@@ -12,6 +12,91 @@ const entry = (doclets, field, text, id = "Example") => ({
   text,
 });
 
+test("reference and demo prose includes labels while literal references and code stay untouched", () => {
+  const references = [
+    "Cartesian3",
+    "module:Math.PI",
+    "PerspectiveFrustum#projectionMatrix.",
+    "{Context#depthTexture}",
+    "https://example.test/api",
+    "{@link Scene}",
+    "{@link https://example.test/api}.",
+    "queryToObject\r// str will be:\r// 'name=value'\rconst example = 1;",
+  ];
+  const docs = [
+    {
+      longname: "Example",
+      see: [...references, "Use {@link Scene|the scene} for rendering."],
+      demo: ["The {@link https://example.test/demo|Demo} shows three modes."],
+    },
+  ];
+  assert.deepEqual(
+    collectUnits(docs)
+      .map((u) => u.field)
+      .sort(),
+    ["demo/0", "see/8"],
+  );
+  localizeDoclets(
+    docs,
+    catalog([
+      entry(docs, "see/8", "使用 {@link Scene|场景}进行渲染。"),
+      entry(
+        docs,
+        "demo/0",
+        "{@link https://example.test/demo|示例}展示三种模式。",
+      ),
+    ]),
+  );
+  assert.deepEqual(docs[0].see.slice(0, 8), references);
+  assert.match(docs[0].demo[0], /展示三种模式/);
+  const changed = [
+    {
+      longname: "Example",
+      demo: [
+        "The {@link https://example.test/demo|New demo} shows three modes.",
+      ],
+    },
+  ];
+  const stale = localizeDoclets(
+    changed,
+    catalog([
+      entry(
+        [
+          {
+            longname: "Example",
+            demo: [
+              "The {@link https://example.test/demo|Demo} shows three modes.",
+            ],
+          },
+        ],
+        "demo/0",
+        "{@link https://example.test/demo|示例}展示三种模式。",
+      ),
+    ]),
+  );
+  assert.equal(stale.counts.stale, 1);
+  assert.match(changed[0].demo[0], /New demo/);
+});
+
+test("reference arrays are isolated between doclets before localization", () => {
+  const shared = ["{@link https://example.test/api|API guide}"];
+  const docs = [
+    { longname: "Example", see: shared },
+    { longname: "Other", see: shared },
+  ];
+  const report = localizeDoclets(
+    docs,
+    catalog([
+      entry(docs, "see/0", "{@link https://example.test/api|API 指南}"),
+    ]),
+  );
+  assert.equal(report.counts.translated, 1);
+  assert.equal(report.counts.missing, 1);
+  assert.match(docs[0].see[0], /API 指南/);
+  assert.equal(docs[1].see[0], shared[0]);
+  assert.match(shared[0], /API guide/);
+});
+
 test("localizes only prose and captions while preserving semantic and executable data", () => {
   const docs = [
     {

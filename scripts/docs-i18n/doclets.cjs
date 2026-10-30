@@ -5,12 +5,31 @@ const fs = require("node:fs");
 const path = require("node:path");
 
 const proseFields = ["description", "classdesc", "summary", "deprecated"];
-const proseArrays = ["performance", "experimental"];
+const proseArrays = ["performance", "experimental", "see", "demo"];
 const pointerPart = (value) =>
   value.replaceAll("~", "~0").replaceAll("/", "~1");
 const identity = (unit) =>
   JSON.stringify([unit.id, unit.field, unit.sourceHash]);
 const fieldIdentity = (unit) => JSON.stringify([unit.id, unit.field]);
+
+/** Reference tags may contain guidance/labels, or only literal API/URL targets. */
+function hasReferenceProse(value) {
+  if (typeof value !== "string") {
+    return false;
+  }
+  const lines = value.split(/\r\n?|\n/);
+  const codeStart = lines.findIndex((line) => /^\s*\/\//.test(line));
+  const text = lines
+    .slice(0, codeStart < 0 ? lines.length : codeStart)
+    .join("\n")
+    .trim();
+  return (
+    text.length > 0 &&
+    !/^(?:\{@(?:link(?:code|plain)?|tutorial)\s+[^\s|}]+\s*\}|https?:\/\/\S+|\{?[\w$]+(?:[:.#~][\w$]+)*\.?\}?)[.!]?$/.test(
+      text,
+    )
+  );
+}
 
 /** Hash unbranded source prose; normalize platform line endings only. */
 function sourceHash(source) {
@@ -41,6 +60,12 @@ function visitProse(doclets, visitor) {
     }
     for (const field of proseArrays) {
       for (const [index] of (doclet[field] ?? []).entries()) {
+        if (
+          (field === "see" || field === "demo") &&
+          !hasReferenceProse(doclet[field][index])
+        ) {
+          continue;
+        }
         visit(doclet[field], index, `${field}/${index}`);
       }
     }
