@@ -22,39 +22,15 @@ export async function buildDocumentation() {
     await rm(target, { recursive: true, force: true });
   }
   await mkdir(template, { recursive: true });
-  for (const locale of ["en-US", "zh-CN"]) {
-    await buildLocale({
-      locale,
-      symbols,
-      version,
-      root: output,
-      staging: template,
-    });
-  }
-  await writeFile(
-    path.join(output, "locales.json"),
-    JSON.stringify(
-      {
-        schemaVersion: 1,
-        sourceLocale: "en-US",
-        locales: [
-          { locale: "en-US", name: "English", path: "./" },
-          { locale: "zh-CN", name: "简体中文", path: "zh-CN/" },
-        ],
-      },
-      null,
-      2,
-    ),
-  );
+  await buildChineseEdition({ symbols, version, output, template });
   await cp(
     "Documentation/SceneGIS/Distribution.md",
     path.resolve("Build/SceneGIS/README.md"),
   );
 }
 
-async function buildLocale({ locale, symbols, version, root, staging }) {
-  const output = locale === "en-US" ? root : path.join(root, locale);
-  const template = path.join(staging, locale);
+async function buildChineseEdition({ symbols, version, output, template }) {
+  const locale = "zh-CN";
   const ui = JSON.parse(
     await readFile(`Documentation/i18n/${locale}/ui.json`, "utf8"),
   );
@@ -96,13 +72,11 @@ async function buildLocale({ locale, symbols, version, root, staging }) {
     }
     source = source.replace('<html lang="en">', `<html lang="${locale}">`);
     if (filename === "layout.tmpl" || filename === "indexLayout.tmpl") {
-      const otherRoot = locale === "en-US" ? "zh-CN/" : "../";
       source = source.replace(
         /<div id="(?:main|mainIndex)">/,
         (opening) => `${opening}
-<div class="doc-locale" style="margin-bottom:1em">
-<a id="DocLanguage" data-root="${otherRoot}" href="${otherRoot}index.html">${ui.otherLanguage}</a>
- · ${ui.coverageNotice}
+<div class="doc-coverage" style="margin-bottom:1em">
+${ui.coverageNotice}
 </div>`,
       );
       source = source.replace(
@@ -138,10 +112,7 @@ async function buildLocale({ locale, symbols, version, root, staging }) {
     ...configuration.opts,
     destination: output,
     template,
-    readme:
-      locale === "en-US"
-        ? "./scripts/scenegis/jsdoc/README.md"
-        : `./Documentation/i18n/${locale}/README.md`,
+    readme: `./Documentation/i18n/${locale}/README.md`,
     mainpagetitle: `SceneGIS ${ui.homeTitle}`,
   };
   const configPath = path.resolve(`Build/SceneGIS-jsdoc-${locale}.json`);

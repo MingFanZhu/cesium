@@ -4,14 +4,6 @@
   const messages = JSON.parse(
     document.getElementById("DocMessages").textContent,
   );
-  const language = document.getElementById("DocLanguage");
-  const switched = new URL(
-    language.dataset.root + window.location.pathname.split("/").pop(),
-    window.location.href,
-  );
-  switched.search = window.location.search;
-  switched.hash = window.location.hash;
-  language.href = switched.href;
   const input = document.getElementById("ClassFilter");
   const navigation = document.getElementById("ClassList");
   const results = document.createElement("div");

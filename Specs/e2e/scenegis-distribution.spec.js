@@ -186,7 +186,7 @@ test("standalone nested documentation filters sidebar names and follows type lin
   expect(indexRequests).toEqual([]);
 });
 
-test("Chinese documentation filters sidebar names and switches the same symbol between languages", async ({
+test("single Chinese documentation shows owned source, native translations and stable anchors", async ({
   page,
 }, info) => {
   const errors = [];
@@ -199,8 +199,8 @@ test("Chinese documentation filters sidebar names and switches the same symbol b
   await page.route(/^https?:\/\/(?!127\.0\.0\.1:8104)/, (route) =>
     route.abort(),
   );
-  const prefix = "/deep/site/vendor/engine/Documentation/";
-  await page.goto(`${prefix}zh-CN/index.html`);
+  const prefix = "/Documentation/";
+  await page.goto(`${prefix}index.html`);
   await expect(page.locator("html")).toHaveAttribute("lang", "zh-CN");
   await page.locator("#ClassFilter").fill("风场体渲染");
   await expect(page.locator("#SceneGISSearchResults a")).toHaveCount(0);
@@ -219,22 +219,12 @@ test("Chinese documentation filters sidebar names and switches the same symbol b
     }),
     contentType: "image/png",
   });
-  await page.goto(
-    `${prefix}zh-CN/SceneGISWindVisualization.html#trailDuration`,
-  );
-  await page.locator("#DocLanguage").click();
-  await expect(page).toHaveURL(
-    /\/Documentation\/SceneGISWindVisualization\.html#trailDuration$/,
-  );
-  await expect(page.locator("html")).toHaveAttribute("lang", "en-US");
+  await page.goto(`${prefix}SceneGISWindVisualization.html#trailDuration`);
+  await expect(page.locator("#DocLanguage")).toHaveCount(0);
   await expect(page.locator('[id="trailDuration"]')).toBeVisible();
-  await page.locator("#DocLanguage").click();
-  await expect(page).toHaveURL(
-    /\/zh-CN\/SceneGISWindVisualization\.html#trailDuration$/,
-  );
-  await page.goto(`${prefix}zh-CN/Viewer.html`);
+  await page.goto(`${prefix}Viewer.html`);
   await page.locator('#main a[href="Scene.html"]').first().click();
-  await expect(page).toHaveURL(/\/zh-CN\/Scene\.html$/);
+  await expect(page).toHaveURL(/\/Documentation\/Scene\.html$/);
   await expect(page.locator("#main")).toContainText("三维图形对象与状态的容器");
   expect(errors).toEqual([]);
 });

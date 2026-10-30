@@ -2,8 +2,7 @@
   "documentationTitle": "API 文档",
   "homeTitle": "引擎 API",
   "help": "引擎 API · 根据当前发行版本的源码生成。",
-  "otherLanguage": "English",
-  "coverageNotice": "中文翻译逐步完善，未译及待复核字段保留英文。<a href=\"translation-report.json\">查看覆盖报告</a>",
+  "coverageNotice": "SceneGIS 扩展说明直接维护中文。Cesium 原生 API 的未译及待复核字段保留英文。<a href=\"translation-report.json\">查看原生翻译报告</a>",
   "search": {
     "results": "显示 {shown} 项，共 {total} 个 API 名称"
   },

@@ -4,10 +4,7 @@ import test from "node:test";
 import { URL } from "node:url";
 import translations from "../docs-i18n/doclets.cjs";
 
-const root = new URL(
-  "../../Build/SceneGIS/Documentation/zh-CN/",
-  import.meta.url,
-);
+const root = new URL("../../Build/SceneGIS/Documentation/", import.meta.url);
 const metadata = JSON.parse(
   await readFile(new URL("api-doclets.json", root), "utf8"),
 );

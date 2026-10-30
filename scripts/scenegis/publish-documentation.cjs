@@ -166,33 +166,31 @@ exports.publish = function (data, opts, tutorials) {
   translations.markSourceDoclets(owned, "zh-CN");
   fs.mkdirSync(opts.destination, { recursive: true });
   const locale = settings.locale;
-  if (locale === "en-US") {
-    fs.writeFileSync(
-      path.join(opts.destination, "translation-source.json"),
-      JSON.stringify(
-        {
-          schemaVersion: 1,
-          sourceLocale: locale,
-          units: translations.collectUnits(nativeDoclets),
-        },
-        null,
-        2,
-      ),
-    );
-  } else {
-    const catalog = translations.readCatalog(
-      settings.translationDirectory,
-      locale,
-    );
-    const report = translations.localizeDoclets(nativeDoclets, catalog);
-    fs.writeFileSync(
-      path.join(opts.destination, "translation-report.json"),
-      JSON.stringify(report, null, 2),
-    );
-    console.log(
-      `Documentation ${locale}: ${report.counts.translated}/${report.counts.total} translated fields, ${report.counts.stale} stale, ${report.counts.unused} unused.`,
-    );
-  }
+  // Capture native English before localization and brand presentation mapping.
+  fs.writeFileSync(
+    path.join(opts.destination, "translation-source.json"),
+    JSON.stringify(
+      {
+        schemaVersion: 1,
+        sourceLocale: "en-US",
+        units: translations.collectUnits(nativeDoclets),
+      },
+      null,
+      2,
+    ),
+  );
+  const catalog = translations.readCatalog(
+    settings.translationDirectory,
+    locale,
+  );
+  const report = translations.localizeDoclets(nativeDoclets, catalog);
+  fs.writeFileSync(
+    path.join(opts.destination, "translation-report.json"),
+    JSON.stringify(report, null, 2),
+  );
+  console.log(
+    `Documentation ${locale}: ${report.counts.translated}/${report.counts.total} translated fields, ${report.counts.stale} stale, ${report.counts.unused} unused.`,
+  );
   publicDoclets.forEach(mapText);
   const doclets = publicDoclets.map(cleanDoclet);
   // Render through the native publisher with its actual prune/link/anchor allocation.

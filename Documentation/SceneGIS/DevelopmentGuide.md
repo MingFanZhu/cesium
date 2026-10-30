@@ -15,9 +15,10 @@ PrimitiveCollection 中的 Cesium3DTileset，可直接传 SDK 的 layer.nativeLa
 独立类型、Workers/Assets/ThirdParty/Widgets、许可证及完整 API 文档和 JSON 元数据。
 `npx gulp buildSceneGISDocs` 只刷新文档。下游 SDK 只消费该发行目录；资源基址、
 类型与元数据格式见 [Distribution.md](Distribution.md)。原 Cesium 构建命令保持不变。
-两目标同时交付英文与 zh-CN 文档。翻译数据在 Documentation/i18n，通用工具在
-scripts/docs-i18n；它们独立于 Source 和品牌映射。维护、覆盖报告和候选提取见
-[文档翻译维护](../i18n/README.md)，不要直接批量改写 Cesium 注释。
+两目标只交付一份中文文档，入口为 Documentation/index.html。SceneGIS 自有公开 API
+直接写中文 JSDoc；原生 Cesium 英文注释保留，通过 Documentation/i18n 中的外部词条翻译。
+通用工具在 scripts/docs-i18n，独立于 Source 和品牌映射。原生翻译维护、覆盖报告和
+候选提取见 [文档翻译维护](../i18n/README.md)，不要批量改写 Cesium 注释。
 
 ## 开始任务前
 

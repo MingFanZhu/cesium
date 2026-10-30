@@ -1,6 +1,7 @@
 # ADR-0206: Independent source-derived API documentation localization
 
-- Status: accepted and implemented
+- Status: accepted and implemented; source-language and bilingual delivery rules superseded by
+  [ADR-0207](ADR-0207-chinese-source-api-documentation.md)
 - Date: 2026-10-30
 - Owner: Architecture Agent (current task)
 - Related: [ADR-0205](ADR-0205-scenegis-distribution.md),

@@ -1,6 +1,6 @@
 # ADR-0207: Chinese source JSDoc and one Chinese documentation edition
 
-- Status: accepted; implementation in progress
+- Status: accepted and implemented
 - Date: 2026-10-30
 - Owner: Architecture Agent (current task)
 - Related: [ADR-0206](ADR-0206-documentation-localization.md),
@@ -44,3 +44,11 @@ smoke cases. Keep metadata semantic/custom fields and canonical IDs throughout.
 
 Neither phase edits SDK, renames runtime classes, changes runtime behavior, modifies native
 comments or hand-edits generated output. Existing native translation gaps remain reported.
+
+## Outcome
+
+C1 checkpoint is `05362428b6`. C2 delivers 533 pages and 7,943 symbols in one Chinese tree.
+All 2,337 owned prose fields (including synthetic VERSION) come directly from Chinese source;
+native-only inventory contains 15,294 fields with 2,960 translations and 12,334 English fallbacks.
+No stale or unused record remains. Full distribution/types and root/nested browser checks pass;
+native buildDocs also passes. See the extension phase reviews for evidence and inherited limits.

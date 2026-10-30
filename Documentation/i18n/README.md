@@ -1,21 +1,22 @@
 # API 文档翻译维护
 
-本目录保存通用 JSDoc 语言数据，独立于引擎源码与发行品牌。工具位于
+本目录保存 Cesium 原生 JSDoc 的外部翻译数据及文档 UI 文案，独立于引擎源码与发行品牌。工具位于
 [scripts/docs-i18n](../../scripts/docs-i18n/)，所有生成结果位于 Build。
 不修改上游注释，不从压缩 bundle 或生成 HTML 反推 API，不调用在线翻译服务。
+SceneGIS 自有公开 API 的自然语言直接维护在源码中文 JSDoc 中，不进入外部翻译词条、
+原文清单、缺失统计或待复核报告。新增或修改自有 API 时直接更新其 JSDoc。
 
 ## 构建与产物
 
-`npx gulp buildSceneGISDocs` 或完整的 `npx gulp buildSceneGIS` 同时生成：
+`npx gulp buildSceneGISDocs` 或完整的 `npx gulp buildSceneGIS` 生成单一中文文档：
 
-- `Build/SceneGIS/Documentation/`：完整英文 HTML、api-doclets.json、api-index.json。
-- `Build/SceneGIS/Documentation/zh-CN/`：完整中文页面树与相同结构的元数据；未译字段保留英文。
-- 英文目录的 `translation-source.json`：品牌映射前的原始英文翻译单元。
-- 中文目录的 `translation-report.json`：覆盖数量、missing/stale 单元和 unused 词条。
-- 英文目录的 `locales.json`：语言名称与相对目录，供 SDK 选择语言。
+- `Build/SceneGIS/Documentation/`：完整 HTML、api-doclets.json、api-index.json。
+- 同目录 `translation-source.json`：品牌映射前的 Cesium 原生英文翻译单元。
+- 同目录 `translation-report.json`：原生翻译的覆盖数量、missing/stale 单元和 unused 词条。
 
-HTML 顶部可切换同一符号的语言，保留搜索词和锚点。搜索仅匹配侧栏列出的 API 名称，不搜索说明或成员方法。完整 API 索引仍保留给 SDK。
-原 Cesium `buildDocs` 目标保持不变；中文只由新增文档目标组合生成。
+不再生成重复英文树、语言目录发现或切换按钮。搜索仅匹配侧栏列出的 API 名称，
+不搜索说明或成员方法。完整 API 索引仍保留给 SDK。
+原 Cesium `buildDocs` 的配置、扫描和模板路径保持不变；中文发行由新增文档目标组合生成。
 
 ## 词条格式
 
@@ -61,6 +62,8 @@ node scripts/docs-i18n/catalog.mjs --source Build/SceneGIS/Documentation/transla
 候选保留原文 source、选择器、当前摘要和空 text。填写并校对 text 后，按模块加入维护词条文件；
 未填写的候选不可直接作为有效词条。复核变化时同时删除或修正已被替代的旧摘要词条。
 构建不会自动更新维护文件或接受旧译文，也不会把未译字段统计为已译。
+`translation-source.json` 和 `translation-report.json` 每次构建覆盖生成；受版本管理的
+翻译词条不会被构建覆盖。这两个清单只反映原生英文 API。
 
 翻译时参考 [术语表](zh-CN/glossary.json)。完整保留原文的坐标系、单位、取值范围、默认值、
 限制和所有权语义。HTML 标签及属性、inline link 目标、code/pre 内容和反引号代码必须原样保留；
@@ -69,9 +72,12 @@ UI 文案位于对应语言的 ui.json，只在复制到 Build 的模板中进�
 
 ## SDK 消费
 
-按 locales.json 选择目录后，读取该目录 api-doclets.json/api-index.json。元数据包含
-locale、sourceLocale，符号 id、类型、exportName 和相对 URL 保持语言间一致。
-中文 doclet.i18n.translatedFields/fallbackFields 指明字段覆盖状态；API 的示例代码与签名保持不变。
+直接读取 Documentation/api-doclets.json 和 api-index.json。根元数据包含
+`locale: "zh-CN"` 和 `sourceLocales: ["en-US", "zh-CN"]`，符号 id、类型、exportName
+和相对 URL 保持原始身份。每个 doclet 的 sourceLocale 标识源码语言。
+自有中文 doclet.i18n.sourceFields 指明直接维护的字段；原生英文 doclet.i18n 的
+translatedFields/fallbackFields 指明翻译或保留原文的字段。示例代码与签名保持不变。
 覆盖以自然语言字段计数，不能以页面数量或中文界面代替翻译完成度。
 
-本次只提交首批优先词条，不宣称完整中文翻译。其余字段仍有完整英文说明，后续持续增补。
+SceneGIS 自有公开说明已完整中文化；Cesium 原生翻译只覆盖优先词条，其余字段保留
+完整英文说明，后续持续增补。原生翻译报告不计入自有中文说明。
