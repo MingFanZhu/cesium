@@ -245,6 +245,101 @@ const roots = new Set([
   "exportKmlModelCallback",
   "exportKmlResultKml",
   "exportKmlResultKmz",
+  "ArcType",
+  "Axis",
+  "AxisAlignedBoundingBox",
+  "BoxGeometry",
+  "BoxOutlineGeometry",
+  "CatmullRomSpline",
+  "CircleGeometry",
+  "CircleOutlineGeometry",
+  "ColorGeometryInstanceAttribute",
+  "ComponentDatatype",
+  "ConstantSpline",
+  "CoplanarPolygonGeometry",
+  "CoplanarPolygonOutlineGeometry",
+  "CornerType",
+  "CorridorGeometry",
+  "CorridorOutlineGeometry",
+  "CubicRealPolynomial",
+  "CullingVolume",
+  "CylinderGeometry",
+  "CylinderOutlineGeometry",
+  "DirectionUp",
+  "DistanceDisplayConditionGeometryInstanceAttribute",
+  "EasingFunction",
+  "EllipseGeometry",
+  "EllipseOutlineGeometry",
+  "EllipsoidGeodesic",
+  "EllipsoidGeometry",
+  "EllipsoidOutlineGeometry",
+  "EllipsoidRhumbLine",
+  "EllipsoidTangentPlane",
+  "FrustumGeometry",
+  "FrustumOutlineGeometry",
+  "GeoJsonGeometry",
+  "Geometry",
+  "GeometryAttribute",
+  "GeometryAttributes",
+  "GeometryFactory",
+  "GeometryInstance",
+  "GeometryInstanceAttribute",
+  "GeometryPipeline",
+  "GroundPolylineGeometry",
+  "HeadingPitchRange",
+  "HeadingPitchRollValues",
+  "HermitePolynomialApproximation",
+  "HermiteSpline",
+  "HilbertOrder",
+  "I3SGeometry",
+  "IndexDatatype",
+  "InterpolationAlgorithm",
+  "Intersect",
+  "Intersections2D",
+  "Interval",
+  "LagrangePolynomialApproximation",
+  "LinearApproximation",
+  "LinearSpline",
+  "MorphWeightSpline",
+  "Occluder",
+  "OrthographicFrustum",
+  "OrthographicOffCenterFrustum",
+  "Packable",
+  "PackableForInterpolation",
+  "PerspectiveFrustum",
+  "PerspectiveOffCenterFrustum",
+  "PlaneGeometry",
+  "PlaneOutlineGeometry",
+  "PolygonGeometry",
+  "PolygonOutlineGeometry",
+  "PolylineGeometry",
+  "PolylineVolumeGeometry",
+  "PolylineVolumeOutlineGeometry",
+  "PrimitiveType",
+  "QuadraticRealPolynomial",
+  "QuarticRealPolynomial",
+  "QuaternionSpline",
+  "RectangleGeometry",
+  "RectangleOutlineGeometry",
+  "Rotation",
+  "ShowGeometryInstanceAttribute",
+  "SimplePolylineGeometry",
+  "SphereGeometry",
+  "SphereOutlineGeometry",
+  "Spherical",
+  "Spline",
+  "SteppedSpline",
+  "Stereographic",
+  "TranslationRotationScale",
+  "TridiagonalSystemSolver",
+  "VertexColorInfo",
+  "VertexFormat",
+  "Visibility",
+  "WallGeometry",
+  "WallOutlineGeometry",
+  "WindingOrder",
+  "barycentricCoordinates",
+  "pointInsideTriangle",
   "ImageryProvider",
   "Terrain",
   "TerrainProvider",
@@ -510,6 +605,63 @@ test("entity data prose preserves evaluation, frames, events and reusable resour
   );
   assert.ok(lookup.get("LabelGraphics#text").description.includes("'\\n'"));
   assert.match(lookup.get("exportKml").description, /并非一一对应/);
+});
+
+test("geometric prose preserves packing, winding, parameter time and verified limits", () => {
+  assert.match(
+    lookup
+      .get("CatmullRomSpline")
+      .params.find((p) => p.name === "options.times").description,
+    /无单位.*与时钟时间没有关联/,
+  );
+  assert.match(
+    lookup
+      .get("GroundPolylineGeometry")
+      .params.find((p) => p.name === "options.granularity").description,
+    /单位为米.*零表示不插值/,
+  );
+  assert.match(
+    lookup
+      .get("CircleGeometry")
+      .params.find((p) => p.name === "options.granularity").description,
+    /单位为弧度/,
+  );
+  assert.match(
+    lookup.get("Geometry#attributes").description,
+    /分量数量沿用源属性/,
+  );
+  assert.match(
+    lookup.get("GeometryPipeline.computeNormal").description,
+    /逆时针绕序/,
+  );
+  assert.match(
+    lookup.get("ComponentDatatype.DOUBLE").description,
+    /WebGL 不支持此类型/,
+  );
+  assert.match(lookup.get("BoxGeometry").description, /最小和最大坐标/);
+  assert.match(
+    lookup.get("EllipsoidRhumbLine").exceptions[0].description,
+    /对跖位置/,
+  );
+  assert.match(
+    lookup.get("HeadingPitchRange").description,
+    /正值位于平面下方，负值位于平面上方/,
+  );
+  assert.match(lookup.get("QuaternionSpline").description, /不保证.*连续性/);
+  assert.match(
+    lookup.get("HermiteSpline.createC1").description,
+    /入切向量与出切向量相同/,
+  );
+  assert.match(lookup.get("RectangleGraphics#rotation").description, /逆时针/);
+  assert.match(
+    lookup.get("Occluder.computeOccludeePoint").returns[0].description,
+    /Cartesian3.*undefined/,
+  );
+  assert.match(
+    lookup.get("Intersections2D.clipTriangleAtAxisAlignedThreshold").returns[0]
+      .description,
+    /-1.*三个数/,
+  );
 });
 
 test("spatial units, ownership, boundary conditions and callback limits reach metadata", () => {

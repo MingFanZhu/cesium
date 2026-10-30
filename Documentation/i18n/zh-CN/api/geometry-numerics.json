@@ -1,0 +1,2016 @@
+{
+  "schemaVersion": 1,
+  "locale": "zh-CN",
+  "entries": [
+    {
+      "id": "CatmullRomSpline",
+      "field": "description",
+      "sourceHash": "sha256:a2c8c509abc622502e756617a639585533108f342cc2914439c0582117f0eaf6",
+      "text": "Catmull-Rom 样条是一种三次样条，除首尾点外，各控制点的切向量由其前后控制点计算。Catmull-Rom 样条具有 C<sup>1</sup> 连续性。"
+    },
+    {
+      "id": "CatmullRomSpline",
+      "field": "exceptions/0/description",
+      "sourceHash": "sha256:03622c96477b5f9a1875a826f343aec09a2e7d3cf1868197783ffabc9a2ed23a",
+      "text": "points.length 必须大于等于 2。"
+    },
+    {
+      "id": "CatmullRomSpline",
+      "field": "exceptions/1/description",
+      "sourceHash": "sha256:e9f5f3ea01f5cc58d46a1b96a101421098613647d70563150db0e655648c630f",
+      "text": "times.length 必须等于 points.length。"
+    },
+    {
+      "id": "CatmullRomSpline",
+      "field": "params/options.firstTangent/description",
+      "sourceHash": "sha256:8cacb11144256a35e65080aa5c20d6b4f4bd51d9e986041cb70bc297c0655722",
+      "text": "曲线在第一个控制点处的切向量。未提供时进行估计。"
+    },
+    {
+      "id": "CatmullRomSpline",
+      "field": "params/options.lastTangent/description",
+      "sourceHash": "sha256:eb0f134e041e319594cbf8eb2bd67bc61118c6f54e5fa5ff415955fd835a8337",
+      "text": "曲线在最后一个控制点处的切向量。未提供时进行估计。"
+    },
+    {
+      "id": "CatmullRomSpline",
+      "field": "params/options.points/description",
+      "sourceHash": "sha256:155021adfc0efaa1c7db9bf1225e836d76513fc3b2161718910713193487c2ea",
+      "text": "{@link Cartesian3} 控制点数组。"
+    },
+    {
+      "id": "CatmullRomSpline",
+      "field": "params/options.times/description",
+      "sourceHash": "sha256:8d71dae66ee4fb181cb05e7a9e286fcdf9fded8128141298dd9e934c6c72dde4",
+      "text": "各控制点对应的严格递增、无单位浮点时间数组。这些值与时钟时间没有关联，仅用于曲线参数化。"
+    },
+    {
+      "id": "CatmullRomSpline#clampTime",
+      "field": "description",
+      "sourceHash": "sha256:cf7fd9365cc8dbc75c286bf37d9d619f420da774f82c7e167d3a8aa8e8d50e71",
+      "text": "将给定时间限制在样条覆盖的区间内。"
+    },
+    {
+      "id": "CatmullRomSpline#clampTime",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:264a1cea44fc47d73634e7feb3f567705193d57aca0ab1f9ff27d3343a249eb1",
+      "text": "限制在动画区间内的时间。"
+    },
+    {
+      "id": "CatmullRomSpline#evaluate",
+      "field": "description",
+      "sourceHash": "sha256:3f33f09a9fd92022886d7c71fdb836aed65a99b1cd1dba75feee968b0e01affb",
+      "text": "在指定时间处计算曲线值。"
+    },
+    {
+      "id": "CatmullRomSpline#evaluate",
+      "field": "exceptions/0/description",
+      "sourceHash": "sha256:daf7d42d264462b4aa90d12c2825b7d4afb5c07c268c231913f576b32cfe5351",
+      "text": "time 必须位于 <code>[t<sub>0</sub>, t<sub>n</sub>]</code> 范围内，其中 <code>t<sub>0</sub></code> 为 <code>times</code> 数组首项，<code>t<sub>n</sub></code> 为 <code>times</code> 数组末项。"
+    },
+    {
+      "id": "CatmullRomSpline#evaluate",
+      "field": "params/time/description",
+      "sourceHash": "sha256:4481138153c7d6a020d21c64d2ffb39e8b14e407d5cc75b3bc16b2602b701f9e",
+      "text": "需要计算曲线值的时间。"
+    },
+    {
+      "id": "CatmullRomSpline#evaluate",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:6a8773a34fadf6fc4fe917c3db29cca7010ac101ea63984a979f1c6550389dda",
+      "text": "修改后的 result 参数，或指定时间处曲线上点的新实例。"
+    },
+    {
+      "id": "CatmullRomSpline#findTimeInterval",
+      "field": "description",
+      "sourceHash": "sha256:2d3b70e954eee0e168175a7296b59fa062e12e8e039f5af26ee257ffd79ff714",
+      "text": "在 <code>times</code> 中寻找索引 <code>i</code>，使参数 <code>time</code> 位于区间 <code>[times[i], times[i + 1]]</code> 内。"
+    },
+    {
+      "id": "CatmullRomSpline#findTimeInterval",
+      "field": "exceptions/0/description",
+      "sourceHash": "sha256:daf7d42d264462b4aa90d12c2825b7d4afb5c07c268c231913f576b32cfe5351",
+      "text": "time 必须位于 <code>[t<sub>0</sub>, t<sub>n</sub>]</code> 范围内，其中 <code>t<sub>0</sub></code> 为 <code>times</code> 数组首项，<code>t<sub>n</sub></code> 为 <code>times</code> 数组末项。"
+    },
+    {
+      "id": "CatmullRomSpline#findTimeInterval",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:60f0528936672c592f1a09be74f287214c23d01f38b8006e6ee03f42b17e479c",
+      "text": "区间起始元素的索引。"
+    },
+    {
+      "id": "CatmullRomSpline#firstTangent",
+      "field": "description",
+      "sourceHash": "sha256:4d2fc6d923935cd53d6bf069ee7e8342ccccad0a0d65330479b245504cf635ab",
+      "text": "第一个控制点处的切向量。"
+    },
+    {
+      "id": "CatmullRomSpline#lastTangent",
+      "field": "description",
+      "sourceHash": "sha256:bbef9e0314d9dd3923b57f720341a4ec4380e76f2e277ef4596eb0ac1bdce88d",
+      "text": "最后一个控制点处的切向量。"
+    },
+    {
+      "id": "CatmullRomSpline#points",
+      "field": "description",
+      "sourceHash": "sha256:a45f71dc11892e5419614d5dfcf884f7700e593c7b438dbb6bcda1843efbe6db",
+      "text": "{@link Cartesian3} 控制点数组。"
+    },
+    {
+      "id": "CatmullRomSpline#times",
+      "field": "description",
+      "sourceHash": "sha256:2bff13619321a975c2f416edb79b721ed9865f25c859f4ced0e61b153702ab0c",
+      "text": "控制点对应的时间数组。"
+    },
+    {
+      "id": "CatmullRomSpline#wrapTime",
+      "field": "description",
+      "sourceHash": "sha256:c43ac8f1f89b4304828e12b669b7e9275a7fb932e9b459f9d33701960eca3fc6",
+      "text": "将给定时间循环映射到样条覆盖的区间内。"
+    },
+    {
+      "id": "CatmullRomSpline#wrapTime",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:69daed3923cf65f32aaabd83b9875516b2943162cf4fa113195d2989942d4b71",
+      "text": "循环映射到动画区间内的时间。"
+    },
+    {
+      "id": "ConstantSpline",
+      "field": "description",
+      "sourceHash": "sha256:a5c95ea11b4f17825da1772e989ad07f7107442cbaf082c3cc6b0e29151365d5",
+      "text": "始终计算为常量值的样条。遵循 {@link Spline} 接口，但由于值不变，不维护内部时间数组。"
+    },
+    {
+      "id": "ConstantSpline",
+      "field": "params/value/description",
+      "sourceHash": "sha256:9a5460f30f872045d9b236602ae67dea4427990473c993f93242834c6874c8b6",
+      "text": "此样条求值得到的常量值。"
+    },
+    {
+      "id": "ConstantSpline#clampTime",
+      "field": "description",
+      "sourceHash": "sha256:cf7fd9365cc8dbc75c286bf37d9d619f420da774f82c7e167d3a8aa8e8d50e71",
+      "text": "将给定时间限制在样条覆盖的区间内。"
+    },
+    {
+      "id": "ConstantSpline#clampTime",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:264a1cea44fc47d73634e7feb3f567705193d57aca0ab1f9ff27d3343a249eb1",
+      "text": "限制在动画区间内的时间。"
+    },
+    {
+      "id": "ConstantSpline#evaluate",
+      "field": "description",
+      "sourceHash": "sha256:3f33f09a9fd92022886d7c71fdb836aed65a99b1cd1dba75feee968b0e01affb",
+      "text": "在指定时间处计算曲线值。"
+    },
+    {
+      "id": "ConstantSpline#evaluate",
+      "field": "params/time/description",
+      "sourceHash": "sha256:4481138153c7d6a020d21c64d2ffb39e8b14e407d5cc75b3bc16b2602b701f9e",
+      "text": "需要计算曲线值的时间。"
+    },
+    {
+      "id": "ConstantSpline#evaluate",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:bc5544f76091143184df5eb10cf44aa7635bb754c5d4635f2c98ff188385aea1",
+      "text": "修改后的 result 参数，或此常量样条表示的值。"
+    },
+    {
+      "id": "ConstantSpline#findTimeInterval",
+      "field": "description",
+      "sourceHash": "sha256:8935584e291c0909e8326c511e91378fa2bdb39c208a3657314b8e54a73465e6",
+      "text": "在 <code>times</code> 中寻找索引 <code>i</code>，使参数 <code>time</code> 位于区间 <code>[times[i], times[i + 1]]</code> 内。\n\n常量样条没有内部时间数组，因此调用此方法会抛出错误。"
+    },
+    {
+      "id": "ConstantSpline#findTimeInterval",
+      "field": "exceptions/0/description",
+      "sourceHash": "sha256:760665adc42ec3f99d8b4deadd8b87159e9cfa558b4350eb1b7f41540e8bb5a0",
+      "text": "不能对 ConstantSpline 调用 findTimeInterval。"
+    },
+    {
+      "id": "ConstantSpline#value",
+      "field": "description",
+      "sourceHash": "sha256:9a5460f30f872045d9b236602ae67dea4427990473c993f93242834c6874c8b6",
+      "text": "此样条求值得到的常量值。"
+    },
+    {
+      "id": "ConstantSpline#wrapTime",
+      "field": "description",
+      "sourceHash": "sha256:c43ac8f1f89b4304828e12b669b7e9275a7fb932e9b459f9d33701960eca3fc6",
+      "text": "将给定时间循环映射到样条覆盖的区间内。"
+    },
+    {
+      "id": "ConstantSpline#wrapTime",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:69daed3923cf65f32aaabd83b9875516b2943162cf4fa113195d2989942d4b71",
+      "text": "循环映射到动画区间内的时间。"
+    },
+    {
+      "id": "CubicRealPolynomial.computeDiscriminant",
+      "field": "description",
+      "sourceHash": "sha256:437d4be37161d3febcc6bbb538a4d2a1e8092cd02707889d6bb04fb39b54465d",
+      "text": "根据所提供系数计算三次方程的判别式。"
+    },
+    {
+      "id": "CubicRealPolynomial.computeDiscriminant",
+      "field": "params/a/description",
+      "sourceHash": "sha256:140fc2cd9736cb2364e4bf25a24f8bdf4d6c29d26d700b20d8a3aa50d5a7cc2d",
+      "text": "三次项的系数。"
+    },
+    {
+      "id": "CubicRealPolynomial.computeDiscriminant",
+      "field": "params/b/description",
+      "sourceHash": "sha256:6883a3c7dd8ba7c8f93e66645569b3f17ca93a6a1713bb7b2128c2c06e645464",
+      "text": "二次项的系数。"
+    },
+    {
+      "id": "CubicRealPolynomial.computeDiscriminant",
+      "field": "params/c/description",
+      "sourceHash": "sha256:676f6ccaf3f9654bf0775eddd154dfff52c8b3a50947ecd75724708b02df0d60",
+      "text": "一次项的系数。"
+    },
+    {
+      "id": "CubicRealPolynomial.computeDiscriminant",
+      "field": "params/d/description",
+      "sourceHash": "sha256:b0febe4dbbdbb3221e7972eee2d93bc0a05dfdc4eba24747883098f56938551b",
+      "text": "常数项的系数。"
+    },
+    {
+      "id": "CubicRealPolynomial.computeDiscriminant",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:548038eeb43027140f605fbed55cc35b77af0d0108b915260ac04c49cc0fa3b4",
+      "text": "判别式的值。"
+    },
+    {
+      "id": "CubicRealPolynomial.computeRealRoots",
+      "field": "description",
+      "sourceHash": "sha256:c6491472c0cf30973d3ca42096954bedd1ab5d3c71941fa9b739ef03a5e61f4f",
+      "text": "根据所提供系数计算三次多项式的实根。"
+    },
+    {
+      "id": "CubicRealPolynomial.computeRealRoots",
+      "field": "params/a/description",
+      "sourceHash": "sha256:140fc2cd9736cb2364e4bf25a24f8bdf4d6c29d26d700b20d8a3aa50d5a7cc2d",
+      "text": "三次项的系数。"
+    },
+    {
+      "id": "CubicRealPolynomial.computeRealRoots",
+      "field": "params/b/description",
+      "sourceHash": "sha256:6883a3c7dd8ba7c8f93e66645569b3f17ca93a6a1713bb7b2128c2c06e645464",
+      "text": "二次项的系数。"
+    },
+    {
+      "id": "CubicRealPolynomial.computeRealRoots",
+      "field": "params/c/description",
+      "sourceHash": "sha256:676f6ccaf3f9654bf0775eddd154dfff52c8b3a50947ecd75724708b02df0d60",
+      "text": "一次项的系数。"
+    },
+    {
+      "id": "CubicRealPolynomial.computeRealRoots",
+      "field": "params/d/description",
+      "sourceHash": "sha256:b0febe4dbbdbb3221e7972eee2d93bc0a05dfdc4eba24747883098f56938551b",
+      "text": "常数项的系数。"
+    },
+    {
+      "id": "CubicRealPolynomial.computeRealRoots",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:4955c931a3d1b16ca8da38eae12af99e486309847f9d9178f11345a753ffe400",
+      "text": "实根。"
+    },
+    {
+      "id": "CubicRealPolynomial",
+      "field": "description",
+      "sourceHash": "sha256:5699bf8497e954489f5f0c7bd93bea5c6525ec6416c6abd5eec4662556b061ca",
+      "text": "定义实系数一元三次多项式的相关函数。"
+    },
+    {
+      "id": "EasingFunction.BACK_IN_OUT",
+      "field": "description",
+      "sourceHash": "sha256:8bcc4e2f9f39655a0a2cc6bed6663ca698cccfcca3c9a01bf3c2c87cd0e60bf7",
+      "text": "回拉式缓入缓出。"
+    },
+    {
+      "id": "EasingFunction.BACK_IN",
+      "field": "description",
+      "sourceHash": "sha256:94afaae04a9900bd5055e3565bbe09369bf13c6c2b4c5c5b9f471ef528b4e269",
+      "text": "回拉式缓入。"
+    },
+    {
+      "id": "EasingFunction.BACK_OUT",
+      "field": "description",
+      "sourceHash": "sha256:1255b6ed5c02cd8e105d776fcfc44f14248904c0f16180b9d8a6ced5d48b492e",
+      "text": "回拉式缓出。"
+    },
+    {
+      "id": "EasingFunction.BOUNCE_IN_OUT",
+      "field": "description",
+      "sourceHash": "sha256:af501fa00715288b56f9f85e6172781dd85f811c7c1ea58488ebb6aa0e93d9a8",
+      "text": "弹跳式缓入缓出。"
+    },
+    {
+      "id": "EasingFunction.BOUNCE_IN",
+      "field": "description",
+      "sourceHash": "sha256:0764c73963d602db8a8a2b7dfbed19613cd14b6083b9f1e0c34e15227bf34ed6",
+      "text": "弹跳式缓入。"
+    },
+    {
+      "id": "EasingFunction.BOUNCE_OUT",
+      "field": "description",
+      "sourceHash": "sha256:e1b166c42dfecb47aa68bf660ebdbea15f28bcb820d56cacedfabbb556322601",
+      "text": "弹跳式缓出。"
+    },
+    {
+      "id": "EasingFunction.Callback",
+      "field": "description",
+      "sourceHash": "sha256:2fc114077ffea3f4bb3b20452fde27fb51a2275a399bcf918587868c6a9f40ab",
+      "text": "实现自定义缓动函数的函数接口。"
+    },
+    {
+      "id": "EasingFunction.Callback",
+      "field": "params/time/description",
+      "sourceHash": "sha256:e92357cc78eac71f9ebdbc0904d6e0aa28a3b4c038c7356e9251b04560fc335e",
+      "text": "范围为 <code>[0, 1]</code> 的时间参数。"
+    },
+    {
+      "id": "EasingFunction.Callback",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:0ef8bc4b2ac1e0d91bb2fd2f124cf565dc1eaf5ce4aa59f5580e81e648ec9a38",
+      "text": "函数在指定时间参数处的值。"
+    },
+    {
+      "id": "EasingFunction.CIRCULAR_IN_OUT",
+      "field": "description",
+      "sourceHash": "sha256:099a536cc6e9bd3c746cd5ed6fb4de3ae9f714ef47b0da7d670338fef94c0b9f",
+      "text": "圆形缓入缓出。"
+    },
+    {
+      "id": "EasingFunction.CIRCULAR_IN",
+      "field": "description",
+      "sourceHash": "sha256:5bda06c86c6d7607f3783cee0c38d2ef963068547d67b4855954393a09f7fd42",
+      "text": "圆形缓入。"
+    },
+    {
+      "id": "EasingFunction.CIRCULAR_OUT",
+      "field": "description",
+      "sourceHash": "sha256:c76bea6ba80f0f03fa9e336417d3b782d3b9be262bb4a2874624119ff95134a7",
+      "text": "圆形缓出。"
+    },
+    {
+      "id": "EasingFunction.CUBIC_IN_OUT",
+      "field": "description",
+      "sourceHash": "sha256:0644963b0264f847d345214284e03b3a1b560cc717a0eb65a9bc12ee1af7126b",
+      "text": "三次缓入缓出。"
+    },
+    {
+      "id": "EasingFunction.CUBIC_IN",
+      "field": "description",
+      "sourceHash": "sha256:2af073a470170f57ba07fd7b70f311d4c08c9ef90b989fea240b2da093123037",
+      "text": "三次缓入。"
+    },
+    {
+      "id": "EasingFunction.CUBIC_OUT",
+      "field": "description",
+      "sourceHash": "sha256:087ef6e85f18af900e7427400dbf4016abbccbf90940be784178cd00a47db987",
+      "text": "三次缓出。"
+    },
+    {
+      "id": "EasingFunction.ELASTIC_IN_OUT",
+      "field": "description",
+      "sourceHash": "sha256:6e28fca0da67181e09df5c1e4325afd150c0d451e938138cc53794bd66dff1e6",
+      "text": "弹性缓入缓出。"
+    },
+    {
+      "id": "EasingFunction.ELASTIC_IN",
+      "field": "description",
+      "sourceHash": "sha256:abf184af4848d36f2fac94a7f93536d1cf96a0082e11d0d69f0f53cab891fa3d",
+      "text": "弹性缓入。"
+    },
+    {
+      "id": "EasingFunction.ELASTIC_OUT",
+      "field": "description",
+      "sourceHash": "sha256:d7d8c29f76269af13d096032c375c6fe5db4e16cb6a6f87bf01215c0dd1bdc94",
+      "text": "弹性缓出。"
+    },
+    {
+      "id": "EasingFunction.EXPONENTIAL_IN_OUT",
+      "field": "description",
+      "sourceHash": "sha256:211109e2ebab4b68ebea32088298477dfbf912d49c5ea0f7070395a24b8fb997",
+      "text": "指数缓入缓出。"
+    },
+    {
+      "id": "EasingFunction.EXPONENTIAL_IN",
+      "field": "description",
+      "sourceHash": "sha256:bfe75d06251cfa2f3fc0737348e786bea195127d557e68aae1c115813f47ae5a",
+      "text": "指数缓入。"
+    },
+    {
+      "id": "EasingFunction.EXPONENTIAL_OUT",
+      "field": "description",
+      "sourceHash": "sha256:1ee9b29be17500ae155a0a6ae0136990fbd81eac60c9f7ebba4edb76774733b7",
+      "text": "指数缓出。"
+    },
+    {
+      "id": "EasingFunction.LINEAR_NONE",
+      "field": "description",
+      "sourceHash": "sha256:0a5dee4a4895ebe89afb05f5603008ec9190e1fef557fe1747773f230aa46748",
+      "text": "线性缓动。"
+    },
+    {
+      "id": "EasingFunction.QUADRATIC_IN_OUT",
+      "field": "description",
+      "sourceHash": "sha256:d4734cb40a06a63711b528024d4eec56eec9063da185d2d521711cc58c39e4e5",
+      "text": "二次缓入缓出。"
+    },
+    {
+      "id": "EasingFunction.QUADRATIC_IN",
+      "field": "description",
+      "sourceHash": "sha256:be71e2ce055086b55aa2fe576f28e00f8ed2e7d59148712e0365a13a8b2526ea",
+      "text": "二次缓入。"
+    },
+    {
+      "id": "EasingFunction.QUADRATIC_OUT",
+      "field": "description",
+      "sourceHash": "sha256:027a897f6511700c941e1c4f8903975fc9256b2463e6db60dde33ea98692af0c",
+      "text": "二次缓出。"
+    },
+    {
+      "id": "EasingFunction.QUARTIC_IN_OUT",
+      "field": "description",
+      "sourceHash": "sha256:30f320c2f4ce5bca53a4aa87366c509762abc1ba95e4d50e5958fe68a0350243",
+      "text": "四次缓入缓出。"
+    },
+    {
+      "id": "EasingFunction.QUARTIC_IN",
+      "field": "description",
+      "sourceHash": "sha256:e0ae6c7d3f271b2bdcafd3991e8c412f4087423c5ab5a40025f9693effa26fcc",
+      "text": "四次缓入。"
+    },
+    {
+      "id": "EasingFunction.QUARTIC_OUT",
+      "field": "description",
+      "sourceHash": "sha256:355f79ef5ccd4d02daa71804f130f58b0d725c361976245f0df119255a5b0be2",
+      "text": "四次缓出。"
+    },
+    {
+      "id": "EasingFunction.QUINTIC_IN_OUT",
+      "field": "description",
+      "sourceHash": "sha256:4f1186321832ebeab6c4aaff5524be977c5b22383c8c0ff7c6e96dbe0a3d751a",
+      "text": "五次缓入缓出。"
+    },
+    {
+      "id": "EasingFunction.QUINTIC_IN",
+      "field": "description",
+      "sourceHash": "sha256:b878c6c1283b02d72589accf9f77189da954654a1b2d157b124cbf9a66e61332",
+      "text": "五次缓入。"
+    },
+    {
+      "id": "EasingFunction.QUINTIC_OUT",
+      "field": "description",
+      "sourceHash": "sha256:f089a5040b497da42ce1048facc92dbe451c089e40c6bf965f2dd437a47dae20",
+      "text": "五次缓出。"
+    },
+    {
+      "id": "EasingFunction.SINUSOIDAL_IN_OUT",
+      "field": "description",
+      "sourceHash": "sha256:d1c2637ebef4f07170ad29d8cc6cd7f97f058d4434135d00ab46bb31ae1d50d1",
+      "text": "正弦缓入缓出。"
+    },
+    {
+      "id": "EasingFunction.SINUSOIDAL_IN",
+      "field": "description",
+      "sourceHash": "sha256:8c8511f12c52515083aa592658c852508ffa721f2a5f4b6c20816539d73a8be6",
+      "text": "正弦缓入。"
+    },
+    {
+      "id": "EasingFunction.SINUSOIDAL_OUT",
+      "field": "description",
+      "sourceHash": "sha256:01a13b3e6ee366baceae55218991507adda25c6566582227d7d16ed27e8cb778",
+      "text": "正弦缓出。"
+    },
+    {
+      "id": "EasingFunction",
+      "field": "description",
+      "sourceHash": "sha256:57e6320311e81468ece2b12f341481ae8392de40ce2f243ce8df2306fd7c1519",
+      "text": "供 TweenCollection 使用的缓动函数，来自 {@link https://github.com/sole/tween.js/|Tween.js} 和 Robert Penner。参见{@link http://sole.github.io/tween.js/examples/03_graphs.html|各函数的 Tween.js 曲线图}。"
+    },
+    {
+      "id": "HermitePolynomialApproximation.getRequiredDataPoints",
+      "field": "description",
+      "sourceHash": "sha256:57909ef57aba2624565a7b57dd8ae0d928e89dcca749ce77f13db89678ae1681",
+      "text": "根据指定插值次数，返回插值所需的数据点数量。"
+    },
+    {
+      "id": "HermitePolynomialApproximation.getRequiredDataPoints",
+      "field": "exceptions/0/description",
+      "sourceHash": "sha256:6a9462be0f632052aec8c59a2d86afdf27a4c229cbd974578a2d9358f6f0c958",
+      "text": "degree 必须大于等于 0。"
+    },
+    {
+      "id": "HermitePolynomialApproximation.getRequiredDataPoints",
+      "field": "exceptions/1/description",
+      "sourceHash": "sha256:a30e6bfcf88c9b42821aefca71edf6c4247b454eb71809819f7a02083ad117b4",
+      "text": "inputOrder 必须大于等于 0。"
+    },
+    {
+      "id": "HermitePolynomialApproximation.getRequiredDataPoints",
+      "field": "params/degree/description",
+      "sourceHash": "sha256:e94547c60c704bab4f229093620780ed0030a41e56160c361f3c2f6ba9ed1715",
+      "text": "期望的插值次数。"
+    },
+    {
+      "id": "HermitePolynomialApproximation.getRequiredDataPoints",
+      "field": "params/inputOrder/description",
+      "sourceHash": "sha256:a4c734c68390a7af3d1e5f4b15f396d31a6d687ba8ee4e9d303dfad1762ba67e",
+      "text": "输入数据的导数阶数。0 表示仅含数据，1 表示数据及一阶导数，依此类推。"
+    },
+    {
+      "id": "HermitePolynomialApproximation.getRequiredDataPoints",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:5ff013a1ff0757571bfbd9c2a06e57dcf0ca909b88917fd10a5d99f2c70bd76f",
+      "text": "达到指定插值次数所需的数据点数量。"
+    },
+    {
+      "id": "HermitePolynomialApproximation.interpolate",
+      "field": "description",
+      "sourceHash": "sha256:1f4a51a837e02e15d5f0361b3c6394a1dc1b6cd25d7ec24520954895c6a652d8",
+      "text": "使用 Hermite 多项式近似进行插值。"
+    },
+    {
+      "id": "HermitePolynomialApproximation.interpolate",
+      "field": "params/inputOrder/description",
+      "sourceHash": "sha256:0cb5bc41f58c29ab29d55bf2819ac0b474381e644aeebad5de94803434e28d3f",
+      "text": "输入提供的导数阶数。"
+    },
+    {
+      "id": "HermitePolynomialApproximation.interpolate",
+      "field": "params/outputOrder/description",
+      "sourceHash": "sha256:ed0a77da7a8850a70c32ba04518bc92e36827cf119f3a1de802f52c672e0559f",
+      "text": "输出需要的导数阶数。"
+    },
+    {
+      "id": "HermitePolynomialApproximation.interpolate",
+      "field": "params/result/description",
+      "sourceHash": "sha256:a7979e93e52e7be544ed8ff38072723f1d26e447adc3032834435d9e4d22ce0a",
+      "text": "用于存储结果的已有数组。"
+    },
+    {
+      "id": "HermitePolynomialApproximation.interpolate",
+      "field": "params/x/description",
+      "sourceHash": "sha256:0a90445c349172aed0be7a6b2865eb1f724eae438b08db36de7b0a3e8452b889",
+      "text": "需要计算对应因变量插值结果的自变量。"
+    },
+    {
+      "id": "HermitePolynomialApproximation.interpolate",
+      "field": "params/xTable/description",
+      "sourceHash": "sha256:dfcefab90c4c5a02dd41066f6e027985a78880a5b88b3d10132fdef936d37514",
+      "text": "用于插值的自变量数组，必须严格递增，且不能出现重复值。"
+    },
+    {
+      "id": "HermitePolynomialApproximation.interpolate",
+      "field": "params/yStride/description",
+      "sourceHash": "sha256:62be3fef239bb5cb3568ed55c4d861fa98c4e4e92d1fc528ecb14a548fe78d72",
+      "text": "yTable 中对应 xTable 每个自变量值的因变量数量。"
+    },
+    {
+      "id": "HermitePolynomialApproximation.interpolate",
+      "field": "params/yTable/description",
+      "sourceHash": "sha256:f93ade36825adecd0253f64737ab0be2b9f7bf9de4b71254a197c725c1b90f5f",
+      "text": "用于插值的因变量数组。例如时刻 1 和时刻 2 各有三个因变量 (p,q,w) 时，按 {p1, q1, w1, p2, q2, w2} 排列。"
+    },
+    {
+      "id": "HermitePolynomialApproximation.interpolate",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:137c67f150cb40d96f2b6bb6f7adba0b6e5f78797b71a2c02d178ab4b176a057",
+      "text": "插值结果数组；提供 result 参数时返回该数组。"
+    },
+    {
+      "id": "HermitePolynomialApproximation.interpolateOrderZero",
+      "field": "description",
+      "sourceHash": "sha256:1f4a51a837e02e15d5f0361b3c6394a1dc1b6cd25d7ec24520954895c6a652d8",
+      "text": "使用 Hermite 多项式近似进行插值。"
+    },
+    {
+      "id": "HermitePolynomialApproximation.interpolateOrderZero",
+      "field": "params/result/description",
+      "sourceHash": "sha256:a7979e93e52e7be544ed8ff38072723f1d26e447adc3032834435d9e4d22ce0a",
+      "text": "用于存储结果的已有数组。"
+    },
+    {
+      "id": "HermitePolynomialApproximation.interpolateOrderZero",
+      "field": "params/x/description",
+      "sourceHash": "sha256:0a90445c349172aed0be7a6b2865eb1f724eae438b08db36de7b0a3e8452b889",
+      "text": "需要计算对应因变量插值结果的自变量。"
+    },
+    {
+      "id": "HermitePolynomialApproximation.interpolateOrderZero",
+      "field": "params/xTable/description",
+      "sourceHash": "sha256:dfcefab90c4c5a02dd41066f6e027985a78880a5b88b3d10132fdef936d37514",
+      "text": "用于插值的自变量数组，必须严格递增，且不能出现重复值。"
+    },
+    {
+      "id": "HermitePolynomialApproximation.interpolateOrderZero",
+      "field": "params/yStride/description",
+      "sourceHash": "sha256:62be3fef239bb5cb3568ed55c4d861fa98c4e4e92d1fc528ecb14a548fe78d72",
+      "text": "yTable 中对应 xTable 每个自变量值的因变量数量。"
+    },
+    {
+      "id": "HermitePolynomialApproximation.interpolateOrderZero",
+      "field": "params/yTable/description",
+      "sourceHash": "sha256:f93ade36825adecd0253f64737ab0be2b9f7bf9de4b71254a197c725c1b90f5f",
+      "text": "用于插值的因变量数组。例如时刻 1 和时刻 2 各有三个因变量 (p,q,w) 时，按 {p1, q1, w1, p2, q2, w2} 排列。"
+    },
+    {
+      "id": "HermitePolynomialApproximation.interpolateOrderZero",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:137c67f150cb40d96f2b6bb6f7adba0b6e5f78797b71a2c02d178ab4b176a057",
+      "text": "插值结果数组；提供 result 参数时返回该数组。"
+    },
+    {
+      "id": "HermitePolynomialApproximation.type",
+      "field": "description",
+      "sourceHash": "sha256:bb9c1baaa95d10629feb95d54e9f43d01e69b05d3960ab7592e84474a87c3702",
+      "text": "获取此插值算法的名称。"
+    },
+    {
+      "id": "HermitePolynomialApproximation",
+      "field": "description",
+      "sourceHash": "sha256:7cc23c487a644b8a23474dec9b7fd825f2aea299dba7592224afcc5bb5747b72",
+      "text": "执行 Hermite 插值的 {@link InterpolationAlgorithm}。"
+    },
+    {
+      "id": "HermiteSpline.createC1",
+      "field": "description",
+      "sourceHash": "sha256:8679ff8d9a51a845be91aae7607e37a9ed92598435c82610f4748e426fd7b5b9",
+      "text": "创建每个控制点处入切向量与出切向量相同的样条，保证至少具有 C<sup>1</sup> 连续性。"
+    },
+    {
+      "id": "HermiteSpline.createC1",
+      "field": "exceptions/0/description",
+      "sourceHash": "sha256:85f308b24d9b4c6161bcc5782ab7181f07b7afcf923254c2b4d8f7bfbbe99c47",
+      "text": "必须提供 points、times 和 tangents。"
+    },
+    {
+      "id": "HermiteSpline.createC1",
+      "field": "exceptions/1/description",
+      "sourceHash": "sha256:03622c96477b5f9a1875a826f343aec09a2e7d3cf1868197783ffabc9a2ed23a",
+      "text": "points.length 必须大于等于 2。"
+    },
+    {
+      "id": "HermiteSpline.createC1",
+      "field": "exceptions/2/description",
+      "sourceHash": "sha256:5de12c5fb45e5d5f52577cd94f4136ad4adc40c29560430577f5642e2e68add2",
+      "text": "times、points 和 tangents 的长度必须相同。"
+    },
+    {
+      "id": "HermiteSpline.createC1",
+      "field": "params/options.points/description",
+      "sourceHash": "sha256:9829b0238ba6e2ba62f925b8a19edb9653b5daa0bed311e037e2ec5b2022def8",
+      "text": "控制点数组。"
+    },
+    {
+      "id": "HermiteSpline.createC1",
+      "field": "params/options.tangents/description",
+      "sourceHash": "sha256:50ab81d6a535bf3984e3c5346d694d9d1375e7b1d6850a6d1a2954e9efc70ebe",
+      "text": "控制点处的切向量数组。"
+    },
+    {
+      "id": "HermiteSpline.createC1",
+      "field": "params/options.times/description",
+      "sourceHash": "sha256:ac5c20b176eabe8a16a53ed86b169a59449a341fcf99701e5b9b7c6dcbe042e0",
+      "text": "控制点时间数组。"
+    },
+    {
+      "id": "HermiteSpline.createC1",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:13093b55ffe3512abb7d927816a36447b0ec9ed21e0ad7391a244d3c2ad3d6d7",
+      "text": "Hermite 样条。"
+    },
+    {
+      "id": "HermiteSpline.createClampedCubic",
+      "field": "description",
+      "sourceHash": "sha256:1d07e15c1cd6e79accf96a6e57f78c866881922e6dc8f0f63e639f9694f747cc",
+      "text": "创建端点切向量受约束的三次样条。自动生成内部控制点的切向量，使曲线具有 C<sup>2</sup> 连续性。"
+    },
+    {
+      "id": "HermiteSpline.createClampedCubic",
+      "field": "exceptions/0/description",
+      "sourceHash": "sha256:a73a08b319e68fc7f6088845eea742c50fb1b8725a7db48a992075e3f72751fc",
+      "text": "必须提供 points、times、firstTangent 和 lastTangent。"
+    },
+    {
+      "id": "HermiteSpline.createClampedCubic",
+      "field": "exceptions/1/description",
+      "sourceHash": "sha256:03622c96477b5f9a1875a826f343aec09a2e7d3cf1868197783ffabc9a2ed23a",
+      "text": "points.length 必须大于等于 2。"
+    },
+    {
+      "id": "HermiteSpline.createClampedCubic",
+      "field": "exceptions/2/description",
+      "sourceHash": "sha256:e9f5f3ea01f5cc58d46a1b96a101421098613647d70563150db0e655648c630f",
+      "text": "times.length 必须等于 points.length。"
+    },
+    {
+      "id": "HermiteSpline.createClampedCubic",
+      "field": "exceptions/3/description",
+      "sourceHash": "sha256:6d6eca3d2430897ee5f258e4368dd9a73e2dad39997f4971fb2e0952a00c77cf",
+      "text": "firstTangent 和 lastTangent 必须与 points 的元素类型相同。"
+    },
+    {
+      "id": "HermiteSpline.createClampedCubic",
+      "field": "params/options.firstTangent/description",
+      "sourceHash": "sha256:07f84a4ce3935ec5a39cdbc335b6a50eb83631ce08d9a765ecb63eeb1906d16a",
+      "text": "第一个控制点的出切向量。"
+    },
+    {
+      "id": "HermiteSpline.createClampedCubic",
+      "field": "params/options.lastTangent/description",
+      "sourceHash": "sha256:08964310f7aafc9fed7bd7357356343c2a3e593a8403b14202fa07522647ebdc",
+      "text": "最后一个控制点的入切向量。"
+    },
+    {
+      "id": "HermiteSpline.createClampedCubic",
+      "field": "params/options.points/description",
+      "sourceHash": "sha256:9829b0238ba6e2ba62f925b8a19edb9653b5daa0bed311e037e2ec5b2022def8",
+      "text": "控制点数组。"
+    },
+    {
+      "id": "HermiteSpline.createClampedCubic",
+      "field": "params/options.times/description",
+      "sourceHash": "sha256:ac5c20b176eabe8a16a53ed86b169a59449a341fcf99701e5b9b7c6dcbe042e0",
+      "text": "控制点时间数组。"
+    },
+    {
+      "id": "HermiteSpline.createClampedCubic",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:b2066124ba54b18eb729eb6d3681d1cf020afebb1e20453457de4a34fbfb07a4",
+      "text": "Hermite 样条；控制点少于 3 个时为线性样条。"
+    },
+    {
+      "id": "HermiteSpline.createNaturalCubic",
+      "field": "description",
+      "sourceHash": "sha256:61e458335117e98a899488e0ed001482992cced181b09460e2b1829eac7fbe11",
+      "text": "创建自然三次样条。自动生成控制点切向量，使曲线具有 C<sup>2</sup> 连续性。"
+    },
+    {
+      "id": "HermiteSpline.createNaturalCubic",
+      "field": "exceptions/0/description",
+      "sourceHash": "sha256:9146d60eba77c282af625f9b326eabb2e91073aedf21c877cab9fb1bb3b17263",
+      "text": "必须提供 points 和 times。"
+    },
+    {
+      "id": "HermiteSpline.createNaturalCubic",
+      "field": "exceptions/1/description",
+      "sourceHash": "sha256:03622c96477b5f9a1875a826f343aec09a2e7d3cf1868197783ffabc9a2ed23a",
+      "text": "points.length 必须大于等于 2。"
+    },
+    {
+      "id": "HermiteSpline.createNaturalCubic",
+      "field": "exceptions/2/description",
+      "sourceHash": "sha256:e9f5f3ea01f5cc58d46a1b96a101421098613647d70563150db0e655648c630f",
+      "text": "times.length 必须等于 points.length。"
+    },
+    {
+      "id": "HermiteSpline.createNaturalCubic",
+      "field": "params/options.points/description",
+      "sourceHash": "sha256:9829b0238ba6e2ba62f925b8a19edb9653b5daa0bed311e037e2ec5b2022def8",
+      "text": "控制点数组。"
+    },
+    {
+      "id": "HermiteSpline.createNaturalCubic",
+      "field": "params/options.times/description",
+      "sourceHash": "sha256:ac5c20b176eabe8a16a53ed86b169a59449a341fcf99701e5b9b7c6dcbe042e0",
+      "text": "控制点时间数组。"
+    },
+    {
+      "id": "HermiteSpline.createNaturalCubic",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:b2066124ba54b18eb729eb6d3681d1cf020afebb1e20453457de4a34fbfb07a4",
+      "text": "Hermite 样条；控制点少于 3 个时为线性样条。"
+    },
+    {
+      "id": "HermiteSpline",
+      "field": "description",
+      "sourceHash": "sha256:27785828ef6b57b68cd636038c1d0fa17ae2309a81fd64a07274cdc8359f8628",
+      "text": "Hermite 样条是三次插值样条。每个控制点需要定义位置、入切向量、出切向量和时间。出切向量对应点 [0, n - 2]，入切向量对应点 [1, n - 1]。例如插值 <code>points[i]</code> 与 <code>points[i + 1]</code> 之间的曲线段时，两端切向量分别为 <code>outTangents[i]</code> 和 <code>inTangents[i]</code>。"
+    },
+    {
+      "id": "HermiteSpline",
+      "field": "exceptions/0/description",
+      "sourceHash": "sha256:03622c96477b5f9a1875a826f343aec09a2e7d3cf1868197783ffabc9a2ed23a",
+      "text": "points.length 必须大于等于 2。"
+    },
+    {
+      "id": "HermiteSpline",
+      "field": "exceptions/1/description",
+      "sourceHash": "sha256:e9f5f3ea01f5cc58d46a1b96a101421098613647d70563150db0e655648c630f",
+      "text": "times.length 必须等于 points.length。"
+    },
+    {
+      "id": "HermiteSpline",
+      "field": "exceptions/2/description",
+      "sourceHash": "sha256:090a2a95fff2aa98fdb3efb60b5c17014289276c09e209410183a67cc40c4fd3",
+      "text": "inTangents 和 outTangents 的长度必须等于 points.length - 1。"
+    },
+    {
+      "id": "HermiteSpline",
+      "field": "exceptions/3/description",
+      "sourceHash": "sha256:775e9b677ab6bb8f8441c3c67da75757e23cfdc0eb2f1281717c3439847e9a11",
+      "text": "inTangents 和 outTangents 必须与 points 的元素类型相同。"
+    },
+    {
+      "id": "HermiteSpline",
+      "field": "params/options.inTangents/description",
+      "sourceHash": "sha256:c3e12c13204cf241f82da24306a9dd505d5c1624a1b18b41c3f9ef17a792621b",
+      "text": "各控制点的入切向量数组。"
+    },
+    {
+      "id": "HermiteSpline",
+      "field": "params/options.outTangents/description",
+      "sourceHash": "sha256:d92397ce15589103c5d55f5116a6e8362e94a23c472bf03f932272d4c1ede2ff",
+      "text": "各控制点的出切向量数组。"
+    },
+    {
+      "id": "HermiteSpline",
+      "field": "params/options.points/description",
+      "sourceHash": "sha256:9829b0238ba6e2ba62f925b8a19edb9653b5daa0bed311e037e2ec5b2022def8",
+      "text": "控制点数组。"
+    },
+    {
+      "id": "HermiteSpline",
+      "field": "params/options.times/description",
+      "sourceHash": "sha256:8d71dae66ee4fb181cb05e7a9e286fcdf9fded8128141298dd9e934c6c72dde4",
+      "text": "各控制点对应的严格递增、无单位浮点时间数组。这些值与时钟时间没有关联，仅用于曲线参数化。"
+    },
+    {
+      "id": "HermiteSpline#clampTime",
+      "field": "description",
+      "sourceHash": "sha256:cf7fd9365cc8dbc75c286bf37d9d619f420da774f82c7e167d3a8aa8e8d50e71",
+      "text": "将给定时间限制在样条覆盖的区间内。"
+    },
+    {
+      "id": "HermiteSpline#clampTime",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:264a1cea44fc47d73634e7feb3f567705193d57aca0ab1f9ff27d3343a249eb1",
+      "text": "限制在动画区间内的时间。"
+    },
+    {
+      "id": "HermiteSpline#evaluate",
+      "field": "description",
+      "sourceHash": "sha256:3f33f09a9fd92022886d7c71fdb836aed65a99b1cd1dba75feee968b0e01affb",
+      "text": "在指定时间处计算曲线值。"
+    },
+    {
+      "id": "HermiteSpline#evaluate",
+      "field": "exceptions/0/description",
+      "sourceHash": "sha256:daf7d42d264462b4aa90d12c2825b7d4afb5c07c268c231913f576b32cfe5351",
+      "text": "time 必须位于 <code>[t<sub>0</sub>, t<sub>n</sub>]</code> 范围内，其中 <code>t<sub>0</sub></code> 为 <code>times</code> 数组首项，<code>t<sub>n</sub></code> 为 <code>times</code> 数组末项。"
+    },
+    {
+      "id": "HermiteSpline#evaluate",
+      "field": "params/time/description",
+      "sourceHash": "sha256:4481138153c7d6a020d21c64d2ffb39e8b14e407d5cc75b3bc16b2602b701f9e",
+      "text": "需要计算曲线值的时间。"
+    },
+    {
+      "id": "HermiteSpline#evaluate",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:6a8773a34fadf6fc4fe917c3db29cca7010ac101ea63984a979f1c6550389dda",
+      "text": "修改后的 result 参数，或指定时间处曲线上点的新实例。"
+    },
+    {
+      "id": "HermiteSpline#findTimeInterval",
+      "field": "description",
+      "sourceHash": "sha256:2d3b70e954eee0e168175a7296b59fa062e12e8e039f5af26ee257ffd79ff714",
+      "text": "在 <code>times</code> 中寻找索引 <code>i</code>，使参数 <code>time</code> 位于区间 <code>[times[i], times[i + 1]]</code> 内。"
+    },
+    {
+      "id": "HermiteSpline#findTimeInterval",
+      "field": "exceptions/0/description",
+      "sourceHash": "sha256:daf7d42d264462b4aa90d12c2825b7d4afb5c07c268c231913f576b32cfe5351",
+      "text": "time 必须位于 <code>[t<sub>0</sub>, t<sub>n</sub>]</code> 范围内，其中 <code>t<sub>0</sub></code> 为 <code>times</code> 数组首项，<code>t<sub>n</sub></code> 为 <code>times</code> 数组末项。"
+    },
+    {
+      "id": "HermiteSpline#findTimeInterval",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:60f0528936672c592f1a09be74f287214c23d01f38b8006e6ee03f42b17e479c",
+      "text": "区间起始元素的索引。"
+    },
+    {
+      "id": "HermiteSpline#inTangents",
+      "field": "description",
+      "sourceHash": "sha256:0072c27e840257dc578044d22773403f85dc23371c3cb681bd1e7a4e8dd4e26d",
+      "text": "各控制点处的入切向量数组。"
+    },
+    {
+      "id": "HermiteSpline#outTangents",
+      "field": "description",
+      "sourceHash": "sha256:e5bdf7a0f3440658eba2cd13764cfc982fada5090997daf0b2715c343fb78715",
+      "text": "各控制点处的出切向量数组。"
+    },
+    {
+      "id": "HermiteSpline#points",
+      "field": "description",
+      "sourceHash": "sha256:61f1d2b8edfc774c19316327675078cbe12784bdf52a223b4eb891f286e8f46e",
+      "text": "控制点数组。"
+    },
+    {
+      "id": "HermiteSpline#times",
+      "field": "description",
+      "sourceHash": "sha256:2bff13619321a975c2f416edb79b721ed9865f25c859f4ced0e61b153702ab0c",
+      "text": "控制点对应的时间数组。"
+    },
+    {
+      "id": "HermiteSpline#wrapTime",
+      "field": "description",
+      "sourceHash": "sha256:c43ac8f1f89b4304828e12b669b7e9275a7fb932e9b459f9d33701960eca3fc6",
+      "text": "将给定时间循环映射到样条覆盖的区间内。"
+    },
+    {
+      "id": "HermiteSpline#wrapTime",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:69daed3923cf65f32aaabd83b9875516b2943162cf4fa113195d2989942d4b71",
+      "text": "循环映射到动画区间内的时间。"
+    },
+    {
+      "id": "InterpolationAlgorithm",
+      "field": "classdesc",
+      "sourceHash": "sha256:3652ff8606d1cc7b2e62dfeb1310144e8cfe80685b611afd66fe1792a1a5011f",
+      "text": "插值算法接口。"
+    },
+    {
+      "id": "InterpolationAlgorithm#getRequiredDataPoints",
+      "field": "description",
+      "sourceHash": "sha256:57909ef57aba2624565a7b57dd8ae0d928e89dcca749ce77f13db89678ae1681",
+      "text": "根据指定插值次数，返回插值所需的数据点数量。"
+    },
+    {
+      "id": "InterpolationAlgorithm#getRequiredDataPoints",
+      "field": "params/degree/description",
+      "sourceHash": "sha256:e94547c60c704bab4f229093620780ed0030a41e56160c361f3c2f6ba9ed1715",
+      "text": "期望的插值次数。"
+    },
+    {
+      "id": "InterpolationAlgorithm#getRequiredDataPoints",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:5ff013a1ff0757571bfbd9c2a06e57dcf0ca909b88917fd10a5d99f2c70bd76f",
+      "text": "达到指定插值次数所需的数据点数量。"
+    },
+    {
+      "id": "InterpolationAlgorithm#interpolate",
+      "field": "description",
+      "sourceHash": "sha256:440076eff8ea050defaaeea388b023d3a7c6109712890ddd594f79c9d0d163ea",
+      "text": "执行使用高阶导数信息的插值。并非所有插值器都需要支持高阶导数；实现对象未定义此函数时，改用 interpolateOrderZero。"
+    },
+    {
+      "id": "InterpolationAlgorithm#interpolate",
+      "field": "params/inputOrder/description",
+      "sourceHash": "sha256:0cb5bc41f58c29ab29d55bf2819ac0b474381e644aeebad5de94803434e28d3f",
+      "text": "输入提供的导数阶数。"
+    },
+    {
+      "id": "InterpolationAlgorithm#interpolate",
+      "field": "params/outputOrder/description",
+      "sourceHash": "sha256:ed0a77da7a8850a70c32ba04518bc92e36827cf119f3a1de802f52c672e0559f",
+      "text": "输出需要的导数阶数。"
+    },
+    {
+      "id": "InterpolationAlgorithm#interpolate",
+      "field": "params/result/description",
+      "sourceHash": "sha256:a7979e93e52e7be544ed8ff38072723f1d26e447adc3032834435d9e4d22ce0a",
+      "text": "用于存储结果的已有数组。"
+    },
+    {
+      "id": "InterpolationAlgorithm#interpolate",
+      "field": "params/x/description",
+      "sourceHash": "sha256:0a90445c349172aed0be7a6b2865eb1f724eae438b08db36de7b0a3e8452b889",
+      "text": "需要计算对应因变量插值结果的自变量。"
+    },
+    {
+      "id": "InterpolationAlgorithm#interpolate",
+      "field": "params/xTable/description",
+      "sourceHash": "sha256:dfcefab90c4c5a02dd41066f6e027985a78880a5b88b3d10132fdef936d37514",
+      "text": "用于插值的自变量数组，必须严格递增，且不能出现重复值。"
+    },
+    {
+      "id": "InterpolationAlgorithm#interpolate",
+      "field": "params/yStride/description",
+      "sourceHash": "sha256:62be3fef239bb5cb3568ed55c4d861fa98c4e4e92d1fc528ecb14a548fe78d72",
+      "text": "yTable 中对应 xTable 每个自变量值的因变量数量。"
+    },
+    {
+      "id": "InterpolationAlgorithm#interpolate",
+      "field": "params/yTable/description",
+      "sourceHash": "sha256:f93ade36825adecd0253f64737ab0be2b9f7bf9de4b71254a197c725c1b90f5f",
+      "text": "用于插值的因变量数组。例如时刻 1 和时刻 2 各有三个因变量 (p,q,w) 时，按 {p1, q1, w1, p2, q2, w2} 排列。"
+    },
+    {
+      "id": "InterpolationAlgorithm#interpolate",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:137c67f150cb40d96f2b6bb6f7adba0b6e5f78797b71a2c02d178ab4b176a057",
+      "text": "插值结果数组；提供 result 参数时返回该数组。"
+    },
+    {
+      "id": "InterpolationAlgorithm#interpolateOrderZero",
+      "field": "description",
+      "sourceHash": "sha256:e6944bae4ce6576805faa4fedf09c399499c4e4721ddea4eb2fafc03cfd09df0",
+      "text": "执行不使用导数信息的值插值。"
+    },
+    {
+      "id": "InterpolationAlgorithm#interpolateOrderZero",
+      "field": "params/result/description",
+      "sourceHash": "sha256:a7979e93e52e7be544ed8ff38072723f1d26e447adc3032834435d9e4d22ce0a",
+      "text": "用于存储结果的已有数组。"
+    },
+    {
+      "id": "InterpolationAlgorithm#interpolateOrderZero",
+      "field": "params/x/description",
+      "sourceHash": "sha256:0a90445c349172aed0be7a6b2865eb1f724eae438b08db36de7b0a3e8452b889",
+      "text": "需要计算对应因变量插值结果的自变量。"
+    },
+    {
+      "id": "InterpolationAlgorithm#interpolateOrderZero",
+      "field": "params/xTable/description",
+      "sourceHash": "sha256:dfcefab90c4c5a02dd41066f6e027985a78880a5b88b3d10132fdef936d37514",
+      "text": "用于插值的自变量数组，必须严格递增，且不能出现重复值。"
+    },
+    {
+      "id": "InterpolationAlgorithm#interpolateOrderZero",
+      "field": "params/yStride/description",
+      "sourceHash": "sha256:62be3fef239bb5cb3568ed55c4d861fa98c4e4e92d1fc528ecb14a548fe78d72",
+      "text": "yTable 中对应 xTable 每个自变量值的因变量数量。"
+    },
+    {
+      "id": "InterpolationAlgorithm#interpolateOrderZero",
+      "field": "params/yTable/description",
+      "sourceHash": "sha256:f93ade36825adecd0253f64737ab0be2b9f7bf9de4b71254a197c725c1b90f5f",
+      "text": "用于插值的因变量数组。例如时刻 1 和时刻 2 各有三个因变量 (p,q,w) 时，按 {p1, q1, w1, p2, q2, w2} 排列。"
+    },
+    {
+      "id": "InterpolationAlgorithm#interpolateOrderZero",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:137c67f150cb40d96f2b6bb6f7adba0b6e5f78797b71a2c02d178ab4b176a057",
+      "text": "插值结果数组；提供 result 参数时返回该数组。"
+    },
+    {
+      "id": "InterpolationAlgorithm#type",
+      "field": "description",
+      "sourceHash": "sha256:bb9c1baaa95d10629feb95d54e9f43d01e69b05d3960ab7592e84474a87c3702",
+      "text": "获取此插值算法的名称。"
+    },
+    {
+      "id": "LagrangePolynomialApproximation.getRequiredDataPoints",
+      "field": "description",
+      "sourceHash": "sha256:57909ef57aba2624565a7b57dd8ae0d928e89dcca749ce77f13db89678ae1681",
+      "text": "根据指定插值次数，返回插值所需的数据点数量。"
+    },
+    {
+      "id": "LagrangePolynomialApproximation.getRequiredDataPoints",
+      "field": "params/degree/description",
+      "sourceHash": "sha256:e94547c60c704bab4f229093620780ed0030a41e56160c361f3c2f6ba9ed1715",
+      "text": "期望的插值次数。"
+    },
+    {
+      "id": "LagrangePolynomialApproximation.getRequiredDataPoints",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:5ff013a1ff0757571bfbd9c2a06e57dcf0ca909b88917fd10a5d99f2c70bd76f",
+      "text": "达到指定插值次数所需的数据点数量。"
+    },
+    {
+      "id": "LagrangePolynomialApproximation.interpolateOrderZero",
+      "field": "description",
+      "sourceHash": "sha256:f596bc9d3fe764d2c4182cf33eabc015c62119d06b1d1c84de21eb107fecda3c",
+      "text": "使用 Lagrange 多项式近似进行插值。"
+    },
+    {
+      "id": "LagrangePolynomialApproximation.interpolateOrderZero",
+      "field": "params/result/description",
+      "sourceHash": "sha256:a7979e93e52e7be544ed8ff38072723f1d26e447adc3032834435d9e4d22ce0a",
+      "text": "用于存储结果的已有数组。"
+    },
+    {
+      "id": "LagrangePolynomialApproximation.interpolateOrderZero",
+      "field": "params/x/description",
+      "sourceHash": "sha256:0a90445c349172aed0be7a6b2865eb1f724eae438b08db36de7b0a3e8452b889",
+      "text": "需要计算对应因变量插值结果的自变量。"
+    },
+    {
+      "id": "LagrangePolynomialApproximation.interpolateOrderZero",
+      "field": "params/xTable/description",
+      "sourceHash": "sha256:dfcefab90c4c5a02dd41066f6e027985a78880a5b88b3d10132fdef936d37514",
+      "text": "用于插值的自变量数组，必须严格递增，且不能出现重复值。"
+    },
+    {
+      "id": "LagrangePolynomialApproximation.interpolateOrderZero",
+      "field": "params/yStride/description",
+      "sourceHash": "sha256:62be3fef239bb5cb3568ed55c4d861fa98c4e4e92d1fc528ecb14a548fe78d72",
+      "text": "yTable 中对应 xTable 每个自变量值的因变量数量。"
+    },
+    {
+      "id": "LagrangePolynomialApproximation.interpolateOrderZero",
+      "field": "params/yTable/description",
+      "sourceHash": "sha256:f93ade36825adecd0253f64737ab0be2b9f7bf9de4b71254a197c725c1b90f5f",
+      "text": "用于插值的因变量数组。例如时刻 1 和时刻 2 各有三个因变量 (p,q,w) 时，按 {p1, q1, w1, p2, q2, w2} 排列。"
+    },
+    {
+      "id": "LagrangePolynomialApproximation.interpolateOrderZero",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:137c67f150cb40d96f2b6bb6f7adba0b6e5f78797b71a2c02d178ab4b176a057",
+      "text": "插值结果数组；提供 result 参数时返回该数组。"
+    },
+    {
+      "id": "LagrangePolynomialApproximation.type",
+      "field": "description",
+      "sourceHash": "sha256:bb9c1baaa95d10629feb95d54e9f43d01e69b05d3960ab7592e84474a87c3702",
+      "text": "获取此插值算法的名称。"
+    },
+    {
+      "id": "LagrangePolynomialApproximation",
+      "field": "description",
+      "sourceHash": "sha256:c63a0ba33894235e0c3ad367edc0681dcf6b2387b7a618833e2f502ba2014023",
+      "text": "执行 Lagrange 插值的 {@link InterpolationAlgorithm}。"
+    },
+    {
+      "id": "LinearApproximation.getRequiredDataPoints",
+      "field": "description",
+      "sourceHash": "sha256:3dafd4d61d67675d7bcf808a48bc812aef2d761ca6a90314a4b84596e74ea3af",
+      "text": "根据期望次数返回插值所需的数据点数量。线性插值只能生成一次多项式，因此此函数始终返回 2。"
+    },
+    {
+      "id": "LinearApproximation.getRequiredDataPoints",
+      "field": "params/degree/description",
+      "sourceHash": "sha256:e94547c60c704bab4f229093620780ed0030a41e56160c361f3c2f6ba9ed1715",
+      "text": "期望的插值次数。"
+    },
+    {
+      "id": "LinearApproximation.getRequiredDataPoints",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:d34c4337b4e3a8b0e5a6763438f2427d0d9c395652711855d0e4adeb0a52c13d",
+      "text": "此函数始终返回 2。"
+    },
+    {
+      "id": "LinearApproximation.interpolateOrderZero",
+      "field": "description",
+      "sourceHash": "sha256:405c74dbb773c3b2f080e9088f2fe9493e2a0fa91d964aaa7c1d691b63d01a06",
+      "text": "使用线性近似进行插值。"
+    },
+    {
+      "id": "LinearApproximation.interpolateOrderZero",
+      "field": "params/result/description",
+      "sourceHash": "sha256:a7979e93e52e7be544ed8ff38072723f1d26e447adc3032834435d9e4d22ce0a",
+      "text": "用于存储结果的已有数组。"
+    },
+    {
+      "id": "LinearApproximation.interpolateOrderZero",
+      "field": "params/x/description",
+      "sourceHash": "sha256:0a90445c349172aed0be7a6b2865eb1f724eae438b08db36de7b0a3e8452b889",
+      "text": "需要计算对应因变量插值结果的自变量。"
+    },
+    {
+      "id": "LinearApproximation.interpolateOrderZero",
+      "field": "params/xTable/description",
+      "sourceHash": "sha256:dfcefab90c4c5a02dd41066f6e027985a78880a5b88b3d10132fdef936d37514",
+      "text": "用于插值的自变量数组，必须严格递增，且不能出现重复值。"
+    },
+    {
+      "id": "LinearApproximation.interpolateOrderZero",
+      "field": "params/yStride/description",
+      "sourceHash": "sha256:62be3fef239bb5cb3568ed55c4d861fa98c4e4e92d1fc528ecb14a548fe78d72",
+      "text": "yTable 中对应 xTable 每个自变量值的因变量数量。"
+    },
+    {
+      "id": "LinearApproximation.interpolateOrderZero",
+      "field": "params/yTable/description",
+      "sourceHash": "sha256:f93ade36825adecd0253f64737ab0be2b9f7bf9de4b71254a197c725c1b90f5f",
+      "text": "用于插值的因变量数组。例如时刻 1 和时刻 2 各有三个因变量 (p,q,w) 时，按 {p1, q1, w1, p2, q2, w2} 排列。"
+    },
+    {
+      "id": "LinearApproximation.interpolateOrderZero",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:137c67f150cb40d96f2b6bb6f7adba0b6e5f78797b71a2c02d178ab4b176a057",
+      "text": "插值结果数组；提供 result 参数时返回该数组。"
+    },
+    {
+      "id": "LinearApproximation.type",
+      "field": "description",
+      "sourceHash": "sha256:bb9c1baaa95d10629feb95d54e9f43d01e69b05d3960ab7592e84474a87c3702",
+      "text": "获取此插值算法的名称。"
+    },
+    {
+      "id": "LinearApproximation",
+      "field": "description",
+      "sourceHash": "sha256:850b018a220928e42be07856a014d044e70ba5a19b3705ea402c84bc6197afd2",
+      "text": "执行线性插值的 {@link InterpolationAlgorithm}。"
+    },
+    {
+      "id": "LinearSpline",
+      "field": "description",
+      "sourceHash": "sha256:a72b44d945c2371e07503068fad54445aff69b8e7bb639bbef60758ec30bafc0",
+      "text": "通过分段线性插值生成曲线的样条。"
+    },
+    {
+      "id": "LinearSpline",
+      "field": "exceptions/0/description",
+      "sourceHash": "sha256:03622c96477b5f9a1875a826f343aec09a2e7d3cf1868197783ffabc9a2ed23a",
+      "text": "points.length 必须大于等于 2。"
+    },
+    {
+      "id": "LinearSpline",
+      "field": "exceptions/1/description",
+      "sourceHash": "sha256:e9f5f3ea01f5cc58d46a1b96a101421098613647d70563150db0e655648c630f",
+      "text": "times.length 必须等于 points.length。"
+    },
+    {
+      "id": "LinearSpline",
+      "field": "params/options.points/description",
+      "sourceHash": "sha256:9829b0238ba6e2ba62f925b8a19edb9653b5daa0bed311e037e2ec5b2022def8",
+      "text": "控制点数组。"
+    },
+    {
+      "id": "LinearSpline",
+      "field": "params/options.times/description",
+      "sourceHash": "sha256:8d71dae66ee4fb181cb05e7a9e286fcdf9fded8128141298dd9e934c6c72dde4",
+      "text": "各控制点对应的严格递增、无单位浮点时间数组。这些值与时钟时间没有关联，仅用于曲线参数化。"
+    },
+    {
+      "id": "LinearSpline#clampTime",
+      "field": "description",
+      "sourceHash": "sha256:cf7fd9365cc8dbc75c286bf37d9d619f420da774f82c7e167d3a8aa8e8d50e71",
+      "text": "将给定时间限制在样条覆盖的区间内。"
+    },
+    {
+      "id": "LinearSpline#clampTime",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:264a1cea44fc47d73634e7feb3f567705193d57aca0ab1f9ff27d3343a249eb1",
+      "text": "限制在动画区间内的时间。"
+    },
+    {
+      "id": "LinearSpline#evaluate",
+      "field": "description",
+      "sourceHash": "sha256:3f33f09a9fd92022886d7c71fdb836aed65a99b1cd1dba75feee968b0e01affb",
+      "text": "在指定时间处计算曲线值。"
+    },
+    {
+      "id": "LinearSpline#evaluate",
+      "field": "exceptions/0/description",
+      "sourceHash": "sha256:daf7d42d264462b4aa90d12c2825b7d4afb5c07c268c231913f576b32cfe5351",
+      "text": "time 必须位于 <code>[t<sub>0</sub>, t<sub>n</sub>]</code> 范围内，其中 <code>t<sub>0</sub></code> 为 <code>times</code> 数组首项，<code>t<sub>n</sub></code> 为 <code>times</code> 数组末项。"
+    },
+    {
+      "id": "LinearSpline#evaluate",
+      "field": "params/time/description",
+      "sourceHash": "sha256:4481138153c7d6a020d21c64d2ffb39e8b14e407d5cc75b3bc16b2602b701f9e",
+      "text": "需要计算曲线值的时间。"
+    },
+    {
+      "id": "LinearSpline#evaluate",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:6a8773a34fadf6fc4fe917c3db29cca7010ac101ea63984a979f1c6550389dda",
+      "text": "修改后的 result 参数，或指定时间处曲线上点的新实例。"
+    },
+    {
+      "id": "LinearSpline#findTimeInterval",
+      "field": "description",
+      "sourceHash": "sha256:2d3b70e954eee0e168175a7296b59fa062e12e8e039f5af26ee257ffd79ff714",
+      "text": "在 <code>times</code> 中寻找索引 <code>i</code>，使参数 <code>time</code> 位于区间 <code>[times[i], times[i + 1]]</code> 内。"
+    },
+    {
+      "id": "LinearSpline#findTimeInterval",
+      "field": "exceptions/0/description",
+      "sourceHash": "sha256:daf7d42d264462b4aa90d12c2825b7d4afb5c07c268c231913f576b32cfe5351",
+      "text": "time 必须位于 <code>[t<sub>0</sub>, t<sub>n</sub>]</code> 范围内，其中 <code>t<sub>0</sub></code> 为 <code>times</code> 数组首项，<code>t<sub>n</sub></code> 为 <code>times</code> 数组末项。"
+    },
+    {
+      "id": "LinearSpline#findTimeInterval",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:60f0528936672c592f1a09be74f287214c23d01f38b8006e6ee03f42b17e479c",
+      "text": "区间起始元素的索引。"
+    },
+    {
+      "id": "LinearSpline#points",
+      "field": "description",
+      "sourceHash": "sha256:a45f71dc11892e5419614d5dfcf884f7700e593c7b438dbb6bcda1843efbe6db",
+      "text": "{@link Cartesian3} 控制点数组。"
+    },
+    {
+      "id": "LinearSpline#times",
+      "field": "description",
+      "sourceHash": "sha256:2bff13619321a975c2f416edb79b721ed9865f25c859f4ced0e61b153702ab0c",
+      "text": "控制点对应的时间数组。"
+    },
+    {
+      "id": "LinearSpline#wrapTime",
+      "field": "description",
+      "sourceHash": "sha256:c43ac8f1f89b4304828e12b669b7e9275a7fb932e9b459f9d33701960eca3fc6",
+      "text": "将给定时间循环映射到样条覆盖的区间内。"
+    },
+    {
+      "id": "LinearSpline#wrapTime",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:69daed3923cf65f32aaabd83b9875516b2943162cf4fa113195d2989942d4b71",
+      "text": "循环映射到动画区间内的时间。"
+    },
+    {
+      "id": "MorphWeightSpline",
+      "field": "description",
+      "sourceHash": "sha256:3638ee70b84e8221dd5760433928bb2852773c3a3787d9585840c0f315df14e1",
+      "text": "对变形目标权重数组进行线性插值的样条。"
+    },
+    {
+      "id": "MorphWeightSpline",
+      "field": "exceptions/0/description",
+      "sourceHash": "sha256:df9e0ead075dcb7eddffeab3b72c4dca9b0dda4109b59ccb2c016edd13962a08",
+      "text": "weights.length 必须大于等于 2。"
+    },
+    {
+      "id": "MorphWeightSpline",
+      "field": "exceptions/1/description",
+      "sourceHash": "sha256:ad10d0c28a536eb94a398d2e05f46356b8a15ada7cb9da3ece65a38119609013",
+      "text": "times.length 必须是 weights.length 的因数。"
+    },
+    {
+      "id": "MorphWeightSpline",
+      "field": "params/options.times/description",
+      "sourceHash": "sha256:8d71dae66ee4fb181cb05e7a9e286fcdf9fded8128141298dd9e934c6c72dde4",
+      "text": "各控制点对应的严格递增、无单位浮点时间数组。这些值与时钟时间没有关联，仅用于曲线参数化。"
+    },
+    {
+      "id": "MorphWeightSpline",
+      "field": "params/options.weights/description",
+      "sourceHash": "sha256:2c89de922383ec082c176d9d060efb98a613106ed87fbf02e7b9dd1fc4601594",
+      "text": "浮点控制权重数组。先按时间顺序排列每一组权重，组内再按变形目标在来源 glTF 中的顺序排列。例如两个目标时，weights = [w(0,0), w(0,1), w(1,0), w(1,1) ...]，其中 w(i,j) 的 i 为时间索引，j 为目标索引。"
+    },
+    {
+      "id": "MorphWeightSpline#clampTime",
+      "field": "description",
+      "sourceHash": "sha256:cf7fd9365cc8dbc75c286bf37d9d619f420da774f82c7e167d3a8aa8e8d50e71",
+      "text": "将给定时间限制在样条覆盖的区间内。"
+    },
+    {
+      "id": "MorphWeightSpline#clampTime",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:264a1cea44fc47d73634e7feb3f567705193d57aca0ab1f9ff27d3343a249eb1",
+      "text": "限制在动画区间内的时间。"
+    },
+    {
+      "id": "MorphWeightSpline#evaluate",
+      "field": "description",
+      "sourceHash": "sha256:3f33f09a9fd92022886d7c71fdb836aed65a99b1cd1dba75feee968b0e01affb",
+      "text": "在指定时间处计算曲线值。"
+    },
+    {
+      "id": "MorphWeightSpline#evaluate",
+      "field": "exceptions/0/description",
+      "sourceHash": "sha256:daf7d42d264462b4aa90d12c2825b7d4afb5c07c268c231913f576b32cfe5351",
+      "text": "time 必须位于 <code>[t<sub>0</sub>, t<sub>n</sub>]</code> 范围内，其中 <code>t<sub>0</sub></code> 为 <code>times</code> 数组首项，<code>t<sub>n</sub></code> 为 <code>times</code> 数组末项。"
+    },
+    {
+      "id": "MorphWeightSpline#evaluate",
+      "field": "params/time/description",
+      "sourceHash": "sha256:4481138153c7d6a020d21c64d2ffb39e8b14e407d5cc75b3bc16b2602b701f9e",
+      "text": "需要计算曲线值的时间。"
+    },
+    {
+      "id": "MorphWeightSpline#evaluate",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:6a8773a34fadf6fc4fe917c3db29cca7010ac101ea63984a979f1c6550389dda",
+      "text": "修改后的 result 参数，或指定时间处曲线上点的新实例。"
+    },
+    {
+      "id": "MorphWeightSpline#findTimeInterval",
+      "field": "description",
+      "sourceHash": "sha256:2d3b70e954eee0e168175a7296b59fa062e12e8e039f5af26ee257ffd79ff714",
+      "text": "在 <code>times</code> 中寻找索引 <code>i</code>，使参数 <code>time</code> 位于区间 <code>[times[i], times[i + 1]]</code> 内。"
+    },
+    {
+      "id": "MorphWeightSpline#findTimeInterval",
+      "field": "exceptions/0/description",
+      "sourceHash": "sha256:daf7d42d264462b4aa90d12c2825b7d4afb5c07c268c231913f576b32cfe5351",
+      "text": "time 必须位于 <code>[t<sub>0</sub>, t<sub>n</sub>]</code> 范围内，其中 <code>t<sub>0</sub></code> 为 <code>times</code> 数组首项，<code>t<sub>n</sub></code> 为 <code>times</code> 数组末项。"
+    },
+    {
+      "id": "MorphWeightSpline#findTimeInterval",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:60f0528936672c592f1a09be74f287214c23d01f38b8006e6ee03f42b17e479c",
+      "text": "区间起始元素的索引。"
+    },
+    {
+      "id": "MorphWeightSpline#wrapTime",
+      "field": "description",
+      "sourceHash": "sha256:c43ac8f1f89b4304828e12b669b7e9275a7fb932e9b459f9d33701960eca3fc6",
+      "text": "将给定时间循环映射到样条覆盖的区间内。"
+    },
+    {
+      "id": "MorphWeightSpline#wrapTime",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:69daed3923cf65f32aaabd83b9875516b2943162cf4fa113195d2989942d4b71",
+      "text": "循环映射到动画区间内的时间。"
+    },
+    {
+      "id": "PackableForInterpolation.convertPackedArrayForInterpolation",
+      "field": "description",
+      "sourceHash": "sha256:2792a9777aaad22017035a1d187cc44590ea66757d493f7b66fc7bbcae496a6b",
+      "text": "将打包数组转换为适合插值的形式。"
+    },
+    {
+      "id": "PackableForInterpolation.convertPackedArrayForInterpolation",
+      "field": "params/lastIndex/description",
+      "sourceHash": "sha256:2a850c6d4c4b5031bac27694d3c12a1489eb2da336f42f2be67cccaef5f51ed8",
+      "text": "要转换的最后一个元素索引。"
+    },
+    {
+      "id": "PackableForInterpolation.convertPackedArrayForInterpolation",
+      "field": "params/startingIndex/description",
+      "sourceHash": "sha256:faab00d96044f72907dc7a5a0b8bb93bf8127d65dfc3f19aec8b4c5ac96c4e86",
+      "text": "要转换的第一个元素索引。"
+    },
+    {
+      "id": "PackableForInterpolation.packedInterpolationLength",
+      "field": "description",
+      "sourceHash": "sha256:01481424ecee099fbde2892561e1e06ad397a516d58e484ca5e6c457283ef5e3",
+      "text": "以可插值形式将对象保存到数组所需的元素数量。"
+    },
+    {
+      "id": "PackableForInterpolation.unpackInterpolationResult",
+      "field": "description",
+      "sourceHash": "sha256:a8f26975b4da0c7420bee5a07a765ac640d5f331f900e6c35f9134d5e27e69b1",
+      "text": "从使用 {@link PackableForInterpolation.convertPackedArrayForInterpolation} 转换后的打包数组中恢复实例。"
+    },
+    {
+      "id": "PackableForInterpolation.unpackInterpolationResult",
+      "field": "params/array/description",
+      "sourceHash": "sha256:ae0d2b59dc0fbb76063293bedaf1b8daf4ca39ffe272c6f8efca76f517fbcb16",
+      "text": "先前为插值打包的数组。"
+    },
+    {
+      "id": "PackableForInterpolation.unpackInterpolationResult",
+      "field": "params/lastIndex/description",
+      "sourceHash": "sha256:88933f5c598f1ff17e6cebaa4ea1036a66591feea021b7d2e685d5aa96ac75a7",
+      "text": "转换数组时使用的 lastIndex。"
+    },
+    {
+      "id": "PackableForInterpolation.unpackInterpolationResult",
+      "field": "params/sourceArray/description",
+      "sourceHash": "sha256:af94b0be92ce77b930f8c97739965f40c501ecd3d194cb7cc026d83b83061132",
+      "text": "原始打包数组。"
+    },
+    {
+      "id": "PackableForInterpolation.unpackInterpolationResult",
+      "field": "params/startingIndex/description",
+      "sourceHash": "sha256:cbbcac145104cd25478e2060d1ced93cb34915b0be43ee680154c5de88efcea5",
+      "text": "转换数组时使用的 startingIndex。"
+    },
+    {
+      "id": "PackableForInterpolation.unpackInterpolationResult",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:600ea664cb88459cdb56e5326ff2b4ea942c7a6ec5a3cb21f4b99b3ed96f504e",
+      "text": "修改后的 result 参数；未提供时返回新的 Object 实例。"
+    },
+    {
+      "id": "PackableForInterpolation",
+      "field": "description",
+      "sourceHash": "sha256:edc4581209b9fd6452f6cc12e1aca8eb0c3c589a427008c7546598aac0bc870d",
+      "text": "用于 {@link Packable} 类型的静态接口：插值时使用的表示形式与打包值不同。这些方法和属性应定义在构造函数上。"
+    },
+    {
+      "id": "QuadraticRealPolynomial.computeDiscriminant",
+      "field": "description",
+      "sourceHash": "sha256:919dc82da0cf2d37de1e711e9e9e687628b56f30fa7b7fb7661298271054df12",
+      "text": "根据所提供系数计算二次方程的判别式。"
+    },
+    {
+      "id": "QuadraticRealPolynomial.computeDiscriminant",
+      "field": "params/a/description",
+      "sourceHash": "sha256:6883a3c7dd8ba7c8f93e66645569b3f17ca93a6a1713bb7b2128c2c06e645464",
+      "text": "二次项的系数。"
+    },
+    {
+      "id": "QuadraticRealPolynomial.computeDiscriminant",
+      "field": "params/b/description",
+      "sourceHash": "sha256:676f6ccaf3f9654bf0775eddd154dfff52c8b3a50947ecd75724708b02df0d60",
+      "text": "一次项的系数。"
+    },
+    {
+      "id": "QuadraticRealPolynomial.computeDiscriminant",
+      "field": "params/c/description",
+      "sourceHash": "sha256:b0febe4dbbdbb3221e7972eee2d93bc0a05dfdc4eba24747883098f56938551b",
+      "text": "常数项的系数。"
+    },
+    {
+      "id": "QuadraticRealPolynomial.computeDiscriminant",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:548038eeb43027140f605fbed55cc35b77af0d0108b915260ac04c49cc0fa3b4",
+      "text": "判别式的值。"
+    },
+    {
+      "id": "QuadraticRealPolynomial.computeRealRoots",
+      "field": "description",
+      "sourceHash": "sha256:cc7e198856d11e5c0c8e0ec14016ea822c86a5a3737f1906ca91932a6bd0469a",
+      "text": "根据所提供系数计算二次多项式的实根。"
+    },
+    {
+      "id": "QuadraticRealPolynomial.computeRealRoots",
+      "field": "params/a/description",
+      "sourceHash": "sha256:6883a3c7dd8ba7c8f93e66645569b3f17ca93a6a1713bb7b2128c2c06e645464",
+      "text": "二次项的系数。"
+    },
+    {
+      "id": "QuadraticRealPolynomial.computeRealRoots",
+      "field": "params/b/description",
+      "sourceHash": "sha256:676f6ccaf3f9654bf0775eddd154dfff52c8b3a50947ecd75724708b02df0d60",
+      "text": "一次项的系数。"
+    },
+    {
+      "id": "QuadraticRealPolynomial.computeRealRoots",
+      "field": "params/c/description",
+      "sourceHash": "sha256:b0febe4dbbdbb3221e7972eee2d93bc0a05dfdc4eba24747883098f56938551b",
+      "text": "常数项的系数。"
+    },
+    {
+      "id": "QuadraticRealPolynomial.computeRealRoots",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:4955c931a3d1b16ca8da38eae12af99e486309847f9d9178f11345a753ffe400",
+      "text": "实根。"
+    },
+    {
+      "id": "QuadraticRealPolynomial",
+      "field": "description",
+      "sourceHash": "sha256:df8a1f9bd94dd5a90d459477ad261d3c08f0cbf82a0a6e17e664a649575dadd9",
+      "text": "定义实系数一元二次多项式的相关函数。"
+    },
+    {
+      "id": "QuarticRealPolynomial.computeDiscriminant",
+      "field": "description",
+      "sourceHash": "sha256:f080475827cef0ef819201d3f2947b00d78c217fa60ea44062061b7abff11d16",
+      "text": "根据所提供系数计算四次方程的判别式。"
+    },
+    {
+      "id": "QuarticRealPolynomial.computeDiscriminant",
+      "field": "params/a/description",
+      "sourceHash": "sha256:9cbdffcd5a83fdb27352ac69e2f7b028775ad2caba64cc3a7326d6056f5ba056",
+      "text": "四次项的系数。"
+    },
+    {
+      "id": "QuarticRealPolynomial.computeDiscriminant",
+      "field": "params/b/description",
+      "sourceHash": "sha256:140fc2cd9736cb2364e4bf25a24f8bdf4d6c29d26d700b20d8a3aa50d5a7cc2d",
+      "text": "三次项的系数。"
+    },
+    {
+      "id": "QuarticRealPolynomial.computeDiscriminant",
+      "field": "params/c/description",
+      "sourceHash": "sha256:6883a3c7dd8ba7c8f93e66645569b3f17ca93a6a1713bb7b2128c2c06e645464",
+      "text": "二次项的系数。"
+    },
+    {
+      "id": "QuarticRealPolynomial.computeDiscriminant",
+      "field": "params/d/description",
+      "sourceHash": "sha256:676f6ccaf3f9654bf0775eddd154dfff52c8b3a50947ecd75724708b02df0d60",
+      "text": "一次项的系数。"
+    },
+    {
+      "id": "QuarticRealPolynomial.computeDiscriminant",
+      "field": "params/e/description",
+      "sourceHash": "sha256:b0febe4dbbdbb3221e7972eee2d93bc0a05dfdc4eba24747883098f56938551b",
+      "text": "常数项的系数。"
+    },
+    {
+      "id": "QuarticRealPolynomial.computeDiscriminant",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:548038eeb43027140f605fbed55cc35b77af0d0108b915260ac04c49cc0fa3b4",
+      "text": "判别式的值。"
+    },
+    {
+      "id": "QuarticRealPolynomial.computeRealRoots",
+      "field": "description",
+      "sourceHash": "sha256:3e59f268d37f50862647792f39eac424c21da2f6328b76c801493fe39af27745",
+      "text": "根据所提供系数计算四次多项式的实根。"
+    },
+    {
+      "id": "QuarticRealPolynomial.computeRealRoots",
+      "field": "params/a/description",
+      "sourceHash": "sha256:9cbdffcd5a83fdb27352ac69e2f7b028775ad2caba64cc3a7326d6056f5ba056",
+      "text": "四次项的系数。"
+    },
+    {
+      "id": "QuarticRealPolynomial.computeRealRoots",
+      "field": "params/b/description",
+      "sourceHash": "sha256:140fc2cd9736cb2364e4bf25a24f8bdf4d6c29d26d700b20d8a3aa50d5a7cc2d",
+      "text": "三次项的系数。"
+    },
+    {
+      "id": "QuarticRealPolynomial.computeRealRoots",
+      "field": "params/c/description",
+      "sourceHash": "sha256:6883a3c7dd8ba7c8f93e66645569b3f17ca93a6a1713bb7b2128c2c06e645464",
+      "text": "二次项的系数。"
+    },
+    {
+      "id": "QuarticRealPolynomial.computeRealRoots",
+      "field": "params/d/description",
+      "sourceHash": "sha256:676f6ccaf3f9654bf0775eddd154dfff52c8b3a50947ecd75724708b02df0d60",
+      "text": "一次项的系数。"
+    },
+    {
+      "id": "QuarticRealPolynomial.computeRealRoots",
+      "field": "params/e/description",
+      "sourceHash": "sha256:b0febe4dbbdbb3221e7972eee2d93bc0a05dfdc4eba24747883098f56938551b",
+      "text": "常数项的系数。"
+    },
+    {
+      "id": "QuarticRealPolynomial.computeRealRoots",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:4955c931a3d1b16ca8da38eae12af99e486309847f9d9178f11345a753ffe400",
+      "text": "实根。"
+    },
+    {
+      "id": "QuarticRealPolynomial",
+      "field": "description",
+      "sourceHash": "sha256:23670b0a5174f89ef026dac2080639cf2fc5356b3a0dd2413eac94b25dbe3d83",
+      "text": "定义实系数一元四次多项式的相关函数。"
+    },
+    {
+      "id": "QuaternionSpline",
+      "field": "description",
+      "sourceHash": "sha256:b757b00ae65544cb375daaec685a57ac086889c510460cea7c1974c51d65f9c3",
+      "text": "使用球面线性插值（slerp）生成四元数曲线的样条。逐段插值通常不保证连接处的 C<sup>1</sup> 连续性。"
+    },
+    {
+      "id": "QuaternionSpline",
+      "field": "exceptions/0/description",
+      "sourceHash": "sha256:763e467d3d489f8e0f4293af233abadedfa9d26eac415412357183fd8674948b",
+      "text": "必须提供 points 和 times。"
+    },
+    {
+      "id": "QuaternionSpline",
+      "field": "exceptions/1/description",
+      "sourceHash": "sha256:03622c96477b5f9a1875a826f343aec09a2e7d3cf1868197783ffabc9a2ed23a",
+      "text": "points.length 必须大于等于 2。"
+    },
+    {
+      "id": "QuaternionSpline",
+      "field": "exceptions/2/description",
+      "sourceHash": "sha256:e9f5f3ea01f5cc58d46a1b96a101421098613647d70563150db0e655648c630f",
+      "text": "times.length 必须等于 points.length。"
+    },
+    {
+      "id": "QuaternionSpline",
+      "field": "params/options.points/description",
+      "sourceHash": "sha256:d4b885924bbdf61c5800844cacc9196cd3342cbbff63173d5626e78132692d6e",
+      "text": "{@link Quaternion} 控制点数组。"
+    },
+    {
+      "id": "QuaternionSpline",
+      "field": "params/options.times/description",
+      "sourceHash": "sha256:8d71dae66ee4fb181cb05e7a9e286fcdf9fded8128141298dd9e934c6c72dde4",
+      "text": "各控制点对应的严格递增、无单位浮点时间数组。这些值与时钟时间没有关联，仅用于曲线参数化。"
+    },
+    {
+      "id": "QuaternionSpline#clampTime",
+      "field": "description",
+      "sourceHash": "sha256:cf7fd9365cc8dbc75c286bf37d9d619f420da774f82c7e167d3a8aa8e8d50e71",
+      "text": "将给定时间限制在样条覆盖的区间内。"
+    },
+    {
+      "id": "QuaternionSpline#clampTime",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:264a1cea44fc47d73634e7feb3f567705193d57aca0ab1f9ff27d3343a249eb1",
+      "text": "限制在动画区间内的时间。"
+    },
+    {
+      "id": "QuaternionSpline#evaluate",
+      "field": "description",
+      "sourceHash": "sha256:3f33f09a9fd92022886d7c71fdb836aed65a99b1cd1dba75feee968b0e01affb",
+      "text": "在指定时间处计算曲线值。"
+    },
+    {
+      "id": "QuaternionSpline#evaluate",
+      "field": "exceptions/0/description",
+      "sourceHash": "sha256:daf7d42d264462b4aa90d12c2825b7d4afb5c07c268c231913f576b32cfe5351",
+      "text": "time 必须位于 <code>[t<sub>0</sub>, t<sub>n</sub>]</code> 范围内，其中 <code>t<sub>0</sub></code> 为 <code>times</code> 数组首项，<code>t<sub>n</sub></code> 为 <code>times</code> 数组末项。"
+    },
+    {
+      "id": "QuaternionSpline#evaluate",
+      "field": "params/time/description",
+      "sourceHash": "sha256:4481138153c7d6a020d21c64d2ffb39e8b14e407d5cc75b3bc16b2602b701f9e",
+      "text": "需要计算曲线值的时间。"
+    },
+    {
+      "id": "QuaternionSpline#evaluate",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:6a8773a34fadf6fc4fe917c3db29cca7010ac101ea63984a979f1c6550389dda",
+      "text": "修改后的 result 参数，或指定时间处曲线上点的新实例。"
+    },
+    {
+      "id": "QuaternionSpline#findTimeInterval",
+      "field": "description",
+      "sourceHash": "sha256:2d3b70e954eee0e168175a7296b59fa062e12e8e039f5af26ee257ffd79ff714",
+      "text": "在 <code>times</code> 中寻找索引 <code>i</code>，使参数 <code>time</code> 位于区间 <code>[times[i], times[i + 1]]</code> 内。"
+    },
+    {
+      "id": "QuaternionSpline#findTimeInterval",
+      "field": "exceptions/0/description",
+      "sourceHash": "sha256:daf7d42d264462b4aa90d12c2825b7d4afb5c07c268c231913f576b32cfe5351",
+      "text": "time 必须位于 <code>[t<sub>0</sub>, t<sub>n</sub>]</code> 范围内，其中 <code>t<sub>0</sub></code> 为 <code>times</code> 数组首项，<code>t<sub>n</sub></code> 为 <code>times</code> 数组末项。"
+    },
+    {
+      "id": "QuaternionSpline#findTimeInterval",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:60f0528936672c592f1a09be74f287214c23d01f38b8006e6ee03f42b17e479c",
+      "text": "区间起始元素的索引。"
+    },
+    {
+      "id": "QuaternionSpline#points",
+      "field": "description",
+      "sourceHash": "sha256:854213f8168cef32a8654f57469ee0698182f08a1a6b0ceec5b97cbf4f4a749a",
+      "text": "{@link Quaternion} 控制点数组。"
+    },
+    {
+      "id": "QuaternionSpline#times",
+      "field": "description",
+      "sourceHash": "sha256:2bff13619321a975c2f416edb79b721ed9865f25c859f4ced0e61b153702ab0c",
+      "text": "控制点对应的时间数组。"
+    },
+    {
+      "id": "QuaternionSpline#wrapTime",
+      "field": "description",
+      "sourceHash": "sha256:c43ac8f1f89b4304828e12b669b7e9275a7fb932e9b459f9d33701960eca3fc6",
+      "text": "将给定时间循环映射到样条覆盖的区间内。"
+    },
+    {
+      "id": "QuaternionSpline#wrapTime",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:69daed3923cf65f32aaabd83b9875516b2943162cf4fa113195d2989942d4b71",
+      "text": "循环映射到动画区间内的时间。"
+    },
+    {
+      "id": "Spline",
+      "field": "description",
+      "sourceHash": "sha256:eab4da6852c1c7c347c3c1421a0877575a1d076a3f7967e7f873baf3a208d671",
+      "text": "创建以时间为参数并按时间求值的曲线。此类型为接口，不应直接实例化。"
+    },
+    {
+      "id": "Spline#clampTime",
+      "field": "description",
+      "sourceHash": "sha256:cf7fd9365cc8dbc75c286bf37d9d619f420da774f82c7e167d3a8aa8e8d50e71",
+      "text": "将给定时间限制在样条覆盖的区间内。"
+    },
+    {
+      "id": "Spline#clampTime",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:264a1cea44fc47d73634e7feb3f567705193d57aca0ab1f9ff27d3343a249eb1",
+      "text": "限制在动画区间内的时间。"
+    },
+    {
+      "id": "Spline#evaluate",
+      "field": "description",
+      "sourceHash": "sha256:3f33f09a9fd92022886d7c71fdb836aed65a99b1cd1dba75feee968b0e01affb",
+      "text": "在指定时间处计算曲线值。"
+    },
+    {
+      "id": "Spline#evaluate",
+      "field": "exceptions/0/description",
+      "sourceHash": "sha256:daf7d42d264462b4aa90d12c2825b7d4afb5c07c268c231913f576b32cfe5351",
+      "text": "time 必须位于 <code>[t<sub>0</sub>, t<sub>n</sub>]</code> 范围内，其中 <code>t<sub>0</sub></code> 为 <code>times</code> 数组首项，<code>t<sub>n</sub></code> 为 <code>times</code> 数组末项。"
+    },
+    {
+      "id": "Spline#evaluate",
+      "field": "params/time/description",
+      "sourceHash": "sha256:4481138153c7d6a020d21c64d2ffb39e8b14e407d5cc75b3bc16b2602b701f9e",
+      "text": "需要计算曲线值的时间。"
+    },
+    {
+      "id": "Spline#evaluate",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:6a8773a34fadf6fc4fe917c3db29cca7010ac101ea63984a979f1c6550389dda",
+      "text": "修改后的 result 参数，或指定时间处曲线上点的新实例。"
+    },
+    {
+      "id": "Spline#findTimeInterval",
+      "field": "description",
+      "sourceHash": "sha256:2d3b70e954eee0e168175a7296b59fa062e12e8e039f5af26ee257ffd79ff714",
+      "text": "在 <code>times</code> 中寻找索引 <code>i</code>，使参数 <code>time</code> 位于区间 <code>[times[i], times[i + 1]]</code> 内。"
+    },
+    {
+      "id": "Spline#findTimeInterval",
+      "field": "exceptions/0/description",
+      "sourceHash": "sha256:daf7d42d264462b4aa90d12c2825b7d4afb5c07c268c231913f576b32cfe5351",
+      "text": "time 必须位于 <code>[t<sub>0</sub>, t<sub>n</sub>]</code> 范围内，其中 <code>t<sub>0</sub></code> 为 <code>times</code> 数组首项，<code>t<sub>n</sub></code> 为 <code>times</code> 数组末项。"
+    },
+    {
+      "id": "Spline#findTimeInterval",
+      "field": "params/startIndex/description",
+      "sourceHash": "sha256:96bc852710215f23bf084c50cca28b06ae772ed3f764aeb5520a9fea6d58bb6c",
+      "text": "开始搜索的索引。"
+    },
+    {
+      "id": "Spline#findTimeInterval",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:60f0528936672c592f1a09be74f287214c23d01f38b8006e6ee03f42b17e479c",
+      "text": "区间起始元素的索引。"
+    },
+    {
+      "id": "Spline#points",
+      "field": "description",
+      "sourceHash": "sha256:61f1d2b8edfc774c19316327675078cbe12784bdf52a223b4eb891f286e8f46e",
+      "text": "控制点数组。"
+    },
+    {
+      "id": "Spline#times",
+      "field": "description",
+      "sourceHash": "sha256:2bff13619321a975c2f416edb79b721ed9865f25c859f4ced0e61b153702ab0c",
+      "text": "控制点对应的时间数组。"
+    },
+    {
+      "id": "Spline#wrapTime",
+      "field": "description",
+      "sourceHash": "sha256:c43ac8f1f89b4304828e12b669b7e9275a7fb932e9b459f9d33701960eca3fc6",
+      "text": "将给定时间循环映射到样条覆盖的区间内。"
+    },
+    {
+      "id": "Spline#wrapTime",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:3b2cf0bc2c92a7d91f676e1df7827281863b0d38aae61879a6e45fcd7a9595fe",
+      "text": "循环映射到动画区间内的时间。"
+    },
+    {
+      "id": "SteppedSpline",
+      "field": "description",
+      "sourceHash": "sha256:62a456aba936ddfe96f6f6ced7b351c9ea43481226a9bdcc96bbc73b70b703e1",
+      "text": "由分段常量组成、表示阶梯函数的样条。"
+    },
+    {
+      "id": "SteppedSpline",
+      "field": "exceptions/0/description",
+      "sourceHash": "sha256:03622c96477b5f9a1875a826f343aec09a2e7d3cf1868197783ffabc9a2ed23a",
+      "text": "points.length 必须大于等于 2。"
+    },
+    {
+      "id": "SteppedSpline",
+      "field": "exceptions/1/description",
+      "sourceHash": "sha256:e9f5f3ea01f5cc58d46a1b96a101421098613647d70563150db0e655648c630f",
+      "text": "times.length 必须等于 points.length。"
+    },
+    {
+      "id": "SteppedSpline",
+      "field": "params/options.points/description",
+      "sourceHash": "sha256:9829b0238ba6e2ba62f925b8a19edb9653b5daa0bed311e037e2ec5b2022def8",
+      "text": "控制点数组。"
+    },
+    {
+      "id": "SteppedSpline",
+      "field": "params/options.times/description",
+      "sourceHash": "sha256:41f54674ee02ca5cf06bb2dd6fd1e3bc4fb6711d250fc4eac5a2ede015f91440",
+      "text": "各控制点对应的严格递增、无单位浮点时间数组。这些值与时钟时间没有关联，仅用于曲线参数化。"
+    },
+    {
+      "id": "SteppedSpline#clampTime",
+      "field": "description",
+      "sourceHash": "sha256:cf7fd9365cc8dbc75c286bf37d9d619f420da774f82c7e167d3a8aa8e8d50e71",
+      "text": "将给定时间限制在样条覆盖的区间内。"
+    },
+    {
+      "id": "SteppedSpline#clampTime",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:264a1cea44fc47d73634e7feb3f567705193d57aca0ab1f9ff27d3343a249eb1",
+      "text": "限制在动画区间内的时间。"
+    },
+    {
+      "id": "SteppedSpline#evaluate",
+      "field": "description",
+      "sourceHash": "sha256:3f33f09a9fd92022886d7c71fdb836aed65a99b1cd1dba75feee968b0e01affb",
+      "text": "在指定时间处计算曲线值。"
+    },
+    {
+      "id": "SteppedSpline#evaluate",
+      "field": "exceptions/0/description",
+      "sourceHash": "sha256:daf7d42d264462b4aa90d12c2825b7d4afb5c07c268c231913f576b32cfe5351",
+      "text": "time 必须位于 <code>[t<sub>0</sub>, t<sub>n</sub>]</code> 范围内，其中 <code>t<sub>0</sub></code> 为 <code>times</code> 数组首项，<code>t<sub>n</sub></code> 为 <code>times</code> 数组末项。"
+    },
+    {
+      "id": "SteppedSpline#evaluate",
+      "field": "params/time/description",
+      "sourceHash": "sha256:4481138153c7d6a020d21c64d2ffb39e8b14e407d5cc75b3bc16b2602b701f9e",
+      "text": "需要计算曲线值的时间。"
+    },
+    {
+      "id": "SteppedSpline#evaluate",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:6a8773a34fadf6fc4fe917c3db29cca7010ac101ea63984a979f1c6550389dda",
+      "text": "修改后的 result 参数，或指定时间处曲线上点的新实例。"
+    },
+    {
+      "id": "SteppedSpline#findTimeInterval",
+      "field": "description",
+      "sourceHash": "sha256:2d3b70e954eee0e168175a7296b59fa062e12e8e039f5af26ee257ffd79ff714",
+      "text": "在 <code>times</code> 中寻找索引 <code>i</code>，使参数 <code>time</code> 位于区间 <code>[times[i], times[i + 1]]</code> 内。"
+    },
+    {
+      "id": "SteppedSpline#findTimeInterval",
+      "field": "exceptions/0/description",
+      "sourceHash": "sha256:daf7d42d264462b4aa90d12c2825b7d4afb5c07c268c231913f576b32cfe5351",
+      "text": "time 必须位于 <code>[t<sub>0</sub>, t<sub>n</sub>]</code> 范围内，其中 <code>t<sub>0</sub></code> 为 <code>times</code> 数组首项，<code>t<sub>n</sub></code> 为 <code>times</code> 数组末项。"
+    },
+    {
+      "id": "SteppedSpline#findTimeInterval",
+      "field": "params/startIndex/description",
+      "sourceHash": "sha256:96bc852710215f23bf084c50cca28b06ae772ed3f764aeb5520a9fea6d58bb6c",
+      "text": "开始搜索的索引。"
+    },
+    {
+      "id": "SteppedSpline#findTimeInterval",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:60f0528936672c592f1a09be74f287214c23d01f38b8006e6ee03f42b17e479c",
+      "text": "区间起始元素的索引。"
+    },
+    {
+      "id": "SteppedSpline#points",
+      "field": "description",
+      "sourceHash": "sha256:61f1d2b8edfc774c19316327675078cbe12784bdf52a223b4eb891f286e8f46e",
+      "text": "控制点数组。"
+    },
+    {
+      "id": "SteppedSpline#times",
+      "field": "description",
+      "sourceHash": "sha256:2bff13619321a975c2f416edb79b721ed9865f25c859f4ced0e61b153702ab0c",
+      "text": "控制点对应的时间数组。"
+    },
+    {
+      "id": "SteppedSpline#wrapTime",
+      "field": "description",
+      "sourceHash": "sha256:c43ac8f1f89b4304828e12b669b7e9275a7fb932e9b459f9d33701960eca3fc6",
+      "text": "将给定时间循环映射到样条覆盖的区间内。"
+    },
+    {
+      "id": "SteppedSpline#wrapTime",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:69daed3923cf65f32aaabd83b9875516b2943162cf4fa113195d2989942d4b71",
+      "text": "循环映射到动画区间内的时间。"
+    },
+    {
+      "id": "TridiagonalSystemSolver.solve",
+      "field": "description",
+      "sourceHash": "sha256:be00860f54be3f70392a0b97b6afc70eae437df464ed3f58cc77a953917bae3c",
+      "text": "求解三对角线性方程组。"
+    },
+    {
+      "id": "TridiagonalSystemSolver.solve",
+      "field": "exceptions/0/description",
+      "sourceHash": "sha256:f325fb70de6a540930e0a122086362309f349150f1ab7384c86b757205a18c30",
+      "text": "diagonal 和 right 的长度必须相同。"
+    },
+    {
+      "id": "TridiagonalSystemSolver.solve",
+      "field": "exceptions/1/description",
+      "sourceHash": "sha256:71d90a0c084ffb7b7ae9d3f34e1b1013e2497e95017f3f4253d9a217e5a2df47",
+      "text": "lower 和 upper 的长度必须相同。"
+    },
+    {
+      "id": "TridiagonalSystemSolver.solve",
+      "field": "exceptions/2/description",
+      "sourceHash": "sha256:bd7897ce37617342a214dae5d6ee02f5d1f0c73dad569b5b2cae93abc6d400fc",
+      "text": "lower 和 upper 的长度必须比 diagonal 少 1。"
+    },
+    {
+      "id": "TridiagonalSystemSolver.solve",
+      "field": "params/diagonal/description",
+      "sourceHash": "sha256:2a10d1a640de72f515cdd6b5453d3a86a27bd64ba12e625d01f58435eb156d38",
+      "text": "长度为 <code>n</code>、包含系数矩阵主对角线的数组。"
+    },
+    {
+      "id": "TridiagonalSystemSolver.solve",
+      "field": "params/lower/description",
+      "sourceHash": "sha256:024850c95298fe7c7d5ff2473fb6b5148da37c0babaca49ce1b5fb53281379b0",
+      "text": "长度为 <code>n - 1</code>、包含系数矩阵下对角线的数组。"
+    },
+    {
+      "id": "TridiagonalSystemSolver.solve",
+      "field": "params/right/description",
+      "sourceHash": "sha256:4a1bc90c002aba3ea2e611dca09598763c312ac50dfb5a2ce5c3cbc4d9b4eb19",
+      "text": "长度为 <code>n</code> 的笛卡尔向量数组，表示方程组右端项。"
+    },
+    {
+      "id": "TridiagonalSystemSolver.solve",
+      "field": "params/upper/description",
+      "sourceHash": "sha256:c078ee4089c365027024b7632481fdf1918d7ea28117f778c895c4063ab73543",
+      "text": "长度为 <code>n - 1</code>、包含系数矩阵上对角线的数组。"
+    },
+    {
+      "id": "TridiagonalSystemSolver.solve",
+      "field": "performance/0",
+      "sourceHash": "sha256:afce8970dd91749eacc3807699a7606949e4c02ae68cb289243bee37a044b81e",
+      "text": "线性时间复杂度。"
+    },
+    {
+      "id": "TridiagonalSystemSolver.solve",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:5aa9a494836d6136fb8ce5c53a335881b84391a4342c2015302500022ef537c6",
+      "text": "长度为 <code>n</code> 的笛卡尔向量数组，表示三对角方程组的解。"
+    },
+    {
+      "id": "TridiagonalSystemSolver",
+      "field": "description",
+      "sourceHash": "sha256:c473d690e003d6be8b314e6421d38a770f8737d6f2b04c81b8b9eba6997118bb",
+      "text": "使用三对角矩阵算法（Thomas 算法）求解系数矩阵为三对角矩阵的线性方程组。"
+    }
+  ]
+}

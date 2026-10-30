@@ -1,0 +1,3096 @@
+{
+  "schemaVersion": 1,
+  "locale": "zh-CN",
+  "entries": [
+    {
+      "id": "ArcType.GEODESIC",
+      "field": "description",
+      "sourceHash": "sha256:01adaac22a4b5d5e43f60b2e5f83cb0cc015f56f7a95f4c43f59913a67511f11",
+      "text": "沿测地线路径连接。"
+    },
+    {
+      "id": "ArcType.NONE",
+      "field": "description",
+      "sourceHash": "sha256:266d0b85e79656c9d39de0bd66829d0ef02a7ffee4665b79c40d672d45ae2e92",
+      "text": "使用不贴合椭球表面的直线连接。"
+    },
+    {
+      "id": "ArcType.RHUMB",
+      "field": "description",
+      "sourceHash": "sha256:b42b0881d5a4611770bbe2887a3326cce6f40e8d9a5a2c8a95ddcacabd7f43c1",
+      "text": "沿等角航线（恒向线）路径连接。"
+    },
+    {
+      "id": "ArcType",
+      "field": "description",
+      "sourceHash": "sha256:c96726e0a0e56f9397ec5175a7744ed57366b0fcc428a95c50203a1013d8d1ec",
+      "text": "ArcType 定义顶点之间的连接路径。"
+    },
+    {
+      "id": "ArcType",
+      "field": "properties/GEODESIC/description",
+      "sourceHash": "sha256:01adaac22a4b5d5e43f60b2e5f83cb0cc015f56f7a95f4c43f59913a67511f11",
+      "text": "沿测地线路径连接。"
+    },
+    {
+      "id": "ArcType",
+      "field": "properties/NONE/description",
+      "sourceHash": "sha256:266d0b85e79656c9d39de0bd66829d0ef02a7ffee4665b79c40d672d45ae2e92",
+      "text": "使用不贴合椭球表面的直线连接。"
+    },
+    {
+      "id": "ArcType",
+      "field": "properties/RHUMB/description",
+      "sourceHash": "sha256:b42b0881d5a4611770bbe2887a3326cce6f40e8d9a5a2c8a95ddcacabd7f43c1",
+      "text": "沿等角航线（恒向线）路径连接。"
+    },
+    {
+      "id": "Axis.fromName",
+      "field": "description",
+      "sourceHash": "sha256:0adf634c564dbf902af8def98da1e5ef4a97625b7db20b05ab7cfc9b58c99f0e",
+      "text": "按名称获取坐标轴。"
+    },
+    {
+      "id": "Axis.fromName",
+      "field": "params/name/description",
+      "sourceHash": "sha256:0014501ffef9e9a2440a33e40de0bedef1c826638d83349e2362fbe944fffb0f",
+      "text": "坐标轴名称。"
+    },
+    {
+      "id": "Axis.fromName",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:8b70ace32472845aa3f4233e6669508dd5c699d9928b6d0d3955e242f3d3aa8c",
+      "text": "坐标轴枚举值。"
+    },
+    {
+      "id": "Axis.X_UP_TO_Y_UP",
+      "field": "description",
+      "sourceHash": "sha256:a30fc8d974e314d3e33a439132585166cad14c70b87fee3c4039175b3eefd8aa",
+      "text": "将 x 轴向上坐标系转换为 y 轴向上坐标系的矩阵。"
+    },
+    {
+      "id": "Axis.X_UP_TO_Z_UP",
+      "field": "description",
+      "sourceHash": "sha256:5b9013362dfc3ac5e79c29d7436eab71137610532ff0145510d85aff8c0aef2a",
+      "text": "将 x 轴向上坐标系转换为 z 轴向上坐标系的矩阵。"
+    },
+    {
+      "id": "Axis.X",
+      "field": "description",
+      "sourceHash": "sha256:b46d5154d97950e9e9c9e35a0d5603a78a60ae350dd56e793f270ba095f8885c",
+      "text": "表示 x 轴。"
+    },
+    {
+      "id": "Axis.Y_UP_TO_X_UP",
+      "field": "description",
+      "sourceHash": "sha256:7c4569fa2e18d3b07bfe01365525f338e6dcd876c570b154fbc4f97d2f4a1150",
+      "text": "将 y 轴向上坐标系转换为 x 轴向上坐标系的矩阵。"
+    },
+    {
+      "id": "Axis.Y_UP_TO_Z_UP",
+      "field": "description",
+      "sourceHash": "sha256:a154e3ebc1023daae2cf3eae1e884bd4c9dcec2bbf1122dee8f310f8df23cbec",
+      "text": "将 y 轴向上坐标系转换为 z 轴向上坐标系的矩阵。"
+    },
+    {
+      "id": "Axis.Y",
+      "field": "description",
+      "sourceHash": "sha256:04a8ed01bd447dcbf0b10ff0664d9bc0c13e18e426c82e2cd927d8b6de0ff2ea",
+      "text": "表示 y 轴。"
+    },
+    {
+      "id": "Axis.Z_UP_TO_X_UP",
+      "field": "description",
+      "sourceHash": "sha256:3d3860114413375f800a2be15bf25e1994f84b2c240e64c3a3b0b160d9a8bf53",
+      "text": "将 z 轴向上坐标系转换为 x 轴向上坐标系的矩阵。"
+    },
+    {
+      "id": "Axis.Z_UP_TO_Y_UP",
+      "field": "description",
+      "sourceHash": "sha256:7e9e41a85470a6e68c9961420571955e40e43e454dc30114cef26818ba423a99",
+      "text": "将 z 轴向上坐标系转换为 y 轴向上坐标系的矩阵。"
+    },
+    {
+      "id": "Axis.Z",
+      "field": "description",
+      "sourceHash": "sha256:53499bbff941c7efd000e00fe4e23d45b5f528f215eaaafd2c0c0415936c9f52",
+      "text": "表示 z 轴。"
+    },
+    {
+      "id": "Axis",
+      "field": "description",
+      "sourceHash": "sha256:6f22549c463493f8f4a0aea0e408a99a7e0b182c64ba0321205aff3331426a16",
+      "text": "描述 x、y、z 轴并提供坐标轴转换辅助函数的枚举。"
+    },
+    {
+      "id": "Axis",
+      "field": "properties/X/description",
+      "sourceHash": "sha256:b46d5154d97950e9e9c9e35a0d5603a78a60ae350dd56e793f270ba095f8885c",
+      "text": "表示 x 轴。"
+    },
+    {
+      "id": "Axis",
+      "field": "properties/Y/description",
+      "sourceHash": "sha256:04a8ed01bd447dcbf0b10ff0664d9bc0c13e18e426c82e2cd927d8b6de0ff2ea",
+      "text": "表示 y 轴。"
+    },
+    {
+      "id": "Axis",
+      "field": "properties/Z/description",
+      "sourceHash": "sha256:53499bbff941c7efd000e00fe4e23d45b5f528f215eaaafd2c0c0415936c9f52",
+      "text": "表示 z 轴。"
+    },
+    {
+      "id": "AxisAlignedBoundingBox.clone",
+      "field": "description",
+      "sourceHash": "sha256:5872686561f80bc10161179fc6df89a392822ae8a524e855885e2c04681f6f34",
+      "text": "复制 AxisAlignedBoundingBox 实例。"
+    },
+    {
+      "id": "AxisAlignedBoundingBox.clone",
+      "field": "params/box/description",
+      "sourceHash": "sha256:1c8e6dcd8a6cbae244a916379642fd9e4fd8fbf805e25373eed9ca5141b70968",
+      "text": "要复制的包围盒。"
+    },
+    {
+      "id": "AxisAlignedBoundingBox.clone",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:050ca35598b1c7c3a59f9596b245975354e09e6c8199b9dc5c9280e36b00e81d",
+      "text": "修改后的 result 参数；未提供时返回新的 AxisAlignedBoundingBox 实例。box 为 undefined 时返回 undefined。"
+    },
+    {
+      "id": "AxisAlignedBoundingBox.equals",
+      "field": "description",
+      "sourceHash": "sha256:311b243dd58906047e5468d2d71619f3ad5357a5765f1444bf8cfe9cf881fc1e",
+      "text": "逐分量比较给定的 AxisAlignedBoundingBox，相等时返回 <code>true</code>，否则返回 <code>false</code>。"
+    },
+    {
+      "id": "AxisAlignedBoundingBox.equals",
+      "field": "params/left/description",
+      "sourceHash": "sha256:984dd44fd051f90e9bdc4fff52f56076320099e0ae84ab536f2a7d0107b48104",
+      "text": "第一个 AxisAlignedBoundingBox。"
+    },
+    {
+      "id": "AxisAlignedBoundingBox.equals",
+      "field": "params/right/description",
+      "sourceHash": "sha256:12f2c3078900f38bd955933c1f97411417231be6be58815616bd801ba9654b0a",
+      "text": "第二个 AxisAlignedBoundingBox。"
+    },
+    {
+      "id": "AxisAlignedBoundingBox.fromCorners",
+      "field": "description",
+      "sourceHash": "sha256:ed84d9ff32bfcfe48d33030ac9f9b7cf3db29f9c5682c6d822e515f4cefafc34",
+      "text": "根据角点创建 AxisAlignedBoundingBox 实例。"
+    },
+    {
+      "id": "AxisAlignedBoundingBox.fromCorners",
+      "field": "params/maximum/description",
+      "sourceHash": "sha256:a8f70780f7ddff70ee41cff596098d7e8f26d7bae5da41786df7f9ddf58a3b20",
+      "text": "沿 x、y、z 各轴的最大坐标点。"
+    },
+    {
+      "id": "AxisAlignedBoundingBox.fromCorners",
+      "field": "params/minimum/description",
+      "sourceHash": "sha256:fa4468be6864c0c16b3c42f39aaad0fc5c0acf8f5a0a175c84b9741b1c7436e4",
+      "text": "沿 x、y、z 各轴的最小坐标点。"
+    },
+    {
+      "id": "AxisAlignedBoundingBox.fromCorners",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:113da1998bd8cc4b9f0f6be7857d6bd8a721ea0d7e699ab38ed90e518e029c0c",
+      "text": "修改后的 result 参数；未提供时返回新的 AxisAlignedBoundingBox 实例。"
+    },
+    {
+      "id": "AxisAlignedBoundingBox.fromPoints",
+      "field": "description",
+      "sourceHash": "sha256:985a8b0faac6fff43cf15ddea76f11727cb4457f559433d9196e1ab3670da62a",
+      "text": "计算 AxisAlignedBoundingBox 实例，分别寻找点集在 x、y、z 各轴方向上的最小和最大坐标，以确定包围盒。"
+    },
+    {
+      "id": "AxisAlignedBoundingBox.fromPoints",
+      "field": "params/positions/description",
+      "sourceHash": "sha256:72fd7010df8d0b58acf1c379bdb641ecaac498143a1bff3b935684ac8e2a8a86",
+      "text": "包围盒需要包围的点列表。每个点必须具有 <code>x</code>、<code>y</code> 和 <code>z</code> 属性。"
+    },
+    {
+      "id": "AxisAlignedBoundingBox.fromPoints",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:113da1998bd8cc4b9f0f6be7857d6bd8a721ea0d7e699ab38ed90e518e029c0c",
+      "text": "修改后的 result 参数；未提供时返回新的 AxisAlignedBoundingBox 实例。"
+    },
+    {
+      "id": "AxisAlignedBoundingBox.intersectAxisAlignedBoundingBox",
+      "field": "description",
+      "sourceHash": "sha256:997b9cc537e9e08ba54c39cb1d45997cf0898148f76e4b80f6648bf2830443c9",
+      "text": "判断两个轴对齐包围盒是否相交。"
+    },
+    {
+      "id": "AxisAlignedBoundingBox.intersectAxisAlignedBoundingBox",
+      "field": "params/box/description",
+      "sourceHash": "sha256:ae07fddd190af2440ce21754b2d12464bfe58c2b61588ed17425d8eec42278cd",
+      "text": "第一个包围盒。"
+    },
+    {
+      "id": "AxisAlignedBoundingBox.intersectAxisAlignedBoundingBox",
+      "field": "params/other/description",
+      "sourceHash": "sha256:1a871fb004b840e2ecc19a4c65dea0998dad7b4f4d606f6796d228f49ffc0292",
+      "text": "第二个包围盒。"
+    },
+    {
+      "id": "AxisAlignedBoundingBox.intersectAxisAlignedBoundingBox",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:f0be51315820bf535abaf2eee38c4e5f8d767c405a78355a1ddbcdb13a265f82",
+      "text": "包围盒相交时为 <code>true</code>，否则为 <code>false</code>。"
+    },
+    {
+      "id": "AxisAlignedBoundingBox.intersectPlane",
+      "field": "description",
+      "sourceHash": "sha256:ee036dd95c1feec0ea6990afe46bacc866d31dad766f64d322f232d7adde8d64",
+      "text": "判断包围盒位于平面的哪一侧。"
+    },
+    {
+      "id": "AxisAlignedBoundingBox.intersectPlane",
+      "field": "params/box/description",
+      "sourceHash": "sha256:11d4bc79e5964539bf4f4e7505122a816a27e4bd264f607ee47eb94d064c5878",
+      "text": "需要测试的包围盒。"
+    },
+    {
+      "id": "AxisAlignedBoundingBox.intersectPlane",
+      "field": "params/plane/description",
+      "sourceHash": "sha256:16ceffc1f684849b57354f87194714a2923ade34e52d08d95afd574edef17ff7",
+      "text": "用于测试的平面。"
+    },
+    {
+      "id": "AxisAlignedBoundingBox.intersectPlane",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:94d6a1171612477ad1edb2963b700c348567837083dba14282176125f7c2a843",
+      "text": "若整个盒体位于平面法线指向的一侧，则为 {@link Intersect.INSIDE}；若整个盒体位于相反一侧，则为 {@link Intersect.OUTSIDE}；若盒体与平面相交，则为 {@link Intersect.INTERSECTING}。"
+    },
+    {
+      "id": "AxisAlignedBoundingBox",
+      "field": "description",
+      "sourceHash": "sha256:2f3c1a0a8230b752aced05bf79ca08692bf1bf22bb1f2fd27eeb9ec5d76949fe",
+      "text": "根据 x、y、z 各轴的最小和最大坐标点创建 AxisAlignedBoundingBox 实例。"
+    },
+    {
+      "id": "AxisAlignedBoundingBox",
+      "field": "params/center/description",
+      "sourceHash": "sha256:2799f1d3462301ad8e3b580a165f58893ab6d82a04490ab92b81ebc1c55f8387",
+      "text": "盒体中心；未提供时自动计算。"
+    },
+    {
+      "id": "AxisAlignedBoundingBox",
+      "field": "params/maximum/description",
+      "sourceHash": "sha256:a8f70780f7ddff70ee41cff596098d7e8f26d7bae5da41786df7f9ddf58a3b20",
+      "text": "沿 x、y、z 各轴的最大坐标点。"
+    },
+    {
+      "id": "AxisAlignedBoundingBox",
+      "field": "params/minimum/description",
+      "sourceHash": "sha256:fa4468be6864c0c16b3c42f39aaad0fc5c0acf8f5a0a175c84b9741b1c7436e4",
+      "text": "沿 x、y、z 各轴的最小坐标点。"
+    },
+    {
+      "id": "AxisAlignedBoundingBox#center",
+      "field": "description",
+      "sourceHash": "sha256:78f8b856edf04b366d028fd833602e9c42adbdb86ec72aa3050d2b9f2ed67fd0",
+      "text": "包围盒的中心点。"
+    },
+    {
+      "id": "AxisAlignedBoundingBox#clone",
+      "field": "description",
+      "sourceHash": "sha256:ff613cd4f46d648c601592447a5e277c505ea9c8d3b2f922137f7482814cb9a7",
+      "text": "复制此 AxisAlignedBoundingBox 实例。"
+    },
+    {
+      "id": "AxisAlignedBoundingBox#clone",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:113da1998bd8cc4b9f0f6be7857d6bd8a721ea0d7e699ab38ed90e518e029c0c",
+      "text": "修改后的 result 参数；未提供时返回新的 AxisAlignedBoundingBox 实例。"
+    },
+    {
+      "id": "AxisAlignedBoundingBox#equals",
+      "field": "description",
+      "sourceHash": "sha256:c08ecfd77440b7c5fd4f354035e7a926d41351a175df1897e9957ae5f25d27ac",
+      "text": "逐分量比较此 AxisAlignedBoundingBox 与给定实例，相等时返回 <code>true</code>，否则返回 <code>false</code>。"
+    },
+    {
+      "id": "AxisAlignedBoundingBox#equals",
+      "field": "params/right/description",
+      "sourceHash": "sha256:86b002e5f6b3aff139a78cb04306bd10c61cb951c005464d1d84b5714c236e58",
+      "text": "右侧 AxisAlignedBoundingBox。"
+    },
+    {
+      "id": "AxisAlignedBoundingBox#intersectAxisAlignedBoundingBox",
+      "field": "description",
+      "sourceHash": "sha256:88ca4dece1f89527d509ff530d75fa309f1604027b97cc03f6dd698c74cda44d",
+      "text": "判断另一个轴对齐包围盒是否与此包围盒相交。"
+    },
+    {
+      "id": "AxisAlignedBoundingBox#intersectAxisAlignedBoundingBox",
+      "field": "params/other/description",
+      "sourceHash": "sha256:adef4ad66deec3be9ebd63220b74db2fab0ce3fe21fa4d68d252fe9d4d7d86a0",
+      "text": "另一个轴对齐包围盒。"
+    },
+    {
+      "id": "AxisAlignedBoundingBox#intersectAxisAlignedBoundingBox",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:f0be51315820bf535abaf2eee38c4e5f8d767c405a78355a1ddbcdb13a265f82",
+      "text": "包围盒相交时为 <code>true</code>，否则为 <code>false</code>。"
+    },
+    {
+      "id": "AxisAlignedBoundingBox#intersectPlane",
+      "field": "description",
+      "sourceHash": "sha256:ac985583d437f220a941a609e618abaf4c9e39ef33158c9c42d40f54be6e8e7d",
+      "text": "判断此包围盒位于平面的哪一侧。"
+    },
+    {
+      "id": "AxisAlignedBoundingBox#intersectPlane",
+      "field": "params/plane/description",
+      "sourceHash": "sha256:16ceffc1f684849b57354f87194714a2923ade34e52d08d95afd574edef17ff7",
+      "text": "用于测试的平面。"
+    },
+    {
+      "id": "AxisAlignedBoundingBox#intersectPlane",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:94d6a1171612477ad1edb2963b700c348567837083dba14282176125f7c2a843",
+      "text": "若整个盒体位于平面法线指向的一侧，则为 {@link Intersect.INSIDE}；若整个盒体位于相反一侧，则为 {@link Intersect.OUTSIDE}；若盒体与平面相交，则为 {@link Intersect.INTERSECTING}。"
+    },
+    {
+      "id": "AxisAlignedBoundingBox#maximum",
+      "field": "description",
+      "sourceHash": "sha256:0edfafd29256e9160683cb76781c8ace1d3b95f24c3967b2fd38a16ad3d19582",
+      "text": "定义包围盒的最大坐标点。"
+    },
+    {
+      "id": "AxisAlignedBoundingBox#minimum",
+      "field": "description",
+      "sourceHash": "sha256:7f7fbb5e5768230662394fb42c39ff37cf72855e3bca4c19e8b2963043fe9b5a",
+      "text": "定义包围盒的最小坐标点。"
+    },
+    {
+      "id": "barycentricCoordinates",
+      "field": "description",
+      "sourceHash": "sha256:d6a4375dc6a6a2e7bb0fe2f0e2914ee9ff712aa4274f783780ed87d7db3b9dbe",
+      "text": "计算点相对于三角形的重心坐标。"
+    },
+    {
+      "id": "barycentricCoordinates",
+      "field": "params/p0/description",
+      "sourceHash": "sha256:8cda45a7e6305cfdc48c1d54c4b77e1ee22dd12c8e085b26d7436a4c73ac9d7c",
+      "text": "三角形第一个顶点，对应重心坐标的 x 分量。"
+    },
+    {
+      "id": "barycentricCoordinates",
+      "field": "params/p1/description",
+      "sourceHash": "sha256:6a761dee2f77563c57d221f8353833a35e396c8c10de3ee8028bae5722f3a113",
+      "text": "三角形第二个顶点，对应重心坐标的 y 分量。"
+    },
+    {
+      "id": "barycentricCoordinates",
+      "field": "params/p2/description",
+      "sourceHash": "sha256:7b9b756554cf0939d14ee4fbf48f6894f99c179cbddae1d0f981b87301937352",
+      "text": "三角形第三个顶点，对应重心坐标的 z 分量。"
+    },
+    {
+      "id": "barycentricCoordinates",
+      "field": "params/point/description",
+      "sourceHash": "sha256:3f73300f8385026691be1fe865724e9ea4d5fc1b252ec4d7bf5592c0ae3ed19f",
+      "text": "要测试的点。"
+    },
+    {
+      "id": "barycentricCoordinates",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:f5cf99d0967e2e3a10db6eb77a7b2e1134e1a9503211f01a5b4c2ff814e53c99",
+      "text": "修改后的 result 参数；未提供时返回新的 Cartesian3 实例。三角形退化时返回 undefined。"
+    },
+    {
+      "id": "CornerType.BEVELED",
+      "field": "description",
+      "sourceHash": "sha256:ee9030aac5304ded0c7060f22d74dd86a680275c16569cf7b6fcd1cd4ac966a0",
+      "text": "<img src=\"Images/CornerTypeBeveled.png\" style=\"vertical-align: middle;\" width=\"186\" height=\"189\" />\n\n转角采用削角处理。"
+    },
+    {
+      "id": "CornerType.MITERED",
+      "field": "description",
+      "sourceHash": "sha256:f8eb1c418aaff63078af058393f1faaa6e650c909802bceb14545082c07b1533",
+      "text": "<img src=\"Images/CornerTypeMitered.png\" style=\"vertical-align: middle;\" width=\"186\" height=\"189\" />\n\n转角顶点为相邻边的交点。"
+    },
+    {
+      "id": "CornerType.ROUNDED",
+      "field": "description",
+      "sourceHash": "sha256:1758fdb19102e0800fa6b1533f596358e0f5b214bda8ec374ba72e115e3f5d1b",
+      "text": "<img src=\"Images/CornerTypeRounded.png\" style=\"vertical-align: middle;\" width=\"186\" height=\"189\" />\n\n转角采用平滑圆弧。"
+    },
+    {
+      "id": "CornerType",
+      "field": "description",
+      "sourceHash": "sha256:93e5083463643f7af7e02c0c650e3973f679d80b97e245dc1a7a444c4d7d84d8",
+      "text": "转角样式选项。"
+    },
+    {
+      "id": "CornerType",
+      "field": "properties/BEVELED/description",
+      "sourceHash": "sha256:ee9030aac5304ded0c7060f22d74dd86a680275c16569cf7b6fcd1cd4ac966a0",
+      "text": "<img src=\"Images/CornerTypeBeveled.png\" style=\"vertical-align: middle;\" width=\"186\" height=\"189\" />\n\n转角采用削角处理。"
+    },
+    {
+      "id": "CornerType",
+      "field": "properties/MITERED/description",
+      "sourceHash": "sha256:f8eb1c418aaff63078af058393f1faaa6e650c909802bceb14545082c07b1533",
+      "text": "<img src=\"Images/CornerTypeMitered.png\" style=\"vertical-align: middle;\" width=\"186\" height=\"189\" />\n\n转角顶点为相邻边的交点。"
+    },
+    {
+      "id": "CornerType",
+      "field": "properties/ROUNDED/description",
+      "sourceHash": "sha256:1758fdb19102e0800fa6b1533f596358e0f5b214bda8ec374ba72e115e3f5d1b",
+      "text": "<img src=\"Images/CornerTypeRounded.png\" style=\"vertical-align: middle;\" width=\"186\" height=\"189\" />\n\n转角采用平滑圆弧。"
+    },
+    {
+      "id": "CullingVolume.fromBoundingSphere",
+      "field": "description",
+      "sourceHash": "sha256:a16955afe7f6de97cd4445a8986cf17e02f04d5bebe656751823007ee2a346d8",
+      "text": "根据包围球构造剔除体。创建六个平面，构成包含该球的盒体；各平面与世界坐标的 x、y、z 轴对齐。"
+    },
+    {
+      "id": "CullingVolume.fromBoundingSphere",
+      "field": "params/boundingSphere/description",
+      "sourceHash": "sha256:6f8127d29ee14dd74e4d37aa888c4bc80e3c90c08790387105f4c4178f599340",
+      "text": "用于创建剔除体的包围球。"
+    },
+    {
+      "id": "CullingVolume.fromBoundingSphere",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:a706aa2c50246cbf0a3842d2ded8c0d9040a16cf426ce973f17d58d4c1638a3c",
+      "text": "根据包围球创建的剔除体。"
+    },
+    {
+      "id": "CullingVolume",
+      "field": "description",
+      "sourceHash": "sha256:fe04f72214b340fb1a6cd613cd5f496541bc697281ee5e796eb96eb999d25605",
+      "text": "由多个平面定义的剔除体。"
+    },
+    {
+      "id": "CullingVolume",
+      "field": "params/planes/description",
+      "sourceHash": "sha256:b9104399ac41425cd12439c7a81773b2b1e7ff1fe5bcdf6f4aa82a165ab98b71",
+      "text": "裁剪平面数组。"
+    },
+    {
+      "id": "CullingVolume#computeVisibility",
+      "field": "description",
+      "sourceHash": "sha256:07cb1e9b01d4ab5868575bab07c8b54ac08d9889564f7410a1ecd7673674f436",
+      "text": "判断包围体是否与剔除体相交。"
+    },
+    {
+      "id": "CullingVolume#computeVisibility",
+      "field": "params/boundingVolume/description",
+      "sourceHash": "sha256:9738a24b489146b95b24cd0e1fc023f690317978fbc1bfd238d38f5795274c26",
+      "text": "需要测试与剔除体是否相交的包围体。"
+    },
+    {
+      "id": "CullingVolume#computeVisibility",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:6a535fd08e776e836dc6b051b34ecae1bf19b6b6529359e04343ebf7d20889a5",
+      "text": "Intersect.OUTSIDE、Intersect.INTERSECTING 或 Intersect.INSIDE。"
+    },
+    {
+      "id": "CullingVolume#planes",
+      "field": "description",
+      "sourceHash": "sha256:97476f510a24e44ae382fc06efadd67255ce185b617a920da2c4d4aa14302208",
+      "text": "每个平面由 Cartesian4 对象表示。x、y、z 分量定义平面单位法线，w 分量为平面距原点的有符号距离，即平面方程的常数项。"
+    },
+    {
+      "id": "DirectionUp",
+      "field": "description",
+      "sourceHash": "sha256:b10d2eb7d26ee5a9d074ab5a31219cf5fcb683af7e8347bce835f51eaa999552",
+      "text": "由一对单位向量表示的朝向。"
+    },
+    {
+      "id": "DirectionUp",
+      "field": "properties/direction/description",
+      "sourceHash": "sha256:c217b9b12d1b53e771f9162c1d1ee8260e408c5da15a5543fae6e9d99dc25112",
+      "text": "单位 direction 向量。"
+    },
+    {
+      "id": "DirectionUp",
+      "field": "properties/up/description",
+      "sourceHash": "sha256:8f5f7234bcae7a3968bb224d3c7c88c9fc7d20f30901161e31fda38a5e9daa60",
+      "text": "单位 up 向量。"
+    },
+    {
+      "id": "EllipsoidGeodesic",
+      "field": "description",
+      "sourceHash": "sha256:ced568ec6675f6033460c84364e2f69def62e934653f1f6a53f23d4c0ce5e730",
+      "text": "初始化连接两个给定大地坐标点的椭球测地线。"
+    },
+    {
+      "id": "EllipsoidGeodesic",
+      "field": "params/ellipsoid/description",
+      "sourceHash": "sha256:fbff0fbe82ebe5512713d837340ce44de3d8560b9552a2c8cd15bedf2726d003",
+      "text": "测地线所在的椭球。"
+    },
+    {
+      "id": "EllipsoidGeodesic",
+      "field": "params/end/description",
+      "sourceHash": "sha256:1ddd48b77fa2421ec907139db97227dbe1bb648e4612e16d82434f46742b6453",
+      "text": "路径终点的大地坐标。"
+    },
+    {
+      "id": "EllipsoidGeodesic",
+      "field": "params/start/description",
+      "sourceHash": "sha256:c31a78b8293fb925b420625f9afd07b1b39d99144d37f82a6ac357b4c1b2ac9d",
+      "text": "路径起点的大地坐标。"
+    },
+    {
+      "id": "EllipsoidGeodesic#ellipsoid",
+      "field": "description",
+      "sourceHash": "sha256:f0902e6fbd18e7715d18392415994043c17facedd3ff884ce00bf469d1f8616e",
+      "text": "获取椭球。"
+    },
+    {
+      "id": "EllipsoidGeodesic#end",
+      "field": "description",
+      "sourceHash": "sha256:fcfd0c053838c912ac3614d6743e6b2a09fe2e74b1d5012a112dfc73df8c8865",
+      "text": "获取路径终点的大地坐标。"
+    },
+    {
+      "id": "EllipsoidGeodesic#endHeading",
+      "field": "description",
+      "sourceHash": "sha256:bed3bd7bca504de5dacf64089c8e2374dc9db271db635a50ba179a8f34530d1d",
+      "text": "获取终点处的航向角。"
+    },
+    {
+      "id": "EllipsoidGeodesic#interpolateUsingFraction",
+      "field": "description",
+      "sourceHash": "sha256:4f2ddc1e014093692f3706666e1f54197976049f586526f0d823a13d728666d2",
+      "text": "获取测地线上指定距离比例处的位置。"
+    },
+    {
+      "id": "EllipsoidGeodesic#interpolateUsingFraction",
+      "field": "params/fraction/description",
+      "sourceHash": "sha256:1287eb54c3e9efdaa482a65c4bbc761bd277843e1049145308fd1a10277f52fd",
+      "text": "相对于起点到终点总距离的比例。"
+    },
+    {
+      "id": "EllipsoidGeodesic#interpolateUsingFraction",
+      "field": "params/result/description",
+      "sourceHash": "sha256:33426d59d0185d3e9ae5aa6f6107cce5b2a5996d77940b48db901f1698c13ad0",
+      "text": "用于存储结果的对象。"
+    },
+    {
+      "id": "EllipsoidGeodesic#interpolateUsingFraction",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:6d0889c4a33450f8189f7deb8e1e3f9b69ad491ac0772fa120716cd4036144a9",
+      "text": "测地线上对应点的位置。"
+    },
+    {
+      "id": "EllipsoidGeodesic#interpolateUsingSurfaceDistance",
+      "field": "description",
+      "sourceHash": "sha256:0240ffbc31fcf1bb960fa43e69f0202a6b7da29e765cc20ad3894abe006dae5e",
+      "text": "获取沿测地线指定距离处的位置。"
+    },
+    {
+      "id": "EllipsoidGeodesic#interpolateUsingSurfaceDistance",
+      "field": "exceptions/0/description",
+      "sourceHash": "sha256:55673273521bb064d77eca8d00ede702be938228ea25a117bd57af517ea82520",
+      "text": "调用 interpolateUsingSurfaceDistance 前必须设置 start 和 end。"
+    },
+    {
+      "id": "EllipsoidGeodesic#interpolateUsingSurfaceDistance",
+      "field": "params/distance/description",
+      "sourceHash": "sha256:6e559a4259eb893e05c975152d71e12fc3ff2bdfcda7ad2a0a81068127696d5d",
+      "text": "沿测地线从起点到目标点的距离。"
+    },
+    {
+      "id": "EllipsoidGeodesic#interpolateUsingSurfaceDistance",
+      "field": "params/result/description",
+      "sourceHash": "sha256:33426d59d0185d3e9ae5aa6f6107cce5b2a5996d77940b48db901f1698c13ad0",
+      "text": "用于存储结果的对象。"
+    },
+    {
+      "id": "EllipsoidGeodesic#interpolateUsingSurfaceDistance",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:6d0889c4a33450f8189f7deb8e1e3f9b69ad491ac0772fa120716cd4036144a9",
+      "text": "测地线上对应点的位置。"
+    },
+    {
+      "id": "EllipsoidGeodesic#setEndPoints",
+      "field": "description",
+      "sourceHash": "sha256:0bfe37ef8312fb3fe2298cf75b28cee6fa710e0654419abbad5875a0988b0154",
+      "text": "设置测地线的起点和终点。"
+    },
+    {
+      "id": "EllipsoidGeodesic#setEndPoints",
+      "field": "params/end/description",
+      "sourceHash": "sha256:1ddd48b77fa2421ec907139db97227dbe1bb648e4612e16d82434f46742b6453",
+      "text": "路径终点的大地坐标。"
+    },
+    {
+      "id": "EllipsoidGeodesic#setEndPoints",
+      "field": "params/start/description",
+      "sourceHash": "sha256:c31a78b8293fb925b420625f9afd07b1b39d99144d37f82a6ac357b4c1b2ac9d",
+      "text": "路径起点的大地坐标。"
+    },
+    {
+      "id": "EllipsoidGeodesic#start",
+      "field": "description",
+      "sourceHash": "sha256:c990a7a6add12ee5bcec5a324392e87d201a919a4355df3231f48863efbc89ae",
+      "text": "获取路径起点的大地坐标。"
+    },
+    {
+      "id": "EllipsoidGeodesic#startHeading",
+      "field": "description",
+      "sourceHash": "sha256:f348f96bc21113407d786860cd7d6102fb413278b3e4908b80b41070a9f47507",
+      "text": "获取起点处的航向角。"
+    },
+    {
+      "id": "EllipsoidGeodesic#surfaceDistance",
+      "field": "description",
+      "sourceHash": "sha256:6121f5dcc8710426c91306ae70381e397f3924413c3bf80e6b4dad6242dc18da",
+      "text": "获取起点与终点之间的表面距离。"
+    },
+    {
+      "id": "EllipsoidRhumbLine.fromStartHeadingDistance",
+      "field": "description",
+      "sourceHash": "sha256:05b269aee6ff9ad4f8378aef835b08181e147079d2452b534cf66eca1e6b38d6",
+      "text": "根据起始位置、航向和距离创建恒向线。"
+    },
+    {
+      "id": "EllipsoidRhumbLine.fromStartHeadingDistance",
+      "field": "params/distance/description",
+      "sourceHash": "sha256:fad1a196bdbb41d80ef0c27c197d4992d94da2525e91ff08d21ee77be0f20c07",
+      "text": "恒向线起点与终点之间的距离。"
+    },
+    {
+      "id": "EllipsoidRhumbLine.fromStartHeadingDistance",
+      "field": "params/ellipsoid/description",
+      "sourceHash": "sha256:98d86bde319fd3feb248e897117fd53be647ae0d81366f05c7c396d978831f6f",
+      "text": "恒向线所在的椭球。"
+    },
+    {
+      "id": "EllipsoidRhumbLine.fromStartHeadingDistance",
+      "field": "params/heading/description",
+      "sourceHash": "sha256:3d141e12c47fe2bc62eae5ad299150ca122777c37afac55443850e178452ccd9",
+      "text": "航向角，单位为弧度。"
+    },
+    {
+      "id": "EllipsoidRhumbLine.fromStartHeadingDistance",
+      "field": "params/result/description",
+      "sourceHash": "sha256:33426d59d0185d3e9ae5aa6f6107cce5b2a5996d77940b48db901f1698c13ad0",
+      "text": "用于存储结果的对象。"
+    },
+    {
+      "id": "EllipsoidRhumbLine.fromStartHeadingDistance",
+      "field": "params/start/description",
+      "sourceHash": "sha256:c31a78b8293fb925b420625f9afd07b1b39d99144d37f82a6ac357b4c1b2ac9d",
+      "text": "路径起点的大地坐标。"
+    },
+    {
+      "id": "EllipsoidRhumbLine.fromStartHeadingDistance",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:1e4af146b66c306629c1cf77f93b95c2c766edc3782464c532201a5aa40d286c",
+      "text": "EllipsoidRhumbLine 对象。"
+    },
+    {
+      "id": "EllipsoidRhumbLine",
+      "field": "description",
+      "sourceHash": "sha256:e153dd6adb8526cb5e2d7e7c46c0821f2316074df592aceab136ac4b7b22eb3f",
+      "text": "初始化连接两个给定大地坐标点的椭球恒向线。"
+    },
+    {
+      "id": "EllipsoidRhumbLine",
+      "field": "exceptions/0/description",
+      "sourceHash": "sha256:9eee466801d8739c9d227a5e1e4990ca14eaf3f3780db10701791dee99260f8d",
+      "text": "起终点对应方向向量的夹角与 PI 的差的绝对值必须至少为 0.0125 弧度，即两点不能过于接近对跖位置。"
+    },
+    {
+      "id": "EllipsoidRhumbLine",
+      "field": "params/ellipsoid/description",
+      "sourceHash": "sha256:98d86bde319fd3feb248e897117fd53be647ae0d81366f05c7c396d978831f6f",
+      "text": "恒向线所在的椭球。"
+    },
+    {
+      "id": "EllipsoidRhumbLine",
+      "field": "params/end/description",
+      "sourceHash": "sha256:1ddd48b77fa2421ec907139db97227dbe1bb648e4612e16d82434f46742b6453",
+      "text": "路径终点的大地坐标。"
+    },
+    {
+      "id": "EllipsoidRhumbLine",
+      "field": "params/start/description",
+      "sourceHash": "sha256:c31a78b8293fb925b420625f9afd07b1b39d99144d37f82a6ac357b4c1b2ac9d",
+      "text": "路径起点的大地坐标。"
+    },
+    {
+      "id": "EllipsoidRhumbLine#ellipsoid",
+      "field": "description",
+      "sourceHash": "sha256:f0902e6fbd18e7715d18392415994043c17facedd3ff884ce00bf469d1f8616e",
+      "text": "获取椭球。"
+    },
+    {
+      "id": "EllipsoidRhumbLine#end",
+      "field": "description",
+      "sourceHash": "sha256:fcfd0c053838c912ac3614d6743e6b2a09fe2e74b1d5012a112dfc73df8c8865",
+      "text": "获取路径终点的大地坐标。"
+    },
+    {
+      "id": "EllipsoidRhumbLine#findIntersectionWithLatitude",
+      "field": "description",
+      "sourceHash": "sha256:43c0eaf0994054206120946027b24fdadd2bdce6a362f042f3d98087df7332c0",
+      "text": "获取恒向线上指定纬度处的位置。如果纬度超出起点与终点的范围，则沿起点航向返回与该纬度的第一个交点，遵循恒向线的螺旋性质。"
+    },
+    {
+      "id": "EllipsoidRhumbLine#findIntersectionWithLatitude",
+      "field": "exceptions/0/description",
+      "sourceHash": "sha256:c887054ec3d936e3458b02c36681482e578d6e3d0edcb965c6caf58ca112a4ae",
+      "text": "调用求交函数前必须设置 start 和 end。"
+    },
+    {
+      "id": "EllipsoidRhumbLine#findIntersectionWithLatitude",
+      "field": "params/intersectionLatitude/description",
+      "sourceHash": "sha256:874a7003f4f7476416790ea7c967efaee24103dd40555ffb7d6a6ffb570b1643",
+      "text": "从起点沿航向寻找交点所用的纬度，单位为弧度。"
+    },
+    {
+      "id": "EllipsoidRhumbLine#findIntersectionWithLatitude",
+      "field": "params/result/description",
+      "sourceHash": "sha256:33426d59d0185d3e9ae5aa6f6107cce5b2a5996d77940b48db901f1698c13ad0",
+      "text": "用于存储结果的对象。"
+    },
+    {
+      "id": "EllipsoidRhumbLine#findIntersectionWithLatitude",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:6cae565b1f9b20afac76ceaf5014b47fc97d37c83d34a8bcca124c4594af87fb",
+      "text": "恒向线交点的位置；没有交点或交点无穷多时为 undefined。"
+    },
+    {
+      "id": "EllipsoidRhumbLine#findIntersectionWithLongitude",
+      "field": "description",
+      "sourceHash": "sha256:ff2e1fd423d248a3a8937d86d1991280e50c39c9c2acd15bdfbfb023b86025e7",
+      "text": "获取恒向线上指定经度处的位置。如果经度超出起点与终点的范围，则沿起点航向返回与该经度的第一个交点，遵循恒向线的螺旋性质。"
+    },
+    {
+      "id": "EllipsoidRhumbLine#findIntersectionWithLongitude",
+      "field": "exceptions/0/description",
+      "sourceHash": "sha256:c887054ec3d936e3458b02c36681482e578d6e3d0edcb965c6caf58ca112a4ae",
+      "text": "调用求交函数前必须设置 start 和 end。"
+    },
+    {
+      "id": "EllipsoidRhumbLine#findIntersectionWithLongitude",
+      "field": "params/intersectionLongitude/description",
+      "sourceHash": "sha256:e00a9f41b85e6ed67170aab2d2a9f8ab6cde499269f061d618ad42e7e41c8673",
+      "text": "从起点沿航向寻找交点所用的经度，单位为弧度。"
+    },
+    {
+      "id": "EllipsoidRhumbLine#findIntersectionWithLongitude",
+      "field": "params/result/description",
+      "sourceHash": "sha256:33426d59d0185d3e9ae5aa6f6107cce5b2a5996d77940b48db901f1698c13ad0",
+      "text": "用于存储结果的对象。"
+    },
+    {
+      "id": "EllipsoidRhumbLine#findIntersectionWithLongitude",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:6cae565b1f9b20afac76ceaf5014b47fc97d37c83d34a8bcca124c4594af87fb",
+      "text": "恒向线交点的位置；没有交点或交点无穷多时为 undefined。"
+    },
+    {
+      "id": "EllipsoidRhumbLine#heading",
+      "field": "description",
+      "sourceHash": "sha256:0f3a0d753c565d7882b10f9db255af12888cf8157c1d13f0f48e633180f6bf70",
+      "text": "获取从起点到终点的航向角。"
+    },
+    {
+      "id": "EllipsoidRhumbLine#interpolateUsingFraction",
+      "field": "description",
+      "sourceHash": "sha256:d41443d1d8c7d52285309520edb11bf2797988db07430448d7ac5849fb440632",
+      "text": "获取恒向线上指定距离比例处的位置。"
+    },
+    {
+      "id": "EllipsoidRhumbLine#interpolateUsingFraction",
+      "field": "params/fraction/description",
+      "sourceHash": "sha256:1287eb54c3e9efdaa482a65c4bbc761bd277843e1049145308fd1a10277f52fd",
+      "text": "相对于起点到终点总距离的比例。"
+    },
+    {
+      "id": "EllipsoidRhumbLine#interpolateUsingFraction",
+      "field": "params/result/description",
+      "sourceHash": "sha256:33426d59d0185d3e9ae5aa6f6107cce5b2a5996d77940b48db901f1698c13ad0",
+      "text": "用于存储结果的对象。"
+    },
+    {
+      "id": "EllipsoidRhumbLine#interpolateUsingFraction",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:ba2bf3859f825fb74c39426dd1f1a614e50061b95b37366d75a85585f8ab5d40",
+      "text": "恒向线上对应点的位置。"
+    },
+    {
+      "id": "EllipsoidRhumbLine#interpolateUsingSurfaceDistance",
+      "field": "description",
+      "sourceHash": "sha256:40cec96ec60d01792b63d744adb7c775b91b1d92731df6cf046f604737b20312",
+      "text": "获取沿恒向线指定距离处的位置。"
+    },
+    {
+      "id": "EllipsoidRhumbLine#interpolateUsingSurfaceDistance",
+      "field": "exceptions/0/description",
+      "sourceHash": "sha256:55673273521bb064d77eca8d00ede702be938228ea25a117bd57af517ea82520",
+      "text": "调用 interpolateUsingSurfaceDistance 前必须设置 start 和 end。"
+    },
+    {
+      "id": "EllipsoidRhumbLine#interpolateUsingSurfaceDistance",
+      "field": "params/distance/description",
+      "sourceHash": "sha256:f4e8a84e7a35622c7821179b668c777380367a08808d8534ffc09abbfc9f0ae8",
+      "text": "沿恒向线从起点到目标点的距离。"
+    },
+    {
+      "id": "EllipsoidRhumbLine#interpolateUsingSurfaceDistance",
+      "field": "params/result/description",
+      "sourceHash": "sha256:33426d59d0185d3e9ae5aa6f6107cce5b2a5996d77940b48db901f1698c13ad0",
+      "text": "用于存储结果的对象。"
+    },
+    {
+      "id": "EllipsoidRhumbLine#interpolateUsingSurfaceDistance",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:ba2bf3859f825fb74c39426dd1f1a614e50061b95b37366d75a85585f8ab5d40",
+      "text": "恒向线上对应点的位置。"
+    },
+    {
+      "id": "EllipsoidRhumbLine#setEndPoints",
+      "field": "description",
+      "sourceHash": "sha256:1e325c1b7e190a6510cf35ec5b1e6941db86ac86874dff0790f4cc4b76e52b8e",
+      "text": "设置恒向线的起点和终点。"
+    },
+    {
+      "id": "EllipsoidRhumbLine#setEndPoints",
+      "field": "params/end/description",
+      "sourceHash": "sha256:1ddd48b77fa2421ec907139db97227dbe1bb648e4612e16d82434f46742b6453",
+      "text": "路径终点的大地坐标。"
+    },
+    {
+      "id": "EllipsoidRhumbLine#setEndPoints",
+      "field": "params/start/description",
+      "sourceHash": "sha256:c31a78b8293fb925b420625f9afd07b1b39d99144d37f82a6ac357b4c1b2ac9d",
+      "text": "路径起点的大地坐标。"
+    },
+    {
+      "id": "EllipsoidRhumbLine#start",
+      "field": "description",
+      "sourceHash": "sha256:c990a7a6add12ee5bcec5a324392e87d201a919a4355df3231f48863efbc89ae",
+      "text": "获取路径起点的大地坐标。"
+    },
+    {
+      "id": "EllipsoidRhumbLine#surfaceDistance",
+      "field": "description",
+      "sourceHash": "sha256:6121f5dcc8710426c91306ae70381e397f3924413c3bf80e6b4dad6242dc18da",
+      "text": "获取起点与终点之间的表面距离。"
+    },
+    {
+      "id": "EllipsoidTangentPlane.fromPoints",
+      "field": "description",
+      "sourceHash": "sha256:12940400b783beb86efb60092684d992dc0fa14b8f581e4f533da49b61d3b88f",
+      "text": "根据所提供椭球及笛卡尔点集的中心点创建新实例。"
+    },
+    {
+      "id": "EllipsoidTangentPlane.fromPoints",
+      "field": "params/cartesians/description",
+      "sourceHash": "sha256:927add1f9dcfa03fded0e630d31a91042dd89054f8bd7e697d583f0f4ae646cc",
+      "text": "围绕中心点分布的位置列表。"
+    },
+    {
+      "id": "EllipsoidTangentPlane.fromPoints",
+      "field": "params/ellipsoid/description",
+      "sourceHash": "sha256:898193b4581945790ae937a56e5f5f598381851485e2b0aff35da36368e21e7d",
+      "text": "要使用的椭球。"
+    },
+    {
+      "id": "EllipsoidTangentPlane.fromPoints",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:141648ce0a55070996a764b6759c390c47cf58be54f45fe0b9766d23f94f0f7a",
+      "text": "新的 EllipsoidTangentPlane 实例。"
+    },
+    {
+      "id": "EllipsoidTangentPlane",
+      "field": "description",
+      "sourceHash": "sha256:2760ba08adfd0bd084904c441aded52d0505e2a2609066bd49398b9bf54b5b2b",
+      "text": "在指定原点处与指定椭球相切的平面。如果原点不在椭球表面，则使用其在表面的投影；原点位于椭球中心时抛出异常。"
+    },
+    {
+      "id": "EllipsoidTangentPlane",
+      "field": "exceptions/0/description",
+      "sourceHash": "sha256:c5774f4c7604c647ed6883722f62846985df4bc82fc8bf91eea396bf2808059c",
+      "text": "origin 不能位于椭球中心。"
+    },
+    {
+      "id": "EllipsoidTangentPlane",
+      "field": "params/ellipsoid/description",
+      "sourceHash": "sha256:898193b4581945790ae937a56e5f5f598381851485e2b0aff35da36368e21e7d",
+      "text": "要使用的椭球。"
+    },
+    {
+      "id": "EllipsoidTangentPlane",
+      "field": "params/origin/description",
+      "sourceHash": "sha256:931bf6163411972abd2032d0497cbb48508c54dec31dcf8f61aa973d425c4d3e",
+      "text": "椭球表面与切平面接触的位置。"
+    },
+    {
+      "id": "EllipsoidTangentPlane#ellipsoid",
+      "field": "description",
+      "sourceHash": "sha256:f0902e6fbd18e7715d18392415994043c17facedd3ff884ce00bf469d1f8616e",
+      "text": "获取椭球。"
+    },
+    {
+      "id": "EllipsoidTangentPlane#origin",
+      "field": "description",
+      "sourceHash": "sha256:3fb07bde7cefbe70ae3b1413370b30adb078d99a686129da3da2cad63fa05a5a",
+      "text": "获取原点。"
+    },
+    {
+      "id": "EllipsoidTangentPlane#plane",
+      "field": "description",
+      "sourceHash": "sha256:ffc16647c8bfb68db4190f9803fec2c4852ad87324d2cbfa7d4313ef6c4d2b29",
+      "text": "获取与椭球相切的平面。"
+    },
+    {
+      "id": "EllipsoidTangentPlane#projectPointOntoEllipsoid",
+      "field": "description",
+      "sourceHash": "sha256:f8ceefbb97666eaae8f4adca84dcf183d3aa769757edcb9c4d3508efa8808922",
+      "text": "将给定二维位置投影到三维椭球表面。"
+    },
+    {
+      "id": "EllipsoidTangentPlane#projectPointOntoEllipsoid",
+      "field": "params/cartesian/description",
+      "sourceHash": "sha256:0f3aad6bcfac7570d546a8a7af8cabba265adb490c884415ebda836cda2299f9",
+      "text": "要投影的点。"
+    },
+    {
+      "id": "EllipsoidTangentPlane#projectPointOntoEllipsoid",
+      "field": "params/result/description",
+      "sourceHash": "sha256:3b7a776db0ec924f155b7c1637752edf0935d12aefc091589732707bd397f356",
+      "text": "用于存储结果的 Cartesian3 实例。"
+    },
+    {
+      "id": "EllipsoidTangentPlane#projectPointOntoEllipsoid",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:58994a1321e2dd82ba863175243208c5c1817bbd27f7b0b89039be0d8930abd4",
+      "text": "修改后的 result 参数；未提供时返回新建的 Cartesian3 实例。"
+    },
+    {
+      "id": "EllipsoidTangentPlane#projectPointOntoPlane",
+      "field": "description",
+      "sourceHash": "sha256:c58a9463bbb1eb01d7df6fce1dd9b20535a7e7039cd1ba46fb2a1dc6b59d0202",
+      "text": "沿从 {@link EllipsoidTangentPlane.ellipsoid} 坐标系原点向外的径向，将给定三维位置投影到二维平面。"
+    },
+    {
+      "id": "EllipsoidTangentPlane#projectPointOntoPlane",
+      "field": "params/cartesian/description",
+      "sourceHash": "sha256:83485bbfd45a151eb121a19f58bc3310d93719137667579e74feb6b283091192",
+      "text": "要投影的点。"
+    },
+    {
+      "id": "EllipsoidTangentPlane#projectPointOntoPlane",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:c41da55a72431ee7bb9fe021b723c6be910011693ebf83e0ac1079558a1cce3b",
+      "text": "修改后的 result 参数；未提供时返回新的 Cartesian2 实例。没有交点时为 undefined。"
+    },
+    {
+      "id": "EllipsoidTangentPlane#projectPointsOntoEllipsoid",
+      "field": "description",
+      "sourceHash": "sha256:44fa029231097849788fa00cf36b1fbe0b2ee266b7001a17bccf343e799faff1",
+      "text": "将给定二维位置数组投影到三维椭球表面。"
+    },
+    {
+      "id": "EllipsoidTangentPlane#projectPointsOntoEllipsoid",
+      "field": "params/cartesians/description",
+      "sourceHash": "sha256:6eb3603d9407b8c197e5f69f3d1f9322d537b90ac14b1aff9d03a6b997c30678",
+      "text": "要投影的点数组。"
+    },
+    {
+      "id": "EllipsoidTangentPlane#projectPointsOntoEllipsoid",
+      "field": "params/result/description",
+      "sourceHash": "sha256:1128d5f95902297c965dc1152c5c271f66927ceaa0f9a654398d59ced8cb9e4e",
+      "text": "用于存储结果的 Cartesian3 实例数组。"
+    },
+    {
+      "id": "EllipsoidTangentPlane#projectPointsOntoEllipsoid",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:f93bccdd7f59ab9b2f56ed528ea293c7c884793448fc0cd6c0ed59e1b2bc3f37",
+      "text": "修改后的 result 参数；未提供时返回新的 Cartesian3 实例数组。"
+    },
+    {
+      "id": "EllipsoidTangentPlane#projectPointsOntoPlane",
+      "field": "description",
+      "sourceHash": "sha256:7b6c60e59929a96990bee3549680a279c2f63a30eae25211fbd1df3645c9df9b",
+      "text": "沿从全局原点向外的径向，将给定三维位置投影到二维平面（若可投影）。结果数组可能短于输入数组，无法投影的点不会包含在结果中。"
+    },
+    {
+      "id": "EllipsoidTangentPlane#projectPointsOntoPlane",
+      "field": "params/cartesians/description",
+      "sourceHash": "sha256:6eb3603d9407b8c197e5f69f3d1f9322d537b90ac14b1aff9d03a6b997c30678",
+      "text": "要投影的点数组。"
+    },
+    {
+      "id": "EllipsoidTangentPlane#projectPointsOntoPlane",
+      "field": "params/result/description",
+      "sourceHash": "sha256:4803f3432693eaf682f3fd45184a000b7658e3aaa140fbb4703b53991b0ed803",
+      "text": "用于存储结果的 Cartesian2 实例数组。"
+    },
+    {
+      "id": "EllipsoidTangentPlane#projectPointsOntoPlane",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:1504d9d3e1cc8d983d8de67b6d6ae5b3b70f86a6d3734396c8e448b83d3f0506",
+      "text": "修改后的 result 参数；未提供时返回新的 Cartesian2 实例数组。"
+    },
+    {
+      "id": "EllipsoidTangentPlane#projectPointsToNearestOnPlane",
+      "field": "description",
+      "sourceHash": "sha256:2dbd315f06ccd9e12d8f84a511391eff82005e48a7725f6454287e40579f2b80",
+      "text": "沿平面法线方向，将给定三维位置数组投影到二维平面。"
+    },
+    {
+      "id": "EllipsoidTangentPlane#projectPointsToNearestOnPlane",
+      "field": "params/cartesians/description",
+      "sourceHash": "sha256:6eb3603d9407b8c197e5f69f3d1f9322d537b90ac14b1aff9d03a6b997c30678",
+      "text": "要投影的点数组。"
+    },
+    {
+      "id": "EllipsoidTangentPlane#projectPointsToNearestOnPlane",
+      "field": "params/result/description",
+      "sourceHash": "sha256:4803f3432693eaf682f3fd45184a000b7658e3aaa140fbb4703b53991b0ed803",
+      "text": "用于存储结果的 Cartesian2 实例数组。"
+    },
+    {
+      "id": "EllipsoidTangentPlane#projectPointsToNearestOnPlane",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:69dd82d3c07e9f9b7339bb5f6e570f34c267b83f37596495f8eca2036eeade64",
+      "text": "修改后的 result 参数；未提供时返回新的 Cartesian2 实例数组。长度与 <code>cartesians</code> 相同。"
+    },
+    {
+      "id": "EllipsoidTangentPlane#projectPointToNearestOnPlane",
+      "field": "description",
+      "sourceHash": "sha256:ac65f2d9beedefc7ba6d7f0bf695c5dae393bddcede9e915acb725f6a02accbc",
+      "text": "沿平面法线方向，将给定三维位置投影到二维平面。"
+    },
+    {
+      "id": "EllipsoidTangentPlane#projectPointToNearestOnPlane",
+      "field": "params/cartesian/description",
+      "sourceHash": "sha256:83485bbfd45a151eb121a19f58bc3310d93719137667579e74feb6b283091192",
+      "text": "要投影的点。"
+    },
+    {
+      "id": "EllipsoidTangentPlane#projectPointToNearestOnPlane",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:0abf1b0e50a18a82ccdd0ca02e49b6290dcdb7b0318645e44fe25adcc24749a9",
+      "text": "修改后的 result 参数；未提供时返回新建的 Cartesian2 实例。"
+    },
+    {
+      "id": "EllipsoidTangentPlane#xAxis",
+      "field": "description",
+      "sourceHash": "sha256:ea97ae586af30e44182c75c4a94a74bb7e3cdd81e081ac9df75e11f5fdd9d52d",
+      "text": "获取切平面的局部 X 轴（东）。"
+    },
+    {
+      "id": "EllipsoidTangentPlane#yAxis",
+      "field": "description",
+      "sourceHash": "sha256:191e72c38c056ea7af6835b938aea12c899a1ab36a528d41f11471bdf95222dd",
+      "text": "获取切平面的局部 Y 轴（北）。"
+    },
+    {
+      "id": "EllipsoidTangentPlane#zAxis",
+      "field": "description",
+      "sourceHash": "sha256:98a9d30ad2d8d91d2d26e146e7b5f6661cac655b66dafbfe187814d1ea6e44ad",
+      "text": "获取切平面的局部 Z 轴（天）。"
+    },
+    {
+      "id": "HeadingPitchRange.clone",
+      "field": "description",
+      "sourceHash": "sha256:0f6d923bb94f1d4d6d012f80a8c634ae441e5b66169197c15010d509c22cca5c",
+      "text": "复制 HeadingPitchRange 实例。"
+    },
+    {
+      "id": "HeadingPitchRange.clone",
+      "field": "params/hpr/description",
+      "sourceHash": "sha256:395ce0c79cf1d7d0e1ac64477de1788221c3063f2c22691b27c0db1b344f2c36",
+      "text": "要复制的 HeadingPitchRange。"
+    },
+    {
+      "id": "HeadingPitchRange.clone",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:323946d47cb91f0d612adf72c21c1222745efd07e4878d37a1055fcf9c59ed0b",
+      "text": "修改后的 result 参数；未提供时返回新的 HeadingPitchRange 实例。hpr 为 undefined 时返回 undefined。"
+    },
+    {
+      "id": "HeadingPitchRange",
+      "field": "description",
+      "sourceHash": "sha256:63a0e97c75b2d388a2fe585f21651dd8721e47b29f9ad2b2a0da7c791198b8d2",
+      "text": "局部参考系中的航向角、俯仰角和距离参数。用于 Camera.lookAt 等相机接口时，航向从局部北方向向东方向增加；俯仰相对于局部 xy 平面，正值位于平面下方，负值位于平面上方。距离为到参考系中心的距离。"
+    },
+    {
+      "id": "HeadingPitchRange",
+      "field": "params/heading/description",
+      "sourceHash": "sha256:1a22bb1f1f29cd3d231911b51f5a43641a09bf3126e167c5cb1fed7f747708ba",
+      "text": "航向角，单位为弧度。"
+    },
+    {
+      "id": "HeadingPitchRange",
+      "field": "params/pitch/description",
+      "sourceHash": "sha256:255067a412ca7c602208df0c8f2498da70e1b7ae8b5d3d012a6dc7fd83f14956",
+      "text": "俯仰角，单位为弧度。"
+    },
+    {
+      "id": "HeadingPitchRange",
+      "field": "params/range/description",
+      "sourceHash": "sha256:a7899d9d1329e3457b37a83076a70af5fad80fee7833936d107704c843b19847",
+      "text": "到中心的距离，单位为米。"
+    },
+    {
+      "id": "HeadingPitchRange#heading",
+      "field": "description",
+      "sourceHash": "sha256:f7b619e4c36a32b4fcacf03a65141922d0b7cdefac9d14018569ca9de84aac35",
+      "text": "用于 Camera.lookAt 等相机接口时，航向从局部北方向向东方向增加。"
+    },
+    {
+      "id": "HeadingPitchRange#pitch",
+      "field": "description",
+      "sourceHash": "sha256:e119ccc7c09aa4625de315d4a4241985aca42cf994f9aff2209d6f8bf303390a",
+      "text": "用于 Camera.lookAt 等相机接口时，俯仰相对于局部 xy 平面，正值位于平面下方，负值位于平面上方。"
+    },
+    {
+      "id": "HeadingPitchRange#range",
+      "field": "description",
+      "sourceHash": "sha256:3a472ca785779454d2c065eed6ec6d36bcfe1959db41731007530df63073acec",
+      "text": "到局部参考系中心的距离。"
+    },
+    {
+      "id": "HeadingPitchRollValues",
+      "field": "description",
+      "sourceHash": "sha256:2f918e180dfee465bc9c809ece6e1705e0fef130d509dac2b9b35a9cdd31915d",
+      "text": "由数值航向角、俯仰角和翻滚角表示的朝向。"
+    },
+    {
+      "id": "HeadingPitchRollValues",
+      "field": "properties/heading/description",
+      "sourceHash": "sha256:16b62afd1b48ae1717cd8b3d928ef6739fea9946879e523b75148c9ab7ee8cac",
+      "text": "航向角，单位为弧度。"
+    },
+    {
+      "id": "HeadingPitchRollValues",
+      "field": "properties/pitch/description",
+      "sourceHash": "sha256:92db695ce51c21c7c9a5d3936d6689efcdf80414a220689d3858cf700d73fdd6",
+      "text": "俯仰角，单位为弧度。"
+    },
+    {
+      "id": "HeadingPitchRollValues",
+      "field": "properties/roll/description",
+      "sourceHash": "sha256:e6692af63d20e9a33106ac0e63fef07ae48df2e4d61aebc006cc91ca987e6ece",
+      "text": "翻滚角，单位为弧度。"
+    },
+    {
+      "id": "HilbertOrder",
+      "field": "description",
+      "sourceHash": "sha256:c907ca99fd47ff21dd1eed13cb64e171af0790bd9d04871bc6309d4af15a3903",
+      "text": "Hilbert 排序辅助函数。"
+    },
+    {
+      "id": "Intersect.INSIDE",
+      "field": "description",
+      "sourceHash": "sha256:c1bcf0467fb99adbee5540c02db4329024c45ca1c326077be8c6c8fe08c7ae8c",
+      "text": "表示对象完全位于视锥内部。"
+    },
+    {
+      "id": "Intersect.INTERSECTING",
+      "field": "description",
+      "sourceHash": "sha256:4761d5baaaafc0e8c7eeaad0cf74fb350b93437af0c2d8693f0e24265b3f355d",
+      "text": "表示对象与视锥的某个平面相交。"
+    },
+    {
+      "id": "Intersect.OUTSIDE",
+      "field": "description",
+      "sourceHash": "sha256:764dd42f818a7fca799ec855f031c78b5bd41bcb0fee6ceb633c3bd6f368f01a",
+      "text": "表示对象完全位于视锥外部。"
+    },
+    {
+      "id": "Intersect",
+      "field": "description",
+      "sourceHash": "sha256:4736aee2977ea6f475827cda220c3db0ff50679856c6cabc3df67c7acb6b322e",
+      "text": "用于判断对象相对于视锥位置的枚举。对象可以完全位于视锥内部（INSIDE）、部分在内且部分在外（INTERSECTING），或完全位于视锥六个平面围成区域之外（OUTSIDE）。"
+    },
+    {
+      "id": "Intersect",
+      "field": "properties/INSIDE/description",
+      "sourceHash": "sha256:c1bcf0467fb99adbee5540c02db4329024c45ca1c326077be8c6c8fe08c7ae8c",
+      "text": "表示对象完全位于视锥内部。"
+    },
+    {
+      "id": "Intersect",
+      "field": "properties/INTERSECTING/description",
+      "sourceHash": "sha256:4761d5baaaafc0e8c7eeaad0cf74fb350b93437af0c2d8693f0e24265b3f355d",
+      "text": "表示对象与视锥的某个平面相交。"
+    },
+    {
+      "id": "Intersect",
+      "field": "properties/OUTSIDE/description",
+      "sourceHash": "sha256:764dd42f818a7fca799ec855f031c78b5bd41bcb0fee6ceb633c3bd6f368f01a",
+      "text": "表示对象完全位于视锥外部。"
+    },
+    {
+      "id": "Intersections2D.clipTriangleAtAxisAlignedThreshold",
+      "field": "description",
+      "sourceHash": "sha256:6db98aacf01e920e03e0d260b7a1549f0c3d6ac18ae032f7400b3721959b5729",
+      "text": "在指定轴对齐阈值处切分二维三角形，返回阈值指定一侧的多边形。结果可包含 0、1、2、3 或 4 个顶点。"
+    },
+    {
+      "id": "Intersections2D.clipTriangleAtAxisAlignedThreshold",
+      "field": "params/keepAbove/description",
+      "sourceHash": "sha256:4a9acecd109fe9d87d3016fe6fe6a37a84947a70b8c09121c51bf94b24607098",
+      "text": "为 true 时保留坐标高于阈值的三角形部分，为 false 时保留低于阈值的部分。"
+    },
+    {
+      "id": "Intersections2D.clipTriangleAtAxisAlignedThreshold",
+      "field": "params/result/description",
+      "sourceHash": "sha256:c63070acb0122051895ab961ef5f8a525aa5c81f428374bb18fe385c973666d2",
+      "text": "用于存储结果的数组。未提供时创建并返回新数组。"
+    },
+    {
+      "id": "Intersections2D.clipTriangleAtAxisAlignedThreshold",
+      "field": "params/threshold/description",
+      "sourceHash": "sha256:d30a92d0d7b4b84d7541526b564aff805c5852ba3c6b5da09f6f209de383e2dc",
+      "text": "裁剪三角形所用的坐标阈值。"
+    },
+    {
+      "id": "Intersections2D.clipTriangleAtAxisAlignedThreshold",
+      "field": "params/u0/description",
+      "sourceHash": "sha256:1fd027b0048f4740224c387184fec20130ce462f1ecabca926a5311c63438045",
+      "text": "按逆时针顺序排列的三角形第一个顶点的坐标。"
+    },
+    {
+      "id": "Intersections2D.clipTriangleAtAxisAlignedThreshold",
+      "field": "params/u1/description",
+      "sourceHash": "sha256:7a2919d0593475c10c8a3ec020fb2cbb641c9fba37a2a3aca0d3825e98ebc4a9",
+      "text": "按逆时针顺序排列的三角形第二个顶点的坐标。"
+    },
+    {
+      "id": "Intersections2D.clipTriangleAtAxisAlignedThreshold",
+      "field": "params/u2/description",
+      "sourceHash": "sha256:5852f04bd8e7096cc2dde511cfb4b974271c8d8f124ced6bfee7cf9e83887631",
+      "text": "按逆时针顺序排列的三角形第三个顶点的坐标。"
+    },
+    {
+      "id": "Intersections2D.clipTriangleAtAxisAlignedThreshold",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:8d0a6a5a25abcc74dad8eb71f14fc7874dc3b5c2cd2a4edeef891d1890524a3c",
+      "text": "裁剪后的多边形，以逆时针顶点列表表示。原三角形中的顶点使用索引 0、1 或 2；新顶点使用 -1 标记，其后再跟三个数：该点所在线段两端的原始顶点索引，以及从第一个端点到第二个端点的距离比例。"
+    },
+    {
+      "id": "Intersections2D.computeBarycentricCoordinates",
+      "field": "description",
+      "sourceHash": "sha256:360abdd24b91b1b2d363ca77bca7d648204cc95d5daedcd8453b170d7b3014df",
+      "text": "计算二维位置相对于二维三角形的重心坐标。"
+    },
+    {
+      "id": "Intersections2D.computeBarycentricCoordinates",
+      "field": "params/result/description",
+      "sourceHash": "sha256:d92baa46c68a732658aeed8a653f37c7435c021048a1a132bd250d0cbc1bbb92",
+      "text": "用于存储结果的实例。为 undefined 时创建并返回新实例。"
+    },
+    {
+      "id": "Intersections2D.computeBarycentricCoordinates",
+      "field": "params/x/description",
+      "sourceHash": "sha256:329dc5fd8e6cedba1a1d3952cadac60ac45dfeadd7ef41062d105871ec500459",
+      "text": "待求重心坐标位置的 x 坐标。"
+    },
+    {
+      "id": "Intersections2D.computeBarycentricCoordinates",
+      "field": "params/x1/description",
+      "sourceHash": "sha256:a1932589a5c1863816a32ad82d59ece103f1971f74137970e5506fa9b6f62a67",
+      "text": "三角形第一个顶点的 x 坐标。"
+    },
+    {
+      "id": "Intersections2D.computeBarycentricCoordinates",
+      "field": "params/x2/description",
+      "sourceHash": "sha256:7ab08c0bb51e4f44b3cd668c52d4c78310a4ee13b7a84408e7df93ced384b593",
+      "text": "三角形第二个顶点的 x 坐标。"
+    },
+    {
+      "id": "Intersections2D.computeBarycentricCoordinates",
+      "field": "params/x3/description",
+      "sourceHash": "sha256:52f9963325c4945ca55cfd25214941754b8a499ebde97c802220c48c42fdbfee",
+      "text": "三角形第三个顶点的 x 坐标。"
+    },
+    {
+      "id": "Intersections2D.computeBarycentricCoordinates",
+      "field": "params/y/description",
+      "sourceHash": "sha256:b7d4319f2bdb7ba0d69140d800d0a7ef94a7e593df3cb8b68f402edbe19722ac",
+      "text": "待求重心坐标位置的 y 坐标。"
+    },
+    {
+      "id": "Intersections2D.computeBarycentricCoordinates",
+      "field": "params/y1/description",
+      "sourceHash": "sha256:7470fb1f958e8bc6d9d72c87d54f822850c0d6bb06e9f27163f22acee072be28",
+      "text": "三角形第一个顶点的 y 坐标。"
+    },
+    {
+      "id": "Intersections2D.computeBarycentricCoordinates",
+      "field": "params/y2/description",
+      "sourceHash": "sha256:3ec9060590b07e27248228f4c04a4ee8d2d584cbd4389c6786e355e87ffb15bd",
+      "text": "三角形第二个顶点的 y 坐标。"
+    },
+    {
+      "id": "Intersections2D.computeBarycentricCoordinates",
+      "field": "params/y3/description",
+      "sourceHash": "sha256:6dcac075a07dde95150bf37a6b469efb8484a7998e801794f4befa79e48ba59b",
+      "text": "三角形第三个顶点的 y 坐标。"
+    },
+    {
+      "id": "Intersections2D.computeBarycentricCoordinates",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:31b08755ec1ce65a9f7fcce14a8d8c3c44101afe9e43d593b4bd8de35c9ff9aa",
+      "text": "该位置相对于三角形的重心坐标。"
+    },
+    {
+      "id": "Intersections2D.computeLineSegmentLineSegmentIntersection",
+      "field": "description",
+      "sourceHash": "sha256:934a45c3a18c8b781fe90de5fe38d534d4e36dc195306e36b3a36ad3ba2b2d57",
+      "text": "计算两条线段的交点。"
+    },
+    {
+      "id": "Intersections2D.computeLineSegmentLineSegmentIntersection",
+      "field": "params/result/description",
+      "sourceHash": "sha256:8b8c0883b7f32cfb8c71f20f2d5727aff2f39a55e927d18879c7881993b5a459",
+      "text": "用于存储结果的实例。为 undefined 时创建并返回新实例。"
+    },
+    {
+      "id": "Intersections2D.computeLineSegmentLineSegmentIntersection",
+      "field": "params/x00/description",
+      "sourceHash": "sha256:9936c05004da099595d26615ac5f7c50472a6f8eb4cebae9e430aa7c571fa056",
+      "text": "第一条线段第一个顶点的 x 坐标。"
+    },
+    {
+      "id": "Intersections2D.computeLineSegmentLineSegmentIntersection",
+      "field": "params/x01/description",
+      "sourceHash": "sha256:201935fde41b792664cbabbd2d81a9371e7ca97e414ab7a0d504436e9341760c",
+      "text": "第一条线段第二个顶点的 x 坐标。"
+    },
+    {
+      "id": "Intersections2D.computeLineSegmentLineSegmentIntersection",
+      "field": "params/x10/description",
+      "sourceHash": "sha256:97f6c5b5bfb22adeb6c0e3b53010ad1594dffff21339eeb10d7436903f8eb6a1",
+      "text": "第二条线段第一个顶点的 x 坐标。"
+    },
+    {
+      "id": "Intersections2D.computeLineSegmentLineSegmentIntersection",
+      "field": "params/x11/description",
+      "sourceHash": "sha256:c5b6168c8607f0ec880dc8d695c97272b6b563cde5e6b73235e388bdc0a96711",
+      "text": "第二条线段第二个顶点的 x 坐标。"
+    },
+    {
+      "id": "Intersections2D.computeLineSegmentLineSegmentIntersection",
+      "field": "params/y00/description",
+      "sourceHash": "sha256:9a17a2b1ec0e0280723bf15dd1b5a16e5042a589d0fb89ea23d9aee91194cc37",
+      "text": "第一条线段第一个顶点的 y 坐标。"
+    },
+    {
+      "id": "Intersections2D.computeLineSegmentLineSegmentIntersection",
+      "field": "params/y01/description",
+      "sourceHash": "sha256:2963fb33181c5b7b4f4b1f5a6183bbc350d68b3872f87a05b044744adbb9ecd5",
+      "text": "第一条线段第二个顶点的 y 坐标。"
+    },
+    {
+      "id": "Intersections2D.computeLineSegmentLineSegmentIntersection",
+      "field": "params/y10/description",
+      "sourceHash": "sha256:4c036aac8e0aa68ec57fea3139362bcfac4106154d054440eda4a8107ff2e6d2",
+      "text": "第二条线段第一个顶点的 y 坐标。"
+    },
+    {
+      "id": "Intersections2D.computeLineSegmentLineSegmentIntersection",
+      "field": "params/y11/description",
+      "sourceHash": "sha256:33940ee8d2cc232d4b86fad1ab4f9b27cd6a7748883a8d658fca5edb4106c450",
+      "text": "第二条线段第二个顶点的 y 坐标。"
+    },
+    {
+      "id": "Intersections2D.computeLineSegmentLineSegmentIntersection",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:91a08b2ae6ce2926242eab061897460104165c1b31130e529a7bd0b5dca8b1b0",
+      "text": "交点；不存在交点或两条直线重合时为 undefined。"
+    },
+    {
+      "id": "Intersections2D",
+      "field": "description",
+      "sourceHash": "sha256:b543620eb78c90bfc5d3e4b967e14c5ddb2af744e5e1926c1284d3601e8982b3",
+      "text": "用于操作二维三角形的函数集合。"
+    },
+    {
+      "id": "Interval",
+      "field": "description",
+      "sourceHash": "sha256:6804a5ecc614dfbaf6cd4c2f637e7f87a43907495b3de31d47cbc7b575e88f83",
+      "text": "表示闭区间 [start, stop]。"
+    },
+    {
+      "id": "Interval",
+      "field": "params/start/description",
+      "sourceHash": "sha256:139f8c53e5357786fffc5bc506b75f4d29e8ac1d3b89ba6858d3d7de9c237b98",
+      "text": "区间起点。"
+    },
+    {
+      "id": "Interval",
+      "field": "params/stop/description",
+      "sourceHash": "sha256:4f4a3ab5c350dc0fe1a185796918a3388264773f97743bbf670f8949d05730f0",
+      "text": "区间终点。"
+    },
+    {
+      "id": "Interval#start",
+      "field": "description",
+      "sourceHash": "sha256:139f8c53e5357786fffc5bc506b75f4d29e8ac1d3b89ba6858d3d7de9c237b98",
+      "text": "区间起点。"
+    },
+    {
+      "id": "Interval#stop",
+      "field": "description",
+      "sourceHash": "sha256:4f4a3ab5c350dc0fe1a185796918a3388264773f97743bbf670f8949d05730f0",
+      "text": "区间终点。"
+    },
+    {
+      "id": "Occluder.computeOccludeePoint",
+      "field": "description",
+      "sourceHash": "sha256:a1c4e8559a449a793a608d7a32d59ece87b7cab263cf51af29e3744b112d1b3e",
+      "text": "计算可供可见性函数用作被遮挡对象位置的点。测试时将被遮挡对象半径设为零。通常使用对象包围球判断可见性，也可计算一个代表点，通过该点可见或不可见来表示对象状态。此方法更适合相对于遮挡体静止、尺寸较大的对象，例如地形块；卫星或地面车辆等对象更适合直接使用其包围球。"
+    },
+    {
+      "id": "Occluder.computeOccludeePoint",
+      "field": "exceptions/0/description",
+      "sourceHash": "sha256:310e4c62d867920a21907c18a1ddc1cf21583e27b8c3399348aebb8555c43ea5",
+      "text": "<code>positions</code> 至少必须包含一个元素。"
+    },
+    {
+      "id": "Occluder.computeOccludeePoint",
+      "field": "exceptions/1/description",
+      "sourceHash": "sha256:598d37e9165ca2208c71faa1acc5e21a309fc1f5812e5ed22a441bd48a5a3d30",
+      "text": "<code>occludeePosition</code> 不能等于 <code>occluderBoundingSphere.center</code>。"
+    },
+    {
+      "id": "Occluder.computeOccludeePoint",
+      "field": "params/occludeePosition/description",
+      "sourceHash": "sha256:fe41d487d26ddd3ec53fc0554f15dc99700b2e923ec3803ee9d4ffa48a07c9ad",
+      "text": "被遮挡对象所在的点，对应半径为零的包围球。"
+    },
+    {
+      "id": "Occluder.computeOccludeePoint",
+      "field": "params/occluderBoundingSphere/description",
+      "sourceHash": "sha256:a8b1195f121931e5c7fd53c1f7cc2498e7c99f0d1eaf4c88db3f8fe17b23b6cf",
+      "text": "包围遮挡体的包围球。"
+    },
+    {
+      "id": "Occluder.computeOccludeePoint",
+      "field": "params/positions/description",
+      "sourceHash": "sha256:bd2b781b8a9e307cad6779f938dcf04b180a9f94e91a781fcd51be9f7eba09da",
+      "text": "遮挡体表面附近地平线上的高程点列表。"
+    },
+    {
+      "id": "Occluder.computeOccludeePoint",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:3512fdc00020bc6e91ec400c7466bbe09de4e5567ddb542e9bbe69228d1c8b9a",
+      "text": "有效时返回 Cartesian3 代表点，无效时返回 undefined。<code>occludeePoint</code> 和 <code>valid</code> 描述的是代表点及其有效性，实际结果无需按这两个字段解构。"
+    },
+    {
+      "id": "Occluder.computeOccludeePointFromRectangle",
+      "field": "description",
+      "sourceHash": "sha256:e9135a591f07d8a9313a4946cb341459978fb7239c452308a9df475d1f300480",
+      "text": "根据矩形计算可供可见性函数用作被遮挡对象位置的点。"
+    },
+    {
+      "id": "Occluder.computeOccludeePointFromRectangle",
+      "field": "params/ellipsoid/description",
+      "sourceHash": "sha256:473e713c8728ebc75b2a41f22eb9ed10b3772df3b7aae7c5f91561926d3c8357",
+      "text": "用于确定矩形位置的椭球。"
+    },
+    {
+      "id": "Occluder.computeOccludeePointFromRectangle",
+      "field": "params/rectangle/description",
+      "sourceHash": "sha256:de528caa201cf72b97c80f1839b4c997f2275a5d5abbfaf535332d869f670c4d",
+      "text": "用于创建包围球的矩形。"
+    },
+    {
+      "id": "Occluder.computeOccludeePointFromRectangle",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:3512fdc00020bc6e91ec400c7466bbe09de4e5567ddb542e9bbe69228d1c8b9a",
+      "text": "有效时返回 Cartesian3 代表点，无效时返回 undefined。<code>occludeePoint</code> 和 <code>valid</code> 描述的是代表点及其有效性，实际结果无需按这两个字段解构。"
+    },
+    {
+      "id": "Occluder.fromBoundingSphere",
+      "field": "description",
+      "sourceHash": "sha256:a90dc46ed1d799e965e956ab8dafd2ef199a2de8088a78a01a1575eec132787b",
+      "text": "根据包围球及相机位置创建遮挡体。"
+    },
+    {
+      "id": "Occluder.fromBoundingSphere",
+      "field": "params/cameraPosition/description",
+      "sourceHash": "sha256:730a232e0a4ebb16e976892c729ed69fbf9bda05d83be96f10be03d47c36dbfa",
+      "text": "观察者或相机的坐标。"
+    },
+    {
+      "id": "Occluder.fromBoundingSphere",
+      "field": "params/occluderBoundingSphere/description",
+      "sourceHash": "sha256:a8b1195f121931e5c7fd53c1f7cc2498e7c99f0d1eaf4c88db3f8fe17b23b6cf",
+      "text": "包围遮挡体的包围球。"
+    },
+    {
+      "id": "Occluder.fromBoundingSphere",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:4c459b859dfca3395e64fcbced3ef200bde0898ae273151950a183f4d94381f7",
+      "text": "根据对象位置、半径及相机位置创建的遮挡体。"
+    },
+    {
+      "id": "Occluder",
+      "field": "description",
+      "sourceHash": "sha256:36d74ccff580f75a0098fc8da08e304356441ebe97593e4fe8f7f1ff92f16089",
+      "text": "根据对象位置、半径及相机位置创建 Occluder。可判断其他对象是否可见，或被遮挡体与相机位置共同定义的可见地平线遮挡。"
+    },
+    {
+      "id": "Occluder",
+      "field": "params/cameraPosition/description",
+      "sourceHash": "sha256:730a232e0a4ebb16e976892c729ed69fbf9bda05d83be96f10be03d47c36dbfa",
+      "text": "观察者或相机的坐标。"
+    },
+    {
+      "id": "Occluder",
+      "field": "params/occluderBoundingSphere/description",
+      "sourceHash": "sha256:a8b1195f121931e5c7fd53c1f7cc2498e7c99f0d1eaf4c88db3f8fe17b23b6cf",
+      "text": "包围遮挡体的包围球。"
+    },
+    {
+      "id": "Occluder#cameraPosition",
+      "field": "description",
+      "sourceHash": "sha256:23d445942e29a2e088c07713c29432d8672cbae41581f85ad6b76f04f316533f",
+      "text": "相机位置。"
+    },
+    {
+      "id": "Occluder#computeVisibility",
+      "field": "description",
+      "sourceHash": "sha256:116874a4d376e144e33095c6d50b4e08db64af525101b1fe81e5af2cea3ad8eb",
+      "text": "判断被遮挡对象的可见程度：不可见、部分可见或完全可见。"
+    },
+    {
+      "id": "Occluder#computeVisibility",
+      "field": "params/occludeeBS/description",
+      "sourceHash": "sha256:41048043b8d1304a17c9c3ff285f4ba9421ff3bbe8dec401801d782bd2de5431",
+      "text": "被遮挡对象的包围球。"
+    },
+    {
+      "id": "Occluder#computeVisibility",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:a6809f368e471644bfb0ed56a9576f74ddd9cec204a125f888ed9adfd1f71c29",
+      "text": "被遮挡对象不可见时为 Visibility.NONE，部分可见时为 Visibility.PARTIAL，完全可见时为 Visibility.FULL。"
+    },
+    {
+      "id": "Occluder#isBoundingSphereVisible",
+      "field": "description",
+      "sourceHash": "sha256:fbd4df148545af2decbc3aa7549b2117827e7ca788182d29c5aca32af290cbc7",
+      "text": "判断包围球 <code>occludee</code> 是否被遮挡体挡住。"
+    },
+    {
+      "id": "Occluder#isBoundingSphereVisible",
+      "field": "params/occludee/description",
+      "sourceHash": "sha256:b4c17d89a53c1e395c666ad9517c34a65bd60feac7d05934187d949a450f902a",
+      "text": "包围被遮挡对象的包围球。"
+    },
+    {
+      "id": "Occluder#isBoundingSphereVisible",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:4043105dfeff9207f72fc8d57dfe994f830b8354fc868c961d544f800ace92ca",
+      "text": "被遮挡对象可见时为 <code>true</code>，否则为 <code>false</code>。"
+    },
+    {
+      "id": "Occluder#isPointVisible",
+      "field": "description",
+      "sourceHash": "sha256:876295acab4f37eab5ca61311fd80e456c378561c4cc397e1e9c4da6d017c55e",
+      "text": "判断点 <code>occludee</code> 是否被遮挡体挡住。"
+    },
+    {
+      "id": "Occluder#isPointVisible",
+      "field": "params/occludee/description",
+      "sourceHash": "sha256:8872045af739976b4cc1461ebb03d3a1f091b7dc4b089ae49833dcd2fae78e7f",
+      "text": "被遮挡对象对应的点。"
+    },
+    {
+      "id": "Occluder#isPointVisible",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:4043105dfeff9207f72fc8d57dfe994f830b8354fc868c961d544f800ace92ca",
+      "text": "被遮挡对象可见时为 <code>true</code>，否则为 <code>false</code>。"
+    },
+    {
+      "id": "Occluder#position",
+      "field": "description",
+      "sourceHash": "sha256:d12c63840b87257869f87838ef4b200f9683a87241e31abf0d637f540344fd3a",
+      "text": "遮挡体的位置。"
+    },
+    {
+      "id": "Occluder#radius",
+      "field": "description",
+      "sourceHash": "sha256:ca5224e8d4d531542df156f8304332fd7dfdd234560e29d340b8ed578a9d36b7",
+      "text": "遮挡体的半径。"
+    },
+    {
+      "id": "OrthographicFrustum.unpack",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:8aaf752848092399f33145eaddaebd1a3678d30331f794e43ef0ef6e27143210",
+      "text": "修改后的 result 参数；未提供时返回新的 OrthographicFrustum 实例。"
+    },
+    {
+      "id": "OrthographicFrustum",
+      "field": "description",
+      "sourceHash": "sha256:f34aae1745e6befc4a339b9eb4702cd9a98e2e28c2a47fb2fd1d0befbfb58e37",
+      "text": "由六个平面定义的视锥。每个平面使用 {@link Cartesian4} 表示，x、y、z 分量定义单位法线，w 分量表示平面相对于原点或相机位置的距离。"
+    },
+    {
+      "id": "OrthographicFrustum",
+      "field": "params/options.aspectRatio/description",
+      "sourceHash": "sha256:ad35c32c53cbca49408bc535967da7d0d2b0747709cb6d300e74ef38a03f3ccc",
+      "text": "视锥宽度与高度之比。"
+    },
+    {
+      "id": "OrthographicFrustum",
+      "field": "params/options.far/description",
+      "sourceHash": "sha256:5b7cbbd6bfc333a860ed4710bd0c3ea20e9c15eeabbf8dfa4f66d1e32ce62903",
+      "text": "远平面的距离。"
+    },
+    {
+      "id": "OrthographicFrustum",
+      "field": "params/options.near/description",
+      "sourceHash": "sha256:43611410457d573d7a44ce85dc6166bc5e35c90337d8b1d19411f57c2d4cfdd8",
+      "text": "近平面的距离。"
+    },
+    {
+      "id": "OrthographicFrustum",
+      "field": "params/options.width/description",
+      "sourceHash": "sha256:f0adff8c64ae522679f067c16c7cdffeaa2acd71620e4e21c9c2191d291a144a",
+      "text": "视锥宽度，单位为米。"
+    },
+    {
+      "id": "OrthographicFrustum#aspectRatio",
+      "field": "description",
+      "sourceHash": "sha256:ad35c32c53cbca49408bc535967da7d0d2b0747709cb6d300e74ef38a03f3ccc",
+      "text": "视锥宽度与高度之比。"
+    },
+    {
+      "id": "OrthographicFrustum#clone",
+      "field": "description",
+      "sourceHash": "sha256:e8958ab6302f1ab434482df66037c40931db7718c51cfa35cff350799ddba023",
+      "text": "复制 OrthographicFrustum 实例。"
+    },
+    {
+      "id": "OrthographicFrustum#clone",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:8aaf752848092399f33145eaddaebd1a3678d30331f794e43ef0ef6e27143210",
+      "text": "修改后的 result 参数；未提供时返回新的 OrthographicFrustum 实例。"
+    },
+    {
+      "id": "OrthographicFrustum#computeCullingVolume",
+      "field": "description",
+      "sourceHash": "sha256:fc68b93acb5f0e79880105bad089051290c82ab0905f3ff8af52311afaa6aefe",
+      "text": "为此视锥创建剔除体。"
+    },
+    {
+      "id": "OrthographicFrustum#computeCullingVolume",
+      "field": "params/direction/description",
+      "sourceHash": "sha256:0119eb0ea7003c040f71c24cffbd8278f6a916b7b1c3ff1d4352eeb8c1ccfbf9",
+      "text": "观察方向。"
+    },
+    {
+      "id": "OrthographicFrustum#computeCullingVolume",
+      "field": "params/position/description",
+      "sourceHash": "sha256:90f2453176fcf48088a20377da8a7c4a9c32e5bf101fe0a75cc29899f3df357d",
+      "text": "观察位置。"
+    },
+    {
+      "id": "OrthographicFrustum#computeCullingVolume",
+      "field": "params/up/description",
+      "sourceHash": "sha256:acc8cfa656316adea028d09c4ff9b18caa78ffdfc3bbac08b93f59244c945ec6",
+      "text": "向上方向。"
+    },
+    {
+      "id": "OrthographicFrustum#computeCullingVolume",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:01e72f39a2745b424154808492da64b7e7d25bd270801a5fa64ae2c9856ebeb1",
+      "text": "具有指定位置和朝向的剔除体。"
+    },
+    {
+      "id": "OrthographicFrustum#equals",
+      "field": "description",
+      "sourceHash": "sha256:80de74a0fe5d15989c4ab275f9ced8ae759c7aa9e70ce3be2b65baa579d5c52e",
+      "text": "逐分量比较给定的 OrthographicFrustum，相等时返回 <code>true</code>，否则返回 <code>false</code>。"
+    },
+    {
+      "id": "OrthographicFrustum#equals",
+      "field": "params/other/description",
+      "sourceHash": "sha256:153295c87b2a64fd83c9d5f9f178bcbb906e24d8f75cf98ac36c0b4c54b26349",
+      "text": "右侧 OrthographicFrustum。"
+    },
+    {
+      "id": "OrthographicFrustum#equalsEpsilon",
+      "field": "description",
+      "sourceHash": "sha256:55e37bc00deb8bd254e7effd021d28813d8da814a0472dfb3b104ffd88c81b96",
+      "text": "逐分量比较给定的 OrthographicFrustum，通过绝对或相对容差测试时返回 <code>true</code>，否则返回 <code>false</code>。"
+    },
+    {
+      "id": "OrthographicFrustum#equalsEpsilon",
+      "field": "params/absoluteEpsilon/description",
+      "sourceHash": "sha256:62e5c46861c6b7f0f4262f10c359b2b825b6fe2f8691de32fe6da1f2101fe776",
+      "text": "相等测试使用的绝对 epsilon 容差。"
+    },
+    {
+      "id": "OrthographicFrustum#equalsEpsilon",
+      "field": "params/other/description",
+      "sourceHash": "sha256:153295c87b2a64fd83c9d5f9f178bcbb906e24d8f75cf98ac36c0b4c54b26349",
+      "text": "右侧 OrthographicFrustum。"
+    },
+    {
+      "id": "OrthographicFrustum#equalsEpsilon",
+      "field": "params/relativeEpsilon/description",
+      "sourceHash": "sha256:b6e762c1ad7a06b44a988832e91d2358793ab32a78832b268298e9342caffe33",
+      "text": "相等测试使用的相对 epsilon 容差。"
+    },
+    {
+      "id": "OrthographicFrustum#equalsEpsilon",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:5dd8a25655013fbb02c38c70b70ebc62152dcd9e6e8194053094296bcf824c7b",
+      "text": "此实例与 other 的差异在给定 epsilon 范围内时为 <code>true</code>，否则为 <code>false</code>。"
+    },
+    {
+      "id": "OrthographicFrustum#far",
+      "field": "description",
+      "sourceHash": "sha256:5b7cbbd6bfc333a860ed4710bd0c3ea20e9c15eeabbf8dfa4f66d1e32ce62903",
+      "text": "远平面的距离。"
+    },
+    {
+      "id": "OrthographicFrustum#getPixelDimensions",
+      "field": "description",
+      "sourceHash": "sha256:4151a9ba7dd5905739de089f61d42ffa6bcec0d0823a5e5f21739cb7187fb1c2",
+      "text": "返回单个像素的宽度和高度，单位为米。"
+    },
+    {
+      "id": "OrthographicFrustum#getPixelDimensions",
+      "field": "exceptions/0/description",
+      "sourceHash": "sha256:319f0337f7507a4a54a6071de8349eb2e776efc9429ba37ec37cf35383b53dfc",
+      "text": "drawingBufferWidth 必须大于零。"
+    },
+    {
+      "id": "OrthographicFrustum#getPixelDimensions",
+      "field": "exceptions/1/description",
+      "sourceHash": "sha256:924ce48a578ee39964cb53cd17af22609cd3d4eb077baa73df7d705b87e46447",
+      "text": "drawingBufferHeight 必须大于零。"
+    },
+    {
+      "id": "OrthographicFrustum#getPixelDimensions",
+      "field": "exceptions/2/description",
+      "sourceHash": "sha256:b56b2b84268b037379fe6fece27be34f3382cbfd536e87a0b47f6e4ab4a5af40",
+      "text": "pixelRatio 必须大于零。"
+    },
+    {
+      "id": "OrthographicFrustum#getPixelDimensions",
+      "field": "params/distance/description",
+      "sourceHash": "sha256:3955f7b90d5428b2ee139376db7dbcf6ffc7d6d1a637681037fbe282affb9342",
+      "text": "用于计算像素对应尺寸的距离参数，单位为米。"
+    },
+    {
+      "id": "OrthographicFrustum#getPixelDimensions",
+      "field": "params/drawingBufferHeight/description",
+      "sourceHash": "sha256:8241510cb45dbb17779315948ecbdeb49d692ff44b642600692012b2c84f63d0",
+      "text": "绘图缓冲区的高度。"
+    },
+    {
+      "id": "OrthographicFrustum#getPixelDimensions",
+      "field": "params/drawingBufferWidth/description",
+      "sourceHash": "sha256:d5007dd77da057140b1b0e0d36b2d29d47a0a4afc441ba9c2f73a8767736e0fd",
+      "text": "绘图缓冲区的宽度。"
+    },
+    {
+      "id": "OrthographicFrustum#getPixelDimensions",
+      "field": "params/pixelRatio/description",
+      "sourceHash": "sha256:bc5fdb8f8e5f1bd8459ac9013d3bbff7f1746174a7aa7d59698f1a00f08b1df7",
+      "text": "从像素空间到坐标空间的缩放因子。"
+    },
+    {
+      "id": "OrthographicFrustum#getPixelDimensions",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:d774e8c4ac7f14dd429fa28ffcb1c3f544007b86bb7d5050d9e8a9e4680b396c",
+      "text": "修改后的 result 参数，或新的 {@link Cartesian2} 实例，x 和 y 分别为像素对应的宽度和高度。"
+    },
+    {
+      "id": "OrthographicFrustum#near",
+      "field": "description",
+      "sourceHash": "sha256:43611410457d573d7a44ce85dc6166bc5e35c90337d8b1d19411f57c2d4cfdd8",
+      "text": "近平面的距离。"
+    },
+    {
+      "id": "OrthographicFrustum#projectionMatrix",
+      "field": "description",
+      "sourceHash": "sha256:25d591c0b065c8bf1bdd66252c3ccac4a128a3f2e93724dbc2c95b878385890c",
+      "text": "获取根据视锥计算的正交投影矩阵。"
+    },
+    {
+      "id": "OrthographicFrustum#width",
+      "field": "description",
+      "sourceHash": "sha256:0e2c65dd301652dfb14b3f794b7450fa2b1403866294145bcac699da237efb73",
+      "text": "视锥的水平宽度，单位为米。"
+    },
+    {
+      "id": "OrthographicOffCenterFrustum",
+      "field": "description",
+      "sourceHash": "sha256:f34aae1745e6befc4a339b9eb4702cd9a98e2e28c2a47fb2fd1d0befbfb58e37",
+      "text": "由六个平面定义的视锥。每个平面使用 {@link Cartesian4} 表示，x、y、z 分量定义单位法线，w 分量表示平面相对于原点或相机位置的距离。"
+    },
+    {
+      "id": "OrthographicOffCenterFrustum",
+      "field": "params/options.bottom/description",
+      "sourceHash": "sha256:939e044a63c01f86c5aba9d5cdb4090eff380ae34a4ab5f7221b8d029a384c20",
+      "text": "下裁剪平面的距离。"
+    },
+    {
+      "id": "OrthographicOffCenterFrustum",
+      "field": "params/options.far/description",
+      "sourceHash": "sha256:3fcd551ce20bd480e9de480640c8ed3e0faee51e9dbb2182eab6876864dfd651",
+      "text": "远裁剪平面的距离。"
+    },
+    {
+      "id": "OrthographicOffCenterFrustum",
+      "field": "params/options.left/description",
+      "sourceHash": "sha256:f4786578be9e246b170f9eb2310645b36ae59cd201394d7b98e576486ce8fcbd",
+      "text": "左裁剪平面的距离。"
+    },
+    {
+      "id": "OrthographicOffCenterFrustum",
+      "field": "params/options.near/description",
+      "sourceHash": "sha256:c9c924b52d6b6905ffb87cc03972faa6fd9c519d42c561f943fa70e295e0faf7",
+      "text": "近裁剪平面的距离。"
+    },
+    {
+      "id": "OrthographicOffCenterFrustum",
+      "field": "params/options.right/description",
+      "sourceHash": "sha256:a129a9bc98cc236bafe5c2d969538146b9122d39aa72987c226cc249ac01f3f9",
+      "text": "右裁剪平面的距离。"
+    },
+    {
+      "id": "OrthographicOffCenterFrustum",
+      "field": "params/options.top/description",
+      "sourceHash": "sha256:763dea05e28ca0153f7949c93de2e66c2872748dadc04d9a658ab1790ccadce1",
+      "text": "上裁剪平面的距离。"
+    },
+    {
+      "id": "OrthographicOffCenterFrustum#bottom",
+      "field": "description",
+      "sourceHash": "sha256:1a59e86fc0ff7e2b898bedddecdcee63f14d7f88ef309286f1a9e8140a58e493",
+      "text": "下裁剪平面。"
+    },
+    {
+      "id": "OrthographicOffCenterFrustum#clone",
+      "field": "description",
+      "sourceHash": "sha256:eacd3100d0a052fe6d237654c2fd2e3c114370fc6e4951d40b99dbd3c45b3a60",
+      "text": "复制 OrthographicOffCenterFrustum 实例。"
+    },
+    {
+      "id": "OrthographicOffCenterFrustum#clone",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:3fa4f5ade0e32600367f3eb7da2c8a9d3402b3df4f043a346c6501d87d3db829",
+      "text": "修改后的 result 参数；未提供时返回新的 OrthographicOffCenterFrustum 实例。"
+    },
+    {
+      "id": "OrthographicOffCenterFrustum#computeCullingVolume",
+      "field": "description",
+      "sourceHash": "sha256:fc68b93acb5f0e79880105bad089051290c82ab0905f3ff8af52311afaa6aefe",
+      "text": "为此视锥创建剔除体。"
+    },
+    {
+      "id": "OrthographicOffCenterFrustum#computeCullingVolume",
+      "field": "params/direction/description",
+      "sourceHash": "sha256:0119eb0ea7003c040f71c24cffbd8278f6a916b7b1c3ff1d4352eeb8c1ccfbf9",
+      "text": "观察方向。"
+    },
+    {
+      "id": "OrthographicOffCenterFrustum#computeCullingVolume",
+      "field": "params/position/description",
+      "sourceHash": "sha256:90f2453176fcf48088a20377da8a7c4a9c32e5bf101fe0a75cc29899f3df357d",
+      "text": "观察位置。"
+    },
+    {
+      "id": "OrthographicOffCenterFrustum#computeCullingVolume",
+      "field": "params/up/description",
+      "sourceHash": "sha256:acc8cfa656316adea028d09c4ff9b18caa78ffdfc3bbac08b93f59244c945ec6",
+      "text": "向上方向。"
+    },
+    {
+      "id": "OrthographicOffCenterFrustum#computeCullingVolume",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:01e72f39a2745b424154808492da64b7e7d25bd270801a5fa64ae2c9856ebeb1",
+      "text": "具有指定位置和朝向的剔除体。"
+    },
+    {
+      "id": "OrthographicOffCenterFrustum#equals",
+      "field": "description",
+      "sourceHash": "sha256:65f7f9767696f50089e8c7d093c599c25acb59d0764b9aeea9f954b67cb07137",
+      "text": "逐分量比较给定的 OrthographicOffCenterFrustum，相等时返回 <code>true</code>，否则返回 <code>false</code>。"
+    },
+    {
+      "id": "OrthographicOffCenterFrustum#equals",
+      "field": "params/other/description",
+      "sourceHash": "sha256:54b2abac052a97af3dbfebeb4ee60b94d55755bd668077419e21a22ebb5b1665",
+      "text": "右侧 OrthographicOffCenterFrustum。"
+    },
+    {
+      "id": "OrthographicOffCenterFrustum#equalsEpsilon",
+      "field": "description",
+      "sourceHash": "sha256:f1fab69ae49d50e2b192b2aac117accd336c38f1e6fbdac1ece0d89a491afb51",
+      "text": "逐分量比较给定的 OrthographicOffCenterFrustum，通过绝对或相对容差测试时返回 <code>true</code>，否则返回 <code>false</code>。"
+    },
+    {
+      "id": "OrthographicOffCenterFrustum#equalsEpsilon",
+      "field": "params/absoluteEpsilon/description",
+      "sourceHash": "sha256:62e5c46861c6b7f0f4262f10c359b2b825b6fe2f8691de32fe6da1f2101fe776",
+      "text": "相等测试使用的绝对 epsilon 容差。"
+    },
+    {
+      "id": "OrthographicOffCenterFrustum#equalsEpsilon",
+      "field": "params/other/description",
+      "sourceHash": "sha256:54b2abac052a97af3dbfebeb4ee60b94d55755bd668077419e21a22ebb5b1665",
+      "text": "右侧 OrthographicOffCenterFrustum。"
+    },
+    {
+      "id": "OrthographicOffCenterFrustum#equalsEpsilon",
+      "field": "params/relativeEpsilon/description",
+      "sourceHash": "sha256:b6e762c1ad7a06b44a988832e91d2358793ab32a78832b268298e9342caffe33",
+      "text": "相等测试使用的相对 epsilon 容差。"
+    },
+    {
+      "id": "OrthographicOffCenterFrustum#equalsEpsilon",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:5dd8a25655013fbb02c38c70b70ebc62152dcd9e6e8194053094296bcf824c7b",
+      "text": "此实例与 other 的差异在给定 epsilon 范围内时为 <code>true</code>，否则为 <code>false</code>。"
+    },
+    {
+      "id": "OrthographicOffCenterFrustum#far",
+      "field": "description",
+      "sourceHash": "sha256:5b7cbbd6bfc333a860ed4710bd0c3ea20e9c15eeabbf8dfa4f66d1e32ce62903",
+      "text": "远平面的距离。"
+    },
+    {
+      "id": "OrthographicOffCenterFrustum#getPixelDimensions",
+      "field": "description",
+      "sourceHash": "sha256:4151a9ba7dd5905739de089f61d42ffa6bcec0d0823a5e5f21739cb7187fb1c2",
+      "text": "返回单个像素的宽度和高度，单位为米。"
+    },
+    {
+      "id": "OrthographicOffCenterFrustum#getPixelDimensions",
+      "field": "exceptions/0/description",
+      "sourceHash": "sha256:319f0337f7507a4a54a6071de8349eb2e776efc9429ba37ec37cf35383b53dfc",
+      "text": "drawingBufferWidth 必须大于零。"
+    },
+    {
+      "id": "OrthographicOffCenterFrustum#getPixelDimensions",
+      "field": "exceptions/1/description",
+      "sourceHash": "sha256:924ce48a578ee39964cb53cd17af22609cd3d4eb077baa73df7d705b87e46447",
+      "text": "drawingBufferHeight 必须大于零。"
+    },
+    {
+      "id": "OrthographicOffCenterFrustum#getPixelDimensions",
+      "field": "exceptions/2/description",
+      "sourceHash": "sha256:b56b2b84268b037379fe6fece27be34f3382cbfd536e87a0b47f6e4ab4a5af40",
+      "text": "pixelRatio 必须大于零。"
+    },
+    {
+      "id": "OrthographicOffCenterFrustum#getPixelDimensions",
+      "field": "params/distance/description",
+      "sourceHash": "sha256:3955f7b90d5428b2ee139376db7dbcf6ffc7d6d1a637681037fbe282affb9342",
+      "text": "用于计算像素对应尺寸的距离参数，单位为米。"
+    },
+    {
+      "id": "OrthographicOffCenterFrustum#getPixelDimensions",
+      "field": "params/drawingBufferHeight/description",
+      "sourceHash": "sha256:8241510cb45dbb17779315948ecbdeb49d692ff44b642600692012b2c84f63d0",
+      "text": "绘图缓冲区的高度。"
+    },
+    {
+      "id": "OrthographicOffCenterFrustum#getPixelDimensions",
+      "field": "params/drawingBufferWidth/description",
+      "sourceHash": "sha256:d5007dd77da057140b1b0e0d36b2d29d47a0a4afc441ba9c2f73a8767736e0fd",
+      "text": "绘图缓冲区的宽度。"
+    },
+    {
+      "id": "OrthographicOffCenterFrustum#getPixelDimensions",
+      "field": "params/pixelRatio/description",
+      "sourceHash": "sha256:bc5fdb8f8e5f1bd8459ac9013d3bbff7f1746174a7aa7d59698f1a00f08b1df7",
+      "text": "从像素空间到坐标空间的缩放因子。"
+    },
+    {
+      "id": "OrthographicOffCenterFrustum#getPixelDimensions",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:d774e8c4ac7f14dd429fa28ffcb1c3f544007b86bb7d5050d9e8a9e4680b396c",
+      "text": "修改后的 result 参数，或新的 {@link Cartesian2} 实例，x 和 y 分别为像素对应的宽度和高度。"
+    },
+    {
+      "id": "OrthographicOffCenterFrustum#left",
+      "field": "description",
+      "sourceHash": "sha256:44c97fdbc32c1a2fc4d1bda7b4b38921fab0039a74b7d47132f1a3e1a21514a0",
+      "text": "左裁剪平面。"
+    },
+    {
+      "id": "OrthographicOffCenterFrustum#near",
+      "field": "description",
+      "sourceHash": "sha256:43611410457d573d7a44ce85dc6166bc5e35c90337d8b1d19411f57c2d4cfdd8",
+      "text": "近平面的距离。"
+    },
+    {
+      "id": "OrthographicOffCenterFrustum#projectionMatrix",
+      "field": "description",
+      "sourceHash": "sha256:25d591c0b065c8bf1bdd66252c3ccac4a128a3f2e93724dbc2c95b878385890c",
+      "text": "获取根据视锥计算的正交投影矩阵。"
+    },
+    {
+      "id": "OrthographicOffCenterFrustum#right",
+      "field": "description",
+      "sourceHash": "sha256:69dd1520899a1ddda266540bf5ed2b3646993e1d1c155d4cda51956f50c04828",
+      "text": "右裁剪平面。"
+    },
+    {
+      "id": "OrthographicOffCenterFrustum#top",
+      "field": "description",
+      "sourceHash": "sha256:1755a95435b7dabbd8f435b0bca4a1e880322532c0b2a7de0476fd5e8491937c",
+      "text": "上裁剪平面。"
+    },
+    {
+      "id": "Packable.unpack",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:600ea664cb88459cdb56e5326ff2b4ea942c7a6ec5a3cb21f4b99b3ed96f504e",
+      "text": "修改后的 result 参数；未提供时返回新的 Object 实例。"
+    },
+    {
+      "id": "Packable",
+      "field": "description",
+      "sourceHash": "sha256:72afee833929663aa39ce1e51bcb1cd76eeb2d25dbcfbf000eb72340806a9fbe",
+      "text": "可将值存储为数组中打包元素的类型所遵循的静态接口。这些方法和属性应定义在构造函数上。"
+    },
+    {
+      "id": "PerspectiveFrustum.unpack",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:45649e00622d886c065d92ac0be1061b4c4b6b5d756c4e5ceb5006383ea0561b",
+      "text": "修改后的 result 参数；未提供时返回新的 PerspectiveFrustum 实例。"
+    },
+    {
+      "id": "PerspectiveFrustum",
+      "field": "description",
+      "sourceHash": "sha256:f34aae1745e6befc4a339b9eb4702cd9a98e2e28c2a47fb2fd1d0befbfb58e37",
+      "text": "由六个平面定义的视锥。每个平面使用 {@link Cartesian4} 表示，x、y、z 分量定义单位法线，w 分量表示平面相对于原点或相机位置的距离。"
+    },
+    {
+      "id": "PerspectiveFrustum",
+      "field": "params/options.aspectRatio/description",
+      "sourceHash": "sha256:ad35c32c53cbca49408bc535967da7d0d2b0747709cb6d300e74ef38a03f3ccc",
+      "text": "视锥宽度与高度之比。"
+    },
+    {
+      "id": "PerspectiveFrustum",
+      "field": "params/options.far/description",
+      "sourceHash": "sha256:5b7cbbd6bfc333a860ed4710bd0c3ea20e9c15eeabbf8dfa4f66d1e32ce62903",
+      "text": "远平面的距离。"
+    },
+    {
+      "id": "PerspectiveFrustum",
+      "field": "params/options.fov/description",
+      "sourceHash": "sha256:50add9385e59c6a4278b289f750d0bf03466a757681f72d32d574779c0119ead",
+      "text": "视场角（FOV），单位为弧度。"
+    },
+    {
+      "id": "PerspectiveFrustum",
+      "field": "params/options.near/description",
+      "sourceHash": "sha256:43611410457d573d7a44ce85dc6166bc5e35c90337d8b1d19411f57c2d4cfdd8",
+      "text": "近平面的距离。"
+    },
+    {
+      "id": "PerspectiveFrustum",
+      "field": "params/options.xOffset/description",
+      "sourceHash": "sha256:05d00b4820d37c75a5fcdd6e7d813670c022d9b039f95a899d05b1d3997f9d76",
+      "text": "x 方向偏移。"
+    },
+    {
+      "id": "PerspectiveFrustum",
+      "field": "params/options.yOffset/description",
+      "sourceHash": "sha256:4534648fad7aa5047d8baceefd13c83493ccba315925529b267b19716cbf3338",
+      "text": "y 方向偏移。"
+    },
+    {
+      "id": "PerspectiveFrustum#aspectRatio",
+      "field": "description",
+      "sourceHash": "sha256:ad35c32c53cbca49408bc535967da7d0d2b0747709cb6d300e74ef38a03f3ccc",
+      "text": "视锥宽度与高度之比。"
+    },
+    {
+      "id": "PerspectiveFrustum#clone",
+      "field": "description",
+      "sourceHash": "sha256:93f89b4f4255842fdeb0673ff2968f9fa9b4d937625adb3ba5affb27d4fa714c",
+      "text": "复制 PerspectiveFrustum 实例。"
+    },
+    {
+      "id": "PerspectiveFrustum#clone",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:45649e00622d886c065d92ac0be1061b4c4b6b5d756c4e5ceb5006383ea0561b",
+      "text": "修改后的 result 参数；未提供时返回新的 PerspectiveFrustum 实例。"
+    },
+    {
+      "id": "PerspectiveFrustum#computeCullingVolume",
+      "field": "description",
+      "sourceHash": "sha256:fc68b93acb5f0e79880105bad089051290c82ab0905f3ff8af52311afaa6aefe",
+      "text": "为此视锥创建剔除体。"
+    },
+    {
+      "id": "PerspectiveFrustum#computeCullingVolume",
+      "field": "params/direction/description",
+      "sourceHash": "sha256:0119eb0ea7003c040f71c24cffbd8278f6a916b7b1c3ff1d4352eeb8c1ccfbf9",
+      "text": "观察方向。"
+    },
+    {
+      "id": "PerspectiveFrustum#computeCullingVolume",
+      "field": "params/position/description",
+      "sourceHash": "sha256:90f2453176fcf48088a20377da8a7c4a9c32e5bf101fe0a75cc29899f3df357d",
+      "text": "观察位置。"
+    },
+    {
+      "id": "PerspectiveFrustum#computeCullingVolume",
+      "field": "params/up/description",
+      "sourceHash": "sha256:acc8cfa656316adea028d09c4ff9b18caa78ffdfc3bbac08b93f59244c945ec6",
+      "text": "向上方向。"
+    },
+    {
+      "id": "PerspectiveFrustum#computeCullingVolume",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:01e72f39a2745b424154808492da64b7e7d25bd270801a5fa64ae2c9856ebeb1",
+      "text": "具有指定位置和朝向的剔除体。"
+    },
+    {
+      "id": "PerspectiveFrustum#equals",
+      "field": "description",
+      "sourceHash": "sha256:288554215db592f2e74fa693b10e8d8598a5ca54a174c37e666d6f21a1f4e948",
+      "text": "逐分量比较给定的 PerspectiveFrustum，相等时返回 <code>true</code>，否则返回 <code>false</code>。"
+    },
+    {
+      "id": "PerspectiveFrustum#equals",
+      "field": "params/other/description",
+      "sourceHash": "sha256:c9968148f603fe4782cb7fec6cc2b7b6da6b76f90b0324a9ced5abcf11832114",
+      "text": "右侧 PerspectiveFrustum。"
+    },
+    {
+      "id": "PerspectiveFrustum#equalsEpsilon",
+      "field": "description",
+      "sourceHash": "sha256:609a25b8b56634956c0f262bfd6aa648ea753dd7c0ce1df9f9356bd28a9fef29",
+      "text": "逐分量比较给定的 PerspectiveFrustum，通过绝对或相对容差测试时返回 <code>true</code>，否则返回 <code>false</code>。"
+    },
+    {
+      "id": "PerspectiveFrustum#equalsEpsilon",
+      "field": "params/absoluteEpsilon/description",
+      "sourceHash": "sha256:62e5c46861c6b7f0f4262f10c359b2b825b6fe2f8691de32fe6da1f2101fe776",
+      "text": "相等测试使用的绝对 epsilon 容差。"
+    },
+    {
+      "id": "PerspectiveFrustum#equalsEpsilon",
+      "field": "params/other/description",
+      "sourceHash": "sha256:c9968148f603fe4782cb7fec6cc2b7b6da6b76f90b0324a9ced5abcf11832114",
+      "text": "右侧 PerspectiveFrustum。"
+    },
+    {
+      "id": "PerspectiveFrustum#equalsEpsilon",
+      "field": "params/relativeEpsilon/description",
+      "sourceHash": "sha256:b6e762c1ad7a06b44a988832e91d2358793ab32a78832b268298e9342caffe33",
+      "text": "相等测试使用的相对 epsilon 容差。"
+    },
+    {
+      "id": "PerspectiveFrustum#equalsEpsilon",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:5dd8a25655013fbb02c38c70b70ebc62152dcd9e6e8194053094296bcf824c7b",
+      "text": "此实例与 other 的差异在给定 epsilon 范围内时为 <code>true</code>，否则为 <code>false</code>。"
+    },
+    {
+      "id": "PerspectiveFrustum#far",
+      "field": "description",
+      "sourceHash": "sha256:5b7cbbd6bfc333a860ed4710bd0c3ea20e9c15eeabbf8dfa4f66d1e32ce62903",
+      "text": "远平面的距离。"
+    },
+    {
+      "id": "PerspectiveFrustum#fov",
+      "field": "description",
+      "sourceHash": "sha256:24d466b425ffc289c03ad1503f11c3c8937c6f157cc507848f5a843b2f7994a1",
+      "text": "视场角（FOV），单位为弧度。宽度大于高度时作为水平视场角，否则作为垂直视场角。"
+    },
+    {
+      "id": "PerspectiveFrustum#fovy",
+      "field": "description",
+      "sourceHash": "sha256:b098370dc92d95aa03e761383c31e50a7705fd68e7e28ee4c82eae645e06c6b6",
+      "text": "获取垂直视场角，单位为弧度。"
+    },
+    {
+      "id": "PerspectiveFrustum#getPixelDimensions",
+      "field": "description",
+      "sourceHash": "sha256:4151a9ba7dd5905739de089f61d42ffa6bcec0d0823a5e5f21739cb7187fb1c2",
+      "text": "返回单个像素的宽度和高度，单位为米。"
+    },
+    {
+      "id": "PerspectiveFrustum#getPixelDimensions",
+      "field": "exceptions/0/description",
+      "sourceHash": "sha256:319f0337f7507a4a54a6071de8349eb2e776efc9429ba37ec37cf35383b53dfc",
+      "text": "drawingBufferWidth 必须大于零。"
+    },
+    {
+      "id": "PerspectiveFrustum#getPixelDimensions",
+      "field": "exceptions/1/description",
+      "sourceHash": "sha256:924ce48a578ee39964cb53cd17af22609cd3d4eb077baa73df7d705b87e46447",
+      "text": "drawingBufferHeight 必须大于零。"
+    },
+    {
+      "id": "PerspectiveFrustum#getPixelDimensions",
+      "field": "exceptions/2/description",
+      "sourceHash": "sha256:b56b2b84268b037379fe6fece27be34f3382cbfd536e87a0b47f6e4ab4a5af40",
+      "text": "pixelRatio 必须大于零。"
+    },
+    {
+      "id": "PerspectiveFrustum#getPixelDimensions",
+      "field": "params/distance/description",
+      "sourceHash": "sha256:3955f7b90d5428b2ee139376db7dbcf6ffc7d6d1a637681037fbe282affb9342",
+      "text": "用于计算像素对应尺寸的距离参数，单位为米。"
+    },
+    {
+      "id": "PerspectiveFrustum#getPixelDimensions",
+      "field": "params/drawingBufferHeight/description",
+      "sourceHash": "sha256:8241510cb45dbb17779315948ecbdeb49d692ff44b642600692012b2c84f63d0",
+      "text": "绘图缓冲区的高度。"
+    },
+    {
+      "id": "PerspectiveFrustum#getPixelDimensions",
+      "field": "params/drawingBufferWidth/description",
+      "sourceHash": "sha256:d5007dd77da057140b1b0e0d36b2d29d47a0a4afc441ba9c2f73a8767736e0fd",
+      "text": "绘图缓冲区的宽度。"
+    },
+    {
+      "id": "PerspectiveFrustum#getPixelDimensions",
+      "field": "params/pixelRatio/description",
+      "sourceHash": "sha256:bc5fdb8f8e5f1bd8459ac9013d3bbff7f1746174a7aa7d59698f1a00f08b1df7",
+      "text": "从像素空间到坐标空间的缩放因子。"
+    },
+    {
+      "id": "PerspectiveFrustum#getPixelDimensions",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:d774e8c4ac7f14dd429fa28ffcb1c3f544007b86bb7d5050d9e8a9e4680b396c",
+      "text": "修改后的 result 参数，或新的 {@link Cartesian2} 实例，x 和 y 分别为像素对应的宽度和高度。"
+    },
+    {
+      "id": "PerspectiveFrustum#infiniteProjectionMatrix",
+      "field": "description",
+      "sourceHash": "sha256:a943f9208393eb09f2c99633baf1fb65eb25b3978895d8a172c00436b4662b87",
+      "text": "根据视锥计算、远平面位于无穷远的透视投影矩阵。"
+    },
+    {
+      "id": "PerspectiveFrustum#near",
+      "field": "description",
+      "sourceHash": "sha256:43611410457d573d7a44ce85dc6166bc5e35c90337d8b1d19411f57c2d4cfdd8",
+      "text": "近平面的距离。"
+    },
+    {
+      "id": "PerspectiveFrustum#projectionMatrix",
+      "field": "description",
+      "sourceHash": "sha256:32163f6eddd5f3b4ebd1489576dfdf66270f36928142cb696f66562a09748467",
+      "text": "获取根据视锥计算的透视投影矩阵，必要时重新计算。"
+    },
+    {
+      "id": "PerspectiveFrustum#xOffset",
+      "field": "description",
+      "sourceHash": "sha256:2094b6d890dfaea96c923fa47f54b7f5bcccab2ece37d3c90937027d59f6a44c",
+      "text": "沿 x 方向偏移视锥。"
+    },
+    {
+      "id": "PerspectiveFrustum#yOffset",
+      "field": "description",
+      "sourceHash": "sha256:a1f938f053a07d06dd8bf401e283f4d970342d876eeb0ad3d2ee65feb5619d15",
+      "text": "沿 y 方向偏移视锥。"
+    },
+    {
+      "id": "PerspectiveOffCenterFrustum",
+      "field": "description",
+      "sourceHash": "sha256:f34aae1745e6befc4a339b9eb4702cd9a98e2e28c2a47fb2fd1d0befbfb58e37",
+      "text": "由六个平面定义的视锥。每个平面使用 {@link Cartesian4} 表示，x、y、z 分量定义单位法线，w 分量表示平面相对于原点或相机位置的距离。"
+    },
+    {
+      "id": "PerspectiveOffCenterFrustum",
+      "field": "params/options.bottom/description",
+      "sourceHash": "sha256:939e044a63c01f86c5aba9d5cdb4090eff380ae34a4ab5f7221b8d029a384c20",
+      "text": "下裁剪平面的距离。"
+    },
+    {
+      "id": "PerspectiveOffCenterFrustum",
+      "field": "params/options.far/description",
+      "sourceHash": "sha256:3fcd551ce20bd480e9de480640c8ed3e0faee51e9dbb2182eab6876864dfd651",
+      "text": "远裁剪平面的距离。"
+    },
+    {
+      "id": "PerspectiveOffCenterFrustum",
+      "field": "params/options.left/description",
+      "sourceHash": "sha256:f4786578be9e246b170f9eb2310645b36ae59cd201394d7b98e576486ce8fcbd",
+      "text": "左裁剪平面的距离。"
+    },
+    {
+      "id": "PerspectiveOffCenterFrustum",
+      "field": "params/options.near/description",
+      "sourceHash": "sha256:c9c924b52d6b6905ffb87cc03972faa6fd9c519d42c561f943fa70e295e0faf7",
+      "text": "近裁剪平面的距离。"
+    },
+    {
+      "id": "PerspectiveOffCenterFrustum",
+      "field": "params/options.right/description",
+      "sourceHash": "sha256:a129a9bc98cc236bafe5c2d969538146b9122d39aa72987c226cc249ac01f3f9",
+      "text": "右裁剪平面的距离。"
+    },
+    {
+      "id": "PerspectiveOffCenterFrustum",
+      "field": "params/options.top/description",
+      "sourceHash": "sha256:763dea05e28ca0153f7949c93de2e66c2872748dadc04d9a658ab1790ccadce1",
+      "text": "上裁剪平面的距离。"
+    },
+    {
+      "id": "PerspectiveOffCenterFrustum#bottom",
+      "field": "description",
+      "sourceHash": "sha256:2b7c58e4f6a35cba10dadcb95048142c0ae4073edef7cbec98a8b2da7acee6f8",
+      "text": "定义下裁剪平面。"
+    },
+    {
+      "id": "PerspectiveOffCenterFrustum#clone",
+      "field": "description",
+      "sourceHash": "sha256:6b661ac110447215b03180cbf5367f4d4c8cf2810d206f4c6ac6ed9e757ac0c1",
+      "text": "复制 PerspectiveOffCenterFrustum 实例。"
+    },
+    {
+      "id": "PerspectiveOffCenterFrustum#clone",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:45649e00622d886c065d92ac0be1061b4c4b6b5d756c4e5ceb5006383ea0561b",
+      "text": "修改后的 result 参数；未提供时返回新的 PerspectiveFrustum 实例。"
+    },
+    {
+      "id": "PerspectiveOffCenterFrustum#computeCullingVolume",
+      "field": "description",
+      "sourceHash": "sha256:fc68b93acb5f0e79880105bad089051290c82ab0905f3ff8af52311afaa6aefe",
+      "text": "为此视锥创建剔除体。"
+    },
+    {
+      "id": "PerspectiveOffCenterFrustum#computeCullingVolume",
+      "field": "params/direction/description",
+      "sourceHash": "sha256:0119eb0ea7003c040f71c24cffbd8278f6a916b7b1c3ff1d4352eeb8c1ccfbf9",
+      "text": "观察方向。"
+    },
+    {
+      "id": "PerspectiveOffCenterFrustum#computeCullingVolume",
+      "field": "params/position/description",
+      "sourceHash": "sha256:90f2453176fcf48088a20377da8a7c4a9c32e5bf101fe0a75cc29899f3df357d",
+      "text": "观察位置。"
+    },
+    {
+      "id": "PerspectiveOffCenterFrustum#computeCullingVolume",
+      "field": "params/up/description",
+      "sourceHash": "sha256:acc8cfa656316adea028d09c4ff9b18caa78ffdfc3bbac08b93f59244c945ec6",
+      "text": "向上方向。"
+    },
+    {
+      "id": "PerspectiveOffCenterFrustum#computeCullingVolume",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:01e72f39a2745b424154808492da64b7e7d25bd270801a5fa64ae2c9856ebeb1",
+      "text": "具有指定位置和朝向的剔除体。"
+    },
+    {
+      "id": "PerspectiveOffCenterFrustum#equals",
+      "field": "description",
+      "sourceHash": "sha256:58a20d9043912cc83bff648017e23d8c8b0116596efd1b0bbb6946b2eabe28cd",
+      "text": "逐分量比较给定的 PerspectiveOffCenterFrustum，相等时返回 <code>true</code>，否则返回 <code>false</code>。"
+    },
+    {
+      "id": "PerspectiveOffCenterFrustum#equals",
+      "field": "params/other/description",
+      "sourceHash": "sha256:151cf2902cde63c14d2deeedc3df81062ce813843784355a6fcbc60870930cf4",
+      "text": "右侧 PerspectiveOffCenterFrustum。"
+    },
+    {
+      "id": "PerspectiveOffCenterFrustum#equalsEpsilon",
+      "field": "description",
+      "sourceHash": "sha256:b8644ef1955b4ecefb4fe9445ea50beb10e05006141f31952d81183c41a6c040",
+      "text": "逐分量比较给定的 PerspectiveOffCenterFrustum，通过绝对或相对容差测试时返回 <code>true</code>，否则返回 <code>false</code>。"
+    },
+    {
+      "id": "PerspectiveOffCenterFrustum#equalsEpsilon",
+      "field": "params/absoluteEpsilon/description",
+      "sourceHash": "sha256:62e5c46861c6b7f0f4262f10c359b2b825b6fe2f8691de32fe6da1f2101fe776",
+      "text": "相等测试使用的绝对 epsilon 容差。"
+    },
+    {
+      "id": "PerspectiveOffCenterFrustum#equalsEpsilon",
+      "field": "params/other/description",
+      "sourceHash": "sha256:151cf2902cde63c14d2deeedc3df81062ce813843784355a6fcbc60870930cf4",
+      "text": "右侧 PerspectiveOffCenterFrustum。"
+    },
+    {
+      "id": "PerspectiveOffCenterFrustum#equalsEpsilon",
+      "field": "params/relativeEpsilon/description",
+      "sourceHash": "sha256:b6e762c1ad7a06b44a988832e91d2358793ab32a78832b268298e9342caffe33",
+      "text": "相等测试使用的相对 epsilon 容差。"
+    },
+    {
+      "id": "PerspectiveOffCenterFrustum#equalsEpsilon",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:5dd8a25655013fbb02c38c70b70ebc62152dcd9e6e8194053094296bcf824c7b",
+      "text": "此实例与 other 的差异在给定 epsilon 范围内时为 <code>true</code>，否则为 <code>false</code>。"
+    },
+    {
+      "id": "PerspectiveOffCenterFrustum#far",
+      "field": "description",
+      "sourceHash": "sha256:5b7cbbd6bfc333a860ed4710bd0c3ea20e9c15eeabbf8dfa4f66d1e32ce62903",
+      "text": "远平面的距离。"
+    },
+    {
+      "id": "PerspectiveOffCenterFrustum#getPixelDimensions",
+      "field": "description",
+      "sourceHash": "sha256:4151a9ba7dd5905739de089f61d42ffa6bcec0d0823a5e5f21739cb7187fb1c2",
+      "text": "返回单个像素的宽度和高度，单位为米。"
+    },
+    {
+      "id": "PerspectiveOffCenterFrustum#getPixelDimensions",
+      "field": "exceptions/0/description",
+      "sourceHash": "sha256:319f0337f7507a4a54a6071de8349eb2e776efc9429ba37ec37cf35383b53dfc",
+      "text": "drawingBufferWidth 必须大于零。"
+    },
+    {
+      "id": "PerspectiveOffCenterFrustum#getPixelDimensions",
+      "field": "exceptions/1/description",
+      "sourceHash": "sha256:924ce48a578ee39964cb53cd17af22609cd3d4eb077baa73df7d705b87e46447",
+      "text": "drawingBufferHeight 必须大于零。"
+    },
+    {
+      "id": "PerspectiveOffCenterFrustum#getPixelDimensions",
+      "field": "exceptions/2/description",
+      "sourceHash": "sha256:b56b2b84268b037379fe6fece27be34f3382cbfd536e87a0b47f6e4ab4a5af40",
+      "text": "pixelRatio 必须大于零。"
+    },
+    {
+      "id": "PerspectiveOffCenterFrustum#getPixelDimensions",
+      "field": "params/distance/description",
+      "sourceHash": "sha256:3955f7b90d5428b2ee139376db7dbcf6ffc7d6d1a637681037fbe282affb9342",
+      "text": "用于计算像素对应尺寸的距离参数，单位为米。"
+    },
+    {
+      "id": "PerspectiveOffCenterFrustum#getPixelDimensions",
+      "field": "params/drawingBufferHeight/description",
+      "sourceHash": "sha256:8241510cb45dbb17779315948ecbdeb49d692ff44b642600692012b2c84f63d0",
+      "text": "绘图缓冲区的高度。"
+    },
+    {
+      "id": "PerspectiveOffCenterFrustum#getPixelDimensions",
+      "field": "params/drawingBufferWidth/description",
+      "sourceHash": "sha256:d5007dd77da057140b1b0e0d36b2d29d47a0a4afc441ba9c2f73a8767736e0fd",
+      "text": "绘图缓冲区的宽度。"
+    },
+    {
+      "id": "PerspectiveOffCenterFrustum#getPixelDimensions",
+      "field": "params/pixelRatio/description",
+      "sourceHash": "sha256:bc5fdb8f8e5f1bd8459ac9013d3bbff7f1746174a7aa7d59698f1a00f08b1df7",
+      "text": "从像素空间到坐标空间的缩放因子。"
+    },
+    {
+      "id": "PerspectiveOffCenterFrustum#getPixelDimensions",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:d774e8c4ac7f14dd429fa28ffcb1c3f544007b86bb7d5050d9e8a9e4680b396c",
+      "text": "修改后的 result 参数，或新的 {@link Cartesian2} 实例，x 和 y 分别为像素对应的宽度和高度。"
+    },
+    {
+      "id": "PerspectiveOffCenterFrustum#infiniteProjectionMatrix",
+      "field": "description",
+      "sourceHash": "sha256:c67019f9abe5a414480d241a539f2885bdc679ac5a94bdecfaad32f8d07bce05",
+      "text": "获取根据视锥计算、远平面位于无穷远的透视投影矩阵。"
+    },
+    {
+      "id": "PerspectiveOffCenterFrustum#left",
+      "field": "description",
+      "sourceHash": "sha256:00b7621ba7cae49537da38ac1de46f7d5ae1a2b39a0996df531f2d17f9c9e515",
+      "text": "定义左裁剪平面。"
+    },
+    {
+      "id": "PerspectiveOffCenterFrustum#near",
+      "field": "description",
+      "sourceHash": "sha256:43611410457d573d7a44ce85dc6166bc5e35c90337d8b1d19411f57c2d4cfdd8",
+      "text": "近平面的距离。"
+    },
+    {
+      "id": "PerspectiveOffCenterFrustum#projectionMatrix",
+      "field": "description",
+      "sourceHash": "sha256:2f4e6822ba13ca1032e048e5c7820938ceaa73a29cda34f032eb7d56803dfed9",
+      "text": "获取根据视锥计算的透视投影矩阵。任意视锥参数变化时重新计算。"
+    },
+    {
+      "id": "PerspectiveOffCenterFrustum#right",
+      "field": "description",
+      "sourceHash": "sha256:4492d243efbbd53797b264601ad34407ef37ca5e403c09ad5f1a56c85f31c5f8",
+      "text": "定义右裁剪平面。"
+    },
+    {
+      "id": "PerspectiveOffCenterFrustum#top",
+      "field": "description",
+      "sourceHash": "sha256:ec2b1e9a1813f7c86e00be28155e33354c3f275e931fd192f08361d721a27072",
+      "text": "定义上裁剪平面。"
+    },
+    {
+      "id": "pointInsideTriangle",
+      "field": "description",
+      "sourceHash": "sha256:6f0e635ea23c55dd82688555727a184827c9150ff3a48e8ddc476e22c2fd0149",
+      "text": "判断点是否位于三角形内部。"
+    },
+    {
+      "id": "pointInsideTriangle",
+      "field": "params/p0/description",
+      "sourceHash": "sha256:89c31f300d161d978f684352abc2b41ab0e12d610442fcbe33f92c152380ff89",
+      "text": "三角形第一个顶点。"
+    },
+    {
+      "id": "pointInsideTriangle",
+      "field": "params/p1/description",
+      "sourceHash": "sha256:293ed94cf8823962ab908dc0d589134f3565bd3a208231cbcb7cf19b4c3163f6",
+      "text": "三角形第二个顶点。"
+    },
+    {
+      "id": "pointInsideTriangle",
+      "field": "params/p2/description",
+      "sourceHash": "sha256:3b52c9db3ca5d599cf1a14f627fd1663cffb280f04d6f2e630d6a061f1b64d77",
+      "text": "三角形第三个顶点。"
+    },
+    {
+      "id": "pointInsideTriangle",
+      "field": "params/point/description",
+      "sourceHash": "sha256:3f73300f8385026691be1fe865724e9ea4d5fc1b252ec4d7bf5592c0ae3ed19f",
+      "text": "要测试的点。"
+    },
+    {
+      "id": "pointInsideTriangle",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:1bdf573f42fb66cdd4c7343d909a0da151bed68f4b0dd9d3d68fb3f04d5dc231",
+      "text": "点位于三角形内部时为 <code>true</code>，否则为 <code>false</code>。"
+    },
+    {
+      "id": "Rotation.convertPackedArrayForInterpolation",
+      "field": "description",
+      "sourceHash": "sha256:2792a9777aaad22017035a1d187cc44590ea66757d493f7b66fc7bbcae496a6b",
+      "text": "将打包数组转换为适合插值的形式。"
+    },
+    {
+      "id": "Rotation.convertPackedArrayForInterpolation",
+      "field": "params/lastIndex/description",
+      "sourceHash": "sha256:2a850c6d4c4b5031bac27694d3c12a1489eb2da336f42f2be67cccaef5f51ed8",
+      "text": "要转换的最后一个元素索引。"
+    },
+    {
+      "id": "Rotation.convertPackedArrayForInterpolation",
+      "field": "params/startingIndex/description",
+      "sourceHash": "sha256:faab00d96044f72907dc7a5a0b8bb93bf8127d65dfc3f19aec8b4c5ac96c4e86",
+      "text": "要转换的第一个元素索引。"
+    },
+    {
+      "id": "Rotation.unpack",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:e915003e3c0fd8f27f156f39d1f5ebce17b03d286fe2d9c29dd15a8eb42fdce9",
+      "text": "修改后的 result 参数；未提供时返回新的 Rotation 实例。"
+    },
+    {
+      "id": "Rotation.unpackInterpolationResult",
+      "field": "description",
+      "sourceHash": "sha256:1995b301d33f520ba6cf869db255f2c169aa827e5a623490a3d54488e180447f",
+      "text": "从使用 {@link Rotation.convertPackedArrayForInterpolation} 转换后的打包数组中恢复实例。"
+    },
+    {
+      "id": "Rotation.unpackInterpolationResult",
+      "field": "params/array/description",
+      "sourceHash": "sha256:ae0d2b59dc0fbb76063293bedaf1b8daf4ca39ffe272c6f8efca76f517fbcb16",
+      "text": "先前为插值打包的数组。"
+    },
+    {
+      "id": "Rotation.unpackInterpolationResult",
+      "field": "params/firstIndex/description",
+      "sourceHash": "sha256:890561fc06aa9def91651614a79a5396a31b30283d381f57ea955a31add2beab",
+      "text": "转换数组时使用的 firstIndex。"
+    },
+    {
+      "id": "Rotation.unpackInterpolationResult",
+      "field": "params/lastIndex/description",
+      "sourceHash": "sha256:88933f5c598f1ff17e6cebaa4ea1036a66591feea021b7d2e685d5aa96ac75a7",
+      "text": "转换数组时使用的 lastIndex。"
+    },
+    {
+      "id": "Rotation.unpackInterpolationResult",
+      "field": "params/sourceArray/description",
+      "sourceHash": "sha256:af94b0be92ce77b930f8c97739965f40c501ecd3d194cb7cc026d83b83061132",
+      "text": "原始打包数组。"
+    },
+    {
+      "id": "Rotation.unpackInterpolationResult",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:e915003e3c0fd8f27f156f39d1f5ebce17b03d286fe2d9c29dd15a8eb42fdce9",
+      "text": "修改后的 result 参数；未提供时返回新的 Rotation 实例。"
+    },
+    {
+      "id": "Rotation",
+      "field": "description",
+      "sourceHash": "sha256:6c9f237b2bbc685d166fc88dfeddd55ea80d41250ea3ba16821cfb27ab7a9e82",
+      "text": "表示一种 {@link Packable} 数值，始终沿最短旋转角方向插值。此对象不直接使用，而是传给 {@link SampledProperty} 构造函数，用于表示二维旋转角。"
+    },
+    {
+      "id": "Spherical.clone",
+      "field": "description",
+      "sourceHash": "sha256:ce64b550b223057f7cdb7b58172f7d7ac72482400709aa79dc90d25c6a4b5342",
+      "text": "复制 Spherical 实例。"
+    },
+    {
+      "id": "Spherical.clone",
+      "field": "params/result/description",
+      "sourceHash": "sha256:ac34ba1a437b887753d9e1de75e4905eb3b2e065a76218842acf044322f8122c",
+      "text": "用于存储结果的对象。为 undefined 时创建新实例。"
+    },
+    {
+      "id": "Spherical.clone",
+      "field": "params/spherical/description",
+      "sourceHash": "sha256:3c767bc231ac2fded4239f974b30affe320b8dc2d3d3da3a28b0d992df01aa75",
+      "text": "要复制的球坐标。"
+    },
+    {
+      "id": "Spherical.clone",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:a7bc3f5037e22b757e4a7cc96b29fc605c2b652ec5b9954426ad11f7e8e507f8",
+      "text": "修改后的 result 参数；result 为 undefined 时返回新实例。spherical 为 undefined 时返回 undefined。"
+    },
+    {
+      "id": "Spherical.equals",
+      "field": "description",
+      "sourceHash": "sha256:ab0934e34bae012b6ad9316bd93ca9efce2587d73d48ebf2ae6d45c4e29ab798",
+      "text": "第一个球坐标与第二个相等时返回 true，否则返回 false。"
+    },
+    {
+      "id": "Spherical.equals",
+      "field": "params/left/description",
+      "sourceHash": "sha256:2ead2b89eec6b2eb1a4e514337c3d07d84c266a0878be18b10e0c8e44e1929cc",
+      "text": "第一个用于比较的 Spherical。"
+    },
+    {
+      "id": "Spherical.equals",
+      "field": "params/right/description",
+      "sourceHash": "sha256:d2e4a181498a8fbead36bed9dfe82003a5a5d0149cf362259faa19ee94d58ea8",
+      "text": "第二个用于比较的 Spherical。"
+    },
+    {
+      "id": "Spherical.equals",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:5c223e71671041b280001f1d71a5052627a0ebe3a2ff73723e068fce2eb709c3",
+      "text": "第一个球坐标与第二个相等时为 true，否则为 false。"
+    },
+    {
+      "id": "Spherical.equalsEpsilon",
+      "field": "description",
+      "sourceHash": "sha256:392aec64a1548f3419b05d4a30878d0aef6745b08a4c24b3fe08f065f77e4590",
+      "text": "两个球坐标的差异在给定 epsilon 范围内时返回 true，否则返回 false。"
+    },
+    {
+      "id": "Spherical.equalsEpsilon",
+      "field": "params/epsilon/description",
+      "sourceHash": "sha256:5c93bc0a2240653233563f1fac99d5c92557c902febc4838f79b0a000307bcff",
+      "text": "比较所用的 epsilon。"
+    },
+    {
+      "id": "Spherical.equalsEpsilon",
+      "field": "params/left/description",
+      "sourceHash": "sha256:2ead2b89eec6b2eb1a4e514337c3d07d84c266a0878be18b10e0c8e44e1929cc",
+      "text": "第一个用于比较的 Spherical。"
+    },
+    {
+      "id": "Spherical.equalsEpsilon",
+      "field": "params/right/description",
+      "sourceHash": "sha256:d2e4a181498a8fbead36bed9dfe82003a5a5d0149cf362259faa19ee94d58ea8",
+      "text": "第二个用于比较的 Spherical。"
+    },
+    {
+      "id": "Spherical.equalsEpsilon",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:4a2a6eac1bdf9325c340f51094d1e7576d439dde0d916091a56175297214a163",
+      "text": "两个球坐标的差异在给定 epsilon 范围内时为 true，否则为 false。"
+    },
+    {
+      "id": "Spherical.fromCartesian3",
+      "field": "description",
+      "sourceHash": "sha256:d1bf7b8c04171161a202d5c23d939bb9b9b204e1bbb0430cd28d52fb0dea0939",
+      "text": "将给定 Cartesian3 转换为球坐标。"
+    },
+    {
+      "id": "Spherical.fromCartesian3",
+      "field": "params/cartesian3/description",
+      "sourceHash": "sha256:3c230e3e179d065014bc1aa0c107a73bc065abe6b964ee6472ecd78f702bb8c5",
+      "text": "要转换为球坐标的 Cartesian3。"
+    },
+    {
+      "id": "Spherical.fromCartesian3",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:e1524c14c2ac2fe5de11b657d24671387501c88a1f5924af7e3ee6662a0e89b3",
+      "text": "修改后的 result 参数；未提供时返回新实例。"
+    },
+    {
+      "id": "Spherical.normalize",
+      "field": "description",
+      "sourceHash": "sha256:4ada906df72ebf7cab35b860e3cb3be233d35603ee545215c1403267fd8d6f9c",
+      "text": "计算给定球坐标的归一化形式。"
+    },
+    {
+      "id": "Spherical.normalize",
+      "field": "params/result/description",
+      "sourceHash": "sha256:ac34ba1a437b887753d9e1de75e4905eb3b2e065a76218842acf044322f8122c",
+      "text": "用于存储结果的对象。为 undefined 时创建新实例。"
+    },
+    {
+      "id": "Spherical.normalize",
+      "field": "params/spherical/description",
+      "sourceHash": "sha256:54ed82105980be60a43aee5f09f72432094007e45eae801fd4300ceb8a735705",
+      "text": "要归一化的球坐标。"
+    },
+    {
+      "id": "Spherical.normalize",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:74e3885f0a5efb2f80b1b847fd2364ab4c6843c07578e533b6181c4d293cde39",
+      "text": "修改后的 result 参数；若 result 为 undefined，则返回新实例。"
+    },
+    {
+      "id": "Spherical",
+      "field": "description",
+      "sourceHash": "sha256:b9c236cc52ac5f82674c7b220feaf5d9d089a9c6c8d5af227ad27df558945c26",
+      "text": "一组三维曲线坐标。"
+    },
+    {
+      "id": "Spherical",
+      "field": "params/clock/description",
+      "sourceHash": "sha256:8415f5d05c14e5ee30c0c5a94e3115302477e03c91b1d90ec5c8846bed69addd",
+      "text": "在 xy 平面内，从正 x 轴向正 y 轴方向测量的角坐标。"
+    },
+    {
+      "id": "Spherical",
+      "field": "params/cone/description",
+      "sourceHash": "sha256:b109a92c37f87e322897b1a22092a093e64e9797c1cc29c71c108fbd8d7ca02e",
+      "text": "从正 z 轴向负 z 轴方向测量的角坐标。"
+    },
+    {
+      "id": "Spherical",
+      "field": "params/magnitude/description",
+      "sourceHash": "sha256:4ef2c1f7045c21b8cfab60431d0012a332f3d1ef8b247d2152f44e05ca3ff019",
+      "text": "从原点量起的线性坐标。"
+    },
+    {
+      "id": "Spherical#clock",
+      "field": "description",
+      "sourceHash": "sha256:2678dc7ba5259ae0de54fa8167ad6e900f4ba1350ef7f76450ffd7e9fdcc1fdf",
+      "text": "方位角 clock 分量。"
+    },
+    {
+      "id": "Spherical#clone",
+      "field": "description",
+      "sourceHash": "sha256:14d0b5af1ddaadaaedd0dbab034427e75aecb275ab3680dae968a0a09028df4f",
+      "text": "复制此 Spherical 实例。"
+    },
+    {
+      "id": "Spherical#clone",
+      "field": "params/result/description",
+      "sourceHash": "sha256:ac34ba1a437b887753d9e1de75e4905eb3b2e065a76218842acf044322f8122c",
+      "text": "用于存储结果的对象。为 undefined 时创建新实例。"
+    },
+    {
+      "id": "Spherical#clone",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:74e3885f0a5efb2f80b1b847fd2364ab4c6843c07578e533b6181c4d293cde39",
+      "text": "修改后的 result 参数；若 result 为 undefined，则返回新实例。"
+    },
+    {
+      "id": "Spherical#cone",
+      "field": "description",
+      "sourceHash": "sha256:5d8de293901f38ede80a71e592a673db42fbc58c1e815998a897c5afa2b29cef",
+      "text": "锥角 cone 分量。"
+    },
+    {
+      "id": "Spherical#equals",
+      "field": "description",
+      "sourceHash": "sha256:c2b400f31e9486aeead0bdc7d879f4ed3adaa629f6177228fca19f70ecf28cb4",
+      "text": "此球坐标与给定球坐标相等时返回 true，否则返回 false。"
+    },
+    {
+      "id": "Spherical#equals",
+      "field": "params/other/description",
+      "sourceHash": "sha256:058a22810f5fa19a05919ad3f68fda689a4fb59b055596fa10315e905d682628",
+      "text": "用于比较的 Spherical。"
+    },
+    {
+      "id": "Spherical#equals",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:e8b1bca4d250f122449890761a73f2afaf1ce904e804e7ac523314016ef6a68e",
+      "text": "此球坐标与给定球坐标相等时为 true，否则为 false。"
+    },
+    {
+      "id": "Spherical#equalsEpsilon",
+      "field": "description",
+      "sourceHash": "sha256:f21dd07e25fc0dd846bf7b2c525c3060a864a5d27b433e92b4b6d9a45a33d4f0",
+      "text": "此球坐标与给定球坐标的差异在 epsilon 范围内时返回 true，否则返回 false。"
+    },
+    {
+      "id": "Spherical#equalsEpsilon",
+      "field": "params/epsilon/description",
+      "sourceHash": "sha256:5c93bc0a2240653233563f1fac99d5c92557c902febc4838f79b0a000307bcff",
+      "text": "比较所用的 epsilon。"
+    },
+    {
+      "id": "Spherical#equalsEpsilon",
+      "field": "params/other/description",
+      "sourceHash": "sha256:058a22810f5fa19a05919ad3f68fda689a4fb59b055596fa10315e905d682628",
+      "text": "用于比较的 Spherical。"
+    },
+    {
+      "id": "Spherical#equalsEpsilon",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:191fb4b25e3744475055a3e108ea034a0f19e3fc87717650ed80c3dfec941f80",
+      "text": "此球坐标与给定球坐标的差异在 epsilon 范围内时为 true，否则为 false。"
+    },
+    {
+      "id": "Spherical#magnitude",
+      "field": "description",
+      "sourceHash": "sha256:3aae9909310617d3759590c236421272eb2fe4897e802c041f5767d6873f7414",
+      "text": "径向长度 magnitude 分量。"
+    },
+    {
+      "id": "Spherical#toString",
+      "field": "description",
+      "sourceHash": "sha256:1bd8669b9e92fea3bb53a1309c8a6420bdf88c754c2a3efce27255e86f042cd8",
+      "text": "返回以 (clock, cone, magnitude) 格式表示此实例的字符串。"
+    },
+    {
+      "id": "Spherical#toString",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:b5914af4206fd5326d841ed7c8269c7291c1633f03b702bb82999a108e3643c4",
+      "text": "表示此实例的字符串。"
+    },
+    {
+      "id": "Stereographic.clone",
+      "field": "description",
+      "sourceHash": "sha256:f112e1a6a1cc01583358b3172a965a8eb689e60875f8f9146e1659817e1a5194",
+      "text": "复制 Stereographic 实例。"
+    },
+    {
+      "id": "Stereographic.clone",
+      "field": "params/stereographic/description",
+      "sourceHash": "sha256:7c0ba0b17864f58d8586c20a24388f3f1a35cbf563bfc21fd2a34ad81413debb",
+      "text": "要复制的 Stereographic。"
+    },
+    {
+      "id": "Stereographic.clone",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:034f5f5a4426fb4aadc67b38ea1bf1090d8a15ffa8252616b979df8c73e4d20b",
+      "text": "修改后的 result 参数；未提供时返回新的 Stereographic 实例。stereographic 为 undefined 时返回 undefined。"
+    },
+    {
+      "id": "Stereographic.fromCartesian",
+      "field": "description",
+      "sourceHash": "sha256:13101d1fc816813f2ef702861ac29e3a31ccb14c1dc62b6a5de2a6fb0eb2daf0",
+      "text": "沿从指定原点向外的径向，将给定三维位置投影到二维极区平面。"
+    },
+    {
+      "id": "Stereographic.fromCartesian",
+      "field": "params/cartesian/description",
+      "sourceHash": "sha256:83485bbfd45a151eb121a19f58bc3310d93719137667579e74feb6b283091192",
+      "text": "要投影的点。"
+    },
+    {
+      "id": "Stereographic.fromCartesian",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:a3be4f932b141a96ef1f6df5d3f39ef5a7e5e4541eb2fc107a37e8b8df97bb23",
+      "text": "修改后的 result 参数；未提供时返回新的 Stereographic 实例。"
+    },
+    {
+      "id": "Stereographic.fromCartesianArray",
+      "field": "description",
+      "sourceHash": "sha256:3d9194e2d936f7fc1b8289132a0091abdb2008c6cf3ef57f784c7d33f4ffa453",
+      "text": "沿从指定原点向外的径向，将给定三维位置数组投影到二维极区平面。"
+    },
+    {
+      "id": "Stereographic.fromCartesianArray",
+      "field": "params/cartesians/description",
+      "sourceHash": "sha256:0f3aad6bcfac7570d546a8a7af8cabba265adb490c884415ebda836cda2299f9",
+      "text": "要投影的点。"
+    },
+    {
+      "id": "Stereographic.fromCartesianArray",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:a3be4f932b141a96ef1f6df5d3f39ef5a7e5e4541eb2fc107a37e8b8df97bb23",
+      "text": "修改后的 result 参数；未提供时返回新的 Stereographic 实例。"
+    },
+    {
+      "id": "Stereographic.HALF_UNIT_SPHERE",
+      "field": "description",
+      "sourceHash": "sha256:d8cdb373149a652d84694b83c27b2eb420af594e9a3c640844ea1fd1267a606f",
+      "text": "半径初始化为 (0.5, 0.5, 0.5) 的 Ellipsoid 实例。"
+    },
+    {
+      "id": "Stereographic",
+      "field": "description",
+      "sourceHash": "sha256:f652b68b44bd45758daeb474c5f26f859b7a0abaf5769353b9b986a8d8fef8c2",
+      "text": "表示极射赤平投影坐标中的点，可通过从一个极点将笛卡尔位置投影到另一极点处的切平面得到。此投影保持穿过投影中心的各大圆之间的相对方向关系。为在各处保持角度，它采用保角投影，将点投影到一个辅助球面。"
+    },
+    {
+      "id": "Stereographic",
+      "field": "params/position/description",
+      "sourceHash": "sha256:628078321667265376c52a0969779898f8d2c76e5ce3bd5be2da5bc11cb7fdb5",
+      "text": "极射赤平投影坐标。"
+    },
+    {
+      "id": "Stereographic",
+      "field": "params/tangentPlane/description",
+      "sourceHash": "sha256:931d675567cd4088b98922f4de0ffc3603e6ccd1f79d5fe7ba9a3cec07f7b20d",
+      "text": "点投影到的切平面。"
+    },
+    {
+      "id": "Stereographic#conformalLatitude",
+      "field": "description",
+      "sourceHash": "sha256:3e729df263dc0137c3733e6c2841029eb9582c65220c6a78a7248dc168781ffb",
+      "text": "计算保角纬度，即椭球纬度投影到辅助球面后对应的纬度。"
+    },
+    {
+      "id": "Stereographic#ellipsoid",
+      "field": "description",
+      "sourceHash": "sha256:f0902e6fbd18e7715d18392415994043c17facedd3ff884ce00bf469d1f8616e",
+      "text": "获取椭球。"
+    },
+    {
+      "id": "Stereographic#getLatitude",
+      "field": "description",
+      "sourceHash": "sha256:625fa3b887763011284e273e57f11359ee18273e52ad24ccd6c73ec0014427b6",
+      "text": "根据椭球计算纬度。"
+    },
+    {
+      "id": "Stereographic#getLatitude",
+      "field": "params/ellipsoid/description",
+      "sourceHash": "sha256:aba0a0edb70acfd3df58d67d34591d7a9c1a2ee51c1782783dd33ad95d77ad3b",
+      "text": "用于计算纬度的椭球。"
+    },
+    {
+      "id": "Stereographic#getLatitude",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:90cd4370b1f28574fc659f95c31e7cf74d70f192807115b6b6685e170e32947c",
+      "text": "纬度。"
+    },
+    {
+      "id": "Stereographic#longitude",
+      "field": "description",
+      "sourceHash": "sha256:a30595930b866b5e5a70c54cf04248f28b4fe317e22da21fc2d216a14b26d9c3",
+      "text": "计算经度。"
+    },
+    {
+      "id": "Stereographic#x",
+      "field": "description",
+      "sourceHash": "sha256:f5cc9f67d7d162fd22e178c29f5dc3d82122840bc0b36bb243f3d2f7bc5f8439",
+      "text": "获取 x 坐标。"
+    },
+    {
+      "id": "Stereographic#y",
+      "field": "description",
+      "sourceHash": "sha256:478ba403490fed52e0635bdfa55ec258d0650ad5620a6c7d437d519e6b47791b",
+      "text": "获取 y 坐标。"
+    },
+    {
+      "id": "TranslationRotationScale",
+      "field": "description",
+      "sourceHash": "sha256:8686fc2443e71f7c38de711b4cd36e16a2eddb0c46e9165fa5e192292fef85c3",
+      "text": "由平移、旋转和缩放定义的仿射变换。"
+    },
+    {
+      "id": "TranslationRotationScale",
+      "field": "params/rotation/description",
+      "sourceHash": "sha256:0111d5f5e8ff5284705a458694dba96fafbf825931a606557d82d936c3670df4",
+      "text": "指定应用到节点的 (x, y, z, w) 旋转的 {@link Quaternion}。"
+    },
+    {
+      "id": "TranslationRotationScale",
+      "field": "params/scale/description",
+      "sourceHash": "sha256:98d99d0d2af259337cbf522732ddc0a32ed374e8f451561dbe61285a6bf21a4a",
+      "text": "指定应用到节点的 (x, y, z) 缩放的 {@link Cartesian3}。"
+    },
+    {
+      "id": "TranslationRotationScale",
+      "field": "params/translation/description",
+      "sourceHash": "sha256:e95be2414432d033fd03d8106e019c96eacf19a56fa75e5a43bca8a04a678b4d",
+      "text": "指定应用到节点的 (x, y, z) 平移的 {@link Cartesian3}。"
+    },
+    {
+      "id": "TranslationRotationScale#equals",
+      "field": "description",
+      "sourceHash": "sha256:0c9791e90bc41d145c7a4c5113c19224eac44306aaa5d978a43c999b60e42525",
+      "text": "比较此实例与给定实例，相等时返回 <code>true</code>，否则返回 <code>false</code>。"
+    },
+    {
+      "id": "TranslationRotationScale#equals",
+      "field": "params/right/description",
+      "sourceHash": "sha256:201987b0fa80abcd7efc0cb6ad07261e331227ccab973e84889d60a8c80a5e8a",
+      "text": "右侧 TranslationRotationScale。"
+    },
+    {
+      "id": "TranslationRotationScale#rotation",
+      "field": "description",
+      "sourceHash": "sha256:267142a40d4e11b1212bfcf67d5e8585ef58cd4d27f14b129fc3249ffc00d0b8",
+      "text": "获取或设置应用到节点的 (x, y, z, w) 旋转。"
+    },
+    {
+      "id": "TranslationRotationScale#scale",
+      "field": "description",
+      "sourceHash": "sha256:7499158a5eba9bd05fb849c83efa0770d788b409a7c4c8b013ba1f0c9fbda846",
+      "text": "获取或设置应用到节点的 (x, y, z) 缩放。"
+    },
+    {
+      "id": "TranslationRotationScale#translation",
+      "field": "description",
+      "sourceHash": "sha256:f4272208a8743b3b02510b97013ec2b8b7c5f0b7c4d102427790c32c024d3506",
+      "text": "获取或设置应用到节点的 (x, y, z) 平移。"
+    },
+    {
+      "id": "Visibility.FULL",
+      "field": "description",
+      "sourceHash": "sha256:f43ccbbf84a057f3d48d340c9aaa6867eeeff7b397a5dedf455ad04138f1c0b2",
+      "text": "表示对象全部可见。"
+    },
+    {
+      "id": "Visibility.NONE",
+      "field": "description",
+      "sourceHash": "sha256:c68b563b2be0edd6fe5f9f3903b4c259535ad83a85e1e4ae0a6c350de6e73654",
+      "text": "表示对象的任何部分都不可见。"
+    },
+    {
+      "id": "Visibility.PARTIAL",
+      "field": "description",
+      "sourceHash": "sha256:6376a29a11edd45cd5cef6cc9f2bec630a25d72b4fa7a3eb72cabae6e4791716",
+      "text": "表示对象部分可见，但并非全部可见。"
+    },
+    {
+      "id": "Visibility",
+      "field": "description",
+      "sourceHash": "sha256:f40062277897e4c15a30522f1c223d34efc30c233584ce57ba1623c2ff0894e3",
+      "text": "用于判断地平线剔除中被遮挡对象可见程度的枚举。遮挡体可完全挡住对象、部分挡住对象，或完全不挡住，分别对应不可见、部分可见和完全可见。"
+    },
+    {
+      "id": "Visibility",
+      "field": "properties/FULL/description",
+      "sourceHash": "sha256:f43ccbbf84a057f3d48d340c9aaa6867eeeff7b397a5dedf455ad04138f1c0b2",
+      "text": "表示对象全部可见。"
+    },
+    {
+      "id": "Visibility",
+      "field": "properties/NONE/description",
+      "sourceHash": "sha256:c68b563b2be0edd6fe5f9f3903b4c259535ad83a85e1e4ae0a6c350de6e73654",
+      "text": "表示对象的任何部分都不可见。"
+    },
+    {
+      "id": "Visibility",
+      "field": "properties/PARTIAL/description",
+      "sourceHash": "sha256:6376a29a11edd45cd5cef6cc9f2bec630a25d72b4fa7a3eb72cabae6e4791716",
+      "text": "表示对象部分可见，但并非全部可见。"
+    }
+  ]
+}

@@ -65,8 +65,10 @@ phases, each reviewed and committed before the next begins. No new runtime or ge
 - [T3 rendering](2026-10-30-t3-rendering-translation.md): completed and reviewed; 1,560 new
   records complete 80 roots and reach 63.1% coverage. Checkpoint `1b84d87298`.
 - [T4 entity data](2026-10-30-t4-data-translation.md): completed and reviewed; 1,471 new
-  records complete 91 roots and reach 72.7% coverage. Ready for its checkpoint.
-- Geometry/numerics and remainder phases will be elaborated after each checkpoint.
+  records complete 91 roots and reach 72.7% coverage. Checkpoint `e8224e7504`.
+- [T5 geometry/numerics](2026-10-30-t5-geometry-translation.md): completed and reviewed;
+  1,547 new records complete 95 roots and reach 82.8% coverage. Ready for its checkpoint.
+- Remaining widgets/input, metadata/providers and utilities will be elaborated after each checkpoint.
 - Remainder and final gate: cover every remaining native field, resolve changed/unused
   catalog records, and verify missing/stale/unused are all zero. Preserve semantic metadata,
   code, links and Chinese owned-source separation throughout.

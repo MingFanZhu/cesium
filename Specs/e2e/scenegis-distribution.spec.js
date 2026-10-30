@@ -395,3 +395,32 @@ test("entity data documentation displays temporal evaluation and reusable cluste
   });
   expect(errors).toEqual([]);
 });
+
+test("geometry documentation displays parameter time and encoded attribute layout", async ({
+  page,
+}, info) => {
+  const errors = [];
+  page.on("pageerror", (error) => errors.push(error.message));
+  page.on("response", (response) => {
+    if (response.status() >= 400) {
+      errors.push(`${response.status()} ${response.url()}`);
+    }
+  });
+  await page.route(/^https?:\/\/(?!127\.0\.0\.1:8104)/, (route) =>
+    route.abort(),
+  );
+  const prefix = "/deep/site/vendor/engine/Documentation/";
+  await page.goto(`${prefix}CatmullRomSpline.html`);
+  await expect(page.locator("#main")).toContainText("与时钟时间没有关联");
+  await page.goto(`${prefix}Geometry.html#attributes`);
+  await expect(page.locator('[id="attributes"]')).toBeVisible();
+  await expect(page.locator("#main")).toContainText("分量数量沿用源属性");
+  await expect(page.locator("#main")).toContainText("非交错存储");
+  await info.attach("geometry-documentation", {
+    body: await page.screenshot({
+      path: info.outputPath("geometry-documentation.png"),
+    }),
+    contentType: "image/png",
+  });
+  expect(errors).toEqual([]);
+});

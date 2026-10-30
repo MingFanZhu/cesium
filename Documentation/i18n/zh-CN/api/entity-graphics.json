@@ -2964,7 +2964,7 @@
       "id": "RectangleGraphics.ConstructorOptions",
       "field": "properties/rotation/description",
       "sourceHash": "sha256:aab538cbcb1d2e2afdd470dfc18c1f7b99daf8bd21fc74c6bc6c9ffe2c1f83ca",
-      "text": "指定矩形从北方向顺时针旋转角度的数值 Property。"
+      "text": "指定矩形从北方向逆时针旋转角度的数值 Property。"
     },
     {
       "id": "RectangleGraphics.ConstructorOptions",
@@ -3078,7 +3078,7 @@
       "id": "RectangleGraphics#rotation",
       "field": "description",
       "sourceHash": "sha256:fb98c173b6b8781a86d23d325672a649c9ef16a1c6ccbf29074485f10a38ce2d",
-      "text": "获取或设置指定矩形从北方向顺时针旋转角度的数值 Property。"
+      "text": "获取或设置指定矩形从北方向逆时针旋转角度的数值 Property。"
     },
     {
       "id": "RectangleGraphics#shadows",

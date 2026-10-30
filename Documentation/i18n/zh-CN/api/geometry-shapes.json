@@ -1,0 +1,2538 @@
+{
+  "schemaVersion": 1,
+  "locale": "zh-CN",
+  "entries": [
+    {
+      "id": "BoxGeometry.createGeometry",
+      "field": "description",
+      "sourceHash": "sha256:bebb1e3e353079f7c4bb64580268e62282aa13aa1acbed4344925611f2183945",
+      "text": "计算盒体的几何表示，包括顶点、索引和包围球。"
+    },
+    {
+      "id": "BoxGeometry.createGeometry",
+      "field": "params/boxGeometry/description",
+      "sourceHash": "sha256:b4f0bf11b204f520d034df11b96450da4b896486b09b358f0b34b04c0b7e6327",
+      "text": "盒体的描述。"
+    },
+    {
+      "id": "BoxGeometry.fromAxisAlignedBoundingBox",
+      "field": "description",
+      "sourceHash": "sha256:ed88402a76f1c8692d7a115371a1812aab5806de1d40117e34d859f38b8ef771",
+      "text": "根据 AxisAlignedBoundingBox 的尺寸创建盒体。"
+    },
+    {
+      "id": "BoxGeometry.fromAxisAlignedBoundingBox",
+      "field": "params/boundingBox/description",
+      "sourceHash": "sha256:3cb34157280f2e112021c7886fcdf71dff7ac92e60560edb2c1c6b9092400d8c",
+      "text": "AxisAlignedBoundingBox 的描述。"
+    },
+    {
+      "id": "BoxGeometry.fromDimensions",
+      "field": "description",
+      "sourceHash": "sha256:e9f4cd643b521fe2525b5120d01dedb741189051eba7e92fc03125182395be4d",
+      "text": "根据尺寸创建以原点为中心的盒体。"
+    },
+    {
+      "id": "BoxGeometry.fromDimensions",
+      "field": "exceptions/0/description",
+      "sourceHash": "sha256:f62b8042cf3208d2425a1b3ff48ef849df9c31175ccbfb49958ad698fdd51910",
+      "text": "尺寸的全部分量必须大于等于零。"
+    },
+    {
+      "id": "BoxGeometry.fromDimensions",
+      "field": "params/options.dimensions/description",
+      "sourceHash": "sha256:ecad5f883f321ea0ac2a88541ab012345f5242d29ad57f0c2cdbfa2103a9fe9c",
+      "text": "盒体宽度、深度和高度，依次存储在 <code>Cartesian3</code> 的 x、y、z 分量中。"
+    },
+    {
+      "id": "BoxGeometry.unpack",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:95ea5fbb433041d5c37457c97a6bd1c94ed60038cc4a62bc6ceb47c1b4de1cea",
+      "text": "修改后的 result 参数；未提供时返回新的 BoxGeometry 实例。"
+    },
+    {
+      "id": "BoxGeometry",
+      "field": "description",
+      "sourceHash": "sha256:4588f1117bac4253fca5697438fb30622f5af1f30dd89af81e3459995909efa7",
+      "text": "根据最小和最大坐标定义的盒体。"
+    },
+    {
+      "id": "BoxGeometry",
+      "field": "params/options.maximum/description",
+      "sourceHash": "sha256:900bbe9b56d37ada290c1a9a60fad107ae49febe72509c2cc22ad82005ae368f",
+      "text": "盒体的最大 x、y、z 坐标。"
+    },
+    {
+      "id": "BoxGeometry",
+      "field": "params/options.minimum/description",
+      "sourceHash": "sha256:54cd34d0c8921cf14cedd0a5bc2dd660a20759d830852d4c3aaa44ab3a82e800",
+      "text": "盒体的最小 x、y、z 坐标。"
+    },
+    {
+      "id": "BoxOutlineGeometry.createGeometry",
+      "field": "description",
+      "sourceHash": "sha256:37c44565c00689bd24f86d8dad9378333c0caa1c45708719b407a4a4dea71b04",
+      "text": "计算盒体轮廓的几何表示，包括顶点、索引和包围球。"
+    },
+    {
+      "id": "BoxOutlineGeometry.createGeometry",
+      "field": "params/boxGeometry/description",
+      "sourceHash": "sha256:9c886f5ffb7443eb1f0336446d844233ccd8a6c44183112ff2a560ed6f9e5cc0",
+      "text": "盒体轮廓的描述。"
+    },
+    {
+      "id": "BoxOutlineGeometry.fromAxisAlignedBoundingBox",
+      "field": "description",
+      "sourceHash": "sha256:b6ba8fcea4c09734923193962f360ec574505f5ed843ed7ffede4c8eb942b8b4",
+      "text": "根据 AxisAlignedBoundingBox 的尺寸创建盒体轮廓。"
+    },
+    {
+      "id": "BoxOutlineGeometry.fromAxisAlignedBoundingBox",
+      "field": "params/boundingBox/description",
+      "sourceHash": "sha256:3cb34157280f2e112021c7886fcdf71dff7ac92e60560edb2c1c6b9092400d8c",
+      "text": "AxisAlignedBoundingBox 的描述。"
+    },
+    {
+      "id": "BoxOutlineGeometry.fromDimensions",
+      "field": "description",
+      "sourceHash": "sha256:3f9c15990f2e3264aef30ef60ee2c849ae7c4fe5655f4564f4c999d8ab03d1ab",
+      "text": "根据尺寸创建以原点为中心的盒体轮廓。"
+    },
+    {
+      "id": "BoxOutlineGeometry.fromDimensions",
+      "field": "exceptions/0/description",
+      "sourceHash": "sha256:f62b8042cf3208d2425a1b3ff48ef849df9c31175ccbfb49958ad698fdd51910",
+      "text": "尺寸的全部分量必须大于等于零。"
+    },
+    {
+      "id": "BoxOutlineGeometry.fromDimensions",
+      "field": "params/options.dimensions/description",
+      "sourceHash": "sha256:ecad5f883f321ea0ac2a88541ab012345f5242d29ad57f0c2cdbfa2103a9fe9c",
+      "text": "盒体宽度、深度和高度，依次存储在 <code>Cartesian3</code> 的 x、y、z 分量中。"
+    },
+    {
+      "id": "BoxOutlineGeometry.unpack",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:eca94b82e46c0fd861b2dd7b9d9582692d3b2b84ac36d50b548fcfd1bb423094",
+      "text": "修改后的 result 参数；未提供时返回新的 BoxOutlineGeometry 实例。"
+    },
+    {
+      "id": "BoxOutlineGeometry",
+      "field": "description",
+      "sourceHash": "sha256:e8c2b44fb070ce29c6dedba6a1bb716715a23a361012e29f7c485c402fb89198",
+      "text": "根据最小和最大坐标定义的盒体轮廓。"
+    },
+    {
+      "id": "BoxOutlineGeometry",
+      "field": "params/options.maximum/description",
+      "sourceHash": "sha256:900bbe9b56d37ada290c1a9a60fad107ae49febe72509c2cc22ad82005ae368f",
+      "text": "盒体的最大 x、y、z 坐标。"
+    },
+    {
+      "id": "BoxOutlineGeometry",
+      "field": "params/options.minimum/description",
+      "sourceHash": "sha256:54cd34d0c8921cf14cedd0a5bc2dd660a20759d830852d4c3aaa44ab3a82e800",
+      "text": "盒体的最小 x、y、z 坐标。"
+    },
+    {
+      "id": "CircleGeometry.createGeometry",
+      "field": "description",
+      "sourceHash": "sha256:1f49e1f26ed5c42041d2179ca46d836481ebc39416f71c048be9bae75ab8746c",
+      "text": "计算椭球表面圆的几何表示，包括顶点、索引和包围球。"
+    },
+    {
+      "id": "CircleGeometry.createGeometry",
+      "field": "params/circleGeometry/description",
+      "sourceHash": "sha256:5176cbcce7956f794e94ac5ee683caacb5c5dc259cdcaa81378abc7e7d252526",
+      "text": "圆的描述。"
+    },
+    {
+      "id": "CircleGeometry.unpack",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:3af833d3cde41113b2a692e0aafe8cd2813a6580ce29ff6df6505b891a19f606",
+      "text": "修改后的 result 参数；未提供时返回新的 CircleGeometry 实例。"
+    },
+    {
+      "id": "CircleGeometry",
+      "field": "description",
+      "sourceHash": "sha256:461d9d005aedc39d7e345e2928c705e5303d70f8c576645ac8806764f8fc8aae",
+      "text": "椭球表面圆的描述。可使用 {@link Primitive} 或 {@link GroundPrimitive} 渲染。"
+    },
+    {
+      "id": "CircleGeometry",
+      "field": "exceptions/0/description",
+      "sourceHash": "sha256:fb51fc9615946f574f3c6a6462c14732ac8cdaba6996aa0a5651f260f7a26eb9",
+      "text": "radius 必须大于零。"
+    },
+    {
+      "id": "CircleGeometry",
+      "field": "exceptions/1/description",
+      "sourceHash": "sha256:9367f7a9705ff41479f51ec72a49b55b65c10520679d84ecdef11206bf18154d",
+      "text": "granularity 必须大于零。"
+    },
+    {
+      "id": "CircleGeometry",
+      "field": "params/options.center/description",
+      "sourceHash": "sha256:507552af1d07f5c80341b543f1d70e0fc3c20fc70fee2d5dcb6d12b43790fb8e",
+      "text": "固定参考系中的圆心位置。"
+    },
+    {
+      "id": "CircleGeometry",
+      "field": "params/options.ellipsoid/description",
+      "sourceHash": "sha256:5640026a7104313dd9cce4aed88f82d0fb6062841a6208dd25544965c252d444",
+      "text": "圆所在的椭球。"
+    },
+    {
+      "id": "CircleGeometry",
+      "field": "params/options.extrudedHeight/description",
+      "sourceHash": "sha256:930f5eef3d5d3cb1f5be73033e8069b9daa0743280f5403b663bd3c2674e0d57",
+      "text": "圆的拉伸面相对于椭球表面的高度，单位为米。"
+    },
+    {
+      "id": "CircleGeometry",
+      "field": "params/options.granularity/description",
+      "sourceHash": "sha256:db46897b5860990aed6354b41a59f7700d46e258ede25279bbf7fbf835b25faf",
+      "text": "圆上相邻采样点的角度间隔，单位为弧度。"
+    },
+    {
+      "id": "CircleGeometry",
+      "field": "params/options.height/description",
+      "sourceHash": "sha256:083ae2a4b50b125ee5f53e06d48aa2dbcc53063cbcaf6685e9e28c3090787051",
+      "text": "圆相对于椭球表面的高度，单位为米。"
+    },
+    {
+      "id": "CircleGeometry",
+      "field": "params/options.radius/description",
+      "sourceHash": "sha256:f3319257b29969ec8ebd99b240d0b057a2e6d4455e490e5ccfee4b8c4f48f02a",
+      "text": "半径，单位为米。"
+    },
+    {
+      "id": "CircleGeometry",
+      "field": "params/options.stRotation/description",
+      "sourceHash": "sha256:298ae4e5e62c4009c6c59c15c8ae501b4d3f51271e495eadf02d676d6c8046b0",
+      "text": "纹理坐标的旋转角度，单位为弧度。正值表示逆时针旋转。"
+    },
+    {
+      "id": "CircleOutlineGeometry.createGeometry",
+      "field": "description",
+      "sourceHash": "sha256:7fd12ab8e41aec3340e53bf2e970c2b0025c9b45c21fba8f47a55141fe6a21a2",
+      "text": "计算椭球表面圆轮廓的几何表示，包括顶点、索引和包围球。"
+    },
+    {
+      "id": "CircleOutlineGeometry.createGeometry",
+      "field": "params/circleGeometry/description",
+      "sourceHash": "sha256:5176cbcce7956f794e94ac5ee683caacb5c5dc259cdcaa81378abc7e7d252526",
+      "text": "圆的描述。"
+    },
+    {
+      "id": "CircleOutlineGeometry.unpack",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:0548587d5495990a06a3e08fb584a0e0326bdbc1befcf2c789819df0456ffd2c",
+      "text": "修改后的 result 参数；未提供时返回新的 CircleOutlineGeometry 实例。"
+    },
+    {
+      "id": "CircleOutlineGeometry",
+      "field": "description",
+      "sourceHash": "sha256:33dc1910998d8911e76af2a73102a5e4640f711e04be2b9183f5a710f6a3671d",
+      "text": "椭球表面圆轮廓的描述。"
+    },
+    {
+      "id": "CircleOutlineGeometry",
+      "field": "exceptions/0/description",
+      "sourceHash": "sha256:fb51fc9615946f574f3c6a6462c14732ac8cdaba6996aa0a5651f260f7a26eb9",
+      "text": "radius 必须大于零。"
+    },
+    {
+      "id": "CircleOutlineGeometry",
+      "field": "exceptions/1/description",
+      "sourceHash": "sha256:9367f7a9705ff41479f51ec72a49b55b65c10520679d84ecdef11206bf18154d",
+      "text": "granularity 必须大于零。"
+    },
+    {
+      "id": "CircleOutlineGeometry",
+      "field": "params/options.center/description",
+      "sourceHash": "sha256:507552af1d07f5c80341b543f1d70e0fc3c20fc70fee2d5dcb6d12b43790fb8e",
+      "text": "固定参考系中的圆心位置。"
+    },
+    {
+      "id": "CircleOutlineGeometry",
+      "field": "params/options.ellipsoid/description",
+      "sourceHash": "sha256:5640026a7104313dd9cce4aed88f82d0fb6062841a6208dd25544965c252d444",
+      "text": "圆所在的椭球。"
+    },
+    {
+      "id": "CircleOutlineGeometry",
+      "field": "params/options.extrudedHeight/description",
+      "sourceHash": "sha256:930f5eef3d5d3cb1f5be73033e8069b9daa0743280f5403b663bd3c2674e0d57",
+      "text": "圆的拉伸面相对于椭球表面的高度，单位为米。"
+    },
+    {
+      "id": "CircleOutlineGeometry",
+      "field": "params/options.granularity/description",
+      "sourceHash": "sha256:db46897b5860990aed6354b41a59f7700d46e258ede25279bbf7fbf835b25faf",
+      "text": "圆上相邻采样点的角度间隔，单位为弧度。"
+    },
+    {
+      "id": "CircleOutlineGeometry",
+      "field": "params/options.height/description",
+      "sourceHash": "sha256:083ae2a4b50b125ee5f53e06d48aa2dbcc53063cbcaf6685e9e28c3090787051",
+      "text": "圆相对于椭球表面的高度，单位为米。"
+    },
+    {
+      "id": "CircleOutlineGeometry",
+      "field": "params/options.numberOfVerticalLines/description",
+      "sourceHash": "sha256:0ce904414208c96ee05eab480d48d55003318844b48ec42536049a2d2f7b55bb",
+      "text": "拉伸圆的顶面与底面之间绘制的线条数量。"
+    },
+    {
+      "id": "CircleOutlineGeometry",
+      "field": "params/options.radius/description",
+      "sourceHash": "sha256:f3319257b29969ec8ebd99b240d0b057a2e6d4455e490e5ccfee4b8c4f48f02a",
+      "text": "半径，单位为米。"
+    },
+    {
+      "id": "CoplanarPolygonGeometry.createGeometry",
+      "field": "description",
+      "sourceHash": "sha256:51c0fbe3a8f00ea65d0aa825bcb58cdc0d1d8c3e28b018b48ddc974769206c55",
+      "text": "计算任意共面多边形的几何表示，包括顶点、索引和包围球。"
+    },
+    {
+      "id": "CoplanarPolygonGeometry.createGeometry",
+      "field": "params/polygonGeometry/description",
+      "sourceHash": "sha256:64782a71b2572ca6633d74a89bb080bc709b38b05c64e89749338150c83c647c",
+      "text": "多边形的描述。"
+    },
+    {
+      "id": "CoplanarPolygonGeometry.fromPositions",
+      "field": "description",
+      "sourceHash": "sha256:ce8ac0edd4ac10c5be10a140cbf70fd6c90630b0589d966fa50ebdfba6801d9a",
+      "text": "根据位置数组创建共面多边形的描述。"
+    },
+    {
+      "id": "CoplanarPolygonGeometry.fromPositions",
+      "field": "params/options.ellipsoid/description",
+      "sourceHash": "sha256:ee0d7e951bc1da87b1c97ffef6a777eea3cad702b30345cc80c97d40efa75955",
+      "text": "用作参考的椭球。"
+    },
+    {
+      "id": "CoplanarPolygonGeometry.fromPositions",
+      "field": "params/options.positions/description",
+      "sourceHash": "sha256:a7178adf2ac90200257de78344efe89a931e4cc5df0f648ee4a24963284cdda8",
+      "text": "定义多边形各角点的位置数组。"
+    },
+    {
+      "id": "CoplanarPolygonGeometry.fromPositions",
+      "field": "params/options.stRotation/description",
+      "sourceHash": "sha256:298ae4e5e62c4009c6c59c15c8ae501b4d3f51271e495eadf02d676d6c8046b0",
+      "text": "纹理坐标的旋转角度，单位为弧度。正值表示逆时针旋转。"
+    },
+    {
+      "id": "CoplanarPolygonGeometry.fromPositions",
+      "field": "params/options.textureCoordinates/description",
+      "sourceHash": "sha256:b389b2f01a801ad7f7acd800918fe6f4530dd16bf66883b2a3a3384382049470",
+      "text": "由 {@link Cartesian2} 点组成的 {@link PolygonHierarchy} 纹理坐标。"
+    },
+    {
+      "id": "CoplanarPolygonGeometry.unpack",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:fd85a7640890c37225537cc1dd67c573a93087ff9d4f6cdd0632ed75839695fa",
+      "text": "修改后的 result 参数；未提供时返回新的 CoplanarPolygonGeometry 实例。"
+    },
+    {
+      "id": "CoplanarPolygonGeometry",
+      "field": "description",
+      "sourceHash": "sha256:6b3b1ef9de61f3341345f6c14fc54093bf819ccffdd0c270957303483aad603a",
+      "text": "由任意共面位置组成的多边形描述。"
+    },
+    {
+      "id": "CoplanarPolygonGeometry",
+      "field": "params/options.ellipsoid/description",
+      "sourceHash": "sha256:ee0d7e951bc1da87b1c97ffef6a777eea3cad702b30345cc80c97d40efa75955",
+      "text": "用作参考的椭球。"
+    },
+    {
+      "id": "CoplanarPolygonGeometry",
+      "field": "params/options.polygonHierarchy/description",
+      "sourceHash": "sha256:9274bc56e5a57e2f2fe77209e250c66637c474444ff9b016747da9aed9137be5",
+      "text": "可包含孔洞的多边形层级。"
+    },
+    {
+      "id": "CoplanarPolygonGeometry",
+      "field": "params/options.stRotation/description",
+      "sourceHash": "sha256:298ae4e5e62c4009c6c59c15c8ae501b4d3f51271e495eadf02d676d6c8046b0",
+      "text": "纹理坐标的旋转角度，单位为弧度。正值表示逆时针旋转。"
+    },
+    {
+      "id": "CoplanarPolygonGeometry",
+      "field": "params/options.textureCoordinates/description",
+      "sourceHash": "sha256:b389b2f01a801ad7f7acd800918fe6f4530dd16bf66883b2a3a3384382049470",
+      "text": "由 {@link Cartesian2} 点组成的 {@link PolygonHierarchy} 纹理坐标。"
+    },
+    {
+      "id": "CoplanarPolygonOutlineGeometry.createGeometry",
+      "field": "description",
+      "sourceHash": "sha256:51c0fbe3a8f00ea65d0aa825bcb58cdc0d1d8c3e28b018b48ddc974769206c55",
+      "text": "计算任意共面多边形的几何表示，包括顶点、索引和包围球。"
+    },
+    {
+      "id": "CoplanarPolygonOutlineGeometry.createGeometry",
+      "field": "params/polygonGeometry/description",
+      "sourceHash": "sha256:64782a71b2572ca6633d74a89bb080bc709b38b05c64e89749338150c83c647c",
+      "text": "多边形的描述。"
+    },
+    {
+      "id": "CoplanarPolygonOutlineGeometry.fromPositions",
+      "field": "description",
+      "sourceHash": "sha256:33ec249f9809b2b4515f18ff82fe0e1feb75bdba4b57adc8ba139a97900f537b",
+      "text": "根据位置数组创建共面多边形轮廓的描述。"
+    },
+    {
+      "id": "CoplanarPolygonOutlineGeometry.fromPositions",
+      "field": "params/options.positions/description",
+      "sourceHash": "sha256:a7178adf2ac90200257de78344efe89a931e4cc5df0f648ee4a24963284cdda8",
+      "text": "定义多边形各角点的位置数组。"
+    },
+    {
+      "id": "CoplanarPolygonOutlineGeometry.unpack",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:e6fa5612bfc9eeee3f492ee9f9d1d9028574eca5f5ce72b13bff4e8f199fde54",
+      "text": "修改后的 result 参数；未提供时返回新的 CoplanarPolygonOutlineGeometry 实例。"
+    },
+    {
+      "id": "CoplanarPolygonOutlineGeometry",
+      "field": "description",
+      "sourceHash": "sha256:6b12336d1c42b9f168ca8de2080ac1983059435590e974271f86894f70789ca6",
+      "text": "由任意共面位置组成的多边形轮廓描述。"
+    },
+    {
+      "id": "CoplanarPolygonOutlineGeometry",
+      "field": "params/options.polygonHierarchy/description",
+      "sourceHash": "sha256:9274bc56e5a57e2f2fe77209e250c66637c474444ff9b016747da9aed9137be5",
+      "text": "可包含孔洞的多边形层级。"
+    },
+    {
+      "id": "CorridorGeometry.computeRectangle",
+      "field": "description",
+      "sourceHash": "sha256:0367beedf30b54417e9d94b323904441e45bcaf6ed88f4ee4a6cbfa24a95c918",
+      "text": "根据所提供选项计算包围矩形。"
+    },
+    {
+      "id": "CorridorGeometry.computeRectangle",
+      "field": "params/options.cornerType/description",
+      "sourceHash": "sha256:94c9b9576740f0298fc2fa2c83fb01253ed9faf9d1c7b64fffcb4b6bba2b36d7",
+      "text": "决定转角样式。"
+    },
+    {
+      "id": "CorridorGeometry.computeRectangle",
+      "field": "params/options.ellipsoid/description",
+      "sourceHash": "sha256:ee0d7e951bc1da87b1c97ffef6a777eea3cad702b30345cc80c97d40efa75955",
+      "text": "用作参考的椭球。"
+    },
+    {
+      "id": "CorridorGeometry.computeRectangle",
+      "field": "params/options.positions/description",
+      "sourceHash": "sha256:671ad28c69daf389583161fc0494604a1170b6fb75306176b7de5a5a896f1b13",
+      "text": "定义走廊中心线的位置数组。"
+    },
+    {
+      "id": "CorridorGeometry.computeRectangle",
+      "field": "params/options.width/description",
+      "sourceHash": "sha256:0aec7662d15bad7cbba11d9e327264500d7018148066fb932a4c318ce10edc54",
+      "text": "走廊两侧边缘之间的距离，单位为米。"
+    },
+    {
+      "id": "CorridorGeometry.computeRectangle",
+      "field": "params/result/description",
+      "sourceHash": "sha256:6a8719e889fa28260f1981bc4bd10845ec2c8694792e5da8511b742ca24ce161",
+      "text": "用于存储结果的对象。"
+    },
+    {
+      "id": "CorridorGeometry.computeRectangle",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:8df891df6dfa55d154243c690011d3c13ab0cf30605caab4d68c881d9a6f68f7",
+      "text": "结果矩形。"
+    },
+    {
+      "id": "CorridorGeometry.createGeometry",
+      "field": "description",
+      "sourceHash": "sha256:eb30ca5702dab79f018b0a76c612ad6f5dda6937a7605b188fcc63c526d20353",
+      "text": "计算走廊的几何表示，包括顶点、索引和包围球。"
+    },
+    {
+      "id": "CorridorGeometry.createGeometry",
+      "field": "params/corridorGeometry/description",
+      "sourceHash": "sha256:047994663b6b3cc0149becd8926532e2ad107587d1216bd2ce8e7b62b91a96e0",
+      "text": "走廊的描述。"
+    },
+    {
+      "id": "CorridorGeometry.unpack",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:71ca54e5f42b48c4bce3ebe710cd9661b8031bbfbf7bb6e00e7b1209d50eeb28",
+      "text": "修改后的 result 参数；未提供时返回新的 CorridorGeometry 实例。"
+    },
+    {
+      "id": "CorridorGeometry",
+      "field": "description",
+      "sourceHash": "sha256:d26116b6a6b88cb9c58d11087f2d18a9511c7e90c8cfacd217274b55cc99de2b",
+      "text": "走廊的描述。可使用 {@link Primitive} 或 {@link GroundPrimitive} 渲染。"
+    },
+    {
+      "id": "CorridorGeometry",
+      "field": "params/options.cornerType/description",
+      "sourceHash": "sha256:94c9b9576740f0298fc2fa2c83fb01253ed9faf9d1c7b64fffcb4b6bba2b36d7",
+      "text": "决定转角样式。"
+    },
+    {
+      "id": "CorridorGeometry",
+      "field": "params/options.ellipsoid/description",
+      "sourceHash": "sha256:ee0d7e951bc1da87b1c97ffef6a777eea3cad702b30345cc80c97d40efa75955",
+      "text": "用作参考的椭球。"
+    },
+    {
+      "id": "CorridorGeometry",
+      "field": "params/options.extrudedHeight/description",
+      "sourceHash": "sha256:6034f9b77dbd7862684180347e6914796face757d5daa9c3976c7fbe34fb2b0e",
+      "text": "拉伸面相对于椭球表面的高度，单位为米。"
+    },
+    {
+      "id": "CorridorGeometry",
+      "field": "params/options.granularity/description",
+      "sourceHash": "sha256:92da44f591d6c37e251a1b1b2d68e35efc47ec70a87dc39ef40f23c133e629b6",
+      "text": "相邻经纬度采样点的角度间隔，单位为弧度，决定缓冲区中的位置数量。"
+    },
+    {
+      "id": "CorridorGeometry",
+      "field": "params/options.height/description",
+      "sourceHash": "sha256:677f04d9c14e9d04e2acf6cf8662475aa326015be6d2413cb8941c02fde02dea",
+      "text": "各位置相对于椭球表面的高度，单位为米。"
+    },
+    {
+      "id": "CorridorGeometry",
+      "field": "params/options.positions/description",
+      "sourceHash": "sha256:671ad28c69daf389583161fc0494604a1170b6fb75306176b7de5a5a896f1b13",
+      "text": "定义走廊中心线的位置数组。"
+    },
+    {
+      "id": "CorridorGeometry",
+      "field": "params/options.width/description",
+      "sourceHash": "sha256:0aec7662d15bad7cbba11d9e327264500d7018148066fb932a4c318ce10edc54",
+      "text": "走廊两侧边缘之间的距离，单位为米。"
+    },
+    {
+      "id": "CorridorOutlineGeometry.createGeometry",
+      "field": "description",
+      "sourceHash": "sha256:eb30ca5702dab79f018b0a76c612ad6f5dda6937a7605b188fcc63c526d20353",
+      "text": "计算走廊的几何表示，包括顶点、索引和包围球。"
+    },
+    {
+      "id": "CorridorOutlineGeometry.createGeometry",
+      "field": "params/corridorOutlineGeometry/description",
+      "sourceHash": "sha256:047994663b6b3cc0149becd8926532e2ad107587d1216bd2ce8e7b62b91a96e0",
+      "text": "走廊的描述。"
+    },
+    {
+      "id": "CorridorOutlineGeometry.unpack",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:552351946f7104cce571e7ebf8cf17f8e88922c3f6e1aa3e0b7498c733599a23",
+      "text": "修改后的 result 参数；未提供时返回新的 CorridorOutlineGeometry 实例。"
+    },
+    {
+      "id": "CorridorOutlineGeometry",
+      "field": "description",
+      "sourceHash": "sha256:85fee44a0da09e67bb3ca23a490122b2e976ec57584e3cfe07155e2ccc6af1e6",
+      "text": "走廊轮廓的描述。"
+    },
+    {
+      "id": "CorridorOutlineGeometry",
+      "field": "params/options.cornerType/description",
+      "sourceHash": "sha256:94c9b9576740f0298fc2fa2c83fb01253ed9faf9d1c7b64fffcb4b6bba2b36d7",
+      "text": "决定转角样式。"
+    },
+    {
+      "id": "CorridorOutlineGeometry",
+      "field": "params/options.ellipsoid/description",
+      "sourceHash": "sha256:ee0d7e951bc1da87b1c97ffef6a777eea3cad702b30345cc80c97d40efa75955",
+      "text": "用作参考的椭球。"
+    },
+    {
+      "id": "CorridorOutlineGeometry",
+      "field": "params/options.extrudedHeight/description",
+      "sourceHash": "sha256:2de2a87d96ab382f32360d49eeb9ba9c144ee1dd6a5b1443266e5e15ee296ba6",
+      "text": "拉伸面相对于椭球表面的高度，单位为米。"
+    },
+    {
+      "id": "CorridorOutlineGeometry",
+      "field": "params/options.granularity/description",
+      "sourceHash": "sha256:92da44f591d6c37e251a1b1b2d68e35efc47ec70a87dc39ef40f23c133e629b6",
+      "text": "相邻经纬度采样点的角度间隔，单位为弧度，决定缓冲区中的位置数量。"
+    },
+    {
+      "id": "CorridorOutlineGeometry",
+      "field": "params/options.height/description",
+      "sourceHash": "sha256:397c7bf5cf9724386ae8a714e407b0b4799cca653a7d6edab2c46614146e2893",
+      "text": "各位置相对于椭球表面的高度，单位为米。"
+    },
+    {
+      "id": "CorridorOutlineGeometry",
+      "field": "params/options.positions/description",
+      "sourceHash": "sha256:c1687f1890ae4d18ab80f4c4cb3738f64369b80d8845da2be4a5dcfeba9fa9bd",
+      "text": "定义走廊轮廓中心线的位置数组。"
+    },
+    {
+      "id": "CorridorOutlineGeometry",
+      "field": "params/options.width/description",
+      "sourceHash": "sha256:352141ed9add9d4ec3b3a1d434e9d8d5005ab9ca9e897d6bcb2117b04573f4d8",
+      "text": "走廊轮廓两侧边缘之间的距离。"
+    },
+    {
+      "id": "CylinderGeometry.createGeometry",
+      "field": "description",
+      "sourceHash": "sha256:6d902d4a8f0d6442ab41ec0822c81e3d3e6ae99c63620afe04f88496c2293b7f",
+      "text": "计算圆柱体的几何表示，包括顶点、索引和包围球。"
+    },
+    {
+      "id": "CylinderGeometry.createGeometry",
+      "field": "params/cylinderGeometry/description",
+      "sourceHash": "sha256:9e7fe4669c2ecdcf74e6fcc5b65e257fe0ec5d7fd08260f22bae4e07ce84ece2",
+      "text": "圆柱体的描述。"
+    },
+    {
+      "id": "CylinderGeometry.unpack",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:c7049cc9a45d5792f498a4bb59d26cce6834a3dc6c4aeb76bcc1477daf6c347f",
+      "text": "修改后的 result 参数；未提供时返回新的 CylinderGeometry 实例。"
+    },
+    {
+      "id": "CylinderGeometry",
+      "field": "description",
+      "sourceHash": "sha256:58d3c84f213576f9faf34a318760c83e5e9faa1724f5ca6b63adfb7f572467a5",
+      "text": "圆柱体的描述。"
+    },
+    {
+      "id": "CylinderGeometry",
+      "field": "exceptions/0/description",
+      "sourceHash": "sha256:040cef6a9e7d968cd8ad7e1dd0a076d04cf588f1bbfbc7576e25ba6fb92ab762",
+      "text": "options.slices 必须大于等于 3。"
+    },
+    {
+      "id": "CylinderGeometry",
+      "field": "params/options.bottomRadius/description",
+      "sourceHash": "sha256:21636bca2c4480859564109a4e270b9e9c7cb751657795fcd6d5736adffd1fd7",
+      "text": "圆柱体底面半径。"
+    },
+    {
+      "id": "CylinderGeometry",
+      "field": "params/options.length/description",
+      "sourceHash": "sha256:6f51417a925394594330926ee71437057d0d97bf2a9d94daaae7cbe7a591b3d0",
+      "text": "圆柱体长度。"
+    },
+    {
+      "id": "CylinderGeometry",
+      "field": "params/options.slices/description",
+      "sourceHash": "sha256:95ad204fa875343c5b81962a10a099c4327449a6bbce10e0ad8ab24cc6c8e7ed",
+      "text": "圆柱体周边的边数。"
+    },
+    {
+      "id": "CylinderGeometry",
+      "field": "params/options.topRadius/description",
+      "sourceHash": "sha256:74dd07f1d82788a667a6cf529dfb600e1967c66fd08b5305571d3f42d20311b8",
+      "text": "圆柱体顶面半径。"
+    },
+    {
+      "id": "CylinderOutlineGeometry.createGeometry",
+      "field": "description",
+      "sourceHash": "sha256:25023bf8286042c9079d8687e50445589b228f529e58c316e1ec4a0ecfe39b46",
+      "text": "计算圆柱体轮廓的几何表示，包括顶点、索引和包围球。"
+    },
+    {
+      "id": "CylinderOutlineGeometry.createGeometry",
+      "field": "params/cylinderGeometry/description",
+      "sourceHash": "sha256:e105ca017e45ce3c8563ead3cdd12f054e1d1e83f8e233e43e47ee91c7cb0bed",
+      "text": "圆柱体轮廓的描述。"
+    },
+    {
+      "id": "CylinderOutlineGeometry.unpack",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:f517d5ee8b9a502e6c61c6d6c80ff1c8a7dcc8acbc35953874182817e04a38e2",
+      "text": "修改后的 result 参数；未提供时返回新的 CylinderOutlineGeometry 实例。"
+    },
+    {
+      "id": "CylinderOutlineGeometry",
+      "field": "description",
+      "sourceHash": "sha256:2351396cdcbf24de3734d943b36bec8d40075790d9bcf8999b9953f5a613b42e",
+      "text": "圆柱体轮廓的描述。"
+    },
+    {
+      "id": "CylinderOutlineGeometry",
+      "field": "exceptions/0/description",
+      "sourceHash": "sha256:1c059dc0c441664114e605333fe50e1e89091137842dde7a87d14811a13c8428",
+      "text": "options.length 必须大于 0。"
+    },
+    {
+      "id": "CylinderOutlineGeometry",
+      "field": "exceptions/1/description",
+      "sourceHash": "sha256:99dfb358a43b85fdedb6466ce16bfb11a7ad4d3962a775962769007bf91d6da5",
+      "text": "options.topRadius 必须大于等于 0。"
+    },
+    {
+      "id": "CylinderOutlineGeometry",
+      "field": "exceptions/2/description",
+      "sourceHash": "sha256:ce36a4f32c97567723be22ef8b9ca672bf6bab20ece4138ac86e940e6053aa1d",
+      "text": "options.bottomRadius 必须大于等于 0。"
+    },
+    {
+      "id": "CylinderOutlineGeometry",
+      "field": "exceptions/3/description",
+      "sourceHash": "sha256:6c9fa9c8aee56c189a6d51da1709caa782a39933a7057cb39dca413e32878396",
+      "text": "bottomRadius 和 topRadius 不能同时为 0。"
+    },
+    {
+      "id": "CylinderOutlineGeometry",
+      "field": "exceptions/4/description",
+      "sourceHash": "sha256:040cef6a9e7d968cd8ad7e1dd0a076d04cf588f1bbfbc7576e25ba6fb92ab762",
+      "text": "options.slices 必须大于等于 3。"
+    },
+    {
+      "id": "CylinderOutlineGeometry",
+      "field": "params/options.bottomRadius/description",
+      "sourceHash": "sha256:21636bca2c4480859564109a4e270b9e9c7cb751657795fcd6d5736adffd1fd7",
+      "text": "圆柱体底面半径。"
+    },
+    {
+      "id": "CylinderOutlineGeometry",
+      "field": "params/options.length/description",
+      "sourceHash": "sha256:6f51417a925394594330926ee71437057d0d97bf2a9d94daaae7cbe7a591b3d0",
+      "text": "圆柱体长度。"
+    },
+    {
+      "id": "CylinderOutlineGeometry",
+      "field": "params/options.numberOfVerticalLines/description",
+      "sourceHash": "sha256:7d239700aa8240e57fb4a0c1840fc359ce020d4ed2531255f9f81a0850e37ace",
+      "text": "圆柱体顶面与底面之间绘制的线条数量。"
+    },
+    {
+      "id": "CylinderOutlineGeometry",
+      "field": "params/options.slices/description",
+      "sourceHash": "sha256:95ad204fa875343c5b81962a10a099c4327449a6bbce10e0ad8ab24cc6c8e7ed",
+      "text": "圆柱体周边的边数。"
+    },
+    {
+      "id": "CylinderOutlineGeometry",
+      "field": "params/options.topRadius/description",
+      "sourceHash": "sha256:74dd07f1d82788a667a6cf529dfb600e1967c66fd08b5305571d3f42d20311b8",
+      "text": "圆柱体顶面半径。"
+    },
+    {
+      "id": "EllipseGeometry.computeRectangle",
+      "field": "description",
+      "sourceHash": "sha256:9392660289cc06525933f2954b382cb1d42418ea0b54779f860f172cf78f415d",
+      "text": "根据所提供选项计算包围矩形。"
+    },
+    {
+      "id": "EllipseGeometry.computeRectangle",
+      "field": "params/options.center/description",
+      "sourceHash": "sha256:ad0199a93f98c9c497379a9e70594fa7aea68ce5016e2a1a627e0b58710143d7",
+      "text": "固定参考系中的椭圆中心点。"
+    },
+    {
+      "id": "EllipseGeometry.computeRectangle",
+      "field": "params/options.ellipsoid/description",
+      "sourceHash": "sha256:4416fbd7035836322014e9094f211769c9a84577cdaf960275fd750286c2ddf2",
+      "text": "椭圆所在的椭球。"
+    },
+    {
+      "id": "EllipseGeometry.computeRectangle",
+      "field": "params/options.granularity/description",
+      "sourceHash": "sha256:4e66ee3253de29fbd5b67f4f71d3260228c748a8ab5847335b3972dce14ae965",
+      "text": "椭圆上相邻采样点的角度间隔，单位为弧度。"
+    },
+    {
+      "id": "EllipseGeometry.computeRectangle",
+      "field": "params/options.rotation/description",
+      "sourceHash": "sha256:38009936c83d6c41392fd5b2742bd3ca5d8c06700ada98515a8a1fda053ce441",
+      "text": "从北方向逆时针旋转的角度。"
+    },
+    {
+      "id": "EllipseGeometry.computeRectangle",
+      "field": "params/options.semiMajorAxis/description",
+      "sourceHash": "sha256:e91cb1aa93f45ffcfe2c985b1b6d49e80580b587a110a58405c82d6dc88497b8",
+      "text": "椭圆半长轴长度，单位为米。"
+    },
+    {
+      "id": "EllipseGeometry.computeRectangle",
+      "field": "params/options.semiMinorAxis/description",
+      "sourceHash": "sha256:d0b5b3200188aa018e6da7d27ed3d7bd9df706b23a8c9aa5fe46dccd4bbbd309",
+      "text": "椭圆半短轴长度，单位为米。"
+    },
+    {
+      "id": "EllipseGeometry.computeRectangle",
+      "field": "params/result/description",
+      "sourceHash": "sha256:b72c4c3b1e28a4b476b1a4dab4b5308159571fc5c1dea8a2bd20676e008b1246",
+      "text": "用于存储结果的对象。"
+    },
+    {
+      "id": "EllipseGeometry.computeRectangle",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:99212ffccc2417b8a170d7269cc228af388d3b69c7eaba74a13cbb746c93b34f",
+      "text": "结果矩形。"
+    },
+    {
+      "id": "EllipseGeometry.createGeometry",
+      "field": "description",
+      "sourceHash": "sha256:0ca20cedf9d1d31a111ed5e6591529742fa5f68fbf2ca2a65d68bb0a71d37b6e",
+      "text": "计算椭球表面椭圆的几何表示，包括顶点、索引和包围球。"
+    },
+    {
+      "id": "EllipseGeometry.createGeometry",
+      "field": "params/ellipseGeometry/description",
+      "sourceHash": "sha256:d2f324211c30bc48025cd54bbae81755bf315c1ef43618a00c56b5c4a269b25c",
+      "text": "椭圆的描述。"
+    },
+    {
+      "id": "EllipseGeometry.unpack",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:244014633019abf68db696c9241edf7335f17ba8a8ecb6d6d3ed9944114517d5",
+      "text": "修改后的 result 参数；未提供时返回新的 EllipseGeometry 实例。"
+    },
+    {
+      "id": "EllipseGeometry",
+      "field": "description",
+      "sourceHash": "sha256:19cd18b778e58f69536b7c79a9dd70965ce1df9557497c4316ce9a3915b7440a",
+      "text": "椭球表面椭圆的描述。可使用 {@link Primitive} 或 {@link GroundPrimitive} 渲染。"
+    },
+    {
+      "id": "EllipseGeometry",
+      "field": "exceptions/0/description",
+      "sourceHash": "sha256:a3c8fc5bf2e574c6312a39787762c669dfd75d57fdca8c0ea23e4aa18c97bd85",
+      "text": "semiMajorAxis 和 semiMinorAxis 必须大于零。"
+    },
+    {
+      "id": "EllipseGeometry",
+      "field": "exceptions/1/description",
+      "sourceHash": "sha256:bfcf9aa94070f2b1cca4b33d02a662c279bea00445d4f8556dfa3bc972fccfaf",
+      "text": "semiMajorAxis 必须大于等于 semiMinorAxis。"
+    },
+    {
+      "id": "EllipseGeometry",
+      "field": "exceptions/2/description",
+      "sourceHash": "sha256:9367f7a9705ff41479f51ec72a49b55b65c10520679d84ecdef11206bf18154d",
+      "text": "granularity 必须大于零。"
+    },
+    {
+      "id": "EllipseGeometry",
+      "field": "params/options.center/description",
+      "sourceHash": "sha256:ad0199a93f98c9c497379a9e70594fa7aea68ce5016e2a1a627e0b58710143d7",
+      "text": "固定参考系中的椭圆中心点。"
+    },
+    {
+      "id": "EllipseGeometry",
+      "field": "params/options.ellipsoid/description",
+      "sourceHash": "sha256:4416fbd7035836322014e9094f211769c9a84577cdaf960275fd750286c2ddf2",
+      "text": "椭圆所在的椭球。"
+    },
+    {
+      "id": "EllipseGeometry",
+      "field": "params/options.extrudedHeight/description",
+      "sourceHash": "sha256:96da74291240e6e5884e727575f5290f6f979206d52a2e4c8fbb20267645f820",
+      "text": "椭圆拉伸面相对于椭球表面的高度，单位为米。"
+    },
+    {
+      "id": "EllipseGeometry",
+      "field": "params/options.granularity/description",
+      "sourceHash": "sha256:4e66ee3253de29fbd5b67f4f71d3260228c748a8ab5847335b3972dce14ae965",
+      "text": "椭圆上相邻采样点的角度间隔，单位为弧度。"
+    },
+    {
+      "id": "EllipseGeometry",
+      "field": "params/options.height/description",
+      "sourceHash": "sha256:6283d98d372e0a0c9dd890e4f8ce6c60f590c6a45edf81b6f0b437dae489d1e5",
+      "text": "椭圆相对于椭球表面的高度，单位为米。"
+    },
+    {
+      "id": "EllipseGeometry",
+      "field": "params/options.rotation/description",
+      "sourceHash": "sha256:38009936c83d6c41392fd5b2742bd3ca5d8c06700ada98515a8a1fda053ce441",
+      "text": "从北方向逆时针旋转的角度。"
+    },
+    {
+      "id": "EllipseGeometry",
+      "field": "params/options.semiMajorAxis/description",
+      "sourceHash": "sha256:e91cb1aa93f45ffcfe2c985b1b6d49e80580b587a110a58405c82d6dc88497b8",
+      "text": "椭圆半长轴长度，单位为米。"
+    },
+    {
+      "id": "EllipseGeometry",
+      "field": "params/options.semiMinorAxis/description",
+      "sourceHash": "sha256:d0b5b3200188aa018e6da7d27ed3d7bd9df706b23a8c9aa5fe46dccd4bbbd309",
+      "text": "椭圆半短轴长度，单位为米。"
+    },
+    {
+      "id": "EllipseGeometry",
+      "field": "params/options.stRotation/description",
+      "sourceHash": "sha256:650e13225937153dda104f787fa1a5eb0f58b6524c29e27324aaadc0d68006cc",
+      "text": "纹理坐标从北方向逆时针旋转的角度。"
+    },
+    {
+      "id": "EllipseOutlineGeometry.createGeometry",
+      "field": "description",
+      "sourceHash": "sha256:00628fde867d0c6e9d17ef1654d454ecddfa44d59b8208622895678d8ec9018e",
+      "text": "计算椭球表面椭圆轮廓的几何表示，包括顶点、索引和包围球。"
+    },
+    {
+      "id": "EllipseOutlineGeometry.createGeometry",
+      "field": "params/ellipseGeometry/description",
+      "sourceHash": "sha256:d2f324211c30bc48025cd54bbae81755bf315c1ef43618a00c56b5c4a269b25c",
+      "text": "椭圆的描述。"
+    },
+    {
+      "id": "EllipseOutlineGeometry.unpack",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:525fe4e0c709a00073101aa22e6523efc1b63b152b92878f9ffd30be5dd9ffbd",
+      "text": "修改后的 result 参数；未提供时返回新的 EllipseOutlineGeometry 实例。"
+    },
+    {
+      "id": "EllipseOutlineGeometry",
+      "field": "description",
+      "sourceHash": "sha256:2c9ac14867ed54e0e1f77d32b0586cac7d323b10f29461dc53f1bc0ef8668404",
+      "text": "椭球表面椭圆轮廓的描述。"
+    },
+    {
+      "id": "EllipseOutlineGeometry",
+      "field": "exceptions/0/description",
+      "sourceHash": "sha256:a3c8fc5bf2e574c6312a39787762c669dfd75d57fdca8c0ea23e4aa18c97bd85",
+      "text": "semiMajorAxis 和 semiMinorAxis 必须大于零。"
+    },
+    {
+      "id": "EllipseOutlineGeometry",
+      "field": "exceptions/1/description",
+      "sourceHash": "sha256:bfcf9aa94070f2b1cca4b33d02a662c279bea00445d4f8556dfa3bc972fccfaf",
+      "text": "semiMajorAxis 必须大于等于 semiMinorAxis。"
+    },
+    {
+      "id": "EllipseOutlineGeometry",
+      "field": "exceptions/2/description",
+      "sourceHash": "sha256:9367f7a9705ff41479f51ec72a49b55b65c10520679d84ecdef11206bf18154d",
+      "text": "granularity 必须大于零。"
+    },
+    {
+      "id": "EllipseOutlineGeometry",
+      "field": "params/options.center/description",
+      "sourceHash": "sha256:ad0199a93f98c9c497379a9e70594fa7aea68ce5016e2a1a627e0b58710143d7",
+      "text": "固定参考系中的椭圆中心点。"
+    },
+    {
+      "id": "EllipseOutlineGeometry",
+      "field": "params/options.ellipsoid/description",
+      "sourceHash": "sha256:4416fbd7035836322014e9094f211769c9a84577cdaf960275fd750286c2ddf2",
+      "text": "椭圆所在的椭球。"
+    },
+    {
+      "id": "EllipseOutlineGeometry",
+      "field": "params/options.extrudedHeight/description",
+      "sourceHash": "sha256:96da74291240e6e5884e727575f5290f6f979206d52a2e4c8fbb20267645f820",
+      "text": "椭圆拉伸面相对于椭球表面的高度，单位为米。"
+    },
+    {
+      "id": "EllipseOutlineGeometry",
+      "field": "params/options.granularity/description",
+      "sourceHash": "sha256:4e66ee3253de29fbd5b67f4f71d3260228c748a8ab5847335b3972dce14ae965",
+      "text": "椭圆上相邻采样点的角度间隔，单位为弧度。"
+    },
+    {
+      "id": "EllipseOutlineGeometry",
+      "field": "params/options.height/description",
+      "sourceHash": "sha256:6283d98d372e0a0c9dd890e4f8ce6c60f590c6a45edf81b6f0b437dae489d1e5",
+      "text": "椭圆相对于椭球表面的高度，单位为米。"
+    },
+    {
+      "id": "EllipseOutlineGeometry",
+      "field": "params/options.numberOfVerticalLines/description",
+      "sourceHash": "sha256:ef41a193e0f83e2ad4a65725d903bc469925122134d0c15942853404b75a4b73",
+      "text": "拉伸椭圆的顶面与底面之间绘制的线条数量。"
+    },
+    {
+      "id": "EllipseOutlineGeometry",
+      "field": "params/options.rotation/description",
+      "sourceHash": "sha256:7a0a60c8410b448c29cd9a76c8c56148650e3b19c130609c0b0a6a6d9f7f3e91",
+      "text": "从北方向逆时针旋转的角度，单位为弧度。"
+    },
+    {
+      "id": "EllipseOutlineGeometry",
+      "field": "params/options.semiMajorAxis/description",
+      "sourceHash": "sha256:e91cb1aa93f45ffcfe2c985b1b6d49e80580b587a110a58405c82d6dc88497b8",
+      "text": "椭圆半长轴长度，单位为米。"
+    },
+    {
+      "id": "EllipseOutlineGeometry",
+      "field": "params/options.semiMinorAxis/description",
+      "sourceHash": "sha256:d0b5b3200188aa018e6da7d27ed3d7bd9df706b23a8c9aa5fe46dccd4bbbd309",
+      "text": "椭圆半短轴长度，单位为米。"
+    },
+    {
+      "id": "EllipsoidGeometry.createGeometry",
+      "field": "description",
+      "sourceHash": "sha256:e6eab64738e665525c154d693ad3fd649edb226ba512dc5d038ab4163b322a34",
+      "text": "计算椭球的几何表示，包括顶点、索引和包围球。"
+    },
+    {
+      "id": "EllipsoidGeometry.createGeometry",
+      "field": "params/ellipsoidGeometry/description",
+      "sourceHash": "sha256:2af6ffce026219cae3f4bd4da4816238683344fbec7b076f4a46b86c8bbfc604",
+      "text": "椭球的描述。"
+    },
+    {
+      "id": "EllipsoidGeometry.unpack",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:81262038327d00077eb90d4f26385cbb489df3a061d0911fd09cc75e6b9d4f4e",
+      "text": "修改后的 result 参数；未提供时返回新的 EllipsoidGeometry 实例。"
+    },
+    {
+      "id": "EllipsoidGeometry",
+      "field": "description",
+      "sourceHash": "sha256:0d852de1dc8a689772fd96ca7a4ea9ee482fd4ad02f045a809bd6961652061f5",
+      "text": "以原点为中心的椭球描述。"
+    },
+    {
+      "id": "EllipsoidGeometry",
+      "field": "exceptions/0/description",
+      "sourceHash": "sha256:42a45a87fa033cd302f4719e8f30225368454c3058f328e598ceba3676a6c08d",
+      "text": "options.slicePartitions 不能小于 3。"
+    },
+    {
+      "id": "EllipsoidGeometry",
+      "field": "exceptions/1/description",
+      "sourceHash": "sha256:3c2a1750671ae136831eccd74c581a394cf1a00d162383be7e5c05d5b4023298",
+      "text": "options.stackPartitions 不能小于 3。"
+    },
+    {
+      "id": "EllipsoidGeometry",
+      "field": "params/options.innerRadii/description",
+      "sourceHash": "sha256:83fa8ef05974cbc37e62e4c7a77fa96c8a1eb76674d06798eff22812a39f9d53",
+      "text": "椭球在 x、y、z 方向的内半径。"
+    },
+    {
+      "id": "EllipsoidGeometry",
+      "field": "params/options.maximumClock/description",
+      "sourceHash": "sha256:08171e8109d2d5552561e370f27b0ee746a698645dfba38c3bdcde74b7c21cca",
+      "text": "在 xy 平面内，从正 x 轴向正 y 轴方向测量的最大方位角。"
+    },
+    {
+      "id": "EllipsoidGeometry",
+      "field": "params/options.maximumCone/description",
+      "sourceHash": "sha256:86768d6e8ba24659ddb1668ceceb2161f31e0c343104182ffafd83d9fa143e94",
+      "text": "从正 z 轴向负 z 轴方向测量的最大锥角。"
+    },
+    {
+      "id": "EllipsoidGeometry",
+      "field": "params/options.minimumClock/description",
+      "sourceHash": "sha256:a2088e617d037b09280ec18e703e48080c76bed1b80959520ddb4f1b46bc591d",
+      "text": "在 xy 平面内，从正 x 轴向正 y 轴方向测量的最小方位角。"
+    },
+    {
+      "id": "EllipsoidGeometry",
+      "field": "params/options.minimumCone/description",
+      "sourceHash": "sha256:8429fd1fbe59dc2e9c27c9393901fb9e8f16268df89eb52ab640ddf081f3f265",
+      "text": "从正 z 轴向负 z 轴方向测量的最小锥角。"
+    },
+    {
+      "id": "EllipsoidGeometry",
+      "field": "params/options.radii/description",
+      "sourceHash": "sha256:aceadf644db00211a121b20e8c155d2e3ff843098abc462351ee66489eba7a0e",
+      "text": "椭球在 x、y、z 方向的半径。"
+    },
+    {
+      "id": "EllipsoidGeometry",
+      "field": "params/options.slicePartitions/description",
+      "sourceHash": "sha256:eb481f1a1461c77a92e62019d36e5d4a94553af59eaf1ab47aaa4954f29bb2f3",
+      "text": "将椭球划分为径向切片的数量。"
+    },
+    {
+      "id": "EllipsoidGeometry",
+      "field": "params/options.stackPartitions/description",
+      "sourceHash": "sha256:d36fe79a7f3f54c97f45b355ed18f33487394ae5037b990101128f354e9edf9d",
+      "text": "将椭球划分为纬向层的数量。"
+    },
+    {
+      "id": "EllipsoidOutlineGeometry.createGeometry",
+      "field": "description",
+      "sourceHash": "sha256:4fd4d1680a334d0050751b0b62df9dab95e2521759e967ee8830ddc9b63f6e42",
+      "text": "计算椭球轮廓的几何表示，包括顶点、索引和包围球。"
+    },
+    {
+      "id": "EllipsoidOutlineGeometry.createGeometry",
+      "field": "params/ellipsoidGeometry/description",
+      "sourceHash": "sha256:c936f296e4a3a9320a4ab8cc075333c8a8e8f5cd2ce205c04b89e24ae1da0fcd",
+      "text": "椭球轮廓的描述。"
+    },
+    {
+      "id": "EllipsoidOutlineGeometry.unpack",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:9a0af6bed6cfabf8bd36985035020e25e2844810e4e4b87a0a229e1864949b79",
+      "text": "修改后的 result 参数；未提供时返回新的 EllipsoidOutlineGeometry 实例。"
+    },
+    {
+      "id": "EllipsoidOutlineGeometry",
+      "field": "description",
+      "sourceHash": "sha256:5440905bf8ba80149bc5e17ce08e79d2bcaffa558ff8528c7e8b52d77d6c0851",
+      "text": "以原点为中心的椭球轮廓描述。"
+    },
+    {
+      "id": "EllipsoidOutlineGeometry",
+      "field": "exceptions/0/description",
+      "sourceHash": "sha256:7d5c1fa71d284c7a0e09ed03268a44f28300cb5d8110412e1c36c19bced3da6b",
+      "text": "options.stackPartitions 必须大于等于 1。"
+    },
+    {
+      "id": "EllipsoidOutlineGeometry",
+      "field": "exceptions/1/description",
+      "sourceHash": "sha256:d4acb9525e64a5353157de2a1e471b6066be3c560ced4f6c513f844b4347758d",
+      "text": "options.slicePartitions 必须大于等于 0。"
+    },
+    {
+      "id": "EllipsoidOutlineGeometry",
+      "field": "exceptions/2/description",
+      "sourceHash": "sha256:46b482d5bfd32ec5d6aa2ab94efcae7cc7177d38f2f0bcbd7af620d5fd342dc5",
+      "text": "options.subdivisions 必须大于等于 0。"
+    },
+    {
+      "id": "EllipsoidOutlineGeometry",
+      "field": "params/options.innerRadii/description",
+      "sourceHash": "sha256:83fa8ef05974cbc37e62e4c7a77fa96c8a1eb76674d06798eff22812a39f9d53",
+      "text": "椭球在 x、y、z 方向的内半径。"
+    },
+    {
+      "id": "EllipsoidOutlineGeometry",
+      "field": "params/options.maximumClock/description",
+      "sourceHash": "sha256:08171e8109d2d5552561e370f27b0ee746a698645dfba38c3bdcde74b7c21cca",
+      "text": "在 xy 平面内，从正 x 轴向正 y 轴方向测量的最大方位角。"
+    },
+    {
+      "id": "EllipsoidOutlineGeometry",
+      "field": "params/options.maximumCone/description",
+      "sourceHash": "sha256:86768d6e8ba24659ddb1668ceceb2161f31e0c343104182ffafd83d9fa143e94",
+      "text": "从正 z 轴向负 z 轴方向测量的最大锥角。"
+    },
+    {
+      "id": "EllipsoidOutlineGeometry",
+      "field": "params/options.minimumClock/description",
+      "sourceHash": "sha256:a2088e617d037b09280ec18e703e48080c76bed1b80959520ddb4f1b46bc591d",
+      "text": "在 xy 平面内，从正 x 轴向正 y 轴方向测量的最小方位角。"
+    },
+    {
+      "id": "EllipsoidOutlineGeometry",
+      "field": "params/options.minimumCone/description",
+      "sourceHash": "sha256:8429fd1fbe59dc2e9c27c9393901fb9e8f16268df89eb52ab640ddf081f3f265",
+      "text": "从正 z 轴向负 z 轴方向测量的最小锥角。"
+    },
+    {
+      "id": "EllipsoidOutlineGeometry",
+      "field": "params/options.radii/description",
+      "sourceHash": "sha256:aceadf644db00211a121b20e8c155d2e3ff843098abc462351ee66489eba7a0e",
+      "text": "椭球在 x、y、z 方向的半径。"
+    },
+    {
+      "id": "EllipsoidOutlineGeometry",
+      "field": "params/options.slicePartitions/description",
+      "sourceHash": "sha256:b11ac66fcff31b6a5d712d340c98c7d536230ca1aff40237a4653808e1850dae",
+      "text": "椭球径向切片数量，等于径向线条数量。"
+    },
+    {
+      "id": "EllipsoidOutlineGeometry",
+      "field": "params/options.stackPartitions/description",
+      "sourceHash": "sha256:79e3387add52f8d9cb70c3ffe3f55d3a883e49324de65708b65f34020d05562b",
+      "text": "椭球纬向分层数量，比平行线数量多 1。"
+    },
+    {
+      "id": "EllipsoidOutlineGeometry",
+      "field": "params/options.subdivisions/description",
+      "sourceHash": "sha256:8bc15cb4770f98515bf620c68bdf3d436eb98d3299d968b3ec733b8987aead7d",
+      "text": "每条线的采样点数量，决定曲线细分程度。"
+    },
+    {
+      "id": "FrustumGeometry.createGeometry",
+      "field": "description",
+      "sourceHash": "sha256:58a778653058939ef0636fd9dcb036f19b1c2e1ad40dab15659e9e13f302702b",
+      "text": "计算视锥的几何表示，包括顶点、索引和包围球。"
+    },
+    {
+      "id": "FrustumGeometry.createGeometry",
+      "field": "params/frustumGeometry/description",
+      "sourceHash": "sha256:453a587c0a08e288833ccaa2e0898ba493645ed0dc905790666e5127140368ac",
+      "text": "视锥的描述。"
+    },
+    {
+      "id": "FrustumGeometry",
+      "field": "description",
+      "sourceHash": "sha256:4ab2a5ddc0ef33c67af01797b2293f13ed34f9f6ddb2089619741a1e4ddb45d5",
+      "text": "描述具有指定原点和朝向的视锥。"
+    },
+    {
+      "id": "FrustumGeometry",
+      "field": "params/options.frustum/description",
+      "sourceHash": "sha256:b06588cba7ddf8d8024f4eb146971345fcc1f11ccbf145e887b63028890605bd",
+      "text": "视锥。"
+    },
+    {
+      "id": "FrustumGeometry",
+      "field": "params/options.orientation/description",
+      "sourceHash": "sha256:a5f3a57b54fe41775faa89ce86c35da924be99944829fc83ab585195b0a7f19c",
+      "text": "视锥朝向。"
+    },
+    {
+      "id": "FrustumGeometry",
+      "field": "params/options.origin/description",
+      "sourceHash": "sha256:af7b835cff4849d9f501649e592d04755d20496a6ad19625c1c5cf122abafcb0",
+      "text": "视锥原点。"
+    },
+    {
+      "id": "FrustumOutlineGeometry.createGeometry",
+      "field": "description",
+      "sourceHash": "sha256:320f22383edab53a4f3251665756dfd7bfdfd35fd83252048ba94d70a994aad2",
+      "text": "计算视锥轮廓的几何表示，包括顶点、索引和包围球。"
+    },
+    {
+      "id": "FrustumOutlineGeometry.createGeometry",
+      "field": "params/frustumGeometry/description",
+      "sourceHash": "sha256:453a587c0a08e288833ccaa2e0898ba493645ed0dc905790666e5127140368ac",
+      "text": "视锥的描述。"
+    },
+    {
+      "id": "FrustumOutlineGeometry",
+      "field": "description",
+      "sourceHash": "sha256:02a37fc6808d1a5fee2aa6a06619c506c8b7c3f09ca09404bbe64b7b5122a813",
+      "text": "具有指定原点和朝向的视锥轮廓描述。"
+    },
+    {
+      "id": "FrustumOutlineGeometry",
+      "field": "params/options.frustum/description",
+      "sourceHash": "sha256:b06588cba7ddf8d8024f4eb146971345fcc1f11ccbf145e887b63028890605bd",
+      "text": "视锥。"
+    },
+    {
+      "id": "FrustumOutlineGeometry",
+      "field": "params/options.orientation/description",
+      "sourceHash": "sha256:a5f3a57b54fe41775faa89ce86c35da924be99944829fc83ab585195b0a7f19c",
+      "text": "视锥朝向。"
+    },
+    {
+      "id": "FrustumOutlineGeometry",
+      "field": "params/options.origin/description",
+      "sourceHash": "sha256:af7b835cff4849d9f501649e592d04755d20496a6ad19625c1c5cf122abafcb0",
+      "text": "视锥原点。"
+    },
+    {
+      "id": "GeoJsonGeometry",
+      "field": "description",
+      "sourceHash": "sha256:a7e7549d3b3186917c772726e72d5f4f40dd7cdda57e7458a5b4bd40603d95ae",
+      "text": "GeoJSON 几何对象。"
+    },
+    {
+      "id": "GroundPolylineGeometry",
+      "field": "description",
+      "sourceHash": "sha256:584a21b500c7971f25e600e98d5b60be5d5cb62d150f85b04ec27c512b6c9cba",
+      "text": "地形或 3D Tiles 表面的折线描述，仅供 {@link GroundPolylinePrimitive} 使用。"
+    },
+    {
+      "id": "GroundPolylineGeometry",
+      "field": "exceptions/0/description",
+      "sourceHash": "sha256:6774d59781ecc364e20dd5cb57af685134ee831196baff87ad9deb143a242233",
+      "text": "至少需要两个位置。"
+    },
+    {
+      "id": "GroundPolylineGeometry",
+      "field": "params/options.arcType/description",
+      "sourceHash": "sha256:cbc9511eed91a655bd29fdb502c1afa21126d06c5b03c101fc23aa392a0b2fd0",
+      "text": "折线段遵循的线段类型，有效值为 {@link ArcType.GEODESIC} 和 {@link ArcType.RHUMB}。"
+    },
+    {
+      "id": "GroundPolylineGeometry",
+      "field": "params/options.granularity/description",
+      "sourceHash": "sha256:9f4b4d119f02b352d6ab26d4c3a86a4c3953879a934ea08c74a0cc52ba709bc1",
+      "text": "对 options.positions 插值所用的距离间隔，单位为米，默认 9999.0 米。零表示不插值。"
+    },
+    {
+      "id": "GroundPolylineGeometry",
+      "field": "params/options.loop/description",
+      "sourceHash": "sha256:bb3aae1c4c8e667e59e0188f73313d52b379ed0a0b3f211a9e051f21d2808f49",
+      "text": "创建几何时是否在末尾和起始位置之间添加线段，使折线闭合。"
+    },
+    {
+      "id": "GroundPolylineGeometry",
+      "field": "params/options.positions/description",
+      "sourceHash": "sha256:0338f64da52f447b07eee73e03575fb2daaccd971bf5e72d222fc72495c2b7c8",
+      "text": "定义折线各点的 {@link Cartesian3} 数组。各点相对于椭球的高度会被忽略。"
+    },
+    {
+      "id": "GroundPolylineGeometry",
+      "field": "params/options.width/description",
+      "sourceHash": "sha256:73930a364a4990e2537acc0fba742beabea582211c4d74c6559d0f350d7ff974",
+      "text": "屏幕空间宽度，单位为像素。"
+    },
+    {
+      "id": "GroundPolylineGeometry",
+      "field": "params/options/description",
+      "sourceHash": "sha256:ef742b94141ceeccaf6183a33390d93cabcc0cb5cc5f589bbd5aa6c49fed7ecc",
+      "text": "包含以下属性的选项对象。"
+    },
+    {
+      "id": "GroundPolylineGeometry#arcType",
+      "field": "description",
+      "sourceHash": "sha256:b7f5cd65373a0ab46e92ef18e067b6ed7b10ae355ff4ed5c1468a78613bec57b",
+      "text": "折线遵循的路径类型，有效值为 {@link ArcType.GEODESIC} 和 {@link ArcType.RHUMB}。"
+    },
+    {
+      "id": "GroundPolylineGeometry#granularity",
+      "field": "description",
+      "sourceHash": "sha256:a5a1f2646c8271b2d620a1df342aaa99dac3291d6d183c0e653384fb2ccca0dd",
+      "text": "对 options.positions 插值所用的距离间隔，单位为米。零表示不插值。默认值 9999.0 可在 32 位浮点表示下达到厘米精度。"
+    },
+    {
+      "id": "GroundPolylineGeometry#loop",
+      "field": "description",
+      "sourceHash": "sha256:31d00fbe5c57d6d280a151d30e6953eab699edf93cb76b769a704877e6d2e2d9",
+      "text": "创建几何时是否在末尾和起始位置之间添加线段，使折线闭合。几何体只有两个位置时忽略此参数。"
+    },
+    {
+      "id": "GroundPolylineGeometry#width",
+      "field": "description",
+      "sourceHash": "sha256:73930a364a4990e2537acc0fba742beabea582211c4d74c6559d0f350d7ff974",
+      "text": "屏幕空间宽度，单位为像素。"
+    },
+    {
+      "id": "I3SGeometry",
+      "field": "description",
+      "sourceHash": "sha256:7451f545d888f330d48571d28703c80cceb76d3ee39ef29371ad9d2db3f03a3e",
+      "text": "I3S 几何实现。每个 I3SGeometry 会在内存中生成 glTF，作为 Cesium3DTile 的内容。\n<p>\n不要直接构造，请通过 {@link I3SNode} 访问瓦片。\n</p>"
+    },
+    {
+      "id": "I3SGeometry#customAttributes",
+      "field": "description",
+      "sourceHash": "sha256:e521a4b0124ff0a2182283a8feacf6ec24975d503d1641858ae20db77a7ad78f",
+      "text": "获取几何体的自定义属性。"
+    },
+    {
+      "id": "I3SGeometry#data",
+      "field": "description",
+      "sourceHash": "sha256:baac6f2b1d63bccfad9798bd34b6a0bccb91112ab6605474e89e198051beaf86",
+      "text": "获取此对象的 I3S 数据。"
+    },
+    {
+      "id": "I3SGeometry#getClosestPointIndexOnTriangle",
+      "field": "description",
+      "sourceHash": "sha256:b95c8f08cb17793a242c3de96db9a31c8c3f3537aaed91c4bb85f7fa27cb22a2",
+      "text": "寻找与点 [px, py, pz] 接触的三角形，再返回其中距查询点最近的顶点。"
+    },
+    {
+      "id": "I3SGeometry#getClosestPointIndexOnTriangle",
+      "field": "params/px/description",
+      "sourceHash": "sha256:b0a12a3baf4ba295d1252d3c0968ec66b559b1efa18413227ee899a3921a4278",
+      "text": "查询点的 x 分量。"
+    },
+    {
+      "id": "I3SGeometry#getClosestPointIndexOnTriangle",
+      "field": "params/py/description",
+      "sourceHash": "sha256:4b136c69daadf3b992edfe715637113e88c6af795a7a58400b97967f6069e901",
+      "text": "查询点的 y 分量。"
+    },
+    {
+      "id": "I3SGeometry#getClosestPointIndexOnTriangle",
+      "field": "params/pz/description",
+      "sourceHash": "sha256:f359a08a00512178253132d85a80feb3da7377f5aef081bb22c4d7f754ac0cc6",
+      "text": "查询点的 z 分量。"
+    },
+    {
+      "id": "I3SGeometry#getClosestPointIndexOnTriangle",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:c46cf95dade95c684dd54dda84a867cc7b4f7a79b6a43fb9e2fe107ce365bf10",
+      "text": "包含以下信息的结构：最近点的索引、查询点到该点的距离平方及距离、查询位置的局部坐标、最近位置的局部坐标。"
+    },
+    {
+      "id": "I3SGeometry#resource",
+      "field": "description",
+      "sourceHash": "sha256:7deac32752c0abc8698eac31edb529f93713e6fdcc586cf8ee0493ebbcbf2355",
+      "text": "获取几何体的资源。"
+    },
+    {
+      "id": "PlaneGeometry.createGeometry",
+      "field": "description",
+      "sourceHash": "sha256:c0496a0fce139d6023764ab073bccce9333a3b6ebf48c20b9cb074e3fc453a5b",
+      "text": "计算平面的几何表示，包括顶点、索引和包围球。"
+    },
+    {
+      "id": "PlaneGeometry.createGeometry",
+      "field": "params/planeGeometry/description",
+      "sourceHash": "sha256:ff2709f27e0af6f07f763177c7d6c512a25ed73430fc7d8ebefe420a510bc111",
+      "text": "平面的描述。"
+    },
+    {
+      "id": "PlaneGeometry.unpack",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:6f765d96c22f1cf252f1b19dec76f16a1cd05055952f0acf073c94213252c5fb",
+      "text": "修改后的 result 参数；未提供时返回新的 PlaneGeometry 实例。"
+    },
+    {
+      "id": "PlaneGeometry",
+      "field": "description",
+      "sourceHash": "sha256:feb2cb25a1e3bd66dc4d8daf85a89cc7ee3fee98ba5818f43f685d53e55915d8",
+      "text": "描述以原点为中心、宽和长均为一个单位的平面几何。"
+    },
+    {
+      "id": "PlaneOutlineGeometry.createGeometry",
+      "field": "description",
+      "sourceHash": "sha256:5476ed81761e77214fbd0ab81823da4b0086e028477263e07f80d6acb8af427f",
+      "text": "计算平面轮廓的几何表示，包括顶点、索引和包围球。"
+    },
+    {
+      "id": "PlaneOutlineGeometry.unpack",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:c7c5e0bdeea15fbfdee228a2f411a3b419569c486ca6810466795d0e0ac83504",
+      "text": "修改后的 result 参数；未提供时返回新的 PlaneOutlineGeometry 实例。"
+    },
+    {
+      "id": "PlaneOutlineGeometry",
+      "field": "description",
+      "sourceHash": "sha256:b04c613ac7741dbb9ae8cfd84e5614a41d46fa2132161c6edaec8b283de1ff32",
+      "text": "描述以原点为中心、宽和长均为一个单位的平面轮廓几何。"
+    },
+    {
+      "id": "PolygonGeometry.computeRectangleFromPositions",
+      "field": "description",
+      "sourceHash": "sha256:71103fe490468c107b838686150904fc82d4b9dcc210d81639b08e366bfb6cbc",
+      "text": "计算包围位置列表所定义多边形的矩形，支持跨越国际日期变更线和极点的情况。"
+    },
+    {
+      "id": "PolygonGeometry.computeRectangleFromPositions",
+      "field": "params/arcType/description",
+      "sourceHash": "sha256:a7becad0c7a02ea61c888ded37e3500716230ab25682afe7937b0329323228f2",
+      "text": "多边形边缘遵循的线段类型，有效值为 {@link ArcType.GEODESIC} 和 {@link ArcType.RHUMB}。"
+    },
+    {
+      "id": "PolygonGeometry.computeRectangleFromPositions",
+      "field": "params/ellipsoid/description",
+      "sourceHash": "sha256:ee0d7e951bc1da87b1c97ffef6a777eea3cad702b30345cc80c97d40efa75955",
+      "text": "用作参考的椭球。"
+    },
+    {
+      "id": "PolygonGeometry.computeRectangleFromPositions",
+      "field": "params/positions/description",
+      "sourceHash": "sha256:bb6f5e6ae2adef3bfacb3a3898454bfeab7f231caa17f3a158122c1017d55555",
+      "text": "定义多边形外边界的线性环。"
+    },
+    {
+      "id": "PolygonGeometry.computeRectangleFromPositions",
+      "field": "params/result/description",
+      "sourceHash": "sha256:6a8719e889fa28260f1981bc4bd10845ec2c8694792e5da8511b742ca24ce161",
+      "text": "用于存储结果的对象。"
+    },
+    {
+      "id": "PolygonGeometry.computeRectangleFromPositions",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:99212ffccc2417b8a170d7269cc228af388d3b69c7eaba74a13cbb746c93b34f",
+      "text": "结果矩形。"
+    },
+    {
+      "id": "PolygonGeometry.createGeometry",
+      "field": "description",
+      "sourceHash": "sha256:034766f64722e64be171fa6ebdcd3da597958b1339d39777c4f14ce905d61ce8",
+      "text": "计算多边形的几何表示，包括顶点、索引和包围球。"
+    },
+    {
+      "id": "PolygonGeometry.createGeometry",
+      "field": "params/polygonGeometry/description",
+      "sourceHash": "sha256:64782a71b2572ca6633d74a89bb080bc709b38b05c64e89749338150c83c647c",
+      "text": "多边形的描述。"
+    },
+    {
+      "id": "PolygonGeometry.fromPositions",
+      "field": "description",
+      "sourceHash": "sha256:f6221cb2b40f66de5d620edec180dd79ac24d708af26362486719d65cd7daf23",
+      "text": "根据位置数组创建多边形描述。可使用 {@link Primitive} 或 {@link GroundPrimitive} 渲染。"
+    },
+    {
+      "id": "PolygonGeometry.fromPositions",
+      "field": "params/options.arcType/description",
+      "sourceHash": "sha256:a7becad0c7a02ea61c888ded37e3500716230ab25682afe7937b0329323228f2",
+      "text": "多边形边缘遵循的线段类型，有效值为 {@link ArcType.GEODESIC} 和 {@link ArcType.RHUMB}。"
+    },
+    {
+      "id": "PolygonGeometry.fromPositions",
+      "field": "params/options.closeBottom/description",
+      "sourceHash": "sha256:3b59bf226520325151fff72d0240b0ca1c123672b14de356cf24133b32fb446a",
+      "text": "为 false 时，拉伸多边形的底部保持开放。"
+    },
+    {
+      "id": "PolygonGeometry.fromPositions",
+      "field": "params/options.closeTop/description",
+      "sourceHash": "sha256:0441dc930add0a22c1c8819b0793f8d81253d2fd7d780e8083eaf1a061382925",
+      "text": "为 false 时，拉伸多边形的顶部保持开放。"
+    },
+    {
+      "id": "PolygonGeometry.fromPositions",
+      "field": "params/options.ellipsoid/description",
+      "sourceHash": "sha256:ee0d7e951bc1da87b1c97ffef6a777eea3cad702b30345cc80c97d40efa75955",
+      "text": "用作参考的椭球。"
+    },
+    {
+      "id": "PolygonGeometry.fromPositions",
+      "field": "params/options.extrudedHeight/description",
+      "sourceHash": "sha256:bf30856a283aaeab79ec415e9048999ad896c45cf75f8c8c45c558b9485d6d0b",
+      "text": "多边形的拉伸高度。"
+    },
+    {
+      "id": "PolygonGeometry.fromPositions",
+      "field": "params/options.granularity/description",
+      "sourceHash": "sha256:92da44f591d6c37e251a1b1b2d68e35efc47ec70a87dc39ef40f23c133e629b6",
+      "text": "相邻经纬度采样点的角度间隔，单位为弧度，决定缓冲区中的位置数量。"
+    },
+    {
+      "id": "PolygonGeometry.fromPositions",
+      "field": "params/options.height/description",
+      "sourceHash": "sha256:154456b3acb229143f2fa4c951db72f5f72916e58e2865ef090ad4090fb26e1b",
+      "text": "多边形高度。"
+    },
+    {
+      "id": "PolygonGeometry.fromPositions",
+      "field": "params/options.perPositionHeight/description",
+      "sourceHash": "sha256:5fc43832bc2b1a2e4d316e273db6c2f59318ecfb645b369e843c7cbd6f606dd2",
+      "text": "使用 options.positions 中每个位置的自身高度，替代 options.height。"
+    },
+    {
+      "id": "PolygonGeometry.fromPositions",
+      "field": "params/options.positions/description",
+      "sourceHash": "sha256:a7178adf2ac90200257de78344efe89a931e4cc5df0f648ee4a24963284cdda8",
+      "text": "定义多边形各角点的位置数组。"
+    },
+    {
+      "id": "PolygonGeometry.fromPositions",
+      "field": "params/options.stRotation/description",
+      "sourceHash": "sha256:298ae4e5e62c4009c6c59c15c8ae501b4d3f51271e495eadf02d676d6c8046b0",
+      "text": "纹理坐标的旋转角度，单位为弧度。正值表示逆时针旋转。"
+    },
+    {
+      "id": "PolygonGeometry.fromPositions",
+      "field": "params/options.textureCoordinates/description",
+      "sourceHash": "sha256:8d17b67f5def75cd68757ecfc87527ce7aadd096b3efd616de73f5a40c5cedbe",
+      "text": "由 {@link Cartesian2} 点组成的 {@link PolygonHierarchy} 纹理坐标，对贴地图元无效。"
+    },
+    {
+      "id": "PolygonGeometry.unpack",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:45a74769a6297f88e0af4e18ac1544283fe6e23d21eac2a29f2c63f1eb02a171",
+      "text": "修改后的 result 参数；未提供时返回新的 PolygonGeometry 实例。"
+    },
+    {
+      "id": "PolygonGeometry",
+      "field": "description",
+      "sourceHash": "sha256:ca2ab65ed9e4545964ba1eb90020e992278ab52689837c337c075ee899fa44ea",
+      "text": "椭球表面多边形的描述，由多边形层级定义。可使用 {@link Primitive} 或 {@link GroundPrimitive} 渲染。"
+    },
+    {
+      "id": "PolygonGeometry",
+      "field": "params/options.arcType/description",
+      "sourceHash": "sha256:a7becad0c7a02ea61c888ded37e3500716230ab25682afe7937b0329323228f2",
+      "text": "多边形边缘遵循的线段类型，有效值为 {@link ArcType.GEODESIC} 和 {@link ArcType.RHUMB}。"
+    },
+    {
+      "id": "PolygonGeometry",
+      "field": "params/options.closeBottom/description",
+      "sourceHash": "sha256:3b59bf226520325151fff72d0240b0ca1c123672b14de356cf24133b32fb446a",
+      "text": "为 false 时，拉伸多边形的底部保持开放。"
+    },
+    {
+      "id": "PolygonGeometry",
+      "field": "params/options.closeTop/description",
+      "sourceHash": "sha256:0441dc930add0a22c1c8819b0793f8d81253d2fd7d780e8083eaf1a061382925",
+      "text": "为 false 时，拉伸多边形的顶部保持开放。"
+    },
+    {
+      "id": "PolygonGeometry",
+      "field": "params/options.ellipsoid/description",
+      "sourceHash": "sha256:ee0d7e951bc1da87b1c97ffef6a777eea3cad702b30345cc80c97d40efa75955",
+      "text": "用作参考的椭球。"
+    },
+    {
+      "id": "PolygonGeometry",
+      "field": "params/options.extrudedHeight/description",
+      "sourceHash": "sha256:cf6a6394cc66f679905a3abe2c6ae22687280a75948c85c668474602a5a26f44",
+      "text": "多边形拉伸面相对于椭球表面的高度，单位为米。"
+    },
+    {
+      "id": "PolygonGeometry",
+      "field": "params/options.granularity/description",
+      "sourceHash": "sha256:92da44f591d6c37e251a1b1b2d68e35efc47ec70a87dc39ef40f23c133e629b6",
+      "text": "相邻经纬度采样点的角度间隔，单位为弧度，决定缓冲区中的位置数量。"
+    },
+    {
+      "id": "PolygonGeometry",
+      "field": "params/options.height/description",
+      "sourceHash": "sha256:416f29f096948050420209c0c6812871ad4f8a850dd4e2265f289e2dcf945b23",
+      "text": "多边形相对于椭球表面的高度，单位为米。"
+    },
+    {
+      "id": "PolygonGeometry",
+      "field": "params/options.perPositionHeight/description",
+      "sourceHash": "sha256:5fc43832bc2b1a2e4d316e273db6c2f59318ecfb645b369e843c7cbd6f606dd2",
+      "text": "使用 options.positions 中每个位置的自身高度，替代 options.height。"
+    },
+    {
+      "id": "PolygonGeometry",
+      "field": "params/options.polygonHierarchy/description",
+      "sourceHash": "sha256:9274bc56e5a57e2f2fe77209e250c66637c474444ff9b016747da9aed9137be5",
+      "text": "可包含孔洞的多边形层级。"
+    },
+    {
+      "id": "PolygonGeometry",
+      "field": "params/options.stRotation/description",
+      "sourceHash": "sha256:298ae4e5e62c4009c6c59c15c8ae501b4d3f51271e495eadf02d676d6c8046b0",
+      "text": "纹理坐标的旋转角度，单位为弧度。正值表示逆时针旋转。"
+    },
+    {
+      "id": "PolygonGeometry",
+      "field": "params/options.textureCoordinates/description",
+      "sourceHash": "sha256:8d17b67f5def75cd68757ecfc87527ce7aadd096b3efd616de73f5a40c5cedbe",
+      "text": "由 {@link Cartesian2} 点组成的 {@link PolygonHierarchy} 纹理坐标，对贴地图元无效。"
+    },
+    {
+      "id": "PolygonOutlineGeometry.createGeometry",
+      "field": "description",
+      "sourceHash": "sha256:1fd127b202ce31f43cdf57eab202d11c1a06ea35917f2f0352fe2c95e31d3654",
+      "text": "计算多边形轮廓的几何表示，包括顶点、索引和包围球。"
+    },
+    {
+      "id": "PolygonOutlineGeometry.createGeometry",
+      "field": "params/polygonGeometry/description",
+      "sourceHash": "sha256:160b067b7b6509ac64493dff1e73e73c126df138041defb4b19ede990dae2561",
+      "text": "多边形轮廓的描述。"
+    },
+    {
+      "id": "PolygonOutlineGeometry.fromPositions",
+      "field": "description",
+      "sourceHash": "sha256:0ea3c9c303d26bd9bda90aa55a38541bafe9e1404d3bf5df962451488d76d8a2",
+      "text": "根据位置数组创建多边形轮廓描述。"
+    },
+    {
+      "id": "PolygonOutlineGeometry.fromPositions",
+      "field": "params/options.arcType/description",
+      "sourceHash": "sha256:af52acaec4ef142d1a719ce959ac315e786af88f9947050cd0e2d138f691b42b",
+      "text": "轮廓遵循的路径类型，有效值为 {@link LinkType.GEODESIC|测地线（ArcType.GEODESIC）} 和 {@link ArcType.RHUMB}。"
+    },
+    {
+      "id": "PolygonOutlineGeometry.fromPositions",
+      "field": "params/options.ellipsoid/description",
+      "sourceHash": "sha256:ee0d7e951bc1da87b1c97ffef6a777eea3cad702b30345cc80c97d40efa75955",
+      "text": "用作参考的椭球。"
+    },
+    {
+      "id": "PolygonOutlineGeometry.fromPositions",
+      "field": "params/options.extrudedHeight/description",
+      "sourceHash": "sha256:bf30856a283aaeab79ec415e9048999ad896c45cf75f8c8c45c558b9485d6d0b",
+      "text": "多边形的拉伸高度。"
+    },
+    {
+      "id": "PolygonOutlineGeometry.fromPositions",
+      "field": "params/options.granularity/description",
+      "sourceHash": "sha256:92da44f591d6c37e251a1b1b2d68e35efc47ec70a87dc39ef40f23c133e629b6",
+      "text": "相邻经纬度采样点的角度间隔，单位为弧度，决定缓冲区中的位置数量。"
+    },
+    {
+      "id": "PolygonOutlineGeometry.fromPositions",
+      "field": "params/options.height/description",
+      "sourceHash": "sha256:154456b3acb229143f2fa4c951db72f5f72916e58e2865ef090ad4090fb26e1b",
+      "text": "多边形高度。"
+    },
+    {
+      "id": "PolygonOutlineGeometry.fromPositions",
+      "field": "params/options.perPositionHeight/description",
+      "sourceHash": "sha256:5fc43832bc2b1a2e4d316e273db6c2f59318ecfb645b369e843c7cbd6f606dd2",
+      "text": "使用 options.positions 中每个位置的自身高度，替代 options.height。"
+    },
+    {
+      "id": "PolygonOutlineGeometry.fromPositions",
+      "field": "params/options.positions/description",
+      "sourceHash": "sha256:a7178adf2ac90200257de78344efe89a931e4cc5df0f648ee4a24963284cdda8",
+      "text": "定义多边形各角点的位置数组。"
+    },
+    {
+      "id": "PolygonOutlineGeometry.unpack",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:b429dc8bfbfc79fedf34db4dd5032efee986b3122c887533ea110e30b3c56514",
+      "text": "修改后的 result 参数；未提供时返回新的 PolygonOutlineGeometry 实例。"
+    },
+    {
+      "id": "PolygonOutlineGeometry",
+      "field": "description",
+      "sourceHash": "sha256:d2e5a6c451e2a7db347a7a459653a1359e747df0edd6c3bef2ca97a3a3597cf6",
+      "text": "椭球表面多边形轮廓的描述，由多边形层级定义。"
+    },
+    {
+      "id": "PolygonOutlineGeometry",
+      "field": "params/options.arcType/description",
+      "sourceHash": "sha256:b2e56e90f1f3d7130987f6618f57d3cbf1ea18be874d1415c3b1f21cb6a669db",
+      "text": "轮廓遵循的路径类型，有效值为 {@link ArcType.GEODESIC} 和 {@link ArcType.RHUMB}。"
+    },
+    {
+      "id": "PolygonOutlineGeometry",
+      "field": "params/options.ellipsoid/description",
+      "sourceHash": "sha256:ee0d7e951bc1da87b1c97ffef6a777eea3cad702b30345cc80c97d40efa75955",
+      "text": "用作参考的椭球。"
+    },
+    {
+      "id": "PolygonOutlineGeometry",
+      "field": "params/options.extrudedHeight/description",
+      "sourceHash": "sha256:cf6a6394cc66f679905a3abe2c6ae22687280a75948c85c668474602a5a26f44",
+      "text": "多边形拉伸面相对于椭球表面的高度，单位为米。"
+    },
+    {
+      "id": "PolygonOutlineGeometry",
+      "field": "params/options.granularity/description",
+      "sourceHash": "sha256:92da44f591d6c37e251a1b1b2d68e35efc47ec70a87dc39ef40f23c133e629b6",
+      "text": "相邻经纬度采样点的角度间隔，单位为弧度，决定缓冲区中的位置数量。"
+    },
+    {
+      "id": "PolygonOutlineGeometry",
+      "field": "params/options.height/description",
+      "sourceHash": "sha256:416f29f096948050420209c0c6812871ad4f8a850dd4e2265f289e2dcf945b23",
+      "text": "多边形相对于椭球表面的高度，单位为米。"
+    },
+    {
+      "id": "PolygonOutlineGeometry",
+      "field": "params/options.perPositionHeight/description",
+      "sourceHash": "sha256:5fc43832bc2b1a2e4d316e273db6c2f59318ecfb645b369e843c7cbd6f606dd2",
+      "text": "使用 options.positions 中每个位置的自身高度，替代 options.height。"
+    },
+    {
+      "id": "PolygonOutlineGeometry",
+      "field": "params/options.polygonHierarchy/description",
+      "sourceHash": "sha256:9274bc56e5a57e2f2fe77209e250c66637c474444ff9b016747da9aed9137be5",
+      "text": "可包含孔洞的多边形层级。"
+    },
+    {
+      "id": "PolylineGeometry.createGeometry",
+      "field": "description",
+      "sourceHash": "sha256:63a50a636e772e909abf239c835d1e525ba53e0a74f8eeef9587e7a8b6ec2f50",
+      "text": "计算折线的几何表示，包括顶点、索引和包围球。"
+    },
+    {
+      "id": "PolylineGeometry.createGeometry",
+      "field": "params/polylineGeometry/description",
+      "sourceHash": "sha256:2f4fd5f802d32d3fff584074177615a438144696ed9f0b25fc1ab45887030425",
+      "text": "折线的描述。"
+    },
+    {
+      "id": "PolylineGeometry.unpack",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:b2956b718d516f69488415728b305177cac0205692afdcdf484da2f31aa930d3",
+      "text": "修改后的 result 参数；未提供时返回新的 PolylineGeometry 实例。"
+    },
+    {
+      "id": "PolylineGeometry",
+      "field": "description",
+      "sourceHash": "sha256:884635efdb35aeeffe1157866623c6f6b2ea9f60eea5df4059073f1eac8964e3",
+      "text": "由线带表示的折线描述。前两个位置定义第一条线段，每个后续位置与前一位置定义下一条线段。折线支持使用材质显示。"
+    },
+    {
+      "id": "PolylineGeometry",
+      "field": "exceptions/0/description",
+      "sourceHash": "sha256:6774d59781ecc364e20dd5cb57af685134ee831196baff87ad9deb143a242233",
+      "text": "至少需要两个位置。"
+    },
+    {
+      "id": "PolylineGeometry",
+      "field": "exceptions/1/description",
+      "sourceHash": "sha256:cf06a62c4eaeafad051aea4b82b9efeb5f75d7179d3d1314343cca02ea0c7c91",
+      "text": "width 必须大于等于 1。"
+    },
+    {
+      "id": "PolylineGeometry",
+      "field": "exceptions/2/description",
+      "sourceHash": "sha256:d432a51fb36a7549dfdfad08671b26010c5120ce040e3114e166fadc063f45d8",
+      "text": "colors 的长度无效。"
+    },
+    {
+      "id": "PolylineGeometry",
+      "field": "params/options.arcType/description",
+      "sourceHash": "sha256:00a7d6ce70526db9ff8d60ce99e4773532f51fb616c716584055b53cfbb03adf",
+      "text": "折线各线段遵循的线段类型。"
+    },
+    {
+      "id": "PolylineGeometry",
+      "field": "params/options.colors/description",
+      "sourceHash": "sha256:c1469dc915bdb8377dc744aba5135485103f6ce69faf2ee34620868022a85d8e",
+      "text": "定义逐顶点或逐线段颜色的 {@link Color} 数组。"
+    },
+    {
+      "id": "PolylineGeometry",
+      "field": "params/options.colorsPerVertex/description",
+      "sourceHash": "sha256:fac3a030e7f4d7b0c7d97ee06689f6c65ee614673a2b00d7b57cc225ae111fcd",
+      "text": "决定每条线段使用固定颜色，还是在顶点间插值颜色的布尔值。"
+    },
+    {
+      "id": "PolylineGeometry",
+      "field": "params/options.ellipsoid/description",
+      "sourceHash": "sha256:ee0d7e951bc1da87b1c97ffef6a777eea3cad702b30345cc80c97d40efa75955",
+      "text": "用作参考的椭球。"
+    },
+    {
+      "id": "PolylineGeometry",
+      "field": "params/options.granularity/description",
+      "sourceHash": "sha256:cb27b61328a46bb607f8c992ed43e67b5efd141afc5a9b1e553e7021d1cb710b",
+      "text": "options.arcType 不为 ArcType.NONE 时，相邻经纬度采样点的角度间隔，单位为弧度，决定缓冲区中的位置数量。"
+    },
+    {
+      "id": "PolylineGeometry",
+      "field": "params/options.positions/description",
+      "sourceHash": "sha256:a4dd7fb560eec560cfbeae4928da7fd6f15e772db335b42e05ee757dbdb624c2",
+      "text": "以线带形式定义折线位置的 {@link Cartesian3} 数组。"
+    },
+    {
+      "id": "PolylineGeometry",
+      "field": "params/options.width/description",
+      "sourceHash": "sha256:68df4ace01f87579f3ded95c6f3ed0f94f593cfb40f0aa3dec1e81c4af379410",
+      "text": "宽度，单位为像素。"
+    },
+    {
+      "id": "PolylineVolumeGeometry.createGeometry",
+      "field": "description",
+      "sourceHash": "sha256:9f33d4b7ce7352d170e796b2f49487ae7246eefdd580beeeed1fbd24b532f7cf",
+      "text": "计算折线体的几何表示，包括顶点、索引和包围球。"
+    },
+    {
+      "id": "PolylineVolumeGeometry.createGeometry",
+      "field": "params/polylineVolumeGeometry/description",
+      "sourceHash": "sha256:8e3732081d0de7af0b957042b8c09ef9b5ca57848a55687e46c51440f23c9412",
+      "text": "折线体的描述。"
+    },
+    {
+      "id": "PolylineVolumeGeometry.unpack",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:06a671deecbee9af1f7c0a062807c9b4eaa65d1ff5728ea76c7f0fc3e0009916",
+      "text": "修改后的 result 参数；未提供时返回新的 PolylineVolumeGeometry 实例。"
+    },
+    {
+      "id": "PolylineVolumeGeometry",
+      "field": "description",
+      "sourceHash": "sha256:a95ecb4b7d6e1cfb32b9ea5e57a39e9496b5de06937b3c35dd9d6036a55628ad",
+      "text": "折线体的描述，即沿折线拉伸二维形状形成的体积。"
+    },
+    {
+      "id": "PolylineVolumeGeometry",
+      "field": "params/options.cornerType/description",
+      "sourceHash": "sha256:94c9b9576740f0298fc2fa2c83fb01253ed9faf9d1c7b64fffcb4b6bba2b36d7",
+      "text": "决定转角样式。"
+    },
+    {
+      "id": "PolylineVolumeGeometry",
+      "field": "params/options.ellipsoid/description",
+      "sourceHash": "sha256:ee0d7e951bc1da87b1c97ffef6a777eea3cad702b30345cc80c97d40efa75955",
+      "text": "用作参考的椭球。"
+    },
+    {
+      "id": "PolylineVolumeGeometry",
+      "field": "params/options.granularity/description",
+      "sourceHash": "sha256:92da44f591d6c37e251a1b1b2d68e35efc47ec70a87dc39ef40f23c133e629b6",
+      "text": "相邻经纬度采样点的角度间隔，单位为弧度，决定缓冲区中的位置数量。"
+    },
+    {
+      "id": "PolylineVolumeGeometry",
+      "field": "params/options.polylinePositions/description",
+      "sourceHash": "sha256:291c05c0f662a43d0a83ad7a9dab6d5b91ee9430577df960aaac4a48eb1d0d39",
+      "text": "定义折线体中心线的 {@link Cartesian3} 位置数组。"
+    },
+    {
+      "id": "PolylineVolumeGeometry",
+      "field": "params/options.shapePositions/description",
+      "sourceHash": "sha256:da894bdba3fa0eaa0e4de5fd8db3d7c66aa9fac6bf2c8fae88f785c50f771cd8",
+      "text": "定义沿折线拉伸截面形状的 {@link Cartesian2} 位置数组。"
+    },
+    {
+      "id": "PolylineVolumeOutlineGeometry.createGeometry",
+      "field": "description",
+      "sourceHash": "sha256:b8afa0f78b4885d40958b7756b56bc5f4e4fbfe1a0530c451cf5d77f56c27a73",
+      "text": "计算折线体轮廓的几何表示，包括顶点、索引和包围球。"
+    },
+    {
+      "id": "PolylineVolumeOutlineGeometry.createGeometry",
+      "field": "params/polylineVolumeOutlineGeometry/description",
+      "sourceHash": "sha256:6ded4693558a22925b6f4f8e91078a124f10cfc77226b0bc627c2233167f67ee",
+      "text": "折线体轮廓的描述。"
+    },
+    {
+      "id": "PolylineVolumeOutlineGeometry.unpack",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:25f9fbe956fc5d0c9b34285013aad55ff464502e032ee869a01201f775b32682",
+      "text": "修改后的 result 参数；未提供时返回新的 PolylineVolumeOutlineGeometry 实例。"
+    },
+    {
+      "id": "PolylineVolumeOutlineGeometry",
+      "field": "description",
+      "sourceHash": "sha256:a95ecb4b7d6e1cfb32b9ea5e57a39e9496b5de06937b3c35dd9d6036a55628ad",
+      "text": "折线体的描述，即沿折线拉伸二维形状形成的体积。"
+    },
+    {
+      "id": "PolylineVolumeOutlineGeometry",
+      "field": "params/options.cornerType/description",
+      "sourceHash": "sha256:94c9b9576740f0298fc2fa2c83fb01253ed9faf9d1c7b64fffcb4b6bba2b36d7",
+      "text": "决定转角样式。"
+    },
+    {
+      "id": "PolylineVolumeOutlineGeometry",
+      "field": "params/options.ellipsoid/description",
+      "sourceHash": "sha256:ee0d7e951bc1da87b1c97ffef6a777eea3cad702b30345cc80c97d40efa75955",
+      "text": "用作参考的椭球。"
+    },
+    {
+      "id": "PolylineVolumeOutlineGeometry",
+      "field": "params/options.granularity/description",
+      "sourceHash": "sha256:92da44f591d6c37e251a1b1b2d68e35efc47ec70a87dc39ef40f23c133e629b6",
+      "text": "相邻经纬度采样点的角度间隔，单位为弧度，决定缓冲区中的位置数量。"
+    },
+    {
+      "id": "PolylineVolumeOutlineGeometry",
+      "field": "params/options.polylinePositions/description",
+      "sourceHash": "sha256:0de43098f70f08588d4b207fb8667f4590cad561addbe523b947c0df8904f6c5",
+      "text": "定义折线体中心线的位置数组。"
+    },
+    {
+      "id": "PolylineVolumeOutlineGeometry",
+      "field": "params/options.shapePositions/description",
+      "sourceHash": "sha256:46e871d5eef4cbe05a9625513e92676089f77aa94e9c41cf004fc649c39d48ee",
+      "text": "定义沿折线拉伸截面形状的位置数组。"
+    },
+    {
+      "id": "RectangleGeometry.computeRectangle",
+      "field": "description",
+      "sourceHash": "sha256:9392660289cc06525933f2954b382cb1d42418ea0b54779f860f172cf78f415d",
+      "text": "根据所提供选项计算包围矩形。"
+    },
+    {
+      "id": "RectangleGeometry.computeRectangle",
+      "field": "params/options.ellipsoid/description",
+      "sourceHash": "sha256:679a377d84319e194320a1a5cd152cd3c86417469a0e53ef320b667fbeb21c98",
+      "text": "矩形所在的椭球。"
+    },
+    {
+      "id": "RectangleGeometry.computeRectangle",
+      "field": "params/options.granularity/description",
+      "sourceHash": "sha256:92da44f591d6c37e251a1b1b2d68e35efc47ec70a87dc39ef40f23c133e629b6",
+      "text": "相邻经纬度采样点的角度间隔，单位为弧度，决定缓冲区中的位置数量。"
+    },
+    {
+      "id": "RectangleGeometry.computeRectangle",
+      "field": "params/options.rectangle/description",
+      "sourceHash": "sha256:871f70585f87733348fd23a9bf30ff2b13b358355708af6e1cae700bdbd646db",
+      "text": "具有 north、south、east、west 属性的经纬度矩形，单位为弧度。"
+    },
+    {
+      "id": "RectangleGeometry.computeRectangle",
+      "field": "params/options.rotation/description",
+      "sourceHash": "sha256:d206d24b604d589e6169aba39bd2192ed264d25280749bfe8f8c92194c28f93a",
+      "text": "矩形旋转角度，单位为弧度。正值表示逆时针旋转。"
+    },
+    {
+      "id": "RectangleGeometry.computeRectangle",
+      "field": "params/result/description",
+      "sourceHash": "sha256:6a8719e889fa28260f1981bc4bd10845ec2c8694792e5da8511b742ca24ce161",
+      "text": "用于存储结果的对象。"
+    },
+    {
+      "id": "RectangleGeometry.computeRectangle",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:99212ffccc2417b8a170d7269cc228af388d3b69c7eaba74a13cbb746c93b34f",
+      "text": "结果矩形。"
+    },
+    {
+      "id": "RectangleGeometry.createGeometry",
+      "field": "description",
+      "sourceHash": "sha256:6a380b52e19afa35613d6210fffbeaa81b2674c6a2b8fd47d52adc0731a5972d",
+      "text": "计算矩形的几何表示，包括顶点、索引和包围球。"
+    },
+    {
+      "id": "RectangleGeometry.createGeometry",
+      "field": "exceptions/0/description",
+      "sourceHash": "sha256:d63668366c1ad68ef5b87a9dc1ccc2aec3caf70e55990371b1efd77e0a3fb2c4",
+      "text": "旋转后的矩形无效。"
+    },
+    {
+      "id": "RectangleGeometry.createGeometry",
+      "field": "params/rectangleGeometry/description",
+      "sourceHash": "sha256:86dc2292f483d0451092c67393dbe7711f4878e193a24453502590d27c36e9a2",
+      "text": "矩形的描述。"
+    },
+    {
+      "id": "RectangleGeometry.unpack",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:f7445c50761e8da2f059a788adb9e9c6c838ddb8248b26144cc880d062d086d1",
+      "text": "修改后的 result 参数；未提供时返回新的 RectangleGeometry 实例。"
+    },
+    {
+      "id": "RectangleGeometry",
+      "field": "description",
+      "sourceHash": "sha256:491896d7965281e8f9e1c70172a0b63e29002b45627f6eefb9d9e554b295d005",
+      "text": "以原点为中心的椭球表面经纬度矩形描述。可使用 {@link Primitive} 或 {@link GroundPrimitive} 渲染。"
+    },
+    {
+      "id": "RectangleGeometry",
+      "field": "exceptions/0/description",
+      "sourceHash": "sha256:56a3d87c483c2bf827cf7394a7795e3b0b1d73aa9be9a451013179772d7fac52",
+      "text": "<code>options.rectangle.north</code> 必须位于 [<code>-Pi/2</code>, <code>Pi/2</code>] 区间内。"
+    },
+    {
+      "id": "RectangleGeometry",
+      "field": "exceptions/1/description",
+      "sourceHash": "sha256:1fe951890186dc64d8640ca1c5c45c7e82ad2f290e7a112318ce5eb89e6a3832",
+      "text": "<code>options.rectangle.south</code> 必须位于 [<code>-Pi/2</code>, <code>Pi/2</code>] 区间内。"
+    },
+    {
+      "id": "RectangleGeometry",
+      "field": "exceptions/2/description",
+      "sourceHash": "sha256:715e8f2721df52e1111892930f8653f2aa45ceabbd323ea701e5236d06a93721",
+      "text": "<code>options.rectangle.east</code> 必须位于 [<code>-Pi</code>, <code>Pi</code>] 区间内。"
+    },
+    {
+      "id": "RectangleGeometry",
+      "field": "exceptions/3/description",
+      "sourceHash": "sha256:719325368ea921190529a76bcaad7d0396ae52e8241d871e689b7d844477a779",
+      "text": "<code>options.rectangle.west</code> 必须位于 [<code>-Pi</code>, <code>Pi</code>] 区间内。"
+    },
+    {
+      "id": "RectangleGeometry",
+      "field": "exceptions/4/description",
+      "sourceHash": "sha256:f0d6fb0aa0ad8391ad9c5067312f945dae4f590924c5477afbf24c7516c15f5a",
+      "text": "<code>options.rectangle.north</code> 必须大于 <code>options.rectangle.south</code>。"
+    },
+    {
+      "id": "RectangleGeometry",
+      "field": "params/options.ellipsoid/description",
+      "sourceHash": "sha256:679a377d84319e194320a1a5cd152cd3c86417469a0e53ef320b667fbeb21c98",
+      "text": "矩形所在的椭球。"
+    },
+    {
+      "id": "RectangleGeometry",
+      "field": "params/options.extrudedHeight/description",
+      "sourceHash": "sha256:fa65317934a3131b385e879f95ecc7748bed4e0adf9284fbcef45f0cf6452e97",
+      "text": "矩形拉伸面相对于椭球表面的高度，单位为米。"
+    },
+    {
+      "id": "RectangleGeometry",
+      "field": "params/options.granularity/description",
+      "sourceHash": "sha256:92da44f591d6c37e251a1b1b2d68e35efc47ec70a87dc39ef40f23c133e629b6",
+      "text": "相邻经纬度采样点的角度间隔，单位为弧度，决定缓冲区中的位置数量。"
+    },
+    {
+      "id": "RectangleGeometry",
+      "field": "params/options.height/description",
+      "sourceHash": "sha256:e89deb881e0dbc41b5157f938a16de31d509e1e49300a484f2a33df1229c2497",
+      "text": "矩形相对于椭球表面的高度，单位为米。"
+    },
+    {
+      "id": "RectangleGeometry",
+      "field": "params/options.rectangle/description",
+      "sourceHash": "sha256:871f70585f87733348fd23a9bf30ff2b13b358355708af6e1cae700bdbd646db",
+      "text": "具有 north、south、east、west 属性的经纬度矩形，单位为弧度。"
+    },
+    {
+      "id": "RectangleGeometry",
+      "field": "params/options.rotation/description",
+      "sourceHash": "sha256:d206d24b604d589e6169aba39bd2192ed264d25280749bfe8f8c92194c28f93a",
+      "text": "矩形旋转角度，单位为弧度。正值表示逆时针旋转。"
+    },
+    {
+      "id": "RectangleGeometry",
+      "field": "params/options.stRotation/description",
+      "sourceHash": "sha256:298ae4e5e62c4009c6c59c15c8ae501b4d3f51271e495eadf02d676d6c8046b0",
+      "text": "纹理坐标的旋转角度，单位为弧度。正值表示逆时针旋转。"
+    },
+    {
+      "id": "RectangleOutlineGeometry.createGeometry",
+      "field": "description",
+      "sourceHash": "sha256:a05dd86a4ef5493d500d1a5fa3edb9586f345c92fcf05cca5af32b54adc4e662",
+      "text": "计算矩形轮廓的几何表示，包括顶点、索引和包围球。"
+    },
+    {
+      "id": "RectangleOutlineGeometry.createGeometry",
+      "field": "exceptions/0/description",
+      "sourceHash": "sha256:d63668366c1ad68ef5b87a9dc1ccc2aec3caf70e55990371b1efd77e0a3fb2c4",
+      "text": "旋转后的矩形无效。"
+    },
+    {
+      "id": "RectangleOutlineGeometry.createGeometry",
+      "field": "params/rectangleGeometry/description",
+      "sourceHash": "sha256:1729ef759ee362bcd6f0bdf19bbb0f5aa2806d9bb48c8ebd9c281e0cae864d71",
+      "text": "矩形轮廓的描述。"
+    },
+    {
+      "id": "RectangleOutlineGeometry.unpack",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:f6b5d3d7f199fd43d3f05adf7d9885404181d9c57a7af7874905e7933fb0533e",
+      "text": "修改后的 result 参数；未提供时返回新的 RectangleOutlineGeometry 实例。"
+    },
+    {
+      "id": "RectangleOutlineGeometry",
+      "field": "description",
+      "sourceHash": "sha256:f7870421815c3c73c1f3817aba6d27a4bdbe43365bf2b86ec45990778a6db1ad",
+      "text": "以原点为中心的椭球表面经纬度矩形轮廓描述。"
+    },
+    {
+      "id": "RectangleOutlineGeometry",
+      "field": "exceptions/0/description",
+      "sourceHash": "sha256:56a3d87c483c2bf827cf7394a7795e3b0b1d73aa9be9a451013179772d7fac52",
+      "text": "<code>options.rectangle.north</code> 必须位于 [<code>-Pi/2</code>, <code>Pi/2</code>] 区间内。"
+    },
+    {
+      "id": "RectangleOutlineGeometry",
+      "field": "exceptions/1/description",
+      "sourceHash": "sha256:1fe951890186dc64d8640ca1c5c45c7e82ad2f290e7a112318ce5eb89e6a3832",
+      "text": "<code>options.rectangle.south</code> 必须位于 [<code>-Pi/2</code>, <code>Pi/2</code>] 区间内。"
+    },
+    {
+      "id": "RectangleOutlineGeometry",
+      "field": "exceptions/2/description",
+      "sourceHash": "sha256:715e8f2721df52e1111892930f8653f2aa45ceabbd323ea701e5236d06a93721",
+      "text": "<code>options.rectangle.east</code> 必须位于 [<code>-Pi</code>, <code>Pi</code>] 区间内。"
+    },
+    {
+      "id": "RectangleOutlineGeometry",
+      "field": "exceptions/3/description",
+      "sourceHash": "sha256:719325368ea921190529a76bcaad7d0396ae52e8241d871e689b7d844477a779",
+      "text": "<code>options.rectangle.west</code> 必须位于 [<code>-Pi</code>, <code>Pi</code>] 区间内。"
+    },
+    {
+      "id": "RectangleOutlineGeometry",
+      "field": "exceptions/4/description",
+      "sourceHash": "sha256:a2ebdaad9e502fff471802fc790e244e90649b1437fbb65adc7c2381a2c6bdd8",
+      "text": "<code>options.rectangle.north</code> 必须大于 <code>rectangle.south</code>。"
+    },
+    {
+      "id": "RectangleOutlineGeometry",
+      "field": "params/options.ellipsoid/description",
+      "sourceHash": "sha256:679a377d84319e194320a1a5cd152cd3c86417469a0e53ef320b667fbeb21c98",
+      "text": "矩形所在的椭球。"
+    },
+    {
+      "id": "RectangleOutlineGeometry",
+      "field": "params/options.extrudedHeight/description",
+      "sourceHash": "sha256:fa65317934a3131b385e879f95ecc7748bed4e0adf9284fbcef45f0cf6452e97",
+      "text": "矩形拉伸面相对于椭球表面的高度，单位为米。"
+    },
+    {
+      "id": "RectangleOutlineGeometry",
+      "field": "params/options.granularity/description",
+      "sourceHash": "sha256:92da44f591d6c37e251a1b1b2d68e35efc47ec70a87dc39ef40f23c133e629b6",
+      "text": "相邻经纬度采样点的角度间隔，单位为弧度，决定缓冲区中的位置数量。"
+    },
+    {
+      "id": "RectangleOutlineGeometry",
+      "field": "params/options.height/description",
+      "sourceHash": "sha256:e89deb881e0dbc41b5157f938a16de31d509e1e49300a484f2a33df1229c2497",
+      "text": "矩形相对于椭球表面的高度，单位为米。"
+    },
+    {
+      "id": "RectangleOutlineGeometry",
+      "field": "params/options.rectangle/description",
+      "sourceHash": "sha256:871f70585f87733348fd23a9bf30ff2b13b358355708af6e1cae700bdbd646db",
+      "text": "具有 north、south、east、west 属性的经纬度矩形，单位为弧度。"
+    },
+    {
+      "id": "RectangleOutlineGeometry",
+      "field": "params/options.rotation/description",
+      "sourceHash": "sha256:d206d24b604d589e6169aba39bd2192ed264d25280749bfe8f8c92194c28f93a",
+      "text": "矩形旋转角度，单位为弧度。正值表示逆时针旋转。"
+    },
+    {
+      "id": "SimplePolylineGeometry.createGeometry",
+      "field": "description",
+      "sourceHash": "sha256:a441fb5a648f106a337ad8ff981a71f22cff8ee23aeac4cf5ad2889df3643a82",
+      "text": "计算简单折线的几何表示，包括顶点、索引和包围球。"
+    },
+    {
+      "id": "SimplePolylineGeometry.createGeometry",
+      "field": "params/simplePolylineGeometry/description",
+      "sourceHash": "sha256:2f4fd5f802d32d3fff584074177615a438144696ed9f0b25fc1ab45887030425",
+      "text": "折线的描述。"
+    },
+    {
+      "id": "SimplePolylineGeometry.unpack",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:b34c1b9c4e4b4c5b81021a59f297be826a00a61743f64ce84f2739600bc0089f",
+      "text": "修改后的 result 参数；未提供时返回新的 SimplePolylineGeometry 实例。"
+    },
+    {
+      "id": "SimplePolylineGeometry",
+      "field": "description",
+      "sourceHash": "sha256:aec177077f193a2b89c8df6a2defcf7589f9b53c851558b4150eea3c393e547c",
+      "text": "由线带表示的折线描述。前两个位置定义第一条线段，每个后续位置与前一位置定义下一条线段。"
+    },
+    {
+      "id": "SimplePolylineGeometry",
+      "field": "exceptions/0/description",
+      "sourceHash": "sha256:6774d59781ecc364e20dd5cb57af685134ee831196baff87ad9deb143a242233",
+      "text": "至少需要两个位置。"
+    },
+    {
+      "id": "SimplePolylineGeometry",
+      "field": "exceptions/1/description",
+      "sourceHash": "sha256:d432a51fb36a7549dfdfad08671b26010c5120ce040e3114e166fadc063f45d8",
+      "text": "colors 的长度无效。"
+    },
+    {
+      "id": "SimplePolylineGeometry",
+      "field": "params/options.arcType/description",
+      "sourceHash": "sha256:00a7d6ce70526db9ff8d60ce99e4773532f51fb616c716584055b53cfbb03adf",
+      "text": "折线各线段遵循的线段类型。"
+    },
+    {
+      "id": "SimplePolylineGeometry",
+      "field": "params/options.colors/description",
+      "sourceHash": "sha256:c1469dc915bdb8377dc744aba5135485103f6ce69faf2ee34620868022a85d8e",
+      "text": "定义逐顶点或逐线段颜色的 {@link Color} 数组。"
+    },
+    {
+      "id": "SimplePolylineGeometry",
+      "field": "params/options.colorsPerVertex/description",
+      "sourceHash": "sha256:fac3a030e7f4d7b0c7d97ee06689f6c65ee614673a2b00d7b57cc225ae111fcd",
+      "text": "决定每条线段使用固定颜色，还是在顶点间插值颜色的布尔值。"
+    },
+    {
+      "id": "SimplePolylineGeometry",
+      "field": "params/options.ellipsoid/description",
+      "sourceHash": "sha256:ee0d7e951bc1da87b1c97ffef6a777eea3cad702b30345cc80c97d40efa75955",
+      "text": "用作参考的椭球。"
+    },
+    {
+      "id": "SimplePolylineGeometry",
+      "field": "params/options.granularity/description",
+      "sourceHash": "sha256:cb27b61328a46bb607f8c992ed43e67b5efd141afc5a9b1e553e7021d1cb710b",
+      "text": "options.arcType 不为 ArcType.NONE 时，相邻经纬度采样点的角度间隔，单位为弧度，决定缓冲区中的位置数量。"
+    },
+    {
+      "id": "SimplePolylineGeometry",
+      "field": "params/options.positions/description",
+      "sourceHash": "sha256:a4dd7fb560eec560cfbeae4928da7fd6f15e772db335b42e05ee757dbdb624c2",
+      "text": "以线带形式定义折线位置的 {@link Cartesian3} 数组。"
+    },
+    {
+      "id": "SphereGeometry.createGeometry",
+      "field": "description",
+      "sourceHash": "sha256:16e705c9bc8aae36137272367bf4bb52205b1c463d5f978f16b3121659b02c0d",
+      "text": "计算球体的几何表示，包括顶点、索引和包围球。"
+    },
+    {
+      "id": "SphereGeometry.createGeometry",
+      "field": "params/sphereGeometry/description",
+      "sourceHash": "sha256:b3ecb055156b46425b707862d210d025f31b0fac52f50cbdc7349a8e0288ae79",
+      "text": "球体的描述。"
+    },
+    {
+      "id": "SphereGeometry.unpack",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:c788acd5abddb6908d8b2d587b9cc08b93e014843f3c3c044886c42c5e371201",
+      "text": "修改后的 result 参数；未提供时返回新的 SphereGeometry 实例。"
+    },
+    {
+      "id": "SphereGeometry",
+      "field": "description",
+      "sourceHash": "sha256:d182acefb1eefda5d77040eb445a6c723db2dd04b5d9ab890fa966fe8cd60796",
+      "text": "以原点为中心的球体描述。"
+    },
+    {
+      "id": "SphereGeometry",
+      "field": "exceptions/0/description",
+      "sourceHash": "sha256:42a45a87fa033cd302f4719e8f30225368454c3058f328e598ceba3676a6c08d",
+      "text": "options.slicePartitions 不能小于 3。"
+    },
+    {
+      "id": "SphereGeometry",
+      "field": "exceptions/1/description",
+      "sourceHash": "sha256:3c2a1750671ae136831eccd74c581a394cf1a00d162383be7e5c05d5b4023298",
+      "text": "options.stackPartitions 不能小于 3。"
+    },
+    {
+      "id": "SphereGeometry",
+      "field": "params/options.radius/description",
+      "sourceHash": "sha256:7c7485139bb7f1aa45b19a0658cd899032cf4a827522935194cc7b65834c3f5d",
+      "text": "球体半径。"
+    },
+    {
+      "id": "SphereGeometry",
+      "field": "params/options.slicePartitions/description",
+      "sourceHash": "sha256:eb481f1a1461c77a92e62019d36e5d4a94553af59eaf1ab47aaa4954f29bb2f3",
+      "text": "将椭球划分为径向切片的数量。"
+    },
+    {
+      "id": "SphereGeometry",
+      "field": "params/options.stackPartitions/description",
+      "sourceHash": "sha256:d36fe79a7f3f54c97f45b355ed18f33487394ae5037b990101128f354e9edf9d",
+      "text": "将椭球划分为纬向层的数量。"
+    },
+    {
+      "id": "SphereOutlineGeometry.createGeometry",
+      "field": "description",
+      "sourceHash": "sha256:2bccd7e00d430f98ff086447480330e6ff17363c2ec61d3289bd53b685add3e2",
+      "text": "计算球体轮廓的几何表示，包括顶点、索引和包围球。"
+    },
+    {
+      "id": "SphereOutlineGeometry.createGeometry",
+      "field": "params/sphereGeometry/description",
+      "sourceHash": "sha256:d17ef17be23a7935fcba4f908259b17d75ccc382b67e2124d7c64a0233b58728",
+      "text": "球体轮廓的描述。"
+    },
+    {
+      "id": "SphereOutlineGeometry.unpack",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:fecc169c68ffe5ba055ab03df6e5f9174c7e58910ffa3431840800672a28682f",
+      "text": "修改后的 result 参数；未提供时返回新的 SphereOutlineGeometry 实例。"
+    },
+    {
+      "id": "SphereOutlineGeometry",
+      "field": "description",
+      "sourceHash": "sha256:17c0c0094d7b7cbc4bcc52eea9561d7fa7d9ce60305b92f5c27a2ad4403c4641",
+      "text": "球体轮廓的描述。"
+    },
+    {
+      "id": "SphereOutlineGeometry",
+      "field": "exceptions/0/description",
+      "sourceHash": "sha256:7d5c1fa71d284c7a0e09ed03268a44f28300cb5d8110412e1c36c19bced3da6b",
+      "text": "options.stackPartitions 必须大于等于 1。"
+    },
+    {
+      "id": "SphereOutlineGeometry",
+      "field": "exceptions/1/description",
+      "sourceHash": "sha256:d4acb9525e64a5353157de2a1e471b6066be3c560ced4f6c513f844b4347758d",
+      "text": "options.slicePartitions 必须大于等于 0。"
+    },
+    {
+      "id": "SphereOutlineGeometry",
+      "field": "exceptions/2/description",
+      "sourceHash": "sha256:46b482d5bfd32ec5d6aa2ab94efcae7cc7177d38f2f0bcbd7af620d5fd342dc5",
+      "text": "options.subdivisions 必须大于等于 0。"
+    },
+    {
+      "id": "SphereOutlineGeometry",
+      "field": "params/options.radius/description",
+      "sourceHash": "sha256:7c7485139bb7f1aa45b19a0658cd899032cf4a827522935194cc7b65834c3f5d",
+      "text": "球体半径。"
+    },
+    {
+      "id": "SphereOutlineGeometry",
+      "field": "params/options.slicePartitions/description",
+      "sourceHash": "sha256:10fdbf8b05b54f9528d50c236ed5b001092312cf3501c0f9c5cdfebc4d92316e",
+      "text": "球体径向切片数量，等于径向线条数量。"
+    },
+    {
+      "id": "SphereOutlineGeometry",
+      "field": "params/options.stackPartitions/description",
+      "sourceHash": "sha256:e83abd73f26b27e697819aaa07bf73104520414edd2a726cf0df27fcacf0a554",
+      "text": "球体纬向分层数量，比平行线数量多 1。"
+    },
+    {
+      "id": "SphereOutlineGeometry",
+      "field": "params/options.subdivisions/description",
+      "sourceHash": "sha256:4df0e1698a01a1f8be37c2862371d0d81a0375e8244ed12f4230de0227dfdbb2",
+      "text": "每条线的采样点数量，决定曲线细分程度。"
+    },
+    {
+      "id": "WallGeometry.createGeometry",
+      "field": "description",
+      "sourceHash": "sha256:504c7cc4ace888676ddfa27a752795c1e2a9330000f51eb0b4008a2707083283",
+      "text": "计算墙体的几何表示，包括顶点、索引和包围球。"
+    },
+    {
+      "id": "WallGeometry.createGeometry",
+      "field": "params/wallGeometry/description",
+      "sourceHash": "sha256:ca272efba11feea5486063af248ef73d87976caa2015d2919cad09038e4a7c13",
+      "text": "墙体的描述。"
+    },
+    {
+      "id": "WallGeometry.fromConstantHeights",
+      "field": "description",
+      "sourceHash": "sha256:4d8f03dbaab901262a59a95d7c63db23960b54232c1ddca716a91f9bb0e47af4",
+      "text": "类似 KML LineString 的墙体描述。墙体由一系列向下延伸到地面的点定义，也可选择延伸到指定高度。"
+    },
+    {
+      "id": "WallGeometry.fromConstantHeights",
+      "field": "params/options.ellipsoid/description",
+      "sourceHash": "sha256:a091bddc3b62bd431bcb6d0198177a4bdebb7567f5d78372fd83aa4eca2ea4e4",
+      "text": "坐标操作所用的椭球。"
+    },
+    {
+      "id": "WallGeometry.fromConstantHeights",
+      "field": "params/options.maximumHeight/description",
+      "sourceHash": "sha256:a624addeb783cd609cde962425408e19ca9a008faf2e8da0d88371bdeef59c24",
+      "text": "指定墙体在 <code>positions</code> 处最高高度的常量。未定义时使用各位置自身的高度。"
+    },
+    {
+      "id": "WallGeometry.fromConstantHeights",
+      "field": "params/options.minimumHeight/description",
+      "sourceHash": "sha256:dc6a26fa6d2491f1d2563d4ac27195581e240df9c7f7980ea782bbe65e664fdd",
+      "text": "指定墙体在 <code>positions</code> 处最低高度的常量。未定义时各位置高度为 0.0。"
+    },
+    {
+      "id": "WallGeometry.fromConstantHeights",
+      "field": "params/options.positions/description",
+      "sourceHash": "sha256:3b55c5ca4840d129645edbfbcf18b7e3ab048366c8ac8eb4ed98685d13848671",
+      "text": "定义墙体各点的笛卡尔位置数组。"
+    },
+    {
+      "id": "WallGeometry.unpack",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:b385cb5279766fd1440b04045accc4655e95e810183562a1a3326104b19cc1de",
+      "text": "修改后的 result 参数；未提供时返回新的 WallGeometry 实例。"
+    },
+    {
+      "id": "WallGeometry",
+      "field": "description",
+      "sourceHash": "sha256:4d8f03dbaab901262a59a95d7c63db23960b54232c1ddca716a91f9bb0e47af4",
+      "text": "类似 KML LineString 的墙体描述。墙体由一系列向下延伸到地面的点定义，也可选择延伸到指定高度。"
+    },
+    {
+      "id": "WallGeometry",
+      "field": "exceptions/0/description",
+      "sourceHash": "sha256:b6cc41c6f4350666abae294d13ff0e7874fffc06397f48bda819aede9565d85c",
+      "text": "positions 的长度必须大于等于 2。"
+    },
+    {
+      "id": "WallGeometry",
+      "field": "exceptions/1/description",
+      "sourceHash": "sha256:3f5698b00968a973b4a6c6f85a888876a6f6e390b5f3e520c8e24dd615a65fd1",
+      "text": "positions 和 maximumHeights 的长度必须相同。"
+    },
+    {
+      "id": "WallGeometry",
+      "field": "exceptions/2/description",
+      "sourceHash": "sha256:25825909b21d5882a9e29ee1e519c74552c663da9b4bc98f87f951e480caf9e0",
+      "text": "positions 和 minimumHeights 的长度必须相同。"
+    },
+    {
+      "id": "WallGeometry",
+      "field": "params/options.ellipsoid/description",
+      "sourceHash": "sha256:a091bddc3b62bd431bcb6d0198177a4bdebb7567f5d78372fd83aa4eca2ea4e4",
+      "text": "坐标操作所用的椭球。"
+    },
+    {
+      "id": "WallGeometry",
+      "field": "params/options.granularity/description",
+      "sourceHash": "sha256:92da44f591d6c37e251a1b1b2d68e35efc47ec70a87dc39ef40f23c133e629b6",
+      "text": "相邻经纬度采样点的角度间隔，单位为弧度，决定缓冲区中的位置数量。"
+    },
+    {
+      "id": "WallGeometry",
+      "field": "params/options.maximumHeights/description",
+      "sourceHash": "sha256:a84b351f72f11cb6386b862fdeaa8725ff0798688c0d7cc6697616c041c361d7",
+      "text": "与 <code>positions</code> 对应的墙顶高度数组，指定墙体在各 <code>positions</code> 处的最高高度。未定义时使用各位置自身的高度。"
+    },
+    {
+      "id": "WallGeometry",
+      "field": "params/options.minimumHeights/description",
+      "sourceHash": "sha256:3e077f75dc79ed5ec3f839e97ae895139026b7cef3062007d27d2810278db6f0",
+      "text": "与 <code>positions</code> 对应的墙底高度数组，指定墙体在各 <code>positions</code> 处的最低高度。未定义时各位置高度为 0.0。"
+    },
+    {
+      "id": "WallGeometry",
+      "field": "params/options.positions/description",
+      "sourceHash": "sha256:3b55c5ca4840d129645edbfbcf18b7e3ab048366c8ac8eb4ed98685d13848671",
+      "text": "定义墙体各点的笛卡尔位置数组。"
+    },
+    {
+      "id": "WallOutlineGeometry.createGeometry",
+      "field": "description",
+      "sourceHash": "sha256:9653234cedfad312e8166f53617c3ac34375ba14f06042234e0e5a7c930ae346",
+      "text": "计算墙体轮廓的几何表示，包括顶点、索引和包围球。"
+    },
+    {
+      "id": "WallOutlineGeometry.createGeometry",
+      "field": "params/wallGeometry/description",
+      "sourceHash": "sha256:1d476307cfb0d3f98af24e83b4ce813c9835f42ce85b3dad578eec3308ef6742",
+      "text": "墙体轮廓的描述。"
+    },
+    {
+      "id": "WallOutlineGeometry.fromConstantHeights",
+      "field": "description",
+      "sourceHash": "sha256:b8642caa3cccf63989938ffef1a07110d127940fdb1d1269cb0d36fedca7e003",
+      "text": "墙体轮廓的描述。墙体由一系列向下延伸到地面的点定义，也可选择延伸到指定高度。"
+    },
+    {
+      "id": "WallOutlineGeometry.fromConstantHeights",
+      "field": "params/options.ellipsoid/description",
+      "sourceHash": "sha256:a091bddc3b62bd431bcb6d0198177a4bdebb7567f5d78372fd83aa4eca2ea4e4",
+      "text": "坐标操作所用的椭球。"
+    },
+    {
+      "id": "WallOutlineGeometry.fromConstantHeights",
+      "field": "params/options.maximumHeight/description",
+      "sourceHash": "sha256:a624addeb783cd609cde962425408e19ca9a008faf2e8da0d88371bdeef59c24",
+      "text": "指定墙体在 <code>positions</code> 处最高高度的常量。未定义时使用各位置自身的高度。"
+    },
+    {
+      "id": "WallOutlineGeometry.fromConstantHeights",
+      "field": "params/options.minimumHeight/description",
+      "sourceHash": "sha256:dc6a26fa6d2491f1d2563d4ac27195581e240df9c7f7980ea782bbe65e664fdd",
+      "text": "指定墙体在 <code>positions</code> 处最低高度的常量。未定义时各位置高度为 0.0。"
+    },
+    {
+      "id": "WallOutlineGeometry.fromConstantHeights",
+      "field": "params/options.positions/description",
+      "sourceHash": "sha256:3b55c5ca4840d129645edbfbcf18b7e3ab048366c8ac8eb4ed98685d13848671",
+      "text": "定义墙体各点的笛卡尔位置数组。"
+    },
+    {
+      "id": "WallOutlineGeometry.unpack",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:59b46604bf9141f274175a0139d25bb2931591a1345885ad41cb5d56cfa76b8c",
+      "text": "修改后的 result 参数；未提供时返回新的 WallOutlineGeometry 实例。"
+    },
+    {
+      "id": "WallOutlineGeometry",
+      "field": "description",
+      "sourceHash": "sha256:f1cdb8b2d7637bdbd0eb508ca4969c02c678229a45d62325136bc17e14a6fb29",
+      "text": "墙体轮廓的描述。墙体由一系列向下延伸到地面的点定义，也可选择延伸到指定高度。"
+    },
+    {
+      "id": "WallOutlineGeometry",
+      "field": "exceptions/0/description",
+      "sourceHash": "sha256:b6cc41c6f4350666abae294d13ff0e7874fffc06397f48bda819aede9565d85c",
+      "text": "positions 的长度必须大于等于 2。"
+    },
+    {
+      "id": "WallOutlineGeometry",
+      "field": "exceptions/1/description",
+      "sourceHash": "sha256:3f5698b00968a973b4a6c6f85a888876a6f6e390b5f3e520c8e24dd615a65fd1",
+      "text": "positions 和 maximumHeights 的长度必须相同。"
+    },
+    {
+      "id": "WallOutlineGeometry",
+      "field": "exceptions/2/description",
+      "sourceHash": "sha256:25825909b21d5882a9e29ee1e519c74552c663da9b4bc98f87f951e480caf9e0",
+      "text": "positions 和 minimumHeights 的长度必须相同。"
+    },
+    {
+      "id": "WallOutlineGeometry",
+      "field": "params/options.ellipsoid/description",
+      "sourceHash": "sha256:a091bddc3b62bd431bcb6d0198177a4bdebb7567f5d78372fd83aa4eca2ea4e4",
+      "text": "坐标操作所用的椭球。"
+    },
+    {
+      "id": "WallOutlineGeometry",
+      "field": "params/options.granularity/description",
+      "sourceHash": "sha256:92da44f591d6c37e251a1b1b2d68e35efc47ec70a87dc39ef40f23c133e629b6",
+      "text": "相邻经纬度采样点的角度间隔，单位为弧度，决定缓冲区中的位置数量。"
+    },
+    {
+      "id": "WallOutlineGeometry",
+      "field": "params/options.maximumHeights/description",
+      "sourceHash": "sha256:a84b351f72f11cb6386b862fdeaa8725ff0798688c0d7cc6697616c041c361d7",
+      "text": "与 <code>positions</code> 对应的墙顶高度数组，指定墙体在各 <code>positions</code> 处的最高高度。未定义时使用各位置自身的高度。"
+    },
+    {
+      "id": "WallOutlineGeometry",
+      "field": "params/options.minimumHeights/description",
+      "sourceHash": "sha256:3e077f75dc79ed5ec3f839e97ae895139026b7cef3062007d27d2810278db6f0",
+      "text": "与 <code>positions</code> 对应的墙底高度数组，指定墙体在各 <code>positions</code> 处的最低高度。未定义时各位置高度为 0.0。"
+    },
+    {
+      "id": "WallOutlineGeometry",
+      "field": "params/options.positions/description",
+      "sourceHash": "sha256:3b55c5ca4840d129645edbfbcf18b7e3ab048366c8ac8eb4ed98685d13848671",
+      "text": "定义墙体各点的笛卡尔位置数组。"
+    }
+  ]
+}

@@ -1,0 +1,378 @@
+{
+  "schemaVersion": 1,
+  "locale": "zh-CN",
+  "entries": [
+    {
+      "id": "GeometryPipeline.compressVertices",
+      "field": "description",
+      "sourceHash": "sha256:acc032af8a617ddc7686dfd1b83571ef91756bd6c2a5ef8f52e51d07a71fdf7b",
+      "text": "压缩并打包几何法线属性值，以节省内存。"
+    },
+    {
+      "id": "GeometryPipeline.compressVertices",
+      "field": "params/geometry/description",
+      "sourceHash": "sha256:73e71711c64fae823007c59d74fde42b80de5ed6bb57fb49c56fdec15b0aa1ae",
+      "text": "需要修改的几何体。"
+    },
+    {
+      "id": "GeometryPipeline.compressVertices",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:0ea21d56fafb8e25012171832b99183437e5eb143e7cd406110c1e97931183f1",
+      "text": "修改后的 <code>geometry</code> 参数，其法线已压缩并打包。"
+    },
+    {
+      "id": "GeometryPipeline.computeNormal",
+      "field": "description",
+      "sourceHash": "sha256:f834855518f5c5fc499b625c244d87cfd860c3f3ded75a2122e7e9661bf31fcf",
+      "text": "为包含 <code>TRIANGLES</code> 的几何体计算逐顶点法线，方法是对与该顶点相接的全部三角形法线求平均。结果作为新的 <code>normal</code> 属性加入几何体。假定三角形采用逆时针绕序。"
+    },
+    {
+      "id": "GeometryPipeline.computeNormal",
+      "field": "exceptions/0/description",
+      "sourceHash": "sha256:2927de52684e8fa425e603b65d8d6e020583fab755ab514d2a2db13ccf4b7650",
+      "text": "geometry.indices 的长度必须大于 0 且为 3 的倍数。"
+    },
+    {
+      "id": "GeometryPipeline.computeNormal",
+      "field": "exceptions/1/description",
+      "sourceHash": "sha256:33acdd4999238f83865cb98f6c60d18d203d76eec7d5564a97e9de40a0203933",
+      "text": "geometry.primitiveType 必须为 {@link PrimitiveType.TRIANGLES}。"
+    },
+    {
+      "id": "GeometryPipeline.computeNormal",
+      "field": "params/geometry/description",
+      "sourceHash": "sha256:73e71711c64fae823007c59d74fde42b80de5ed6bb57fb49c56fdec15b0aa1ae",
+      "text": "需要修改的几何体。"
+    },
+    {
+      "id": "GeometryPipeline.computeNormal",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:124b7aa0151083fc03a0b61d20b30d0619805d5a9298e12fb98062ba5dda9b62",
+      "text": "修改后的 <code>geometry</code> 参数，包含计算得到的 <code>normal</code> 属性。"
+    },
+    {
+      "id": "GeometryPipeline.computeTangentAndBitangent",
+      "field": "description",
+      "sourceHash": "sha256:2efc6fc84462ac8e392723c9a9089786a51a60356431118c96b1adfb0b6f378e",
+      "text": "为包含 <code>TRIANGLES</code> 的几何体计算逐顶点切线和副切线，并将结果作为新的 <code>tangent</code> 和 <code>bitangent</code> 属性加入几何体。假定三角形采用逆时针绕序。\n<p>\n基于 Eric Lengyel 的 <a href=\"http://www.terathon.com/code/tangent.html\">Computing Tangent Space Basis Vectors for an Arbitrary Mesh</a>。\n</p>"
+    },
+    {
+      "id": "GeometryPipeline.computeTangentAndBitangent",
+      "field": "exceptions/0/description",
+      "sourceHash": "sha256:2927de52684e8fa425e603b65d8d6e020583fab755ab514d2a2db13ccf4b7650",
+      "text": "geometry.indices 的长度必须大于 0 且为 3 的倍数。"
+    },
+    {
+      "id": "GeometryPipeline.computeTangentAndBitangent",
+      "field": "exceptions/1/description",
+      "sourceHash": "sha256:33acdd4999238f83865cb98f6c60d18d203d76eec7d5564a97e9de40a0203933",
+      "text": "geometry.primitiveType 必须为 {@link PrimitiveType.TRIANGLES}。"
+    },
+    {
+      "id": "GeometryPipeline.computeTangentAndBitangent",
+      "field": "params/geometry/description",
+      "sourceHash": "sha256:73e71711c64fae823007c59d74fde42b80de5ed6bb57fb49c56fdec15b0aa1ae",
+      "text": "需要修改的几何体。"
+    },
+    {
+      "id": "GeometryPipeline.computeTangentAndBitangent",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:77e32d938f5c3abd3e1dc4afd1d145518a8e01492657593c78f065bb52ea812c",
+      "text": "修改后的 <code>geometry</code> 参数，包含计算得到的 <code>tangent</code> 和 <code>bitangent</code> 属性。"
+    },
+    {
+      "id": "GeometryPipeline.createAttributeLocations",
+      "field": "description",
+      "sourceHash": "sha256:b28ca844d1c65f3f523f774227b72d4dc93076eecea1f429a0ac759c7b5278f6",
+      "text": "创建将属性名称映射到唯一位置索引的对象，以匹配顶点属性和着色器程序。"
+    },
+    {
+      "id": "GeometryPipeline.createAttributeLocations",
+      "field": "params/geometry/description",
+      "sourceHash": "sha256:6897c5ae52bac78bd9048336efc503388e85f5e8ac880c545885aa31e75a6b47",
+      "text": "用于创建映射对象的几何体，本身不会被修改。"
+    },
+    {
+      "id": "GeometryPipeline.createAttributeLocations",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:18baade6be86bb88e6a8087d19bed7b70fa3d83c2a935686c010f65fcce5503c",
+      "text": "属性名称与索引的键值对象。"
+    },
+    {
+      "id": "GeometryPipeline.createLineSegmentsForVectors",
+      "field": "description",
+      "sourceHash": "sha256:057a55e865934249dbe17f6762c81d884f44398536445e42d46a4ff3d3aad6d6",
+      "text": "为给定几何体创建新的 {@link Geometry}，使用 <code>LINES</code> 表示指定属性 <code>attributeName</code>。用于显示法线、切线和副切线等向量属性。"
+    },
+    {
+      "id": "GeometryPipeline.createLineSegmentsForVectors",
+      "field": "exceptions/0/description",
+      "sourceHash": "sha256:6727a2472c9f8e2db392181ead372650d576913a4c3d6ab046cb0b0005490a25",
+      "text": "geometry.attributes 必须包含与 attributeName 参数同名的属性。"
+    },
+    {
+      "id": "GeometryPipeline.createLineSegmentsForVectors",
+      "field": "params/attributeName/description",
+      "sourceHash": "sha256:dbcf97c4a4a016d98595663cd64cbfa15906e8a56a51550094231a010e44383f",
+      "text": "属性名称。"
+    },
+    {
+      "id": "GeometryPipeline.createLineSegmentsForVectors",
+      "field": "params/geometry/description",
+      "sourceHash": "sha256:c0b1863c5aed38f86cced875ef8f09d0e6ceb3b3d937083896c20cb745e38238",
+      "text": "包含该属性的 <code>Geometry</code> 实例。"
+    },
+    {
+      "id": "GeometryPipeline.createLineSegmentsForVectors",
+      "field": "params/length/description",
+      "sourceHash": "sha256:7eabb54926ee62e8880dd3e5a0f4cab85aae556e4bf1b07f483abff06ccbc95a",
+      "text": "每条线段的长度，单位为米。可使用负值，使向量指向相反方向。"
+    },
+    {
+      "id": "GeometryPipeline.createLineSegmentsForVectors",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:502cbae63b5683e9adfe126013c9e4ec3c0302c862b6c5de9f2c7e2717030566",
+      "text": "包含向量线段的新 <code>Geometry</code> 实例。"
+    },
+    {
+      "id": "GeometryPipeline.encodeAttribute",
+      "field": "description",
+      "sourceHash": "sha256:fd34692cd84b8499db4cb69f0c10dce98628ad00b33bc6d13cc8b82343115d38",
+      "text": "将浮点几何属性值编码为两个独立属性，以提高渲染精度。\n<p>\n常用于生成高精度位置顶点属性。\n</p>"
+    },
+    {
+      "id": "GeometryPipeline.encodeAttribute",
+      "field": "exceptions/0/description",
+      "sourceHash": "sha256:a2d59e4236dc92d440d08d2d561e6ab730d0cacbdbae637c4b181f479a6feaee",
+      "text": "geometry 必须包含与 attributeName 参数匹配的属性。"
+    },
+    {
+      "id": "GeometryPipeline.encodeAttribute",
+      "field": "exceptions/1/description",
+      "sourceHash": "sha256:95f8bf10ed23d922b97b445a948c6585e3a1c53b7aef47e8f38afdd7ddcafbe6",
+      "text": "属性的 componentDatatype 必须为 ComponentDatatype.DOUBLE。"
+    },
+    {
+      "id": "GeometryPipeline.encodeAttribute",
+      "field": "params/attributeHighName/description",
+      "sourceHash": "sha256:12ed8e816995d2533d6891ed225ecb32b7def935704f91588815e48bdc12ff27",
+      "text": "存储编码高位部分的属性名称。"
+    },
+    {
+      "id": "GeometryPipeline.encodeAttribute",
+      "field": "params/attributeLowName/description",
+      "sourceHash": "sha256:86e857d07d30fd94997d3f61cf136c7fe3b0edec99593ed3eec68e8349bb4d16",
+      "text": "存储编码低位部分的属性名称。"
+    },
+    {
+      "id": "GeometryPipeline.encodeAttribute",
+      "field": "params/attributeName/description",
+      "sourceHash": "sha256:dbcf97c4a4a016d98595663cd64cbfa15906e8a56a51550094231a010e44383f",
+      "text": "属性名称。"
+    },
+    {
+      "id": "GeometryPipeline.encodeAttribute",
+      "field": "params/geometry/description",
+      "sourceHash": "sha256:73e71711c64fae823007c59d74fde42b80de5ed6bb57fb49c56fdec15b0aa1ae",
+      "text": "需要修改的几何体。"
+    },
+    {
+      "id": "GeometryPipeline.encodeAttribute",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:6bc3ab25f5be5fcc87bd18262bfa6d353d4c04cf2471dea1590b050b5e817e88",
+      "text": "修改后的 <code>geometry</code> 参数，包含编码后的属性。"
+    },
+    {
+      "id": "GeometryPipeline.fitToUnsignedShortIndices",
+      "field": "description",
+      "sourceHash": "sha256:583a656bb6e0bec25335ca0c515df65f65c2f7aa88f7ef7599698a4d2bcd588d",
+      "text": "必要时将一个几何体拆分为多个几何体，确保 <code>indices</code> 中的索引可用无符号短整数表示，以满足不支持无符号整数索引时的 WebGL 要求。\n<p>\n几何体没有 <code>indices</code> 时，此函数不产生影响。\n</p>"
+    },
+    {
+      "id": "GeometryPipeline.fitToUnsignedShortIndices",
+      "field": "exceptions/0/description",
+      "sourceHash": "sha256:0979a327f5678a55afae5acc526859b006a7e5e7c3f4e8622b4fc19178ad0b9b",
+      "text": "geometry.primitiveType 必须为 PrimitiveType.TRIANGLES、PrimitiveType.LINES 或 PrimitiveType.POINTS。"
+    },
+    {
+      "id": "GeometryPipeline.fitToUnsignedShortIndices",
+      "field": "exceptions/1/description",
+      "sourceHash": "sha256:fb2907ddf2dc4e5b1aa1728faaeba4446f806c6ee31e549ddab43b776e1d1935",
+      "text": "各几何属性的数据列表必须对应相同的顶点数量。"
+    },
+    {
+      "id": "GeometryPipeline.fitToUnsignedShortIndices",
+      "field": "params/geometry/description",
+      "sourceHash": "sha256:b6d271e8d8e8e5a708c1704e5bc2b63436b29b6d964aff11b6489e244a469888",
+      "text": "需要拆分为多个几何体的几何体。"
+    },
+    {
+      "id": "GeometryPipeline.fitToUnsignedShortIndices",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:0fc2b9c8d8a847675c726f38f36c6450f0306b815489aaea621d28eeb4f1205a",
+      "text": "几何体数组，其中每个几何体的索引都可用无符号短整数表示。"
+    },
+    {
+      "id": "GeometryPipeline.projectTo2D",
+      "field": "description",
+      "sourceHash": "sha256:92268c40c2cc5df737a75bec382b8a41b72eeeedacd44959742ace3e58ca3859",
+      "text": "将几何体的三维 <code>position</code> 属性投影为二维，将原 <code>position</code> 替换为独立的 <code>position3D</code> 和 <code>position2D</code> 属性。\n<p>\n没有 <code>position</code> 时，此函数不产生影响。\n</p>"
+    },
+    {
+      "id": "GeometryPipeline.projectTo2D",
+      "field": "exceptions/0/description",
+      "sourceHash": "sha256:a2d59e4236dc92d440d08d2d561e6ab730d0cacbdbae637c4b181f479a6feaee",
+      "text": "geometry 必须包含与 attributeName 参数匹配的属性。"
+    },
+    {
+      "id": "GeometryPipeline.projectTo2D",
+      "field": "exceptions/1/description",
+      "sourceHash": "sha256:95f8bf10ed23d922b97b445a948c6585e3a1c53b7aef47e8f38afdd7ddcafbe6",
+      "text": "属性的 componentDatatype 必须为 ComponentDatatype.DOUBLE。"
+    },
+    {
+      "id": "GeometryPipeline.projectTo2D",
+      "field": "exceptions/2/description",
+      "sourceHash": "sha256:e75f1cc97b05e54f116be15febfa0893bfdb08dd76f275492661ac2d0619e3c5",
+      "text": "无法将某个点投影到二维。"
+    },
+    {
+      "id": "GeometryPipeline.projectTo2D",
+      "field": "params/attributeName/description",
+      "sourceHash": "sha256:dbcf97c4a4a016d98595663cd64cbfa15906e8a56a51550094231a010e44383f",
+      "text": "属性名称。"
+    },
+    {
+      "id": "GeometryPipeline.projectTo2D",
+      "field": "params/attributeName2D/description",
+      "sourceHash": "sha256:e2ef17061f124e1212dedf480828ed4fa9be6d4437b7bc19dc8bcf61e76e7395",
+      "text": "二维属性的名称。"
+    },
+    {
+      "id": "GeometryPipeline.projectTo2D",
+      "field": "params/attributeName3D/description",
+      "sourceHash": "sha256:ec0a64a853dcf14cbaf1e65519b0f40c108be0052a2ec748dd6bcfd4084d4aaa",
+      "text": "三维属性的名称。"
+    },
+    {
+      "id": "GeometryPipeline.projectTo2D",
+      "field": "params/geometry/description",
+      "sourceHash": "sha256:73e71711c64fae823007c59d74fde42b80de5ed6bb57fb49c56fdec15b0aa1ae",
+      "text": "需要修改的几何体。"
+    },
+    {
+      "id": "GeometryPipeline.projectTo2D",
+      "field": "params/projection/description",
+      "sourceHash": "sha256:067d7e5fdf5e9fce39ac0aada4f18c35331f47b8cb01133570b14a78a0650e10",
+      "text": "使用的投影。"
+    },
+    {
+      "id": "GeometryPipeline.projectTo2D",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:2e7e2d858dd88229131dbfa0481f8c1247c9d96654db1707b2caae1a4178184a",
+      "text": "修改后的 <code>geometry</code> 参数，包含 <code>position3D</code> 和 <code>position2D</code> 属性。"
+    },
+    {
+      "id": "GeometryPipeline.reorderForPostVertexCache",
+      "field": "description",
+      "sourceHash": "sha256:5addc2b60c7efeeb4cfdab9f3a1fb44d8629689b5f0a953f4afcb476dd554a83",
+      "text": "使用 Tipsify 算法重排几何体的 <code>indices</code>，以更有效地利用 GPU 顶点着色器后缓存。若 <code>primitiveType</code> 不是 <code>TRIANGLES</code>，或没有 <code>indices</code>，此函数不产生影响。"
+    },
+    {
+      "id": "GeometryPipeline.reorderForPostVertexCache",
+      "field": "exceptions/0/description",
+      "sourceHash": "sha256:19188cdfac5a4df90643aeea5da168176a7086cd25d46e337304e11ef7998286",
+      "text": "cacheCapacity 必须大于 2。"
+    },
+    {
+      "id": "GeometryPipeline.reorderForPostVertexCache",
+      "field": "params/cacheCapacity/description",
+      "sourceHash": "sha256:242d4a5fce59c653545e78d93b16e0cd91e5e30281ddd302a96af583520e62ea",
+      "text": "GPU 顶点缓存可容纳的顶点数量。"
+    },
+    {
+      "id": "GeometryPipeline.reorderForPostVertexCache",
+      "field": "params/geometry/description",
+      "sourceHash": "sha256:73e71711c64fae823007c59d74fde42b80de5ed6bb57fb49c56fdec15b0aa1ae",
+      "text": "需要修改的几何体。"
+    },
+    {
+      "id": "GeometryPipeline.reorderForPostVertexCache",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:0c20ff785f46b746b5505603ab2b336faa7513f32820121942c1cd72d8952386",
+      "text": "修改后的 <code>geometry</code> 参数，其索引已为顶点着色器后缓存重新排序。"
+    },
+    {
+      "id": "GeometryPipeline.reorderForPreVertexCache",
+      "field": "description",
+      "sourceHash": "sha256:e90791a9e62c4e4868ed49ffc96350238ee4bdc32cb1e685c00fd9047fb6faeb",
+      "text": "重排几何体的属性和 <code>indices</code>，以更有效地利用 GPU 顶点着色器前缓存。"
+    },
+    {
+      "id": "GeometryPipeline.reorderForPreVertexCache",
+      "field": "exceptions/0/description",
+      "sourceHash": "sha256:547e9a6dd2a704f341bffa33540a3be876ec7df2c248716ca4db3d10af9a1d9e",
+      "text": "geometry.attributes 中各属性数组必须对应相同的顶点数量。"
+    },
+    {
+      "id": "GeometryPipeline.reorderForPreVertexCache",
+      "field": "params/geometry/description",
+      "sourceHash": "sha256:73e71711c64fae823007c59d74fde42b80de5ed6bb57fb49c56fdec15b0aa1ae",
+      "text": "需要修改的几何体。"
+    },
+    {
+      "id": "GeometryPipeline.reorderForPreVertexCache",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:bf82518dca343c93b00d7d2092c0b857326b519db0bfa145be154076d0f4a90c",
+      "text": "修改后的 <code>geometry</code> 参数，其属性和索引已为 GPU 顶点着色器前缓存重新排序。"
+    },
+    {
+      "id": "GeometryPipeline.toWireframe",
+      "field": "description",
+      "sourceHash": "sha256:ab0ca4e9cb6c814b0b57f06196bf997d361b2abaaba47dc3621cdcf53b3eb16c",
+      "text": "将几何体的三角形索引转换为线段索引。存在 <code>indices</code> 且 <code>primitiveType</code> 为 <code>TRIANGLES</code>、<code>TRIANGLE_STRIP</code> 或 <code>TRIANGLE_FAN</code> 时，转换为 <code>LINES</code>；其他情况不改变几何体。\n<p>\n常用于创建线框几何，以便进行视觉调试。\n</p>"
+    },
+    {
+      "id": "GeometryPipeline.toWireframe",
+      "field": "exceptions/0/description",
+      "sourceHash": "sha256:a6935f496fb36517d0bfce5db84fe33009d34aec57ae94ccad7c8f72744c9b56",
+      "text": "geometry.primitiveType 必须为 TRIANGLES、TRIANGLE_STRIP 或 TRIANGLE_FAN。"
+    },
+    {
+      "id": "GeometryPipeline.toWireframe",
+      "field": "params/geometry/description",
+      "sourceHash": "sha256:73e71711c64fae823007c59d74fde42b80de5ed6bb57fb49c56fdec15b0aa1ae",
+      "text": "需要修改的几何体。"
+    },
+    {
+      "id": "GeometryPipeline.toWireframe",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:85254b14ee8a39dfa5eab86524a4ec55fad71a04b1b06dfa3ceda07bc682b60a",
+      "text": "修改后的 <code>geometry</code> 参数，其三角形索引已转换为线段索引。"
+    },
+    {
+      "id": "GeometryPipeline.transformToWorldCoordinates",
+      "field": "description",
+      "sourceHash": "sha256:b5eb80c856dc3c2d50fa682248b07de478f86e67710e5a1f1b43129692865001",
+      "text": "将几何实例变换到世界坐标。会将实例的 <code>modelMatrix</code> 设为 {@link Matrix4.IDENTITY}，并变换以下已存在的属性：<code>position</code>、<code>normal</code>、<code>tangent</code> 和 <code>bitangent</code>。"
+    },
+    {
+      "id": "GeometryPipeline.transformToWorldCoordinates",
+      "field": "params/instance/description",
+      "sourceHash": "sha256:2fdc61acf76a9f33c67187f94c2900943e23e0f6bdc3b089ef56df7e06ff00da",
+      "text": "需要修改的几何实例。"
+    },
+    {
+      "id": "GeometryPipeline.transformToWorldCoordinates",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:c249cde2804539959fa1db969966a58bcaa2a2fd2b5e91438978ab60fdcc91ef",
+      "text": "修改后的 <code>instance</code> 参数，其属性已变换到世界坐标。"
+    },
+    {
+      "id": "GeometryPipeline",
+      "field": "description",
+      "sourceHash": "sha256:28cfd1de0c9619aff4c204e56f9714caecca7ab73a3e183e8f388b6445560d64",
+      "text": "几何内容处理管线函数。"
+    }
+  ]
+}

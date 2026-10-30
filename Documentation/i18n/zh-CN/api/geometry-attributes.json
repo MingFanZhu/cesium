@@ -1,0 +1,1284 @@
+{
+  "schemaVersion": 1,
+  "locale": "zh-CN",
+  "entries": [
+    {
+      "id": "ColorGeometryInstanceAttribute.equals",
+      "field": "description",
+      "sourceHash": "sha256:c18f5fe6890c13ec1e8e5b27882df6a9ce94ee290cd342745b2457613f5a84a4",
+      "text": "比较给定的 ColorGeometryInstanceAttribute，相等时返回 <code>true</code>，否则返回 <code>false</code>。"
+    },
+    {
+      "id": "ColorGeometryInstanceAttribute.equals",
+      "field": "params/left/description",
+      "sourceHash": "sha256:6a37c6d94699b9f56d2ae4d32ced36fe23d618971faf760bc3ba5b0e84fe37fe",
+      "text": "第一个 ColorGeometryInstanceAttribute。"
+    },
+    {
+      "id": "ColorGeometryInstanceAttribute.equals",
+      "field": "params/right/description",
+      "sourceHash": "sha256:0fbee40a3bf3cda2ba8b1b7d3f19e69482ccfdecd560df6c1b4a9236a207558d",
+      "text": "第二个 ColorGeometryInstanceAttribute。"
+    },
+    {
+      "id": "ColorGeometryInstanceAttribute.fromColor",
+      "field": "description",
+      "sourceHash": "sha256:72f8e5889a0530be01c6d26ac5c63d2cd1d7b424e538400f5f36d0dfa97a5e57",
+      "text": "根据给定 {@link Color} 创建新的 {@link ColorGeometryInstanceAttribute} 实例。"
+    },
+    {
+      "id": "ColorGeometryInstanceAttribute.fromColor",
+      "field": "params/color/description",
+      "sourceHash": "sha256:2b0821ff6e657c9b6ee696565a889ab1a6358e914c4add54c4fb32e78ec27ba8",
+      "text": "颜色。"
+    },
+    {
+      "id": "ColorGeometryInstanceAttribute.fromColor",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:00212ee791545ed41ae9e13164bf48855d1e394de42303d682f9206dac43e134",
+      "text": "新的 {@link ColorGeometryInstanceAttribute} 实例。"
+    },
+    {
+      "id": "ColorGeometryInstanceAttribute.toValue",
+      "field": "description",
+      "sourceHash": "sha256:3e328dfc847660021119b22fb8716f1571407ce31e93c034d744374655c3fd94",
+      "text": "将颜色转换为可用于赋值颜色属性的类型化数组。"
+    },
+    {
+      "id": "ColorGeometryInstanceAttribute.toValue",
+      "field": "params/color/description",
+      "sourceHash": "sha256:2b0821ff6e657c9b6ee696565a889ab1a6358e914c4add54c4fb32e78ec27ba8",
+      "text": "颜色。"
+    },
+    {
+      "id": "ColorGeometryInstanceAttribute.toValue",
+      "field": "params/result/description",
+      "sourceHash": "sha256:2057283d1fa0f812aebf087011b4c72e91c291c8c0697da7e374d1624557b77d",
+      "text": "用于保存结果的数组；若为 undefined，则创建新实例。"
+    },
+    {
+      "id": "ColorGeometryInstanceAttribute.toValue",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:74e3885f0a5efb2f80b1b847fd2364ab4c6843c07578e533b6181c4d293cde39",
+      "text": "修改后的 result 参数；若 result 为 undefined，则返回新实例。"
+    },
+    {
+      "id": "ColorGeometryInstanceAttribute",
+      "field": "description",
+      "sourceHash": "sha256:9a0db6e9992c6c6d64ff7d96c7d9859fdcb4d7dcaa6d68697d2d243221561535",
+      "text": "逐实例几何颜色的值及类型信息。"
+    },
+    {
+      "id": "ColorGeometryInstanceAttribute",
+      "field": "params/alpha/description",
+      "sourceHash": "sha256:e2bed0452928b941f3fffd1549d5f874d402cff4175c76166c6206893f1bd7c8",
+      "text": "alpha 分量。"
+    },
+    {
+      "id": "ColorGeometryInstanceAttribute",
+      "field": "params/blue/description",
+      "sourceHash": "sha256:15b5577f67ad0846b4071c8e9a258ae45abbba67e4e05e6835a0f85ab68ed5a9",
+      "text": "蓝色分量。"
+    },
+    {
+      "id": "ColorGeometryInstanceAttribute",
+      "field": "params/green/description",
+      "sourceHash": "sha256:ab7c7878cf5514b52449d5df3205f401a4a3db3e98058b9878cfc76c796251eb",
+      "text": "绿色分量。"
+    },
+    {
+      "id": "ColorGeometryInstanceAttribute",
+      "field": "params/red/description",
+      "sourceHash": "sha256:be130e2f6b7a20aeded0ccd327dc79db7ffd8cca08cc7ef060b1f1ae08307ded",
+      "text": "红色分量。"
+    },
+    {
+      "id": "ColorGeometryInstanceAttribute#componentDatatype",
+      "field": "description",
+      "sourceHash": "sha256:9f40f1ed231ae7e691c0374b9622d8b7e3b0df118bc2ff10950c62b67c88d405",
+      "text": "属性中每个分量的数据类型，例如 {@link ColorGeometryInstanceAttribute#value} 中各元素的类型。"
+    },
+    {
+      "id": "ColorGeometryInstanceAttribute#componentsPerAttribute",
+      "field": "description",
+      "sourceHash": "sha256:4b82ec7953e5f38f931e80b55af8def4485c0eb0183f163105daf0f02bbf1aff",
+      "text": "属性的分量数量，即 {@link ColorGeometryInstanceAttribute#value} 中的分量数。"
+    },
+    {
+      "id": "ColorGeometryInstanceAttribute#normalize",
+      "field": "description",
+      "sourceHash": "sha256:cdcd7e3e667b679b7ada5f66740d14c47e08ab65e4e0e6e7e852ecd7e47f8660",
+      "text": "为 <code>true</code> 且 <code>componentDatatype</code> 为整数格式时，渲染中按浮点值访问这些分量会将其映射到 [0, 1]（无符号）或 [-1, 1]（有符号）范围。"
+    },
+    {
+      "id": "ColorGeometryInstanceAttribute#value",
+      "field": "description",
+      "sourceHash": "sha256:cc9fa86f1e810fcd9b2b6e3532d61d8705ebfd7479773893b4f5bb1f1472f653",
+      "text": "存储在类型化数组中的属性值。"
+    },
+    {
+      "id": "ComponentDatatype.BYTE",
+      "field": "description",
+      "sourceHash": "sha256:4859ed3eb60b7f3b77b719b7d4d6e7aeae2515f625f2740f6369c971e88cc3bc",
+      "text": "8 位有符号字节，对应 <code>gl.BYTE</code>，也是 <code>Int8Array</code> 的元素类型。"
+    },
+    {
+      "id": "ComponentDatatype.createArrayBufferView",
+      "field": "description",
+      "sourceHash": "sha256:677b7936f474cb276f867afe6149f074aa5477eb57ee73585cf9ddb8cd0836c3",
+      "text": "为字节数组创建类型化视图。"
+    },
+    {
+      "id": "ComponentDatatype.createArrayBufferView",
+      "field": "exceptions/0/description",
+      "sourceHash": "sha256:32247c6f8c2e382a99f664fc777beb900349ca635edfeefb22365a8dfdf85cbf",
+      "text": "componentDatatype 不是有效值。"
+    },
+    {
+      "id": "ComponentDatatype.createArrayBufferView",
+      "field": "params/buffer/description",
+      "sourceHash": "sha256:2620fc00cb0400aebce816dcdf6fadd46d310f530f9bfa038670d05460d2da95",
+      "text": "视图所使用的底层缓冲区。"
+    },
+    {
+      "id": "ComponentDatatype.createArrayBufferView",
+      "field": "params/byteOffset/description",
+      "sourceHash": "sha256:ba7be810750cd5ade7309408befe2e051dce991c78bf699d33856573961b05ef",
+      "text": "视图首元素相对于缓冲区起点的偏移，单位为字节。"
+    },
+    {
+      "id": "ComponentDatatype.createArrayBufferView",
+      "field": "params/componentDatatype/description",
+      "sourceHash": "sha256:208bf3f85fb89a7679f328c59c603a50c617f3661238217720674db57593a3b2",
+      "text": "需要创建的视图类型。"
+    },
+    {
+      "id": "ComponentDatatype.createArrayBufferView",
+      "field": "params/length/description",
+      "sourceHash": "sha256:4aeb21b1ea445653a9c51687e866341ff993d21395e5e6aaf468ebb36725a7de",
+      "text": "视图中的元素数量。"
+    },
+    {
+      "id": "ComponentDatatype.createArrayBufferView",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:b218567cf49e7f6690da8f5ad5d3e11d600263e1f27e7e4a4c4c6fcdc8a6f757",
+      "text": "缓冲区的类型化数组视图。"
+    },
+    {
+      "id": "ComponentDatatype.createTypedArray",
+      "field": "description",
+      "sourceHash": "sha256:fc927062b084e8f669cbf8596cfa3eb4f40c4d8f7ce36d080b739d94ed3682b9",
+      "text": "创建与分量数据类型对应的类型化数组。"
+    },
+    {
+      "id": "ComponentDatatype.createTypedArray",
+      "field": "exceptions/0/description",
+      "sourceHash": "sha256:32247c6f8c2e382a99f664fc777beb900349ca635edfeefb22365a8dfdf85cbf",
+      "text": "componentDatatype 不是有效值。"
+    },
+    {
+      "id": "ComponentDatatype.createTypedArray",
+      "field": "params/componentDatatype/description",
+      "sourceHash": "sha256:5e8d78b1d450371de574eed1c807339e54a0d462c49b360f511f120c9894c3bc",
+      "text": "分量数据类型。"
+    },
+    {
+      "id": "ComponentDatatype.createTypedArray",
+      "field": "params/valuesOrLength/description",
+      "sourceHash": "sha256:8d41f030c48889a5387fbedd2eabebf928aa0d92150a3e167dc7ffc339212129",
+      "text": "要创建的数组长度，或已有数组。"
+    },
+    {
+      "id": "ComponentDatatype.createTypedArray",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:4bcaf737304ab15525705fde1f4c7c9cdc014983d3b5901bcccf9729fbf612c1",
+      "text": "类型化数组。"
+    },
+    {
+      "id": "ComponentDatatype.dequantize",
+      "field": "description",
+      "sourceHash": "sha256:c33ce565db2bc9ec0f9d1efca95d9c4b3dcadedad6dd66a54920191164726ff8",
+      "text": "遵循 WebGL 和 glTF 的归一化约定，将单个归一化整数值转换为浮点值。有符号类型的结果范围为 [-1, 1]，无符号类型为 [0, 1]。"
+    },
+    {
+      "id": "ComponentDatatype.dequantize",
+      "field": "params/componentDatatype/description",
+      "sourceHash": "sha256:5c8228d38dc1e53808849d1541d59c9d2591ab0a8faf9f9994406da9bdd17335",
+      "text": "该值的分量数据类型。"
+    },
+    {
+      "id": "ComponentDatatype.dequantize",
+      "field": "params/value/description",
+      "sourceHash": "sha256:a603ca5561d3376d8676dd5dcbc1bc93de1b344b70fbbb4db22d0e9aba8af7ed",
+      "text": "需要反量化的整数值。"
+    },
+    {
+      "id": "ComponentDatatype.dequantize",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:4499b525bd60584c3fabc2296afa059d91f139b30b380239dddc58a934b1e5a2",
+      "text": "反量化后的浮点值。"
+    },
+    {
+      "id": "ComponentDatatype.DOUBLE",
+      "field": "description",
+      "sourceHash": "sha256:14d9860841fce373e25a7ba50be3c8ccc3c2de159f6f7520a4f7eae6a3594d08",
+      "text": "64 位浮点数，对应桌面 OpenGL 的 <code>gl.DOUBLE</code>；WebGL 不支持此类型，引擎通过 {@link GeometryPipeline.encodeAttribute} 模拟。也是 <code>Float64Array</code> 的元素类型。"
+    },
+    {
+      "id": "ComponentDatatype.FLOAT",
+      "field": "description",
+      "sourceHash": "sha256:1968abe0e37ee6f053c92034c32fbdd2e10c2933cff822d6fbf8c4bba3d5ed6a",
+      "text": "32 位浮点数，对应 <code>FLOAT</code>，也是 <code>Float32Array</code> 的元素类型。"
+    },
+    {
+      "id": "ComponentDatatype.fromName",
+      "field": "description",
+      "sourceHash": "sha256:daef2aad2e85eda5b7371e1e2f52a9d102e8d9940f5c7040596f6a144b317a92",
+      "text": "按名称获取 ComponentDatatype。"
+    },
+    {
+      "id": "ComponentDatatype.fromName",
+      "field": "exceptions/0/description",
+      "sourceHash": "sha256:d2e943575819148a634e9d2e45b5562fff91a7924966f066b9ad9ad1efbc8f34",
+      "text": "name 不是有效值。"
+    },
+    {
+      "id": "ComponentDatatype.fromName",
+      "field": "params/name/description",
+      "sourceHash": "sha256:0bc93ab369d13e1ecc09f19e8e77a65fd404a5bcab3fca88c5533ca92c47976a",
+      "text": "ComponentDatatype 的名称。"
+    },
+    {
+      "id": "ComponentDatatype.fromName",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:8cb1c14b6bd344fb7b6e4a6a5622177b6bae0c2a39bddfc2814ab3589cd0ce5d",
+      "text": "ComponentDatatype。"
+    },
+    {
+      "id": "ComponentDatatype.fromTypedArray",
+      "field": "description",
+      "sourceHash": "sha256:3e5096e991a2828e2ef7fcbdf29137b1c8c6b13b6deedfaf4e2866910ebd47f2",
+      "text": "获取给定 TypedArray 实例对应的 {@link ComponentDatatype}。"
+    },
+    {
+      "id": "ComponentDatatype.fromTypedArray",
+      "field": "params/array/description",
+      "sourceHash": "sha256:d89461a4d69b5e4093dc56e3409ba61f2aa7577437414188eda4d0061e3e66d1",
+      "text": "类型化数组。"
+    },
+    {
+      "id": "ComponentDatatype.fromTypedArray",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:b64ba9f8fae5a70ae1422b9671c05c97c917e429070b3049e2265c8c139266c3",
+      "text": "给定数组对应的 ComponentDatatype；不是 TypedArray 时为 undefined。"
+    },
+    {
+      "id": "ComponentDatatype.getSizeInBytes",
+      "field": "description",
+      "sourceHash": "sha256:9597497e3f077035ba8b5f206bf0fb2602b2505886d07b23a977682ef058f68b",
+      "text": "返回对应数据类型的大小，单位为字节。"
+    },
+    {
+      "id": "ComponentDatatype.getSizeInBytes",
+      "field": "exceptions/0/description",
+      "sourceHash": "sha256:32247c6f8c2e382a99f664fc777beb900349ca635edfeefb22365a8dfdf85cbf",
+      "text": "componentDatatype 不是有效值。"
+    },
+    {
+      "id": "ComponentDatatype.getSizeInBytes",
+      "field": "params/componentDatatype/description",
+      "sourceHash": "sha256:5829a9c118a0dfe0e6752ddb1b03bd761819db5e2af2846df70dad6bd75274a4",
+      "text": "需要获取大小的分量数据类型。"
+    },
+    {
+      "id": "ComponentDatatype.getSizeInBytes",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:9a56a53143f7d4e2d1e75b7222562ef7c1809ff26e69ab32a33dc76e19208ea0",
+      "text": "大小，单位为字节。"
+    },
+    {
+      "id": "ComponentDatatype.INT",
+      "field": "description",
+      "sourceHash": "sha256:888f8b12866760a6d2e6a60e0b9b0303d545ec528ad6c23eb9aa334c0df059fb",
+      "text": "32 位有符号整数，对应 <code>INT</code>，也是 <code>Int32Array</code> 的元素类型。"
+    },
+    {
+      "id": "ComponentDatatype.SHORT",
+      "field": "description",
+      "sourceHash": "sha256:033bc76ebd85be6804d369cd880124e6e5626d25bfb234245aa7eead1019b369",
+      "text": "16 位有符号短整数，对应 <code>SHORT</code>，也是 <code>Int16Array</code> 的元素类型。"
+    },
+    {
+      "id": "ComponentDatatype.UNSIGNED_BYTE",
+      "field": "description",
+      "sourceHash": "sha256:f85208b4604eb64a25234a04c2ed07703d52462f35f4479b803f3c291ad694e8",
+      "text": "8 位无符号字节，对应 <code>UNSIGNED_BYTE</code>，也是 <code>Uint8Array</code> 的元素类型。"
+    },
+    {
+      "id": "ComponentDatatype.UNSIGNED_INT",
+      "field": "description",
+      "sourceHash": "sha256:15d6b31fd1a1c2009d559eb4c30b59fafd296dd6eaea2f01ce6431847fa5c6b5",
+      "text": "32 位无符号整数，对应 <code>UNSIGNED_INT</code>，也是 <code>Uint32Array</code> 的元素类型。"
+    },
+    {
+      "id": "ComponentDatatype.UNSIGNED_SHORT",
+      "field": "description",
+      "sourceHash": "sha256:d3579af32aa6740c368e25ab1b4af4bf4e64d100d0755c0d1317c16fb2977e69",
+      "text": "16 位无符号短整数，对应 <code>UNSIGNED_SHORT</code>，也是 <code>Uint16Array</code> 的元素类型。"
+    },
+    {
+      "id": "ComponentDatatype.validate",
+      "field": "description",
+      "sourceHash": "sha256:b37296e1faa9709f5d8ba2eddab6baef37592e347b6f66829cb084a0037975da",
+      "text": "验证给定分量数据类型是否为有效的 {@link ComponentDatatype}。"
+    },
+    {
+      "id": "ComponentDatatype.validate",
+      "field": "params/componentDatatype/description",
+      "sourceHash": "sha256:ad69d5d01669c3b2b2b24f58435c7ffcde2336223b353ec37498755b7c9193e3",
+      "text": "要验证的分量数据类型。"
+    },
+    {
+      "id": "ComponentDatatype.validate",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:0246635950a40684622f76a3c3e238faabbb431f9d574f521ab5fcb953d9d2c5",
+      "text": "给定分量数据类型有效时为 <code>true</code>，否则为 <code>false</code>。"
+    },
+    {
+      "id": "ComponentDatatype",
+      "field": "description",
+      "sourceHash": "sha256:06ec339bbb2f6d022b21861e2573dfc733b36c92504cae888d0d0d3dfc6151a5",
+      "text": "WebGL 分量数据类型。分量是基础数据单元，分量组成属性，属性组成顶点。"
+    },
+    {
+      "id": "ComponentDatatype",
+      "field": "properties/BYTE/description",
+      "sourceHash": "sha256:4859ed3eb60b7f3b77b719b7d4d6e7aeae2515f625f2740f6369c971e88cc3bc",
+      "text": "8 位有符号字节，对应 <code>gl.BYTE</code>，也是 <code>Int8Array</code> 的元素类型。"
+    },
+    {
+      "id": "ComponentDatatype",
+      "field": "properties/DOUBLE/description",
+      "sourceHash": "sha256:14d9860841fce373e25a7ba50be3c8ccc3c2de159f6f7520a4f7eae6a3594d08",
+      "text": "64 位浮点数，对应桌面 OpenGL 的 <code>gl.DOUBLE</code>；WebGL 不支持此类型，引擎通过 {@link GeometryPipeline.encodeAttribute} 模拟。也是 <code>Float64Array</code> 的元素类型。"
+    },
+    {
+      "id": "ComponentDatatype",
+      "field": "properties/FLOAT/description",
+      "sourceHash": "sha256:1968abe0e37ee6f053c92034c32fbdd2e10c2933cff822d6fbf8c4bba3d5ed6a",
+      "text": "32 位浮点数，对应 <code>FLOAT</code>，也是 <code>Float32Array</code> 的元素类型。"
+    },
+    {
+      "id": "ComponentDatatype",
+      "field": "properties/INT/description",
+      "sourceHash": "sha256:888f8b12866760a6d2e6a60e0b9b0303d545ec528ad6c23eb9aa334c0df059fb",
+      "text": "32 位有符号整数，对应 <code>INT</code>，也是 <code>Int32Array</code> 的元素类型。"
+    },
+    {
+      "id": "ComponentDatatype",
+      "field": "properties/SHORT/description",
+      "sourceHash": "sha256:033bc76ebd85be6804d369cd880124e6e5626d25bfb234245aa7eead1019b369",
+      "text": "16 位有符号短整数，对应 <code>SHORT</code>，也是 <code>Int16Array</code> 的元素类型。"
+    },
+    {
+      "id": "ComponentDatatype",
+      "field": "properties/UNSIGNED_BYTE/description",
+      "sourceHash": "sha256:f85208b4604eb64a25234a04c2ed07703d52462f35f4479b803f3c291ad694e8",
+      "text": "8 位无符号字节，对应 <code>UNSIGNED_BYTE</code>，也是 <code>Uint8Array</code> 的元素类型。"
+    },
+    {
+      "id": "ComponentDatatype",
+      "field": "properties/UNSIGNED_INT/description",
+      "sourceHash": "sha256:15d6b31fd1a1c2009d559eb4c30b59fafd296dd6eaea2f01ce6431847fa5c6b5",
+      "text": "32 位无符号整数，对应 <code>UNSIGNED_INT</code>，也是 <code>Uint32Array</code> 的元素类型。"
+    },
+    {
+      "id": "ComponentDatatype",
+      "field": "properties/UNSIGNED_SHORT/description",
+      "sourceHash": "sha256:d3579af32aa6740c368e25ab1b4af4bf4e64d100d0755c0d1317c16fb2977e69",
+      "text": "16 位无符号短整数，对应 <code>UNSIGNED_SHORT</code>，也是 <code>Uint16Array</code> 的元素类型。"
+    },
+    {
+      "id": "DistanceDisplayConditionGeometryInstanceAttribute.fromDistanceDisplayCondition",
+      "field": "description",
+      "sourceHash": "sha256:d0ca9d89bbc4e16baef9714d45652fc068532d32d24d7dcbe7bf2a6ce39fa18b",
+      "text": "根据给定 {@link DistanceDisplayCondition} 创建新的 {@link DistanceDisplayConditionGeometryInstanceAttribute} 实例。"
+    },
+    {
+      "id": "DistanceDisplayConditionGeometryInstanceAttribute.fromDistanceDisplayCondition",
+      "field": "exceptions/0/description",
+      "sourceHash": "sha256:ddaf7d687784d98e9f1a7ee8ecb25a8ada3f31d3eb5ea128a4bd78d6ab486fc7",
+      "text": "distanceDisplayCondition.far 必须大于 distanceDisplayCondition.near。"
+    },
+    {
+      "id": "DistanceDisplayConditionGeometryInstanceAttribute.fromDistanceDisplayCondition",
+      "field": "params/distanceDisplayCondition/description",
+      "sourceHash": "sha256:46eb52c5fb94bb7035ad54263cd7c761f8a711a49f575fa5ffd3c99c9cc884a2",
+      "text": "距离显示条件。"
+    },
+    {
+      "id": "DistanceDisplayConditionGeometryInstanceAttribute.fromDistanceDisplayCondition",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:5399d4feb263446c85c19bbf155b30c003dd22849dc197f00ef0f0554693e72f",
+      "text": "新的 {@link DistanceDisplayConditionGeometryInstanceAttribute} 实例。"
+    },
+    {
+      "id": "DistanceDisplayConditionGeometryInstanceAttribute.toValue",
+      "field": "description",
+      "sourceHash": "sha256:8fc89e577b934835dc46f8f0d3928d5ba55755a29f2a6b074f795e6afa64d18e",
+      "text": "将距离显示条件转换为类型化数组，可用于赋值距离显示条件属性。"
+    },
+    {
+      "id": "DistanceDisplayConditionGeometryInstanceAttribute.toValue",
+      "field": "params/distanceDisplayCondition/description",
+      "sourceHash": "sha256:33dcfd11d9f2187a5267543910e83c27d0d21c65bf50b04e99661a3444bde56b",
+      "text": "距离显示条件值。"
+    },
+    {
+      "id": "DistanceDisplayConditionGeometryInstanceAttribute.toValue",
+      "field": "params/result/description",
+      "sourceHash": "sha256:2057283d1fa0f812aebf087011b4c72e91c291c8c0697da7e374d1624557b77d",
+      "text": "用于保存结果的数组；若为 undefined，则创建新实例。"
+    },
+    {
+      "id": "DistanceDisplayConditionGeometryInstanceAttribute.toValue",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:74e3885f0a5efb2f80b1b847fd2364ab4c6843c07578e533b6181c4d293cde39",
+      "text": "修改后的 result 参数；若 result 为 undefined，则返回新实例。"
+    },
+    {
+      "id": "DistanceDisplayConditionGeometryInstanceAttribute",
+      "field": "description",
+      "sourceHash": "sha256:657245a6eda9391b5d24586a498057a77e2bfc7b8596a3fff56577a8d264d771",
+      "text": "逐实例几何距离显示条件属性的值及类型信息。"
+    },
+    {
+      "id": "DistanceDisplayConditionGeometryInstanceAttribute",
+      "field": "exceptions/0/description",
+      "sourceHash": "sha256:eefea00e3d69a18d78669b84f0b6570788d1239b4f2026a45fb826df8510ea23",
+      "text": "far 必须大于 near。"
+    },
+    {
+      "id": "DistanceDisplayConditionGeometryInstanceAttribute",
+      "field": "params/far/description",
+      "sourceHash": "sha256:e836b4a1c5124ef6437ff4d8114e61c9c3f8defe2d5bddf9ae7d52ea187aca18",
+      "text": "远距离。"
+    },
+    {
+      "id": "DistanceDisplayConditionGeometryInstanceAttribute",
+      "field": "params/near/description",
+      "sourceHash": "sha256:54a8c7c45d05dd9aaad308e5d8dc5ef0f93e8c778bc2272405c9832a6e4684c7",
+      "text": "近距离。"
+    },
+    {
+      "id": "DistanceDisplayConditionGeometryInstanceAttribute#componentDatatype",
+      "field": "description",
+      "sourceHash": "sha256:e482d6ff979b22bee1930ba37745f4cae821dfaf8409b7a47cbc3970319e7b82",
+      "text": "属性中每个分量的数据类型，例如 {@link DistanceDisplayConditionGeometryInstanceAttribute#value} 中各元素的类型。"
+    },
+    {
+      "id": "DistanceDisplayConditionGeometryInstanceAttribute#componentsPerAttribute",
+      "field": "description",
+      "sourceHash": "sha256:c4b03c731316086b3fc21c00ee3386d79662ec3d3d2041f5d92602450ab3e741",
+      "text": "属性的分量数量，即 {@link DistanceDisplayConditionGeometryInstanceAttribute#value} 中的分量数。"
+    },
+    {
+      "id": "DistanceDisplayConditionGeometryInstanceAttribute#normalize",
+      "field": "description",
+      "sourceHash": "sha256:cdcd7e3e667b679b7ada5f66740d14c47e08ab65e4e0e6e7e852ecd7e47f8660",
+      "text": "为 <code>true</code> 且 <code>componentDatatype</code> 为整数格式时，渲染中按浮点值访问这些分量会将其映射到 [0, 1]（无符号）或 [-1, 1]（有符号）范围。"
+    },
+    {
+      "id": "DistanceDisplayConditionGeometryInstanceAttribute#value",
+      "field": "description",
+      "sourceHash": "sha256:cc9fa86f1e810fcd9b2b6e3532d61d8705ebfd7479773893b4f5bb1f1472f653",
+      "text": "存储在类型化数组中的属性值。"
+    },
+    {
+      "id": "Geometry.computeNumberOfVertices",
+      "field": "description",
+      "sourceHash": "sha256:e5064f8d777ad334d837d5b12114da581247545e9a9d6a4dd8c0acef35db5fe2",
+      "text": "计算几何体的顶点数量。运行时间随每个顶点的属性种类数量线性增长，与顶点总数无关。"
+    },
+    {
+      "id": "Geometry.computeNumberOfVertices",
+      "field": "params/geometry/description",
+      "sourceHash": "sha256:67481ad6d4a15587be3b774082b3adbe6b741ce08b2c9f01ee2eb3de65da934d",
+      "text": "几何体。"
+    },
+    {
+      "id": "Geometry.computeNumberOfVertices",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:c60a098519a71a6158d94f8c9efbb5fabd1234840838ae8a08aeb69650210417",
+      "text": "几何体的顶点数量。"
+    },
+    {
+      "id": "Geometry",
+      "field": "description",
+      "sourceHash": "sha256:415ffe1900aa5e0b6e86beb9f21a5f05634127cdccbaa8a8b33421e76b3ca4e2",
+      "text": "由属性组成顶点、并可通过可选索引数据定义图元的几何表示。几何体与描述着色方式的 {@link Appearance} 可共同赋给 {@link Primitive} 显示。一个 <code>Primitive</code> 通常可包含多个不同类型的几何体，以提升性能。\n<p>\n可通过 {@link GeometryPipeline} 中的函数变换和优化几何体。\n</p>"
+    },
+    {
+      "id": "Geometry",
+      "field": "params/options.attributes/description",
+      "sourceHash": "sha256:534a5440ab90fa90e543e9e92b6c271a0e1cfadfbf239f6c9e14a68a727329c3",
+      "text": "组成几何顶点的属性。"
+    },
+    {
+      "id": "Geometry",
+      "field": "params/options.boundingSphere/description",
+      "sourceHash": "sha256:e3a5ff189e0c1b28313c6c923e866507f95bc630474f4cf1cd9bb2430ae9b687",
+      "text": "可选的、完全包围几何体的包围球。"
+    },
+    {
+      "id": "Geometry",
+      "field": "params/options.indices/description",
+      "sourceHash": "sha256:5e3a2138e08eeef939b530647fcdd06337471c78e81b247f60481b8d1b6e9eee",
+      "text": "可选索引数据，用于定义几何体中的图元。"
+    },
+    {
+      "id": "Geometry",
+      "field": "params/options.primitiveType/description",
+      "sourceHash": "sha256:5414700adbc97338b12a524c58ff177756943e0c758abcd2908820af832efa15",
+      "text": "几何体中的图元类型。"
+    },
+    {
+      "id": "Geometry#attributes",
+      "field": "description",
+      "sourceHash": "sha256:a815625e5e2fbb914521348d56d6b8e282aca4c556db64fdb0ccfd70244314d5",
+      "text": "组成几何顶点的属性。对象的每个属性对应包含具体数据的 {@link GeometryAttribute}。\n<p>\nGeometry 中各顶点属性始终采用非交错存储。\n</p>\n<p>\n以下保留属性名具有约定语义，具体由 Geometry 根据所提供的 {@link VertexFormat} 创建。\n<ul>\n   <li><code>position</code>：三维顶点位置。为保证精度，采用 64 位浮点数，每属性 3 个分量。参见 {@link VertexFormat#position}。</li>\n   <li><code>normal</code>：已归一化的法线，常用于光照。32 位浮点数，每属性 3 个分量。参见 {@link VertexFormat#normal}。</li>\n   <li><code>st</code>：二维纹理坐标。32 位浮点数，每属性 2 个分量。参见 {@link VertexFormat#st}。</li>\n   <li><code>bitangent</code>：已归一化的副切线，用于凹凸映射等切线空间效果。32 位浮点数，每属性 3 个分量。参见 {@link VertexFormat#bitangent}。</li>\n   <li><code>tangent</code>：已归一化的切线，用于凹凸映射等切线空间效果。32 位浮点数，每属性 3 个分量。参见 {@link VertexFormat#tangent}。</li>\n</ul>\n</p>\n<p>\n以下属性通常不由 Geometry 创建，而是在渲染准备期间由 {@link Primitive} 或 {@link GeometryPipeline} 函数添加。\n<ul>\n   <li><code>position3DHigh</code>：通过 {@link GeometryPipeline.encodeAttribute} 编码的 64 位三维位置高位部分。采用 32 位浮点数，分量数量沿用源属性。</li>\n   <li><code>position3DLow</code>：通过 {@link GeometryPipeline.encodeAttribute} 编码的 64 位三维位置低位部分。采用 32 位浮点数，分量数量沿用源属性。</li>\n   <li><code>position2DHigh</code>：通过 {@link GeometryPipeline.encodeAttribute} 编码的 64 位二维位置（哥伦布视图）高位部分。采用 32 位浮点数，分量数量沿用源属性。</li>\n   <li><code>position2DLow</code>：通过 {@link GeometryPipeline.encodeAttribute} 编码的 64 位二维位置（哥伦布视图）低位部分。采用 32 位浮点数，分量数量沿用源属性。</li>\n   <li><code>color</code>：归一化的 RGBA 颜色，通常来自 {@link GeometryInstance#color}。渲染时按浮点分量访问，每属性 4 个分量；存储格式由具体属性的数据类型决定。</li>\n   <li><code>pickColor</code>：用于拾取的 RGBA 颜色。渲染时按浮点分量访问，每属性 4 个分量。</li>\n</ul>\n</p>"
+    },
+    {
+      "id": "Geometry#boundingSphere",
+      "field": "description",
+      "sourceHash": "sha256:d0d64ca99f9131d424ca5e54aabe9f5f9ddbe8c649b09ce6727a06ca6c51232e",
+      "text": "可选的、完全包围几何体的包围球，通常用于剔除。"
+    },
+    {
+      "id": "Geometry#indices",
+      "field": "description",
+      "sourceHash": "sha256:415fb54001569330cd017daacc7078f19c348dcb216416a0f0001a74712e4a01",
+      "text": "可选索引数据，与 {@link Geometry#primitiveType} 一起确定几何体中的图元。"
+    },
+    {
+      "id": "Geometry#primitiveType",
+      "field": "description",
+      "sourceHash": "sha256:a12fc89d683ed47f1ac7803d9db85959619a777cf3e1222cfb6da5e039f6354a",
+      "text": "几何体中的图元类型，最常见的是 {@link PrimitiveType.TRIANGLES}，也可因具体几何而异。"
+    },
+    {
+      "id": "GeometryAttribute",
+      "field": "description",
+      "sourceHash": "sha256:25d2c9aa1a18cf3c1c98d5acab1623f80ea96c2408b658c8c53219f69ab7c0e3",
+      "text": "几何属性的值及类型信息。一个 {@link Geometry} 通常包含一个或多个属性，这些属性共同组成几何顶点。"
+    },
+    {
+      "id": "GeometryAttribute",
+      "field": "exceptions/0/description",
+      "sourceHash": "sha256:a629265c8e491a2150509c37f319210e989987f40991adc7ed953c8916206385",
+      "text": "options.componentsPerAttribute 必须在 1 到 4 之间。"
+    },
+    {
+      "id": "GeometryAttribute",
+      "field": "params/options.componentDatatype/description",
+      "sourceHash": "sha256:d37d8edf09375f268d1262cdbd803ae3e184f224a41b7d3f441efd5172f13575",
+      "text": "属性中每个分量的数据类型，即 values 中各元素的类型。"
+    },
+    {
+      "id": "GeometryAttribute",
+      "field": "params/options.componentsPerAttribute/description",
+      "sourceHash": "sha256:e28bbcc1b07edebfd40d6566e77b728658a26c7c4284c43083f88e1eeb1e63e1",
+      "text": "1 到 4 之间的数值，定义每个属性的分量数量。"
+    },
+    {
+      "id": "GeometryAttribute",
+      "field": "params/options.normalize/description",
+      "sourceHash": "sha256:2c379793a560de58e9c15c30b16f04a04025c1027a5819347d665cd2d2e65f61",
+      "text": "为 <code>true</code> 且 <code>componentDatatype</code> 为整数格式时，渲染中按浮点值访问这些分量会将其映射到 [0, 1]（无符号）或 [-1, 1]（有符号）范围。"
+    },
+    {
+      "id": "GeometryAttribute",
+      "field": "params/options.values/description",
+      "sourceHash": "sha256:cc9fa86f1e810fcd9b2b6e3532d61d8705ebfd7479773893b4f5bb1f1472f653",
+      "text": "存储在类型化数组中的属性值。"
+    },
+    {
+      "id": "GeometryAttribute#componentDatatype",
+      "field": "description",
+      "sourceHash": "sha256:b46851e5ece0383d9f529c3b40b294cadaf194fe9d688ea82d322fdf302c5509",
+      "text": "属性中每个分量的数据类型，例如 {@link GeometryAttribute#values} 中各元素的类型。"
+    },
+    {
+      "id": "GeometryAttribute#componentsPerAttribute",
+      "field": "description",
+      "sourceHash": "sha256:d4ff9bd80e9404ad2ab20fc53d4731ffef97db947301528ebef5057c85601025",
+      "text": "1 到 4 之间的数值，定义每个属性的分量数量。例如具有 x、y、z 分量的位置属性为 3，参见代码示例。"
+    },
+    {
+      "id": "GeometryAttribute#normalize",
+      "field": "description",
+      "sourceHash": "sha256:f91df829784b439e01ee8647460670626f12dc45494efc757a78474c463a379d",
+      "text": "为 <code>true</code> 且 <code>componentDatatype</code> 为整数格式时，渲染中按浮点值访问这些分量会将其映射到 [0, 1]（无符号）或 [-1, 1]（有符号）范围。\n<p>\n常用于使用 {@link ComponentDatatype.UNSIGNED_BYTE} 存储颜色。\n</p>"
+    },
+    {
+      "id": "GeometryAttribute#values",
+      "field": "description",
+      "sourceHash": "sha256:748cd3ad867e0b0e51fecfaba9cf6a03179a7aeeec3e417fd6362a27a7d216b6",
+      "text": "存储在类型化数组中的属性值。代码示例中 <code>componentsPerAttribute</code> 为 3，因此 <code>values</code> 中每三个元素定义一个属性值。"
+    },
+    {
+      "id": "GeometryAttributes",
+      "field": "description",
+      "sourceHash": "sha256:1ab7c0d504d8269da71f02cbf6b3000056517239780135d6808f759e6cfc6220",
+      "text": "组成几何顶点的属性。对象的每个属性对应包含具体属性数据的 {@link GeometryAttribute}。\n<p>\nGeometry 中各顶点属性始终采用非交错存储。\n</p>"
+    },
+    {
+      "id": "GeometryAttributes#bitangent",
+      "field": "description",
+      "sourceHash": "sha256:d2822c54f936d242aeb2b377fda65fbaaefef37875222ef8dd4a546401f1b799",
+      "text": "已归一化的副切线属性，用于凹凸映射等切线空间效果。\n<p>\n32 位浮点数，每属性 3 个分量。\n</p>"
+    },
+    {
+      "id": "GeometryAttributes#color",
+      "field": "description",
+      "sourceHash": "sha256:5511d9e13c06caf513af041560b7b3f741ee33b176e16388d5cc35dd5cef3993",
+      "text": "颜色属性。\n<p>\n8 位无符号整数，每属性 4 个分量。\n</p>"
+    },
+    {
+      "id": "GeometryAttributes#normal",
+      "field": "description",
+      "sourceHash": "sha256:d0b000b510b86f7c3e93e43ea7ba362f7b8b721059064fdde212092fd1c6d88c",
+      "text": "已归一化的法线属性，常用于光照。\n<p>\n32 位浮点数，每属性 3 个分量。\n</p>"
+    },
+    {
+      "id": "GeometryAttributes#position",
+      "field": "description",
+      "sourceHash": "sha256:f936d25bf06cfee5c757156c6030a8344292f0d6633223395dc5599259d46f48",
+      "text": "三维位置属性。\n<p>\n为保证精度，使用 64 位浮点数，每属性 3 个分量。\n</p>"
+    },
+    {
+      "id": "GeometryAttributes#st",
+      "field": "description",
+      "sourceHash": "sha256:57a346c419d92d8f328065f129260b0a919dc26005a1bbf4a972b6e9773f9587",
+      "text": "二维纹理坐标属性。\n<p>\n32 位浮点数，每属性 2 个分量。\n</p>"
+    },
+    {
+      "id": "GeometryAttributes#tangent",
+      "field": "description",
+      "sourceHash": "sha256:a263a96e71cc1c4b08869cb85f5ee05bd544912c543c6eb57245101cac771116",
+      "text": "已归一化的切线属性，用于凹凸映射等切线空间效果。\n<p>\n32 位浮点数，每属性 3 个分量。\n</p>"
+    },
+    {
+      "id": "GeometryFactory.createGeometry",
+      "field": "description",
+      "sourceHash": "sha256:10b493a2df527b264c7b4fff70e47d2c2c2fa0762a5bd083d77c405c4929f544",
+      "text": "返回几何体。"
+    },
+    {
+      "id": "GeometryFactory.createGeometry",
+      "field": "params/geometryFactory/description",
+      "sourceHash": "sha256:5176cbcce7956f794e94ac5ee683caacb5c5dc259cdcaa81378abc7e7d252526",
+      "text": "圆的描述。"
+    },
+    {
+      "id": "GeometryFactory",
+      "field": "description",
+      "sourceHash": "sha256:678e3e35ac1cee9ee86ad3d31f9aa87a3185974881668be4feab46ed6a3da5bd",
+      "text": "全部几何创建辅助类的基类，可传给 {@link GeometryInstance} 以异步创建几何。"
+    },
+    {
+      "id": "GeometryInstance",
+      "field": "description",
+      "sourceHash": "sha256:6bcc2001014a53ea2a63892d2b58e2e377305758f32f83ae92431f2884497daf",
+      "text": "几何实例化允许将同一个 {@link Geometry} 放在多个位置，并分别设置颜色。例如，一个 {@link BoxGeometry} 可被实例化多次，每个实例使用不同的 <code>modelMatrix</code>，从而改变位置、旋转和缩放。"
+    },
+    {
+      "id": "GeometryInstance",
+      "field": "params/options.attributes/description",
+      "sourceHash": "sha256:dbb0d51f7f491b700384aea105ff2276dfed54e6de795cb5ce01db8196e6da66",
+      "text": "逐实例属性，例如下方示例中的 show 或 color 属性。"
+    },
+    {
+      "id": "GeometryInstance",
+      "field": "params/options.geometry/description",
+      "sourceHash": "sha256:7cdcf0a74f55de039ae786a943999f82c65c37388bacb33bf89ae997f881e032",
+      "text": "需要实例化的几何体。"
+    },
+    {
+      "id": "GeometryInstance",
+      "field": "params/options.id/description",
+      "sourceHash": "sha256:7ba6f0e636dee02bfddee2c80d41bfd5e84e80f2422b5932d7518365a4c23eec",
+      "text": "用户自定义对象，在通过 {@link Scene#pick} 拾取实例时返回，也可用于通过 {@link Primitive#getGeometryInstanceAttributes} 获取或设置逐实例属性。"
+    },
+    {
+      "id": "GeometryInstance",
+      "field": "params/options.modelMatrix/description",
+      "sourceHash": "sha256:af750835b9c8c352dd78657e027bf8b9f56d6d93e0793b9bbe61c674a36f92ec",
+      "text": "将几何体从模型坐标变换到世界坐标的模型矩阵。"
+    },
+    {
+      "id": "GeometryInstance#attributes",
+      "field": "description",
+      "sourceHash": "sha256:9e90bb35352abe0c664d86a45c70b671e29b6452afa5414fa821c2aea1270399",
+      "text": "逐实例属性，例如 {@link ColorGeometryInstanceAttribute} 或 {@link ShowGeometryInstanceAttribute}。{@link Geometry} 的属性随顶点变化，而这些属性对整个实例保持一致。"
+    },
+    {
+      "id": "GeometryInstance#geometry",
+      "field": "description",
+      "sourceHash": "sha256:fb43c88184b473ab82f72b64a4a2ef6f6406754ea680f7134b8320c87825a43d",
+      "text": "正在实例化的几何体。"
+    },
+    {
+      "id": "GeometryInstance#id",
+      "field": "description",
+      "sourceHash": "sha256:92174b899f88105e51c59a1c95f6cd192ad86bd9730b4f401ee47cd668cad3cd",
+      "text": "拾取实例时返回，或用于获取和设置逐实例属性的用户自定义对象。"
+    },
+    {
+      "id": "GeometryInstance#modelMatrix",
+      "field": "description",
+      "sourceHash": "sha256:725534cd4674a4741fab332f83ab789d6a04195812d943a091218b00546db92b",
+      "text": "将几何体从模型坐标变换到世界坐标的 4x4 矩阵。为单位矩阵时，按世界坐标绘制，即地球的 WGS84 坐标。可提供其他变换矩阵来使用局部参考系，例如 {@link Transforms.eastNorthUpToFixedFrame} 的返回值。"
+    },
+    {
+      "id": "GeometryInstanceAttribute",
+      "field": "description",
+      "sourceHash": "sha256:cdb29e7748ee81eaaeddec3b35d42aa0c05af7ff2e830236593295674f9b3008",
+      "text": "逐实例几何属性的值及类型信息。"
+    },
+    {
+      "id": "GeometryInstanceAttribute",
+      "field": "exceptions/0/description",
+      "sourceHash": "sha256:a629265c8e491a2150509c37f319210e989987f40991adc7ed953c8916206385",
+      "text": "options.componentsPerAttribute 必须在 1 到 4 之间。"
+    },
+    {
+      "id": "GeometryInstanceAttribute",
+      "field": "params/options.componentDatatype/description",
+      "sourceHash": "sha256:d37d8edf09375f268d1262cdbd803ae3e184f224a41b7d3f441efd5172f13575",
+      "text": "属性中每个分量的数据类型，即 values 中各元素的类型。"
+    },
+    {
+      "id": "GeometryInstanceAttribute",
+      "field": "params/options.componentsPerAttribute/description",
+      "sourceHash": "sha256:e28bbcc1b07edebfd40d6566e77b728658a26c7c4284c43083f88e1eeb1e63e1",
+      "text": "1 到 4 之间的数值，定义每个属性的分量数量。"
+    },
+    {
+      "id": "GeometryInstanceAttribute",
+      "field": "params/options.normalize/description",
+      "sourceHash": "sha256:2c379793a560de58e9c15c30b16f04a04025c1027a5819347d665cd2d2e65f61",
+      "text": "为 <code>true</code> 且 <code>componentDatatype</code> 为整数格式时，渲染中按浮点值访问这些分量会将其映射到 [0, 1]（无符号）或 [-1, 1]（有符号）范围。"
+    },
+    {
+      "id": "GeometryInstanceAttribute",
+      "field": "params/options.value/description",
+      "sourceHash": "sha256:9845faeac43965f50194c9354219ce6b74655297f0b23457ce22abd1b0c20f29",
+      "text": "属性值。"
+    },
+    {
+      "id": "GeometryInstanceAttribute#componentDatatype",
+      "field": "description",
+      "sourceHash": "sha256:6f9224b141841b605aea251ccff1ae2c44dab83a7da4f453de23a8375ec58117",
+      "text": "属性中每个分量的数据类型，例如 {@link GeometryInstanceAttribute#value} 中各元素的类型。"
+    },
+    {
+      "id": "GeometryInstanceAttribute#componentsPerAttribute",
+      "field": "description",
+      "sourceHash": "sha256:d4ff9bd80e9404ad2ab20fc53d4731ffef97db947301528ebef5057c85601025",
+      "text": "1 到 4 之间的数值，定义每个属性的分量数量。例如具有 x、y、z 分量的位置属性为 3，参见代码示例。"
+    },
+    {
+      "id": "GeometryInstanceAttribute#normalize",
+      "field": "description",
+      "sourceHash": "sha256:f91df829784b439e01ee8647460670626f12dc45494efc757a78474c463a379d",
+      "text": "为 <code>true</code> 且 <code>componentDatatype</code> 为整数格式时，渲染中按浮点值访问这些分量会将其映射到 [0, 1]（无符号）或 [-1, 1]（有符号）范围。\n<p>\n常用于使用 {@link ComponentDatatype.UNSIGNED_BYTE} 存储颜色。\n</p>"
+    },
+    {
+      "id": "GeometryInstanceAttribute#value",
+      "field": "description",
+      "sourceHash": "sha256:748cd3ad867e0b0e51fecfaba9cf6a03179a7aeeec3e417fd6362a27a7d216b6",
+      "text": "存储在类型化数组中的属性值。代码示例中 <code>componentsPerAttribute</code> 为 3，因此 <code>values</code> 中每三个元素定义一个属性值。"
+    },
+    {
+      "id": "IndexDatatype.createTypedArray",
+      "field": "description",
+      "sourceHash": "sha256:e094d389e86a3650a0e845fbf273c8c89024fc2e48d9938947d379a440b7f58d",
+      "text": "根据引用的顶点数量，创建存储索引的 <code><Uint16Array</code> 或 <code>Uint32Array</code> 类型化数组。"
+    },
+    {
+      "id": "IndexDatatype.createTypedArray",
+      "field": "params/indicesLengthOrArray/description",
+      "sourceHash": "sha256:7267d04757f3af7b59bbf5b7ef62ac4d5690c1420378a89f1458f8ee12b9547c",
+      "text": "传递给类型化数组构造函数的参数。"
+    },
+    {
+      "id": "IndexDatatype.createTypedArray",
+      "field": "params/numberOfVertices/description",
+      "sourceHash": "sha256:2fa769f57266074c62ce5d07e7beb0ef0753e9c5ca4d9a583743b5169521b7e9",
+      "text": "索引将引用的顶点数量。"
+    },
+    {
+      "id": "IndexDatatype.createTypedArray",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:a54be8b76234a0c44b0626d1abb450b0db7613db1184b53c29e2412f38c0a53a",
+      "text": "使用 <code>indicesLengthOrArray</code> 构造的 <code>Uint16Array</code> 或 <code>Uint32Array</code>。"
+    },
+    {
+      "id": "IndexDatatype.createTypedArrayFromArrayBuffer",
+      "field": "description",
+      "sourceHash": "sha256:786efd78227640b47a1fc2e9a2e7ac245dc60a39a4e81ba6a5bd888162cbb3e1",
+      "text": "根据源数组缓冲区创建存储索引的类型化数组。根据引用的顶点数量，选择 <code><Uint16Array</code> 或 <code>Uint32Array</code>。"
+    },
+    {
+      "id": "IndexDatatype.createTypedArrayFromArrayBuffer",
+      "field": "params/byteOffset/description",
+      "sourceHash": "sha256:7267d04757f3af7b59bbf5b7ef62ac4d5690c1420378a89f1458f8ee12b9547c",
+      "text": "传递给类型化数组构造函数的参数。"
+    },
+    {
+      "id": "IndexDatatype.createTypedArrayFromArrayBuffer",
+      "field": "params/length/description",
+      "sourceHash": "sha256:7267d04757f3af7b59bbf5b7ef62ac4d5690c1420378a89f1458f8ee12b9547c",
+      "text": "传递给类型化数组构造函数的参数。"
+    },
+    {
+      "id": "IndexDatatype.createTypedArrayFromArrayBuffer",
+      "field": "params/numberOfVertices/description",
+      "sourceHash": "sha256:2fa769f57266074c62ce5d07e7beb0ef0753e9c5ca4d9a583743b5169521b7e9",
+      "text": "索引将引用的顶点数量。"
+    },
+    {
+      "id": "IndexDatatype.createTypedArrayFromArrayBuffer",
+      "field": "params/sourceArray/description",
+      "sourceHash": "sha256:7267d04757f3af7b59bbf5b7ef62ac4d5690c1420378a89f1458f8ee12b9547c",
+      "text": "传递给类型化数组构造函数的参数。"
+    },
+    {
+      "id": "IndexDatatype.createTypedArrayFromArrayBuffer",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:75d1c9cd4c37908924c52215da6ecf5677b31320e4632016275909a511a38ddb",
+      "text": "使用 <code>sourceArray</code>、<code>byteOffset</code> 和 <code>length</code> 构造的 <code>Uint16Array</code> 或 <code>Uint32Array</code>。"
+    },
+    {
+      "id": "IndexDatatype.fromSizeInBytes",
+      "field": "description",
+      "sourceHash": "sha256:58aa2341ed0ccb1c8f88a6392d501646e9038974d57cf1c664f7c1f3641fe392",
+      "text": "根据字节大小获取数据类型。"
+    },
+    {
+      "id": "IndexDatatype.fromSizeInBytes",
+      "field": "params/sizeInBytes/description",
+      "sourceHash": "sha256:050ea27e4ae58f5e4c0b7363653eb55b2da25b5b238d1d78e0f68cb81879c4c4",
+      "text": "单个索引的字节大小。"
+    },
+    {
+      "id": "IndexDatatype.fromSizeInBytes",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:fb7b87c99d1ebd39a080779c1cc53a7f4915782d5d7156261a0bd718020cf148",
+      "text": "具有指定大小的索引数据类型。"
+    },
+    {
+      "id": "IndexDatatype.fromTypedArray",
+      "field": "description",
+      "sourceHash": "sha256:a35ffd72eca4984496fe7e77a35d5003fd903da0bf364de820691213ab3ea947",
+      "text": "获取给定 TypedArray 实例对应的 {@link IndexDatatype}。"
+    },
+    {
+      "id": "IndexDatatype.fromTypedArray",
+      "field": "params/array/description",
+      "sourceHash": "sha256:d89461a4d69b5e4093dc56e3409ba61f2aa7577437414188eda4d0061e3e66d1",
+      "text": "类型化数组。"
+    },
+    {
+      "id": "IndexDatatype.fromTypedArray",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:07ee82716cc9be8e68d39c1d94089de06c49be2b75421fe4315b354fb297d0bc",
+      "text": "给定数组对应的 IndexDatatype；若不是 Uint8Array、Uint16Array 或 Uint32Array，则为 undefined。"
+    },
+    {
+      "id": "IndexDatatype.getSizeInBytes",
+      "field": "description",
+      "sourceHash": "sha256:9597497e3f077035ba8b5f206bf0fb2602b2505886d07b23a977682ef058f68b",
+      "text": "返回对应数据类型的大小，单位为字节。"
+    },
+    {
+      "id": "IndexDatatype.getSizeInBytes",
+      "field": "params/indexDatatype/description",
+      "sourceHash": "sha256:2b32add343f2be987d97d4737278fed494e039329c4c2b9b0868a029b0be5b63",
+      "text": "需要获取大小的索引数据类型。"
+    },
+    {
+      "id": "IndexDatatype.getSizeInBytes",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:9a56a53143f7d4e2d1e75b7222562ef7c1809ff26e69ab32a33dc76e19208ea0",
+      "text": "大小，单位为字节。"
+    },
+    {
+      "id": "IndexDatatype.UNSIGNED_BYTE",
+      "field": "description",
+      "sourceHash": "sha256:f85208b4604eb64a25234a04c2ed07703d52462f35f4479b803f3c291ad694e8",
+      "text": "8 位无符号字节，对应 <code>UNSIGNED_BYTE</code>，也是 <code>Uint8Array</code> 的元素类型。"
+    },
+    {
+      "id": "IndexDatatype.UNSIGNED_INT",
+      "field": "description",
+      "sourceHash": "sha256:15d6b31fd1a1c2009d559eb4c30b59fafd296dd6eaea2f01ce6431847fa5c6b5",
+      "text": "32 位无符号整数，对应 <code>UNSIGNED_INT</code>，也是 <code>Uint32Array</code> 的元素类型。"
+    },
+    {
+      "id": "IndexDatatype.UNSIGNED_SHORT",
+      "field": "description",
+      "sourceHash": "sha256:d3579af32aa6740c368e25ab1b4af4bf4e64d100d0755c0d1317c16fb2977e69",
+      "text": "16 位无符号短整数，对应 <code>UNSIGNED_SHORT</code>，也是 <code>Uint16Array</code> 的元素类型。"
+    },
+    {
+      "id": "IndexDatatype.validate",
+      "field": "description",
+      "sourceHash": "sha256:11c24d6f5827e928d29f7523bfa8d634c315cba6bc2fca9c7375c5997e8b1c71",
+      "text": "验证给定索引数据类型是否为有效的 {@link IndexDatatype}。"
+    },
+    {
+      "id": "IndexDatatype.validate",
+      "field": "params/indexDatatype/description",
+      "sourceHash": "sha256:b2cd59e3342560085bc860c6bab37c71dfd9eff586b0a4d07c8d047e3595b23f",
+      "text": "要验证的索引数据类型。"
+    },
+    {
+      "id": "IndexDatatype.validate",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:9eb82f6d42cafc4c5ac79b02e992e6ca488581a937d1bd15a693a0889b8c352f",
+      "text": "给定索引数据类型有效时为 <code>true</code>，否则为 <code>false</code>。"
+    },
+    {
+      "id": "IndexDatatype",
+      "field": "description",
+      "sourceHash": "sha256:6754dec24c576b33ff37e6c67aa74302523e62f6ec5afb2a489568665cf8a9e8",
+      "text": "WebGL 索引数据类型常量，对应 {@link http://www.khronos.org/opengles/sdk/docs/man/xhtml/glDrawElements.xml|drawElements} 的 <code>type</code> 参数。"
+    },
+    {
+      "id": "IndexDatatype",
+      "field": "properties/UNSIGNED_BYTE/description",
+      "sourceHash": "sha256:f85208b4604eb64a25234a04c2ed07703d52462f35f4479b803f3c291ad694e8",
+      "text": "8 位无符号字节，对应 <code>UNSIGNED_BYTE</code>，也是 <code>Uint8Array</code> 的元素类型。"
+    },
+    {
+      "id": "IndexDatatype",
+      "field": "properties/UNSIGNED_INT/description",
+      "sourceHash": "sha256:15d6b31fd1a1c2009d559eb4c30b59fafd296dd6eaea2f01ce6431847fa5c6b5",
+      "text": "32 位无符号整数，对应 <code>UNSIGNED_INT</code>，也是 <code>Uint32Array</code> 的元素类型。"
+    },
+    {
+      "id": "IndexDatatype",
+      "field": "properties/UNSIGNED_SHORT/description",
+      "sourceHash": "sha256:d3579af32aa6740c368e25ab1b4af4bf4e64d100d0755c0d1317c16fb2977e69",
+      "text": "16 位无符号短整数，对应 <code>UNSIGNED_SHORT</code>，也是 <code>Uint16Array</code> 的元素类型。"
+    },
+    {
+      "id": "PrimitiveType.LINE_LOOP",
+      "field": "description",
+      "sourceHash": "sha256:f8c7d9d9964d6de71494005460f76a34f361aa526120e3a1c2e2554d8990488f",
+      "text": "闭合线环图元。首个顶点（或索引）之后的每个顶点都与前一个连接，最后一个顶点自动连接到第一个顶点。"
+    },
+    {
+      "id": "PrimitiveType.LINE_STRIP",
+      "field": "description",
+      "sourceHash": "sha256:de210fa61acf36483eb3bad7cfcbcddd37fb06eca6cd267095f36a5f2d6ee595",
+      "text": "线带图元。首个顶点（或索引）之后的每个顶点都与前一个连接。"
+    },
+    {
+      "id": "PrimitiveType.LINES",
+      "field": "description",
+      "sourceHash": "sha256:d13cd9b58bfbb908ddba8da57685b021a3b916db5246e0624a95f210d3e1a1e3",
+      "text": "独立线段图元。每两个顶点（或索引）组成一条线段，各线段不必连接。"
+    },
+    {
+      "id": "PrimitiveType.POINTS",
+      "field": "description",
+      "sourceHash": "sha256:502eeafa9ff2e8cd4557568cb94b78084b0a6a592c040766c2acadeb46a34c08",
+      "text": "点图元，每个顶点（或索引）表示一个独立点。"
+    },
+    {
+      "id": "PrimitiveType.TRIANGLE_FAN",
+      "field": "description",
+      "sourceHash": "sha256:0d250fe98652318f4968eca1cf90791061d8aa12dc1c75e499dae8caff7bad86",
+      "text": "三角扇图元。前两个顶点（或索引）之后的每个顶点与前一个顶点及第一个顶点组成三角形，例如可表示圆锥或圆。"
+    },
+    {
+      "id": "PrimitiveType.TRIANGLE_STRIP",
+      "field": "description",
+      "sourceHash": "sha256:49c19c9de8ecf7427e88b6f105cf4adac43db92232dfa57d143a09d219d94ddd",
+      "text": "三角带图元。前两个顶点（或索引）之后的每个顶点与前两个顶点组成三角形，例如可表示墙面。"
+    },
+    {
+      "id": "PrimitiveType.TRIANGLES",
+      "field": "description",
+      "sourceHash": "sha256:5ac5cc9fa883887b578ee66f9a3c4135657d9aed7195917073e88840b129642e",
+      "text": "独立三角形图元。每三个顶点（或索引）组成一个三角形，各三角形不必共享边。"
+    },
+    {
+      "id": "PrimitiveType",
+      "field": "description",
+      "sourceHash": "sha256:041700833a3d5236eeb80e5d367e82e63e47b21a657b86022f391d5288a23dea",
+      "text": "几何图元类型，即点、线或三角形。"
+    },
+    {
+      "id": "PrimitiveType",
+      "field": "properties/LINE_LOOP/description",
+      "sourceHash": "sha256:f8c7d9d9964d6de71494005460f76a34f361aa526120e3a1c2e2554d8990488f",
+      "text": "闭合线环图元。首个顶点（或索引）之后的每个顶点都与前一个连接，最后一个顶点自动连接到第一个顶点。"
+    },
+    {
+      "id": "PrimitiveType",
+      "field": "properties/LINE_STRIP/description",
+      "sourceHash": "sha256:de210fa61acf36483eb3bad7cfcbcddd37fb06eca6cd267095f36a5f2d6ee595",
+      "text": "线带图元。首个顶点（或索引）之后的每个顶点都与前一个连接。"
+    },
+    {
+      "id": "PrimitiveType",
+      "field": "properties/LINES/description",
+      "sourceHash": "sha256:d13cd9b58bfbb908ddba8da57685b021a3b916db5246e0624a95f210d3e1a1e3",
+      "text": "独立线段图元。每两个顶点（或索引）组成一条线段，各线段不必连接。"
+    },
+    {
+      "id": "PrimitiveType",
+      "field": "properties/POINTS/description",
+      "sourceHash": "sha256:502eeafa9ff2e8cd4557568cb94b78084b0a6a592c040766c2acadeb46a34c08",
+      "text": "点图元，每个顶点（或索引）表示一个独立点。"
+    },
+    {
+      "id": "PrimitiveType",
+      "field": "properties/TRIANGLE_FAN/description",
+      "sourceHash": "sha256:0d250fe98652318f4968eca1cf90791061d8aa12dc1c75e499dae8caff7bad86",
+      "text": "三角扇图元。前两个顶点（或索引）之后的每个顶点与前一个顶点及第一个顶点组成三角形，例如可表示圆锥或圆。"
+    },
+    {
+      "id": "PrimitiveType",
+      "field": "properties/TRIANGLE_STRIP/description",
+      "sourceHash": "sha256:49c19c9de8ecf7427e88b6f105cf4adac43db92232dfa57d143a09d219d94ddd",
+      "text": "三角带图元。前两个顶点（或索引）之后的每个顶点与前两个顶点组成三角形，例如可表示墙面。"
+    },
+    {
+      "id": "PrimitiveType",
+      "field": "properties/TRIANGLES/description",
+      "sourceHash": "sha256:5ac5cc9fa883887b578ee66f9a3c4135657d9aed7195917073e88840b129642e",
+      "text": "独立三角形图元。每三个顶点（或索引）组成一个三角形，各三角形不必共享边。"
+    },
+    {
+      "id": "ShowGeometryInstanceAttribute.toValue",
+      "field": "description",
+      "sourceHash": "sha256:5ae9b9522f26203dd133f26bf5341d7e63e8aca0718630fccd3c3e356fad31c4",
+      "text": "将布尔 show 值转换为类型化数组，可用于赋值 show 属性。"
+    },
+    {
+      "id": "ShowGeometryInstanceAttribute.toValue",
+      "field": "params/result/description",
+      "sourceHash": "sha256:2057283d1fa0f812aebf087011b4c72e91c291c8c0697da7e374d1624557b77d",
+      "text": "用于保存结果的数组；若为 undefined，则创建新实例。"
+    },
+    {
+      "id": "ShowGeometryInstanceAttribute.toValue",
+      "field": "params/show/description",
+      "sourceHash": "sha256:76c9f728c29d60eb2ecad520073132b6494300a22eea441f057ccd7cfde124e5",
+      "text": "show 值。"
+    },
+    {
+      "id": "ShowGeometryInstanceAttribute.toValue",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:74e3885f0a5efb2f80b1b847fd2364ab4c6843c07578e533b6181c4d293cde39",
+      "text": "修改后的 result 参数；若 result 为 undefined，则返回新实例。"
+    },
+    {
+      "id": "ShowGeometryInstanceAttribute",
+      "field": "description",
+      "sourceHash": "sha256:ef0e7a1213a9153c18e01c1151eec1cc2bc959870e55565f63818f3d00bb4f15",
+      "text": "逐实例几何显示属性的值及类型信息，决定是否显示几何实例。"
+    },
+    {
+      "id": "ShowGeometryInstanceAttribute",
+      "field": "params/show/description",
+      "sourceHash": "sha256:7526ea0ed8505096b0dccfff2d7536251eb3e27e386187f0b7e16c4b302aea88",
+      "text": "决定是否显示几何实例。"
+    },
+    {
+      "id": "ShowGeometryInstanceAttribute#componentDatatype",
+      "field": "description",
+      "sourceHash": "sha256:9f40f1ed231ae7e691c0374b9622d8b7e3b0df118bc2ff10950c62b67c88d405",
+      "text": "属性中每个分量的数据类型，例如 {@link ColorGeometryInstanceAttribute#value} 中各元素的类型。"
+    },
+    {
+      "id": "ShowGeometryInstanceAttribute#componentsPerAttribute",
+      "field": "description",
+      "sourceHash": "sha256:4b82ec7953e5f38f931e80b55af8def4485c0eb0183f163105daf0f02bbf1aff",
+      "text": "属性的分量数量，即 {@link ColorGeometryInstanceAttribute#value} 中的分量数。"
+    },
+    {
+      "id": "ShowGeometryInstanceAttribute#normalize",
+      "field": "description",
+      "sourceHash": "sha256:cdcd7e3e667b679b7ada5f66740d14c47e08ab65e4e0e6e7e852ecd7e47f8660",
+      "text": "为 <code>true</code> 且 <code>componentDatatype</code> 为整数格式时，渲染中按浮点值访问这些分量会将其映射到 [0, 1]（无符号）或 [-1, 1]（有符号）范围。"
+    },
+    {
+      "id": "ShowGeometryInstanceAttribute#value",
+      "field": "description",
+      "sourceHash": "sha256:cc9fa86f1e810fcd9b2b6e3532d61d8705ebfd7479773893b4f5bb1f1472f653",
+      "text": "存储在类型化数组中的属性值。"
+    },
+    {
+      "id": "VertexColorInfo",
+      "field": "properties/colors/description",
+      "sourceHash": "sha256:fe2d234769da18ca892058325cb49b08d245d814b3448430266d4f8eb556c01c",
+      "text": "打包的逐顶点颜色。"
+    },
+    {
+      "id": "VertexColorInfo",
+      "field": "properties/count/description",
+      "sourceHash": "sha256:49b62b99837ee7c0ea75d74d110514741460ba1779f357bdedc4c074005e2784",
+      "text": "顶点数量。"
+    },
+    {
+      "id": "VertexFormat.ALL",
+      "field": "description",
+      "sourceHash": "sha256:7bcba429a637ff44c561e07258b3ed0f1d5c2117aa18e11f13ec7dcdf887352b",
+      "text": "包含 position、normal、st、tangent 和 bitangent 等约定属性的不可变顶点格式。"
+    },
+    {
+      "id": "VertexFormat.clone",
+      "field": "description",
+      "sourceHash": "sha256:2ac48d6d98589cd72f72797a0820406ae37254d7125f483c7dae00e96ca2f502",
+      "text": "复制 VertexFormat 实例。"
+    },
+    {
+      "id": "VertexFormat.clone",
+      "field": "params/vertexFormat/description",
+      "sourceHash": "sha256:be983cd7665f14e2df418a80167f2648f874ea1ad065f1237a10164cd5eeb5a0",
+      "text": "要复制的顶点格式。"
+    },
+    {
+      "id": "VertexFormat.clone",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:c6c69cbff5c03907051ef88a4b6ac8b31c548f4a67d35a1dfc04d966b8999fb4",
+      "text": "修改后的 result 参数；未提供时返回新的 VertexFormat 实例。vertexFormat 为 undefined 时返回 undefined。"
+    },
+    {
+      "id": "VertexFormat.DEFAULT",
+      "field": "description",
+      "sourceHash": "sha256:61ee68f98f9958575e6c82ac62035add5f84ebedff84626277e567956c2901ea",
+      "text": "包含 position、normal 和 st 属性的不可变顶点格式，兼容大多数外观和材质。并非总是需要 normal 和 st，预先明确不需要时应选择其他 <code>VertexFormat</code>。"
+    },
+    {
+      "id": "VertexFormat.POSITION_AND_COLOR",
+      "field": "description",
+      "sourceHash": "sha256:eb8c19d040a34d3199f1a994a52c6e7461ae338ef99b4d6910c66f3099f9045c",
+      "text": "包含 position 和 color 属性的不可变顶点格式。"
+    },
+    {
+      "id": "VertexFormat.POSITION_AND_NORMAL",
+      "field": "description",
+      "sourceHash": "sha256:03bc891b7c914feb9b4d9a94d9ca44eff875d5e699224c3872c05c41d1b769aa",
+      "text": "包含 position 和 normal 属性的不可变顶点格式，兼容 {@link PerInstanceColorAppearance} 等逐实例颜色外观。"
+    },
+    {
+      "id": "VertexFormat.POSITION_AND_ST",
+      "field": "description",
+      "sourceHash": "sha256:aedb4d070ad12e42bc9272ed354675856a644006bedd928a4e014c3efd0453f2",
+      "text": "包含 position 和 st 属性的不可变顶点格式，兼容 {@link EllipsoidSurfaceAppearance}。"
+    },
+    {
+      "id": "VertexFormat.POSITION_NORMAL_AND_ST",
+      "field": "description",
+      "sourceHash": "sha256:ecd56feff2cc23093a13222067997f3dbf8c0ef1790e0dbadc6ef32b361a4ff9",
+      "text": "包含 position、normal 和 st 属性的不可变顶点格式，兼容 {@link MaterialAppearance}，要求其 {@link MaterialAppearance#materialSupport} 为 <code>TEXTURED/code>."
+    },
+    {
+      "id": "VertexFormat.POSITION_ONLY",
+      "field": "description",
+      "sourceHash": "sha256:7a571ebcdbd3b9805fdcbf0c8bfaf27e6eca7de655e40ebb87fb85fb23332839",
+      "text": "仅包含 position 属性的不可变顶点格式。"
+    },
+    {
+      "id": "VertexFormat.unpack",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:c17ae1e4cf4bdbd9d8f6f3bd90f1ca7450c637518664e2c871be53b4b840f837",
+      "text": "修改后的 result 参数；未提供时返回新的 VertexFormat 实例。"
+    },
+    {
+      "id": "VertexFormat",
+      "field": "description",
+      "sourceHash": "sha256:39a5a637187a0e59aa44a104f00916c35ec694ac1e49eb577f5e0a9fe5a95368",
+      "text": "顶点格式定义一个顶点由哪些属性组成。可向 {@link Geometry} 提供 VertexFormat，要求计算特定属性，例如仅 position，或 position 与 normal 等。"
+    },
+    {
+      "id": "VertexFormat",
+      "field": "params/options/description",
+      "sourceHash": "sha256:b395bd41c67e3c72ff07368eda8ec85db4b793bd6dd8bee7d6731042246ce417",
+      "text": "包含与 VertexFormat 各属性对应布尔值的对象，参见代码示例。"
+    },
+    {
+      "id": "VertexFormat#bitangent",
+      "field": "description",
+      "sourceHash": "sha256:0cc630389a62d33edebb2b2c76182e229662f972ff2835aeb453b57c4568b66c",
+      "text": "为 <code>true</code> 时，顶点包含已归一化的副切线属性，用于凹凸映射等切线空间效果。\n<p>\n32 位浮点数，每属性 3 个分量。\n</p>"
+    },
+    {
+      "id": "VertexFormat#color",
+      "field": "description",
+      "sourceHash": "sha256:ea6ac490daddfaa7a74dbc6b9cd1efe334d36d7a146b7401522b26e7d590e9a0",
+      "text": "为 <code>true</code> 时，顶点包含 RGB 颜色属性。\n<p>\n8 位无符号字节，每属性 3 个分量。\n</p>"
+    },
+    {
+      "id": "VertexFormat#normal",
+      "field": "description",
+      "sourceHash": "sha256:104ac7c3b5db17c055f3daa6e78e97063236a72433b90288811bc49a1c7097a7",
+      "text": "为 <code>true</code> 时，顶点包含已归一化的法线属性，常用于光照。\n<p>\n32 位浮点数，每属性 3 个分量。\n</p>"
+    },
+    {
+      "id": "VertexFormat#position",
+      "field": "description",
+      "sourceHash": "sha256:d890bb5fedea63eab58bf97ce3f4336d07a861757d99e874f781fe902dabae28",
+      "text": "为 <code>true</code> 时，顶点包含三维位置属性。\n<p>\n为保证精度，采用 64 位浮点数，每属性 3 个分量。\n</p>"
+    },
+    {
+      "id": "VertexFormat#st",
+      "field": "description",
+      "sourceHash": "sha256:1dab477791b70f480ddc6b9e530ecbfb97d89880abe97faf7d2b3478d320cdac",
+      "text": "为 <code>true</code> 时，顶点包含二维纹理坐标属性。\n<p>\n32 位浮点数，每属性 2 个分量。\n</p>"
+    },
+    {
+      "id": "VertexFormat#tangent",
+      "field": "description",
+      "sourceHash": "sha256:bfba0a7e648eceb9e7caaf6f8b94000b7daae9991fa41ae5c3a420fa6a05a26c",
+      "text": "为 <code>true</code> 时，顶点包含已归一化的切线属性，用于凹凸映射等切线空间效果。\n<p>\n32 位浮点数，每属性 3 个分量。\n</p>"
+    },
+    {
+      "id": "WindingOrder.CLOCKWISE",
+      "field": "description",
+      "sourceHash": "sha256:20b3c9f3136121f5d7c7c4c7d108a8e8c4af08cba9c8c21e1876298f70485b90",
+      "text": "顶点按顺时针顺序排列。"
+    },
+    {
+      "id": "WindingOrder.COUNTER_CLOCKWISE",
+      "field": "description",
+      "sourceHash": "sha256:19348d0d08be2e14e5f856c8469c30da38ce9ad125ad41df8e5e0052adcd3d7d",
+      "text": "顶点按逆时针顺序排列。"
+    },
+    {
+      "id": "WindingOrder",
+      "field": "description",
+      "sourceHash": "sha256:89ae6c8726929aa555c6a64377f1795c16528e8d6b26eb91a96f035f5911328c",
+      "text": "绕序定义三角形顶点的排列顺序，用于决定哪一面为正面。"
+    },
+    {
+      "id": "WindingOrder",
+      "field": "properties/CLOCKWISE/description",
+      "sourceHash": "sha256:20b3c9f3136121f5d7c7c4c7d108a8e8c4af08cba9c8c21e1876298f70485b90",
+      "text": "顶点按顺时针顺序排列。"
+    },
+    {
+      "id": "WindingOrder",
+      "field": "properties/COUNTER_CLOCKWISE/description",
+      "sourceHash": "sha256:19348d0d08be2e14e5f856c8469c30da38ce9ad125ad41df8e5e0052adcd3d7d",
+      "text": "顶点按逆时针顺序排列。"
+    }
+  ]
+}
