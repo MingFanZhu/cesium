@@ -1,0 +1,2778 @@
+{
+  "schemaVersion": 1,
+  "locale": "zh-CN",
+  "entries": [
+    {
+      "id": "Color.add",
+      "field": "description",
+      "sourceHash": "sha256:db2c7227fd9911d00e15f2d7902fc4519bcff5a05157f7f3080ac7b7df76997a",
+      "text": "计算两个 Color 逐分量的和。"
+    },
+    {
+      "id": "Color.add",
+      "field": "params/left/description",
+      "sourceHash": "sha256:017bd36b28b45f4b2eb6b584f34defb4031637c332a4c5298cc076ba2ed0dc29",
+      "text": "第一个 Color。"
+    },
+    {
+      "id": "Color.add",
+      "field": "params/right/description",
+      "sourceHash": "sha256:0cad7b4bd5a45c688ea3dc4c2dc801636f8ecb56eceb8d66113e7589fc37028b",
+      "text": "第二个 Color。"
+    },
+    {
+      "id": "Color.ALICEBLUE",
+      "field": "description",
+      "sourceHash": "sha256:fcc291b83ee349c3afef89e34882d6bdc0f9fcd292b618524d5856efa7bf3745",
+      "text": "以 CSS 颜色 #F0F8FF 初始化的不可变 Color 实例。\r<span class=\"colorSwath\" style=\"background: #F0F8FF;\"></span>"
+    },
+    {
+      "id": "Color.ANTIQUEWHITE",
+      "field": "description",
+      "sourceHash": "sha256:b062c62974c0081670db9f05f017ef2dabc6b4e0ec9a8e5c702c06763d74ccc9",
+      "text": "以 CSS 颜色 #FAEBD7 初始化的不可变 Color 实例。\r<span class=\"colorSwath\" style=\"background: #FAEBD7;\"></span>"
+    },
+    {
+      "id": "Color.AQUA",
+      "field": "description",
+      "sourceHash": "sha256:cb6aa45945f5b89110d9d913e1052e37b69408e4cb8a10201602cde55f0adb2a",
+      "text": "以 CSS 颜色 #00FFFF 初始化的不可变 Color 实例。\r<span class=\"colorSwath\" style=\"background: #00FFFF;\"></span>"
+    },
+    {
+      "id": "Color.AQUAMARINE",
+      "field": "description",
+      "sourceHash": "sha256:b55c5f723abd99c9fabb1ae3f1f58fa0ede7bbf8490727960da0820de0a54d81",
+      "text": "以 CSS 颜色 #7FFFD4 初始化的不可变 Color 实例。\r<span class=\"colorSwath\" style=\"background: #7FFFD4;\"></span>"
+    },
+    {
+      "id": "Color.AZURE",
+      "field": "description",
+      "sourceHash": "sha256:75d96323404c6ca085f0dad03c98963aac3e71c4f1d1033d004ebf7a6beb0682",
+      "text": "以 CSS 颜色 #F0FFFF 初始化的不可变 Color 实例。\r<span class=\"colorSwath\" style=\"background: #F0FFFF;\"></span>"
+    },
+    {
+      "id": "Color.BEIGE",
+      "field": "description",
+      "sourceHash": "sha256:bed27f930b85290e515b4407b8d1324285fcf4aa07b93ac8865ba7c6a8d93d92",
+      "text": "以 CSS 颜色 #F5F5DC 初始化的不可变 Color 实例。\r<span class=\"colorSwath\" style=\"background: #F5F5DC;\"></span>"
+    },
+    {
+      "id": "Color.BISQUE",
+      "field": "description",
+      "sourceHash": "sha256:fb89702821a7ef6ce05cf46ca8a7e81ccdabbf39be0d08c8fdbaca081ceecf72",
+      "text": "以 CSS 颜色 #FFE4C4 初始化的不可变 Color 实例。\r<span class=\"colorSwath\" style=\"background: #FFE4C4;\"></span>"
+    },
+    {
+      "id": "Color.BLACK",
+      "field": "description",
+      "sourceHash": "sha256:8b291e9a5c4bbcecac218b581201d76e1ec460742a628207465cfcc675d2f091",
+      "text": "以 CSS 颜色 #000000 初始化的不可变 Color 实例。\r<span class=\"colorSwath\" style=\"background: #000000;\"></span>"
+    },
+    {
+      "id": "Color.BLANCHEDALMOND",
+      "field": "description",
+      "sourceHash": "sha256:6c7c6409ae847a264baba8177f8e0c1e763a8d632143f70e6e0cb7acf9fc82dc",
+      "text": "以 CSS 颜色 #FFEBCD 初始化的不可变 Color 实例。\r<span class=\"colorSwath\" style=\"background: #FFEBCD;\"></span>"
+    },
+    {
+      "id": "Color.BLUE",
+      "field": "description",
+      "sourceHash": "sha256:cd3681a7f69f34d32fe5694ec3c3417da29a5ea847d6022c2d8abf1b25b6ce97",
+      "text": "以 CSS 颜色 #0000FF 初始化的不可变 Color 实例。\r<span class=\"colorSwath\" style=\"background: #0000FF;\"></span>"
+    },
+    {
+      "id": "Color.BLUEVIOLET",
+      "field": "description",
+      "sourceHash": "sha256:473b637a9d39eaba37a8228a063b53f8d652e3e170fc755c93f287142e36ef89",
+      "text": "以 CSS 颜色 #8A2BE2 初始化的不可变 Color 实例。\r<span class=\"colorSwath\" style=\"background: #8A2BE2;\"></span>"
+    },
+    {
+      "id": "Color.BROWN",
+      "field": "description",
+      "sourceHash": "sha256:85d7369bf64abdec2089d4dc5e1abfe6f9bfb333ac3c1dcd631af96ad1fb805a",
+      "text": "以 CSS 颜色 #A52A2A 初始化的不可变 Color 实例。\r<span class=\"colorSwath\" style=\"background: #A52A2A;\"></span>"
+    },
+    {
+      "id": "Color.BURLYWOOD",
+      "field": "description",
+      "sourceHash": "sha256:185f2eeb0b7528961fbcf32d946d9c3eaf95b2dd7f66c5937b57df76f5c2860d",
+      "text": "以 CSS 颜色 #DEB887 初始化的不可变 Color 实例。\r<span class=\"colorSwath\" style=\"background: #DEB887;\"></span>"
+    },
+    {
+      "id": "Color.bytesToRgba",
+      "field": "description",
+      "sourceHash": "sha256:862835549ae102df77572cf8129fea801ce4dbde9604766784f33454aad1bcb0",
+      "text": "按系统字节序，将字节形式的 RGBA 值转换为单个无符号 32 位 RGBA 数值。"
+    },
+    {
+      "id": "Color.bytesToRgba",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:16d4ae7e41f59a925f25a56e42e368cca0b45dcae588a2ff966ffa25c41038e1",
+      "text": "单个无符号 32 位 RGBA 数值。"
+    },
+    {
+      "id": "Color.byteToFloat",
+      "field": "description",
+      "sourceHash": "sha256:2c719b67fcd2b4f2f81091bc0caa22ac495f94d6beb4818c677dd3ecad51b5bd",
+      "text": "将 0 至 255 范围内的字节颜色分量转换为 0 至 1.0 范围内的浮点颜色分量。"
+    },
+    {
+      "id": "Color.byteToFloat",
+      "field": "params/number/description",
+      "sourceHash": "sha256:5dab988236234601171487bef864104bdd7d482d3454acc5b7285501e5d4b1ab",
+      "text": "要转换的数值。"
+    },
+    {
+      "id": "Color.byteToFloat",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:156d8ab1704001a40df07c7edc17668efe26742c6de1f422f11e4b2ec234c224",
+      "text": "转换后的数值。"
+    },
+    {
+      "id": "Color.CADETBLUE",
+      "field": "description",
+      "sourceHash": "sha256:2f47e363e21893beccdd1de0f4543a7ee433da115736d7a282d564bd870bb180",
+      "text": "以 CSS 颜色 #5F9EA0 初始化的不可变 Color 实例。\r<span class=\"colorSwath\" style=\"background: #5F9EA0;\"></span>"
+    },
+    {
+      "id": "Color.CHARTREUSE",
+      "field": "description",
+      "sourceHash": "sha256:ce72cb01e14f1285835a59f8aeb8058300cb86a970bb6ec7249d350cbb7d3c38",
+      "text": "以 CSS 颜色 #7FFF00 初始化的不可变 Color 实例。\r<span class=\"colorSwath\" style=\"background: #7FFF00;\"></span>"
+    },
+    {
+      "id": "Color.CHOCOLATE",
+      "field": "description",
+      "sourceHash": "sha256:9b148d80e87ccffe5bd621a930191fd54999e31d08668e0b1647592037141279",
+      "text": "以 CSS 颜色 #D2691E 初始化的不可变 Color 实例。\r<span class=\"colorSwath\" style=\"background: #D2691E;\"></span>"
+    },
+    {
+      "id": "Color.clone",
+      "field": "description",
+      "sourceHash": "sha256:0ab0329aa7708df97de6d75f49cb6e80df8a92d0991409a56b7e10978bb7a187",
+      "text": "复制 Color。"
+    },
+    {
+      "id": "Color.clone",
+      "field": "params/color/description",
+      "sourceHash": "sha256:ef46cb78e6cae26adca02460fce9cb6f205e44a15e18b110f40a2a1568848af4",
+      "text": "要复制的 Color。"
+    },
+    {
+      "id": "Color.clone",
+      "field": "params/result/description",
+      "sourceHash": "sha256:afdf71251e0dfe86688e2a9e04462341a8733e062d3bc54cb223ac928dcd6489",
+      "text": "用于保存结果的对象；若为 undefined，则创建新实例。"
+    },
+    {
+      "id": "Color.clone",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:c557b9907491dfb093d9bd2a7dfa8a69e4553fdb4fdd2f52048c0044657c9125",
+      "text": "修改后的 result 参数；若 result 为 undefined，则返回新实例。若 color 为 undefined，则返回 undefined。"
+    },
+    {
+      "id": "Color.CORAL",
+      "field": "description",
+      "sourceHash": "sha256:e64060b3485e38f30820cb72214a4a23d6681fda727b9daead1bef4072f87b27",
+      "text": "以 CSS 颜色 #FF7F50 初始化的不可变 Color 实例。\r<span class=\"colorSwath\" style=\"background: #FF7F50;\"></span>"
+    },
+    {
+      "id": "Color.CORNFLOWERBLUE",
+      "field": "description",
+      "sourceHash": "sha256:64550b5f65f83a7ca5146d6aa0502865f20f39281862437f59da728e318ab9e8",
+      "text": "以 CSS 颜色 #6495ED 初始化的不可变 Color 实例。\r<span class=\"colorSwath\" style=\"background: #6495ED;\"></span>"
+    },
+    {
+      "id": "Color.CORNSILK",
+      "field": "description",
+      "sourceHash": "sha256:1fdc28b3dfb488af6a937f50c7243539e77822f1f55f0c6abd771ad2c716d6b9",
+      "text": "以 CSS 颜色 #FFF8DC 初始化的不可变 Color 实例。\r<span class=\"colorSwath\" style=\"background: #FFF8DC;\"></span>"
+    },
+    {
+      "id": "Color.CRIMSON",
+      "field": "description",
+      "sourceHash": "sha256:4b478a75b3029e692c2df065a402a6d2f51bccc2afa86abf2206ce9d4dc4e1bb",
+      "text": "以 CSS 颜色 #DC143C 初始化的不可变 Color 实例。\r<span class=\"colorSwath\" style=\"background: #DC143C;\"></span>"
+    },
+    {
+      "id": "Color.CYAN",
+      "field": "description",
+      "sourceHash": "sha256:cb6aa45945f5b89110d9d913e1052e37b69408e4cb8a10201602cde55f0adb2a",
+      "text": "以 CSS 颜色 #00FFFF 初始化的不可变 Color 实例。\r<span class=\"colorSwath\" style=\"background: #00FFFF;\"></span>"
+    },
+    {
+      "id": "Color.DARKBLUE",
+      "field": "description",
+      "sourceHash": "sha256:897a47dcac6030e15c74622c79ef277f02d3dacbf9eabb6bea0f3387b056bf53",
+      "text": "以 CSS 颜色 #00008B 初始化的不可变 Color 实例。\r<span class=\"colorSwath\" style=\"background: #00008B;\"></span>"
+    },
+    {
+      "id": "Color.DARKCYAN",
+      "field": "description",
+      "sourceHash": "sha256:b9cc60f3c4f9c6219dd1b0f8fe16361220ebe111fabda438bfd9f0fcec096ef5",
+      "text": "以 CSS 颜色 #008B8B 初始化的不可变 Color 实例。\r<span class=\"colorSwath\" style=\"background: #008B8B;\"></span>"
+    },
+    {
+      "id": "Color.DARKGOLDENROD",
+      "field": "description",
+      "sourceHash": "sha256:28881733d4cd1cd614df5d3cb2c2382e506544545c43cf81fa0833f687759783",
+      "text": "以 CSS 颜色 #B8860B 初始化的不可变 Color 实例。\r<span class=\"colorSwath\" style=\"background: #B8860B;\"></span>"
+    },
+    {
+      "id": "Color.DARKGRAY",
+      "field": "description",
+      "sourceHash": "sha256:db91851c5f8c4110bd21bb40ceafb2643129e6e89e63f61a677ba1c180af396e",
+      "text": "以 CSS 颜色 #A9A9A9 初始化的不可变 Color 实例。\r<span class=\"colorSwath\" style=\"background: #A9A9A9;\"></span>"
+    },
+    {
+      "id": "Color.DARKGREEN",
+      "field": "description",
+      "sourceHash": "sha256:4890bd27ccbcd476d1a3bc8aaa73896bb250c0eb69ac598969960a6f0539c846",
+      "text": "以 CSS 颜色 #006400 初始化的不可变 Color 实例。\r<span class=\"colorSwath\" style=\"background: #006400;\"></span>"
+    },
+    {
+      "id": "Color.DARKGREY",
+      "field": "description",
+      "sourceHash": "sha256:db91851c5f8c4110bd21bb40ceafb2643129e6e89e63f61a677ba1c180af396e",
+      "text": "以 CSS 颜色 #A9A9A9 初始化的不可变 Color 实例。\r<span class=\"colorSwath\" style=\"background: #A9A9A9;\"></span>"
+    },
+    {
+      "id": "Color.DARKKHAKI",
+      "field": "description",
+      "sourceHash": "sha256:934bc88227b8581d493821beb507cffe3a6e25721564a05a1fd6f6a1274edff2",
+      "text": "以 CSS 颜色 #BDB76B 初始化的不可变 Color 实例。\r<span class=\"colorSwath\" style=\"background: #BDB76B;\"></span>"
+    },
+    {
+      "id": "Color.DARKMAGENTA",
+      "field": "description",
+      "sourceHash": "sha256:6ddb108cebd32ecf6bbdaac2e7dcfca2316ee2dc30bccaf3eab886285b80780b",
+      "text": "以 CSS 颜色 #8B008B 初始化的不可变 Color 实例。\r<span class=\"colorSwath\" style=\"background: #8B008B;\"></span>"
+    },
+    {
+      "id": "Color.DARKOLIVEGREEN",
+      "field": "description",
+      "sourceHash": "sha256:a163bbe679a5cbed3fa7ef4d55326b2386d6586332322ea56783d4ae25a5c204",
+      "text": "以 CSS 颜色 #556B2F 初始化的不可变 Color 实例。\r<span class=\"colorSwath\" style=\"background: #556B2F;\"></span>"
+    },
+    {
+      "id": "Color.DARKORANGE",
+      "field": "description",
+      "sourceHash": "sha256:dc21290f76bd0c377267ff41d0b96e203bbccf8017ea7f0a9f51a7114810bff0",
+      "text": "以 CSS 颜色 #FF8C00 初始化的不可变 Color 实例。\r<span class=\"colorSwath\" style=\"background: #FF8C00;\"></span>"
+    },
+    {
+      "id": "Color.DARKORCHID",
+      "field": "description",
+      "sourceHash": "sha256:125ef1f2e17bb5fd41f62c43b37e9add80a24bb124522dedf12db0c0163d8eb5",
+      "text": "以 CSS 颜色 #9932CC 初始化的不可变 Color 实例。\r<span class=\"colorSwath\" style=\"background: #9932CC;\"></span>"
+    },
+    {
+      "id": "Color.DARKRED",
+      "field": "description",
+      "sourceHash": "sha256:c8b181d4744f76605c8fc1c27618fd0ff3723afb01e4ee0ec84b21e696b6202f",
+      "text": "以 CSS 颜色 #8B0000 初始化的不可变 Color 实例。\r<span class=\"colorSwath\" style=\"background: #8B0000;\"></span>"
+    },
+    {
+      "id": "Color.DARKSALMON",
+      "field": "description",
+      "sourceHash": "sha256:642b4b4f5ddd1decf5d8d3d5a642adabc31569450da820ea26dbe3b4e7776033",
+      "text": "以 CSS 颜色 #E9967A 初始化的不可变 Color 实例。\r<span class=\"colorSwath\" style=\"background: #E9967A;\"></span>"
+    },
+    {
+      "id": "Color.DARKSEAGREEN",
+      "field": "description",
+      "sourceHash": "sha256:872f64cdb14119285fbaabc1d41b29232153ce8db89ca0bbdd2bcca43c2d4535",
+      "text": "以 CSS 颜色 #8FBC8F 初始化的不可变 Color 实例。\r<span class=\"colorSwath\" style=\"background: #8FBC8F;\"></span>"
+    },
+    {
+      "id": "Color.DARKSLATEBLUE",
+      "field": "description",
+      "sourceHash": "sha256:7c3aa49d5b1f78f928eb148c620d09780c940583d208640cc71c74dd04fcd46a",
+      "text": "以 CSS 颜色 #483D8B 初始化的不可变 Color 实例。\r<span class=\"colorSwath\" style=\"background: #483D8B;\"></span>"
+    },
+    {
+      "id": "Color.DARKSLATEGRAY",
+      "field": "description",
+      "sourceHash": "sha256:90f089d04d177f50c0b38a962580f99b285a45244c70f648bc97605e17124f63",
+      "text": "以 CSS 颜色 #2F4F4F 初始化的不可变 Color 实例。\r<span class=\"colorSwath\" style=\"background: #2F4F4F;\"></span>"
+    },
+    {
+      "id": "Color.DARKSLATEGREY",
+      "field": "description",
+      "sourceHash": "sha256:90f089d04d177f50c0b38a962580f99b285a45244c70f648bc97605e17124f63",
+      "text": "以 CSS 颜色 #2F4F4F 初始化的不可变 Color 实例。\r<span class=\"colorSwath\" style=\"background: #2F4F4F;\"></span>"
+    },
+    {
+      "id": "Color.DARKTURQUOISE",
+      "field": "description",
+      "sourceHash": "sha256:f840bfa43c97aa0df4655a60f782e30298e8b46f427a4bd02f13beb0ba6b5efc",
+      "text": "以 CSS 颜色 #00CED1 初始化的不可变 Color 实例。\r<span class=\"colorSwath\" style=\"background: #00CED1;\"></span>"
+    },
+    {
+      "id": "Color.DARKVIOLET",
+      "field": "description",
+      "sourceHash": "sha256:dcb1ae6cefa1ba47a6ab798c33d1ce11eb2ed6106a40229399d4b0bffd7a1b91",
+      "text": "以 CSS 颜色 #9400D3 初始化的不可变 Color 实例。\r<span class=\"colorSwath\" style=\"background: #9400D3;\"></span>"
+    },
+    {
+      "id": "Color.DEEPPINK",
+      "field": "description",
+      "sourceHash": "sha256:c5697dafd6a497c804c6bb7f71dba233a7c19f156a0394d78ae93a67d2ed0ed9",
+      "text": "以 CSS 颜色 #FF1493 初始化的不可变 Color 实例。\r<span class=\"colorSwath\" style=\"background: #FF1493;\"></span>"
+    },
+    {
+      "id": "Color.DEEPSKYBLUE",
+      "field": "description",
+      "sourceHash": "sha256:e491e98f080a05a4840003693ec515f74269ada3afc96aabc3f32e6ad56e7270",
+      "text": "以 CSS 颜色 #00BFFF 初始化的不可变 Color 实例。\r<span class=\"colorSwath\" style=\"background: #00BFFF;\"></span>"
+    },
+    {
+      "id": "Color.DIMGRAY",
+      "field": "description",
+      "sourceHash": "sha256:565c8b51902e6ca68d9058d03fbf1e1f2fa02fb4e348b0b888a732aaf3d2aae4",
+      "text": "以 CSS 颜色 #696969 初始化的不可变 Color 实例。\r<span class=\"colorSwath\" style=\"background: #696969;\"></span>"
+    },
+    {
+      "id": "Color.DIMGREY",
+      "field": "description",
+      "sourceHash": "sha256:565c8b51902e6ca68d9058d03fbf1e1f2fa02fb4e348b0b888a732aaf3d2aae4",
+      "text": "以 CSS 颜色 #696969 初始化的不可变 Color 实例。\r<span class=\"colorSwath\" style=\"background: #696969;\"></span>"
+    },
+    {
+      "id": "Color.divide",
+      "field": "description",
+      "sourceHash": "sha256:470e0793bfcbb26e7ac458160062c2f45f3ae0709ea98ec3852368198f41caad",
+      "text": "计算两个 Color 逐分量的商。"
+    },
+    {
+      "id": "Color.divide",
+      "field": "params/left/description",
+      "sourceHash": "sha256:017bd36b28b45f4b2eb6b584f34defb4031637c332a4c5298cc076ba2ed0dc29",
+      "text": "第一个 Color。"
+    },
+    {
+      "id": "Color.divide",
+      "field": "params/right/description",
+      "sourceHash": "sha256:0cad7b4bd5a45c688ea3dc4c2dc801636f8ecb56eceb8d66113e7589fc37028b",
+      "text": "第二个 Color。"
+    },
+    {
+      "id": "Color.divideByScalar",
+      "field": "description",
+      "sourceHash": "sha256:363585ada77ccb6ddd8c6b08fd6aad47396efcae21579dfa4d8aabfab0825f66",
+      "text": "将给定 Color 各分量除以给定标量。"
+    },
+    {
+      "id": "Color.divideByScalar",
+      "field": "params/color/description",
+      "sourceHash": "sha256:bf5fa1f68a339da854cbbe8d3e4c454c30d81f5326654e6fa7a699be7f9aa6c6",
+      "text": "被除的 Color。"
+    },
+    {
+      "id": "Color.divideByScalar",
+      "field": "params/scalar/description",
+      "sourceHash": "sha256:1c6593b4c21e26e07857c253d0eaa994bd87fdcba09c6b72ec51f19dc87c89f3",
+      "text": "用作除数的标量。"
+    },
+    {
+      "id": "Color.DODGERBLUE",
+      "field": "description",
+      "sourceHash": "sha256:f0785d9b4554c31acceed3267956618194407cb939a700e0b1fde7f3e5296b38",
+      "text": "以 CSS 颜色 #1E90FF 初始化的不可变 Color 实例。\r<span class=\"colorSwath\" style=\"background: #1E90FF;\"></span>"
+    },
+    {
+      "id": "Color.equals",
+      "field": "description",
+      "sourceHash": "sha256:b433c7e69a541aabda95001deb0191e7cc92f83932ed18e3425bb659e49c3edb",
+      "text": "若第一个 Color 与第二个颜色相等，则返回 true。"
+    },
+    {
+      "id": "Color.equals",
+      "field": "params/left/description",
+      "sourceHash": "sha256:9c29c389628f24cb90658ed73e5f6e25aab0d9bdfa984ea946fc919d167803da",
+      "text": "参与相等比较的第一个 Color。"
+    },
+    {
+      "id": "Color.equals",
+      "field": "params/right/description",
+      "sourceHash": "sha256:b93641bbcabd22fdc18c04c2e326c2741cb753ecf692df2a68cfba673a354831",
+      "text": "参与相等比较的第二个 Color。"
+    },
+    {
+      "id": "Color.equals",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:1e4aeadf94e9492cafded84cb121cf1756e5c3c6c485fddc69a9bd865f928d47",
+      "text": "颜色相等时返回 <code>true</code>，否则返回 <code>false</code>。"
+    },
+    {
+      "id": "Color.FIREBRICK",
+      "field": "description",
+      "sourceHash": "sha256:c0a78f2dee388eeef1af83c99bf9f0678b51fcacdaed7a667e2f320fe0c83a81",
+      "text": "以 CSS 颜色 #B22222 初始化的不可变 Color 实例。\r<span class=\"colorSwath\" style=\"background: #B22222;\"></span>"
+    },
+    {
+      "id": "Color.floatToByte",
+      "field": "description",
+      "sourceHash": "sha256:f1ecfa80117a9df6e8e56cae30d376264be169ffcdcf258d9e7dff75ff376ef3",
+      "text": "将 0 至 1.0 范围内的浮点颜色分量转换为 0 至 255 范围内的字节颜色分量。"
+    },
+    {
+      "id": "Color.floatToByte",
+      "field": "params/number/description",
+      "sourceHash": "sha256:5dab988236234601171487bef864104bdd7d482d3454acc5b7285501e5d4b1ab",
+      "text": "要转换的数值。"
+    },
+    {
+      "id": "Color.floatToByte",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:156d8ab1704001a40df07c7edc17668efe26742c6de1f422f11e4b2ec234c224",
+      "text": "转换后的数值。"
+    },
+    {
+      "id": "Color.FLORALWHITE",
+      "field": "description",
+      "sourceHash": "sha256:3ae97b6739335d7ea0425232bfb49fa195f88bf5aa2f2a579e57ee7d70839cff",
+      "text": "以 CSS 颜色 #FFFAF0 初始化的不可变 Color 实例。\r<span class=\"colorSwath\" style=\"background: #FFFAF0;\"></span>"
+    },
+    {
+      "id": "Color.FORESTGREEN",
+      "field": "description",
+      "sourceHash": "sha256:f98267cd082fa96e8e7ddf9d3ef7a2d128b9c86241847e491315f05fab93d3e2",
+      "text": "以 CSS 颜色 #228B22 初始化的不可变 Color 实例。\r<span class=\"colorSwath\" style=\"background: #228B22;\"></span>"
+    },
+    {
+      "id": "Color.fromAlpha",
+      "field": "description",
+      "sourceHash": "sha256:1356b93d8148e5b7deb5926ec820f2ef1daa75f05427fd5c43ff6144c1b81d93",
+      "text": "创建与指定颜色具有相同红、绿、蓝分量，但使用指定 alpha 值的新 Color。"
+    },
+    {
+      "id": "Color.fromAlpha",
+      "field": "params/alpha/description",
+      "sourceHash": "sha256:8cd22db338351b898a94d198f00d6877d8d370420e1c558aec639ceb6de9e8e1",
+      "text": "新的 alpha 分量。"
+    },
+    {
+      "id": "Color.fromAlpha",
+      "field": "params/color/description",
+      "sourceHash": "sha256:3a3f7d4da27c84522e8caf9dc6b12362bb04ce195c7d974ece6d51f6aadf1e31",
+      "text": "基础颜色。"
+    },
+    {
+      "id": "Color.fromAlpha",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:318efef230a969c6ecc9f93d4f017ce48838f346a86f7af827b46fbfb9725220",
+      "text": "修改后的 result 参数；未提供时返回新建的 Color 实例。"
+    },
+    {
+      "id": "Color.fromBytes",
+      "field": "description",
+      "sourceHash": "sha256:8a21c0f34afbf1fcd28512573af0429396ef0457b1ef5f3ac983f5d193aaccb8",
+      "text": "使用 0 至 255 范围内的红、绿、蓝和 alpha 值创建 Color，并在内部转换到 0.0 至 1.0 范围。"
+    },
+    {
+      "id": "Color.fromBytes",
+      "field": "params/alpha/description",
+      "sourceHash": "sha256:e2bed0452928b941f3fffd1549d5f874d402cff4175c76166c6206893f1bd7c8",
+      "text": "alpha 分量。"
+    },
+    {
+      "id": "Color.fromBytes",
+      "field": "params/blue/description",
+      "sourceHash": "sha256:15b5577f67ad0846b4071c8e9a258ae45abbba67e4e05e6835a0f85ab68ed5a9",
+      "text": "蓝色分量。"
+    },
+    {
+      "id": "Color.fromBytes",
+      "field": "params/green/description",
+      "sourceHash": "sha256:ab7c7878cf5514b52449d5df3205f401a4a3db3e98058b9878cfc76c796251eb",
+      "text": "绿色分量。"
+    },
+    {
+      "id": "Color.fromBytes",
+      "field": "params/red/description",
+      "sourceHash": "sha256:be130e2f6b7a20aeded0ccd327dc79db7ffd8cca08cc7ef060b1f1ae08307ded",
+      "text": "红色分量。"
+    },
+    {
+      "id": "Color.fromBytes",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:318efef230a969c6ecc9f93d4f017ce48838f346a86f7af827b46fbfb9725220",
+      "text": "修改后的 result 参数；未提供时返回新建的 Color 实例。"
+    },
+    {
+      "id": "Color.fromCartesian4",
+      "field": "description",
+      "sourceHash": "sha256:9174657927ed2b52849863c3b442fb48d35ee4a26296de3cd60b059a4055a197",
+      "text": "从 {@link Cartesian4} 创建 Color 实例。<code>x</code>、<code>y</code>、<code>z</code> 和 <code>w</code> 分别映射到 <code>red</code>、<code>green</code>、<code>blue</code> 和 <code>alpha</code>。"
+    },
+    {
+      "id": "Color.fromCartesian4",
+      "field": "params/cartesian/description",
+      "sourceHash": "sha256:2750f9178438ccda09bb4cdae52108ed1fe2681796a625a4a05c21dd2b794729",
+      "text": "原始笛卡尔向量。"
+    },
+    {
+      "id": "Color.fromCartesian4",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:318efef230a969c6ecc9f93d4f017ce48838f346a86f7af827b46fbfb9725220",
+      "text": "修改后的 result 参数；未提供时返回新建的 Color 实例。"
+    },
+    {
+      "id": "Color.fromCssColorString",
+      "field": "description",
+      "sourceHash": "sha256:8221382b8aee9df798ca905d42ee1bc90982ec0e48d78760dcb57643532ae6e2",
+      "text": "从 CSS 颜色值创建 Color 实例。"
+    },
+    {
+      "id": "Color.fromCssColorString",
+      "field": "params/color/description",
+      "sourceHash": "sha256:ec6e170069a8f5ac6e8e1f500c3965913760eea5fd415acf6bea78d8209aa719",
+      "text": "CSS 颜色值，可采用 #rgb、#rgba、#rrggbb、#rrggbbaa、rgb()、rgba()、hsl() 或 hsla() 格式。"
+    },
+    {
+      "id": "Color.fromCssColorString",
+      "field": "params/result/description",
+      "sourceHash": "sha256:afdf71251e0dfe86688e2a9e04462341a8733e062d3bc54cb223ac928dcd6489",
+      "text": "用于保存结果的对象；若为 undefined，则创建新实例。"
+    },
+    {
+      "id": "Color.fromCssColorString",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:c99bee6608c7420a64e25911f0cf0569588697e065069fbd8209aa3325ceed55",
+      "text": "颜色对象；若字符串不是有效 CSS 颜色，则返回 undefined。"
+    },
+    {
+      "id": "Color.fromHsl",
+      "field": "description",
+      "sourceHash": "sha256:47a29405a7cdbdc2024daefb8d64881630079bd4c0b9940662637be1f7a02383",
+      "text": "根据色相、饱和度和亮度创建 Color 实例。"
+    },
+    {
+      "id": "Color.fromHsl",
+      "field": "params/alpha/description",
+      "sourceHash": "sha256:78553eb9b0bf417f64567fe89b429f47e77a1c05ebc1cc4d90e086407b656753",
+      "text": "alpha 分量，范围为 0...1。"
+    },
+    {
+      "id": "Color.fromHsl",
+      "field": "params/hue/description",
+      "sourceHash": "sha256:08b3b757ce4537628b77be242e79deb39dc11246529ac5b4767d3639149113ec",
+      "text": "色相角，范围为 0...1。"
+    },
+    {
+      "id": "Color.fromHsl",
+      "field": "params/lightness/description",
+      "sourceHash": "sha256:b7eac279889374700eaca65adc90cddf8d2dd47f6f34df8043f94ef5102c5f87",
+      "text": "亮度值，范围为 0...1。"
+    },
+    {
+      "id": "Color.fromHsl",
+      "field": "params/result/description",
+      "sourceHash": "sha256:afdf71251e0dfe86688e2a9e04462341a8733e062d3bc54cb223ac928dcd6489",
+      "text": "用于保存结果的对象；若为 undefined，则创建新实例。"
+    },
+    {
+      "id": "Color.fromHsl",
+      "field": "params/saturation/description",
+      "sourceHash": "sha256:8bd3fe3f3e5981695865b6c626c1cc379b918e3a72b71c29fe55fc2564bbad3f",
+      "text": "饱和度值，范围为 0...1。"
+    },
+    {
+      "id": "Color.fromHsl",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:e48282d24b2b6ce78fafde2a53c851f8621c757139511a6abfbcc65581809463",
+      "text": "颜色对象。"
+    },
+    {
+      "id": "Color.fromRandom",
+      "field": "description",
+      "sourceHash": "sha256:8d26659c0834a1333c994e5a0652a5a2b63152fe89e686f6b081050d16c84a36",
+      "text": "根据给定选项创建随机颜色。若要获得可复现的随机颜色，应在应用开始时调用一次 {@link CesiumMath#setRandomNumberSeed}。"
+    },
+    {
+      "id": "Color.fromRandom",
+      "field": "exceptions/0/description",
+      "sourceHash": "sha256:8f39dbd1005c7f458579c2f97fd9b80576644e514a968c3a636755b16e0c320c",
+      "text": "minimumRed 必须小于等于 maximumRed。"
+    },
+    {
+      "id": "Color.fromRandom",
+      "field": "exceptions/1/description",
+      "sourceHash": "sha256:4e338306f10cfbc2f0808c496b09f605048f0147ba08fc2bfe780cdf0c3833b0",
+      "text": "minimumGreen 必须小于等于 maximumGreen。"
+    },
+    {
+      "id": "Color.fromRandom",
+      "field": "exceptions/2/description",
+      "sourceHash": "sha256:a5f5565e880a2a6b778ed97801f011d1a2b15f7e5b5a69060734dfaef51acfbb",
+      "text": "minimumBlue 必须小于等于 maximumBlue。"
+    },
+    {
+      "id": "Color.fromRandom",
+      "field": "exceptions/3/description",
+      "sourceHash": "sha256:4cdf4f3bffc71c03ab5a6e3f470128361f246734e8166b52ba24f870ffaa939f",
+      "text": "minimumAlpha 必须小于等于 maximumAlpha。"
+    },
+    {
+      "id": "Color.fromRandom",
+      "field": "params/options.alpha/description",
+      "sourceHash": "sha256:3dff508063948dbec91b853d11cfd5a9c2f78c64f2f3648e3ec80ae9cf8e7261",
+      "text": "若指定，则直接使用此 alpha 分量，而不使用随机值。"
+    },
+    {
+      "id": "Color.fromRandom",
+      "field": "params/options.blue/description",
+      "sourceHash": "sha256:1d34fa76171b71a2853fcba2c1925efb88e09f122e75107fb9d9ef1002242e6d",
+      "text": "若指定，则直接使用此蓝色分量，而不使用随机值。"
+    },
+    {
+      "id": "Color.fromRandom",
+      "field": "params/options.green/description",
+      "sourceHash": "sha256:44169123be42559c768d815afeabf849ba28640f5f8fd43d16fc39df17e63e98",
+      "text": "若指定，则直接使用此绿色分量，而不使用随机值。"
+    },
+    {
+      "id": "Color.fromRandom",
+      "field": "params/options.maximumAlpha/description",
+      "sourceHash": "sha256:f8f1e24bb07750936c7e60f47171d5ea3671f7b00ef4b42fc1d7609f88005b45",
+      "text": "未显式指定 alpha 时，随机生成 alpha 值的最大值。"
+    },
+    {
+      "id": "Color.fromRandom",
+      "field": "params/options.maximumBlue/description",
+      "sourceHash": "sha256:d9f5f5bb49ebd76b4059ec810bb2d77436f191ba006a32b2cef51cfea27a06c2",
+      "text": "未显式指定蓝色分量时，随机生成蓝色值的最大值。"
+    },
+    {
+      "id": "Color.fromRandom",
+      "field": "params/options.maximumGreen/description",
+      "sourceHash": "sha256:e321eeffe332fd0fa9c4700bc3a0ec6b9aa4254489dc4b8a491fa6426fb22409",
+      "text": "未显式指定绿色分量时，随机生成绿色值的最大值。"
+    },
+    {
+      "id": "Color.fromRandom",
+      "field": "params/options.maximumRed/description",
+      "sourceHash": "sha256:6183cc76d993841506bfb4d2b3856eea262598fbbae77c9c370b0af1c7970248",
+      "text": "未显式指定红色分量时，随机生成红色值的最大值。"
+    },
+    {
+      "id": "Color.fromRandom",
+      "field": "params/options.minimumAlpha/description",
+      "sourceHash": "sha256:64805bc627ba94a673ef0c9b17aea3b80b49e73c3c632782545a91d2e7515502",
+      "text": "未显式指定 alpha 时，随机生成 alpha 值的最小值。"
+    },
+    {
+      "id": "Color.fromRandom",
+      "field": "params/options.minimumBlue/description",
+      "sourceHash": "sha256:ccca6d0ab6301532e1de27f53260aff4a9582221c13109256e86d5585037e228",
+      "text": "未显式指定蓝色分量时，随机生成蓝色值的最小值。"
+    },
+    {
+      "id": "Color.fromRandom",
+      "field": "params/options.minimumGreen/description",
+      "sourceHash": "sha256:0dbecbcc835aa2b42fcb43224c885b5ba3d0e152beceb7375d3d78b8e605629b",
+      "text": "未显式指定绿色分量时，随机生成绿色值的最小值。"
+    },
+    {
+      "id": "Color.fromRandom",
+      "field": "params/options.minimumRed/description",
+      "sourceHash": "sha256:df15caea45f051d6911f4ee591e7a1125e9f36063357d1999bc93afbe6ad8fdb",
+      "text": "未显式指定红色分量时，随机生成红色值的最小值。"
+    },
+    {
+      "id": "Color.fromRandom",
+      "field": "params/options.red/description",
+      "sourceHash": "sha256:ea013546f277958aafb7258dd1ebef128ddbc92d9afe4f229a67e262dc908e69",
+      "text": "若指定，则直接使用此红色分量，而不使用随机值。"
+    },
+    {
+      "id": "Color.fromRandom",
+      "field": "params/result/description",
+      "sourceHash": "sha256:afdf71251e0dfe86688e2a9e04462341a8733e062d3bc54cb223ac928dcd6489",
+      "text": "用于保存结果的对象；若为 undefined，则创建新实例。"
+    },
+    {
+      "id": "Color.fromRandom",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:74e3885f0a5efb2f80b1b847fd2364ab4c6843c07578e533b6181c4d293cde39",
+      "text": "修改后的 result 参数；若 result 为 undefined，则返回新实例。"
+    },
+    {
+      "id": "Color.fromRgba",
+      "field": "description",
+      "sourceHash": "sha256:e9e6ac5f6be60ec215d200a0dcc79ad0639eb05050a8247771bf921b913c69d0",
+      "text": "按系统字节序，从单个无符号 32 位 RGBA 数值创建新 Color。"
+    },
+    {
+      "id": "Color.fromRgba",
+      "field": "params/result/description",
+      "sourceHash": "sha256:afdf71251e0dfe86688e2a9e04462341a8733e062d3bc54cb223ac928dcd6489",
+      "text": "用于保存结果的对象；若为 undefined，则创建新实例。"
+    },
+    {
+      "id": "Color.fromRgba",
+      "field": "params/rgba/description",
+      "sourceHash": "sha256:16d4ae7e41f59a925f25a56e42e368cca0b45dcae588a2ff966ffa25c41038e1",
+      "text": "单个无符号 32 位 RGBA 数值。"
+    },
+    {
+      "id": "Color.fromRgba",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:e48282d24b2b6ce78fafde2a53c851f8621c757139511a6abfbcc65581809463",
+      "text": "颜色对象。"
+    },
+    {
+      "id": "Color.FUCHSIA",
+      "field": "description",
+      "sourceHash": "sha256:7c0e2afe6c2ad2b6327173fcd84118607ba05d9f1598532326cd0f44c6348f7f",
+      "text": "以 CSS 颜色 #FF00FF 初始化的不可变 Color 实例。\r<span class=\"colorSwath\" style=\"background: #FF00FF;\"></span>"
+    },
+    {
+      "id": "Color.GAINSBORO",
+      "field": "description",
+      "sourceHash": "sha256:c99dbd6cea11a1f3fc586606bbd92df8a56116aa7a6e7558f35cfb0ca5f01f95",
+      "text": "以 CSS 颜色 #DCDCDC 初始化的不可变 Color 实例。\r<span class=\"colorSwath\" style=\"background: #DCDCDC;\"></span>"
+    },
+    {
+      "id": "Color.GHOSTWHITE",
+      "field": "description",
+      "sourceHash": "sha256:54f93dbdca9b7795e2fa4cabc49b5a50ac93afe3dad16908e251c063e6eb517e",
+      "text": "以 CSS 颜色 #F8F8FF 初始化的不可变 Color 实例。\r<span class=\"colorSwath\" style=\"background: #F8F8FF;\"></span>"
+    },
+    {
+      "id": "Color.GOLD",
+      "field": "description",
+      "sourceHash": "sha256:7c228117497286fb3b700fb02b61478418aa1cf3b7b45819ecc4059bd65cee26",
+      "text": "以 CSS 颜色 #FFD700 初始化的不可变 Color 实例。\r<span class=\"colorSwath\" style=\"background: #FFD700;\"></span>"
+    },
+    {
+      "id": "Color.GOLDENROD",
+      "field": "description",
+      "sourceHash": "sha256:7885aea95411fde6eef86b2e9afbcd0834e5be35f2cd553794347de4926e08d3",
+      "text": "以 CSS 颜色 #DAA520 初始化的不可变 Color 实例。\r<span class=\"colorSwath\" style=\"background: #DAA520;\"></span>"
+    },
+    {
+      "id": "Color.GRAY",
+      "field": "description",
+      "sourceHash": "sha256:9c91ab22d95fe8608057e1ffc03d149f3ab37478a202d776525d352f5ae8bd2e",
+      "text": "以 CSS 颜色 #808080 初始化的不可变 Color 实例。\r<span class=\"colorSwath\" style=\"background: #808080;\"></span>"
+    },
+    {
+      "id": "Color.GREEN",
+      "field": "description",
+      "sourceHash": "sha256:f1e49184df7ed387cc3c8e8180b8eb5ba527821f771d8c649158e8b6c4039485",
+      "text": "以 CSS 颜色 #008000 初始化的不可变 Color 实例。\r<span class=\"colorSwath\" style=\"background: #008000;\"></span>"
+    },
+    {
+      "id": "Color.GREENYELLOW",
+      "field": "description",
+      "sourceHash": "sha256:89f6b2d7de4460e3814632d5fea8b5142dc7bf4a5f296b03074efe9b0ac0c2f2",
+      "text": "以 CSS 颜色 #ADFF2F 初始化的不可变 Color 实例。\r<span class=\"colorSwath\" style=\"background: #ADFF2F;\"></span>"
+    },
+    {
+      "id": "Color.GREY",
+      "field": "description",
+      "sourceHash": "sha256:9c91ab22d95fe8608057e1ffc03d149f3ab37478a202d776525d352f5ae8bd2e",
+      "text": "以 CSS 颜色 #808080 初始化的不可变 Color 实例。\r<span class=\"colorSwath\" style=\"background: #808080;\"></span>"
+    },
+    {
+      "id": "Color.HONEYDEW",
+      "field": "description",
+      "sourceHash": "sha256:49efb10a1054f068e852ab8b66b02c8c065806fede1cb21e1a9923e31c979f17",
+      "text": "以 CSS 颜色 #F0FFF0 初始化的不可变 Color 实例。\r<span class=\"colorSwath\" style=\"background: #F0FFF0;\"></span>"
+    },
+    {
+      "id": "Color.HOTPINK",
+      "field": "description",
+      "sourceHash": "sha256:ea41a09dd8dd2a32567399a96febdb38aff73c49cc0f530221147a71cb222d84",
+      "text": "以 CSS 颜色 #FF69B4 初始化的不可变 Color 实例。\r<span class=\"colorSwath\" style=\"background: #FF69B4;\"></span>"
+    },
+    {
+      "id": "Color.INDIANRED",
+      "field": "description",
+      "sourceHash": "sha256:af24ed50cd27a3f64585b53315e3d9aa4676ac80de2f82f9ec721d06d2472026",
+      "text": "以 CSS 颜色 #CD5C5C 初始化的不可变 Color 实例。\r<span class=\"colorSwath\" style=\"background: #CD5C5C;\"></span>"
+    },
+    {
+      "id": "Color.INDIGO",
+      "field": "description",
+      "sourceHash": "sha256:13cb4f52ad169301f4cd2bd07fda6bca91b75a3f5ce28def3252555e7049816e",
+      "text": "以 CSS 颜色 #4B0082 初始化的不可变 Color 实例。\r<span class=\"colorSwath\" style=\"background: #4B0082;\"></span>"
+    },
+    {
+      "id": "Color.IVORY",
+      "field": "description",
+      "sourceHash": "sha256:d7436af36f4bc65e6c1a3e901f8ae8adb8cf48dfa3ccc336c5e5200341bab2dc",
+      "text": "以 CSS 颜色 #FFFFF0 初始化的不可变 Color 实例。\r<span class=\"colorSwath\" style=\"background: #FFFFF0;\"></span>"
+    },
+    {
+      "id": "Color.KHAKI",
+      "field": "description",
+      "sourceHash": "sha256:fca9753bb85e97a7475a97925ccc630ea5f0a47ca6e7c3b64efc2d7cc3ed47c2",
+      "text": "以 CSS 颜色 #F0E68C 初始化的不可变 Color 实例。\r<span class=\"colorSwath\" style=\"background: #F0E68C;\"></span>"
+    },
+    {
+      "id": "Color.LAVENDAR_BLUSH",
+      "field": "description",
+      "sourceHash": "sha256:8f9023a7aed2e8190c537b915baaf0eb327da1f2ac5d6ea6ddf65c4c0a3313b9",
+      "text": "以 CSS 颜色 #FFF0F5 初始化的不可变 Color 实例。\r<span class=\"colorSwath\" style=\"background: #FFF0F5;\"></span>"
+    },
+    {
+      "id": "Color.LAVENDER",
+      "field": "description",
+      "sourceHash": "sha256:eafadd8f957c564b0ff561cf58ceafcb278390d3fe5d803edab927aa72df9921",
+      "text": "以 CSS 颜色 #E6E6FA 初始化的不可变 Color 实例。\r<span class=\"colorSwath\" style=\"background: #E6E6FA;\"></span>"
+    },
+    {
+      "id": "Color.LAWNGREEN",
+      "field": "description",
+      "sourceHash": "sha256:240ec9190121d0ec2002184eaeefdc1ace3f87bf4f6331684160195ba8fe3f74",
+      "text": "以 CSS 颜色 #7CFC00 初始化的不可变 Color 实例。\r<span class=\"colorSwath\" style=\"background: #7CFC00;\"></span>"
+    },
+    {
+      "id": "Color.LEMONCHIFFON",
+      "field": "description",
+      "sourceHash": "sha256:ae43b121908da3e286718308655e813e55bf30a9d857f942f914fdaee22dc5b2",
+      "text": "以 CSS 颜色 #FFFACD 初始化的不可变 Color 实例。\r<span class=\"colorSwath\" style=\"background: #FFFACD;\"></span>"
+    },
+    {
+      "id": "Color.lerp",
+      "field": "description",
+      "sourceHash": "sha256:044f84b0e3012e7def55439b449b4b9fe6c8ffa8d99da52073b69010802ed860",
+      "text": "计算给定颜色在 t 处的线性插值或外推值。"
+    },
+    {
+      "id": "Color.lerp",
+      "field": "params/end/description",
+      "sourceHash": "sha256:2bc432702eca60a995adac95a1331ab2185c19708da947ebcd623cd3648fe0bd",
+      "text": "t 为 1.0 时对应的颜色。"
+    },
+    {
+      "id": "Color.lerp",
+      "field": "params/start/description",
+      "sourceHash": "sha256:235e399907b2bfa00cd1fef11a50074d4e47733c7cd7ce8a9db08691d9b05df0",
+      "text": "t 为 0.0 时对应的颜色。"
+    },
+    {
+      "id": "Color.lerp",
+      "field": "params/t/description",
+      "sourceHash": "sha256:eb6494a782486871612062cf92e61cb7f60fe742bd528058e9b997e4f93d2b45",
+      "text": "要进行插值的 t 参数位置。"
+    },
+    {
+      "id": "Color.LIGHTBLUE",
+      "field": "description",
+      "sourceHash": "sha256:dc7c481f5680ed1a8097a57982d235f3243895378b87c9a79f907fbbd887bacd",
+      "text": "以 CSS 颜色 #ADD8E6 初始化的不可变 Color 实例。\r<span class=\"colorSwath\" style=\"background: #ADD8E6;\"></span>"
+    },
+    {
+      "id": "Color.LIGHTCORAL",
+      "field": "description",
+      "sourceHash": "sha256:72659781d8fb8a2c95d4be435702454eb4bef5497383b8fb0dc1662d48b929b7",
+      "text": "以 CSS 颜色 #F08080 初始化的不可变 Color 实例。\r<span class=\"colorSwath\" style=\"background: #F08080;\"></span>"
+    },
+    {
+      "id": "Color.LIGHTCYAN",
+      "field": "description",
+      "sourceHash": "sha256:e1e5a0cfb51514d22dea5ea9f0b6dca3fe6e2c5422412b3c9cfe287f32c62340",
+      "text": "以 CSS 颜色 #E0FFFF 初始化的不可变 Color 实例。\r<span class=\"colorSwath\" style=\"background: #E0FFFF;\"></span>"
+    },
+    {
+      "id": "Color.LIGHTGOLDENRODYELLOW",
+      "field": "description",
+      "sourceHash": "sha256:76f872c7eb5f750da5113c761ca08c9524c75423264b8ec82dafe1908ca33231",
+      "text": "以 CSS 颜色 #FAFAD2 初始化的不可变 Color 实例。\r<span class=\"colorSwath\" style=\"background: #FAFAD2;\"></span>"
+    },
+    {
+      "id": "Color.LIGHTGRAY",
+      "field": "description",
+      "sourceHash": "sha256:f74e1189d466b84ad179a7d46cb1358543714b8eb01f02645dd288859cb63f4f",
+      "text": "以 CSS 颜色 #D3D3D3 初始化的不可变 Color 实例。\r<span class=\"colorSwath\" style=\"background: #D3D3D3;\"></span>"
+    },
+    {
+      "id": "Color.LIGHTGREEN",
+      "field": "description",
+      "sourceHash": "sha256:34c82ee9efb5db6b8b694332d77f13d1ba0e7b5c5ebb0c98b49b8e336a3460b5",
+      "text": "以 CSS 颜色 #90EE90 初始化的不可变 Color 实例。\r<span class=\"colorSwath\" style=\"background: #90EE90;\"></span>"
+    },
+    {
+      "id": "Color.LIGHTGREY",
+      "field": "description",
+      "sourceHash": "sha256:f74e1189d466b84ad179a7d46cb1358543714b8eb01f02645dd288859cb63f4f",
+      "text": "以 CSS 颜色 #D3D3D3 初始化的不可变 Color 实例。\r<span class=\"colorSwath\" style=\"background: #D3D3D3;\"></span>"
+    },
+    {
+      "id": "Color.LIGHTPINK",
+      "field": "description",
+      "sourceHash": "sha256:f703800426fdd63b10c671b249f7d51d9d225ed0d90149fc71535d2753d261db",
+      "text": "以 CSS 颜色 #FFB6C1 初始化的不可变 Color 实例。\r<span class=\"colorSwath\" style=\"background: #FFB6C1;\"></span>"
+    },
+    {
+      "id": "Color.LIGHTSEAGREEN",
+      "field": "description",
+      "sourceHash": "sha256:11ea9111965379807272775d8507898aaaf02622c76c591706871eb7c928a06e",
+      "text": "以 CSS 颜色 #20B2AA 初始化的不可变 Color 实例。\r<span class=\"colorSwath\" style=\"background: #20B2AA;\"></span>"
+    },
+    {
+      "id": "Color.LIGHTSKYBLUE",
+      "field": "description",
+      "sourceHash": "sha256:fa06f357db0a0cbc323a71a121f4aca68de6d4dc05fc9d5e96318843afffe996",
+      "text": "以 CSS 颜色 #87CEFA 初始化的不可变 Color 实例。\r<span class=\"colorSwath\" style=\"background: #87CEFA;\"></span>"
+    },
+    {
+      "id": "Color.LIGHTSLATEGRAY",
+      "field": "description",
+      "sourceHash": "sha256:6e64995b111f508babc0c4f23fb2394e07969067842d58541d10592e5cd666c5",
+      "text": "以 CSS 颜色 #778899 初始化的不可变 Color 实例。\r<span class=\"colorSwath\" style=\"background: #778899;\"></span>"
+    },
+    {
+      "id": "Color.LIGHTSLATEGREY",
+      "field": "description",
+      "sourceHash": "sha256:6e64995b111f508babc0c4f23fb2394e07969067842d58541d10592e5cd666c5",
+      "text": "以 CSS 颜色 #778899 初始化的不可变 Color 实例。\r<span class=\"colorSwath\" style=\"background: #778899;\"></span>"
+    },
+    {
+      "id": "Color.LIGHTSTEELBLUE",
+      "field": "description",
+      "sourceHash": "sha256:a0c73bc198208fba6e79be3026bed4178ff2f0d8cd4de3ef8bcf778d6c0014ac",
+      "text": "以 CSS 颜色 #B0C4DE 初始化的不可变 Color 实例。\r<span class=\"colorSwath\" style=\"background: #B0C4DE;\"></span>"
+    },
+    {
+      "id": "Color.LIGHTYELLOW",
+      "field": "description",
+      "sourceHash": "sha256:33a3e86db6f4047f298c6060e712cab43f30d5916f5188e4152ede46577f4310",
+      "text": "以 CSS 颜色 #FFFFE0 初始化的不可变 Color 实例。\r<span class=\"colorSwath\" style=\"background: #FFFFE0;\"></span>"
+    },
+    {
+      "id": "Color.LIME",
+      "field": "description",
+      "sourceHash": "sha256:1471526eed1e130f9f620147660c0ac08e15e812d1ecb924ec7ff6d0c7010821",
+      "text": "以 CSS 颜色 #00FF00 初始化的不可变 Color 实例。\r<span class=\"colorSwath\" style=\"background: #00FF00;\"></span>"
+    },
+    {
+      "id": "Color.LIMEGREEN",
+      "field": "description",
+      "sourceHash": "sha256:e76b59eb353c3fd20e5af0ed6efc6a77fda8db52135380320000327f45f83fef",
+      "text": "以 CSS 颜色 #32CD32 初始化的不可变 Color 实例。\r<span class=\"colorSwath\" style=\"background: #32CD32;\"></span>"
+    },
+    {
+      "id": "Color.LINEN",
+      "field": "description",
+      "sourceHash": "sha256:4090db916fd3cac1ff27ee9856f5a8be327b3280c2d3c6985a9dbcaab2bfd996",
+      "text": "以 CSS 颜色 #FAF0E6 初始化的不可变 Color 实例。\r<span class=\"colorSwath\" style=\"background: #FAF0E6;\"></span>"
+    },
+    {
+      "id": "Color.MAGENTA",
+      "field": "description",
+      "sourceHash": "sha256:7c0e2afe6c2ad2b6327173fcd84118607ba05d9f1598532326cd0f44c6348f7f",
+      "text": "以 CSS 颜色 #FF00FF 初始化的不可变 Color 实例。\r<span class=\"colorSwath\" style=\"background: #FF00FF;\"></span>"
+    },
+    {
+      "id": "Color.MAROON",
+      "field": "description",
+      "sourceHash": "sha256:a0541c7650ed5f0b2850e5b6ff8488f46b8ecfe651f9d5bc5065a0d18c6b6636",
+      "text": "以 CSS 颜色 #800000 初始化的不可变 Color 实例。\r<span class=\"colorSwath\" style=\"background: #800000;\"></span>"
+    },
+    {
+      "id": "Color.MEDIUMAQUAMARINE",
+      "field": "description",
+      "sourceHash": "sha256:6fead39dd25014d3897c1151c6e1ede05d4e4ca23827486a327a2eb86c425abd",
+      "text": "以 CSS 颜色 #66CDAA 初始化的不可变 Color 实例。\r<span class=\"colorSwath\" style=\"background: #66CDAA;\"></span>"
+    },
+    {
+      "id": "Color.MEDIUMBLUE",
+      "field": "description",
+      "sourceHash": "sha256:da15314f566c1d4ef0296462d7c1989f1ad539354499e0f01b55c8cde3604709",
+      "text": "以 CSS 颜色 #0000CD 初始化的不可变 Color 实例。\r<span class=\"colorSwath\" style=\"background: #0000CD;\"></span>"
+    },
+    {
+      "id": "Color.MEDIUMORCHID",
+      "field": "description",
+      "sourceHash": "sha256:2e2272c1f79b378941283400dc3c469d23adf6aed2499cf5901066ddf028ef8e",
+      "text": "以 CSS 颜色 #BA55D3 初始化的不可变 Color 实例。\r<span class=\"colorSwath\" style=\"background: #BA55D3;\"></span>"
+    },
+    {
+      "id": "Color.MEDIUMPURPLE",
+      "field": "description",
+      "sourceHash": "sha256:985e53433dbbd4f3ccc3d1a8c8c606cb79a499810d51466fd8ceb07d6fb133ae",
+      "text": "以 CSS 颜色 #9370DB 初始化的不可变 Color 实例。\r<span class=\"colorSwath\" style=\"background: #9370DB;\"></span>"
+    },
+    {
+      "id": "Color.MEDIUMSEAGREEN",
+      "field": "description",
+      "sourceHash": "sha256:f1e10852543d233022376fe9c83593675980587cce9c844d6a03d088e0173001",
+      "text": "以 CSS 颜色 #3CB371 初始化的不可变 Color 实例。\r<span class=\"colorSwath\" style=\"background: #3CB371;\"></span>"
+    },
+    {
+      "id": "Color.MEDIUMSLATEBLUE",
+      "field": "description",
+      "sourceHash": "sha256:0391a9c9203c020f03208a19b53bc0f0673799511f44795b856fbce35bb66ad6",
+      "text": "以 CSS 颜色 #7B68EE 初始化的不可变 Color 实例。\r<span class=\"colorSwath\" style=\"background: #7B68EE;\"></span>"
+    },
+    {
+      "id": "Color.MEDIUMSPRINGGREEN",
+      "field": "description",
+      "sourceHash": "sha256:841fa7a68e64298b6a8cc262f8b3f45eb5e7f9ee99482c10ccf2236098a6bea4",
+      "text": "以 CSS 颜色 #00FA9A 初始化的不可变 Color 实例。\r<span class=\"colorSwath\" style=\"background: #00FA9A;\"></span>"
+    },
+    {
+      "id": "Color.MEDIUMTURQUOISE",
+      "field": "description",
+      "sourceHash": "sha256:3abf93fcd51df87b68a79cbda3462e63683463993e4fe31a406eb8d7ad046504",
+      "text": "以 CSS 颜色 #48D1CC 初始化的不可变 Color 实例。\r<span class=\"colorSwath\" style=\"background: #48D1CC;\"></span>"
+    },
+    {
+      "id": "Color.MEDIUMVIOLETRED",
+      "field": "description",
+      "sourceHash": "sha256:31b64135080c604c8bcacff66f7f5af8cad415575f6cd9bea857fa19fcff49e2",
+      "text": "以 CSS 颜色 #C71585 初始化的不可变 Color 实例。\r<span class=\"colorSwath\" style=\"background: #C71585;\"></span>"
+    },
+    {
+      "id": "Color.MIDNIGHTBLUE",
+      "field": "description",
+      "sourceHash": "sha256:b13d568d48fb7e59624593fb2dfc61c69a663969eba8603cc66f27c9446a7962",
+      "text": "以 CSS 颜色 #191970 初始化的不可变 Color 实例。\r<span class=\"colorSwath\" style=\"background: #191970;\"></span>"
+    },
+    {
+      "id": "Color.MINTCREAM",
+      "field": "description",
+      "sourceHash": "sha256:d2d465eebd7467e1498414ae8b4e7e2096687d99483c60cf504c0857b1db0879",
+      "text": "以 CSS 颜色 #F5FFFA 初始化的不可变 Color 实例。\r<span class=\"colorSwath\" style=\"background: #F5FFFA;\"></span>"
+    },
+    {
+      "id": "Color.MISTYROSE",
+      "field": "description",
+      "sourceHash": "sha256:2b420b2162b6a0bc528a95ad9b240660d165c0eb9b99fe241811de2f98e54bb2",
+      "text": "以 CSS 颜色 #FFE4E1 初始化的不可变 Color 实例。\r<span class=\"colorSwath\" style=\"background: #FFE4E1;\"></span>"
+    },
+    {
+      "id": "Color.MOCCASIN",
+      "field": "description",
+      "sourceHash": "sha256:ca45f864ca23862e9d3ff45bedb82296b2a050f14a2e34b55783073c68b0eb94",
+      "text": "以 CSS 颜色 #FFE4B5 初始化的不可变 Color 实例。\r<span class=\"colorSwath\" style=\"background: #FFE4B5;\"></span>"
+    },
+    {
+      "id": "Color.mod",
+      "field": "description",
+      "sourceHash": "sha256:b9e47d7ab902f543f790e2657910153d4ca167b8102de568809821a5c76b6c7b",
+      "text": "计算两个 Color 逐分量的模。"
+    },
+    {
+      "id": "Color.mod",
+      "field": "params/left/description",
+      "sourceHash": "sha256:017bd36b28b45f4b2eb6b584f34defb4031637c332a4c5298cc076ba2ed0dc29",
+      "text": "第一个 Color。"
+    },
+    {
+      "id": "Color.mod",
+      "field": "params/right/description",
+      "sourceHash": "sha256:0cad7b4bd5a45c688ea3dc4c2dc801636f8ecb56eceb8d66113e7589fc37028b",
+      "text": "第二个 Color。"
+    },
+    {
+      "id": "Color.multiply",
+      "field": "description",
+      "sourceHash": "sha256:c2a56392012b2b08aa37dfa2c2e14c4c2b9303ef6916e5c586961b8485cd5b93",
+      "text": "计算两个 Color 逐分量的积。"
+    },
+    {
+      "id": "Color.multiply",
+      "field": "params/left/description",
+      "sourceHash": "sha256:017bd36b28b45f4b2eb6b584f34defb4031637c332a4c5298cc076ba2ed0dc29",
+      "text": "第一个 Color。"
+    },
+    {
+      "id": "Color.multiply",
+      "field": "params/right/description",
+      "sourceHash": "sha256:0cad7b4bd5a45c688ea3dc4c2dc801636f8ecb56eceb8d66113e7589fc37028b",
+      "text": "第二个 Color。"
+    },
+    {
+      "id": "Color.multiplyByScalar",
+      "field": "description",
+      "sourceHash": "sha256:588ba76edaadcf9bc4bfc2e6d7a1a2a6a835a66e620c9a56e09c8bf70cbf075f",
+      "text": "将给定 Color 各分量乘以给定标量。"
+    },
+    {
+      "id": "Color.multiplyByScalar",
+      "field": "params/color/description",
+      "sourceHash": "sha256:e6d5a4e975a9570ae436f848fc2a7d47a871376d004238d8d0013842f2c0ea77",
+      "text": "要缩放的 Color。"
+    },
+    {
+      "id": "Color.multiplyByScalar",
+      "field": "params/scalar/description",
+      "sourceHash": "sha256:f947f410a6a05720d667798aca2b64c18c1e125a950a90cc08c10ad49e439a83",
+      "text": "要乘的标量。"
+    },
+    {
+      "id": "Color.NAVAJOWHITE",
+      "field": "description",
+      "sourceHash": "sha256:7e6858d8a6d36cb1eb48ea0c694e88fdbad47b12937d81c42e6fdf1063ddf24b",
+      "text": "以 CSS 颜色 #FFDEAD 初始化的不可变 Color 实例。\r<span class=\"colorSwath\" style=\"background: #FFDEAD;\"></span>"
+    },
+    {
+      "id": "Color.NAVY",
+      "field": "description",
+      "sourceHash": "sha256:ba46b193da86226ec67f2a912fd536fcb534cf577e3b01ab0ed779abd2b81987",
+      "text": "以 CSS 颜色 #000080 初始化的不可变 Color 实例。\r<span class=\"colorSwath\" style=\"background: #000080;\"></span>"
+    },
+    {
+      "id": "Color.OLDLACE",
+      "field": "description",
+      "sourceHash": "sha256:2622196c9f3dce7d10c6ffbea639176d6c1974060be35286653e0c876e11e04c",
+      "text": "以 CSS 颜色 #FDF5E6 初始化的不可变 Color 实例。\r<span class=\"colorSwath\" style=\"background: #FDF5E6;\"></span>"
+    },
+    {
+      "id": "Color.OLIVE",
+      "field": "description",
+      "sourceHash": "sha256:d00b98231d779bcd32c633be7790428c08ba1b739873acb08a29f324e0ffabdd",
+      "text": "以 CSS 颜色 #808000 初始化的不可变 Color 实例。\r<span class=\"colorSwath\" style=\"background: #808000;\"></span>"
+    },
+    {
+      "id": "Color.OLIVEDRAB",
+      "field": "description",
+      "sourceHash": "sha256:6565bac20ae1b71b39b3662799a34e00c75d5c02c6cd21e8a5f11b05c65630bf",
+      "text": "以 CSS 颜色 #6B8E23 初始化的不可变 Color 实例。\r<span class=\"colorSwath\" style=\"background: #6B8E23;\"></span>"
+    },
+    {
+      "id": "Color.ORANGE",
+      "field": "description",
+      "sourceHash": "sha256:f88f95cd86da4bb80cf81c202548c75bf3b96d9d6ec1355674489ecd6f2ac5b5",
+      "text": "以 CSS 颜色 #FFA500 初始化的不可变 Color 实例。\r<span class=\"colorSwath\" style=\"background: #FFA500;\"></span>"
+    },
+    {
+      "id": "Color.ORANGERED",
+      "field": "description",
+      "sourceHash": "sha256:ff80493b4e822d0767fd656b138b2fa713eac8d9d855a96482b7f9cef5d632b3",
+      "text": "以 CSS 颜色 #FF4500 初始化的不可变 Color 实例。\r<span class=\"colorSwath\" style=\"background: #FF4500;\"></span>"
+    },
+    {
+      "id": "Color.ORCHID",
+      "field": "description",
+      "sourceHash": "sha256:f5465083a87a7d61499d99bfd8f041ee3c2e265535caab4d4c37c2238fc533cf",
+      "text": "以 CSS 颜色 #DA70D6 初始化的不可变 Color 实例。\r<span class=\"colorSwath\" style=\"background: #DA70D6;\"></span>"
+    },
+    {
+      "id": "Color.PALEGOLDENROD",
+      "field": "description",
+      "sourceHash": "sha256:d7a9a3b6c9b2293dd563f9ec17b3fd5a34bbbc7f1813c9880d492a68fc33093e",
+      "text": "以 CSS 颜色 #EEE8AA 初始化的不可变 Color 实例。\r<span class=\"colorSwath\" style=\"background: #EEE8AA;\"></span>"
+    },
+    {
+      "id": "Color.PALEGREEN",
+      "field": "description",
+      "sourceHash": "sha256:a627085e783d88f0eaa5c901bc6fcd93ffff90ed8e0a3a247ef7cbf99962f2e6",
+      "text": "以 CSS 颜色 #98FB98 初始化的不可变 Color 实例。\r<span class=\"colorSwath\" style=\"background: #98FB98;\"></span>"
+    },
+    {
+      "id": "Color.PALETURQUOISE",
+      "field": "description",
+      "sourceHash": "sha256:16e92c7e9c099dc144cf53c9aecca343dfe4d6ab9a5d3854b8a09b9158d62812",
+      "text": "以 CSS 颜色 #AFEEEE 初始化的不可变 Color 实例。\r<span class=\"colorSwath\" style=\"background: #AFEEEE;\"></span>"
+    },
+    {
+      "id": "Color.PALEVIOLETRED",
+      "field": "description",
+      "sourceHash": "sha256:5a819462b800e529de559ca2ed844424857e0287c446901c8e812ddac8669136",
+      "text": "以 CSS 颜色 #DB7093 初始化的不可变 Color 实例。\r<span class=\"colorSwath\" style=\"background: #DB7093;\"></span>"
+    },
+    {
+      "id": "Color.PAPAYAWHIP",
+      "field": "description",
+      "sourceHash": "sha256:0bad45bbf01f51b086fe98ecc9a31edfe2236a0baf65db70d6ee9e73622d759a",
+      "text": "以 CSS 颜色 #FFEFD5 初始化的不可变 Color 实例。\r<span class=\"colorSwath\" style=\"background: #FFEFD5;\"></span>"
+    },
+    {
+      "id": "Color.PEACHPUFF",
+      "field": "description",
+      "sourceHash": "sha256:54534e3d25b024044bc462d454603f4a9609c8e5be8cc59223653e88890abd2d",
+      "text": "以 CSS 颜色 #FFDAB9 初始化的不可变 Color 实例。\r<span class=\"colorSwath\" style=\"background: #FFDAB9;\"></span>"
+    },
+    {
+      "id": "Color.PERU",
+      "field": "description",
+      "sourceHash": "sha256:d02ae9561f819c3ccf4e7fbab56a3ab68976b5677fdac93f3bfbe054ca38a275",
+      "text": "以 CSS 颜色 #CD853F 初始化的不可变 Color 实例。\r<span class=\"colorSwath\" style=\"background: #CD853F;\"></span>"
+    },
+    {
+      "id": "Color.PINK",
+      "field": "description",
+      "sourceHash": "sha256:924a7b52331d2d51354fa07e7db99082e4779a3c55bdd96317e70821b35d957c",
+      "text": "以 CSS 颜色 #FFC0CB 初始化的不可变 Color 实例。\r<span class=\"colorSwath\" style=\"background: #FFC0CB;\"></span>"
+    },
+    {
+      "id": "Color.PLUM",
+      "field": "description",
+      "sourceHash": "sha256:dd422056a34f4aae626f8c0f992451300d67ddaf6f89c554764fc11e347d1174",
+      "text": "以 CSS 颜色 #DDA0DD 初始化的不可变 Color 实例。\r<span class=\"colorSwath\" style=\"background: #DDA0DD;\"></span>"
+    },
+    {
+      "id": "Color.POWDERBLUE",
+      "field": "description",
+      "sourceHash": "sha256:2aefd8922bbc0a2b3988acc96c94b80ab8b0ac5449f2a0f62d981734f1489146",
+      "text": "以 CSS 颜色 #B0E0E6 初始化的不可变 Color 实例。\r<span class=\"colorSwath\" style=\"background: #B0E0E6;\"></span>"
+    },
+    {
+      "id": "Color.PURPLE",
+      "field": "description",
+      "sourceHash": "sha256:e1c4d07a357510419e4f6937bf161e349b7afea2598326d98ce8268dd5794daf",
+      "text": "以 CSS 颜色 #800080 初始化的不可变 Color 实例。\r<span class=\"colorSwath\" style=\"background: #800080;\"></span>"
+    },
+    {
+      "id": "Color.RED",
+      "field": "description",
+      "sourceHash": "sha256:4e19a9d737778a5665ea35481a3200a3f827d648ebb14854265c9fdf5265e5c7",
+      "text": "以 CSS 颜色 #FF0000 初始化的不可变 Color 实例。\r<span class=\"colorSwath\" style=\"background: #FF0000;\"></span>"
+    },
+    {
+      "id": "Color.ROSYBROWN",
+      "field": "description",
+      "sourceHash": "sha256:fd165c415f2ec90b95804792e2fb28687e594a9dbce1ac7dd55baab4c037424f",
+      "text": "以 CSS 颜色 #BC8F8F 初始化的不可变 Color 实例。\r<span class=\"colorSwath\" style=\"background: #BC8F8F;\"></span>"
+    },
+    {
+      "id": "Color.ROYALBLUE",
+      "field": "description",
+      "sourceHash": "sha256:7a49527f5dac906894e649b3760299fee29b07acad4c2ed54cd385de7d42d6cf",
+      "text": "以 CSS 颜色 #4169E1 初始化的不可变 Color 实例。\r<span class=\"colorSwath\" style=\"background: #4169E1;\"></span>"
+    },
+    {
+      "id": "Color.SADDLEBROWN",
+      "field": "description",
+      "sourceHash": "sha256:e8e9a0340bab14c6dfcbce6a9125335780079c1399ed31bc397f0ff5d6e59b1e",
+      "text": "以 CSS 颜色 #8B4513 初始化的不可变 Color 实例。\r<span class=\"colorSwath\" style=\"background: #8B4513;\"></span>"
+    },
+    {
+      "id": "Color.SALMON",
+      "field": "description",
+      "sourceHash": "sha256:7805d311dcf2cca31844685f9dc3c949f0e809a298c67991ad57c4a8914cae1d",
+      "text": "以 CSS 颜色 #FA8072 初始化的不可变 Color 实例。\r<span class=\"colorSwath\" style=\"background: #FA8072;\"></span>"
+    },
+    {
+      "id": "Color.SANDYBROWN",
+      "field": "description",
+      "sourceHash": "sha256:b2afd56627d23858c50c172f8fe00db40b7dc737d8f68641dd358f842242f9b0",
+      "text": "以 CSS 颜色 #F4A460 初始化的不可变 Color 实例。\r<span class=\"colorSwath\" style=\"background: #F4A460;\"></span>"
+    },
+    {
+      "id": "Color.SEAGREEN",
+      "field": "description",
+      "sourceHash": "sha256:5fb6299a6e7e1f653183f2c648e746fa34ad286e0de006443d89295e728dbf46",
+      "text": "以 CSS 颜色 #2E8B57 初始化的不可变 Color 实例。\r<span class=\"colorSwath\" style=\"background: #2E8B57;\"></span>"
+    },
+    {
+      "id": "Color.SEASHELL",
+      "field": "description",
+      "sourceHash": "sha256:4f180d02c0e4948d0010dc681bfc46ade37eecd4c71ad6650d07ad124b0346fb",
+      "text": "以 CSS 颜色 #FFF5EE 初始化的不可变 Color 实例。\r<span class=\"colorSwath\" style=\"background: #FFF5EE;\"></span>"
+    },
+    {
+      "id": "Color.SIENNA",
+      "field": "description",
+      "sourceHash": "sha256:a69a03ac338b7efe1cae578d3452fb66b9201f5cffe58a48937e8dd042948838",
+      "text": "以 CSS 颜色 #A0522D 初始化的不可变 Color 实例。\r<span class=\"colorSwath\" style=\"background: #A0522D;\"></span>"
+    },
+    {
+      "id": "Color.SILVER",
+      "field": "description",
+      "sourceHash": "sha256:29365d48ac686368ce4dfe5b1e286489073e25fac55b52a66cfe8641f4f8e87d",
+      "text": "以 CSS 颜色 #C0C0C0 初始化的不可变 Color 实例。\r<span class=\"colorSwath\" style=\"background: #C0C0C0;\"></span>"
+    },
+    {
+      "id": "Color.SKYBLUE",
+      "field": "description",
+      "sourceHash": "sha256:1e8f7760e1c6c65daa3832a8f74b3499a4032d46189b2f75279ee6628b8519ab",
+      "text": "以 CSS 颜色 #87CEEB 初始化的不可变 Color 实例。\r<span class=\"colorSwath\" style=\"background: #87CEEB;\"></span>"
+    },
+    {
+      "id": "Color.SLATEBLUE",
+      "field": "description",
+      "sourceHash": "sha256:0802667ff77631f9afe944fdb5d17723b65dbe39814a27e210e563bb60c7f17a",
+      "text": "以 CSS 颜色 #6A5ACD 初始化的不可变 Color 实例。\r<span class=\"colorSwath\" style=\"background: #6A5ACD;\"></span>"
+    },
+    {
+      "id": "Color.SLATEGRAY",
+      "field": "description",
+      "sourceHash": "sha256:4cf32743efec1d3c09df1675d89c090f964f820507ce35897f08d68f2790bf90",
+      "text": "以 CSS 颜色 #708090 初始化的不可变 Color 实例。\r<span class=\"colorSwath\" style=\"background: #708090;\"></span>"
+    },
+    {
+      "id": "Color.SLATEGREY",
+      "field": "description",
+      "sourceHash": "sha256:4cf32743efec1d3c09df1675d89c090f964f820507ce35897f08d68f2790bf90",
+      "text": "以 CSS 颜色 #708090 初始化的不可变 Color 实例。\r<span class=\"colorSwath\" style=\"background: #708090;\"></span>"
+    },
+    {
+      "id": "Color.SNOW",
+      "field": "description",
+      "sourceHash": "sha256:9c5790175dc61d45431fd087f1968139179f45a78a70d38a6e796c4fe6f2f581",
+      "text": "以 CSS 颜色 #FFFAFA 初始化的不可变 Color 实例。\r<span class=\"colorSwath\" style=\"background: #FFFAFA;\"></span>"
+    },
+    {
+      "id": "Color.SPRINGGREEN",
+      "field": "description",
+      "sourceHash": "sha256:92386744670b8e42e1e66671e1ff1f16d99dcf1dccbf3383085a8b6dcee6a2c8",
+      "text": "以 CSS 颜色 #00FF7F 初始化的不可变 Color 实例。\r<span class=\"colorSwath\" style=\"background: #00FF7F;\"></span>"
+    },
+    {
+      "id": "Color.STEELBLUE",
+      "field": "description",
+      "sourceHash": "sha256:b024c73e765a478fea6e27db62bb750b26a3216cd2ac6bd9bad7c5b857006217",
+      "text": "以 CSS 颜色 #4682B4 初始化的不可变 Color 实例。\r<span class=\"colorSwath\" style=\"background: #4682B4;\"></span>"
+    },
+    {
+      "id": "Color.subtract",
+      "field": "description",
+      "sourceHash": "sha256:2834ced842a40e13f8354aadb338d9f04b875f487731b920a13b7b71dc8b0c28",
+      "text": "计算两个 Color 逐分量的差。"
+    },
+    {
+      "id": "Color.subtract",
+      "field": "params/left/description",
+      "sourceHash": "sha256:017bd36b28b45f4b2eb6b584f34defb4031637c332a4c5298cc076ba2ed0dc29",
+      "text": "第一个 Color。"
+    },
+    {
+      "id": "Color.subtract",
+      "field": "params/right/description",
+      "sourceHash": "sha256:0cad7b4bd5a45c688ea3dc4c2dc801636f8ecb56eceb8d66113e7589fc37028b",
+      "text": "第二个 Color。"
+    },
+    {
+      "id": "Color.TAN",
+      "field": "description",
+      "sourceHash": "sha256:a79a516577cb21410167cd472bc1278758d9f652af0a4ff46fc4aa1152404454",
+      "text": "以 CSS 颜色 #D2B48C 初始化的不可变 Color 实例。\r<span class=\"colorSwath\" style=\"background: #D2B48C;\"></span>"
+    },
+    {
+      "id": "Color.TEAL",
+      "field": "description",
+      "sourceHash": "sha256:66cf60ca364f13f07e68e34fd5868c9c9a091a47fa79b92d2452b0fb44d31cd1",
+      "text": "以 CSS 颜色 #008080 初始化的不可变 Color 实例。\r<span class=\"colorSwath\" style=\"background: #008080;\"></span>"
+    },
+    {
+      "id": "Color.THISTLE",
+      "field": "description",
+      "sourceHash": "sha256:89ae60c55d3e7b2b0781e6b41e6c9515ecbdbb0fac9a42bd44aa9a467ea81265",
+      "text": "以 CSS 颜色 #D8BFD8 初始化的不可变 Color 实例。\r<span class=\"colorSwath\" style=\"background: #D8BFD8;\"></span>"
+    },
+    {
+      "id": "Color.TOMATO",
+      "field": "description",
+      "sourceHash": "sha256:851d82b7d3d1774473c24fdb909c4762324ea1c9528fcc62758cbb5b4a83df80",
+      "text": "以 CSS 颜色 #FF6347 初始化的不可变 Color 实例。\r<span class=\"colorSwath\" style=\"background: #FF6347;\"></span>"
+    },
+    {
+      "id": "Color.TRANSPARENT",
+      "field": "description",
+      "sourceHash": "sha256:165f6334724398438c423079c470001c48923b2d94f86af02b5b62054dac289f",
+      "text": "初始化为 CSS transparent 的不可变 Color 实例。<span class=\"colorSwath\" style=\"background: transparent;\"></span>"
+    },
+    {
+      "id": "Color.TURQUOISE",
+      "field": "description",
+      "sourceHash": "sha256:85ce65bf562e8af97257bd4fb6ff5954ca8573c771a349506f8bcb89487e8ed0",
+      "text": "以 CSS 颜色 #40E0D0 初始化的不可变 Color 实例。\r<span class=\"colorSwath\" style=\"background: #40E0D0;\"></span>"
+    },
+    {
+      "id": "Color.unpack",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:318efef230a969c6ecc9f93d4f017ce48838f346a86f7af827b46fbfb9725220",
+      "text": "修改后的 result 参数；未提供时返回新建的 Color 实例。"
+    },
+    {
+      "id": "Color.VIOLET",
+      "field": "description",
+      "sourceHash": "sha256:98966659c596e9c4d3c4f27ede4823e477bb2f881eb36e66b3ee005412fa14d9",
+      "text": "以 CSS 颜色 #EE82EE 初始化的不可变 Color 实例。\r<span class=\"colorSwath\" style=\"background: #EE82EE;\"></span>"
+    },
+    {
+      "id": "Color.WHEAT",
+      "field": "description",
+      "sourceHash": "sha256:3267b31aa0e67154e772308f8a2d8fe282a0fb94f401acfae3d8c3fc9469fbbd",
+      "text": "以 CSS 颜色 #F5DEB3 初始化的不可变 Color 实例。\r<span class=\"colorSwath\" style=\"background: #F5DEB3;\"></span>"
+    },
+    {
+      "id": "Color.WHITE",
+      "field": "description",
+      "sourceHash": "sha256:43cb833c815b0fe6d9efadecdbcba88eb1616a61bd407734e1a3afc93e7c22b9",
+      "text": "以 CSS 颜色 #FFFFFF 初始化的不可变 Color 实例。\r<span class=\"colorSwath\" style=\"background: #FFFFFF;\"></span>"
+    },
+    {
+      "id": "Color.WHITESMOKE",
+      "field": "description",
+      "sourceHash": "sha256:bb9d2400d0bb49a8def99fc8b45077069e9f70fd14eafb52aa2e512773d2d99a",
+      "text": "以 CSS 颜色 #F5F5F5 初始化的不可变 Color 实例。\r<span class=\"colorSwath\" style=\"background: #F5F5F5;\"></span>"
+    },
+    {
+      "id": "Color.YELLOW",
+      "field": "description",
+      "sourceHash": "sha256:954e4e66a6468adff5173a5d4d9c6d90d26596142b33f73d4c6c79fa82c00a89",
+      "text": "以 CSS 颜色 #FFFF00 初始化的不可变 Color 实例。\r<span class=\"colorSwath\" style=\"background: #FFFF00;\"></span>"
+    },
+    {
+      "id": "Color.YELLOWGREEN",
+      "field": "description",
+      "sourceHash": "sha256:458f71c4d7c3227bd31b49c1ebb6d8f37adf7abd501b55dd1c58275c10c267aa",
+      "text": "以 CSS 颜色 #9ACD32 初始化的不可变 Color 实例。\r<span class=\"colorSwath\" style=\"background: #9ACD32;\"></span>"
+    },
+    {
+      "id": "Color",
+      "field": "params/alpha/description",
+      "sourceHash": "sha256:e2bed0452928b941f3fffd1549d5f874d402cff4175c76166c6206893f1bd7c8",
+      "text": "alpha 分量。"
+    },
+    {
+      "id": "Color",
+      "field": "params/blue/description",
+      "sourceHash": "sha256:15b5577f67ad0846b4071c8e9a258ae45abbba67e4e05e6835a0f85ab68ed5a9",
+      "text": "蓝色分量。"
+    },
+    {
+      "id": "Color",
+      "field": "params/green/description",
+      "sourceHash": "sha256:ab7c7878cf5514b52449d5df3205f401a4a3db3e98058b9878cfc76c796251eb",
+      "text": "绿色分量。"
+    },
+    {
+      "id": "Color",
+      "field": "params/red/description",
+      "sourceHash": "sha256:be130e2f6b7a20aeded0ccd327dc79db7ffd8cca08cc7ef060b1f1ae08307ded",
+      "text": "红色分量。"
+    },
+    {
+      "id": "Color#alpha",
+      "field": "description",
+      "sourceHash": "sha256:e2bed0452928b941f3fffd1549d5f874d402cff4175c76166c6206893f1bd7c8",
+      "text": "alpha 分量。"
+    },
+    {
+      "id": "Color#blue",
+      "field": "description",
+      "sourceHash": "sha256:15b5577f67ad0846b4071c8e9a258ae45abbba67e4e05e6835a0f85ab68ed5a9",
+      "text": "蓝色分量。"
+    },
+    {
+      "id": "Color#brighten",
+      "field": "description",
+      "sourceHash": "sha256:0bfd979e1de90f3ab7702603407e569d7dc576543fd208439035c318486f17c2",
+      "text": "按给定幅度提亮此颜色。"
+    },
+    {
+      "id": "Color#brighten",
+      "field": "params/magnitude/description",
+      "sourceHash": "sha256:b0c96a4fae5b640ff098d524c0dc4a2b560f7b70f541364d2caf57b2679e0ee0",
+      "text": "表示提亮幅度的正数。"
+    },
+    {
+      "id": "Color#clone",
+      "field": "description",
+      "sourceHash": "sha256:3a65dd984e29fde139374d71b55b046214e5b6ce4378c3b11960ad980807493d",
+      "text": "返回 Color 实例的副本。"
+    },
+    {
+      "id": "Color#clone",
+      "field": "params/result/description",
+      "sourceHash": "sha256:afdf71251e0dfe86688e2a9e04462341a8733e062d3bc54cb223ac928dcd6489",
+      "text": "用于保存结果的对象；若为 undefined，则创建新实例。"
+    },
+    {
+      "id": "Color#clone",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:74e3885f0a5efb2f80b1b847fd2364ab4c6843c07578e533b6181c4d293cde39",
+      "text": "修改后的 result 参数；若 result 为 undefined，则返回新实例。"
+    },
+    {
+      "id": "Color#darken",
+      "field": "description",
+      "sourceHash": "sha256:7594149cc1453f92871bf6f5d7f11b7c952326a7ba8d35d8ba4e5aae08bd8cdc",
+      "text": "按给定幅度调暗此颜色。"
+    },
+    {
+      "id": "Color#darken",
+      "field": "params/magnitude/description",
+      "sourceHash": "sha256:2776315075fa34a479cc2f1fdff85139e7060318e1a035c255ee1bc452afe20c",
+      "text": "表示调暗幅度的正数。"
+    },
+    {
+      "id": "Color#equals",
+      "field": "description",
+      "sourceHash": "sha256:4e219fe8c5ae49e8d18422f2234607979bb33b7611a0e2bbe4f344193d01d232",
+      "text": "若此 Color 与 other 相等，则返回 true。"
+    },
+    {
+      "id": "Color#equals",
+      "field": "params/other/description",
+      "sourceHash": "sha256:0208bf8b264b8691c6cfea123dc742b868d96d142ba0a995738e46da32cada64",
+      "text": "参与相等比较的 Color。"
+    },
+    {
+      "id": "Color#equals",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:1e4aeadf94e9492cafded84cb121cf1756e5c3c6c485fddc69a9bd865f928d47",
+      "text": "颜色相等时返回 <code>true</code>，否则返回 <code>false</code>。"
+    },
+    {
+      "id": "Color#equalsEpsilon",
+      "field": "description",
+      "sourceHash": "sha256:c117ebced3d2b54e62606ff5b927ec4b7de5ab3c7ccefeca1751b030124a5056",
+      "text": "若此 Color 与 other 的各分量差异均在指定 epsilon 范围内，则返回 <code>true</code>。"
+    },
+    {
+      "id": "Color#equalsEpsilon",
+      "field": "params/epsilon/description",
+      "sourceHash": "sha256:1ab4d3a4f4ca315af12f39b1b4e64b7ec35e58ae52588c40ff36843a8836cb4b",
+      "text": "相等测试使用的 epsilon 容差。"
+    },
+    {
+      "id": "Color#equalsEpsilon",
+      "field": "params/other/description",
+      "sourceHash": "sha256:0208bf8b264b8691c6cfea123dc742b868d96d142ba0a995738e46da32cada64",
+      "text": "参与相等比较的 Color。"
+    },
+    {
+      "id": "Color#equalsEpsilon",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:10e774b6674f7444a0e603598d0dd96cc12689eaf79896259d6850b6ccff9a2c",
+      "text": "颜色差异在指定 epsilon 范围内时返回 <code>true</code>，否则返回 <code>false</code>。"
+    },
+    {
+      "id": "Color#green",
+      "field": "description",
+      "sourceHash": "sha256:ab7c7878cf5514b52449d5df3205f401a4a3db3e98058b9878cfc76c796251eb",
+      "text": "绿色分量。"
+    },
+    {
+      "id": "Color#red",
+      "field": "description",
+      "sourceHash": "sha256:be130e2f6b7a20aeded0ccd327dc79db7ffd8cca08cc7ef060b1f1ae08307ded",
+      "text": "红色分量。"
+    },
+    {
+      "id": "Color#toBytes",
+      "field": "description",
+      "sourceHash": "sha256:c5575199e20758788498eb126a231458d25d837980c2fc2017604736c1fdf36c",
+      "text": "将此颜色转换为红、绿、蓝和 alpha 数组，值域为 0 至 255。"
+    },
+    {
+      "id": "Color#toBytes",
+      "field": "params/result/description",
+      "sourceHash": "sha256:2057283d1fa0f812aebf087011b4c72e91c291c8c0697da7e374d1624557b77d",
+      "text": "用于保存结果的数组；若为 undefined，则创建新实例。"
+    },
+    {
+      "id": "Color#toBytes",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:74e3885f0a5efb2f80b1b847fd2364ab4c6843c07578e533b6181c4d293cde39",
+      "text": "修改后的 result 参数；若 result 为 undefined，则返回新实例。"
+    },
+    {
+      "id": "Color#toCssColorString",
+      "field": "description",
+      "sourceHash": "sha256:1eb4406059b4d0879ac895eee7b0b370bc1f600d7fbabedb9afaaa59a6b735c0",
+      "text": "创建包含此颜色 CSS 颜色值的字符串。"
+    },
+    {
+      "id": "Color#toCssColorString",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:e347ed58371b20cce26afd243e7764dc8c933a52f1c20f257cf5c43c7fc67288",
+      "text": "与此颜色等价的 CSS 表示。"
+    },
+    {
+      "id": "Color#toCssHexString",
+      "field": "description",
+      "sourceHash": "sha256:d516e630f4c24a9afe300780618f46ab59d524f1e6f52f0f334d7a8fc91fc8c1",
+      "text": "创建包含此颜色 CSS 十六进制颜色值的字符串。"
+    },
+    {
+      "id": "Color#toCssHexString",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:832ee744d26b42edfd7752ce052b9fe7bf3087f147e31e76fabc9bee517b7119",
+      "text": "与此颜色等价的 CSS 十六进制字符串。"
+    },
+    {
+      "id": "Color#toRgba",
+      "field": "description",
+      "sourceHash": "sha256:be5d25c9d22066eaa061bc0e2a415f19539f518b91b6b83bbd17e5512956c582",
+      "text": "按系统字节序，将此颜色转换为单个无符号 32 位 RGBA 数值。"
+    },
+    {
+      "id": "Color#toRgba",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:16d4ae7e41f59a925f25a56e42e368cca0b45dcae588a2ff966ffa25c41038e1",
+      "text": "单个无符号 32 位 RGBA 数值。"
+    },
+    {
+      "id": "Color#toString",
+      "field": "description",
+      "sourceHash": "sha256:d0339a96e8d096565733d5277f0cd72a0a383cf472746f3a09c431894aea906a",
+      "text": "创建以 '(red, green, blue, alpha)' 格式表示此 Color 的字符串。"
+    },
+    {
+      "id": "Color#toString",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:5ec072ccd0e5ee81a5381ba9c68c4d269f6059d686e8554b237dd4a9a3b9d726",
+      "text": "以 '(red, green, blue, alpha)' 格式表示此 Color 的字符串。"
+    },
+    {
+      "id": "Color#withAlpha",
+      "field": "description",
+      "sourceHash": "sha256:b6273e9bd44c1928ebc4728299fd8ff963c96ba9fe0cbaf4930d7e3d146d7676",
+      "text": "创建与此 Color 具有相同红、绿、蓝分量，但使用指定 alpha 值的新 Color。"
+    },
+    {
+      "id": "Color#withAlpha",
+      "field": "params/alpha/description",
+      "sourceHash": "sha256:8cd22db338351b898a94d198f00d6877d8d370420e1c558aec639ceb6de9e8e1",
+      "text": "新的 alpha 分量。"
+    },
+    {
+      "id": "Color#withAlpha",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:318efef230a969c6ecc9f93d4f017ce48838f346a86f7af827b46fbfb9725220",
+      "text": "修改后的 result 参数；未提供时返回新建的 Color 实例。"
+    },
+    {
+      "id": "module:Math.acosClamped",
+      "field": "description",
+      "sourceHash": "sha256:811864ac171179a2ee10adfa3723dbb7c3e7593580f297ef669b03b68b4c1ed6",
+      "text": "计算 <code>Math.acos(value)</code>，但先将 <code>value</code> 限制到 [-1.0, 1.0]，避免返回 NaN。"
+    },
+    {
+      "id": "module:Math.acosClamped",
+      "field": "params/value/description",
+      "sourceHash": "sha256:cc75838ec1696e0bb083d2bc54f999bd88a634f553ac0f6ce642fce4d3b5f558",
+      "text": "要求反余弦的值。"
+    },
+    {
+      "id": "module:Math.acosClamped",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:c8e70390baa672acb911d041513fabae0e6eed057b7e52a8d09294034f6ca38c",
+      "text": "值在 [-1.0, 1.0] 范围内时返回其反余弦；超出范围时，返回较近端点 -1.0 或 1.0 的反余弦。"
+    },
+    {
+      "id": "module:Math.asinClamped",
+      "field": "description",
+      "sourceHash": "sha256:b03c2ad276b028f9d25fac082fb6d6b9b924a1eebbeacbe11af7a6652b4c81bb",
+      "text": "计算 <code>Math.asin(value)</code>，但先将 <code>value</code> 限制到 [-1.0, 1.0]，避免返回 NaN。"
+    },
+    {
+      "id": "module:Math.asinClamped",
+      "field": "params/value/description",
+      "sourceHash": "sha256:2dc01ba3bb9da4b884c2b8e1c95528a887576b41aa7ff1e0fcf2425dc35cbe8c",
+      "text": "要求反正弦的值。"
+    },
+    {
+      "id": "module:Math.asinClamped",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:332c04a71998279a18768da97360ea7f017aa34ec3a35e2c7063b2c05ad336b6",
+      "text": "值在 [-1.0, 1.0] 范围内时返回其反正弦；超出范围时，返回较近端点 -1.0 或 1.0 的反正弦。"
+    },
+    {
+      "id": "module:Math.cbrt",
+      "field": "description",
+      "sourceHash": "sha256:01ebc2e296b2219452f4a46c912374cb66abce4b5f696f6675374f584dfd13ec",
+      "text": "求数值的立方根。若未提供 <code>number</code>，则返回 NaN。"
+    },
+    {
+      "id": "module:Math.cbrt",
+      "field": "params/number/description",
+      "sourceHash": "sha256:314dae3bd8b3156ee00503909327be8db9800fdf295e2290042fbe785ddb6304",
+      "text": "数值。"
+    },
+    {
+      "id": "module:Math.cbrt",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:45192991b556a4afccaecd7d4da71a6c85758d266e8740182ec203e8d23c73d0",
+      "text": "结果。"
+    },
+    {
+      "id": "module:Math.chordLength",
+      "field": "description",
+      "sourceHash": "sha256:5e0870417bb1bd864486a6a7a7279ab84dfc70e93a9f103b7e870c4c2324c1ec",
+      "text": "根据圆半径及两点间夹角求弦长。"
+    },
+    {
+      "id": "module:Math.chordLength",
+      "field": "params/angle/description",
+      "sourceHash": "sha256:37bd11dba6005ca7d703bd96a6c24cbab98732422ff77ab347639523d8a2f2ce",
+      "text": "两点间的夹角。"
+    },
+    {
+      "id": "module:Math.chordLength",
+      "field": "params/radius/description",
+      "sourceHash": "sha256:571a57b0b4407fa9da5106b34f93a9fdc5a2f372d8a3ca7937f31ec6d51b0fc0",
+      "text": "圆半径。"
+    },
+    {
+      "id": "module:Math.chordLength",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:0d086497f6fd7a48466b4c423eb15f3806f62f711f48c8d023de360073823a3f",
+      "text": "弦长。"
+    },
+    {
+      "id": "module:Math.clamp",
+      "field": "description",
+      "sourceHash": "sha256:c1bbf55c9e414bfa7c05b578070687c1dd5326abdbc1e1dc4f196995d57a2d18",
+      "text": "将一个值限制在两个值之间。"
+    },
+    {
+      "id": "module:Math.clamp",
+      "field": "params/max/description",
+      "sourceHash": "sha256:00122463dffebaed9f58dd4dbb51b974ed791492bca0a7d7cbd049409d9b6823",
+      "text": "最大值。"
+    },
+    {
+      "id": "module:Math.clamp",
+      "field": "params/min/description",
+      "sourceHash": "sha256:3533ea3052f13b4c4e78de2ffae002ec07bda1e0a6435f2d6a0d9c1e46d4fa4f",
+      "text": "最小值。"
+    },
+    {
+      "id": "module:Math.clamp",
+      "field": "params/value/description",
+      "sourceHash": "sha256:0d91bc456302ff8c58412b83ad84e147e3625b55b07b5e68084d25236ce50227",
+      "text": "要限制的值。"
+    },
+    {
+      "id": "module:Math.clamp",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:d613b7f7158eecf31728c719b8584809ecbf67db494ca2a8128e3c2a97363e1c",
+      "text": "限制后的值，满足 min <= result <= max。"
+    },
+    {
+      "id": "module:Math.clampToLatitudeRange",
+      "field": "description",
+      "sourceHash": "sha256:9ee34322f61da1537e59494bca184d620f37f52aceea84b600c01fb12e37c1ed",
+      "text": "将以弧度为单位的纬度限制到 [<code>-Math.PI/2</code>, <code>Math.PI/2</code>] 范围的便捷函数。可用于在将数据传给要求有效取值范围的对象之前进行规范化。"
+    },
+    {
+      "id": "module:Math.clampToLatitudeRange",
+      "field": "params/angle/description",
+      "sourceHash": "sha256:ca195ac1256b605af35c4b7b8d203fb9701bf02afd2a1fbff56477ae63a7f09b",
+      "text": "要限制到 [<code>-Math.PI/2</code>, <code>Math.PI/2</code>] 范围的纬度值，单位为弧度。"
+    },
+    {
+      "id": "module:Math.clampToLatitudeRange",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:e8d2b354a7f0c81edcff9fce3591bf499d63c4d6be36784b19bad8cd2d1fff3d",
+      "text": "限制到 [<code>-Math.PI/2</code>, <code>Math.PI/2</code>] 范围后的纬度。"
+    },
+    {
+      "id": "module:Math.convertLongitudeRange",
+      "field": "description",
+      "sourceHash": "sha256:9cde557478d9b43a21820c05cdabfe5086bc3ff4bea222bbd7a49fd15fe2d3e4",
+      "text": "将以弧度为单位的经度转换到 [<code>-Math.PI</code>, <code>Math.PI</code>) 范围。"
+    },
+    {
+      "id": "module:Math.convertLongitudeRange",
+      "field": "params/angle/description",
+      "sourceHash": "sha256:d6a541e339f8ca5c1c7d4b57d5ee8b736077a66bb325b04f4cc4bc0bc6491e6b",
+      "text": "要转换到 [<code>-Math.PI</code>, <code>Math.PI</code>) 范围的经度值，单位为弧度。"
+    },
+    {
+      "id": "module:Math.convertLongitudeRange",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:7031c2953f25c9c4aa841dc992ce6b8dfbdc4e800eb912b70f9237878d90a0e2",
+      "text": "位于 [<code>-Math.PI</code>, <code>Math.PI</code>) 范围内的等价经度。"
+    },
+    {
+      "id": "module:Math.cosh",
+      "field": "description",
+      "sourceHash": "sha256:6c8c86926b4207f2fa104fbe1f195c8bfbb0018d6bb080c8c80a5621817d567a",
+      "text": "返回数值的双曲余弦。<strong>value</strong> 的双曲余弦定义为 (<em>e<sup>x</sup>&nbsp;+&nbsp;e<sup>-x</sup></em>)/2.0，其中 <i>e</i> 为欧拉常数，约等于 2.71828183。<p>特殊情况：<ul><li>参数为 NaN 时，结果为 NaN。</li><li>参数为无穷大时，结果为正无穷大。</li><li>参数为零时，结果为 1.0。</li></ul></p>"
+    },
+    {
+      "id": "module:Math.cosh",
+      "field": "params/value/description",
+      "sourceHash": "sha256:1df617c23b6815fc85946c22510805b4f5b62e317d9caa102fb63138a98b3526",
+      "text": "要求双曲余弦的数值。"
+    },
+    {
+      "id": "module:Math.cosh",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:347c40b2b2df1dd0c9c45288a48f1dbd80cc5cee252e41a7fcfd3a35fbe89e50",
+      "text": "<code>value</code> 的双曲余弦。"
+    },
+    {
+      "id": "module:Math.DEGREES_PER_RADIAN",
+      "field": "description",
+      "sourceHash": "sha256:12720bc91b83ce6f73b35a566af094a4ea3a9c3650f66972058acc024d6c0d4a",
+      "text": "一弧度对应的度数。"
+    },
+    {
+      "id": "module:Math.EPSILON1",
+      "field": "description",
+      "sourceHash": "sha256:14be4b45f18e0d8c67b4f719b5144eee88497e413709d11d85b096d8e2346310",
+      "text": "0.1"
+    },
+    {
+      "id": "module:Math.EPSILON10",
+      "field": "description",
+      "sourceHash": "sha256:1d690720f3619d939e494612017d551ac40adaf47b51d2a4e6d4e21ab9bd5389",
+      "text": "0.0000000001"
+    },
+    {
+      "id": "module:Math.EPSILON11",
+      "field": "description",
+      "sourceHash": "sha256:0791bd227862d9a5c1ee6e951a1f74e14e5b84eeb3262afd99b05c7452a88359",
+      "text": "0.00000000001"
+    },
+    {
+      "id": "module:Math.EPSILON12",
+      "field": "description",
+      "sourceHash": "sha256:cf7853c1809bda331c45ad37e0c720e9929933f67c480011370628ac3ee1c722",
+      "text": "0.000000000001"
+    },
+    {
+      "id": "module:Math.EPSILON13",
+      "field": "description",
+      "sourceHash": "sha256:cd41fdba175eb9b0f4c0fa4d911dbff6c834a8fb00cab0b82ebbb99410765e0e",
+      "text": "0.0000000000001"
+    },
+    {
+      "id": "module:Math.EPSILON14",
+      "field": "description",
+      "sourceHash": "sha256:4e79aaa6faf35501a4380c001ef7b721e515123cd31b041b5ff7227658548bdf",
+      "text": "0.00000000000001"
+    },
+    {
+      "id": "module:Math.EPSILON15",
+      "field": "description",
+      "sourceHash": "sha256:5e31bef9f9d44d6c681805f856d915b935d25f5f3159c2b05d45d9ad15ab35f7",
+      "text": "0.000000000000001"
+    },
+    {
+      "id": "module:Math.EPSILON16",
+      "field": "description",
+      "sourceHash": "sha256:ec4a05d0b5bad53915797006a6af602aff47b903bef9cd7a0398a5d8e488dc2a",
+      "text": "0.0000000000000001"
+    },
+    {
+      "id": "module:Math.EPSILON17",
+      "field": "description",
+      "sourceHash": "sha256:678e0b73b6ec6e415efd6538480919a37adcbdc13102769fdd51fa70e9819ffe",
+      "text": "0.00000000000000001"
+    },
+    {
+      "id": "module:Math.EPSILON18",
+      "field": "description",
+      "sourceHash": "sha256:20e5873c64250bf4bc8ab9bfb7f8c93900cabc04225f5f9f7738b9c417eca6d8",
+      "text": "0.000000000000000001"
+    },
+    {
+      "id": "module:Math.EPSILON19",
+      "field": "description",
+      "sourceHash": "sha256:e780fc5e8b448fa312201c99ba98de73e87b8fb0fbfc5c6f5ccfebeaed3da2cc",
+      "text": "0.0000000000000000001"
+    },
+    {
+      "id": "module:Math.EPSILON2",
+      "field": "description",
+      "sourceHash": "sha256:312b95ee5a344d2f7a16ad817ff70788980da6e30b9bb04b651d53847abd476f",
+      "text": "0.01"
+    },
+    {
+      "id": "module:Math.EPSILON20",
+      "field": "description",
+      "sourceHash": "sha256:4f4764cda112b2ea7f5a906b5a29fb32f6621f0d5ed560e99463a512b4fd70d7",
+      "text": "0.00000000000000000001"
+    },
+    {
+      "id": "module:Math.EPSILON21",
+      "field": "description",
+      "sourceHash": "sha256:2a293eca16732272610b9205cd77ab046d8858c2c042516ac9fb7c7f88298955",
+      "text": "0.000000000000000000001"
+    },
+    {
+      "id": "module:Math.EPSILON3",
+      "field": "description",
+      "sourceHash": "sha256:9fca51987c96ba92d35f303353b7065f31114501c9f2afa37463ff1fdffe8f1f",
+      "text": "0.001"
+    },
+    {
+      "id": "module:Math.EPSILON4",
+      "field": "description",
+      "sourceHash": "sha256:e539aebac7fd2ed8aba8854fedeaa65436962f8ee1c82341b394698f085b6496",
+      "text": "0.0001"
+    },
+    {
+      "id": "module:Math.EPSILON5",
+      "field": "description",
+      "sourceHash": "sha256:661710915adfa7c40b5dbd6b2122dfa65b1accb57a8b7cdee05423ecfe14b0c7",
+      "text": "0.00001"
+    },
+    {
+      "id": "module:Math.EPSILON6",
+      "field": "description",
+      "sourceHash": "sha256:159fb29a827ad04b260aa6c8ab6d8637f8f2b38af5c4f3cb49d6a21205e040f8",
+      "text": "0.000001"
+    },
+    {
+      "id": "module:Math.EPSILON7",
+      "field": "description",
+      "sourceHash": "sha256:4035c4eedb2f0cf061cb4aedac998085c68fc1a1f5a3cc5de86c5086ba770324",
+      "text": "0.0000001"
+    },
+    {
+      "id": "module:Math.EPSILON8",
+      "field": "description",
+      "sourceHash": "sha256:6d77335c4f23474034476816f9e962b194a4afe26f6f67579aa76d39bcb3a740",
+      "text": "0.00000001"
+    },
+    {
+      "id": "module:Math.EPSILON9",
+      "field": "description",
+      "sourceHash": "sha256:ae3fdeaf56f735e69a5c9d94bdc88a96b09e9df59cc806e2b153f5c1f39fc733",
+      "text": "0.000000001"
+    },
+    {
+      "id": "module:Math.equalsEpsilon",
+      "field": "description",
+      "sourceHash": "sha256:e01464d85fbe65ee4dba02d1ac61f4d6a93d22b19c1174d5b5f1db691cfbed97",
+      "text": "通过绝对或相对容差测试判断两个值是否相等，可避免直接比较浮点值产生的舍入误差问题。先进行绝对容差测试，未通过时再进行相对容差测试。若不确定 left 和 right 的数量级，可使用此测试。"
+    },
+    {
+      "id": "module:Math.equalsEpsilon",
+      "field": "params/absoluteEpsilon/description",
+      "sourceHash": "sha256:e292fae5478861d9e2afcd9adbe092207988574b755c96a843f85256b1613db1",
+      "text": "绝对容差测试中，<code>left</code> 与 <code>right</code> 允许的最大差值，包含边界。"
+    },
+    {
+      "id": "module:Math.equalsEpsilon",
+      "field": "params/left/description",
+      "sourceHash": "sha256:76afac71a074a58d6cf2bbee6a362e16b88f9a193ff962c7a36b4206b499fb47",
+      "text": "参与比较的第一个值。"
+    },
+    {
+      "id": "module:Math.equalsEpsilon",
+      "field": "params/relativeEpsilon/description",
+      "sourceHash": "sha256:076636690e74785bbb3c15ae0571579c3f0b305155d0aca67d5dbcf76148d23a",
+      "text": "相对容差测试中，<code>left</code> 与 <code>right</code> 允许的最大差值，包含边界。"
+    },
+    {
+      "id": "module:Math.equalsEpsilon",
+      "field": "params/right/description",
+      "sourceHash": "sha256:a7fc28017abf4d215e62747ae9e0da72062e56be0d6c5cc9d046c7d665eeeb24",
+      "text": "参与比较的另一个值。"
+    },
+    {
+      "id": "module:Math.equalsEpsilon",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:7e6170f6b2a3d38ee90c9a55b1c74b74ba73d102de0844e885eaeaf2e7b6cbcc",
+      "text": "值的差异在 epsilon 范围内时返回 <code>true</code>，否则返回 <code>false</code>。"
+    },
+    {
+      "id": "module:Math.factorial",
+      "field": "description",
+      "sourceHash": "sha256:cdc991d298848eb86093f7e89547c552c73738008e008c2e5f49f37e5d73ae87",
+      "text": "计算给定数的阶乘。"
+    },
+    {
+      "id": "module:Math.factorial",
+      "field": "exceptions/0/description",
+      "sourceHash": "sha256:d24a52e3e54c34a3f2ebf36b91481e62c5c6c758bfb98d723242d90609123d89",
+      "text": "必须提供大于等于 0 的数。"
+    },
+    {
+      "id": "module:Math.factorial",
+      "field": "params/n/description",
+      "sourceHash": "sha256:1c78aeba59cd663c9309e3ba4b3a5ca65edf9af3fe4f1b82520a80b9be649d75",
+      "text": "要求阶乘的数。"
+    },
+    {
+      "id": "module:Math.factorial",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:6ecf284bff8377cd6fed8f7e7bb9264d91dc1d1b82b57b44269f28da1a644ac9",
+      "text": "给定数的阶乘；若该数小于 0，则返回 undefined。"
+    },
+    {
+      "id": "module:Math.fastApproximateAtan",
+      "field": "description",
+      "sourceHash": "sha256:7123acedcd5ecfe1a835bbdf424311a3a2c119ca6712b878d7cb4fed4f442c4a",
+      "text": "计算 [-1, 1] 范围输入的快速反正切近似值。基于 ShaderFastLibs 中 Michal Drobot 的近似方法，后者基于 Rajan、S.、Sichun Wang、Inkol、R.、Joyal、A. 于 2006 年 5 月发表的《反正切函数的高效近似》。根据 MIT 许可证从 ShaderFastLibs 改编。"
+    },
+    {
+      "id": "module:Math.fastApproximateAtan",
+      "field": "params/x/description",
+      "sourceHash": "sha256:ea5227697345e8b6e7ad6c4b1b1ce478bc09f320d5efa59a113c3cdd50e613c8",
+      "text": "范围为 [-1, 1] 的输入数值。"
+    },
+    {
+      "id": "module:Math.fastApproximateAtan",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:bc4301f549bcaabad507b9e9d943be4184c9ca461ead4222c9f40c43c58f5bcd",
+      "text": "atan(x) 的近似值。"
+    },
+    {
+      "id": "module:Math.fastApproximateAtan2",
+      "field": "description",
+      "sourceHash": "sha256:13fdbf7ea7e1c295517b7cfd83de83a89385d78a97a8e667bc65db0a14c6404c",
+      "text": "对任意输入标量计算 Atan2(x, y) 的快速近似值。范围归约计算基于 NVIDIA 的 Cg 参考实现：http://developer.download.nvidia.com/cg/atan2.html"
+    },
+    {
+      "id": "module:Math.fastApproximateAtan2",
+      "field": "params/x/description",
+      "sourceHash": "sha256:b66dd9a49478c1d76554df0719083c72981b59773b3e07f3bbf8edac71b59fa3",
+      "text": "输入数值；若 y 为零，则 x 不能为零。"
+    },
+    {
+      "id": "module:Math.fastApproximateAtan2",
+      "field": "params/y/description",
+      "sourceHash": "sha256:042a6fa2e85a4e2f71fc8e572c1bcd6956e8e705c166559d4ef3b24b16be13cc",
+      "text": "输入数值；若 x 为零，则 y 不能为零。"
+    },
+    {
+      "id": "module:Math.fastApproximateAtan2",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:ebc6b7d9b1fa67ccb145b6026d635926db043889fdfbe98f3148a8fd73151964",
+      "text": "atan2(x, y) 的近似值。"
+    },
+    {
+      "id": "module:Math.FOUR_GIGABYTES",
+      "field": "description",
+      "sourceHash": "sha256:52921820a57170be4a2891b91c3eb3befc537dc36f04d3ebee18ac9702f67282",
+      "text": "4 * 1024 * 1024 * 1024"
+    },
+    {
+      "id": "module:Math.fromSNorm",
+      "field": "description",
+      "sourceHash": "sha256:93cf2a2ff6adb9be74b6eed1595004ce58e6e20eab044782871741482fba0a5c",
+      "text": "将 [0, rangeMaximum] 范围内的 SNORM 值转换为 [-1.0, 1.0] 范围内的标量。"
+    },
+    {
+      "id": "module:Math.fromSNorm",
+      "field": "params/rangeMaximum/description",
+      "sourceHash": "sha256:b3aec453114a2a0c55b1dc5c19d321501b18e0220b69adf2b7a4785d3c6e7d1b",
+      "text": "SNORM 范围的最大值，默认为 255。"
+    },
+    {
+      "id": "module:Math.fromSNorm",
+      "field": "params/value/description",
+      "sourceHash": "sha256:47815a9598e21e02c528d45f855ec4b08683d89e2a0dfa6d18881f7f378695c6",
+      "text": "位于 [0, rangeMaximum] 范围内的 SNORM 值。"
+    },
+    {
+      "id": "module:Math.fromSNorm",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:21cc2ecf476693f15b1d2064a3e4eff05d4756415f5560bf5885fa8792bc1e96",
+      "text": "范围为 [-1.0, 1.0] 的标量。"
+    },
+    {
+      "id": "module:Math.GRAVITATIONALPARAMETER",
+      "field": "description",
+      "sourceHash": "sha256:282e70967ad48a1a213100e0205c0ee307d1b0433c22caae3a3683c14dcf1bf8",
+      "text": "WGS84 模型定义的地球引力参数，单位为立方米每平方秒，值为 3.986004418e14。"
+    },
+    {
+      "id": "module:Math.greaterThan",
+      "field": "description",
+      "sourceHash": "sha256:57745fb3581475301feed336381782d22ead8166f54979d236ea09d119decbb7",
+      "text": "判断左值是否大于右值。若两值相差不超过 <code>absoluteEpsilon</code>，则视为相等，此函数返回 false。"
+    },
+    {
+      "id": "module:Math.greaterThan",
+      "field": "params/absoluteEpsilon/description",
+      "sourceHash": "sha256:b52d085eee105d52e34efdc8ea4f35d14206126e1c20625ec142d6730d7b21f7",
+      "text": "比较使用的绝对 epsilon 容差。"
+    },
+    {
+      "id": "module:Math.greaterThan",
+      "field": "params/left/description",
+      "sourceHash": "sha256:593529ea651436514a2c73073a030662ca32704375383de2152d25c287ef07d4",
+      "text": "参与比较的第一个数。"
+    },
+    {
+      "id": "module:Math.greaterThan",
+      "field": "params/right/description",
+      "sourceHash": "sha256:8eb67af2b5da2c01a1a1d368eee26d15f338047567dbacc35c4b1eddf0494a1d",
+      "text": "参与比较的第二个数。"
+    },
+    {
+      "id": "module:Math.greaterThan",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:dfe018e70d7e337aeb8e1b24b39c8e19887fc41c6ce6f3a42c18079635afb086",
+      "text": "<code>true</code> 表示 <code>left</code> 比 <code>right</code> 大，且差值超过 <code>absoluteEpsilon<code>. <code>false</code> 表示 <code>left</code> 较小或两值近似相等。"
+    },
+    {
+      "id": "module:Math.greaterThanOrEquals",
+      "field": "description",
+      "sourceHash": "sha256:eb800da4f5dc6b5c22a9fbed1346a00ea2acdcd5db90479a58e9d3d65cfe913c",
+      "text": "判断左值是否大于等于右值。若两值相差不超过 <code>absoluteEpsilon</code>，则视为相等，此函数返回 true。"
+    },
+    {
+      "id": "module:Math.greaterThanOrEquals",
+      "field": "params/absoluteEpsilon/description",
+      "sourceHash": "sha256:b52d085eee105d52e34efdc8ea4f35d14206126e1c20625ec142d6730d7b21f7",
+      "text": "比较使用的绝对 epsilon 容差。"
+    },
+    {
+      "id": "module:Math.greaterThanOrEquals",
+      "field": "params/left/description",
+      "sourceHash": "sha256:593529ea651436514a2c73073a030662ca32704375383de2152d25c287ef07d4",
+      "text": "参与比较的第一个数。"
+    },
+    {
+      "id": "module:Math.greaterThanOrEquals",
+      "field": "params/right/description",
+      "sourceHash": "sha256:8eb67af2b5da2c01a1a1d368eee26d15f338047567dbacc35c4b1eddf0494a1d",
+      "text": "参与比较的第二个数。"
+    },
+    {
+      "id": "module:Math.greaterThanOrEquals",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:8dd155526d89ce12f6fd1bfe2b8690f7804e953bd9690c6d2d37e1ee53f5be57",
+      "text": "若 <code>left</code> 大于 <code>right</code>，或两值近似相等，则返回 <code>true</code>。"
+    },
+    {
+      "id": "module:Math.incrementWrap",
+      "field": "description",
+      "sourceHash": "sha256:e6fc9106e130264597178976ca47f38207b049b7d21249af2d8598584a29e72a",
+      "text": "对数值递增；超过最大值时回绕至最小值。"
+    },
+    {
+      "id": "module:Math.incrementWrap",
+      "field": "exceptions/0/description",
+      "sourceHash": "sha256:7a887fa85b065d9cbdcea881508fc7bcb69da6f5a339c04578e9c1fa0bf6e8d6",
+      "text": "最大值必须大于最小值。"
+    },
+    {
+      "id": "module:Math.incrementWrap",
+      "field": "params/maximumValue/description",
+      "sourceHash": "sha256:5f992469f1795d04842b665830d0ad41839ba043b01e926138e25fe7ed757cf2",
+      "text": "回绕至最小值之前允许的最大递增值。"
+    },
+    {
+      "id": "module:Math.incrementWrap",
+      "field": "params/minimumValue/description",
+      "sourceHash": "sha256:7e869e11f921789ffea731a4da77983e51bfc0143656c2c5452d5cc1eb001401",
+      "text": "超过最大值后重置到的数值。"
+    },
+    {
+      "id": "module:Math.incrementWrap",
+      "field": "params/n/description",
+      "sourceHash": "sha256:29f86714195dca9f1557644c273727065fb11dc480e8cc9b78bbd9a9167281fc",
+      "text": "要递增的数值。"
+    },
+    {
+      "id": "module:Math.incrementWrap",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:f3c43be7540290627627cd8dd20d8c1936df6d93dbb90ab128c3e8e286efc328",
+      "text": "递增后的数值。"
+    },
+    {
+      "id": "module:Math.isPowerOfTwo",
+      "field": "description",
+      "sourceHash": "sha256:4fbf7e6d5508ee3e3e14433f6a5f9fe943f6f6c3180a0a5a676e983b5cc2e533",
+      "text": "判断非负整数是否为 2 的幂。受 JavaScript 32 位位运算限制，允许的最大输入为 (2^32)-1。"
+    },
+    {
+      "id": "module:Math.isPowerOfTwo",
+      "field": "exceptions/0/description",
+      "sourceHash": "sha256:7a8ca4083913b657b878f3db90651800c5c08e059eec3b651c66ad2e9a577939",
+      "text": "必须提供 0 至 (2^32)-1 范围内的数。"
+    },
+    {
+      "id": "module:Math.isPowerOfTwo",
+      "field": "params/n/description",
+      "sourceHash": "sha256:7f70a5f3b9b11e778e079be9f8fac77d220bbc7a6aa481e2388a3165c1f1d12f",
+      "text": "要测试的整数，范围为 [0, (2^32)-1]。"
+    },
+    {
+      "id": "module:Math.isPowerOfTwo",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:cf0512ca74c95b7bafb18651e5dd9d500a3b7ce5b9af68690728e59f07afbe3a",
+      "text": "若该数为 2 的幂，则返回 <code>true</code>；否则返回 <code>false</code>。"
+    },
+    {
+      "id": "module:Math.lerp",
+      "field": "description",
+      "sourceHash": "sha256:43a3b4e19f0b8147e4db8df984c87ee18a190999de518aa39634d01226b1e327",
+      "text": "计算两个值的线性插值。"
+    },
+    {
+      "id": "module:Math.lerp",
+      "field": "params/p/description",
+      "sourceHash": "sha256:07e74dbf8c3a0f4fab75db84d79ee873a12a5bd54c84b4c65d9ee43d4cf96208",
+      "text": "插值起始值。"
+    },
+    {
+      "id": "module:Math.lerp",
+      "field": "params/q/description",
+      "sourceHash": "sha256:a4f15ca9f8cfee88583240a1bc3d85a91f4c8cf6a9f003d797183afb71ac2554",
+      "text": "插值结束值。"
+    },
+    {
+      "id": "module:Math.lerp",
+      "field": "params/time/description",
+      "sourceHash": "sha256:096c0d8f290fefc6efef61d94745ad8cf9cf275841f12b039644f84b359625a7",
+      "text": "插值时间，通常在 <code>[0.0, 1.0]</code> 范围内。"
+    },
+    {
+      "id": "module:Math.lerp",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:fc2c399b37e16e206d308a7a5e4e464730846e31b4d42ad325126c2f1b71a8bc",
+      "text": "线性插值后的值。"
+    },
+    {
+      "id": "module:Math.lessThan",
+      "field": "description",
+      "sourceHash": "sha256:10ea85b49079f0e633a8297a3631e9df2f5119728d1e2dd626bb49596313072e",
+      "text": "判断左值是否小于右值。若两值相差不超过 <code>absoluteEpsilon</code>，则视为相等，此函数返回 false。"
+    },
+    {
+      "id": "module:Math.lessThan",
+      "field": "params/absoluteEpsilon/description",
+      "sourceHash": "sha256:b52d085eee105d52e34efdc8ea4f35d14206126e1c20625ec142d6730d7b21f7",
+      "text": "比较使用的绝对 epsilon 容差。"
+    },
+    {
+      "id": "module:Math.lessThan",
+      "field": "params/left/description",
+      "sourceHash": "sha256:593529ea651436514a2c73073a030662ca32704375383de2152d25c287ef07d4",
+      "text": "参与比较的第一个数。"
+    },
+    {
+      "id": "module:Math.lessThan",
+      "field": "params/right/description",
+      "sourceHash": "sha256:8eb67af2b5da2c01a1a1d368eee26d15f338047567dbacc35c4b1eddf0494a1d",
+      "text": "参与比较的第二个数。"
+    },
+    {
+      "id": "module:Math.lessThan",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:ee51f4b19786bf10a9bf63eddab05d20012bb4fbafacaac3641e2c9eb4cfbad8",
+      "text": "<code>true</code> 表示 <code>left</code> 比 <code>right</code> 小，且差值超过 <code>absoluteEpsilon<code>. <code>false</code> 表示 <code>left</code> 较大或两值近似相等。"
+    },
+    {
+      "id": "module:Math.lessThanOrEquals",
+      "field": "description",
+      "sourceHash": "sha256:ae614bfd0cb800c72abb6dcc367b42fd91344b74db69b6746df794c339d624b0",
+      "text": "判断左值是否小于等于右值。若两值相差不超过 <code>absoluteEpsilon</code>，则视为相等，此函数返回 true。"
+    },
+    {
+      "id": "module:Math.lessThanOrEquals",
+      "field": "params/absoluteEpsilon/description",
+      "sourceHash": "sha256:b52d085eee105d52e34efdc8ea4f35d14206126e1c20625ec142d6730d7b21f7",
+      "text": "比较使用的绝对 epsilon 容差。"
+    },
+    {
+      "id": "module:Math.lessThanOrEquals",
+      "field": "params/left/description",
+      "sourceHash": "sha256:593529ea651436514a2c73073a030662ca32704375383de2152d25c287ef07d4",
+      "text": "参与比较的第一个数。"
+    },
+    {
+      "id": "module:Math.lessThanOrEquals",
+      "field": "params/right/description",
+      "sourceHash": "sha256:8eb67af2b5da2c01a1a1d368eee26d15f338047567dbacc35c4b1eddf0494a1d",
+      "text": "参与比较的第二个数。"
+    },
+    {
+      "id": "module:Math.lessThanOrEquals",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:b50d532da49af9d6e056f04315bc71eae0316362c2d58a7ad3a1794136a70bea",
+      "text": "若 <code>left</code> 小于 <code>right</code>，或两值近似相等，则返回 <code>true</code>。"
+    },
+    {
+      "id": "module:Math.log2",
+      "field": "description",
+      "sourceHash": "sha256:59b1df642598cbba962ce8ec654db7b26df59d94a5f42dd569e4af3b00851c8d",
+      "text": "求以 2 为底的对数。"
+    },
+    {
+      "id": "module:Math.log2",
+      "field": "params/number/description",
+      "sourceHash": "sha256:314dae3bd8b3156ee00503909327be8db9800fdf295e2290042fbe785ddb6304",
+      "text": "数值。"
+    },
+    {
+      "id": "module:Math.log2",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:45192991b556a4afccaecd7d4da71a6c85758d266e8740182ec203e8d23c73d0",
+      "text": "结果。"
+    },
+    {
+      "id": "module:Math.logBase",
+      "field": "description",
+      "sourceHash": "sha256:cf583bdc04ae02f883c10173a8c1b9d61befbee1804c3f00bd9fb8f1775c3644",
+      "text": "求指定底数的对数。"
+    },
+    {
+      "id": "module:Math.logBase",
+      "field": "params/base/description",
+      "sourceHash": "sha256:b704c9f947c8010332ebb3729d7031c8fdf5ff73d647f6e7025108f3208ceaf2",
+      "text": "底数。"
+    },
+    {
+      "id": "module:Math.logBase",
+      "field": "params/number/description",
+      "sourceHash": "sha256:314dae3bd8b3156ee00503909327be8db9800fdf295e2290042fbe785ddb6304",
+      "text": "数值。"
+    },
+    {
+      "id": "module:Math.logBase",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:45192991b556a4afccaecd7d4da71a6c85758d266e8740182ec203e8d23c73d0",
+      "text": "结果。"
+    },
+    {
+      "id": "module:Math.LUNAR_RADIUS",
+      "field": "description",
+      "sourceHash": "sha256:082d0a1f7dcdba26f032710cbc0150e0fa77f9209a8a3edd5af8d8c66194f7ad",
+      "text": "月球平均半径，依据《IAU/IAG 行星和卫星制图坐标及自转要素工作组报告：2000》，发表于 Celestial Mechanics 82: 83-110，2002 年。"
+    },
+    {
+      "id": "module:Math.mod",
+      "field": "description",
+      "sourceHash": "sha256:2adb626312714d3a03ddf63b0a18c8e0d1f4a8b13458c8eb0be70bdabadfc4f9",
+      "text": "对负被除数也适用的取模运算。"
+    },
+    {
+      "id": "module:Math.mod",
+      "field": "params/m/description",
+      "sourceHash": "sha256:79e289ffb4ffdd7a22e37d0a3c9c940eaee011202d850dde0e8c377b7f2968a9",
+      "text": "被除数。"
+    },
+    {
+      "id": "module:Math.mod",
+      "field": "params/n/description",
+      "sourceHash": "sha256:288cd8bc1e5238a42d261d7bd65a26215905fd9da57195e3cf957b76a1e5563d",
+      "text": "除数。"
+    },
+    {
+      "id": "module:Math.mod",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:edb6ef053294b8676db01eea7a74cc6ca2cd5ec00b22f9b7874445faa016f0d8",
+      "text": "余数。"
+    },
+    {
+      "id": "module:Math.negativePiToPi",
+      "field": "description",
+      "sourceHash": "sha256:6024172b6c49f709222297eba5c8684e2b6ff8545e830428323098352cb1260e",
+      "text": "生成与给定角度等价、范围为 -Pi <= angle <= Pi 的角度。"
+    },
+    {
+      "id": "module:Math.negativePiToPi",
+      "field": "params/angle/description",
+      "sourceHash": "sha256:c2d1c9b6126500305e3ddf9669a0bc859c030437203ba2330aec6fecc71a4e24",
+      "text": "单位为弧度。"
+    },
+    {
+      "id": "module:Math.negativePiToPi",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:3417b0f3a9f707ec9dcfde080e32c3c4cb0ccfa916c36dba9f7f9b55d0450608",
+      "text": "范围为 [<code>-CesiumMath.PI</code>, <code>CesiumMath.PI</code>] 的角度。"
+    },
+    {
+      "id": "module:Math.nextPowerOfTwo",
+      "field": "description",
+      "sourceHash": "sha256:914f728d21e44f17ed34f26684629a01e80e7207cd0e8500ce7caf166c3111ef",
+      "text": "计算大于等于给定非负整数的下一个 2 的幂整数。受 JavaScript 32 位位运算限制，允许的最大输入为 2^31。"
+    },
+    {
+      "id": "module:Math.nextPowerOfTwo",
+      "field": "exceptions/0/description",
+      "sourceHash": "sha256:b8b3a221fbfe4e1dbfb2fa919b53b329f3f01d6c570cea2c6f7bcf001a2863d0",
+      "text": "必须提供 0 至 2^31 范围内的数。"
+    },
+    {
+      "id": "module:Math.nextPowerOfTwo",
+      "field": "params/n/description",
+      "sourceHash": "sha256:ae4e79b1fdb53d430eebb32ee57bd898704c8b33e18a149d312a3c1f97c09395",
+      "text": "要测试的整数，范围为 [0, 2^31]。"
+    },
+    {
+      "id": "module:Math.nextPowerOfTwo",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:c37062ab33078130fd5b3b9bb4a657018a649bc47d79a99458fcd4cda7024357",
+      "text": "下一个 2 的幂整数。"
+    },
+    {
+      "id": "module:Math.nextRandomNumber",
+      "field": "description",
+      "sourceHash": "sha256:eaffadf1967b84991534e79fe278208663ea659e8b39ee24398c9cac4099eda6",
+      "text": "使用梅森旋转算法生成 [0.0, 1.0) 范围内的随机浮点数。"
+    },
+    {
+      "id": "module:Math.nextRandomNumber",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:ad4d0927b4a203a10fc2752fc5c0cd7085c6290f8e452b4a8c95c302d9e5b224",
+      "text": "范围为 [0.0, 1.0) 的随机数。"
+    },
+    {
+      "id": "module:Math.normalize",
+      "field": "description",
+      "sourceHash": "sha256:03fd4c6dc801dd8ec0de8186e7cf26de743941459aae2afb250ec41658cf553e",
+      "text": "将 [rangeMinimum, rangeMaximum] 范围内的标量转换为 [0.0, 1.0] 范围内的标量。"
+    },
+    {
+      "id": "module:Math.normalize",
+      "field": "params/rangeMaximum/description",
+      "sourceHash": "sha256:2e4b23eb0832aeb06af17bf845a34746dfee7b7aa61b59385e070b5d4645a9eb",
+      "text": "映射范围的最大值。"
+    },
+    {
+      "id": "module:Math.normalize",
+      "field": "params/rangeMinimum/description",
+      "sourceHash": "sha256:1faf2ebf0a8521c5062304d6e9b708638f869400f6478a722812fe6a03aabf22",
+      "text": "映射范围的最小值。"
+    },
+    {
+      "id": "module:Math.normalize",
+      "field": "params/value/description",
+      "sourceHash": "sha256:c0b39fa8df8a2939e75422e4fcf15f44197f9e6528bc4b927316ffb885e3463e",
+      "text": "位于 [rangeMinimum, rangeMaximum] 范围内的标量。"
+    },
+    {
+      "id": "module:Math.normalize",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:5f93eb447ec770c273da4d8ccbca1986856c893a6da556fd0832fa90eb169a92",
+      "text": "标量值，其中 rangeMinimum 映射到 0.0，rangeMaximum 映射到 1.0。"
+    },
+    {
+      "id": "module:Math.ONE_OVER_PI",
+      "field": "description",
+      "sourceHash": "sha256:519e1f8291e797f9cfd4bd62606b9947cf2f9e6bd17e37ef70df4b2733f5b181",
+      "text": "1/pi"
+    },
+    {
+      "id": "module:Math.ONE_OVER_TWO_PI",
+      "field": "description",
+      "sourceHash": "sha256:ef70051455a7c81794f1cc0283df61e291e1a31d33d447bdabb59ffb692e515b",
+      "text": "1/2pi"
+    },
+    {
+      "id": "module:Math.PI_OVER_FOUR",
+      "field": "description",
+      "sourceHash": "sha256:689aab562781c810b393df19cb4bca43ebd70eadad5fe995bd2ef98d7d313259",
+      "text": "pi/4"
+    },
+    {
+      "id": "module:Math.PI_OVER_SIX",
+      "field": "description",
+      "sourceHash": "sha256:3b578d93a59f7bd0d94b5d30b5ebb6571bd70ae57745e954e5f4c24c2aacc155",
+      "text": "pi/6"
+    },
+    {
+      "id": "module:Math.PI_OVER_THREE",
+      "field": "description",
+      "sourceHash": "sha256:52b99a37e423ba60b4bef94a576f14733f5412a9e272a0f1790f2f792c738622",
+      "text": "pi/3"
+    },
+    {
+      "id": "module:Math.PI_OVER_TWO",
+      "field": "description",
+      "sourceHash": "sha256:890e749bd6cbcfd6fe6c9e9d05e7274afcfc9a9b3606ce6f9309b22d9e95c1cc",
+      "text": "pi/2"
+    },
+    {
+      "id": "module:Math.PI",
+      "field": "description",
+      "sourceHash": "sha256:85b42e1702877c851eb7412fe958c8fb447c3207b4798fadab42ea8539046ce1",
+      "text": "pi"
+    },
+    {
+      "id": "module:Math.previousPowerOfTwo",
+      "field": "description",
+      "sourceHash": "sha256:04582ebea1c1cffa1e7cfb685780909d1678a08f7894ea78cd53612e3d1f72de",
+      "text": "计算小于等于给定非负整数的上一个 2 的幂整数。受 JavaScript 32 位位运算限制，允许的最大输入为 (2^32)-1。"
+    },
+    {
+      "id": "module:Math.previousPowerOfTwo",
+      "field": "exceptions/0/description",
+      "sourceHash": "sha256:7a8ca4083913b657b878f3db90651800c5c08e059eec3b651c66ad2e9a577939",
+      "text": "必须提供 0 至 (2^32)-1 范围内的数。"
+    },
+    {
+      "id": "module:Math.previousPowerOfTwo",
+      "field": "params/n/description",
+      "sourceHash": "sha256:7f70a5f3b9b11e778e079be9f8fac77d220bbc7a6aa481e2388a3165c1f1d12f",
+      "text": "要测试的整数，范围为 [0, (2^32)-1]。"
+    },
+    {
+      "id": "module:Math.previousPowerOfTwo",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:17158b6de77a3a92e33b3faeab6cecc4dbac2004d83fbc3dc039048199f8b721",
+      "text": "上一个 2 的幂整数。"
+    },
+    {
+      "id": "module:Math.RADIANS_PER_ARCSECOND",
+      "field": "description",
+      "sourceHash": "sha256:097878f9fb185f0a3dd7ec261a6dd7ed47d8d20c46a6422bf1a86865b497995b",
+      "text": "一角秒对应的弧度数。"
+    },
+    {
+      "id": "module:Math.RADIANS_PER_DEGREE",
+      "field": "description",
+      "sourceHash": "sha256:4f93dc651300ab5a9f1cdfa28de8bed4d9590bf522fa338ec7549209139281d0",
+      "text": "一度对应的弧度数。"
+    },
+    {
+      "id": "module:Math.randomBetween",
+      "field": "description",
+      "sourceHash": "sha256:1e43ea79397e6e641ad232b0a7905f9276daed3c5360b45b91f4d86b79e97bc4",
+      "text": "生成两个数之间的随机数。"
+    },
+    {
+      "id": "module:Math.randomBetween",
+      "field": "params/max/description",
+      "sourceHash": "sha256:00122463dffebaed9f58dd4dbb51b974ed791492bca0a7d7cbd049409d9b6823",
+      "text": "最大值。"
+    },
+    {
+      "id": "module:Math.randomBetween",
+      "field": "params/min/description",
+      "sourceHash": "sha256:3533ea3052f13b4c4e78de2ffae002ec07bda1e0a6435f2d6a0d9c1e46d4fa4f",
+      "text": "最小值。"
+    },
+    {
+      "id": "module:Math.randomBetween",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:3169fc5d7a9617331af3fa05484101bbf9439ad21c03ae218b798c37012a89b4",
+      "text": "min 与 max 之间的随机数。"
+    },
+    {
+      "id": "module:Math.setRandomNumberSeed",
+      "field": "description",
+      "sourceHash": "sha256:d7b86f9688e48b538f3154097ac9633ab32906cccaba90bf81e330822a2dcba0",
+      "text": "设置 {@link CesiumMath#nextRandomNumber} 所使用随机数生成器的种子。"
+    },
+    {
+      "id": "module:Math.setRandomNumberSeed",
+      "field": "params/seed/description",
+      "sourceHash": "sha256:883c7488e37fa7be343ef733dfd9954f8f3090b4b224474f9723f68229d2752e",
+      "text": "用作种子的整数。"
+    },
+    {
+      "id": "module:Math.sign",
+      "field": "description",
+      "sourceHash": "sha256:cb78b066e261828f2e760288ad8439d94fe57235a5da68afa0fe8a004b7cbc57",
+      "text": "返回数值的符号：正数返回 1，负数返回 -1，零返回 0。"
+    },
+    {
+      "id": "module:Math.sign",
+      "field": "params/value/description",
+      "sourceHash": "sha256:40f6aeb0b6fab180679b6b7c73704951f9a8d33e7c23dede47f36551f645afe7",
+      "text": "要返回其符号的值。"
+    },
+    {
+      "id": "module:Math.sign",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:33356f432262ec9ba0a3e04a23db54e9ff72ffac8d90d97c4fff3aa4e06df996",
+      "text": "value 的符号。"
+    },
+    {
+      "id": "module:Math.signNotZero",
+      "field": "description",
+      "sourceHash": "sha256:0d74587298d8b5ef247e7b626a1ce6f935ff77a5a86cfcff2a67f11f14bedd4b",
+      "text": "给定值为正数或零时返回 1.0，为负数时返回 -1.0。与 {@link CesiumMath#sign} 类似，但输入为 0.0 时返回 1.0 而非 0.0。"
+    },
+    {
+      "id": "module:Math.signNotZero",
+      "field": "params/value/description",
+      "sourceHash": "sha256:40f6aeb0b6fab180679b6b7c73704951f9a8d33e7c23dede47f36551f645afe7",
+      "text": "要返回其符号的值。"
+    },
+    {
+      "id": "module:Math.signNotZero",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:33356f432262ec9ba0a3e04a23db54e9ff72ffac8d90d97c4fff3aa4e06df996",
+      "text": "value 的符号。"
+    },
+    {
+      "id": "module:Math.sinh",
+      "field": "description",
+      "sourceHash": "sha256:c8a84afd726635bddb8920f3c629678540bf5f14c33ff485b1f7d547c126812b",
+      "text": "返回数值的双曲正弦。<em>value</em> 的双曲正弦定义为 (<em>e<sup>x</sup>&nbsp;-&nbsp;e<sup>-x</sup></em>)/2.0，其中 <i>e</i> 为欧拉常数，约等于 2.71828183。<p>特殊情况：<ul><li>参数为 NaN 时，结果为 NaN。</li><li>参数为无穷大时，结果为同号无穷大。</li><li>参数为零时，结果为同号零。</li></ul></p>"
+    },
+    {
+      "id": "module:Math.sinh",
+      "field": "params/value/description",
+      "sourceHash": "sha256:e4bc2b0758273a8f32020cabd079fceb40dd0faada4ac1881abdb393cf8a4632",
+      "text": "要求双曲正弦的数值。"
+    },
+    {
+      "id": "module:Math.sinh",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:d3c3236c176afcb6c614d04d9e442bdb9b10662f7c464484a777bb0ea4000a0f",
+      "text": "<code>value</code> 的双曲正弦。"
+    },
+    {
+      "id": "module:Math.SIXTY_FOUR_KILOBYTES",
+      "field": "description",
+      "sourceHash": "sha256:2acfd08aa731ac7cb3a84903b096431859617ae369863aeea33912a3220616d4",
+      "text": "64 * 1024"
+    },
+    {
+      "id": "module:Math.smoothDamp",
+      "field": "description",
+      "sourceHash": "sha256:07c953fb4bb6193525585d8dca070be04138a92d5e8b2d33c535f9dd53774ae6",
+      "text": "随时间将一个值逐渐平滑逼近目标值。平滑函数使用基于《Game Programming Gems 4》第 1.10 章的弹簧阻尼算法。"
+    },
+    {
+      "id": "module:Math.smoothDamp",
+      "field": "params/deltaTime/description",
+      "sourceHash": "sha256:28dfec4d98681eb1b67893950e63c72d0acd4575b10d8956665c85cac50d9c78",
+      "text": "自上次调用此函数经过的时间，必须大于等于 0.0。"
+    },
+    {
+      "id": "module:Math.smoothDamp",
+      "field": "params/maximumSpeed/description",
+      "sourceHash": "sha256:678293f6701feb8052e48075faf6bacce59a6420e4f7612b3f4799ee8a96f0a9",
+      "text": "可选，用于将速度限制为给定最大值。"
+    },
+    {
+      "id": "module:Math.smoothDamp",
+      "field": "params/p/description",
+      "sourceHash": "sha256:3173d9ff6d6577f0f2279bd2cd6da4e2267fdf4e4c900a211ba46c1bd5996e37",
+      "text": "当前值。"
+    },
+    {
+      "id": "module:Math.smoothDamp",
+      "field": "params/q/description",
+      "sourceHash": "sha256:057dc27b9997bb54f5b397dcaa6d6a0205bfe86217579d9b88a5e235b2d2fde8",
+      "text": "目标值。"
+    },
+    {
+      "id": "module:Math.smoothDamp",
+      "field": "params/result/description",
+      "sourceHash": "sha256:3be27900006a0a1cf7c4a07d3686bd360ad985e8232f4837449d130e1eb692c8",
+      "text": "用于保存结果的对象；未提供时创建并返回新对象。"
+    },
+    {
+      "id": "module:Math.smoothDamp",
+      "field": "params/smoothTime/description",
+      "sourceHash": "sha256:12b94f5bedab0936f2a40b35535ae2f74a52a3f7d8abd5e175d1a03df2487f0b",
+      "text": "达到目标大致所需的时间。较小值会更快到达目标。此值必须大于等于 0.0001。"
+    },
+    {
+      "id": "module:Math.smoothDamp",
+      "field": "params/velocity/description",
+      "sourceHash": "sha256:72eb42ea9f46749cdc58748bae1bdf188121f186bb829693eb57ea1f22f1f2c4",
+      "text": "当前速度。"
+    },
+    {
+      "id": "module:Math.smoothDamp",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:1a0c6239b9ee2017f7fd19dc73457fcc5b2c2d880043bacf0f08ba9ea3c55774",
+      "text": "包含新值和更新后当前速度的对象。"
+    },
+    {
+      "id": "module:Math.SOLAR_RADIUS",
+      "field": "description",
+      "sourceHash": "sha256:b17ac6deb1230b32b26a468a6cc210280dc34446a900b6c615712922113f00b2",
+      "text": "太阳半径，单位为米，值为 6.955e8。"
+    },
+    {
+      "id": "module:Math.THREE_PI_OVER_TWO",
+      "field": "description",
+      "sourceHash": "sha256:edf25d9ceeb15c3d04265f3a8a0858b3148e9641785faf86610dfab304ab4217",
+      "text": "3pi/2"
+    },
+    {
+      "id": "module:Math.toDegrees",
+      "field": "description",
+      "sourceHash": "sha256:4d22146a9e4c288dad3a0e5308a41fadb9bdf9fca0ccae07a0b19194ec447a50",
+      "text": "将弧度转换为度。"
+    },
+    {
+      "id": "module:Math.toDegrees",
+      "field": "params/radians/description",
+      "sourceHash": "sha256:5f31ca4054233b86a1b88cc17855690a769e0dee22f792734bb7f50e921ca55d",
+      "text": "要转换的角度，单位为弧度。"
+    },
+    {
+      "id": "module:Math.toDegrees",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:529da12c24cbc43fdf60d9c8c9e15853c4876d16131bf55d8a4a6066c8a34674",
+      "text": "对应角度，单位为度。"
+    },
+    {
+      "id": "module:Math.toRadians",
+      "field": "description",
+      "sourceHash": "sha256:f551205ea07ca4fff86aef36181ac65c684e122e439aab388892cecb88e164bb",
+      "text": "将度转换为弧度。"
+    },
+    {
+      "id": "module:Math.toRadians",
+      "field": "params/degrees/description",
+      "sourceHash": "sha256:b1e369a5a5a19cf352671ec2a9e730ec44670bd5194f66afe99db40b60a8101d",
+      "text": "要转换的角度，单位为度。"
+    },
+    {
+      "id": "module:Math.toRadians",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:b59f478a56dd40142f43bd3847a92e3fc6a3ab6f21c2fa5e3dab609fe9fb083e",
+      "text": "对应角度，单位为弧度。"
+    },
+    {
+      "id": "module:Math.toSNorm",
+      "field": "description",
+      "sourceHash": "sha256:0a49ab6c1330744021e97992dff612d3542e7b6ebc8cce194be2c309e3d81bf2",
+      "text": "将 [-1.0, 1.0] 范围内的标量转换为 [0, rangeMaximum] 范围内的 SNORM。"
+    },
+    {
+      "id": "module:Math.toSNorm",
+      "field": "params/rangeMaximum/description",
+      "sourceHash": "sha256:05aa9bf0ff63714be650746d9a6ee1b946b6db00fbd3978d62a5305f6bc8813b",
+      "text": "映射范围的最大值，默认为 255。"
+    },
+    {
+      "id": "module:Math.toSNorm",
+      "field": "params/value/description",
+      "sourceHash": "sha256:0f68b9ee9ad19a674c5097f1a586814f3dfcfcff8ed56a7c9b5d12b402480889",
+      "text": "位于 [-1.0, 1.0] 范围内的标量。"
+    },
+    {
+      "id": "module:Math.toSNorm",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:b952fd85be2e460c6ed4c50208af5a193fcc8d64e887af58dabcbc7ce091f63b",
+      "text": "SNORM 值，其中 0 对应 -1.0，rangeMaximum 对应 1.0。"
+    },
+    {
+      "id": "module:Math.TWO_PI",
+      "field": "description",
+      "sourceHash": "sha256:5a1162df1a75ce73ece8f32104d70f21f6b59b3ee790bdd32dbaf61974e09d46",
+      "text": "2pi"
+    },
+    {
+      "id": "module:Math.zeroToTwoPi",
+      "field": "description",
+      "sourceHash": "sha256:0c1f5431e17986035c0be50aad0717114944f2a22bf3bfb9cd1f04628e52f123",
+      "text": "生成与给定角度等价、范围为 0 <= angle <= 2Pi 的角度。"
+    },
+    {
+      "id": "module:Math.zeroToTwoPi",
+      "field": "params/angle/description",
+      "sourceHash": "sha256:c2d1c9b6126500305e3ddf9669a0bc859c030437203ba2330aec6fecc71a4e24",
+      "text": "单位为弧度。"
+    },
+    {
+      "id": "module:Math.zeroToTwoPi",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:f2fe96e638ccf178c9f2f6d9672eb7e28a99fb0b1a9dbe3d809d79489e0e3e5e",
+      "text": "范围为 [0, <code>CesiumMath.TWO_PI</code>] 的角度。"
+    },
+    {
+      "id": "module:Math",
+      "field": "description",
+      "sourceHash": "sha256:83d9a18092be9df3bd6f9fc9f71c36de8b784a634a6a1bb65dced6f6a73ca210",
+      "text": "数学函数。"
+    },
+    {
+      "id": "module:Math~SmoothDampResult",
+      "field": "properties/value/description",
+      "sourceHash": "sha256:bc8d04d986cfda3862eadfb9d3678f9ab3e363f6bd91819cd0d3e4987a21c527",
+      "text": "应用平滑阻尼后的新值。"
+    },
+    {
+      "id": "module:Math~SmoothDampResult",
+      "field": "properties/velocity/description",
+      "sourceHash": "sha256:4cafc265a29553cb9f73c813c13913c17d674815bf9ae27aa218cc5b26b01a71",
+      "text": "更新后的当前速度。"
+    }
+  ]
+}

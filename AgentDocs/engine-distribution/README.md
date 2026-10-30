@@ -5,12 +5,12 @@
 | Field                  | Value                                                                     |
 | ---------------------- | ------------------------------------------------------------------------- |
 | Extension slug         | `engine-distribution`                                                     |
-| Status                 | `completed`                                                               |
+| Status                 | `active`                                                                  |
 | Planning model         | `extension`                                                               |
 | Active extension plan  | [Distribution](plans/2026-10-29-extension.md)                             |
-| Current phase          | C2 completed and reviewed                                                 |
+| Current phase          | T1 completed; T2 pending checkpoint                                       |
 | Active standalone plan | None; latest [Native batch](plans/2026-10-30-native-translation-batch.md) |
-| Active phase plan      | None; latest [C2](plans/2026-10-30-c2-chinese-edition.md)                 |
+| Active phase plan      | [T1](plans/2026-10-30-t1-foundation-translation.md)                       |
 | Architecture contact   | Architecture Agent (current task)                                         |
 | Execution contact      | Execution Agent (current task)                                            |
 | Last updated           | 2026-10-30                                                                |
@@ -41,7 +41,7 @@ and committed as `05362428b6`; [C2](plans/2026-10-30-c2-chinese-edition.md) is
 
 All 73 owned API source files maintain Chinese prose directly. The 2,337 published owned
 fields include synthetic VERSION and bypass external translation. Native English comments
-remain intact; independent catalogs translate 4,287 of 15,294 native fields. The 11,007 remaining
+remain intact; independent catalogs translate 6,394 of 15,294 native fields. The 8,900 remaining
 native fields retain English, with zero stale/unused entries. Each build overwrites source
 inventory/report without altering maintained catalogs. Historical bilingual delivery in
 [ADR-0206](../../Documentation/SceneGIS/Decisions/ADR-0206-documentation-localization.md) and
@@ -59,7 +59,14 @@ No upstream or runtime changes.
 [reviewed](reviews/2026-10-29-asset-directories.md). SGP-0074 filters directory entries in the
 shared asset stream. Rebuilt artifact has zero empty directories; 8 Node and 7 browser tests pass.
 
-## Latest native translation batch
+## Latest foundation phase
+
+[T1](plans/2026-10-30-t1-foundation-translation.md) is completed and
+[reviewed](reviews/2026-10-30-t1-foundation-translation.md): 2,107 new records, all 2,858 fields
+of 20 foundation roots covered. Native coverage is 41.8%; 23 Node checks and the focused browser
+case pass. Runtime, source, generator, code and SDK remain unchanged.
+
+## Earlier native translation batch
 
 [Native translation batch](plans/2026-10-30-native-translation-batch.md) is completed and
 [reviewed](reviews/2026-10-30-native-translation-batch.md). Added 1,327 entries and completed
@@ -83,4 +90,5 @@ resources, both Worlds, Chinese docs, name-only filtering, links and lifecycle. 
 also passes. [SDK guide](../../Documentation/SceneGIS/Distribution.md) and
 [translation maintenance](../../Documentation/i18n/README.md) cover consumption and native updates.
 No SDK edits or upstream-owned files in C1/C2; inherited native JSDoc/lint warnings remain.
-Latest catalog gate is the native batch above. No unresolved new finding or active plan.
+The continuous native translation program is active. T1 is completed and reviewed; later phases
+will be elaborated after each reviewed local checkpoint. Final gate: zero missing/stale/unused.

@@ -30,9 +30,29 @@ const roots = new Set([
   "GeoJsonDataSource",
   "CustomDataSource",
   "DataSourceCollection",
+  "Cartesian2",
+  "Cartesian3",
+  "Cartesian4",
+  "Cartographic",
+  "Rectangle",
+  "Ellipsoid",
+  "Matrix2",
+  "Matrix3",
+  "Matrix4",
+  "Quaternion",
+  "HeadingPitchRoll",
+  "Transforms",
+  "Color",
+  "BoundingSphere",
+  "BoundingRectangle",
+  "OrientedBoundingBox",
+  "Ray",
+  "Plane",
+  "IntersectionTests",
+  "module:Math",
 ]);
 
-test("common native API roots have complete source-bound prose translations", () => {
+test("reviewed native API roots have complete source-bound prose translations", () => {
   const selected = report.units.filter((unit) =>
     roots.has(unit.id.split(/[.#~]/, 1)[0]),
   );
@@ -45,6 +65,43 @@ test("common native API roots have complete source-bound prose translations", ()
   assert.deepEqual(visited, roots);
   assert.equal(report.counts.stale, 0);
   assert.equal(report.counts.unused, 0);
+});
+
+test("foundation prose preserves storage order, homogeneous coordinates and verified bounds", () => {
+  const matrix = lookup.get("Matrix4").classdesc;
+  assert.match(matrix, /列主序/);
+  assert.match(matrix, /行主序/);
+  assert.match(lookup.get("Matrix4.multiplyByPoint").description, /分量为 1/);
+  assert.match(
+    lookup.get("Matrix4.multiplyByPointAsVector").description,
+    /分量为零/,
+  );
+  assert.match(
+    lookup.get("Matrix4.inverseTransformation").description,
+    /不会验证/,
+  );
+  assert.match(lookup.get("BoundingSphere#volume").description, /体积/);
+  const random = lookup.get("Color.fromRandom");
+  for (const component of ["Red", "Green", "Blue", "Alpha"]) {
+    assert.match(
+      random.params.find((p) => p.name === `options.minimum${component}`)
+        .description,
+      /最小值/,
+    );
+    assert.match(
+      random.params.find((p) => p.name === `options.maximum${component}`)
+        .description,
+      /最大值/,
+    );
+  }
+  assert.match(
+    lookup.get("module:Math.clampToLatitudeRange").description,
+    /Math.PI\/2<\/code>\]/,
+  );
+  assert.match(
+    lookup.get("Transforms.headingPitchRollToFixedFrame").description,
+    /向上轴负向旋转/,
+  );
 });
 
 test("spatial units, ownership, boundary conditions and callback limits reach metadata", () => {

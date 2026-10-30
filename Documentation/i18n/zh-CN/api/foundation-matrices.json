@@ -1,0 +1,3540 @@
+{
+  "schemaVersion": 1,
+  "locale": "zh-CN",
+  "entries": [
+    {
+      "id": "Matrix2.abs",
+      "field": "description",
+      "sourceHash": "sha256:df9548a7833f1462dd3239881846a01e0f9fa0b92fac1a29c8eaddea9133950b",
+      "text": "计算由给定矩阵各元素绝对值组成的矩阵。"
+    },
+    {
+      "id": "Matrix2.abs",
+      "field": "params/matrix/description",
+      "sourceHash": "sha256:cf5d887129504dfb15693e3bf08c1f3a66b301681c1729821558859e22ec4f2a",
+      "text": "元素包含正负符号的矩阵。"
+    },
+    {
+      "id": "Matrix2.add",
+      "field": "description",
+      "sourceHash": "sha256:9f18ec54e345be4cb3dcb2432259c7428963559e5a408b0622934f9f5e843b43",
+      "text": "计算两个矩阵的和。"
+    },
+    {
+      "id": "Matrix2.clone",
+      "field": "description",
+      "sourceHash": "sha256:c1791a278b81b9069981b346c60abda6fccf83ce531d25a9984c8148eacdf96c",
+      "text": "复制 Matrix2 实例。"
+    },
+    {
+      "id": "Matrix2.clone",
+      "field": "params/matrix/description",
+      "sourceHash": "sha256:d3936de0231e463b25962f0aef7b43d067e9f5b9ac5f6c342695c6c575372d6b",
+      "text": "要复制的矩阵。"
+    },
+    {
+      "id": "Matrix2.clone",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:37a1588932c9c9d67ef1fa139faf8c4fc41d7d87f74152d3d860680a3c54ae8c",
+      "text": "修改后的 result 参数；未提供时返回新建的 Matrix2 实例。若 matrix 为 undefined，则返回 undefined。"
+    },
+    {
+      "id": "Matrix2.COLUMN0ROW0",
+      "field": "description",
+      "sourceHash": "sha256:3f73b7a2ecff387dac2c96b65151bedf7456236d851e4c141557ffc565472ae2",
+      "text": "Matrix2 中第 0 列、第 0 行元素的索引。"
+    },
+    {
+      "id": "Matrix2.COLUMN0ROW1",
+      "field": "description",
+      "sourceHash": "sha256:7fecb97e0fe2d772e60999bd739784d3bcf0b492fed0cc10c869986c2e2f6b64",
+      "text": "Matrix2 中第 0 列、第 1 行元素的索引。"
+    },
+    {
+      "id": "Matrix2.COLUMN1ROW0",
+      "field": "description",
+      "sourceHash": "sha256:1bc965c1ec4e2d3bbbef39d683f1133d3cb598ce1bc5fd8ec390709aa9ea8043",
+      "text": "Matrix2 中第 1 列、第 0 行元素的索引。"
+    },
+    {
+      "id": "Matrix2.COLUMN1ROW1",
+      "field": "description",
+      "sourceHash": "sha256:c40cf56bcd767d6bf468173a501fd61e9c5d1c80dc7b8404a65b9f19b103b611",
+      "text": "Matrix2 中第 1 列、第 1 行元素的索引。"
+    },
+    {
+      "id": "Matrix2.equals",
+      "field": "description",
+      "sourceHash": "sha256:0419fe25cb211280bf77be43acf3d341b7ff846df51f8f9fc8bdb6b233129998",
+      "text": "逐分量比较给定矩阵，相等时返回 <code>true</code>，否则返回 <code>false</code>。"
+    },
+    {
+      "id": "Matrix2.equalsEpsilon",
+      "field": "description",
+      "sourceHash": "sha256:110ef70bb2a67fad552cd2b992b1e5b8bed6d7972ec7a943ff20c367bb4bf4ee",
+      "text": "逐分量比较给定矩阵，差异在给定 epsilon 范围内时返回 <code>true</code>，否则返回 <code>false</code>。"
+    },
+    {
+      "id": "Matrix2.equalsEpsilon",
+      "field": "params/epsilon/description",
+      "sourceHash": "sha256:1ab4d3a4f4ca315af12f39b1b4e64b7ec35e58ae52588c40ff36843a8836cb4b",
+      "text": "相等测试使用的 epsilon 容差。"
+    },
+    {
+      "id": "Matrix2.equalsEpsilon",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:d73d821dc6b34822dfe11364cb173a7333751e53e9ef3a80bb985a26ce173b2c",
+      "text": "若 left 和 right 的差异在给定 epsilon 范围内，则返回 <code>true</code>；否则返回 <code>false</code>。"
+    },
+    {
+      "id": "Matrix2.fromArray",
+      "field": "description",
+      "sourceHash": "sha256:6a9c38c076bf4d19cad2408e70807c9e071a36ecadd2af3d69503f28d6d8cce4",
+      "text": "使用数组中连续 4 个元素创建 Matrix2。"
+    },
+    {
+      "id": "Matrix2.fromArray",
+      "field": "params/array/description",
+      "sourceHash": "sha256:ea4bedf9ae8cc395c4e35a51cd1e72e5631e1be62139f9f201fbeddf5fba4cc5",
+      "text": "连续 4 个元素对应矩阵各位置的数组，按列主序解释。"
+    },
+    {
+      "id": "Matrix2.fromArray",
+      "field": "params/startingIndex/description",
+      "sourceHash": "sha256:d49364cd0bf862083018cc9f35dee565ad98e4c6e2adc321dd54dbe8946cdde0",
+      "text": "数组中首个元素的偏移，对应矩阵第一列、第一行的位置。"
+    },
+    {
+      "id": "Matrix2.fromArray",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:1c753ea3b40d04b318bb76842c19062765c7a2a4cee32844230c3e255743afff",
+      "text": "修改后的 result 参数；未提供时返回新建的 Matrix2 实例。"
+    },
+    {
+      "id": "Matrix2.fromColumnMajorArray",
+      "field": "description",
+      "sourceHash": "sha256:776022bb21f07d72222fa9a7466458fc9c2240c67ad68bf8fc64c0956dc3eb9d",
+      "text": "从列主序数组创建 Matrix2 实例。"
+    },
+    {
+      "id": "Matrix2.fromColumnMajorArray",
+      "field": "params/values/description",
+      "sourceHash": "sha256:c6cb65f403e7918c1bfae1c241ae978b83e48005f87783e6e98f7cdfc5bb96bb",
+      "text": "列主序数组。"
+    },
+    {
+      "id": "Matrix2.fromColumnMajorArray",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:ff6beb12a960f711e702425c1f8633b35f720d595b21998eb77d2aa001ae268f",
+      "text": "修改后的 result 参数；未提供时返回新建的 Matrix2 实例。"
+    },
+    {
+      "id": "Matrix2.fromRotation",
+      "field": "description",
+      "sourceHash": "sha256:8290ea3bc1521f44e6712b227d8431e295698db61351d2009e0a297b0175c8c8",
+      "text": "创建旋转矩阵。"
+    },
+    {
+      "id": "Matrix2.fromRotation",
+      "field": "params/angle/description",
+      "sourceHash": "sha256:53219fd30d6706c664016bc26b3792a06cc87e7ded6093c3b77d1e2f173538f3",
+      "text": "旋转角度，单位为弧度。正角度表示逆时针旋转。"
+    },
+    {
+      "id": "Matrix2.fromRotation",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:ff6beb12a960f711e702425c1f8633b35f720d595b21998eb77d2aa001ae268f",
+      "text": "修改后的 result 参数；未提供时返回新建的 Matrix2 实例。"
+    },
+    {
+      "id": "Matrix2.fromRowMajorArray",
+      "field": "description",
+      "sourceHash": "sha256:c2aca9e91aad404ce39c8505a5de6290f4ad5ef0a2b1729bcd117660cc3eb59e",
+      "text": "从行主序数组创建 Matrix2 实例。生成的矩阵按列主序存储。"
+    },
+    {
+      "id": "Matrix2.fromRowMajorArray",
+      "field": "params/values/description",
+      "sourceHash": "sha256:6800823c3686cedd1098273f61d24fa4ad6f5bbc22062697bafa0a73df7f111c",
+      "text": "行主序数组。"
+    },
+    {
+      "id": "Matrix2.fromRowMajorArray",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:ff6beb12a960f711e702425c1f8633b35f720d595b21998eb77d2aa001ae268f",
+      "text": "修改后的 result 参数；未提供时返回新建的 Matrix2 实例。"
+    },
+    {
+      "id": "Matrix2.fromScale",
+      "field": "description",
+      "sourceHash": "sha256:0303c7e6f615ce6663f6076a31dfc497c0a0e99b94501a7fca0057450bc195b9",
+      "text": "计算表示非均匀缩放的 Matrix2 实例。"
+    },
+    {
+      "id": "Matrix2.fromScale",
+      "field": "params/scale/description",
+      "sourceHash": "sha256:2d251b18683d13e3bfa5489d6ffd59d0192d71f2f8e906a80820550724a51a68",
+      "text": "x 和 y 方向的缩放系数。"
+    },
+    {
+      "id": "Matrix2.fromScale",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:ff6beb12a960f711e702425c1f8633b35f720d595b21998eb77d2aa001ae268f",
+      "text": "修改后的 result 参数；未提供时返回新建的 Matrix2 实例。"
+    },
+    {
+      "id": "Matrix2.fromUniformScale",
+      "field": "description",
+      "sourceHash": "sha256:8798c13c18b6bb4bc201abcbeae3cbbba3b5343297c8a49d376204e96a8434e1",
+      "text": "计算表示均匀缩放的 Matrix2 实例。"
+    },
+    {
+      "id": "Matrix2.fromUniformScale",
+      "field": "params/scale/description",
+      "sourceHash": "sha256:36394d0763ec7a25b5318b12ab1d9d35e439e3badbecd002ae65a3eb6cbd73bd",
+      "text": "均匀缩放系数。"
+    },
+    {
+      "id": "Matrix2.fromUniformScale",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:ff6beb12a960f711e702425c1f8633b35f720d595b21998eb77d2aa001ae268f",
+      "text": "修改后的 result 参数；未提供时返回新建的 Matrix2 实例。"
+    },
+    {
+      "id": "Matrix2.getColumn",
+      "field": "description",
+      "sourceHash": "sha256:8bfe0e7d6482c1d17d088d1918c79f1a923bc1abb4150f6dacd313e6fcde7f3b",
+      "text": "以 Cartesian2 实例形式获取矩阵指定索引列的副本。"
+    },
+    {
+      "id": "Matrix2.getColumn",
+      "field": "exceptions/0/description",
+      "sourceHash": "sha256:c25ffee0ed5f3e2de184c737fb6ce04c99e734d58f4fe1204e583a478bc8a158",
+      "text": "index 必须为 0 或 1。"
+    },
+    {
+      "id": "Matrix2.getColumn",
+      "field": "params/index/description",
+      "sourceHash": "sha256:45856c6a6d46bd4eda5e3c56bc78a61e6269db22e6890dd0491ecfdf722f59a2",
+      "text": "要获取的列索引，从零开始。"
+    },
+    {
+      "id": "Matrix2.getElementIndex",
+      "field": "description",
+      "sourceHash": "sha256:2ce89286f12f92933a2cfb7a96c4e28fe1db551f89d7a74f879c232029094585",
+      "text": "计算给定行列处元素的数组索引。"
+    },
+    {
+      "id": "Matrix2.getElementIndex",
+      "field": "exceptions/0/description",
+      "sourceHash": "sha256:1ef46af35c4868f7d6f7c1410b5ffc3e7192ce98647bd1356c3d558f00d9bbdd",
+      "text": "row 必须为 0 或 1。"
+    },
+    {
+      "id": "Matrix2.getElementIndex",
+      "field": "exceptions/1/description",
+      "sourceHash": "sha256:b15e9070349c4b601b78bc271705b628b2bda3026d6414cd22a1f0c3870951eb",
+      "text": "column 必须为 0 或 1。"
+    },
+    {
+      "id": "Matrix2.getElementIndex",
+      "field": "params/column/description",
+      "sourceHash": "sha256:bcb5c8606f27d65f0c77fec63ba9898dc57ed863396a8c9585065761dbc1d0b1",
+      "text": "列索引，从零开始。"
+    },
+    {
+      "id": "Matrix2.getElementIndex",
+      "field": "params/row/description",
+      "sourceHash": "sha256:1bd47057a0e886925db1329f4fca3e73c262a315dcef037e724a8460d0cb19b7",
+      "text": "行索引，从零开始。"
+    },
+    {
+      "id": "Matrix2.getElementIndex",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:182481131fffef8a8a11e9803e28f368b05614b71e8bba453c56c13141b7a3b1",
+      "text": "给定行列处元素的索引。"
+    },
+    {
+      "id": "Matrix2.getMaximumScale",
+      "field": "description",
+      "sourceHash": "sha256:6c65d119f6d5b9cc6a5d59762c0e80a310eaba9a207e948124205033004957d8",
+      "text": "假定矩阵为仿射变换，计算最大缩放系数，即各列向量长度的最大值。"
+    },
+    {
+      "id": "Matrix2.getMaximumScale",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:e843c96e44ace41ef6b08bf1d23a82a726eca92f3838551789440f8a1be8a6e1",
+      "text": "最大缩放系数。"
+    },
+    {
+      "id": "Matrix2.getRotation",
+      "field": "description",
+      "sourceHash": "sha256:3f4778044e95847dafa7587174469751f8494da76f78d1d7a0d1e0339600d829",
+      "text": "假定矩阵为仿射变换，提取旋转矩阵。"
+    },
+    {
+      "id": "Matrix2.getRow",
+      "field": "description",
+      "sourceHash": "sha256:0df9abb98a107df7b5a907e26257ebdbd8b5371f0f6651952d4d7ed4ebbe0de7",
+      "text": "以 Cartesian2 实例形式获取矩阵指定索引行的副本。"
+    },
+    {
+      "id": "Matrix2.getRow",
+      "field": "exceptions/0/description",
+      "sourceHash": "sha256:c25ffee0ed5f3e2de184c737fb6ce04c99e734d58f4fe1204e583a478bc8a158",
+      "text": "index 必须为 0 或 1。"
+    },
+    {
+      "id": "Matrix2.getRow",
+      "field": "params/index/description",
+      "sourceHash": "sha256:c4455db6dee069d75f6b2e44b579ba30a9f0022e6605791b147aaf295705a956",
+      "text": "要获取的行索引，从零开始。"
+    },
+    {
+      "id": "Matrix2.getScale",
+      "field": "description",
+      "sourceHash": "sha256:eb51cca17c14b147e112da86be21db322d1d6655e4acecf3be59b8bb36412ab1",
+      "text": "假定矩阵为仿射变换，提取非均匀缩放。"
+    },
+    {
+      "id": "Matrix2.IDENTITY",
+      "field": "description",
+      "sourceHash": "sha256:ed94c8ea0bcc8703e343a385a77f37b568166ec7eafa5d9624b285c27a8f2a98",
+      "text": "初始化为单位矩阵的不可变 Matrix2 实例。"
+    },
+    {
+      "id": "Matrix2.multiply",
+      "field": "description",
+      "sourceHash": "sha256:bb0a5a9d6755e29a4e0710a7ab2d572b99ad21cf5a26a8e05c1a05b399aec951",
+      "text": "计算两个矩阵的积。"
+    },
+    {
+      "id": "Matrix2.multiplyByScalar",
+      "field": "description",
+      "sourceHash": "sha256:a45cd59b8500d94534029b4ed20afb5abd29c5715c56e11a69495cc559affdd4",
+      "text": "计算矩阵与标量的积。"
+    },
+    {
+      "id": "Matrix2.multiplyByScalar",
+      "field": "params/scalar/description",
+      "sourceHash": "sha256:ae9330bd868ec9d9687271dc8831869a1bac85c6ecb1950c52417b4b5816600d",
+      "text": "要乘的数值。"
+    },
+    {
+      "id": "Matrix2.multiplyByScale",
+      "field": "description",
+      "sourceHash": "sha256:85601794f8bd4726b3843e9971be74e17121cd4b7e7acc11dfc3f0129d941629",
+      "text": "计算矩阵与非均匀缩放的积，将缩放视为缩放矩阵。"
+    },
+    {
+      "id": "Matrix2.multiplyByScale",
+      "field": "params/matrix/description",
+      "sourceHash": "sha256:134731582a96e5ffffc5b46debabbf28a2fc32ec743ba87ad342f819ab593826",
+      "text": "左侧矩阵。"
+    },
+    {
+      "id": "Matrix2.multiplyByScale",
+      "field": "params/scale/description",
+      "sourceHash": "sha256:b37a0d54b5747baeb1e84872c4efb38da996e37ac59e47c8c8e1cc77fc264bfb",
+      "text": "右侧非均匀缩放。"
+    },
+    {
+      "id": "Matrix2.multiplyByUniformScale",
+      "field": "description",
+      "sourceHash": "sha256:3402b2f37391c94d2e196b92d059bd4baae319df372c131e2969979a4677e740",
+      "text": "计算矩阵与均匀缩放的积，将缩放视为缩放矩阵。"
+    },
+    {
+      "id": "Matrix2.multiplyByUniformScale",
+      "field": "params/matrix/description",
+      "sourceHash": "sha256:134731582a96e5ffffc5b46debabbf28a2fc32ec743ba87ad342f819ab593826",
+      "text": "左侧矩阵。"
+    },
+    {
+      "id": "Matrix2.multiplyByUniformScale",
+      "field": "params/scale/description",
+      "sourceHash": "sha256:2d92c281d8274f729bffc9bcd996ca39d8b7e1f36550603bc8c9defd7c28135e",
+      "text": "右侧均匀缩放。"
+    },
+    {
+      "id": "Matrix2.multiplyByVector",
+      "field": "description",
+      "sourceHash": "sha256:567369a8ed68a7dd55b46b4c29f12fab7c03a3e931de220b7bd8290f78c67a2e",
+      "text": "计算矩阵与列向量的积。"
+    },
+    {
+      "id": "Matrix2.multiplyByVector",
+      "field": "params/cartesian/description",
+      "sourceHash": "sha256:e15bde017c6ebd3146caaca26c7963b023fc8c2652f59411a88a2122b6f5b2a0",
+      "text": "列向量。"
+    },
+    {
+      "id": "Matrix2.negate",
+      "field": "description",
+      "sourceHash": "sha256:1125c125876416a7e087d92d5cebc8f39b49c75bc469ece5547521ae2ee732fe",
+      "text": "创建给定矩阵逐元素取反的副本。"
+    },
+    {
+      "id": "Matrix2.negate",
+      "field": "params/matrix/description",
+      "sourceHash": "sha256:dd63835fad2f4a048973ff6762607df7fd03675b73f628c4b17d565293be1cb9",
+      "text": "要取反的矩阵。"
+    },
+    {
+      "id": "Matrix2.packArray",
+      "field": "description",
+      "sourceHash": "sha256:7ea88f82254c961932178b5629132e6626ffb42897a10e32127785430c4cf3c3",
+      "text": "将 Matrix2 数组展平为分量数组，分量按列主序存储。"
+    },
+    {
+      "id": "Matrix2.packArray",
+      "field": "params/array/description",
+      "sourceHash": "sha256:bb9ade198d9ca514ae09d3ca541dea48436d29f505db043a88f2e7c16fe4f2b1",
+      "text": "要打包的矩阵数组。"
+    },
+    {
+      "id": "Matrix2.packArray",
+      "field": "params/result/description",
+      "sourceHash": "sha256:948c6a92950011ce1fcf1766f379f7f150eae020a7a1e691d16b0708a0c0c610",
+      "text": "用于保存结果的数组。若为类型化数组，必须具有 array.length * 4 个分量，否则抛出 {@link DeveloperError}；若为普通数组，则调整长度为 array.length * 4。"
+    },
+    {
+      "id": "Matrix2.setColumn",
+      "field": "description",
+      "sourceHash": "sha256:ac9dad8bcdc77379b7194ff9cdf24e16ad95d93358c91285789d2e5948cb7588",
+      "text": "计算新矩阵，将给定矩阵的指定列替换为给定 Cartesian2 实例。"
+    },
+    {
+      "id": "Matrix2.setColumn",
+      "field": "exceptions/0/description",
+      "sourceHash": "sha256:c25ffee0ed5f3e2de184c737fb6ce04c99e734d58f4fe1204e583a478bc8a158",
+      "text": "index 必须为 0 或 1。"
+    },
+    {
+      "id": "Matrix2.setColumn",
+      "field": "params/cartesian/description",
+      "sourceHash": "sha256:d76bb6ec328d0a4885a878f3bd553c306502e2da3e1c9b9117242f0e43518cff",
+      "text": "其分量值要赋给指定列的笛卡尔向量。"
+    },
+    {
+      "id": "Matrix2.setColumn",
+      "field": "params/index/description",
+      "sourceHash": "sha256:9125f231d97213c50a3cf9a70468380b4a36ba88032df8c41276ccd05ce78064",
+      "text": "要设置的列索引，从零开始。"
+    },
+    {
+      "id": "Matrix2.setRotation",
+      "field": "description",
+      "sourceHash": "sha256:4bc19da2c60db366e3f808239f05e3b5453ea59a7fdcf856ba8a49d96db053ab",
+      "text": "假定矩阵为仿射变换，设置旋转。"
+    },
+    {
+      "id": "Matrix2.setRotation",
+      "field": "params/rotation/description",
+      "sourceHash": "sha256:f27bf8a32ec9579cfa755a7f66fcdea0c3230fd537df2a0074703f3a5f28f082",
+      "text": "旋转矩阵。"
+    },
+    {
+      "id": "Matrix2.setRow",
+      "field": "description",
+      "sourceHash": "sha256:a9e281ca5044984c58a19e796cfe83a6fc02b75b44416ec5710520764b67244a",
+      "text": "计算新矩阵，将给定矩阵的指定行替换为给定 Cartesian2 实例。"
+    },
+    {
+      "id": "Matrix2.setRow",
+      "field": "exceptions/0/description",
+      "sourceHash": "sha256:c25ffee0ed5f3e2de184c737fb6ce04c99e734d58f4fe1204e583a478bc8a158",
+      "text": "index 必须为 0 或 1。"
+    },
+    {
+      "id": "Matrix2.setRow",
+      "field": "params/cartesian/description",
+      "sourceHash": "sha256:3fa32df26b52833b819de1601a272b125711194de54b48ffd71df1e68ce775b4",
+      "text": "其分量值要赋给指定行的笛卡尔向量。"
+    },
+    {
+      "id": "Matrix2.setRow",
+      "field": "params/index/description",
+      "sourceHash": "sha256:a276e9f6e18e82ea8d296b00e69052995f0894e3418b88c402ddb20f45cef9a9",
+      "text": "要设置的行索引，从零开始。"
+    },
+    {
+      "id": "Matrix2.setScale",
+      "field": "description",
+      "sourceHash": "sha256:534c20696781d4cd6d642ceb65c50f5175763b4d8452d2311deed217cffb219c",
+      "text": "计算新矩阵，用给定缩放替换原缩放。假定矩阵为仿射变换。"
+    },
+    {
+      "id": "Matrix2.setScale",
+      "field": "params/scale/description",
+      "sourceHash": "sha256:17fbc5b20d215e30cad180d80912202f47e83990ae76b7ef910babd4b3b561e3",
+      "text": "用于替换给定矩阵原缩放的缩放值。"
+    },
+    {
+      "id": "Matrix2.setUniformScale",
+      "field": "description",
+      "sourceHash": "sha256:16d5e6ef8ae51742d687c2b99fadbde4711f806beff76e02e1d557a6db5c6980",
+      "text": "计算新矩阵，用给定均匀缩放替换原缩放。假定矩阵为仿射变换。"
+    },
+    {
+      "id": "Matrix2.setUniformScale",
+      "field": "params/scale/description",
+      "sourceHash": "sha256:86d6f74e3aeb5813a061d036cf3b582e9732106c7ddd8645dc5f25e4ad27bc64",
+      "text": "用于替换给定矩阵原缩放的均匀缩放值。"
+    },
+    {
+      "id": "Matrix2.subtract",
+      "field": "description",
+      "sourceHash": "sha256:2fcbb51e3559759115c5bb59bd7994ce2769901111023602c821365f838b9923",
+      "text": "计算两个矩阵的差。"
+    },
+    {
+      "id": "Matrix2.toArray",
+      "field": "description",
+      "sourceHash": "sha256:0f4d601d05a1ca4a87922ed34dab94db5ebc2c5a7ecdf59f80b2bd290892037d",
+      "text": "从给定 Matrix2 实例创建 Array，数组采用列主序。"
+    },
+    {
+      "id": "Matrix2.toArray",
+      "field": "params/matrix/description",
+      "sourceHash": "sha256:8e88c00aebbe72773dfa60771066c8db51e703802fcf53c8f93f59361699a705",
+      "text": "要使用的矩阵。"
+    },
+    {
+      "id": "Matrix2.toArray",
+      "field": "params/result/description",
+      "sourceHash": "sha256:380247d860f284089df90805698bb0c30254771402665590ed1d806c46a6efd5",
+      "text": "用于保存结果的 Array。"
+    },
+    {
+      "id": "Matrix2.toArray",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:ce9aec064a5193c71b9a4dcf06865af4d1e786e102aa463e3f6b1d9801e2c818",
+      "text": "修改后的 Array 参数；未提供时返回新建的 Array 实例。"
+    },
+    {
+      "id": "Matrix2.transpose",
+      "field": "description",
+      "sourceHash": "sha256:121c5ccbfea5386228e63c51a4ac91ea6b1a83d6df9740c2c7508bd614fa2675",
+      "text": "计算给定矩阵的转置。"
+    },
+    {
+      "id": "Matrix2.transpose",
+      "field": "params/matrix/description",
+      "sourceHash": "sha256:4231f560decc6ca0fa3e52f9ff57c44dfc122b5ef362ab33f9f4f7582bccd2d5",
+      "text": "要转置的矩阵。"
+    },
+    {
+      "id": "Matrix2.unpack",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:1c753ea3b40d04b318bb76842c19062765c7a2a4cee32844230c3e255743afff",
+      "text": "修改后的 result 参数；未提供时返回新建的 Matrix2 实例。"
+    },
+    {
+      "id": "Matrix2.unpackArray",
+      "field": "description",
+      "sourceHash": "sha256:874c71688a4563e2c94b24f04e69ace12fb777cbceadc8b4dd6ea56e1a1f0178",
+      "text": "将列主序矩阵分量数组解包为 Matrix2 数组。"
+    },
+    {
+      "id": "Matrix2.unpackArray",
+      "field": "params/array/description",
+      "sourceHash": "sha256:761b03a4a01a1ef3a05d3ef102bd166754372e250e3053ba6067be9fe25fe5a0",
+      "text": "要解包的分量数组。"
+    },
+    {
+      "id": "Matrix2.unpackArray",
+      "field": "params/result/description",
+      "sourceHash": "sha256:e92ce6987d55381c90196bb0f2de2e9021c026fda6edb8330ecad112a8d7c273",
+      "text": "用于保存结果的数组。"
+    },
+    {
+      "id": "Matrix2.unpackArray",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:e0f13d64283eff08944af38407c51866a8ca5eece7c26aa0952f227ca9a0038c",
+      "text": "解包后的数组。"
+    },
+    {
+      "id": "Matrix2.ZERO",
+      "field": "description",
+      "sourceHash": "sha256:f8947547ba3739b1f26b7ab00ead3a29d18bb83ee4915d7df04c2de95b8b0da5",
+      "text": "初始化为零矩阵的不可变 Matrix2 实例。"
+    },
+    {
+      "id": "Matrix2",
+      "field": "classdesc",
+      "sourceHash": "sha256:fe144f6f7e5d40a05db2d331a3c6e50004e8290b71fdef9b8a1ff66bf06b32d9",
+      "text": "2x2 矩阵，可按列主序数组索引访问。构造函数参数采用行主序，以提高代码可读性。"
+    },
+    {
+      "id": "Matrix2",
+      "field": "params/column0Row0/description",
+      "sourceHash": "sha256:cc6b241f1146b74e5a62488f50e91cc47139b9f317fdb90369160bb2f8bca2d7",
+      "text": "第 0 列、第 0 行的值。"
+    },
+    {
+      "id": "Matrix2",
+      "field": "params/column0Row1/description",
+      "sourceHash": "sha256:63363cdce5ec2b6a89381462067dceddbce989612fde86dbc87e72e217dbc0a0",
+      "text": "第 0 列、第 1 行的值。"
+    },
+    {
+      "id": "Matrix2",
+      "field": "params/column1Row0/description",
+      "sourceHash": "sha256:57a3ce59842c5eeb2fcbed3d58e2aaf02f58afcee490595734820dd399f3d844",
+      "text": "第 1 列、第 0 行的值。"
+    },
+    {
+      "id": "Matrix2",
+      "field": "params/column1Row1/description",
+      "sourceHash": "sha256:f855c5d50fb96d457cfca700a671fb11ad156c6a66d3b36878ea5f1776110af7",
+      "text": "第 1 列、第 1 行的值。"
+    },
+    {
+      "id": "Matrix2#clone",
+      "field": "description",
+      "sourceHash": "sha256:e317f38da91b60269f7d3c1adbc9d85a69078231d7e550768af4d8ff5ab870f8",
+      "text": "复制给定 Matrix2 实例。"
+    },
+    {
+      "id": "Matrix2#clone",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:1c753ea3b40d04b318bb76842c19062765c7a2a4cee32844230c3e255743afff",
+      "text": "修改后的 result 参数；未提供时返回新建的 Matrix2 实例。"
+    },
+    {
+      "id": "Matrix2#equals",
+      "field": "description",
+      "sourceHash": "sha256:5e5d2196e389edf51948ec9f25f227990cb9833845f3cd8033af51a5338c19c0",
+      "text": "将此矩阵与给定矩阵逐分量比较，相等时返回 <code>true</code>，否则返回 <code>false</code>。"
+    },
+    {
+      "id": "Matrix2#equals",
+      "field": "params/right/description",
+      "sourceHash": "sha256:6171cda230795ab2325a9f0e6422a548e16edb0fd74e3db3c61e419e1674420c",
+      "text": "右侧矩阵。"
+    },
+    {
+      "id": "Matrix2#equalsEpsilon",
+      "field": "description",
+      "sourceHash": "sha256:0cee8b59bfa40d8994d1a0b96edd6a8a2d1a28353bb3fb6e1ddbf11a295b88e4",
+      "text": "将此矩阵与给定矩阵逐分量比较，差异在给定 epsilon 范围内时返回 <code>true</code>，否则返回 <code>false</code>。"
+    },
+    {
+      "id": "Matrix2#equalsEpsilon",
+      "field": "params/epsilon/description",
+      "sourceHash": "sha256:1ab4d3a4f4ca315af12f39b1b4e64b7ec35e58ae52588c40ff36843a8836cb4b",
+      "text": "相等测试使用的 epsilon 容差。"
+    },
+    {
+      "id": "Matrix2#equalsEpsilon",
+      "field": "params/right/description",
+      "sourceHash": "sha256:6171cda230795ab2325a9f0e6422a548e16edb0fd74e3db3c61e419e1674420c",
+      "text": "右侧矩阵。"
+    },
+    {
+      "id": "Matrix2#equalsEpsilon",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:10dbf4a7ddfcc7153660dfa7cfbd4cdcdcb39e498b54dcf418df578bc90f40df",
+      "text": "若差异在给定 epsilon 范围内，则返回 <code>true</code>；否则返回 <code>false</code>。"
+    },
+    {
+      "id": "Matrix2#length",
+      "field": "description",
+      "sourceHash": "sha256:9f20b6057e769aeb911f5917fb38f6790118f5cd51957010b67f09b8529e7fc2",
+      "text": "获取集合中的元素数量。"
+    },
+    {
+      "id": "Matrix2#toString",
+      "field": "description",
+      "sourceHash": "sha256:ef137ea92bb33921c83c73ad5d3eba3ce1ad7d7d24445b8c3b0fd331f8eb3f75",
+      "text": "创建表示此矩阵的字符串，每行单独一行，格式为 '(column0, column1)'。"
+    },
+    {
+      "id": "Matrix2#toString",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:9ab6d5e89a7e9c86297f7478361b6f9c143b53b6235362f1aa53cbb2ebe47016",
+      "text": "表示给定矩阵的字符串，每行单独一行，格式为 '(column0, column1)'。"
+    },
+    {
+      "id": "Matrix3.abs",
+      "field": "description",
+      "sourceHash": "sha256:df9548a7833f1462dd3239881846a01e0f9fa0b92fac1a29c8eaddea9133950b",
+      "text": "计算由给定矩阵各元素绝对值组成的矩阵。"
+    },
+    {
+      "id": "Matrix3.abs",
+      "field": "params/matrix/description",
+      "sourceHash": "sha256:cf5d887129504dfb15693e3bf08c1f3a66b301681c1729821558859e22ec4f2a",
+      "text": "元素包含正负符号的矩阵。"
+    },
+    {
+      "id": "Matrix3.add",
+      "field": "description",
+      "sourceHash": "sha256:9f18ec54e345be4cb3dcb2432259c7428963559e5a408b0622934f9f5e843b43",
+      "text": "计算两个矩阵的和。"
+    },
+    {
+      "id": "Matrix3.clone",
+      "field": "description",
+      "sourceHash": "sha256:08ba1316d70c9b08b780e348e579d20e34cb46ddac497b0dd3fc8d5eb26e3bdd",
+      "text": "复制 Matrix3 实例。"
+    },
+    {
+      "id": "Matrix3.clone",
+      "field": "params/matrix/description",
+      "sourceHash": "sha256:d3936de0231e463b25962f0aef7b43d067e9f5b9ac5f6c342695c6c575372d6b",
+      "text": "要复制的矩阵。"
+    },
+    {
+      "id": "Matrix3.clone",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:ce57dbd251c616a697ca78af661f2772916aed327318c01e91a722893886f0e1",
+      "text": "修改后的 result 参数；未提供时返回新建的 Matrix3 实例。若 matrix 为 undefined，则返回 undefined。"
+    },
+    {
+      "id": "Matrix3.COLUMN0ROW0",
+      "field": "description",
+      "sourceHash": "sha256:6798e3cb41bb2b3620f1746b2ebbda8a8296e9d05f6c3131f3db9962e11d8b92",
+      "text": "Matrix3 中第 0 列、第 0 行元素的索引。"
+    },
+    {
+      "id": "Matrix3.COLUMN0ROW1",
+      "field": "description",
+      "sourceHash": "sha256:2abafcc2b7f3668b06b4a67c971feb755ebf7ccd5b65063d4a0aaaa637a84595",
+      "text": "Matrix3 中第 0 列、第 1 行元素的索引。"
+    },
+    {
+      "id": "Matrix3.COLUMN0ROW2",
+      "field": "description",
+      "sourceHash": "sha256:3efb06de6fbc8185c2f10fbe04b96611c66c2b6b1d8bb2349a96c797bf131d97",
+      "text": "Matrix3 中第 0 列、第 2 行元素的索引。"
+    },
+    {
+      "id": "Matrix3.COLUMN1ROW0",
+      "field": "description",
+      "sourceHash": "sha256:6a2b3627883efe4389d28a809afa64e57fd55a777cc3b7e91f2230423f404c0c",
+      "text": "Matrix3 中第 1 列、第 0 行元素的索引。"
+    },
+    {
+      "id": "Matrix3.COLUMN1ROW1",
+      "field": "description",
+      "sourceHash": "sha256:ed5c50226b8a8e6a380b4b0433045f77b7a0b2209fe1f2407688cd60ec358156",
+      "text": "Matrix3 中第 1 列、第 1 行元素的索引。"
+    },
+    {
+      "id": "Matrix3.COLUMN1ROW2",
+      "field": "description",
+      "sourceHash": "sha256:f36ea35b64b5e0245ae71420976d77cd38027cc577a4ca0d359f17fac9c4569a",
+      "text": "Matrix3 中第 1 列、第 2 行元素的索引。"
+    },
+    {
+      "id": "Matrix3.COLUMN2ROW0",
+      "field": "description",
+      "sourceHash": "sha256:d5114a0c1b03b75660107c8c122ed15bb5d2a091ab648d0cd06ee6e578e2f340",
+      "text": "Matrix3 中第 2 列、第 0 行元素的索引。"
+    },
+    {
+      "id": "Matrix3.COLUMN2ROW1",
+      "field": "description",
+      "sourceHash": "sha256:512e250fa033eaac525f4bee600a5453e0eecba6fd6ab228047b1df8e1d264fc",
+      "text": "Matrix3 中第 2 列、第 1 行元素的索引。"
+    },
+    {
+      "id": "Matrix3.COLUMN2ROW2",
+      "field": "description",
+      "sourceHash": "sha256:cdcc8d38f39115474fc4c4c9a1a4d56d5c631096a5e419562980fac4a8d867c4",
+      "text": "Matrix3 中第 2 列、第 2 行元素的索引。"
+    },
+    {
+      "id": "Matrix3.computeEigenDecomposition",
+      "field": "description",
+      "sourceHash": "sha256:3ac77d3bcf4178db3f6a0528372884caa462d3a3759d803d5e52f289384d4e44",
+      "text": "计算对称矩阵的特征向量和特征值。<p>返回对角矩阵和酉矩阵，满足：<code>matrix = unitary matrix * diagonal matrix * transpose(unitary matrix)</code></p><p>对角矩阵的对角元素为特征值，酉矩阵的列为相应特征向量。</p>"
+    },
+    {
+      "id": "Matrix3.computeEigenDecomposition",
+      "field": "params/matrix/description",
+      "sourceHash": "sha256:7742c0b6f388ce30489473d499e3fb4a4fd1dbe9ab352f6a737dc5d5b7f74aaa",
+      "text": "要分解为对角矩阵和酉矩阵的矩阵，应为对称矩阵。"
+    },
+    {
+      "id": "Matrix3.computeEigenDecomposition",
+      "field": "params/result/description",
+      "sourceHash": "sha256:0398113d247f9dd1c4acab255517bbe9afe73d7fbd91fb46e9c9b55fff71c522",
+      "text": "具有 unitary 和 diagonal 属性的对象，这两个矩阵用于保存结果。"
+    },
+    {
+      "id": "Matrix3.computeEigenDecomposition",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:fba6236786d71efcca7763a8cf645bbf0aae16da0739d05d56d8c68492762100",
+      "text": "具有 unitary 和 diagonal 属性的对象，分别对应酉矩阵和对角矩阵。"
+    },
+    {
+      "id": "Matrix3.determinant",
+      "field": "description",
+      "sourceHash": "sha256:12b42ab0f8d2ff50080730a04ceedef9e56ace353c4cd1457569c05c03271f53",
+      "text": "计算给定矩阵的行列式。"
+    },
+    {
+      "id": "Matrix3.determinant",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:f59517eaa3c9344225269341637be0ab72a7250c96818df044a22110841e8ee9",
+      "text": "矩阵行列式的值。"
+    },
+    {
+      "id": "Matrix3.equals",
+      "field": "description",
+      "sourceHash": "sha256:0419fe25cb211280bf77be43acf3d341b7ff846df51f8f9fc8bdb6b233129998",
+      "text": "逐分量比较给定矩阵，相等时返回 <code>true</code>，否则返回 <code>false</code>。"
+    },
+    {
+      "id": "Matrix3.equalsEpsilon",
+      "field": "description",
+      "sourceHash": "sha256:110ef70bb2a67fad552cd2b992b1e5b8bed6d7972ec7a943ff20c367bb4bf4ee",
+      "text": "逐分量比较给定矩阵，差异在给定 epsilon 范围内时返回 <code>true</code>，否则返回 <code>false</code>。"
+    },
+    {
+      "id": "Matrix3.equalsEpsilon",
+      "field": "params/epsilon/description",
+      "sourceHash": "sha256:1ab4d3a4f4ca315af12f39b1b4e64b7ec35e58ae52588c40ff36843a8836cb4b",
+      "text": "相等测试使用的 epsilon 容差。"
+    },
+    {
+      "id": "Matrix3.equalsEpsilon",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:d73d821dc6b34822dfe11364cb173a7333751e53e9ef3a80bb985a26ce173b2c",
+      "text": "若 left 和 right 的差异在给定 epsilon 范围内，则返回 <code>true</code>；否则返回 <code>false</code>。"
+    },
+    {
+      "id": "Matrix3.fromArray",
+      "field": "description",
+      "sourceHash": "sha256:ea71bbdbfec07bc846bea835be544fc22bbf3302bd5978e765e6b7ee5c270133",
+      "text": "使用数组中连续 9 个元素创建 Matrix3。"
+    },
+    {
+      "id": "Matrix3.fromArray",
+      "field": "params/array/description",
+      "sourceHash": "sha256:44683f807bed3d7da2854975f4f53be2caae63844cc0ee93949eeb72543ca81a",
+      "text": "连续 9 个元素对应矩阵各位置的数组，按列主序解释。"
+    },
+    {
+      "id": "Matrix3.fromArray",
+      "field": "params/startingIndex/description",
+      "sourceHash": "sha256:d49364cd0bf862083018cc9f35dee565ad98e4c6e2adc321dd54dbe8946cdde0",
+      "text": "数组中首个元素的偏移，对应矩阵第一列、第一行的位置。"
+    },
+    {
+      "id": "Matrix3.fromArray",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:9a2153c013457bbd62864f8367d79ef45d3f54cd675915286b7b3997a20c3e1d",
+      "text": "修改后的 result 参数；未提供时返回新建的 Matrix3 实例。"
+    },
+    {
+      "id": "Matrix3.fromColumnMajorArray",
+      "field": "description",
+      "sourceHash": "sha256:6323076c2619bdc16819768efcffb3da9e63641aa2a494f4c0413c9cc88e8738",
+      "text": "从列主序数组创建 Matrix3 实例。"
+    },
+    {
+      "id": "Matrix3.fromColumnMajorArray",
+      "field": "params/values/description",
+      "sourceHash": "sha256:c6cb65f403e7918c1bfae1c241ae978b83e48005f87783e6e98f7cdfc5bb96bb",
+      "text": "列主序数组。"
+    },
+    {
+      "id": "Matrix3.fromColumnMajorArray",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:48f1043306f9729c65e627dbf5d4d5cd875dd79beeea7331a543da5dacdf38e5",
+      "text": "修改后的 result 参数；未提供时返回新建的 Matrix3 实例。"
+    },
+    {
+      "id": "Matrix3.fromCrossProduct",
+      "field": "description",
+      "sourceHash": "sha256:fa1770af22a4647c44be9d538cebda83057df3fa2d8b3782f04300798bd1c5c3",
+      "text": "计算 Cartesian3 向量叉积运算对应的 Matrix3 矩阵。"
+    },
+    {
+      "id": "Matrix3.fromCrossProduct",
+      "field": "params/vector/description",
+      "sourceHash": "sha256:874d7eb342386f41f73884b6c0e516cafcfa825a736f43d305230cd005c0921f",
+      "text": "叉积运算左侧的向量。"
+    },
+    {
+      "id": "Matrix3.fromCrossProduct",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:48f1043306f9729c65e627dbf5d4d5cd875dd79beeea7331a543da5dacdf38e5",
+      "text": "修改后的 result 参数；未提供时返回新建的 Matrix3 实例。"
+    },
+    {
+      "id": "Matrix3.fromHeadingPitchRoll",
+      "field": "description",
+      "sourceHash": "sha256:127ac1209f6aa3c13a79ab4392fd33cb60814ab6417130861fbb353717c95fd6",
+      "text": "根据给定 headingPitchRoll 计算 3x3 旋转矩阵。参见 http://en.wikipedia.org/wiki/Conversion_between_quaternions_and_Euler_angles 。"
+    },
+    {
+      "id": "Matrix3.fromHeadingPitchRoll",
+      "field": "params/headingPitchRoll/description",
+      "sourceHash": "sha256:7aaae93cd6e2d8e37762e3f0aaa61f8b1ce28b5c0e811ddf2b973ff41aab94de",
+      "text": "要使用的 headingPitchRoll。"
+    },
+    {
+      "id": "Matrix3.fromHeadingPitchRoll",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:06cb7a123b6d16fbc667b3cf5482885b9b10f7f26e1a4f1b10a4c606dd536521",
+      "text": "由此 headingPitchRoll 得到的 3x3 旋转矩阵。"
+    },
+    {
+      "id": "Matrix3.fromQuaternion",
+      "field": "description",
+      "sourceHash": "sha256:72ba7ee1b55a8356166278ae265d7b70a4d7fe34d743a65a32673882482ed9c8",
+      "text": "根据给定四元数计算 3x3 旋转矩阵。"
+    },
+    {
+      "id": "Matrix3.fromQuaternion",
+      "field": "params/quaternion/description",
+      "sourceHash": "sha256:52cbbc530588c36bf4573bf40a1a0ea80b3b4763d631aecd336af9b7558270a5",
+      "text": "要使用的四元数。"
+    },
+    {
+      "id": "Matrix3.fromQuaternion",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:8b062d613c1eb09bd11d56dc12c4555b969c4b3a1951396d87d753a3d5c0559e",
+      "text": "由此四元数得到的 3x3 旋转矩阵。"
+    },
+    {
+      "id": "Matrix3.fromRotationX",
+      "field": "description",
+      "sourceHash": "sha256:b47420d75e320e2a3fd57f0d8bdcabc40fe06ecc8a8ebeac0529edb609d67941",
+      "text": "创建绕 x 轴的旋转矩阵。"
+    },
+    {
+      "id": "Matrix3.fromRotationX",
+      "field": "params/angle/description",
+      "sourceHash": "sha256:53219fd30d6706c664016bc26b3792a06cc87e7ded6093c3b77d1e2f173538f3",
+      "text": "旋转角度，单位为弧度。正角度表示逆时针旋转。"
+    },
+    {
+      "id": "Matrix3.fromRotationX",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:48f1043306f9729c65e627dbf5d4d5cd875dd79beeea7331a543da5dacdf38e5",
+      "text": "修改后的 result 参数；未提供时返回新建的 Matrix3 实例。"
+    },
+    {
+      "id": "Matrix3.fromRotationY",
+      "field": "description",
+      "sourceHash": "sha256:bb1ce2d0472773a8aa2dd46794d2be481fb0ac19020e5d94e4b43cbf8d238b9b",
+      "text": "创建绕 y 轴的旋转矩阵。"
+    },
+    {
+      "id": "Matrix3.fromRotationY",
+      "field": "params/angle/description",
+      "sourceHash": "sha256:53219fd30d6706c664016bc26b3792a06cc87e7ded6093c3b77d1e2f173538f3",
+      "text": "旋转角度，单位为弧度。正角度表示逆时针旋转。"
+    },
+    {
+      "id": "Matrix3.fromRotationY",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:48f1043306f9729c65e627dbf5d4d5cd875dd79beeea7331a543da5dacdf38e5",
+      "text": "修改后的 result 参数；未提供时返回新建的 Matrix3 实例。"
+    },
+    {
+      "id": "Matrix3.fromRotationZ",
+      "field": "description",
+      "sourceHash": "sha256:b3bf8243932f4c72eac14793ff258cefc42235e48f90d72974585cf92f22bd60",
+      "text": "创建绕 z 轴的旋转矩阵。"
+    },
+    {
+      "id": "Matrix3.fromRotationZ",
+      "field": "params/angle/description",
+      "sourceHash": "sha256:53219fd30d6706c664016bc26b3792a06cc87e7ded6093c3b77d1e2f173538f3",
+      "text": "旋转角度，单位为弧度。正角度表示逆时针旋转。"
+    },
+    {
+      "id": "Matrix3.fromRotationZ",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:48f1043306f9729c65e627dbf5d4d5cd875dd79beeea7331a543da5dacdf38e5",
+      "text": "修改后的 result 参数；未提供时返回新建的 Matrix3 实例。"
+    },
+    {
+      "id": "Matrix3.fromRowMajorArray",
+      "field": "description",
+      "sourceHash": "sha256:10dd1f4b1c0f2fe906aaa5cba1f82044ad4caec23140ad93417ab345c36bf14b",
+      "text": "从行主序数组创建 Matrix3 实例。生成的矩阵按列主序存储。"
+    },
+    {
+      "id": "Matrix3.fromRowMajorArray",
+      "field": "params/values/description",
+      "sourceHash": "sha256:6800823c3686cedd1098273f61d24fa4ad6f5bbc22062697bafa0a73df7f111c",
+      "text": "行主序数组。"
+    },
+    {
+      "id": "Matrix3.fromRowMajorArray",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:48f1043306f9729c65e627dbf5d4d5cd875dd79beeea7331a543da5dacdf38e5",
+      "text": "修改后的 result 参数；未提供时返回新建的 Matrix3 实例。"
+    },
+    {
+      "id": "Matrix3.fromScale",
+      "field": "description",
+      "sourceHash": "sha256:ca191a1db0aa51e2c4f9f5296a6a9a6a0d863dc321a849f6d85deb4d14ec3219",
+      "text": "计算表示非均匀缩放的 Matrix3 实例。"
+    },
+    {
+      "id": "Matrix3.fromScale",
+      "field": "params/scale/description",
+      "sourceHash": "sha256:44b3fc95a735cc1573f472009f3a63e4a0acac6b9dcbfd5eefac75d6c615951b",
+      "text": "x、y、z 方向的缩放系数。"
+    },
+    {
+      "id": "Matrix3.fromScale",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:48f1043306f9729c65e627dbf5d4d5cd875dd79beeea7331a543da5dacdf38e5",
+      "text": "修改后的 result 参数；未提供时返回新建的 Matrix3 实例。"
+    },
+    {
+      "id": "Matrix3.fromUniformScale",
+      "field": "description",
+      "sourceHash": "sha256:38052e720459f0b608f9946ec68c18209d488c1b08a3912d35a9266fca791b17",
+      "text": "计算表示均匀缩放的 Matrix3 实例。"
+    },
+    {
+      "id": "Matrix3.fromUniformScale",
+      "field": "params/scale/description",
+      "sourceHash": "sha256:36394d0763ec7a25b5318b12ab1d9d35e439e3badbecd002ae65a3eb6cbd73bd",
+      "text": "均匀缩放系数。"
+    },
+    {
+      "id": "Matrix3.fromUniformScale",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:48f1043306f9729c65e627dbf5d4d5cd875dd79beeea7331a543da5dacdf38e5",
+      "text": "修改后的 result 参数；未提供时返回新建的 Matrix3 实例。"
+    },
+    {
+      "id": "Matrix3.getColumn",
+      "field": "description",
+      "sourceHash": "sha256:df8b82dfae6c8bcfc8cfe2da42e71df6f2ba455e151b2ef8ceda516b32b458d7",
+      "text": "以 Cartesian3 实例形式获取矩阵指定索引列的副本。"
+    },
+    {
+      "id": "Matrix3.getColumn",
+      "field": "exceptions/0/description",
+      "sourceHash": "sha256:09cfe529f9c645db28b84316ddf8ab58898fa3cb1bc4bd75474712d94e18bfa8",
+      "text": "index 必须为 0、1 或 2。"
+    },
+    {
+      "id": "Matrix3.getColumn",
+      "field": "params/index/description",
+      "sourceHash": "sha256:45856c6a6d46bd4eda5e3c56bc78a61e6269db22e6890dd0491ecfdf722f59a2",
+      "text": "要获取的列索引，从零开始。"
+    },
+    {
+      "id": "Matrix3.getElementIndex",
+      "field": "description",
+      "sourceHash": "sha256:2ce89286f12f92933a2cfb7a96c4e28fe1db551f89d7a74f879c232029094585",
+      "text": "计算给定行列处元素的数组索引。"
+    },
+    {
+      "id": "Matrix3.getElementIndex",
+      "field": "exceptions/0/description",
+      "sourceHash": "sha256:d4b2f2eeb24494c191cc07916a6d0238189333f84aa6a556aba870905fe2cd51",
+      "text": "row 必须为 0、1 或 2。"
+    },
+    {
+      "id": "Matrix3.getElementIndex",
+      "field": "exceptions/1/description",
+      "sourceHash": "sha256:a298fa7bd68c96146ba163731aa4e82635ee7e758e32017c0d87fbfa38f7ae38",
+      "text": "column 必须为 0、1 或 2。"
+    },
+    {
+      "id": "Matrix3.getElementIndex",
+      "field": "params/column/description",
+      "sourceHash": "sha256:bcb5c8606f27d65f0c77fec63ba9898dc57ed863396a8c9585065761dbc1d0b1",
+      "text": "列索引，从零开始。"
+    },
+    {
+      "id": "Matrix3.getElementIndex",
+      "field": "params/row/description",
+      "sourceHash": "sha256:1bd47057a0e886925db1329f4fca3e73c262a315dcef037e724a8460d0cb19b7",
+      "text": "行索引，从零开始。"
+    },
+    {
+      "id": "Matrix3.getElementIndex",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:182481131fffef8a8a11e9803e28f368b05614b71e8bba453c56c13141b7a3b1",
+      "text": "给定行列处元素的索引。"
+    },
+    {
+      "id": "Matrix3.getMaximumScale",
+      "field": "description",
+      "sourceHash": "sha256:6c65d119f6d5b9cc6a5d59762c0e80a310eaba9a207e948124205033004957d8",
+      "text": "假定矩阵为仿射变换，计算最大缩放系数，即各列向量长度的最大值。"
+    },
+    {
+      "id": "Matrix3.getMaximumScale",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:e843c96e44ace41ef6b08bf1d23a82a726eca92f3838551789440f8a1be8a6e1",
+      "text": "最大缩放系数。"
+    },
+    {
+      "id": "Matrix3.getRotation",
+      "field": "description",
+      "sourceHash": "sha256:3f4778044e95847dafa7587174469751f8494da76f78d1d7a0d1e0339600d829",
+      "text": "假定矩阵为仿射变换，提取旋转矩阵。"
+    },
+    {
+      "id": "Matrix3.getRow",
+      "field": "description",
+      "sourceHash": "sha256:fd6cfa256a78dbecc84c875833f96d47d288aaaf667acfdd628afc66990633fb",
+      "text": "以 Cartesian3 实例形式获取矩阵指定索引行的副本。"
+    },
+    {
+      "id": "Matrix3.getRow",
+      "field": "exceptions/0/description",
+      "sourceHash": "sha256:09cfe529f9c645db28b84316ddf8ab58898fa3cb1bc4bd75474712d94e18bfa8",
+      "text": "index 必须为 0、1 或 2。"
+    },
+    {
+      "id": "Matrix3.getRow",
+      "field": "params/index/description",
+      "sourceHash": "sha256:c4455db6dee069d75f6b2e44b579ba30a9f0022e6605791b147aaf295705a956",
+      "text": "要获取的行索引，从零开始。"
+    },
+    {
+      "id": "Matrix3.getScale",
+      "field": "description",
+      "sourceHash": "sha256:eb51cca17c14b147e112da86be21db322d1d6655e4acecf3be59b8bb36412ab1",
+      "text": "假定矩阵为仿射变换，提取非均匀缩放。"
+    },
+    {
+      "id": "Matrix3.IDENTITY",
+      "field": "description",
+      "sourceHash": "sha256:7f4604ee9ba6c0676c7f91be8b0fe72722c39044169bbf8094796a1ad2e9d407",
+      "text": "初始化为单位矩阵的不可变 Matrix3 实例。"
+    },
+    {
+      "id": "Matrix3.inverse",
+      "field": "description",
+      "sourceHash": "sha256:7c745311be8bc57f2ab13be7131ad1575cc0713f279ff441c47842fdecc2eee1",
+      "text": "计算给定矩阵的逆矩阵。"
+    },
+    {
+      "id": "Matrix3.inverse",
+      "field": "exceptions/0/description",
+      "sourceHash": "sha256:364f63b985a34394a37f022bd8b9b8bc128d508d826b55458f71f74ee868e9f3",
+      "text": "matrix 不可逆。"
+    },
+    {
+      "id": "Matrix3.inverse",
+      "field": "params/matrix/description",
+      "sourceHash": "sha256:015d2d36d072e52863dbfe037b36bf444548f4396dc2b29bca7f2553294a25cf",
+      "text": "要求逆的矩阵。"
+    },
+    {
+      "id": "Matrix3.inverseTranspose",
+      "field": "description",
+      "sourceHash": "sha256:56de02858e8fb42981a9e963a78dd51073d38c1e7565f08e2b00ace0217849e9",
+      "text": "计算矩阵的逆转置。"
+    },
+    {
+      "id": "Matrix3.inverseTranspose",
+      "field": "params/matrix/description",
+      "sourceHash": "sha256:f4f1eee76eda28f6e28681cd8b8e69455a9ce3c072ed4785fd3543d1aaedae67",
+      "text": "要转置并求逆的矩阵。"
+    },
+    {
+      "id": "Matrix3.multiply",
+      "field": "description",
+      "sourceHash": "sha256:bb0a5a9d6755e29a4e0710a7ab2d572b99ad21cf5a26a8e05c1a05b399aec951",
+      "text": "计算两个矩阵的积。"
+    },
+    {
+      "id": "Matrix3.multiplyByScalar",
+      "field": "description",
+      "sourceHash": "sha256:a45cd59b8500d94534029b4ed20afb5abd29c5715c56e11a69495cc559affdd4",
+      "text": "计算矩阵与标量的积。"
+    },
+    {
+      "id": "Matrix3.multiplyByScalar",
+      "field": "params/scalar/description",
+      "sourceHash": "sha256:ae9330bd868ec9d9687271dc8831869a1bac85c6ecb1950c52417b4b5816600d",
+      "text": "要乘的数值。"
+    },
+    {
+      "id": "Matrix3.multiplyByScale",
+      "field": "description",
+      "sourceHash": "sha256:85601794f8bd4726b3843e9971be74e17121cd4b7e7acc11dfc3f0129d941629",
+      "text": "计算矩阵与非均匀缩放的积，将缩放视为缩放矩阵。"
+    },
+    {
+      "id": "Matrix3.multiplyByScale",
+      "field": "params/matrix/description",
+      "sourceHash": "sha256:134731582a96e5ffffc5b46debabbf28a2fc32ec743ba87ad342f819ab593826",
+      "text": "左侧矩阵。"
+    },
+    {
+      "id": "Matrix3.multiplyByScale",
+      "field": "params/scale/description",
+      "sourceHash": "sha256:b37a0d54b5747baeb1e84872c4efb38da996e37ac59e47c8c8e1cc77fc264bfb",
+      "text": "右侧非均匀缩放。"
+    },
+    {
+      "id": "Matrix3.multiplyByUniformScale",
+      "field": "description",
+      "sourceHash": "sha256:3402b2f37391c94d2e196b92d059bd4baae319df372c131e2969979a4677e740",
+      "text": "计算矩阵与均匀缩放的积，将缩放视为缩放矩阵。"
+    },
+    {
+      "id": "Matrix3.multiplyByUniformScale",
+      "field": "params/matrix/description",
+      "sourceHash": "sha256:134731582a96e5ffffc5b46debabbf28a2fc32ec743ba87ad342f819ab593826",
+      "text": "左侧矩阵。"
+    },
+    {
+      "id": "Matrix3.multiplyByUniformScale",
+      "field": "params/scale/description",
+      "sourceHash": "sha256:2d92c281d8274f729bffc9bcd996ca39d8b7e1f36550603bc8c9defd7c28135e",
+      "text": "右侧均匀缩放。"
+    },
+    {
+      "id": "Matrix3.multiplyByVector",
+      "field": "description",
+      "sourceHash": "sha256:567369a8ed68a7dd55b46b4c29f12fab7c03a3e931de220b7bd8290f78c67a2e",
+      "text": "计算矩阵与列向量的积。"
+    },
+    {
+      "id": "Matrix3.multiplyByVector",
+      "field": "params/cartesian/description",
+      "sourceHash": "sha256:e15bde017c6ebd3146caaca26c7963b023fc8c2652f59411a88a2122b6f5b2a0",
+      "text": "列向量。"
+    },
+    {
+      "id": "Matrix3.negate",
+      "field": "description",
+      "sourceHash": "sha256:1125c125876416a7e087d92d5cebc8f39b49c75bc469ece5547521ae2ee732fe",
+      "text": "创建给定矩阵逐元素取反的副本。"
+    },
+    {
+      "id": "Matrix3.negate",
+      "field": "params/matrix/description",
+      "sourceHash": "sha256:dd63835fad2f4a048973ff6762607df7fd03675b73f628c4b17d565293be1cb9",
+      "text": "要取反的矩阵。"
+    },
+    {
+      "id": "Matrix3.packArray",
+      "field": "description",
+      "sourceHash": "sha256:78eaecb82657e76c457c2fd762473a2af52b757e46778082029447c5e30de68f",
+      "text": "将 Matrix3 数组展平为分量数组，分量按列主序存储。"
+    },
+    {
+      "id": "Matrix3.packArray",
+      "field": "params/array/description",
+      "sourceHash": "sha256:bb9ade198d9ca514ae09d3ca541dea48436d29f505db043a88f2e7c16fe4f2b1",
+      "text": "要打包的矩阵数组。"
+    },
+    {
+      "id": "Matrix3.packArray",
+      "field": "params/result/description",
+      "sourceHash": "sha256:3aed3aa222888d849125f953f975188db9d08c2685695c09462eaea615475b2f",
+      "text": "用于保存结果的数组。若为类型化数组，必须具有 array.length * 9 个分量，否则抛出 {@link DeveloperError}；若为普通数组，则调整长度为 array.length * 9。"
+    },
+    {
+      "id": "Matrix3.setColumn",
+      "field": "description",
+      "sourceHash": "sha256:83d40a118bd2856b5e8bdd612ecf233ebf6634306813c712021c23f9ae875aa3",
+      "text": "计算新矩阵，将给定矩阵的指定列替换为给定 Cartesian3 实例。"
+    },
+    {
+      "id": "Matrix3.setColumn",
+      "field": "exceptions/0/description",
+      "sourceHash": "sha256:09cfe529f9c645db28b84316ddf8ab58898fa3cb1bc4bd75474712d94e18bfa8",
+      "text": "index 必须为 0、1 或 2。"
+    },
+    {
+      "id": "Matrix3.setColumn",
+      "field": "params/cartesian/description",
+      "sourceHash": "sha256:d76bb6ec328d0a4885a878f3bd553c306502e2da3e1c9b9117242f0e43518cff",
+      "text": "其分量值要赋给指定列的笛卡尔向量。"
+    },
+    {
+      "id": "Matrix3.setColumn",
+      "field": "params/index/description",
+      "sourceHash": "sha256:9125f231d97213c50a3cf9a70468380b4a36ba88032df8c41276ccd05ce78064",
+      "text": "要设置的列索引，从零开始。"
+    },
+    {
+      "id": "Matrix3.setRotation",
+      "field": "description",
+      "sourceHash": "sha256:4bc19da2c60db366e3f808239f05e3b5453ea59a7fdcf856ba8a49d96db053ab",
+      "text": "假定矩阵为仿射变换，设置旋转。"
+    },
+    {
+      "id": "Matrix3.setRotation",
+      "field": "params/rotation/description",
+      "sourceHash": "sha256:f27bf8a32ec9579cfa755a7f66fcdea0c3230fd537df2a0074703f3a5f28f082",
+      "text": "旋转矩阵。"
+    },
+    {
+      "id": "Matrix3.setRow",
+      "field": "description",
+      "sourceHash": "sha256:358f9c948e485efb6960fd4abd78d3dfaabb4fc3e212edc0d78d918500549d2f",
+      "text": "计算新矩阵，将给定矩阵的指定行替换为给定 Cartesian3 实例。"
+    },
+    {
+      "id": "Matrix3.setRow",
+      "field": "exceptions/0/description",
+      "sourceHash": "sha256:09cfe529f9c645db28b84316ddf8ab58898fa3cb1bc4bd75474712d94e18bfa8",
+      "text": "index 必须为 0、1 或 2。"
+    },
+    {
+      "id": "Matrix3.setRow",
+      "field": "params/cartesian/description",
+      "sourceHash": "sha256:3fa32df26b52833b819de1601a272b125711194de54b48ffd71df1e68ce775b4",
+      "text": "其分量值要赋给指定行的笛卡尔向量。"
+    },
+    {
+      "id": "Matrix3.setRow",
+      "field": "params/index/description",
+      "sourceHash": "sha256:a276e9f6e18e82ea8d296b00e69052995f0894e3418b88c402ddb20f45cef9a9",
+      "text": "要设置的行索引，从零开始。"
+    },
+    {
+      "id": "Matrix3.setScale",
+      "field": "description",
+      "sourceHash": "sha256:534c20696781d4cd6d642ceb65c50f5175763b4d8452d2311deed217cffb219c",
+      "text": "计算新矩阵，用给定缩放替换原缩放。假定矩阵为仿射变换。"
+    },
+    {
+      "id": "Matrix3.setScale",
+      "field": "params/scale/description",
+      "sourceHash": "sha256:17fbc5b20d215e30cad180d80912202f47e83990ae76b7ef910babd4b3b561e3",
+      "text": "用于替换给定矩阵原缩放的缩放值。"
+    },
+    {
+      "id": "Matrix3.setUniformScale",
+      "field": "description",
+      "sourceHash": "sha256:16d5e6ef8ae51742d687c2b99fadbde4711f806beff76e02e1d557a6db5c6980",
+      "text": "计算新矩阵，用给定均匀缩放替换原缩放。假定矩阵为仿射变换。"
+    },
+    {
+      "id": "Matrix3.setUniformScale",
+      "field": "params/scale/description",
+      "sourceHash": "sha256:86d6f74e3aeb5813a061d036cf3b582e9732106c7ddd8645dc5f25e4ad27bc64",
+      "text": "用于替换给定矩阵原缩放的均匀缩放值。"
+    },
+    {
+      "id": "Matrix3.subtract",
+      "field": "description",
+      "sourceHash": "sha256:2fcbb51e3559759115c5bb59bd7994ce2769901111023602c821365f838b9923",
+      "text": "计算两个矩阵的差。"
+    },
+    {
+      "id": "Matrix3.toArray",
+      "field": "description",
+      "sourceHash": "sha256:795b8b05a2c38113f34944f34369ff3c04803b13e0b4bebdf2e5f1653990f5f9",
+      "text": "从给定 Matrix3 实例创建 Array，数组采用列主序。"
+    },
+    {
+      "id": "Matrix3.toArray",
+      "field": "params/matrix/description",
+      "sourceHash": "sha256:8e88c00aebbe72773dfa60771066c8db51e703802fcf53c8f93f59361699a705",
+      "text": "要使用的矩阵。"
+    },
+    {
+      "id": "Matrix3.toArray",
+      "field": "params/result/description",
+      "sourceHash": "sha256:380247d860f284089df90805698bb0c30254771402665590ed1d806c46a6efd5",
+      "text": "用于保存结果的 Array。"
+    },
+    {
+      "id": "Matrix3.toArray",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:ce9aec064a5193c71b9a4dcf06865af4d1e786e102aa463e3f6b1d9801e2c818",
+      "text": "修改后的 Array 参数；未提供时返回新建的 Array 实例。"
+    },
+    {
+      "id": "Matrix3.transpose",
+      "field": "description",
+      "sourceHash": "sha256:121c5ccbfea5386228e63c51a4ac91ea6b1a83d6df9740c2c7508bd614fa2675",
+      "text": "计算给定矩阵的转置。"
+    },
+    {
+      "id": "Matrix3.transpose",
+      "field": "params/matrix/description",
+      "sourceHash": "sha256:4231f560decc6ca0fa3e52f9ff57c44dfc122b5ef362ab33f9f4f7582bccd2d5",
+      "text": "要转置的矩阵。"
+    },
+    {
+      "id": "Matrix3.unpack",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:9a2153c013457bbd62864f8367d79ef45d3f54cd675915286b7b3997a20c3e1d",
+      "text": "修改后的 result 参数；未提供时返回新建的 Matrix3 实例。"
+    },
+    {
+      "id": "Matrix3.unpackArray",
+      "field": "description",
+      "sourceHash": "sha256:68d452c7384ebe02b41ed0e81240cf5064d7176d301c95d3921881a649c70e1b",
+      "text": "将列主序矩阵分量数组解包为 Matrix3 数组。"
+    },
+    {
+      "id": "Matrix3.unpackArray",
+      "field": "params/array/description",
+      "sourceHash": "sha256:761b03a4a01a1ef3a05d3ef102bd166754372e250e3053ba6067be9fe25fe5a0",
+      "text": "要解包的分量数组。"
+    },
+    {
+      "id": "Matrix3.unpackArray",
+      "field": "params/result/description",
+      "sourceHash": "sha256:e92ce6987d55381c90196bb0f2de2e9021c026fda6edb8330ecad112a8d7c273",
+      "text": "用于保存结果的数组。"
+    },
+    {
+      "id": "Matrix3.unpackArray",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:e0f13d64283eff08944af38407c51866a8ca5eece7c26aa0952f227ca9a0038c",
+      "text": "解包后的数组。"
+    },
+    {
+      "id": "Matrix3.ZERO",
+      "field": "description",
+      "sourceHash": "sha256:9dcee37cdec356f53eeaa72e90a1572a9638389c15cbe33631495a50987ace27",
+      "text": "初始化为零矩阵的不可变 Matrix3 实例。"
+    },
+    {
+      "id": "Matrix3",
+      "field": "classdesc",
+      "sourceHash": "sha256:b79fc50cd29ef69804946d65db82a0faf335fe7b3b024d078090af3652d4dd3f",
+      "text": "3x3 矩阵，可按列主序数组索引访问。构造函数参数采用行主序，以提高代码可读性。"
+    },
+    {
+      "id": "Matrix3",
+      "field": "params/column0Row0/description",
+      "sourceHash": "sha256:cc6b241f1146b74e5a62488f50e91cc47139b9f317fdb90369160bb2f8bca2d7",
+      "text": "第 0 列、第 0 行的值。"
+    },
+    {
+      "id": "Matrix3",
+      "field": "params/column0Row1/description",
+      "sourceHash": "sha256:63363cdce5ec2b6a89381462067dceddbce989612fde86dbc87e72e217dbc0a0",
+      "text": "第 0 列、第 1 行的值。"
+    },
+    {
+      "id": "Matrix3",
+      "field": "params/column0Row2/description",
+      "sourceHash": "sha256:f5b777ac7aff792d950179b30d7635de79d5970e67fa716bb8e05bf584231170",
+      "text": "第 0 列、第 2 行的值。"
+    },
+    {
+      "id": "Matrix3",
+      "field": "params/column1Row0/description",
+      "sourceHash": "sha256:57a3ce59842c5eeb2fcbed3d58e2aaf02f58afcee490595734820dd399f3d844",
+      "text": "第 1 列、第 0 行的值。"
+    },
+    {
+      "id": "Matrix3",
+      "field": "params/column1Row1/description",
+      "sourceHash": "sha256:f855c5d50fb96d457cfca700a671fb11ad156c6a66d3b36878ea5f1776110af7",
+      "text": "第 1 列、第 1 行的值。"
+    },
+    {
+      "id": "Matrix3",
+      "field": "params/column1Row2/description",
+      "sourceHash": "sha256:6d867fb767476182018135dbe081b6d9c721a7af4d52eb662c03255ca92f9129",
+      "text": "第 1 列、第 2 行的值。"
+    },
+    {
+      "id": "Matrix3",
+      "field": "params/column2Row0/description",
+      "sourceHash": "sha256:742372f500c6d64381ed9c29301a51318fbd1321172fb737d18049fac596e607",
+      "text": "第 2 列、第 0 行的值。"
+    },
+    {
+      "id": "Matrix3",
+      "field": "params/column2Row1/description",
+      "sourceHash": "sha256:f1e1d852f28285e6b9e90401f87785a7f13f9b4fa332602260c224d58e48dc51",
+      "text": "第 2 列、第 1 行的值。"
+    },
+    {
+      "id": "Matrix3",
+      "field": "params/column2Row2/description",
+      "sourceHash": "sha256:1a80d089ff254f8dffec2fd3ff537fb8ef141075078696bb330287aa4f370595",
+      "text": "第 2 列、第 2 行的值。"
+    },
+    {
+      "id": "Matrix3#clone",
+      "field": "description",
+      "sourceHash": "sha256:bf2dd9f5057c4f612cc20032a58fc2320c4ed25599415b4fc38cc844b6bf99b5",
+      "text": "复制给定 Matrix3 实例。"
+    },
+    {
+      "id": "Matrix3#clone",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:9a2153c013457bbd62864f8367d79ef45d3f54cd675915286b7b3997a20c3e1d",
+      "text": "修改后的 result 参数；未提供时返回新建的 Matrix3 实例。"
+    },
+    {
+      "id": "Matrix3#equals",
+      "field": "description",
+      "sourceHash": "sha256:5e5d2196e389edf51948ec9f25f227990cb9833845f3cd8033af51a5338c19c0",
+      "text": "将此矩阵与给定矩阵逐分量比较，相等时返回 <code>true</code>，否则返回 <code>false</code>。"
+    },
+    {
+      "id": "Matrix3#equals",
+      "field": "params/right/description",
+      "sourceHash": "sha256:6171cda230795ab2325a9f0e6422a548e16edb0fd74e3db3c61e419e1674420c",
+      "text": "右侧矩阵。"
+    },
+    {
+      "id": "Matrix3#equalsEpsilon",
+      "field": "description",
+      "sourceHash": "sha256:0cee8b59bfa40d8994d1a0b96edd6a8a2d1a28353bb3fb6e1ddbf11a295b88e4",
+      "text": "将此矩阵与给定矩阵逐分量比较，差异在给定 epsilon 范围内时返回 <code>true</code>，否则返回 <code>false</code>。"
+    },
+    {
+      "id": "Matrix3#equalsEpsilon",
+      "field": "params/epsilon/description",
+      "sourceHash": "sha256:1ab4d3a4f4ca315af12f39b1b4e64b7ec35e58ae52588c40ff36843a8836cb4b",
+      "text": "相等测试使用的 epsilon 容差。"
+    },
+    {
+      "id": "Matrix3#equalsEpsilon",
+      "field": "params/right/description",
+      "sourceHash": "sha256:6171cda230795ab2325a9f0e6422a548e16edb0fd74e3db3c61e419e1674420c",
+      "text": "右侧矩阵。"
+    },
+    {
+      "id": "Matrix3#equalsEpsilon",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:10dbf4a7ddfcc7153660dfa7cfbd4cdcdcb39e498b54dcf418df578bc90f40df",
+      "text": "若差异在给定 epsilon 范围内，则返回 <code>true</code>；否则返回 <code>false</code>。"
+    },
+    {
+      "id": "Matrix3#length",
+      "field": "description",
+      "sourceHash": "sha256:9f20b6057e769aeb911f5917fb38f6790118f5cd51957010b67f09b8529e7fc2",
+      "text": "获取集合中的元素数量。"
+    },
+    {
+      "id": "Matrix3#toString",
+      "field": "description",
+      "sourceHash": "sha256:36cd5a0a8d92d1be41d7a43eba86aad05461f1bcb6f6638bdf8dccd1599bbf31",
+      "text": "创建表示此矩阵的字符串，每行单独一行，格式为 '(column0, column1, column2)'。"
+    },
+    {
+      "id": "Matrix3#toString",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:98785c170b888365b845a9bbdacbe8c1018e27c0ea9b7031d5f87d67c88d1cea",
+      "text": "表示给定矩阵的字符串，每行单独一行，格式为 '(column0, column1, column2)'。"
+    },
+    {
+      "id": "Matrix4.abs",
+      "field": "description",
+      "sourceHash": "sha256:df9548a7833f1462dd3239881846a01e0f9fa0b92fac1a29c8eaddea9133950b",
+      "text": "计算由给定矩阵各元素绝对值组成的矩阵。"
+    },
+    {
+      "id": "Matrix4.abs",
+      "field": "params/matrix/description",
+      "sourceHash": "sha256:cf5d887129504dfb15693e3bf08c1f3a66b301681c1729821558859e22ec4f2a",
+      "text": "元素包含正负符号的矩阵。"
+    },
+    {
+      "id": "Matrix4.add",
+      "field": "description",
+      "sourceHash": "sha256:9f18ec54e345be4cb3dcb2432259c7428963559e5a408b0622934f9f5e843b43",
+      "text": "计算两个矩阵的和。"
+    },
+    {
+      "id": "Matrix4.clone",
+      "field": "description",
+      "sourceHash": "sha256:7303f022bda382219bfc36bb6faf87a2f5caaa4f1cfc517a7e4aed74914fcae8",
+      "text": "复制 Matrix4 实例。"
+    },
+    {
+      "id": "Matrix4.clone",
+      "field": "params/matrix/description",
+      "sourceHash": "sha256:d3936de0231e463b25962f0aef7b43d067e9f5b9ac5f6c342695c6c575372d6b",
+      "text": "要复制的矩阵。"
+    },
+    {
+      "id": "Matrix4.clone",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:32990a5c7fcfd3854c4c26cfdd5370bf5aaefc94d298a46c2fce5979908f5043",
+      "text": "修改后的 result 参数；未提供时返回新建的 Matrix4 实例。若 matrix 为 undefined，则返回 undefined。"
+    },
+    {
+      "id": "Matrix4.COLUMN0ROW0",
+      "field": "description",
+      "sourceHash": "sha256:1815c94b0bf512788ac2e72d7de29c8b6574eb9d348506d12aa42ad9d79bf701",
+      "text": "Matrix4 中第 0 列、第 0 行元素的索引。"
+    },
+    {
+      "id": "Matrix4.COLUMN0ROW1",
+      "field": "description",
+      "sourceHash": "sha256:c8cef0ec758f78f885202a0797432540b8f85bc99063404c6ac90399e76ab49e",
+      "text": "Matrix4 中第 0 列、第 1 行元素的索引。"
+    },
+    {
+      "id": "Matrix4.COLUMN0ROW2",
+      "field": "description",
+      "sourceHash": "sha256:1710cd55e0d2eab36dc90ceb816009f3bd9c78a97118955f5a2aea344f676bf0",
+      "text": "Matrix4 中第 0 列、第 2 行元素的索引。"
+    },
+    {
+      "id": "Matrix4.COLUMN0ROW3",
+      "field": "description",
+      "sourceHash": "sha256:65a83c06bc09cbc0a0335b224dd4f67d71e614cdbff5932188a136b8401636c8",
+      "text": "Matrix4 中第 0 列、第 3 行元素的索引。"
+    },
+    {
+      "id": "Matrix4.COLUMN1ROW0",
+      "field": "description",
+      "sourceHash": "sha256:599274cbfeaf06e2d39bd89f86cfd309ceda19e7c1fddaba06bf2b09339b28c8",
+      "text": "Matrix4 中第 1 列、第 0 行元素的索引。"
+    },
+    {
+      "id": "Matrix4.COLUMN1ROW1",
+      "field": "description",
+      "sourceHash": "sha256:f8cb9a6e44da78413db81acdd0f7dc2c8ba9db257f56f0576d01538698d8006e",
+      "text": "Matrix4 中第 1 列、第 1 行元素的索引。"
+    },
+    {
+      "id": "Matrix4.COLUMN1ROW2",
+      "field": "description",
+      "sourceHash": "sha256:78f739611fc89e94a2f332bf6cf05dfeef2f20511ecb4dc846685dfac6ddb4f0",
+      "text": "Matrix4 中第 1 列、第 2 行元素的索引。"
+    },
+    {
+      "id": "Matrix4.COLUMN1ROW3",
+      "field": "description",
+      "sourceHash": "sha256:03dbe535b9fcbed33bfa967bc5646f38e0e0dd1ef7f9e34e0f03dce43a9b8834",
+      "text": "Matrix4 中第 1 列、第 3 行元素的索引。"
+    },
+    {
+      "id": "Matrix4.COLUMN2ROW0",
+      "field": "description",
+      "sourceHash": "sha256:7609adfed903b920e7823e179b2fc0f43d124e388178f68c2df3bfd4c0c51f00",
+      "text": "Matrix4 中第 2 列、第 0 行元素的索引。"
+    },
+    {
+      "id": "Matrix4.COLUMN2ROW1",
+      "field": "description",
+      "sourceHash": "sha256:a0cb3bcc104c343b323a2b6427ef6e7f34f42bcf9c181752b44e0b3031dd354b",
+      "text": "Matrix4 中第 2 列、第 1 行元素的索引。"
+    },
+    {
+      "id": "Matrix4.COLUMN2ROW2",
+      "field": "description",
+      "sourceHash": "sha256:f8a9600287e6126530f85f9f73e751ceb69838b19a8bdfe000c30ce5046f6c9f",
+      "text": "Matrix4 中第 2 列、第 2 行元素的索引。"
+    },
+    {
+      "id": "Matrix4.COLUMN2ROW3",
+      "field": "description",
+      "sourceHash": "sha256:3a783b53a14531e390f44446a392bb18497f3e66597aee798425f23bb530c1cc",
+      "text": "Matrix4 中第 2 列、第 3 行元素的索引。"
+    },
+    {
+      "id": "Matrix4.COLUMN3ROW0",
+      "field": "description",
+      "sourceHash": "sha256:266a969c560a6e182b6f010ceceab9cdae0f6c05e2c81526af9fd9561aaf54b7",
+      "text": "Matrix4 中第 3 列、第 0 行元素的索引。"
+    },
+    {
+      "id": "Matrix4.COLUMN3ROW1",
+      "field": "description",
+      "sourceHash": "sha256:868a52bcf31f8c26197339b7b68bdec276ed3f8c54a31daa5c033d83f8a8b2c0",
+      "text": "Matrix4 中第 3 列、第 1 行元素的索引。"
+    },
+    {
+      "id": "Matrix4.COLUMN3ROW2",
+      "field": "description",
+      "sourceHash": "sha256:99c7b0a93a8c52ba94df0a23d5ff23343a5b47162b2ef6ca1b08f6f0ab07c8b6",
+      "text": "Matrix4 中第 3 列、第 2 行元素的索引。"
+    },
+    {
+      "id": "Matrix4.COLUMN3ROW3",
+      "field": "description",
+      "sourceHash": "sha256:58e3269a49941904f26bc67e6632f27e14d472ffa24a4e197bf6f9c865011873",
+      "text": "Matrix4 中第 3 列、第 3 行元素的索引。"
+    },
+    {
+      "id": "Matrix4.computeInfinitePerspectiveOffCenter",
+      "field": "description",
+      "sourceHash": "sha256:fb355badf80807530928935d2cebb0ba798224655903b6492f71f67f0b0842f2",
+      "text": "计算表示无限远偏心透视变换的 Matrix4 实例。"
+    },
+    {
+      "id": "Matrix4.computeInfinitePerspectiveOffCenter",
+      "field": "params/bottom/description",
+      "sourceHash": "sha256:b9a9eb5b038a55da1eda7f8512f7b693650dfe053793c99961dd2249d2a37b04",
+      "text": "相机下方可见范围的米数。"
+    },
+    {
+      "id": "Matrix4.computeInfinitePerspectiveOffCenter",
+      "field": "params/left/description",
+      "sourceHash": "sha256:f950ff2ad22b183ac263bf725b198a2f33b30d32e77115c6eea5fcb98bb17be4",
+      "text": "相机左侧可见范围的米数。"
+    },
+    {
+      "id": "Matrix4.computeInfinitePerspectiveOffCenter",
+      "field": "params/near/description",
+      "sourceHash": "sha256:3955f7b90d5428b2ee139376db7dbcf6ffc7d6d1a637681037fbe282affb9342",
+      "text": "到近平面的距离，单位为米。"
+    },
+    {
+      "id": "Matrix4.computeInfinitePerspectiveOffCenter",
+      "field": "params/result/description",
+      "sourceHash": "sha256:9b612b126538209ef14dd8aa26f2ef75dbd81fe28deb0cffa1f5fae78cdd066e",
+      "text": "用于保存结果的对象。"
+    },
+    {
+      "id": "Matrix4.computeInfinitePerspectiveOffCenter",
+      "field": "params/right/description",
+      "sourceHash": "sha256:df9557a477487d932742cd2b02b2f66091ac11e89a496769f78673453f93614a",
+      "text": "相机右侧可见范围的米数。"
+    },
+    {
+      "id": "Matrix4.computeInfinitePerspectiveOffCenter",
+      "field": "params/top/description",
+      "sourceHash": "sha256:ff4372720f6099dcfd63d000ff48022cf9b40e9bb94f324a49feb7f1290387c3",
+      "text": "相机上方可见范围的米数。"
+    },
+    {
+      "id": "Matrix4.computeOrthographicOffCenter",
+      "field": "description",
+      "sourceHash": "sha256:63832947e7844ee8e6e0550aa812ba6bf251cf2bd1b5fef509a91ca192104dc1",
+      "text": "计算表示正交变换矩阵的 Matrix4 实例。"
+    },
+    {
+      "id": "Matrix4.computeOrthographicOffCenter",
+      "field": "params/bottom/description",
+      "sourceHash": "sha256:b9a9eb5b038a55da1eda7f8512f7b693650dfe053793c99961dd2249d2a37b04",
+      "text": "相机下方可见范围的米数。"
+    },
+    {
+      "id": "Matrix4.computeOrthographicOffCenter",
+      "field": "params/far/description",
+      "sourceHash": "sha256:f39018fcb49ef31cc4519ec49f26e0cdb14f184e1ce886571254264b7529fbbf",
+      "text": "到远平面的距离，单位为米。"
+    },
+    {
+      "id": "Matrix4.computeOrthographicOffCenter",
+      "field": "params/left/description",
+      "sourceHash": "sha256:f950ff2ad22b183ac263bf725b198a2f33b30d32e77115c6eea5fcb98bb17be4",
+      "text": "相机左侧可见范围的米数。"
+    },
+    {
+      "id": "Matrix4.computeOrthographicOffCenter",
+      "field": "params/near/description",
+      "sourceHash": "sha256:3955f7b90d5428b2ee139376db7dbcf6ffc7d6d1a637681037fbe282affb9342",
+      "text": "到近平面的距离，单位为米。"
+    },
+    {
+      "id": "Matrix4.computeOrthographicOffCenter",
+      "field": "params/result/description",
+      "sourceHash": "sha256:9b612b126538209ef14dd8aa26f2ef75dbd81fe28deb0cffa1f5fae78cdd066e",
+      "text": "用于保存结果的对象。"
+    },
+    {
+      "id": "Matrix4.computeOrthographicOffCenter",
+      "field": "params/right/description",
+      "sourceHash": "sha256:df9557a477487d932742cd2b02b2f66091ac11e89a496769f78673453f93614a",
+      "text": "相机右侧可见范围的米数。"
+    },
+    {
+      "id": "Matrix4.computeOrthographicOffCenter",
+      "field": "params/top/description",
+      "sourceHash": "sha256:ff4372720f6099dcfd63d000ff48022cf9b40e9bb94f324a49feb7f1290387c3",
+      "text": "相机上方可见范围的米数。"
+    },
+    {
+      "id": "Matrix4.computePerspectiveFieldOfView",
+      "field": "description",
+      "sourceHash": "sha256:3aa7fb391c2ff8f537b2477812c7a68446d021dba471fbb89fdaed55e71554b1",
+      "text": "计算表示透视变换矩阵的 Matrix4 实例。"
+    },
+    {
+      "id": "Matrix4.computePerspectiveFieldOfView",
+      "field": "exceptions/0/description",
+      "sourceHash": "sha256:eb117194088c2088f18044932c7c6654fe033a743ae53b4261755efa57749710",
+      "text": "fovY 必须位于 (0, PI]。"
+    },
+    {
+      "id": "Matrix4.computePerspectiveFieldOfView",
+      "field": "exceptions/1/description",
+      "sourceHash": "sha256:490879ae37a6a3a11111290dc3933bb90896a1ee1d0970985592c0f30dba9c91",
+      "text": "aspectRatio 必须大于零。"
+    },
+    {
+      "id": "Matrix4.computePerspectiveFieldOfView",
+      "field": "exceptions/2/description",
+      "sourceHash": "sha256:f1debbb39a8f28410c10906b2e1c47728dde4bba7c2b63e97b0272a0e094ca45",
+      "text": "near 必须大于零。"
+    },
+    {
+      "id": "Matrix4.computePerspectiveFieldOfView",
+      "field": "exceptions/3/description",
+      "sourceHash": "sha256:02f1630ac352c5f6b6ac10796d33cd13b0833e49b2a388fcd1f650f32e0a91f9",
+      "text": "far 必须大于零。"
+    },
+    {
+      "id": "Matrix4.computePerspectiveFieldOfView",
+      "field": "params/aspectRatio/description",
+      "sourceHash": "sha256:05632c1f81ea6270b75512df1e30cd3b6c57ea6ee4a4a9084a7a60613f437a9d",
+      "text": "宽高比。"
+    },
+    {
+      "id": "Matrix4.computePerspectiveFieldOfView",
+      "field": "params/far/description",
+      "sourceHash": "sha256:f39018fcb49ef31cc4519ec49f26e0cdb14f184e1ce886571254264b7529fbbf",
+      "text": "到远平面的距离，单位为米。"
+    },
+    {
+      "id": "Matrix4.computePerspectiveFieldOfView",
+      "field": "params/fovY/description",
+      "sourceHash": "sha256:8d08044df1d6a2a067a607f13a0e1cb6567d4bdc05ce3fae71ac94707534f4e3",
+      "text": "沿 Y 轴的视场角，单位为弧度。"
+    },
+    {
+      "id": "Matrix4.computePerspectiveFieldOfView",
+      "field": "params/near/description",
+      "sourceHash": "sha256:3955f7b90d5428b2ee139376db7dbcf6ffc7d6d1a637681037fbe282affb9342",
+      "text": "到近平面的距离，单位为米。"
+    },
+    {
+      "id": "Matrix4.computePerspectiveFieldOfView",
+      "field": "params/result/description",
+      "sourceHash": "sha256:9b612b126538209ef14dd8aa26f2ef75dbd81fe28deb0cffa1f5fae78cdd066e",
+      "text": "用于保存结果的对象。"
+    },
+    {
+      "id": "Matrix4.computePerspectiveOffCenter",
+      "field": "description",
+      "sourceHash": "sha256:52e2946370d45b028cd8c09132bc60403ebd9f3cacc87a73e6175101e5a976e2",
+      "text": "计算表示偏心透视变换的 Matrix4 实例。"
+    },
+    {
+      "id": "Matrix4.computePerspectiveOffCenter",
+      "field": "params/bottom/description",
+      "sourceHash": "sha256:626b5259cc4bb5c86e3a48a8e5040548736721d9909dd446b16245fd45488294",
+      "text": "相机下方可见范围的米数。"
+    },
+    {
+      "id": "Matrix4.computePerspectiveOffCenter",
+      "field": "params/far/description",
+      "sourceHash": "sha256:f39018fcb49ef31cc4519ec49f26e0cdb14f184e1ce886571254264b7529fbbf",
+      "text": "到远平面的距离，单位为米。"
+    },
+    {
+      "id": "Matrix4.computePerspectiveOffCenter",
+      "field": "params/left/description",
+      "sourceHash": "sha256:f950ff2ad22b183ac263bf725b198a2f33b30d32e77115c6eea5fcb98bb17be4",
+      "text": "相机左侧可见范围的米数。"
+    },
+    {
+      "id": "Matrix4.computePerspectiveOffCenter",
+      "field": "params/near/description",
+      "sourceHash": "sha256:3955f7b90d5428b2ee139376db7dbcf6ffc7d6d1a637681037fbe282affb9342",
+      "text": "到近平面的距离，单位为米。"
+    },
+    {
+      "id": "Matrix4.computePerspectiveOffCenter",
+      "field": "params/result/description",
+      "sourceHash": "sha256:9b612b126538209ef14dd8aa26f2ef75dbd81fe28deb0cffa1f5fae78cdd066e",
+      "text": "用于保存结果的对象。"
+    },
+    {
+      "id": "Matrix4.computePerspectiveOffCenter",
+      "field": "params/right/description",
+      "sourceHash": "sha256:df9557a477487d932742cd2b02b2f66091ac11e89a496769f78673453f93614a",
+      "text": "相机右侧可见范围的米数。"
+    },
+    {
+      "id": "Matrix4.computePerspectiveOffCenter",
+      "field": "params/top/description",
+      "sourceHash": "sha256:6686e465cfab14d9c31c3f7d59c7275566691673f18d90994c7587d3ff2cb350",
+      "text": "相机上方可见范围的米数。"
+    },
+    {
+      "id": "Matrix4.computeView",
+      "field": "description",
+      "sourceHash": "sha256:9826281c6f38bf55069e6cc41b8533d89a4e68339dff86be240d6be1f3c5f173",
+      "text": "计算将世界空间变换到观察空间的 Matrix4 实例。"
+    },
+    {
+      "id": "Matrix4.computeView",
+      "field": "params/direction/description",
+      "sourceHash": "sha256:3f6ec06d6ce7e00a00a862f205a07c6109563bfdb7155a2315b6556641bffe55",
+      "text": "向前方向。"
+    },
+    {
+      "id": "Matrix4.computeView",
+      "field": "params/position/description",
+      "sourceHash": "sha256:23d445942e29a2e088c07713c29432d8672cbae41581f85ad6b76f04f316533f",
+      "text": "相机位置。"
+    },
+    {
+      "id": "Matrix4.computeView",
+      "field": "params/result/description",
+      "sourceHash": "sha256:9b612b126538209ef14dd8aa26f2ef75dbd81fe28deb0cffa1f5fae78cdd066e",
+      "text": "用于保存结果的对象。"
+    },
+    {
+      "id": "Matrix4.computeView",
+      "field": "params/right/description",
+      "sourceHash": "sha256:4816abb8a339b91742b09b924b013b6b560ff0b214af8118e730261fa94aa009",
+      "text": "右方向。"
+    },
+    {
+      "id": "Matrix4.computeView",
+      "field": "params/up/description",
+      "sourceHash": "sha256:acc8cfa656316adea028d09c4ff9b18caa78ffdfc3bbac08b93f59244c945ec6",
+      "text": "向上方向。"
+    },
+    {
+      "id": "Matrix4.computeViewportTransformation",
+      "field": "description",
+      "sourceHash": "sha256:839946f2cfcac397ab6e2678a5b307aab4fa3f25d1f6215baceda7237152e35e",
+      "text": "计算从归一化设备坐标变换到窗口坐标的 Matrix4 实例。"
+    },
+    {
+      "id": "Matrix4.computeViewportTransformation",
+      "field": "params/farDepthRange/description",
+      "sourceHash": "sha256:878e257586a2f63f4bc30294b21ecb98a0b4570874a3f3c72bd4fa0ec78f083c",
+      "text": "窗口坐标中的远平面距离。"
+    },
+    {
+      "id": "Matrix4.computeViewportTransformation",
+      "field": "params/nearDepthRange/description",
+      "sourceHash": "sha256:e9b03ab5038e215047d047913ec60ee0c2f7f13bfc517daf8e3c2ff28f8a0c20",
+      "text": "窗口坐标中的近平面距离。"
+    },
+    {
+      "id": "Matrix4.computeViewportTransformation",
+      "field": "params/result/description",
+      "sourceHash": "sha256:9b612b126538209ef14dd8aa26f2ef75dbd81fe28deb0cffa1f5fae78cdd066e",
+      "text": "用于保存结果的对象。"
+    },
+    {
+      "id": "Matrix4.computeViewportTransformation",
+      "field": "params/viewport/description",
+      "sourceHash": "sha256:63d7616d44ab83dcd0ead654be48b3fbda17ca1afbbc0d18a1aad272211c7ad8",
+      "text": "视口角点，如示例 1 所示。"
+    },
+    {
+      "id": "Matrix4.equals",
+      "field": "description",
+      "sourceHash": "sha256:0419fe25cb211280bf77be43acf3d341b7ff846df51f8f9fc8bdb6b233129998",
+      "text": "逐分量比较给定矩阵，相等时返回 <code>true</code>，否则返回 <code>false</code>。"
+    },
+    {
+      "id": "Matrix4.equalsEpsilon",
+      "field": "description",
+      "sourceHash": "sha256:110ef70bb2a67fad552cd2b992b1e5b8bed6d7972ec7a943ff20c367bb4bf4ee",
+      "text": "逐分量比较给定矩阵，差异在给定 epsilon 范围内时返回 <code>true</code>，否则返回 <code>false</code>。"
+    },
+    {
+      "id": "Matrix4.equalsEpsilon",
+      "field": "params/epsilon/description",
+      "sourceHash": "sha256:1ab4d3a4f4ca315af12f39b1b4e64b7ec35e58ae52588c40ff36843a8836cb4b",
+      "text": "相等测试使用的 epsilon 容差。"
+    },
+    {
+      "id": "Matrix4.equalsEpsilon",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:d73d821dc6b34822dfe11364cb173a7333751e53e9ef3a80bb985a26ce173b2c",
+      "text": "若 left 和 right 的差异在给定 epsilon 范围内，则返回 <code>true</code>；否则返回 <code>false</code>。"
+    },
+    {
+      "id": "Matrix4.fromArray",
+      "field": "description",
+      "sourceHash": "sha256:6af10be5042989d89b66003a39abd46bbf66a5d448fa5b89d921c86c01d86ce8",
+      "text": "使用数组中连续 16 个元素创建 Matrix4。"
+    },
+    {
+      "id": "Matrix4.fromArray",
+      "field": "params/array/description",
+      "sourceHash": "sha256:d3efe74c200af110fe9543360d82a1c4a371bc8ca8c91274debde8021959789e",
+      "text": "连续 16 个元素对应矩阵各位置的数组，按列主序解释。"
+    },
+    {
+      "id": "Matrix4.fromArray",
+      "field": "params/startingIndex/description",
+      "sourceHash": "sha256:d49364cd0bf862083018cc9f35dee565ad98e4c6e2adc321dd54dbe8946cdde0",
+      "text": "数组中首个元素的偏移，对应矩阵第一列、第一行的位置。"
+    },
+    {
+      "id": "Matrix4.fromArray",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:bc62f9b335ff37c3027d1bb85515d6eac9a63176861cd3d9e62d364a61e21000",
+      "text": "修改后的 result 参数；未提供时返回新建的 Matrix4 实例。"
+    },
+    {
+      "id": "Matrix4.fromCamera",
+      "field": "description",
+      "sourceHash": "sha256:4d54bccfbcb6003c5c8a8cfe6020a0885660de74998dffb8024a253e48e37749",
+      "text": "根据 Camera 计算 Matrix4 实例。"
+    },
+    {
+      "id": "Matrix4.fromCamera",
+      "field": "params/camera/description",
+      "sourceHash": "sha256:725fcc586eeba72b4f8490908650e37f1ef576fdea4cd8223c34710cb1b01739",
+      "text": "要使用的相机。"
+    },
+    {
+      "id": "Matrix4.fromCamera",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:d993b2a08e939643c30393a29460779a8294fe65ad2263e1987d3391d4972eeb",
+      "text": "修改后的 result 参数；未提供时返回新建的 Matrix4 实例。"
+    },
+    {
+      "id": "Matrix4.fromColumnMajorArray",
+      "field": "description",
+      "sourceHash": "sha256:2df2c0ea87e45795fb1949c30ee366b0d7c03accdbef4b1033effef77a297da2",
+      "text": "从列主序数组计算 Matrix4 实例。"
+    },
+    {
+      "id": "Matrix4.fromColumnMajorArray",
+      "field": "params/values/description",
+      "sourceHash": "sha256:c6cb65f403e7918c1bfae1c241ae978b83e48005f87783e6e98f7cdfc5bb96bb",
+      "text": "列主序数组。"
+    },
+    {
+      "id": "Matrix4.fromColumnMajorArray",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:d993b2a08e939643c30393a29460779a8294fe65ad2263e1987d3391d4972eeb",
+      "text": "修改后的 result 参数；未提供时返回新建的 Matrix4 实例。"
+    },
+    {
+      "id": "Matrix4.fromRotation",
+      "field": "description",
+      "sourceHash": "sha256:8290ea3bc1521f44e6712b227d8431e295698db61351d2009e0a297b0175c8c8",
+      "text": "创建旋转矩阵。"
+    },
+    {
+      "id": "Matrix4.fromRotation",
+      "field": "params/rotation/description",
+      "sourceHash": "sha256:f27bf8a32ec9579cfa755a7f66fcdea0c3230fd537df2a0074703f3a5f28f082",
+      "text": "旋转矩阵。"
+    },
+    {
+      "id": "Matrix4.fromRotation",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:d993b2a08e939643c30393a29460779a8294fe65ad2263e1987d3391d4972eeb",
+      "text": "修改后的 result 参数；未提供时返回新建的 Matrix4 实例。"
+    },
+    {
+      "id": "Matrix4.fromRotationTranslation",
+      "field": "description",
+      "sourceHash": "sha256:794b7dfd4ff4aed90ea1fd7e30464a45805a07fb29b838d8511a2d47a77530a5",
+      "text": "由表示旋转的 Matrix3 和表示平移的 Cartesian3 计算 Matrix4 实例。"
+    },
+    {
+      "id": "Matrix4.fromRotationTranslation",
+      "field": "params/rotation/description",
+      "sourceHash": "sha256:05198b777c7b44a0c53b36cbe0ec44b61fe8748f3d80189b2c21577cd84fa5de",
+      "text": "矩阵左上方表示旋转的部分。"
+    },
+    {
+      "id": "Matrix4.fromRotationTranslation",
+      "field": "params/translation/description",
+      "sourceHash": "sha256:560b13bc65ac8cae5ca8a2a5e6b276c75986cb4130182bbf2a4349d69b987386",
+      "text": "矩阵右上方表示平移的部分。"
+    },
+    {
+      "id": "Matrix4.fromRotationTranslation",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:d993b2a08e939643c30393a29460779a8294fe65ad2263e1987d3391d4972eeb",
+      "text": "修改后的 result 参数；未提供时返回新建的 Matrix4 实例。"
+    },
+    {
+      "id": "Matrix4.fromRowMajorArray",
+      "field": "description",
+      "sourceHash": "sha256:e0b0aeb90ecd4d030762e1b790f5656222d801994a90f2cbe9b11af9380ff3de",
+      "text": "从行主序数组计算 Matrix4 实例。生成的矩阵按列主序存储。"
+    },
+    {
+      "id": "Matrix4.fromRowMajorArray",
+      "field": "params/values/description",
+      "sourceHash": "sha256:6800823c3686cedd1098273f61d24fa4ad6f5bbc22062697bafa0a73df7f111c",
+      "text": "行主序数组。"
+    },
+    {
+      "id": "Matrix4.fromRowMajorArray",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:d993b2a08e939643c30393a29460779a8294fe65ad2263e1987d3391d4972eeb",
+      "text": "修改后的 result 参数；未提供时返回新建的 Matrix4 实例。"
+    },
+    {
+      "id": "Matrix4.fromScale",
+      "field": "description",
+      "sourceHash": "sha256:b7042fce10338cb665eab527dd016bf1535548ae9aba0e5d4406fad90516a4a7",
+      "text": "计算表示非均匀缩放的 Matrix4 实例。"
+    },
+    {
+      "id": "Matrix4.fromScale",
+      "field": "params/scale/description",
+      "sourceHash": "sha256:44b3fc95a735cc1573f472009f3a63e4a0acac6b9dcbfd5eefac75d6c615951b",
+      "text": "x、y、z 方向的缩放系数。"
+    },
+    {
+      "id": "Matrix4.fromScale",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:d993b2a08e939643c30393a29460779a8294fe65ad2263e1987d3391d4972eeb",
+      "text": "修改后的 result 参数；未提供时返回新建的 Matrix4 实例。"
+    },
+    {
+      "id": "Matrix4.fromTranslation",
+      "field": "description",
+      "sourceHash": "sha256:ebac469a1e11ab2bc1b001976cdfe875535caa94deb972cda9b5517cb61c8e65",
+      "text": "由表示平移的 Cartesian3 创建 Matrix4 实例。"
+    },
+    {
+      "id": "Matrix4.fromTranslation",
+      "field": "params/translation/description",
+      "sourceHash": "sha256:560b13bc65ac8cae5ca8a2a5e6b276c75986cb4130182bbf2a4349d69b987386",
+      "text": "矩阵右上方表示平移的部分。"
+    },
+    {
+      "id": "Matrix4.fromTranslation",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:d993b2a08e939643c30393a29460779a8294fe65ad2263e1987d3391d4972eeb",
+      "text": "修改后的 result 参数；未提供时返回新建的 Matrix4 实例。"
+    },
+    {
+      "id": "Matrix4.fromTranslationQuaternionRotationScale",
+      "field": "description",
+      "sourceHash": "sha256:d58a0e6814961b6f564da8c965710a91af8fc166d719b1d580d7d045457ceaee",
+      "text": "根据平移、旋转和缩放（TRS）表示计算 Matrix4 实例，其中旋转使用四元数。"
+    },
+    {
+      "id": "Matrix4.fromTranslationQuaternionRotationScale",
+      "field": "params/rotation/description",
+      "sourceHash": "sha256:06675c2da162939c65acce26f80c8477b95ba5b039428f5487468694cbc8e9a1",
+      "text": "旋转变换。"
+    },
+    {
+      "id": "Matrix4.fromTranslationQuaternionRotationScale",
+      "field": "params/scale/description",
+      "sourceHash": "sha256:84250730ca38c04b6e092b0e511a94c8c6f5c67d0459b2f93dabc816c0bf437b",
+      "text": "非均匀缩放变换。"
+    },
+    {
+      "id": "Matrix4.fromTranslationQuaternionRotationScale",
+      "field": "params/translation/description",
+      "sourceHash": "sha256:2fb80f4e4014f87bd2de417d84d55bf691a85b9e3f93110c616e97d963e720ae",
+      "text": "平移变换。"
+    },
+    {
+      "id": "Matrix4.fromTranslationQuaternionRotationScale",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:d993b2a08e939643c30393a29460779a8294fe65ad2263e1987d3391d4972eeb",
+      "text": "修改后的 result 参数；未提供时返回新建的 Matrix4 实例。"
+    },
+    {
+      "id": "Matrix4.fromTranslationRotationScale",
+      "field": "description",
+      "sourceHash": "sha256:1e4addb4a1a8d0ef1accb7cecaf390bf97b5e38532b34843df78e8dd6366fa74",
+      "text": "根据 {@link TranslationRotationScale} 实例创建 Matrix4 实例。"
+    },
+    {
+      "id": "Matrix4.fromTranslationRotationScale",
+      "field": "params/translationRotationScale/description",
+      "sourceHash": "sha256:8a64cd4813758044244d19657e38df00d038c5a12dea414263f6bd89e643dc3c",
+      "text": "实例。"
+    },
+    {
+      "id": "Matrix4.fromTranslationRotationScale",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:d993b2a08e939643c30393a29460779a8294fe65ad2263e1987d3391d4972eeb",
+      "text": "修改后的 result 参数；未提供时返回新建的 Matrix4 实例。"
+    },
+    {
+      "id": "Matrix4.fromUniformScale",
+      "field": "description",
+      "sourceHash": "sha256:bea8af51e66c010c24dbced435a1ed3c5d75d6c3d2f956c80465701f15e1dbc9",
+      "text": "计算表示均匀缩放的 Matrix4 实例。"
+    },
+    {
+      "id": "Matrix4.fromUniformScale",
+      "field": "params/scale/description",
+      "sourceHash": "sha256:36394d0763ec7a25b5318b12ab1d9d35e439e3badbecd002ae65a3eb6cbd73bd",
+      "text": "均匀缩放系数。"
+    },
+    {
+      "id": "Matrix4.fromUniformScale",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:d993b2a08e939643c30393a29460779a8294fe65ad2263e1987d3391d4972eeb",
+      "text": "修改后的 result 参数；未提供时返回新建的 Matrix4 实例。"
+    },
+    {
+      "id": "Matrix4.getColumn",
+      "field": "description",
+      "sourceHash": "sha256:e50ff9bff36b7e0454d25daee11e443c3bb747a3e5afe27d027d3f78316f34ec",
+      "text": "以 Cartesian4 实例形式获取矩阵指定索引列的副本。"
+    },
+    {
+      "id": "Matrix4.getColumn",
+      "field": "exceptions/0/description",
+      "sourceHash": "sha256:a8f06e82da728b3db0877dcfdd17164344425939d5fab4768ce04b9230b68ecd",
+      "text": "index 必须为 0、1、2 或 3。"
+    },
+    {
+      "id": "Matrix4.getColumn",
+      "field": "params/index/description",
+      "sourceHash": "sha256:45856c6a6d46bd4eda5e3c56bc78a61e6269db22e6890dd0491ecfdf722f59a2",
+      "text": "要获取的列索引，从零开始。"
+    },
+    {
+      "id": "Matrix4.getElementIndex",
+      "field": "description",
+      "sourceHash": "sha256:2ce89286f12f92933a2cfb7a96c4e28fe1db551f89d7a74f879c232029094585",
+      "text": "计算给定行列处元素的数组索引。"
+    },
+    {
+      "id": "Matrix4.getElementIndex",
+      "field": "exceptions/0/description",
+      "sourceHash": "sha256:29d304597fb8c7f28bb5280ee1d55419229056c5758b604bbb5a9d3567fc6936",
+      "text": "row 必须为 0、1、2 或 3。"
+    },
+    {
+      "id": "Matrix4.getElementIndex",
+      "field": "exceptions/1/description",
+      "sourceHash": "sha256:b4ffb2098dd4ec77ab174a1ba60437f4f6ddb9bd754f85c2a39880d62fa54233",
+      "text": "column 必须为 0、1、2 或 3。"
+    },
+    {
+      "id": "Matrix4.getElementIndex",
+      "field": "params/column/description",
+      "sourceHash": "sha256:bcb5c8606f27d65f0c77fec63ba9898dc57ed863396a8c9585065761dbc1d0b1",
+      "text": "列索引，从零开始。"
+    },
+    {
+      "id": "Matrix4.getElementIndex",
+      "field": "params/row/description",
+      "sourceHash": "sha256:1bd47057a0e886925db1329f4fca3e73c262a315dcef037e724a8460d0cb19b7",
+      "text": "行索引，从零开始。"
+    },
+    {
+      "id": "Matrix4.getElementIndex",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:182481131fffef8a8a11e9803e28f368b05614b71e8bba453c56c13141b7a3b1",
+      "text": "给定行列处元素的索引。"
+    },
+    {
+      "id": "Matrix4.getMatrix3",
+      "field": "description",
+      "sourceHash": "sha256:bfa0b4bdb0cbf68b50d36219fefc0325e95131926d82d0fb07ece9b243d1ab55",
+      "text": "获取给定矩阵左上方的 3x3 矩阵。"
+    },
+    {
+      "id": "Matrix4.getMaximumScale",
+      "field": "description",
+      "sourceHash": "sha256:3c0d91a6b347c92d7d69bb66b1a1028eebfa7e74223bdceac1af122979f9f10c",
+      "text": "假定矩阵为仿射变换，计算最大缩放系数，即左上方 3x3 矩阵各列向量长度的最大值。"
+    },
+    {
+      "id": "Matrix4.getMaximumScale",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:e843c96e44ace41ef6b08bf1d23a82a726eca92f3838551789440f8a1be8a6e1",
+      "text": "最大缩放系数。"
+    },
+    {
+      "id": "Matrix4.getRotation",
+      "field": "description",
+      "sourceHash": "sha256:3f4778044e95847dafa7587174469751f8494da76f78d1d7a0d1e0339600d829",
+      "text": "假定矩阵为仿射变换，提取旋转矩阵。"
+    },
+    {
+      "id": "Matrix4.getRow",
+      "field": "description",
+      "sourceHash": "sha256:43d63c7beed7b1d11ca89bcadb37fc5dd0b1fdf6b8f8704bc3fca54194990ba7",
+      "text": "以 Cartesian4 实例形式获取矩阵指定索引行的副本。"
+    },
+    {
+      "id": "Matrix4.getRow",
+      "field": "exceptions/0/description",
+      "sourceHash": "sha256:a8f06e82da728b3db0877dcfdd17164344425939d5fab4768ce04b9230b68ecd",
+      "text": "index 必须为 0、1、2 或 3。"
+    },
+    {
+      "id": "Matrix4.getRow",
+      "field": "params/index/description",
+      "sourceHash": "sha256:c4455db6dee069d75f6b2e44b579ba30a9f0022e6605791b147aaf295705a956",
+      "text": "要获取的行索引，从零开始。"
+    },
+    {
+      "id": "Matrix4.getScale",
+      "field": "description",
+      "sourceHash": "sha256:eb51cca17c14b147e112da86be21db322d1d6655e4acecf3be59b8bb36412ab1",
+      "text": "假定矩阵为仿射变换，提取非均匀缩放。"
+    },
+    {
+      "id": "Matrix4.getScale",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:ae79fcd815358c776448a53c1098d6f3ccc98c8e210f0fb1fb8fa69b624daffb",
+      "text": "修改后的 result 参数。"
+    },
+    {
+      "id": "Matrix4.getTranslation",
+      "field": "description",
+      "sourceHash": "sha256:12c847e17375994e3747856dd0c5384a9e1fcf7c88105792154a44bbc3c91d2c",
+      "text": "假定矩阵为仿射变换矩阵，获取其平移部分。"
+    },
+    {
+      "id": "Matrix4.IDENTITY",
+      "field": "description",
+      "sourceHash": "sha256:2503e4be0bb59411fe1ceb7178c7904acbded8ba77ac949938a8cd37acce73f2",
+      "text": "初始化为单位矩阵的不可变 Matrix4 实例。"
+    },
+    {
+      "id": "Matrix4.inverse",
+      "field": "description",
+      "sourceHash": "sha256:225b8f6d94a47fff5eae7035f16c70b6432fe150875aff3e8f86582917cf6047",
+      "text": "使用克拉默法则计算给定矩阵的逆矩阵。若行列式为零，则矩阵不可逆并抛出异常。若矩阵为规范的刚体变换，使用 {@link Matrix4.inverseTransformation} 求逆更高效。"
+    },
+    {
+      "id": "Matrix4.inverse",
+      "field": "exceptions/0/description",
+      "sourceHash": "sha256:7a88c14c5d6185d10e01d0438713c24978a93577dd0ff1faaf11f31ee0ff84e1",
+      "text": "matrix 的行列式为零，因此不可逆。"
+    },
+    {
+      "id": "Matrix4.inverse",
+      "field": "params/matrix/description",
+      "sourceHash": "sha256:015d2d36d072e52863dbfe037b36bf444548f4396dc2b29bca7f2553294a25cf",
+      "text": "要求逆的矩阵。"
+    },
+    {
+      "id": "Matrix4.inverseTransformation",
+      "field": "description",
+      "sourceHash": "sha256:6aeb562f5cb552af23be50a383b45da7577002b10127d50723baa865c5a66970",
+      "text": "假定给定矩阵为规范刚体变换并计算其逆矩阵：左上方 3x3 元素为旋转矩阵，第四列的前三个元素为平移，底行为 [0, 0, 0, 1]。不会验证矩阵是否符合此形式。此方法比通过 {@link Matrix4.inverse} 对一般 4x4 矩阵求逆更快。"
+    },
+    {
+      "id": "Matrix4.inverseTransformation",
+      "field": "params/matrix/description",
+      "sourceHash": "sha256:015d2d36d072e52863dbfe037b36bf444548f4396dc2b29bca7f2553294a25cf",
+      "text": "要求逆的矩阵。"
+    },
+    {
+      "id": "Matrix4.inverseTranspose",
+      "field": "description",
+      "sourceHash": "sha256:56de02858e8fb42981a9e963a78dd51073d38c1e7565f08e2b00ace0217849e9",
+      "text": "计算矩阵的逆转置。"
+    },
+    {
+      "id": "Matrix4.inverseTranspose",
+      "field": "params/matrix/description",
+      "sourceHash": "sha256:f4f1eee76eda28f6e28681cd8b8e69455a9ce3c072ed4785fd3543d1aaedae67",
+      "text": "要转置并求逆的矩阵。"
+    },
+    {
+      "id": "Matrix4.multiply",
+      "field": "description",
+      "sourceHash": "sha256:bb0a5a9d6755e29a4e0710a7ab2d572b99ad21cf5a26a8e05c1a05b399aec951",
+      "text": "计算两个矩阵的积。"
+    },
+    {
+      "id": "Matrix4.multiplyByMatrix3",
+      "field": "description",
+      "sourceHash": "sha256:10f21622aabd6eb6721417f7f33aa26bb160ef73ec3f022c1d5759713a256f88",
+      "text": "将底行为 <code>[0.0, 0.0, 0.0, 1.0]</code> 的变换矩阵与 3x3 旋转矩阵相乘。相当于优化的 <code>Matrix4.multiply(m, Matrix4.fromRotationTranslation(rotation), m);</code>，减少内存分配和算术运算。"
+    },
+    {
+      "id": "Matrix4.multiplyByMatrix3",
+      "field": "params/matrix/description",
+      "sourceHash": "sha256:134731582a96e5ffffc5b46debabbf28a2fc32ec743ba87ad342f819ab593826",
+      "text": "左侧矩阵。"
+    },
+    {
+      "id": "Matrix4.multiplyByMatrix3",
+      "field": "params/rotation/description",
+      "sourceHash": "sha256:044dcfa76ff0a759af0eab38e737870822978693423e7206bc0dd7004a14cf93",
+      "text": "右侧的 3x3 旋转矩阵。"
+    },
+    {
+      "id": "Matrix4.multiplyByPoint",
+      "field": "description",
+      "sourceHash": "sha256:da9be16f62bc8b3495c9bf852cf38b19322e1a7ae00c92547e4127a80f7cd523",
+      "text": "计算矩阵与 {@link Cartesian3} 的积。相当于使用 <code>w</code> 分量为 1 的 {@link Cartesian4} 调用 {@link Matrix4.multiplyByVector}，但返回 {@link Cartesian3} 而非 {@link Cartesian4}。"
+    },
+    {
+      "id": "Matrix4.multiplyByPoint",
+      "field": "params/cartesian/description",
+      "sourceHash": "sha256:54b563f410f50fbc072615f79455e900428e67f058313f840ca164b9954c8415",
+      "text": "点。"
+    },
+    {
+      "id": "Matrix4.multiplyByPointAsVector",
+      "field": "description",
+      "sourceHash": "sha256:6fa5f71f2830f1a4477e7739988e428965f6501c8e036e6f7eee978493d51b15",
+      "text": "计算矩阵与 {@link Cartesian3} 的积。相当于使用 <code>w</code> 分量为零的 {@link Cartesian4} 调用 {@link Matrix4.multiplyByVector}。"
+    },
+    {
+      "id": "Matrix4.multiplyByPointAsVector",
+      "field": "params/cartesian/description",
+      "sourceHash": "sha256:54b563f410f50fbc072615f79455e900428e67f058313f840ca164b9954c8415",
+      "text": "点。"
+    },
+    {
+      "id": "Matrix4.multiplyByScalar",
+      "field": "description",
+      "sourceHash": "sha256:a45cd59b8500d94534029b4ed20afb5abd29c5715c56e11a69495cc559affdd4",
+      "text": "计算矩阵与标量的积。"
+    },
+    {
+      "id": "Matrix4.multiplyByScalar",
+      "field": "params/scalar/description",
+      "sourceHash": "sha256:ae9330bd868ec9d9687271dc8831869a1bac85c6ecb1950c52417b4b5816600d",
+      "text": "要乘的数值。"
+    },
+    {
+      "id": "Matrix4.multiplyByScale",
+      "field": "description",
+      "sourceHash": "sha256:81cfe5742f24bb6608e288b585381cb80a7cc4ba8b7acd2315debb8f846174c0",
+      "text": "将底行为 <code>[0.0, 0.0, 0.0, 1.0]</code> 的仿射变换矩阵与隐式非均匀缩放矩阵相乘。这是 <code>Matrix4.multiply(m, Matrix4.fromUniformScale(scale), m);</code> 的优化形式，其中 <code>m</code> 必须为仿射矩阵。此函数减少内存分配和算术运算。"
+    },
+    {
+      "id": "Matrix4.multiplyByScale",
+      "field": "params/matrix/description",
+      "sourceHash": "sha256:f824ec0d2dd8f16e9149f4ecd3a480dee18b69bea1cbf49171135263f72e15d8",
+      "text": "左侧的仿射矩阵。"
+    },
+    {
+      "id": "Matrix4.multiplyByScale",
+      "field": "params/scale/description",
+      "sourceHash": "sha256:b37a0d54b5747baeb1e84872c4efb38da996e37ac59e47c8c8e1cc77fc264bfb",
+      "text": "右侧非均匀缩放。"
+    },
+    {
+      "id": "Matrix4.multiplyByTranslation",
+      "field": "description",
+      "sourceHash": "sha256:fd51b63b6c766f0b77b35ea8571eefc1197259d1f129157acb66440a0d84b99d",
+      "text": "将底行为 <code>[0.0, 0.0, 0.0, 1.0]</code> 的变换矩阵与 {@link Cartesian3} 定义的隐式平移矩阵相乘。相当于优化的 <code>Matrix4.multiply(m, Matrix4.fromTranslation(position), m);</code>，减少内存分配和算术运算。"
+    },
+    {
+      "id": "Matrix4.multiplyByTranslation",
+      "field": "params/matrix/description",
+      "sourceHash": "sha256:134731582a96e5ffffc5b46debabbf28a2fc32ec743ba87ad342f819ab593826",
+      "text": "左侧矩阵。"
+    },
+    {
+      "id": "Matrix4.multiplyByTranslation",
+      "field": "params/translation/description",
+      "sourceHash": "sha256:563d639235bd78ab21c31cd5efb5cde8da0d1874166de0c2b1eff3d4a6ef5dde",
+      "text": "右侧平移。"
+    },
+    {
+      "id": "Matrix4.multiplyByUniformScale",
+      "field": "description",
+      "sourceHash": "sha256:3402b2f37391c94d2e196b92d059bd4baae319df372c131e2969979a4677e740",
+      "text": "计算矩阵与均匀缩放的积，将缩放视为缩放矩阵。"
+    },
+    {
+      "id": "Matrix4.multiplyByUniformScale",
+      "field": "params/matrix/description",
+      "sourceHash": "sha256:134731582a96e5ffffc5b46debabbf28a2fc32ec743ba87ad342f819ab593826",
+      "text": "左侧矩阵。"
+    },
+    {
+      "id": "Matrix4.multiplyByUniformScale",
+      "field": "params/scale/description",
+      "sourceHash": "sha256:2d92c281d8274f729bffc9bcd996ca39d8b7e1f36550603bc8c9defd7c28135e",
+      "text": "右侧均匀缩放。"
+    },
+    {
+      "id": "Matrix4.multiplyByVector",
+      "field": "description",
+      "sourceHash": "sha256:567369a8ed68a7dd55b46b4c29f12fab7c03a3e931de220b7bd8290f78c67a2e",
+      "text": "计算矩阵与列向量的积。"
+    },
+    {
+      "id": "Matrix4.multiplyByVector",
+      "field": "params/cartesian/description",
+      "sourceHash": "sha256:93599b7c100d6f578fc5bcfa6af9b6ae16ad7ebe3b333e074ad4b313a8c8395c",
+      "text": "向量。"
+    },
+    {
+      "id": "Matrix4.multiplyTransformation",
+      "field": "description",
+      "sourceHash": "sha256:9b9a00eaa5e8f107a01e56f2a30c05552a5cb13f3e8ac04782790c3c5b17b667",
+      "text": "假定两个矩阵为仿射变换矩阵并计算其积：左上方 3x3 元素可为任意矩阵，第四列的前三个元素为平移，底行为 [0, 0, 0, 1]。不会验证矩阵是否符合此形式。此方法比通过 {@link Matrix4.multiply} 计算一般 4x4 矩阵的积更快。"
+    },
+    {
+      "id": "Matrix4.negate",
+      "field": "description",
+      "sourceHash": "sha256:5d5f24db4c4ae3d354bad4455558d6c377babb04012358e10081ae992a95ebd8",
+      "text": "计算给定矩阵逐元素取反的副本。"
+    },
+    {
+      "id": "Matrix4.negate",
+      "field": "params/matrix/description",
+      "sourceHash": "sha256:dd63835fad2f4a048973ff6762607df7fd03675b73f628c4b17d565293be1cb9",
+      "text": "要取反的矩阵。"
+    },
+    {
+      "id": "Matrix4.packArray",
+      "field": "description",
+      "sourceHash": "sha256:46646f8f03bb68887a254d43462444d962ceba59670c24adef6a38b59cb007d1",
+      "text": "将 Matrix4 数组展平为分量数组，分量按列主序存储。"
+    },
+    {
+      "id": "Matrix4.packArray",
+      "field": "params/array/description",
+      "sourceHash": "sha256:bb9ade198d9ca514ae09d3ca541dea48436d29f505db043a88f2e7c16fe4f2b1",
+      "text": "要打包的矩阵数组。"
+    },
+    {
+      "id": "Matrix4.packArray",
+      "field": "params/result/description",
+      "sourceHash": "sha256:c5b9e1d36229f4aa0b28aba48f8bba71c2def98e0619631bb215eaea7d48057d",
+      "text": "用于保存结果的数组。若为类型化数组，必须具有 array.length * 16 个分量，否则抛出 {@link DeveloperError}；若为普通数组，则调整长度为 array.length * 16。"
+    },
+    {
+      "id": "Matrix4.setColumn",
+      "field": "description",
+      "sourceHash": "sha256:040d02ae1b7abfdc5a8638df0919c15e38e5023dd7333c5f21508b7086de766a",
+      "text": "计算新矩阵，将给定矩阵的指定列替换为给定 Cartesian4 实例。"
+    },
+    {
+      "id": "Matrix4.setColumn",
+      "field": "exceptions/0/description",
+      "sourceHash": "sha256:a8f06e82da728b3db0877dcfdd17164344425939d5fab4768ce04b9230b68ecd",
+      "text": "index 必须为 0、1、2 或 3。"
+    },
+    {
+      "id": "Matrix4.setColumn",
+      "field": "params/cartesian/description",
+      "sourceHash": "sha256:d76bb6ec328d0a4885a878f3bd553c306502e2da3e1c9b9117242f0e43518cff",
+      "text": "其分量值要赋给指定列的笛卡尔向量。"
+    },
+    {
+      "id": "Matrix4.setColumn",
+      "field": "params/index/description",
+      "sourceHash": "sha256:9125f231d97213c50a3cf9a70468380b4a36ba88032df8c41276ccd05ce78064",
+      "text": "要设置的列索引，从零开始。"
+    },
+    {
+      "id": "Matrix4.setRotation",
+      "field": "description",
+      "sourceHash": "sha256:4bc19da2c60db366e3f808239f05e3b5453ea59a7fdcf856ba8a49d96db053ab",
+      "text": "假定矩阵为仿射变换，设置旋转。"
+    },
+    {
+      "id": "Matrix4.setRotation",
+      "field": "params/rotation/description",
+      "sourceHash": "sha256:f27bf8a32ec9579cfa755a7f66fcdea0c3230fd537df2a0074703f3a5f28f082",
+      "text": "旋转矩阵。"
+    },
+    {
+      "id": "Matrix4.setRow",
+      "field": "description",
+      "sourceHash": "sha256:ac4f4a220b770a95f70112905ed4702d56cfb1969b0e7f7eccbd0c1892e6ab3d",
+      "text": "计算新矩阵，将给定矩阵的指定行替换为给定 Cartesian4 实例。"
+    },
+    {
+      "id": "Matrix4.setRow",
+      "field": "exceptions/0/description",
+      "sourceHash": "sha256:a8f06e82da728b3db0877dcfdd17164344425939d5fab4768ce04b9230b68ecd",
+      "text": "index 必须为 0、1、2 或 3。"
+    },
+    {
+      "id": "Matrix4.setRow",
+      "field": "params/cartesian/description",
+      "sourceHash": "sha256:3fa32df26b52833b819de1601a272b125711194de54b48ffd71df1e68ce775b4",
+      "text": "其分量值要赋给指定行的笛卡尔向量。"
+    },
+    {
+      "id": "Matrix4.setRow",
+      "field": "params/index/description",
+      "sourceHash": "sha256:a276e9f6e18e82ea8d296b00e69052995f0894e3418b88c402ddb20f45cef9a9",
+      "text": "要设置的行索引，从零开始。"
+    },
+    {
+      "id": "Matrix4.setScale",
+      "field": "description",
+      "sourceHash": "sha256:534c20696781d4cd6d642ceb65c50f5175763b4d8452d2311deed217cffb219c",
+      "text": "计算新矩阵，用给定缩放替换原缩放。假定矩阵为仿射变换。"
+    },
+    {
+      "id": "Matrix4.setScale",
+      "field": "params/scale/description",
+      "sourceHash": "sha256:17fbc5b20d215e30cad180d80912202f47e83990ae76b7ef910babd4b3b561e3",
+      "text": "用于替换给定矩阵原缩放的缩放值。"
+    },
+    {
+      "id": "Matrix4.setTranslation",
+      "field": "description",
+      "sourceHash": "sha256:df7734d1db6cacb354914f5802b2aa5626a385074249c985db1c26ded9580387",
+      "text": "计算新矩阵，将给定矩阵最右列的平移替换为给定平移。假定矩阵为仿射变换。"
+    },
+    {
+      "id": "Matrix4.setTranslation",
+      "field": "params/translation/description",
+      "sourceHash": "sha256:afc39c105c26cd0ad96b52390f6293e232bc6cf710ada717cf667238f80dda3c",
+      "text": "用于替换给定矩阵原平移的平移值。"
+    },
+    {
+      "id": "Matrix4.setUniformScale",
+      "field": "description",
+      "sourceHash": "sha256:16d5e6ef8ae51742d687c2b99fadbde4711f806beff76e02e1d557a6db5c6980",
+      "text": "计算新矩阵，用给定均匀缩放替换原缩放。假定矩阵为仿射变换。"
+    },
+    {
+      "id": "Matrix4.setUniformScale",
+      "field": "params/scale/description",
+      "sourceHash": "sha256:86d6f74e3aeb5813a061d036cf3b582e9732106c7ddd8645dc5f25e4ad27bc64",
+      "text": "用于替换给定矩阵原缩放的均匀缩放值。"
+    },
+    {
+      "id": "Matrix4.subtract",
+      "field": "description",
+      "sourceHash": "sha256:2fcbb51e3559759115c5bb59bd7994ce2769901111023602c821365f838b9923",
+      "text": "计算两个矩阵的差。"
+    },
+    {
+      "id": "Matrix4.toArray",
+      "field": "description",
+      "sourceHash": "sha256:eb0cbdec555dbfe50cd5db73754a1da893be4f65afc6e167615155378ded2b19",
+      "text": "从给定 Matrix4 实例计算 Array，数组采用列主序。"
+    },
+    {
+      "id": "Matrix4.toArray",
+      "field": "params/matrix/description",
+      "sourceHash": "sha256:8e88c00aebbe72773dfa60771066c8db51e703802fcf53c8f93f59361699a705",
+      "text": "要使用的矩阵。"
+    },
+    {
+      "id": "Matrix4.toArray",
+      "field": "params/result/description",
+      "sourceHash": "sha256:380247d860f284089df90805698bb0c30254771402665590ed1d806c46a6efd5",
+      "text": "用于保存结果的 Array。"
+    },
+    {
+      "id": "Matrix4.toArray",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:ce9aec064a5193c71b9a4dcf06865af4d1e786e102aa463e3f6b1d9801e2c818",
+      "text": "修改后的 Array 参数；未提供时返回新建的 Array 实例。"
+    },
+    {
+      "id": "Matrix4.transpose",
+      "field": "description",
+      "sourceHash": "sha256:121c5ccbfea5386228e63c51a4ac91ea6b1a83d6df9740c2c7508bd614fa2675",
+      "text": "计算给定矩阵的转置。"
+    },
+    {
+      "id": "Matrix4.transpose",
+      "field": "params/matrix/description",
+      "sourceHash": "sha256:4231f560decc6ca0fa3e52f9ff57c44dfc122b5ef362ab33f9f4f7582bccd2d5",
+      "text": "要转置的矩阵。"
+    },
+    {
+      "id": "Matrix4.unpack",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:bc62f9b335ff37c3027d1bb85515d6eac9a63176861cd3d9e62d364a61e21000",
+      "text": "修改后的 result 参数；未提供时返回新建的 Matrix4 实例。"
+    },
+    {
+      "id": "Matrix4.unpackArray",
+      "field": "description",
+      "sourceHash": "sha256:f79ee05c6ad94aaa35a8953bb5e8650aef099a2d89b0666b8af176d0daf526b4",
+      "text": "将列主序矩阵分量数组解包为 Matrix4 数组。"
+    },
+    {
+      "id": "Matrix4.unpackArray",
+      "field": "params/array/description",
+      "sourceHash": "sha256:761b03a4a01a1ef3a05d3ef102bd166754372e250e3053ba6067be9fe25fe5a0",
+      "text": "要解包的分量数组。"
+    },
+    {
+      "id": "Matrix4.unpackArray",
+      "field": "params/result/description",
+      "sourceHash": "sha256:e92ce6987d55381c90196bb0f2de2e9021c026fda6edb8330ecad112a8d7c273",
+      "text": "用于保存结果的数组。"
+    },
+    {
+      "id": "Matrix4.unpackArray",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:e0f13d64283eff08944af38407c51866a8ca5eece7c26aa0952f227ca9a0038c",
+      "text": "解包后的数组。"
+    },
+    {
+      "id": "Matrix4.ZERO",
+      "field": "description",
+      "sourceHash": "sha256:7d7173d16b04dfd1ff14fd24351beff78eae63353a9515f9f455266e53ae75c7",
+      "text": "初始化为零矩阵的不可变 Matrix4 实例。"
+    },
+    {
+      "id": "Matrix4",
+      "field": "params/column0Row0/description",
+      "sourceHash": "sha256:cc6b241f1146b74e5a62488f50e91cc47139b9f317fdb90369160bb2f8bca2d7",
+      "text": "第 0 列、第 0 行的值。"
+    },
+    {
+      "id": "Matrix4",
+      "field": "params/column0Row1/description",
+      "sourceHash": "sha256:63363cdce5ec2b6a89381462067dceddbce989612fde86dbc87e72e217dbc0a0",
+      "text": "第 0 列、第 1 行的值。"
+    },
+    {
+      "id": "Matrix4",
+      "field": "params/column0Row2/description",
+      "sourceHash": "sha256:f5b777ac7aff792d950179b30d7635de79d5970e67fa716bb8e05bf584231170",
+      "text": "第 0 列、第 2 行的值。"
+    },
+    {
+      "id": "Matrix4",
+      "field": "params/column0Row3/description",
+      "sourceHash": "sha256:d777ff9db61812e10feb586cc32f7e0be89495fb2be0530052fedb784bcc0ab3",
+      "text": "第 0 列、第 3 行的值。"
+    },
+    {
+      "id": "Matrix4",
+      "field": "params/column1Row0/description",
+      "sourceHash": "sha256:57a3ce59842c5eeb2fcbed3d58e2aaf02f58afcee490595734820dd399f3d844",
+      "text": "第 1 列、第 0 行的值。"
+    },
+    {
+      "id": "Matrix4",
+      "field": "params/column1Row1/description",
+      "sourceHash": "sha256:f855c5d50fb96d457cfca700a671fb11ad156c6a66d3b36878ea5f1776110af7",
+      "text": "第 1 列、第 1 行的值。"
+    },
+    {
+      "id": "Matrix4",
+      "field": "params/column1Row2/description",
+      "sourceHash": "sha256:6d867fb767476182018135dbe081b6d9c721a7af4d52eb662c03255ca92f9129",
+      "text": "第 1 列、第 2 行的值。"
+    },
+    {
+      "id": "Matrix4",
+      "field": "params/column1Row3/description",
+      "sourceHash": "sha256:ceefde73791c906998f3fa5ae44a1be20195c20a364c8d09d4095466da38bb3c",
+      "text": "第 1 列、第 3 行的值。"
+    },
+    {
+      "id": "Matrix4",
+      "field": "params/column2Row0/description",
+      "sourceHash": "sha256:742372f500c6d64381ed9c29301a51318fbd1321172fb737d18049fac596e607",
+      "text": "第 2 列、第 0 行的值。"
+    },
+    {
+      "id": "Matrix4",
+      "field": "params/column2Row1/description",
+      "sourceHash": "sha256:f1e1d852f28285e6b9e90401f87785a7f13f9b4fa332602260c224d58e48dc51",
+      "text": "第 2 列、第 1 行的值。"
+    },
+    {
+      "id": "Matrix4",
+      "field": "params/column2Row2/description",
+      "sourceHash": "sha256:1a80d089ff254f8dffec2fd3ff537fb8ef141075078696bb330287aa4f370595",
+      "text": "第 2 列、第 2 行的值。"
+    },
+    {
+      "id": "Matrix4",
+      "field": "params/column2Row3/description",
+      "sourceHash": "sha256:7602cda411a7c32f6dda382b1906066dba1eaa2eb581ebba3064a31166a622e4",
+      "text": "第 2 列、第 3 行的值。"
+    },
+    {
+      "id": "Matrix4",
+      "field": "params/column3Row0/description",
+      "sourceHash": "sha256:b47566dcb15c3facf2b83cdf4bd6adc028e5770b8b6a287e58c023e03a83b690",
+      "text": "第 3 列、第 0 行的值。"
+    },
+    {
+      "id": "Matrix4",
+      "field": "params/column3Row1/description",
+      "sourceHash": "sha256:fcf85c8ab1d5af09e83a52e4df1eb19686f749b40ae2c1c639309097298d3b9d",
+      "text": "第 3 列、第 1 行的值。"
+    },
+    {
+      "id": "Matrix4",
+      "field": "params/column3Row2/description",
+      "sourceHash": "sha256:fcc6169dfaba8729a1d60e981a093809867dd4e19643f992d9b0815cd4a9942f",
+      "text": "第 3 列、第 2 行的值。"
+    },
+    {
+      "id": "Matrix4",
+      "field": "params/column3Row3/description",
+      "sourceHash": "sha256:8b78e205a5e51f8017ecc99018501b82e10fc26ae7a0d48960f73f2db3e342ae",
+      "text": "第 3 列、第 3 行的值。"
+    },
+    {
+      "id": "Matrix4#clone",
+      "field": "description",
+      "sourceHash": "sha256:398585826c5c1a4238b08def045f06a06db1012a563a9073029e8a32c2c603aa",
+      "text": "复制给定 Matrix4 实例。"
+    },
+    {
+      "id": "Matrix4#clone",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:bc62f9b335ff37c3027d1bb85515d6eac9a63176861cd3d9e62d364a61e21000",
+      "text": "修改后的 result 参数；未提供时返回新建的 Matrix4 实例。"
+    },
+    {
+      "id": "Matrix4#equals",
+      "field": "description",
+      "sourceHash": "sha256:5e5d2196e389edf51948ec9f25f227990cb9833845f3cd8033af51a5338c19c0",
+      "text": "将此矩阵与给定矩阵逐分量比较，相等时返回 <code>true</code>，否则返回 <code>false</code>。"
+    },
+    {
+      "id": "Matrix4#equals",
+      "field": "params/right/description",
+      "sourceHash": "sha256:6171cda230795ab2325a9f0e6422a548e16edb0fd74e3db3c61e419e1674420c",
+      "text": "右侧矩阵。"
+    },
+    {
+      "id": "Matrix4#equalsEpsilon",
+      "field": "description",
+      "sourceHash": "sha256:0cee8b59bfa40d8994d1a0b96edd6a8a2d1a28353bb3fb6e1ddbf11a295b88e4",
+      "text": "将此矩阵与给定矩阵逐分量比较，差异在给定 epsilon 范围内时返回 <code>true</code>，否则返回 <code>false</code>。"
+    },
+    {
+      "id": "Matrix4#equalsEpsilon",
+      "field": "params/epsilon/description",
+      "sourceHash": "sha256:1ab4d3a4f4ca315af12f39b1b4e64b7ec35e58ae52588c40ff36843a8836cb4b",
+      "text": "相等测试使用的 epsilon 容差。"
+    },
+    {
+      "id": "Matrix4#equalsEpsilon",
+      "field": "params/right/description",
+      "sourceHash": "sha256:6171cda230795ab2325a9f0e6422a548e16edb0fd74e3db3c61e419e1674420c",
+      "text": "右侧矩阵。"
+    },
+    {
+      "id": "Matrix4#equalsEpsilon",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:10dbf4a7ddfcc7153660dfa7cfbd4cdcdcb39e498b54dcf418df578bc90f40df",
+      "text": "若差异在给定 epsilon 范围内，则返回 <code>true</code>；否则返回 <code>false</code>。"
+    },
+    {
+      "id": "Matrix4#length",
+      "field": "description",
+      "sourceHash": "sha256:9f20b6057e769aeb911f5917fb38f6790118f5cd51957010b67f09b8529e7fc2",
+      "text": "获取集合中的元素数量。"
+    },
+    {
+      "id": "Matrix4#toString",
+      "field": "description",
+      "sourceHash": "sha256:5d622d608f2fce805b23c07d18d32b240c9dfccd8295345940009e1faccbb48e",
+      "text": "计算表示此矩阵的字符串，每行单独一行，格式为 '(column0, column1, column2, column3)'。"
+    },
+    {
+      "id": "Matrix4#toString",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:2422b50581f901c569d32f88791d1c60e9a497d44ddb69699bfe8b30cbbfc845",
+      "text": "表示给定矩阵的字符串，每行单独一行，格式为 '(column0, column1, column2, column3)'。"
+    },
+    {
+      "id": "Quaternion.add",
+      "field": "description",
+      "sourceHash": "sha256:d1a054a4019449829507a4a2a833f0b36740185d0e4e00a75d0a53f2d4d2036e",
+      "text": "计算两个四元数逐分量的和。"
+    },
+    {
+      "id": "Quaternion.add",
+      "field": "params/left/description",
+      "sourceHash": "sha256:d01b31b8198b53dc86e4816e730b4436054466b719ee80981e8e34c2fb646c53",
+      "text": "第一个四元数。"
+    },
+    {
+      "id": "Quaternion.add",
+      "field": "params/right/description",
+      "sourceHash": "sha256:70b2408b3807197e1c24d9f79e8719cb9db9a43a775821736bcb63ff66017251",
+      "text": "第二个四元数。"
+    },
+    {
+      "id": "Quaternion.clone",
+      "field": "description",
+      "sourceHash": "sha256:afd5f5b0099dafd17e497886b787f7dc55216d474916c83426d77ddf616b1c84",
+      "text": "复制 Quaternion 实例。"
+    },
+    {
+      "id": "Quaternion.clone",
+      "field": "params/quaternion/description",
+      "sourceHash": "sha256:8582d3db683da4b2c29be3eb56fd5173ea86b31ca7b6d4a766903fc3b04eb059",
+      "text": "要复制的四元数。"
+    },
+    {
+      "id": "Quaternion.clone",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:cf1b0c9c3b27ca8e35707cd84d7e630fe78f59bca729f5d92350394e1911a0ae",
+      "text": "修改后的 result 参数；未提供时返回新建的 Quaternion 实例。若 quaternion 为 undefined，则返回 undefined。"
+    },
+    {
+      "id": "Quaternion.computeAngle",
+      "field": "description",
+      "sourceHash": "sha256:72bdead9c1b6ee83749cccfd39bfdae209df104c6ebd61a13b320ecdb0345970",
+      "text": "计算给定四元数的旋转角。"
+    },
+    {
+      "id": "Quaternion.computeAngle",
+      "field": "params/quaternion/description",
+      "sourceHash": "sha256:fe4687a83d31e75f989271f1428c9c4a2930fed9cbc3054f9a0902becb871c5c",
+      "text": "要使用的四元数。"
+    },
+    {
+      "id": "Quaternion.computeAngle",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:07a717747d2d478e4b9ed9f22f9729bbf392215e2e10cfa61351dc6d63100812",
+      "text": "旋转角。"
+    },
+    {
+      "id": "Quaternion.computeAxis",
+      "field": "description",
+      "sourceHash": "sha256:7ba578ee57381fc6896a1ea2d63603bb6c20c942a8df5588e535c72ff9423a98",
+      "text": "计算给定四元数的旋转轴。"
+    },
+    {
+      "id": "Quaternion.computeAxis",
+      "field": "params/quaternion/description",
+      "sourceHash": "sha256:fe4687a83d31e75f989271f1428c9c4a2930fed9cbc3054f9a0902becb871c5c",
+      "text": "要使用的四元数。"
+    },
+    {
+      "id": "Quaternion.computeInnerQuadrangle",
+      "field": "description",
+      "sourceHash": "sha256:abae397896535d26a08c6b7fff499bbc2ff8fc6718137a16174305aaf047de78",
+      "text": "计算球面四边形插值的内部控制点。<p>所得四元数可保证 squad 曲线具有 C<sup>1</sup> 连续性。</p>"
+    },
+    {
+      "id": "Quaternion.computeInnerQuadrangle",
+      "field": "params/q0/description",
+      "sourceHash": "sha256:d01b31b8198b53dc86e4816e730b4436054466b719ee80981e8e34c2fb646c53",
+      "text": "第一个四元数。"
+    },
+    {
+      "id": "Quaternion.computeInnerQuadrangle",
+      "field": "params/q1/description",
+      "sourceHash": "sha256:70b2408b3807197e1c24d9f79e8719cb9db9a43a775821736bcb63ff66017251",
+      "text": "第二个四元数。"
+    },
+    {
+      "id": "Quaternion.computeInnerQuadrangle",
+      "field": "params/q2/description",
+      "sourceHash": "sha256:ede31eb192128e1b79d4cf3c8740a93d6eb4b9890601867352c16d5d2383929c",
+      "text": "第三个四元数。"
+    },
+    {
+      "id": "Quaternion.conjugate",
+      "field": "description",
+      "sourceHash": "sha256:a06cac9c19018a8e4c39597e6f2cf2178f41bf4078e2f230e1c1b323ed5ce682",
+      "text": "计算给定四元数的共轭。"
+    },
+    {
+      "id": "Quaternion.conjugate",
+      "field": "params/quaternion/description",
+      "sourceHash": "sha256:d7fe6fe77f562e80de357693a4d9617cb3e78212de850af926ae69bf7a6e0a4d",
+      "text": "要求共轭的四元数。"
+    },
+    {
+      "id": "Quaternion.convertPackedArrayForInterpolation",
+      "field": "description",
+      "sourceHash": "sha256:2792a9777aaad22017035a1d187cc44590ea66757d493f7b66fc7bbcae496a6b",
+      "text": "将打包数组转换为适合插值的形式。"
+    },
+    {
+      "id": "Quaternion.convertPackedArrayForInterpolation",
+      "field": "params/lastIndex/description",
+      "sourceHash": "sha256:2a850c6d4c4b5031bac27694d3c12a1489eb2da336f42f2be67cccaef5f51ed8",
+      "text": "要转换的最后一个元素索引。"
+    },
+    {
+      "id": "Quaternion.convertPackedArrayForInterpolation",
+      "field": "params/startingIndex/description",
+      "sourceHash": "sha256:faab00d96044f72907dc7a5a0b8bb93bf8127d65dfc3f19aec8b4c5ac96c4e86",
+      "text": "要转换的第一个元素索引。"
+    },
+    {
+      "id": "Quaternion.divideByScalar",
+      "field": "description",
+      "sourceHash": "sha256:825443a109c432932b9642e67915b97cd7e613e95c783c1e406acd880f6a2666",
+      "text": "将给定四元数各分量除以给定标量。"
+    },
+    {
+      "id": "Quaternion.divideByScalar",
+      "field": "params/quaternion/description",
+      "sourceHash": "sha256:c6adbc2c225e22df040fe7b521970664eb3fe752cc49077b2283e860f0d815b2",
+      "text": "被除的四元数。"
+    },
+    {
+      "id": "Quaternion.divideByScalar",
+      "field": "params/scalar/description",
+      "sourceHash": "sha256:89b6fd5063ab1169ca0a24ef34bed5ed0fa9dd6f6223b01a00f303fd1e555166",
+      "text": "用作除数的标量。"
+    },
+    {
+      "id": "Quaternion.dot",
+      "field": "description",
+      "sourceHash": "sha256:e63afedfbaceaec3114ceff9c77cfd01b4cec9d2bd5ce8d900532d1a88c35869",
+      "text": "计算两个四元数的点积（标量积）。"
+    },
+    {
+      "id": "Quaternion.dot",
+      "field": "params/left/description",
+      "sourceHash": "sha256:d01b31b8198b53dc86e4816e730b4436054466b719ee80981e8e34c2fb646c53",
+      "text": "第一个四元数。"
+    },
+    {
+      "id": "Quaternion.dot",
+      "field": "params/right/description",
+      "sourceHash": "sha256:70b2408b3807197e1c24d9f79e8719cb9db9a43a775821736bcb63ff66017251",
+      "text": "第二个四元数。"
+    },
+    {
+      "id": "Quaternion.dot",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:bf9d783712cc1006d6e21ba309f1e5b73362e5c43a24f98b28e69e2db8dcc2c3",
+      "text": "点积。"
+    },
+    {
+      "id": "Quaternion.equals",
+      "field": "description",
+      "sourceHash": "sha256:d8bc3486df9d0704f7a946c0f06e552054e1aa1fe31718aa48395a2a9320649e",
+      "text": "逐分量比较给定四元数，相等时返回 <code>true</code>，否则返回 <code>false</code>。"
+    },
+    {
+      "id": "Quaternion.equals",
+      "field": "params/left/description",
+      "sourceHash": "sha256:d01b31b8198b53dc86e4816e730b4436054466b719ee80981e8e34c2fb646c53",
+      "text": "第一个四元数。"
+    },
+    {
+      "id": "Quaternion.equals",
+      "field": "params/right/description",
+      "sourceHash": "sha256:70b2408b3807197e1c24d9f79e8719cb9db9a43a775821736bcb63ff66017251",
+      "text": "第二个四元数。"
+    },
+    {
+      "id": "Quaternion.equalsEpsilon",
+      "field": "description",
+      "sourceHash": "sha256:bcfc84c63d2dba27a309d00baa2d2075a5eadf7c279935df610d0320c07ff0bd",
+      "text": "逐分量比较给定四元数，差异在给定 epsilon 范围内时返回 <code>true</code>，否则返回 <code>false</code>。"
+    },
+    {
+      "id": "Quaternion.equalsEpsilon",
+      "field": "params/epsilon/description",
+      "sourceHash": "sha256:1ab4d3a4f4ca315af12f39b1b4e64b7ec35e58ae52588c40ff36843a8836cb4b",
+      "text": "相等测试使用的 epsilon 容差。"
+    },
+    {
+      "id": "Quaternion.equalsEpsilon",
+      "field": "params/left/description",
+      "sourceHash": "sha256:d01b31b8198b53dc86e4816e730b4436054466b719ee80981e8e34c2fb646c53",
+      "text": "第一个四元数。"
+    },
+    {
+      "id": "Quaternion.equalsEpsilon",
+      "field": "params/right/description",
+      "sourceHash": "sha256:70b2408b3807197e1c24d9f79e8719cb9db9a43a775821736bcb63ff66017251",
+      "text": "第二个四元数。"
+    },
+    {
+      "id": "Quaternion.equalsEpsilon",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:d73d821dc6b34822dfe11364cb173a7333751e53e9ef3a80bb985a26ce173b2c",
+      "text": "若 left 和 right 的差异在给定 epsilon 范围内，则返回 <code>true</code>；否则返回 <code>false</code>。"
+    },
+    {
+      "id": "Quaternion.exp",
+      "field": "description",
+      "sourceHash": "sha256:bfba9d6329c5cd9b267cf70bc46039258657662bfeaf95f09744298ac15d8dee",
+      "text": "四元数指数函数。"
+    },
+    {
+      "id": "Quaternion.exp",
+      "field": "params/cartesian/description",
+      "sourceHash": "sha256:e6ef57de5a765dbb89de4f523513419f04f6d59fcb13dcc7c5b56f4a5093d6ec",
+      "text": "笛卡尔向量。"
+    },
+    {
+      "id": "Quaternion.fastSlerp",
+      "field": "description",
+      "sourceHash": "sha256:90e1cb45235ce08ccb26ef68a691a43d6aea440b8c8ac2ce459cedaf66b957e2",
+      "text": "使用给定四元数计算 t 处的球面线性插值或外推值。此实现比 {@link Quaternion#slerp} 更快，但精度仅达到 10<sup>-6</sup>。"
+    },
+    {
+      "id": "Quaternion.fastSlerp",
+      "field": "params/end/description",
+      "sourceHash": "sha256:884dbeba3bf8ed28078f4abb3810e7ed45b54311c72e42bb597360f2446046c9",
+      "text": "t 为 1.0 时对应的值。"
+    },
+    {
+      "id": "Quaternion.fastSlerp",
+      "field": "params/start/description",
+      "sourceHash": "sha256:685c8a784648baf605d5df5eb389e4780c6c401b0f95ba40560c670835b18674",
+      "text": "t 为 0.0 时对应的值。"
+    },
+    {
+      "id": "Quaternion.fastSlerp",
+      "field": "params/t/description",
+      "sourceHash": "sha256:eb6494a782486871612062cf92e61cb7f60fe742bd528058e9b997e4f93d2b45",
+      "text": "要进行插值的 t 参数位置。"
+    },
+    {
+      "id": "Quaternion.fastSquad",
+      "field": "description",
+      "sourceHash": "sha256:bd1c11cc02081fb6f489a82ce3c7769ab8bf05fdb3e2d7b3e09a9bad630e1e69",
+      "text": "计算四元数间的球面四边形插值。此实现比 {@link Quaternion#squad} 更快，但精度较低。"
+    },
+    {
+      "id": "Quaternion.fastSquad",
+      "field": "params/q0/description",
+      "sourceHash": "sha256:d01b31b8198b53dc86e4816e730b4436054466b719ee80981e8e34c2fb646c53",
+      "text": "第一个四元数。"
+    },
+    {
+      "id": "Quaternion.fastSquad",
+      "field": "params/q1/description",
+      "sourceHash": "sha256:70b2408b3807197e1c24d9f79e8719cb9db9a43a775821736bcb63ff66017251",
+      "text": "第二个四元数。"
+    },
+    {
+      "id": "Quaternion.fastSquad",
+      "field": "params/s0/description",
+      "sourceHash": "sha256:7c4ea4c1b1d695fd694aa0bddd7c67788b8deac39471dc8dd66f2a13594601e3",
+      "text": "第一个内部控制四元数。"
+    },
+    {
+      "id": "Quaternion.fastSquad",
+      "field": "params/s1/description",
+      "sourceHash": "sha256:2527301ccfd4f3753e8459a8d631de79c68d5ad7c08cedf189da074e3d11e9eb",
+      "text": "第二个内部控制四元数。"
+    },
+    {
+      "id": "Quaternion.fastSquad",
+      "field": "params/t/description",
+      "sourceHash": "sha256:427006cda35fc7addce88edd9aa93f21734af666ff12668e7981a69aba749c64",
+      "text": "用于插值的 [0,1] 范围内时间参数。"
+    },
+    {
+      "id": "Quaternion.fastSquad",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:cf988b12169a1cc4ca849c5b40bf15dbc08d6274d7ffed7e00d92b97a2f4c5bc",
+      "text": "修改后的 result 参数；未提供时返回新实例。"
+    },
+    {
+      "id": "Quaternion.fromAxisAngle",
+      "field": "description",
+      "sourceHash": "sha256:49f956ff25f99071027ce88eb08127ffc8d5dfa637ac79918b6a33277d090665",
+      "text": "计算表示绕某轴旋转的四元数。"
+    },
+    {
+      "id": "Quaternion.fromAxisAngle",
+      "field": "params/angle/description",
+      "sourceHash": "sha256:832d2082215e8735ba3a149b43f05ee3b30759c4271193753f1c4c921974a113",
+      "text": "绕轴旋转的角度，单位为弧度。"
+    },
+    {
+      "id": "Quaternion.fromAxisAngle",
+      "field": "params/axis/description",
+      "sourceHash": "sha256:a6260a6c5a4a202103e4529fccbb03293e8e750e366fd4325310ea8309e62b7c",
+      "text": "旋转轴。"
+    },
+    {
+      "id": "Quaternion.fromAxisAngle",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:032bf1accf42fd8fd5241440725c3a5f4b961963877d3f3c10ae208ded1ac484",
+      "text": "修改后的 result 参数；未提供时返回新建的 Quaternion 实例。"
+    },
+    {
+      "id": "Quaternion.fromHeadingPitchRoll",
+      "field": "description",
+      "sourceHash": "sha256:626518046fc7b7fb1ca0a17731c7fbaf8ec624e0980ff61170c63ce327be8557",
+      "text": "根据给定方位角、俯仰角和横滚角计算旋转。方位角绕 z 轴负方向旋转，俯仰角绕 y 轴负方向旋转，横滚角绕 x 轴正方向旋转。"
+    },
+    {
+      "id": "Quaternion.fromHeadingPitchRoll",
+      "field": "params/headingPitchRoll/description",
+      "sourceHash": "sha256:7847381c062ddf0badeaf3f0cf3a295e4c47f620f67c37dd223744c11becb9c0",
+      "text": "以方位角、俯仰角和横滚角表示的旋转。"
+    },
+    {
+      "id": "Quaternion.fromHeadingPitchRoll",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:86b8e0afa52b598d8a01c9e991dacaf7f2d33e78bf61bf20159526fb9627ea6b",
+      "text": "修改后的 result 参数；未提供时返回新建的 Quaternion 实例。"
+    },
+    {
+      "id": "Quaternion.fromRotationMatrix",
+      "field": "description",
+      "sourceHash": "sha256:1b0778893ab2652b7f3eb619f51fafb67dc6c3fc79f6475806d58b3ff2b2c957",
+      "text": "根据给定 Matrix3 实例计算 Quaternion。"
+    },
+    {
+      "id": "Quaternion.fromRotationMatrix",
+      "field": "params/matrix/description",
+      "sourceHash": "sha256:f27bf8a32ec9579cfa755a7f66fcdea0c3230fd537df2a0074703f3a5f28f082",
+      "text": "旋转矩阵。"
+    },
+    {
+      "id": "Quaternion.fromRotationMatrix",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:032bf1accf42fd8fd5241440725c3a5f4b961963877d3f3c10ae208ded1ac484",
+      "text": "修改后的 result 参数；未提供时返回新建的 Quaternion 实例。"
+    },
+    {
+      "id": "Quaternion.IDENTITY",
+      "field": "description",
+      "sourceHash": "sha256:d805221816593823c6da6b73635b325679e9afd5538729d4bb3c09dfd268e4d6",
+      "text": "初始化为 (0.0, 0.0, 0.0, 1.0) 的不可变 Quaternion 实例。"
+    },
+    {
+      "id": "Quaternion.inverse",
+      "field": "description",
+      "sourceHash": "sha256:0c4da08b0ed438dae005c3a7a04b81e65db11ac975e537d589c364a83a22cbd7",
+      "text": "计算给定四元数的逆。"
+    },
+    {
+      "id": "Quaternion.inverse",
+      "field": "params/quaternion/description",
+      "sourceHash": "sha256:d461a2a6b300271bd7c02b1ea6275a30bfa20368d4393009d9ef0d665b52677c",
+      "text": "要求逆的四元数。"
+    },
+    {
+      "id": "Quaternion.lerp",
+      "field": "description",
+      "sourceHash": "sha256:4d1743b00575cc244f0cd247d6e8ace6ffa10c0f3b95b1b396ff00b27c7731d6",
+      "text": "使用给定四元数计算 t 处的线性插值或外推值。"
+    },
+    {
+      "id": "Quaternion.lerp",
+      "field": "params/end/description",
+      "sourceHash": "sha256:884dbeba3bf8ed28078f4abb3810e7ed45b54311c72e42bb597360f2446046c9",
+      "text": "t 为 1.0 时对应的值。"
+    },
+    {
+      "id": "Quaternion.lerp",
+      "field": "params/start/description",
+      "sourceHash": "sha256:685c8a784648baf605d5df5eb389e4780c6c401b0f95ba40560c670835b18674",
+      "text": "t 为 0.0 时对应的值。"
+    },
+    {
+      "id": "Quaternion.lerp",
+      "field": "params/t/description",
+      "sourceHash": "sha256:eb6494a782486871612062cf92e61cb7f60fe742bd528058e9b997e4f93d2b45",
+      "text": "要进行插值的 t 参数位置。"
+    },
+    {
+      "id": "Quaternion.log",
+      "field": "description",
+      "sourceHash": "sha256:4c214e12c09b641991f355f8a3c69f80e5e403e9d732f9d202c2d9d76bf8e614",
+      "text": "四元数对数函数。"
+    },
+    {
+      "id": "Quaternion.log",
+      "field": "params/quaternion/description",
+      "sourceHash": "sha256:021029c76c7422b1b2299d4a609ae85673fb7faef5403baff457bb36bc75da93",
+      "text": "单位四元数。"
+    },
+    {
+      "id": "Quaternion.magnitude",
+      "field": "description",
+      "sourceHash": "sha256:d0fd380cc1d2d7b750e83a4972894884aa2dc99c6c0461b7d517506780030a7d",
+      "text": "计算给定四元数的模。"
+    },
+    {
+      "id": "Quaternion.magnitude",
+      "field": "params/quaternion/description",
+      "sourceHash": "sha256:d7fe6fe77f562e80de357693a4d9617cb3e78212de850af926ae69bf7a6e0a4d",
+      "text": "要求共轭的四元数。"
+    },
+    {
+      "id": "Quaternion.magnitude",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:72c8045572472070abc8a17116132846ebcc47e397086d78ff1292ddc7aa256b",
+      "text": "模。"
+    },
+    {
+      "id": "Quaternion.magnitudeSquared",
+      "field": "description",
+      "sourceHash": "sha256:5c61506ad4d047d1ffc889ac102738f35a9337a306303249f549295fdc64830c",
+      "text": "计算给定四元数模的平方。"
+    },
+    {
+      "id": "Quaternion.magnitudeSquared",
+      "field": "params/quaternion/description",
+      "sourceHash": "sha256:d7fe6fe77f562e80de357693a4d9617cb3e78212de850af926ae69bf7a6e0a4d",
+      "text": "要求共轭的四元数。"
+    },
+    {
+      "id": "Quaternion.magnitudeSquared",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:a3c2eb403fdbeb141febc5ede3e15ffcc3cc0ab35f609d6985a3b0f65982e71c",
+      "text": "模的平方。"
+    },
+    {
+      "id": "Quaternion.multiply",
+      "field": "description",
+      "sourceHash": "sha256:fa6deb4b29c0a9cc84018ca1895e392dd87957d41b1de7b8a211767dedd0242e",
+      "text": "计算两个四元数的积。"
+    },
+    {
+      "id": "Quaternion.multiply",
+      "field": "params/left/description",
+      "sourceHash": "sha256:d01b31b8198b53dc86e4816e730b4436054466b719ee80981e8e34c2fb646c53",
+      "text": "第一个四元数。"
+    },
+    {
+      "id": "Quaternion.multiply",
+      "field": "params/right/description",
+      "sourceHash": "sha256:70b2408b3807197e1c24d9f79e8719cb9db9a43a775821736bcb63ff66017251",
+      "text": "第二个四元数。"
+    },
+    {
+      "id": "Quaternion.multiplyByScalar",
+      "field": "description",
+      "sourceHash": "sha256:000c61bf40608d1a81e9349001b11df58137e666815b1e3e3192699d91741dc4",
+      "text": "将给定四元数各分量乘以给定标量。"
+    },
+    {
+      "id": "Quaternion.multiplyByScalar",
+      "field": "params/quaternion/description",
+      "sourceHash": "sha256:6541ffc683f12dcbef1a7a2587da4eeba5e2d0977ddbc1da8c1e5ab80d421d59",
+      "text": "要缩放的四元数。"
+    },
+    {
+      "id": "Quaternion.multiplyByScalar",
+      "field": "params/scalar/description",
+      "sourceHash": "sha256:f947f410a6a05720d667798aca2b64c18c1e125a950a90cc08c10ad49e439a83",
+      "text": "要乘的标量。"
+    },
+    {
+      "id": "Quaternion.negate",
+      "field": "description",
+      "sourceHash": "sha256:efd9eb5d244beb52bcf1d15d34bde84d4d4ff1f0687b9076a9c92c1499a76fd6",
+      "text": "将给定四元数各分量取反。"
+    },
+    {
+      "id": "Quaternion.negate",
+      "field": "params/quaternion/description",
+      "sourceHash": "sha256:d582c61a422940f78e1cd3c107c207a53f6c4098ffa6d80d9405e5edbfd0eefa",
+      "text": "要取反的四元数。"
+    },
+    {
+      "id": "Quaternion.normalize",
+      "field": "description",
+      "sourceHash": "sha256:032678fcb2a608061e6737fddf33cfa943c94dffb3507070b90f9ec217a17fb1",
+      "text": "计算给定四元数的归一化形式。"
+    },
+    {
+      "id": "Quaternion.normalize",
+      "field": "params/quaternion/description",
+      "sourceHash": "sha256:d461a2a6b300271bd7c02b1ea6275a30bfa20368d4393009d9ef0d665b52677c",
+      "text": "要求逆的四元数。"
+    },
+    {
+      "id": "Quaternion.packedInterpolationLength",
+      "field": "description",
+      "sourceHash": "sha256:01481424ecee099fbde2892561e1e06ad397a516d58e484ca5e6c457283ef5e3",
+      "text": "以可插值形式将对象保存到数组所需的元素数量。"
+    },
+    {
+      "id": "Quaternion.slerp",
+      "field": "description",
+      "sourceHash": "sha256:32d2648e185e1ccf4170758dc0e5a08d6d0173ca8b43824e91f150694bf1262b",
+      "text": "使用给定四元数计算 t 处的球面线性插值或外推值。"
+    },
+    {
+      "id": "Quaternion.slerp",
+      "field": "params/end/description",
+      "sourceHash": "sha256:884dbeba3bf8ed28078f4abb3810e7ed45b54311c72e42bb597360f2446046c9",
+      "text": "t 为 1.0 时对应的值。"
+    },
+    {
+      "id": "Quaternion.slerp",
+      "field": "params/start/description",
+      "sourceHash": "sha256:685c8a784648baf605d5df5eb389e4780c6c401b0f95ba40560c670835b18674",
+      "text": "t 为 0.0 时对应的值。"
+    },
+    {
+      "id": "Quaternion.slerp",
+      "field": "params/t/description",
+      "sourceHash": "sha256:eb6494a782486871612062cf92e61cb7f60fe742bd528058e9b997e4f93d2b45",
+      "text": "要进行插值的 t 参数位置。"
+    },
+    {
+      "id": "Quaternion.squad",
+      "field": "description",
+      "sourceHash": "sha256:f33025bebfc6581214f587718b23a7e38ab005017c1a4f601d032ea9594ac82b",
+      "text": "计算四元数间的球面四边形插值。"
+    },
+    {
+      "id": "Quaternion.squad",
+      "field": "params/q0/description",
+      "sourceHash": "sha256:d01b31b8198b53dc86e4816e730b4436054466b719ee80981e8e34c2fb646c53",
+      "text": "第一个四元数。"
+    },
+    {
+      "id": "Quaternion.squad",
+      "field": "params/q1/description",
+      "sourceHash": "sha256:70b2408b3807197e1c24d9f79e8719cb9db9a43a775821736bcb63ff66017251",
+      "text": "第二个四元数。"
+    },
+    {
+      "id": "Quaternion.squad",
+      "field": "params/s0/description",
+      "sourceHash": "sha256:7c4ea4c1b1d695fd694aa0bddd7c67788b8deac39471dc8dd66f2a13594601e3",
+      "text": "第一个内部控制四元数。"
+    },
+    {
+      "id": "Quaternion.squad",
+      "field": "params/s1/description",
+      "sourceHash": "sha256:2527301ccfd4f3753e8459a8d631de79c68d5ad7c08cedf189da074e3d11e9eb",
+      "text": "第二个内部控制四元数。"
+    },
+    {
+      "id": "Quaternion.squad",
+      "field": "params/t/description",
+      "sourceHash": "sha256:427006cda35fc7addce88edd9aa93f21734af666ff12668e7981a69aba749c64",
+      "text": "用于插值的 [0,1] 范围内时间参数。"
+    },
+    {
+      "id": "Quaternion.subtract",
+      "field": "description",
+      "sourceHash": "sha256:4bb7b35dd1c0d88a91df8de5765cc3de2dfc7d234a82956bc6d3bc3b87a08740",
+      "text": "计算两个四元数逐分量的差。"
+    },
+    {
+      "id": "Quaternion.subtract",
+      "field": "params/left/description",
+      "sourceHash": "sha256:d01b31b8198b53dc86e4816e730b4436054466b719ee80981e8e34c2fb646c53",
+      "text": "第一个四元数。"
+    },
+    {
+      "id": "Quaternion.subtract",
+      "field": "params/right/description",
+      "sourceHash": "sha256:70b2408b3807197e1c24d9f79e8719cb9db9a43a775821736bcb63ff66017251",
+      "text": "第二个四元数。"
+    },
+    {
+      "id": "Quaternion.unpack",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:032bf1accf42fd8fd5241440725c3a5f4b961963877d3f3c10ae208ded1ac484",
+      "text": "修改后的 result 参数；未提供时返回新建的 Quaternion 实例。"
+    },
+    {
+      "id": "Quaternion.unpackInterpolationResult",
+      "field": "description",
+      "sourceHash": "sha256:901f7b40c506ef1c1ed9adf05bac25a70c974c67fc3606a33bd1f6b4a9495085",
+      "text": "从通过 {@link convertPackedArrayForInterpolation} 转换的打包数组中恢复实例。"
+    },
+    {
+      "id": "Quaternion.unpackInterpolationResult",
+      "field": "params/array/description",
+      "sourceHash": "sha256:ae0d2b59dc0fbb76063293bedaf1b8daf4ca39ffe272c6f8efca76f517fbcb16",
+      "text": "先前为插值打包的数组。"
+    },
+    {
+      "id": "Quaternion.unpackInterpolationResult",
+      "field": "params/firstIndex/description",
+      "sourceHash": "sha256:890561fc06aa9def91651614a79a5396a31b30283d381f57ea955a31add2beab",
+      "text": "转换数组时使用的 firstIndex。"
+    },
+    {
+      "id": "Quaternion.unpackInterpolationResult",
+      "field": "params/lastIndex/description",
+      "sourceHash": "sha256:88933f5c598f1ff17e6cebaa4ea1036a66591feea021b7d2e685d5aa96ac75a7",
+      "text": "转换数组时使用的 lastIndex。"
+    },
+    {
+      "id": "Quaternion.unpackInterpolationResult",
+      "field": "params/sourceArray/description",
+      "sourceHash": "sha256:af94b0be92ce77b930f8c97739965f40c501ecd3d194cb7cc026d83b83061132",
+      "text": "原始打包数组。"
+    },
+    {
+      "id": "Quaternion.unpackInterpolationResult",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:032bf1accf42fd8fd5241440725c3a5f4b961963877d3f3c10ae208ded1ac484",
+      "text": "修改后的 result 参数；未提供时返回新建的 Quaternion 实例。"
+    },
+    {
+      "id": "Quaternion.ZERO",
+      "field": "description",
+      "sourceHash": "sha256:f22ef9c49f489bafef1b0be5d048517c335f1c6424149f30a8c5234e438cd143",
+      "text": "初始化为 (0.0, 0.0, 0.0, 0.0) 的不可变 Quaternion 实例。"
+    },
+    {
+      "id": "Quaternion",
+      "field": "description",
+      "sourceHash": "sha256:ff260035b5399c0b1d316e99088eb696ea86d1b6ae817ca183b6d21f7cc3697a",
+      "text": "用于表示三维空间旋转的一组四维坐标。"
+    },
+    {
+      "id": "Quaternion",
+      "field": "params/w/description",
+      "sourceHash": "sha256:4fece05e64eeab3db76b0f7d67923d562a7cd7d23b915fada4e2859da15f3dbb",
+      "text": "W 分量。"
+    },
+    {
+      "id": "Quaternion#clone",
+      "field": "description",
+      "sourceHash": "sha256:5810b801aaa47ccd0f27abfb54ae3d26bba98390060d64a62db26bb866cef4e2",
+      "text": "复制此 Quaternion 实例。"
+    },
+    {
+      "id": "Quaternion#clone",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:032bf1accf42fd8fd5241440725c3a5f4b961963877d3f3c10ae208ded1ac484",
+      "text": "修改后的 result 参数；未提供时返回新建的 Quaternion 实例。"
+    },
+    {
+      "id": "Quaternion#equals",
+      "field": "description",
+      "sourceHash": "sha256:15b0cffe48741a2cd46a6dd1542cacb828a1061dfda93128119f7740f98b94e7",
+      "text": "将此四元数与给定四元数逐分量比较，相等时返回 <code>true</code>，否则返回 <code>false</code>。"
+    },
+    {
+      "id": "Quaternion#equals",
+      "field": "params/right/description",
+      "sourceHash": "sha256:df2ad29099f15065d00085da8605e67f10318f236bb7272637e53cf77f9c2b0d",
+      "text": "右侧四元数。"
+    },
+    {
+      "id": "Quaternion#equalsEpsilon",
+      "field": "description",
+      "sourceHash": "sha256:b5d679ea4bdec4adf287c2368f380ed1a72dc169612bbd19657fc83eb2334093",
+      "text": "将此四元数与给定四元数逐分量比较，差异在给定 epsilon 范围内时返回 <code>true</code>，否则返回 <code>false</code>。"
+    },
+    {
+      "id": "Quaternion#equalsEpsilon",
+      "field": "params/epsilon/description",
+      "sourceHash": "sha256:1ab4d3a4f4ca315af12f39b1b4e64b7ec35e58ae52588c40ff36843a8836cb4b",
+      "text": "相等测试使用的 epsilon 容差。"
+    },
+    {
+      "id": "Quaternion#equalsEpsilon",
+      "field": "params/right/description",
+      "sourceHash": "sha256:df2ad29099f15065d00085da8605e67f10318f236bb7272637e53cf77f9c2b0d",
+      "text": "右侧四元数。"
+    },
+    {
+      "id": "Quaternion#equalsEpsilon",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:d73d821dc6b34822dfe11364cb173a7333751e53e9ef3a80bb985a26ce173b2c",
+      "text": "若 left 和 right 的差异在给定 epsilon 范围内，则返回 <code>true</code>；否则返回 <code>false</code>。"
+    },
+    {
+      "id": "Quaternion#toString",
+      "field": "description",
+      "sourceHash": "sha256:70a772ccffde7a8926fa2f24e23d5ad95fc7190211b53f94f37ab209b8ca4c6a",
+      "text": "返回以 (x, y, z, w) 格式表示此四元数的字符串。"
+    },
+    {
+      "id": "Quaternion#toString",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:d3d3642cb7168fe5c7cdc877b771eda10334b7a353358da4469545831ef89115",
+      "text": "表示此 Quaternion 的字符串。"
+    },
+    {
+      "id": "Quaternion#w",
+      "field": "description",
+      "sourceHash": "sha256:4fece05e64eeab3db76b0f7d67923d562a7cd7d23b915fada4e2859da15f3dbb",
+      "text": "W 分量。"
+    }
+  ]
+}

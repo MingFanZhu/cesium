@@ -1,0 +1,4284 @@
+{
+  "schemaVersion": 1,
+  "locale": "zh-CN",
+  "entries": [
+    {
+      "id": "Cartesian2.abs",
+      "field": "description",
+      "sourceHash": "sha256:4d340cc745e9f191f5bdb6505565f0db7864d0d7b7b1092dd136c22f1930727b",
+      "text": "计算给定笛卡尔向量各分量的绝对值。"
+    },
+    {
+      "id": "Cartesian2.abs",
+      "field": "params/cartesian/description",
+      "sourceHash": "sha256:459e786d95ec92c818df5edc3f64107d82aaba55fd0edcbbadb35ca991e5a65c",
+      "text": "要计算绝对值的笛卡尔向量。"
+    },
+    {
+      "id": "Cartesian2.add",
+      "field": "description",
+      "sourceHash": "sha256:7e2a45bd37343e77952e91194a8322167918a6ce931d3655e50e467f797f7a44",
+      "text": "计算两个笛卡尔向量逐分量的和。"
+    },
+    {
+      "id": "Cartesian2.angleBetween",
+      "field": "description",
+      "sourceHash": "sha256:0f63dfc377797574241f5fc8bbcb27c0f41479f94c1c6919c52b81fb111741f8",
+      "text": "返回给定笛卡尔向量之间的夹角，单位为弧度。"
+    },
+    {
+      "id": "Cartesian2.angleBetween",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:5e76f4f73283747abe5b5ea3fabb1eb25cc136c462a5050d5c555dd1808872d8",
+      "text": "两个笛卡尔向量之间的夹角。"
+    },
+    {
+      "id": "Cartesian2.clamp",
+      "field": "description",
+      "sourceHash": "sha256:18d68f96e668e9cf34a7211c6e57ffa7b6ea3b24ef9673124bd7e684d1ebef5f",
+      "text": "将一个值限制在两个值之间。"
+    },
+    {
+      "id": "Cartesian2.clamp",
+      "field": "params/max/description",
+      "sourceHash": "sha256:2b58192289f856877e629190592a4a464e9148f28b5c6ef2d99c4a027302e00b",
+      "text": "最大边界值。"
+    },
+    {
+      "id": "Cartesian2.clamp",
+      "field": "params/min/description",
+      "sourceHash": "sha256:b5c08cbefc0b415b7c7f8e5adc2bf9ad0d1ab9e5cd98367b037cd5461d28bac2",
+      "text": "最小边界值。"
+    },
+    {
+      "id": "Cartesian2.clamp",
+      "field": "params/value/description",
+      "sourceHash": "sha256:0d91bc456302ff8c58412b83ad84e147e3625b55b07b5e68084d25236ce50227",
+      "text": "要限制的值。"
+    },
+    {
+      "id": "Cartesian2.clamp",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:d613b7f7158eecf31728c719b8584809ecbf67db494ca2a8128e3c2a97363e1c",
+      "text": "限制后的值，满足 min <= result <= max。"
+    },
+    {
+      "id": "Cartesian2.clone",
+      "field": "description",
+      "sourceHash": "sha256:a4669ec9794211e922d2406b659553abea7781aaeb929e006790d6c9336f50c2",
+      "text": "复制 Cartesian2 实例。"
+    },
+    {
+      "id": "Cartesian2.clone",
+      "field": "params/cartesian/description",
+      "sourceHash": "sha256:284563ad40ab68557472d242ef753f261de3ab77273326ec1537627110bfe255",
+      "text": "要复制的笛卡尔向量。"
+    },
+    {
+      "id": "Cartesian2.clone",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:778305d17601892ee6a93921c31c378eac262272b5fe931503787ecb859ba921",
+      "text": "修改后的 result 参数；未提供时返回新建的 Cartesian2 实例。若 cartesian 为 undefined，则返回 undefined。"
+    },
+    {
+      "id": "Cartesian2.cross",
+      "field": "description",
+      "sourceHash": "sha256:693d4941aa00702460a1c0974724f6513eb1c782c384748c4317bf73e32f74c2",
+      "text": "将输入向量的 Z 坐标隐式设为 0，计算叉积的有符号 z 分量。"
+    },
+    {
+      "id": "Cartesian2.cross",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:5afe775f6331da69ba0969cd57f1d98200345177c30b143c04d0e108cf31638a",
+      "text": "叉积。"
+    },
+    {
+      "id": "Cartesian2.distance",
+      "field": "description",
+      "sourceHash": "sha256:f9582f202e01bb5efe59f2150efed2f7c9c1be691372ce04f4fb6560f7f840c1",
+      "text": "计算两点间的距离。"
+    },
+    {
+      "id": "Cartesian2.distance",
+      "field": "params/left/description",
+      "sourceHash": "sha256:f028363c4baad1c5925966d994ac207f15a7567875353703eb436784b27e9b84",
+      "text": "距离计算的起点。"
+    },
+    {
+      "id": "Cartesian2.distance",
+      "field": "params/right/description",
+      "sourceHash": "sha256:5043878552895cfedc19d760096865cc6558ab4803819180254358a73318f1b4",
+      "text": "距离计算的终点。"
+    },
+    {
+      "id": "Cartesian2.distance",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:750c1a8707c7a7a28f67c422c912b7719725ba88258921a2c6ed27463290a738",
+      "text": "两点间的距离。"
+    },
+    {
+      "id": "Cartesian2.distanceSquared",
+      "field": "description",
+      "sourceHash": "sha256:363c9288a7fc35540e720b16752da2bd8526487632467cdb85ce786345118b48",
+      "text": "计算两点间距离的平方。使用此函数比较距离平方，比使用 {@link Cartesian2#distance} 比较距离更高效。"
+    },
+    {
+      "id": "Cartesian2.distanceSquared",
+      "field": "params/left/description",
+      "sourceHash": "sha256:f028363c4baad1c5925966d994ac207f15a7567875353703eb436784b27e9b84",
+      "text": "距离计算的起点。"
+    },
+    {
+      "id": "Cartesian2.distanceSquared",
+      "field": "params/right/description",
+      "sourceHash": "sha256:5043878552895cfedc19d760096865cc6558ab4803819180254358a73318f1b4",
+      "text": "距离计算的终点。"
+    },
+    {
+      "id": "Cartesian2.distanceSquared",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:750c1a8707c7a7a28f67c422c912b7719725ba88258921a2c6ed27463290a738",
+      "text": "两点间的距离。"
+    },
+    {
+      "id": "Cartesian2.divideByScalar",
+      "field": "description",
+      "sourceHash": "sha256:049b56939bcfd4fec643f14444bd0f2c30b48af323b186701253f3f675e2cfdf",
+      "text": "将给定笛卡尔向量的各分量除以给定标量。"
+    },
+    {
+      "id": "Cartesian2.divideByScalar",
+      "field": "params/cartesian/description",
+      "sourceHash": "sha256:528eae60993ed300c48ba829c93a4647021e20b5ab93a8543d5214c0899b5190",
+      "text": "被除的笛卡尔向量。"
+    },
+    {
+      "id": "Cartesian2.divideByScalar",
+      "field": "params/scalar/description",
+      "sourceHash": "sha256:89b6fd5063ab1169ca0a24ef34bed5ed0fa9dd6f6223b01a00f303fd1e555166",
+      "text": "用作除数的标量。"
+    },
+    {
+      "id": "Cartesian2.divideComponents",
+      "field": "description",
+      "sourceHash": "sha256:346bc3b8181b5046704d80dcb61f027be8aac9a67e4479f8ac7dfb29579ec7f2",
+      "text": "计算两个笛卡尔向量逐分量的商。"
+    },
+    {
+      "id": "Cartesian2.dot",
+      "field": "description",
+      "sourceHash": "sha256:a8497d4e4fd8afa74f6391f5fce454b7667d124631030503111afb4156eb6aba",
+      "text": "计算两个笛卡尔向量的点积（标量积）。"
+    },
+    {
+      "id": "Cartesian2.dot",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:bf9d783712cc1006d6e21ba309f1e5b73362e5c43a24f98b28e69e2db8dcc2c3",
+      "text": "点积。"
+    },
+    {
+      "id": "Cartesian2.equals",
+      "field": "description",
+      "sourceHash": "sha256:023d501dde57a487ac0b5cfcc66380034f06061174bed45d7563719848ba7ec1",
+      "text": "逐分量比较给定笛卡尔向量，相等时返回 <code>true</code>，否则返回 <code>false</code>。"
+    },
+    {
+      "id": "Cartesian2.equalsEpsilon",
+      "field": "description",
+      "sourceHash": "sha256:b08299128d348cf01aeb73869f73d79390a4e790a509a5d1a9e0845fcf84d705",
+      "text": "逐分量比较给定笛卡尔向量，通过绝对或相对容差测试时返回 <code>true</code>，否则返回 <code>false</code>。"
+    },
+    {
+      "id": "Cartesian2.equalsEpsilon",
+      "field": "params/absoluteEpsilon/description",
+      "sourceHash": "sha256:62e5c46861c6b7f0f4262f10c359b2b825b6fe2f8691de32fe6da1f2101fe776",
+      "text": "相等测试使用的绝对 epsilon 容差。"
+    },
+    {
+      "id": "Cartesian2.equalsEpsilon",
+      "field": "params/relativeEpsilon/description",
+      "sourceHash": "sha256:b6e762c1ad7a06b44a988832e91d2358793ab32a78832b268298e9342caffe33",
+      "text": "相等测试使用的相对 epsilon 容差。"
+    },
+    {
+      "id": "Cartesian2.equalsEpsilon",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:d73d821dc6b34822dfe11364cb173a7333751e53e9ef3a80bb985a26ce173b2c",
+      "text": "若 left 和 right 的差异在给定 epsilon 范围内，则返回 <code>true</code>；否则返回 <code>false</code>。"
+    },
+    {
+      "id": "Cartesian2.fromArray",
+      "field": "description",
+      "sourceHash": "sha256:95c55ffb442a350ebc77ffee54a14734ff59fc8f63b82a9f516719fbfe5dfd38",
+      "text": "使用数组中连续两个元素创建 Cartesian2。"
+    },
+    {
+      "id": "Cartesian2.fromArray",
+      "field": "params/array/description",
+      "sourceHash": "sha256:d58316499c8f348ea05ce97fcd8555767cdfc0d2ac1232565848a7053c20013e",
+      "text": "连续两个元素分别对应 x、y 分量的数组。"
+    },
+    {
+      "id": "Cartesian2.fromArray",
+      "field": "params/startingIndex/description",
+      "sourceHash": "sha256:83ca85452a6d466fb74a46463ac58b6cdb1b272cf95e5f63585ea894451648b5",
+      "text": "数组中第一个元素的偏移，该元素对应 x 分量。"
+    },
+    {
+      "id": "Cartesian2.fromArray",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:33580e7b03d723e1c21b9f61ad11080d223182a868915cfbdaed47473173f107",
+      "text": "修改后的 result 参数；未提供时返回新建的 Cartesian2 实例。"
+    },
+    {
+      "id": "Cartesian2.fromCartesian3",
+      "field": "description",
+      "sourceHash": "sha256:84baaa1a12ddd7b53af66ab4cbe0b0cd39ce8163990b89b7b4522b33f8227b85",
+      "text": "从现有 Cartesian3 创建 Cartesian2 实例，仅取 x 和 y 属性，舍弃 z。"
+    },
+    {
+      "id": "Cartesian2.fromCartesian3",
+      "field": "params/cartesian/description",
+      "sourceHash": "sha256:f58ff85643928ab88cf52bc8060359e235a0afde8ba5bf061f4e85efdd4a9629",
+      "text": "用于创建 Cartesian2 的 Cartesian3 实例。"
+    },
+    {
+      "id": "Cartesian2.fromCartesian3",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:33580e7b03d723e1c21b9f61ad11080d223182a868915cfbdaed47473173f107",
+      "text": "修改后的 result 参数；未提供时返回新建的 Cartesian2 实例。"
+    },
+    {
+      "id": "Cartesian2.fromCartesian4",
+      "field": "description",
+      "sourceHash": "sha256:0e5c5af0cc6fea3e32a9107a2e15d0921e33dbcc3f1658c1b0b0869ca0b9a087",
+      "text": "从现有 Cartesian4 创建 Cartesian2 实例，仅取 x 和 y 属性，舍弃 z 和 w。"
+    },
+    {
+      "id": "Cartesian2.fromCartesian4",
+      "field": "params/cartesian/description",
+      "sourceHash": "sha256:3c5dfd98edb06c9a5fd363bf9e230d4cc2f55fe4ee68b808ba98785edcd60f5d",
+      "text": "用于创建 Cartesian2 的 Cartesian4 实例。"
+    },
+    {
+      "id": "Cartesian2.fromCartesian4",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:33580e7b03d723e1c21b9f61ad11080d223182a868915cfbdaed47473173f107",
+      "text": "修改后的 result 参数；未提供时返回新建的 Cartesian2 实例。"
+    },
+    {
+      "id": "Cartesian2.fromElements",
+      "field": "description",
+      "sourceHash": "sha256:41a2f1fd9d531cc664922a4132c02e380e7a299baa0d7a4c1b721728fe356dbf",
+      "text": "使用 x 和 y 坐标创建 Cartesian2 实例。"
+    },
+    {
+      "id": "Cartesian2.fromElements",
+      "field": "params/x/description",
+      "sourceHash": "sha256:71a6e78b56307f36c5371cb0a58b9ff3c4c8deae5099273a4dd5696eeebe6a4a",
+      "text": "x 坐标。"
+    },
+    {
+      "id": "Cartesian2.fromElements",
+      "field": "params/y/description",
+      "sourceHash": "sha256:0ecf5f8080177eb0a9c5ca817e4ac68d9a3b537ea7c8219a72c613ba31c109b2",
+      "text": "y 坐标。"
+    },
+    {
+      "id": "Cartesian2.fromElements",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:33580e7b03d723e1c21b9f61ad11080d223182a868915cfbdaed47473173f107",
+      "text": "修改后的 result 参数；未提供时返回新建的 Cartesian2 实例。"
+    },
+    {
+      "id": "Cartesian2.lerp",
+      "field": "description",
+      "sourceHash": "sha256:5c9d661505fa4474581334bc92aa041e1823f953d35c7ee96e8ffb167f6ce6c6",
+      "text": "使用给定笛卡尔向量计算 t 处的线性插值或外推值。"
+    },
+    {
+      "id": "Cartesian2.lerp",
+      "field": "params/end/description",
+      "sourceHash": "sha256:884dbeba3bf8ed28078f4abb3810e7ed45b54311c72e42bb597360f2446046c9",
+      "text": "t 为 1.0 时对应的值。"
+    },
+    {
+      "id": "Cartesian2.lerp",
+      "field": "params/start/description",
+      "sourceHash": "sha256:685c8a784648baf605d5df5eb389e4780c6c401b0f95ba40560c670835b18674",
+      "text": "t 为 0.0 时对应的值。"
+    },
+    {
+      "id": "Cartesian2.lerp",
+      "field": "params/t/description",
+      "sourceHash": "sha256:eb6494a782486871612062cf92e61cb7f60fe742bd528058e9b997e4f93d2b45",
+      "text": "要进行插值的 t 参数位置。"
+    },
+    {
+      "id": "Cartesian2.magnitude",
+      "field": "description",
+      "sourceHash": "sha256:af785ae8036893738e9e3b08f7ad03a9a03618b4cfccc0651bfbaa9ca39feab0",
+      "text": "计算笛卡尔向量的模（长度）。"
+    },
+    {
+      "id": "Cartesian2.magnitude",
+      "field": "params/cartesian/description",
+      "sourceHash": "sha256:be4d4f824d95703a8e8a9a3fd6ce9c9f97d86674dea97ac371748adc6f8a51df",
+      "text": "要计算模的笛卡尔向量实例。"
+    },
+    {
+      "id": "Cartesian2.magnitude",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:72c8045572472070abc8a17116132846ebcc47e397086d78ff1292ddc7aa256b",
+      "text": "模。"
+    },
+    {
+      "id": "Cartesian2.magnitudeSquared",
+      "field": "description",
+      "sourceHash": "sha256:f60d6bcd3b0ea832520423695ecbb15b70d969201a550d4d9fbe1970bfe87c8b",
+      "text": "计算给定笛卡尔向量模的平方。"
+    },
+    {
+      "id": "Cartesian2.magnitudeSquared",
+      "field": "params/cartesian/description",
+      "sourceHash": "sha256:c38041d1fab102e2c4922f2af3a99511b5c917333eb13995d8d2c7f5f44eaefe",
+      "text": "要计算模平方的笛卡尔向量实例。"
+    },
+    {
+      "id": "Cartesian2.magnitudeSquared",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:56c3be773653f09e09b088451a8c23595c1bd5d807b8ea4181cfcda9935398b4",
+      "text": "模的平方。"
+    },
+    {
+      "id": "Cartesian2.maximumByComponent",
+      "field": "description",
+      "sourceHash": "sha256:a7dfc4dde9b633e85488f29ecac30f548dc3b96161aa5556e904071df8798f0c",
+      "text": "比较两个笛卡尔向量，计算由对应分量最大值组成的笛卡尔向量。"
+    },
+    {
+      "id": "Cartesian2.maximumByComponent",
+      "field": "params/first/description",
+      "sourceHash": "sha256:c0b3aea81f089154cf263dc98cb25a3dc6173002d12a5d1a33a3b924e8eb74f3",
+      "text": "要比较的笛卡尔向量。"
+    },
+    {
+      "id": "Cartesian2.maximumByComponent",
+      "field": "params/second/description",
+      "sourceHash": "sha256:c0b3aea81f089154cf263dc98cb25a3dc6173002d12a5d1a33a3b924e8eb74f3",
+      "text": "要比较的笛卡尔向量。"
+    },
+    {
+      "id": "Cartesian2.maximumByComponent",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:cec4d11db3df7a58830fca936757eaa958d4934b14ee20d16f9dd0db65a9e8ec",
+      "text": "由对应分量最大值组成的笛卡尔向量。"
+    },
+    {
+      "id": "Cartesian2.maximumComponent",
+      "field": "description",
+      "sourceHash": "sha256:1a213645f9e25e60c2f122909c4a28592964834e7137297e94f17a600af0d061",
+      "text": "计算给定笛卡尔向量中最大分量的值。"
+    },
+    {
+      "id": "Cartesian2.maximumComponent",
+      "field": "params/cartesian/description",
+      "sourceHash": "sha256:831143459eac2940b428999fe5dd1dccee7f356a5c894b1658c84683bb1c0396",
+      "text": "要使用的笛卡尔向量。"
+    },
+    {
+      "id": "Cartesian2.maximumComponent",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:e6499b3cda908c19bf61a55538335b0fb912af7596c6569dbfc345e4a609adc8",
+      "text": "最大分量的值。"
+    },
+    {
+      "id": "Cartesian2.minimumByComponent",
+      "field": "description",
+      "sourceHash": "sha256:f7cba161a086a38827318101668083a573274ea15ac2f03df413ab35e0664b9e",
+      "text": "比较两个笛卡尔向量，计算由对应分量最小值组成的笛卡尔向量。"
+    },
+    {
+      "id": "Cartesian2.minimumByComponent",
+      "field": "params/first/description",
+      "sourceHash": "sha256:c0b3aea81f089154cf263dc98cb25a3dc6173002d12a5d1a33a3b924e8eb74f3",
+      "text": "要比较的笛卡尔向量。"
+    },
+    {
+      "id": "Cartesian2.minimumByComponent",
+      "field": "params/second/description",
+      "sourceHash": "sha256:c0b3aea81f089154cf263dc98cb25a3dc6173002d12a5d1a33a3b924e8eb74f3",
+      "text": "要比较的笛卡尔向量。"
+    },
+    {
+      "id": "Cartesian2.minimumByComponent",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:0e35484f0ba60d5b080ba26b62f32a5377da89b3d7600fe28220c6d337c56a10",
+      "text": "由对应分量最小值组成的笛卡尔向量。"
+    },
+    {
+      "id": "Cartesian2.minimumComponent",
+      "field": "description",
+      "sourceHash": "sha256:466732a905f91f5a3d63fd6645cfdf5b05324831798877801eae781872595638",
+      "text": "计算给定笛卡尔向量中最小分量的值。"
+    },
+    {
+      "id": "Cartesian2.minimumComponent",
+      "field": "params/cartesian/description",
+      "sourceHash": "sha256:831143459eac2940b428999fe5dd1dccee7f356a5c894b1658c84683bb1c0396",
+      "text": "要使用的笛卡尔向量。"
+    },
+    {
+      "id": "Cartesian2.minimumComponent",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:fde295d969cf6d06ee6ad31f14e1eeef5b6b8e864b13556d4469e69ef16402c3",
+      "text": "最小分量的值。"
+    },
+    {
+      "id": "Cartesian2.mostOrthogonalAxis",
+      "field": "description",
+      "sourceHash": "sha256:d3874c270419ee7802e200775575a091b046af671c691be9df411a720599e5d8",
+      "text": "返回与给定笛卡尔向量最接近正交的坐标轴。"
+    },
+    {
+      "id": "Cartesian2.mostOrthogonalAxis",
+      "field": "params/cartesian/description",
+      "sourceHash": "sha256:428d8c6f0a6bdda28b912b56e04b809c1180a5e400f55cfaa321da157bb91eae",
+      "text": "用于确定最正交坐标轴的笛卡尔向量。"
+    },
+    {
+      "id": "Cartesian2.mostOrthogonalAxis",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:deb2ed69873ba92660c0a963f8aa3860c1196894520177e99454112fa4732bc0",
+      "text": "最接近正交的坐标轴。"
+    },
+    {
+      "id": "Cartesian2.multiplyByScalar",
+      "field": "description",
+      "sourceHash": "sha256:38b99dcba63092cd7d24c853e3bf9d279b1e35fc453ae4a2e127adf7a0953198",
+      "text": "将给定笛卡尔向量的各分量乘以给定标量。"
+    },
+    {
+      "id": "Cartesian2.multiplyByScalar",
+      "field": "params/cartesian/description",
+      "sourceHash": "sha256:399cb7ee4a7868528b089f2908ee7e9bd24af3f348f3369fcd9968667e9f6279",
+      "text": "要缩放的笛卡尔向量。"
+    },
+    {
+      "id": "Cartesian2.multiplyByScalar",
+      "field": "params/scalar/description",
+      "sourceHash": "sha256:f947f410a6a05720d667798aca2b64c18c1e125a950a90cc08c10ad49e439a83",
+      "text": "要乘的标量。"
+    },
+    {
+      "id": "Cartesian2.multiplyComponents",
+      "field": "description",
+      "sourceHash": "sha256:587f49c3b204a64f3c37de701cf1fbed0901e8f181b94f7a6972b9b8871f517e",
+      "text": "计算两个笛卡尔向量逐分量的积。"
+    },
+    {
+      "id": "Cartesian2.negate",
+      "field": "description",
+      "sourceHash": "sha256:0dc214165b3f81a1e4c40ad19a02626d37abb211ebf3ffc0169b3ddfac97de6c",
+      "text": "将给定笛卡尔向量各分量取反。"
+    },
+    {
+      "id": "Cartesian2.negate",
+      "field": "params/cartesian/description",
+      "sourceHash": "sha256:f70f592f3beacd9c529c08bda068519461c6c3d88d4b81ef9a847717ef2df35e",
+      "text": "要取反的笛卡尔向量。"
+    },
+    {
+      "id": "Cartesian2.normalize",
+      "field": "description",
+      "sourceHash": "sha256:c64dcb03fcdfbe8e60c2ca183c77a0af06b3ef53bcf0532f639d5e841bd7fd68",
+      "text": "计算给定笛卡尔向量的归一化形式。"
+    },
+    {
+      "id": "Cartesian2.normalize",
+      "field": "params/cartesian/description",
+      "sourceHash": "sha256:202e7a4c9ed1169dc3bd85cf841739fb3317e5b595150fe1b40ab8646bd2d36a",
+      "text": "要归一化的笛卡尔向量。"
+    },
+    {
+      "id": "Cartesian2.ONE",
+      "field": "description",
+      "sourceHash": "sha256:1acb843e45c70d78c9fcd2d7ede18d2fd143cb918f8f90de7d4e58f207e4ba59",
+      "text": "初始化为 (1.0, 1.0) 的不可变 Cartesian2 实例。"
+    },
+    {
+      "id": "Cartesian2.packArray",
+      "field": "description",
+      "sourceHash": "sha256:a091a4688ac689f268715a07ad404075842f6c9424adfa897503d415d1e0f0e8",
+      "text": "将 Cartesian2 数组展平为分量数组。"
+    },
+    {
+      "id": "Cartesian2.packArray",
+      "field": "params/array/description",
+      "sourceHash": "sha256:cabd2b342eb83dfe4a17468997909e5ee4f4e83bdef933b3b6d951984eb0911f",
+      "text": "要打包的笛卡尔向量数组。"
+    },
+    {
+      "id": "Cartesian2.packArray",
+      "field": "params/result/description",
+      "sourceHash": "sha256:54cf0b9debe0ffd1a1f2c23b0ade91e432d00fea514e044075df23db3b699ef5",
+      "text": "用于保存结果的数组。若为类型化数组，必须具有 array.length * 2 个分量，否则抛出 {@link DeveloperError}；若为普通数组，则调整长度为 array.length * 2。"
+    },
+    {
+      "id": "Cartesian2.subtract",
+      "field": "description",
+      "sourceHash": "sha256:3deaad3e5cffbed851030c02fef4719961c9dee502918ad09fd39df00d42e07c",
+      "text": "计算两个笛卡尔向量逐分量的差。"
+    },
+    {
+      "id": "Cartesian2.UNIT_X",
+      "field": "description",
+      "sourceHash": "sha256:87217a0c8e066725cf08fdc95991d6957f73ab0e1d5c7e6e454d7984f00cd6df",
+      "text": "初始化为 (1.0, 0.0) 的不可变 Cartesian2 实例。"
+    },
+    {
+      "id": "Cartesian2.UNIT_Y",
+      "field": "description",
+      "sourceHash": "sha256:ba1fd2427c24ed28d4a374002a524bffbdee0aad09f997abc2d3c7deaf703b2c",
+      "text": "初始化为 (0.0, 1.0) 的不可变 Cartesian2 实例。"
+    },
+    {
+      "id": "Cartesian2.unpack",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:33580e7b03d723e1c21b9f61ad11080d223182a868915cfbdaed47473173f107",
+      "text": "修改后的 result 参数；未提供时返回新建的 Cartesian2 实例。"
+    },
+    {
+      "id": "Cartesian2.unpackArray",
+      "field": "description",
+      "sourceHash": "sha256:6b8e167c96a65100d3057d30d5b1d7b11806316f8dd5ade817c2c0654fa8dcf7",
+      "text": "将笛卡尔分量数组解包为 Cartesian2 数组。"
+    },
+    {
+      "id": "Cartesian2.unpackArray",
+      "field": "params/array/description",
+      "sourceHash": "sha256:761b03a4a01a1ef3a05d3ef102bd166754372e250e3053ba6067be9fe25fe5a0",
+      "text": "要解包的分量数组。"
+    },
+    {
+      "id": "Cartesian2.unpackArray",
+      "field": "params/result/description",
+      "sourceHash": "sha256:e92ce6987d55381c90196bb0f2de2e9021c026fda6edb8330ecad112a8d7c273",
+      "text": "用于保存结果的数组。"
+    },
+    {
+      "id": "Cartesian2.unpackArray",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:e0f13d64283eff08944af38407c51866a8ca5eece7c26aa0952f227ca9a0038c",
+      "text": "解包后的数组。"
+    },
+    {
+      "id": "Cartesian2.ZERO",
+      "field": "description",
+      "sourceHash": "sha256:f404142cb373616a70fe2c4f8493b7885f9c35aefbc6baa0aa8e829ddaab92d2",
+      "text": "初始化为 (0.0, 0.0) 的不可变 Cartesian2 实例。"
+    },
+    {
+      "id": "Cartesian2",
+      "field": "classdesc",
+      "sourceHash": "sha256:8675cdf2e41ac155be7e94391e2fb66372027a651ba9e228aad4ec09e6341593",
+      "text": "二维笛卡尔坐标点。"
+    },
+    {
+      "id": "Cartesian2#clone",
+      "field": "description",
+      "sourceHash": "sha256:d5466982b14034d4428f0035ef01af552dc639d8d2fe4245196f73e339cb9687",
+      "text": "复制此 Cartesian2 实例。"
+    },
+    {
+      "id": "Cartesian2#clone",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:33580e7b03d723e1c21b9f61ad11080d223182a868915cfbdaed47473173f107",
+      "text": "修改后的 result 参数；未提供时返回新建的 Cartesian2 实例。"
+    },
+    {
+      "id": "Cartesian2#equals",
+      "field": "description",
+      "sourceHash": "sha256:9ad112ac4414abd22156e86bc41662fe006057bc898e89dad59a513401954f9b",
+      "text": "将此笛卡尔向量与给定向量逐分量比较，相等时返回 <code>true</code>，否则返回 <code>false</code>。"
+    },
+    {
+      "id": "Cartesian2#equals",
+      "field": "params/right/description",
+      "sourceHash": "sha256:efda8c59547b894072307b332dca5dabeebf3f0542ddd583683d0d46706ab293",
+      "text": "右侧笛卡尔向量。"
+    },
+    {
+      "id": "Cartesian2#equalsEpsilon",
+      "field": "description",
+      "sourceHash": "sha256:27efa44f941f76cd0b5023a94a47dea5b0074c1ea8023e9c2464817dcc45642d",
+      "text": "将此笛卡尔向量与给定向量逐分量比较，通过绝对或相对容差测试时返回 <code>true</code>，否则返回 <code>false</code>。"
+    },
+    {
+      "id": "Cartesian2#equalsEpsilon",
+      "field": "params/absoluteEpsilon/description",
+      "sourceHash": "sha256:62e5c46861c6b7f0f4262f10c359b2b825b6fe2f8691de32fe6da1f2101fe776",
+      "text": "相等测试使用的绝对 epsilon 容差。"
+    },
+    {
+      "id": "Cartesian2#equalsEpsilon",
+      "field": "params/relativeEpsilon/description",
+      "sourceHash": "sha256:b6e762c1ad7a06b44a988832e91d2358793ab32a78832b268298e9342caffe33",
+      "text": "相等测试使用的相对 epsilon 容差。"
+    },
+    {
+      "id": "Cartesian2#equalsEpsilon",
+      "field": "params/right/description",
+      "sourceHash": "sha256:efda8c59547b894072307b332dca5dabeebf3f0542ddd583683d0d46706ab293",
+      "text": "右侧笛卡尔向量。"
+    },
+    {
+      "id": "Cartesian2#equalsEpsilon",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:10dbf4a7ddfcc7153660dfa7cfbd4cdcdcb39e498b54dcf418df578bc90f40df",
+      "text": "若差异在给定 epsilon 范围内，则返回 <code>true</code>；否则返回 <code>false</code>。"
+    },
+    {
+      "id": "Cartesian2#toString",
+      "field": "description",
+      "sourceHash": "sha256:34a5ce2b9a0836b4b3d8069d3f846bc2a66ae9bce9a713532a7eff93e5d976d0",
+      "text": "创建以 '(x, y)' 格式表示此笛卡尔坐标的字符串。"
+    },
+    {
+      "id": "Cartesian2#toString",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:f33132e1c00bd52b6267a18ff2fa4b89a0dcf998ed1a554137fb0503d641cdff",
+      "text": "以 '(x, y)' 格式表示给定笛卡尔坐标的字符串。"
+    },
+    {
+      "id": "Cartesian3.abs",
+      "field": "description",
+      "sourceHash": "sha256:4d340cc745e9f191f5bdb6505565f0db7864d0d7b7b1092dd136c22f1930727b",
+      "text": "计算给定笛卡尔向量各分量的绝对值。"
+    },
+    {
+      "id": "Cartesian3.abs",
+      "field": "params/cartesian/description",
+      "sourceHash": "sha256:459e786d95ec92c818df5edc3f64107d82aaba55fd0edcbbadb35ca991e5a65c",
+      "text": "要计算绝对值的笛卡尔向量。"
+    },
+    {
+      "id": "Cartesian3.add",
+      "field": "description",
+      "sourceHash": "sha256:7e2a45bd37343e77952e91194a8322167918a6ce931d3655e50e467f797f7a44",
+      "text": "计算两个笛卡尔向量逐分量的和。"
+    },
+    {
+      "id": "Cartesian3.angleBetween",
+      "field": "description",
+      "sourceHash": "sha256:0f63dfc377797574241f5fc8bbcb27c0f41479f94c1c6919c52b81fb111741f8",
+      "text": "返回给定笛卡尔向量之间的夹角，单位为弧度。"
+    },
+    {
+      "id": "Cartesian3.angleBetween",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:5e76f4f73283747abe5b5ea3fabb1eb25cc136c462a5050d5c555dd1808872d8",
+      "text": "两个笛卡尔向量之间的夹角。"
+    },
+    {
+      "id": "Cartesian3.clamp",
+      "field": "description",
+      "sourceHash": "sha256:18d68f96e668e9cf34a7211c6e57ffa7b6ea3b24ef9673124bd7e684d1ebef5f",
+      "text": "将一个值限制在两个值之间。"
+    },
+    {
+      "id": "Cartesian3.clamp",
+      "field": "params/max/description",
+      "sourceHash": "sha256:2b58192289f856877e629190592a4a464e9148f28b5c6ef2d99c4a027302e00b",
+      "text": "最大边界值。"
+    },
+    {
+      "id": "Cartesian3.clamp",
+      "field": "params/min/description",
+      "sourceHash": "sha256:b5c08cbefc0b415b7c7f8e5adc2bf9ad0d1ab9e5cd98367b037cd5461d28bac2",
+      "text": "最小边界值。"
+    },
+    {
+      "id": "Cartesian3.clamp",
+      "field": "params/value/description",
+      "sourceHash": "sha256:0d91bc456302ff8c58412b83ad84e147e3625b55b07b5e68084d25236ce50227",
+      "text": "要限制的值。"
+    },
+    {
+      "id": "Cartesian3.clamp",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:f5005a796fbec3e1fb7e520ba710550f59811bc676b34eab8a172578b2d0eb7e",
+      "text": "限制后的值，满足 min <= value <= max。"
+    },
+    {
+      "id": "Cartesian3.clone",
+      "field": "description",
+      "sourceHash": "sha256:10c32eb783ed353af7f80a4810c0b4d58fb070f1be4f43ec37633498e9d7baec",
+      "text": "复制 Cartesian3 实例。"
+    },
+    {
+      "id": "Cartesian3.clone",
+      "field": "params/cartesian/description",
+      "sourceHash": "sha256:284563ad40ab68557472d242ef753f261de3ab77273326ec1537627110bfe255",
+      "text": "要复制的笛卡尔向量。"
+    },
+    {
+      "id": "Cartesian3.clone",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:0a1df505b51b73e226f769101bbc1b4bfb45bba09803a3e5ecbb97b171361902",
+      "text": "修改后的 result 参数；未提供时返回新建的 Cartesian3 实例。若 cartesian 为 undefined，则返回 undefined。"
+    },
+    {
+      "id": "Cartesian3.cross",
+      "field": "description",
+      "sourceHash": "sha256:e12080095a7028068d6fce078c59ece617977024ae31e8aaf208746821f86713",
+      "text": "计算两个笛卡尔向量的叉积（向量积）。"
+    },
+    {
+      "id": "Cartesian3.cross",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:5afe775f6331da69ba0969cd57f1d98200345177c30b143c04d0e108cf31638a",
+      "text": "叉积。"
+    },
+    {
+      "id": "Cartesian3.distance",
+      "field": "description",
+      "sourceHash": "sha256:f9582f202e01bb5efe59f2150efed2f7c9c1be691372ce04f4fb6560f7f840c1",
+      "text": "计算两点间的距离。"
+    },
+    {
+      "id": "Cartesian3.distance",
+      "field": "params/left/description",
+      "sourceHash": "sha256:f028363c4baad1c5925966d994ac207f15a7567875353703eb436784b27e9b84",
+      "text": "距离计算的起点。"
+    },
+    {
+      "id": "Cartesian3.distance",
+      "field": "params/right/description",
+      "sourceHash": "sha256:5043878552895cfedc19d760096865cc6558ab4803819180254358a73318f1b4",
+      "text": "距离计算的终点。"
+    },
+    {
+      "id": "Cartesian3.distance",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:750c1a8707c7a7a28f67c422c912b7719725ba88258921a2c6ed27463290a738",
+      "text": "两点间的距离。"
+    },
+    {
+      "id": "Cartesian3.distanceSquared",
+      "field": "description",
+      "sourceHash": "sha256:b5ed4a1f4e1de12af3f5b251a4c6544a5c474b1588436d3271890c089d68c140",
+      "text": "计算两点间距离的平方。使用此函数比较距离平方，比使用 {@link Cartesian3#distance} 比较距离更高效。"
+    },
+    {
+      "id": "Cartesian3.distanceSquared",
+      "field": "params/left/description",
+      "sourceHash": "sha256:f028363c4baad1c5925966d994ac207f15a7567875353703eb436784b27e9b84",
+      "text": "距离计算的起点。"
+    },
+    {
+      "id": "Cartesian3.distanceSquared",
+      "field": "params/right/description",
+      "sourceHash": "sha256:5043878552895cfedc19d760096865cc6558ab4803819180254358a73318f1b4",
+      "text": "距离计算的终点。"
+    },
+    {
+      "id": "Cartesian3.distanceSquared",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:750c1a8707c7a7a28f67c422c912b7719725ba88258921a2c6ed27463290a738",
+      "text": "两点间的距离。"
+    },
+    {
+      "id": "Cartesian3.divideByScalar",
+      "field": "description",
+      "sourceHash": "sha256:049b56939bcfd4fec643f14444bd0f2c30b48af323b186701253f3f675e2cfdf",
+      "text": "将给定笛卡尔向量的各分量除以给定标量。"
+    },
+    {
+      "id": "Cartesian3.divideByScalar",
+      "field": "params/cartesian/description",
+      "sourceHash": "sha256:528eae60993ed300c48ba829c93a4647021e20b5ab93a8543d5214c0899b5190",
+      "text": "被除的笛卡尔向量。"
+    },
+    {
+      "id": "Cartesian3.divideByScalar",
+      "field": "params/scalar/description",
+      "sourceHash": "sha256:89b6fd5063ab1169ca0a24ef34bed5ed0fa9dd6f6223b01a00f303fd1e555166",
+      "text": "用作除数的标量。"
+    },
+    {
+      "id": "Cartesian3.divideComponents",
+      "field": "description",
+      "sourceHash": "sha256:346bc3b8181b5046704d80dcb61f027be8aac9a67e4479f8ac7dfb29579ec7f2",
+      "text": "计算两个笛卡尔向量逐分量的商。"
+    },
+    {
+      "id": "Cartesian3.dot",
+      "field": "description",
+      "sourceHash": "sha256:a8497d4e4fd8afa74f6391f5fce454b7667d124631030503111afb4156eb6aba",
+      "text": "计算两个笛卡尔向量的点积（标量积）。"
+    },
+    {
+      "id": "Cartesian3.dot",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:bf9d783712cc1006d6e21ba309f1e5b73362e5c43a24f98b28e69e2db8dcc2c3",
+      "text": "点积。"
+    },
+    {
+      "id": "Cartesian3.equals",
+      "field": "description",
+      "sourceHash": "sha256:023d501dde57a487ac0b5cfcc66380034f06061174bed45d7563719848ba7ec1",
+      "text": "逐分量比较给定笛卡尔向量，相等时返回 <code>true</code>，否则返回 <code>false</code>。"
+    },
+    {
+      "id": "Cartesian3.equalsEpsilon",
+      "field": "description",
+      "sourceHash": "sha256:b08299128d348cf01aeb73869f73d79390a4e790a509a5d1a9e0845fcf84d705",
+      "text": "逐分量比较给定笛卡尔向量，通过绝对或相对容差测试时返回 <code>true</code>，否则返回 <code>false</code>。"
+    },
+    {
+      "id": "Cartesian3.equalsEpsilon",
+      "field": "params/absoluteEpsilon/description",
+      "sourceHash": "sha256:62e5c46861c6b7f0f4262f10c359b2b825b6fe2f8691de32fe6da1f2101fe776",
+      "text": "相等测试使用的绝对 epsilon 容差。"
+    },
+    {
+      "id": "Cartesian3.equalsEpsilon",
+      "field": "params/relativeEpsilon/description",
+      "sourceHash": "sha256:b6e762c1ad7a06b44a988832e91d2358793ab32a78832b268298e9342caffe33",
+      "text": "相等测试使用的相对 epsilon 容差。"
+    },
+    {
+      "id": "Cartesian3.equalsEpsilon",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:d73d821dc6b34822dfe11364cb173a7333751e53e9ef3a80bb985a26ce173b2c",
+      "text": "若 left 和 right 的差异在给定 epsilon 范围内，则返回 <code>true</code>；否则返回 <code>false</code>。"
+    },
+    {
+      "id": "Cartesian3.fromArray",
+      "field": "description",
+      "sourceHash": "sha256:61cc41c2ea00bc98816fa6e2c66292da8bcdc359293fc735c5bfaf20802d1cb2",
+      "text": "使用数组中连续三个元素创建 Cartesian3。"
+    },
+    {
+      "id": "Cartesian3.fromArray",
+      "field": "params/array/description",
+      "sourceHash": "sha256:a544355ac8539c67d92547133644cf3c10cf19f18ca2a9aca7295f5300017557",
+      "text": "连续三个元素分别对应 x、y、z 分量的数组。"
+    },
+    {
+      "id": "Cartesian3.fromArray",
+      "field": "params/startingIndex/description",
+      "sourceHash": "sha256:83ca85452a6d466fb74a46463ac58b6cdb1b272cf95e5f63585ea894451648b5",
+      "text": "数组中第一个元素的偏移，该元素对应 x 分量。"
+    },
+    {
+      "id": "Cartesian3.fromArray",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:3b28d95418a91fc98ef8eabf19a1cbff31f190a0c1124274ab830b7bd48ee92f",
+      "text": "修改后的 result 参数；未提供时返回新建的 Cartesian3 实例。"
+    },
+    {
+      "id": "Cartesian3.fromCartesian4",
+      "field": "description",
+      "sourceHash": "sha256:88716da79bc6e04d0f2867bdba2bdbcaa0ff60b72e82f61bf1841649a7896ece",
+      "text": "从现有 Cartesian4 创建 Cartesian3 实例，仅取 x、y 和 z 属性，舍弃 w。"
+    },
+    {
+      "id": "Cartesian3.fromCartesian4",
+      "field": "params/cartesian/description",
+      "sourceHash": "sha256:79c3df07840f5738178332d0c443c6c24c7cf68729bae4ea0af3b889cf1d7a2f",
+      "text": "用于创建 Cartesian3 的 Cartesian4 实例。"
+    },
+    {
+      "id": "Cartesian3.fromCartesian4",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:3b28d95418a91fc98ef8eabf19a1cbff31f190a0c1124274ab830b7bd48ee92f",
+      "text": "修改后的 result 参数；未提供时返回新建的 Cartesian3 实例。"
+    },
+    {
+      "id": "Cartesian3.fromDegrees",
+      "field": "params/ellipsoid/description",
+      "sourceHash": "sha256:58b38c0ef6f1c358f1484d47f40f9b2fbddaf67abd0b01ad61751e7b1f2dd177",
+      "text": "位置所在的椭球。"
+    },
+    {
+      "id": "Cartesian3.fromDegrees",
+      "field": "params/latitude/description",
+      "sourceHash": "sha256:57b2fbaa79ecee39d4deee6b88f91618c2d661a86a276a2dcd8b6a5f3e38cf28",
+      "text": "纬度，单位为度。"
+    },
+    {
+      "id": "Cartesian3.fromDegrees",
+      "field": "params/longitude/description",
+      "sourceHash": "sha256:bdf47fb5e85331afcb7e571a5069dd585cfb4b53f56487e6965a461045ab49ce",
+      "text": "经度，单位为度。"
+    },
+    {
+      "id": "Cartesian3.fromDegrees",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:d13a8864364f44de71406803f784ee7cde818840c270272d89471f508a52a4c9",
+      "text": "位置。"
+    },
+    {
+      "id": "Cartesian3.fromDegreesArray",
+      "field": "description",
+      "sourceHash": "sha256:f33d33bf04d08d69cbf54989f3e9147539666af8c158b032617c0484b5b3e2fb",
+      "text": "根据以度为单位的经纬度数组，返回 Cartesian3 位置数组。"
+    },
+    {
+      "id": "Cartesian3.fromDegreesArray",
+      "field": "params/coordinates/description",
+      "sourceHash": "sha256:045c6fb2583b4ce0f704bc3326e696670efb78d0366f3801e3b2920c2e817ab0",
+      "text": "经纬度列表，依次交替排列为 [longitude, latitude, longitude, latitude...]。"
+    },
+    {
+      "id": "Cartesian3.fromDegreesArray",
+      "field": "params/ellipsoid/description",
+      "sourceHash": "sha256:dce43b716082d0065335ad668f07815fd732591a266609408c91daa6b43e984e",
+      "text": "坐标所在的椭球。"
+    },
+    {
+      "id": "Cartesian3.fromDegreesArray",
+      "field": "params/result/description",
+      "sourceHash": "sha256:680cf4f87ffb550991778e80c04929eb9352c9f77f00a468508006a687b9e330",
+      "text": "用于保存结果的 Cartesian3 对象数组。"
+    },
+    {
+      "id": "Cartesian3.fromDegreesArray",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:f9ca73c9b35742a7c723f5ffd24cb633e278ffc79c64e90c36204eb7cbe3a97f",
+      "text": "位置数组。"
+    },
+    {
+      "id": "Cartesian3.fromDegreesArrayHeights",
+      "field": "description",
+      "sourceHash": "sha256:103512bad775309d1587ec8d52f3fb5aa0016e32a7501a0688777924b90fc93f",
+      "text": "根据经度、纬度和高度数组返回 Cartesian3 位置数组，其中经纬度使用度。"
+    },
+    {
+      "id": "Cartesian3.fromDegreesArrayHeights",
+      "field": "params/coordinates/description",
+      "sourceHash": "sha256:8d8f3829548fd0506654578647ae373ca0408c67533aac88a7e6332f5d4ce5b4",
+      "text": "经度、纬度和高度列表，依次交替排列为 [longitude, latitude, height, longitude, latitude, height...]。"
+    },
+    {
+      "id": "Cartesian3.fromDegreesArrayHeights",
+      "field": "params/ellipsoid/description",
+      "sourceHash": "sha256:58b38c0ef6f1c358f1484d47f40f9b2fbddaf67abd0b01ad61751e7b1f2dd177",
+      "text": "位置所在的椭球。"
+    },
+    {
+      "id": "Cartesian3.fromDegreesArrayHeights",
+      "field": "params/result/description",
+      "sourceHash": "sha256:680cf4f87ffb550991778e80c04929eb9352c9f77f00a468508006a687b9e330",
+      "text": "用于保存结果的 Cartesian3 对象数组。"
+    },
+    {
+      "id": "Cartesian3.fromDegreesArrayHeights",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:f9ca73c9b35742a7c723f5ffd24cb633e278ffc79c64e90c36204eb7cbe3a97f",
+      "text": "位置数组。"
+    },
+    {
+      "id": "Cartesian3.fromElements",
+      "field": "description",
+      "sourceHash": "sha256:ec48655eca38c0f97109e8ed026e32deca2b92cdf43507e2c4dd6dc63c755b2d",
+      "text": "使用 x、y 和 z 坐标创建 Cartesian3 实例。"
+    },
+    {
+      "id": "Cartesian3.fromElements",
+      "field": "params/x/description",
+      "sourceHash": "sha256:71a6e78b56307f36c5371cb0a58b9ff3c4c8deae5099273a4dd5696eeebe6a4a",
+      "text": "x 坐标。"
+    },
+    {
+      "id": "Cartesian3.fromElements",
+      "field": "params/y/description",
+      "sourceHash": "sha256:0ecf5f8080177eb0a9c5ca817e4ac68d9a3b537ea7c8219a72c613ba31c109b2",
+      "text": "y 坐标。"
+    },
+    {
+      "id": "Cartesian3.fromElements",
+      "field": "params/z/description",
+      "sourceHash": "sha256:d6f59f019e2fc3d6c3db15b3d71f6e062ea29d56ff2c36cac1003ac4c8a8af30",
+      "text": "z 坐标。"
+    },
+    {
+      "id": "Cartesian3.fromElements",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:3b28d95418a91fc98ef8eabf19a1cbff31f190a0c1124274ab830b7bd48ee92f",
+      "text": "修改后的 result 参数；未提供时返回新建的 Cartesian3 实例。"
+    },
+    {
+      "id": "Cartesian3.fromRadians",
+      "field": "description",
+      "sourceHash": "sha256:706f6b9e0be7d18d9f706871967ab9b786ff7fb554e79b713f192a6d05d057ce",
+      "text": "根据以弧度为单位的经纬度返回 Cartesian3 位置。"
+    },
+    {
+      "id": "Cartesian3.fromRadians",
+      "field": "params/ellipsoid/description",
+      "sourceHash": "sha256:58b38c0ef6f1c358f1484d47f40f9b2fbddaf67abd0b01ad61751e7b1f2dd177",
+      "text": "位置所在的椭球。"
+    },
+    {
+      "id": "Cartesian3.fromRadians",
+      "field": "params/latitude/description",
+      "sourceHash": "sha256:90ccfdd32649682ad36e5ff579cc9bea4b4a6dafcb0646c533ca9237024bf7ca",
+      "text": "纬度，单位为弧度。"
+    },
+    {
+      "id": "Cartesian3.fromRadians",
+      "field": "params/longitude/description",
+      "sourceHash": "sha256:6e06f8828dcd1d93c73b232932b0888d87816c9e98a816e4390804600543dc51",
+      "text": "经度，单位为弧度。"
+    },
+    {
+      "id": "Cartesian3.fromRadians",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:d13a8864364f44de71406803f784ee7cde818840c270272d89471f508a52a4c9",
+      "text": "位置。"
+    },
+    {
+      "id": "Cartesian3.fromRadiansArray",
+      "field": "description",
+      "sourceHash": "sha256:862005af41ddbab83d191beb55f57c01f6ae7230a2d7df88e8b1f52929fb6393",
+      "text": "根据以弧度为单位的经纬度数组，返回 Cartesian3 位置数组。"
+    },
+    {
+      "id": "Cartesian3.fromRadiansArray",
+      "field": "params/coordinates/description",
+      "sourceHash": "sha256:045c6fb2583b4ce0f704bc3326e696670efb78d0366f3801e3b2920c2e817ab0",
+      "text": "经纬度列表，依次交替排列为 [longitude, latitude, longitude, latitude...]。"
+    },
+    {
+      "id": "Cartesian3.fromRadiansArray",
+      "field": "params/ellipsoid/description",
+      "sourceHash": "sha256:dce43b716082d0065335ad668f07815fd732591a266609408c91daa6b43e984e",
+      "text": "坐标所在的椭球。"
+    },
+    {
+      "id": "Cartesian3.fromRadiansArray",
+      "field": "params/result/description",
+      "sourceHash": "sha256:680cf4f87ffb550991778e80c04929eb9352c9f77f00a468508006a687b9e330",
+      "text": "用于保存结果的 Cartesian3 对象数组。"
+    },
+    {
+      "id": "Cartesian3.fromRadiansArray",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:f9ca73c9b35742a7c723f5ffd24cb633e278ffc79c64e90c36204eb7cbe3a97f",
+      "text": "位置数组。"
+    },
+    {
+      "id": "Cartesian3.fromRadiansArrayHeights",
+      "field": "description",
+      "sourceHash": "sha256:f602e59c027b963b066766cdbcc4e5ef50a3159c1958cb96db55f1cebb84b3d3",
+      "text": "根据经度、纬度和高度数组返回 Cartesian3 位置数组，其中经纬度使用弧度。"
+    },
+    {
+      "id": "Cartesian3.fromRadiansArrayHeights",
+      "field": "params/coordinates/description",
+      "sourceHash": "sha256:8d8f3829548fd0506654578647ae373ca0408c67533aac88a7e6332f5d4ce5b4",
+      "text": "经度、纬度和高度列表，依次交替排列为 [longitude, latitude, height, longitude, latitude, height...]。"
+    },
+    {
+      "id": "Cartesian3.fromRadiansArrayHeights",
+      "field": "params/ellipsoid/description",
+      "sourceHash": "sha256:58b38c0ef6f1c358f1484d47f40f9b2fbddaf67abd0b01ad61751e7b1f2dd177",
+      "text": "位置所在的椭球。"
+    },
+    {
+      "id": "Cartesian3.fromRadiansArrayHeights",
+      "field": "params/result/description",
+      "sourceHash": "sha256:680cf4f87ffb550991778e80c04929eb9352c9f77f00a468508006a687b9e330",
+      "text": "用于保存结果的 Cartesian3 对象数组。"
+    },
+    {
+      "id": "Cartesian3.fromRadiansArrayHeights",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:f9ca73c9b35742a7c723f5ffd24cb633e278ffc79c64e90c36204eb7cbe3a97f",
+      "text": "位置数组。"
+    },
+    {
+      "id": "Cartesian3.fromSpherical",
+      "field": "description",
+      "sourceHash": "sha256:11d9730e98d4ecfeec153977d51dca8c42a0b7175a4381a419f125a05ef6808e",
+      "text": "将给定 Spherical 转换为 Cartesian3 坐标。"
+    },
+    {
+      "id": "Cartesian3.fromSpherical",
+      "field": "params/spherical/description",
+      "sourceHash": "sha256:d1f819e10cf00651822c26a62782fe2aa24b1f7309bfd235957ccb8d07d35c59",
+      "text": "要转换为 Cartesian3 的 Spherical。"
+    },
+    {
+      "id": "Cartesian3.fromSpherical",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:3b28d95418a91fc98ef8eabf19a1cbff31f190a0c1124274ab830b7bd48ee92f",
+      "text": "修改后的 result 参数；未提供时返回新建的 Cartesian3 实例。"
+    },
+    {
+      "id": "Cartesian3.lerp",
+      "field": "description",
+      "sourceHash": "sha256:5c9d661505fa4474581334bc92aa041e1823f953d35c7ee96e8ffb167f6ce6c6",
+      "text": "使用给定笛卡尔向量计算 t 处的线性插值或外推值。"
+    },
+    {
+      "id": "Cartesian3.lerp",
+      "field": "params/end/description",
+      "sourceHash": "sha256:884dbeba3bf8ed28078f4abb3810e7ed45b54311c72e42bb597360f2446046c9",
+      "text": "t 为 1.0 时对应的值。"
+    },
+    {
+      "id": "Cartesian3.lerp",
+      "field": "params/start/description",
+      "sourceHash": "sha256:685c8a784648baf605d5df5eb389e4780c6c401b0f95ba40560c670835b18674",
+      "text": "t 为 0.0 时对应的值。"
+    },
+    {
+      "id": "Cartesian3.lerp",
+      "field": "params/t/description",
+      "sourceHash": "sha256:eb6494a782486871612062cf92e61cb7f60fe742bd528058e9b997e4f93d2b45",
+      "text": "要进行插值的 t 参数位置。"
+    },
+    {
+      "id": "Cartesian3.magnitude",
+      "field": "description",
+      "sourceHash": "sha256:af785ae8036893738e9e3b08f7ad03a9a03618b4cfccc0651bfbaa9ca39feab0",
+      "text": "计算笛卡尔向量的模（长度）。"
+    },
+    {
+      "id": "Cartesian3.magnitude",
+      "field": "params/cartesian/description",
+      "sourceHash": "sha256:be4d4f824d95703a8e8a9a3fd6ce9c9f97d86674dea97ac371748adc6f8a51df",
+      "text": "要计算模的笛卡尔向量实例。"
+    },
+    {
+      "id": "Cartesian3.magnitude",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:72c8045572472070abc8a17116132846ebcc47e397086d78ff1292ddc7aa256b",
+      "text": "模。"
+    },
+    {
+      "id": "Cartesian3.magnitudeSquared",
+      "field": "description",
+      "sourceHash": "sha256:f60d6bcd3b0ea832520423695ecbb15b70d969201a550d4d9fbe1970bfe87c8b",
+      "text": "计算给定笛卡尔向量模的平方。"
+    },
+    {
+      "id": "Cartesian3.magnitudeSquared",
+      "field": "params/cartesian/description",
+      "sourceHash": "sha256:c38041d1fab102e2c4922f2af3a99511b5c917333eb13995d8d2c7f5f44eaefe",
+      "text": "要计算模平方的笛卡尔向量实例。"
+    },
+    {
+      "id": "Cartesian3.magnitudeSquared",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:56c3be773653f09e09b088451a8c23595c1bd5d807b8ea4181cfcda9935398b4",
+      "text": "模的平方。"
+    },
+    {
+      "id": "Cartesian3.maximumByComponent",
+      "field": "description",
+      "sourceHash": "sha256:a7dfc4dde9b633e85488f29ecac30f548dc3b96161aa5556e904071df8798f0c",
+      "text": "比较两个笛卡尔向量，计算由对应分量最大值组成的笛卡尔向量。"
+    },
+    {
+      "id": "Cartesian3.maximumByComponent",
+      "field": "params/first/description",
+      "sourceHash": "sha256:c0b3aea81f089154cf263dc98cb25a3dc6173002d12a5d1a33a3b924e8eb74f3",
+      "text": "要比较的笛卡尔向量。"
+    },
+    {
+      "id": "Cartesian3.maximumByComponent",
+      "field": "params/second/description",
+      "sourceHash": "sha256:c0b3aea81f089154cf263dc98cb25a3dc6173002d12a5d1a33a3b924e8eb74f3",
+      "text": "要比较的笛卡尔向量。"
+    },
+    {
+      "id": "Cartesian3.maximumByComponent",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:cec4d11db3df7a58830fca936757eaa958d4934b14ee20d16f9dd0db65a9e8ec",
+      "text": "由对应分量最大值组成的笛卡尔向量。"
+    },
+    {
+      "id": "Cartesian3.maximumComponent",
+      "field": "description",
+      "sourceHash": "sha256:1a213645f9e25e60c2f122909c4a28592964834e7137297e94f17a600af0d061",
+      "text": "计算给定笛卡尔向量中最大分量的值。"
+    },
+    {
+      "id": "Cartesian3.maximumComponent",
+      "field": "params/cartesian/description",
+      "sourceHash": "sha256:831143459eac2940b428999fe5dd1dccee7f356a5c894b1658c84683bb1c0396",
+      "text": "要使用的笛卡尔向量。"
+    },
+    {
+      "id": "Cartesian3.maximumComponent",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:e6499b3cda908c19bf61a55538335b0fb912af7596c6569dbfc345e4a609adc8",
+      "text": "最大分量的值。"
+    },
+    {
+      "id": "Cartesian3.midpoint",
+      "field": "description",
+      "sourceHash": "sha256:7c97c57f2d400efbb2c5bf10f26c7f4a09fe5fc24170df7b8f954aec86b429b2",
+      "text": "计算左右两个笛卡尔坐标点之间的中点。"
+    },
+    {
+      "id": "Cartesian3.midpoint",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:b0bf115088e975e13faee4bf23886df3087610bb198056596be32471897a5742",
+      "text": "中点。"
+    },
+    {
+      "id": "Cartesian3.minimumByComponent",
+      "field": "description",
+      "sourceHash": "sha256:f7cba161a086a38827318101668083a573274ea15ac2f03df413ab35e0664b9e",
+      "text": "比较两个笛卡尔向量，计算由对应分量最小值组成的笛卡尔向量。"
+    },
+    {
+      "id": "Cartesian3.minimumByComponent",
+      "field": "params/first/description",
+      "sourceHash": "sha256:c0b3aea81f089154cf263dc98cb25a3dc6173002d12a5d1a33a3b924e8eb74f3",
+      "text": "要比较的笛卡尔向量。"
+    },
+    {
+      "id": "Cartesian3.minimumByComponent",
+      "field": "params/second/description",
+      "sourceHash": "sha256:c0b3aea81f089154cf263dc98cb25a3dc6173002d12a5d1a33a3b924e8eb74f3",
+      "text": "要比较的笛卡尔向量。"
+    },
+    {
+      "id": "Cartesian3.minimumByComponent",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:0e35484f0ba60d5b080ba26b62f32a5377da89b3d7600fe28220c6d337c56a10",
+      "text": "由对应分量最小值组成的笛卡尔向量。"
+    },
+    {
+      "id": "Cartesian3.minimumComponent",
+      "field": "description",
+      "sourceHash": "sha256:466732a905f91f5a3d63fd6645cfdf5b05324831798877801eae781872595638",
+      "text": "计算给定笛卡尔向量中最小分量的值。"
+    },
+    {
+      "id": "Cartesian3.minimumComponent",
+      "field": "params/cartesian/description",
+      "sourceHash": "sha256:831143459eac2940b428999fe5dd1dccee7f356a5c894b1658c84683bb1c0396",
+      "text": "要使用的笛卡尔向量。"
+    },
+    {
+      "id": "Cartesian3.minimumComponent",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:fde295d969cf6d06ee6ad31f14e1eeef5b6b8e864b13556d4469e69ef16402c3",
+      "text": "最小分量的值。"
+    },
+    {
+      "id": "Cartesian3.mostOrthogonalAxis",
+      "field": "description",
+      "sourceHash": "sha256:d3874c270419ee7802e200775575a091b046af671c691be9df411a720599e5d8",
+      "text": "返回与给定笛卡尔向量最接近正交的坐标轴。"
+    },
+    {
+      "id": "Cartesian3.mostOrthogonalAxis",
+      "field": "params/cartesian/description",
+      "sourceHash": "sha256:428d8c6f0a6bdda28b912b56e04b809c1180a5e400f55cfaa321da157bb91eae",
+      "text": "用于确定最正交坐标轴的笛卡尔向量。"
+    },
+    {
+      "id": "Cartesian3.mostOrthogonalAxis",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:deb2ed69873ba92660c0a963f8aa3860c1196894520177e99454112fa4732bc0",
+      "text": "最接近正交的坐标轴。"
+    },
+    {
+      "id": "Cartesian3.multiplyByScalar",
+      "field": "description",
+      "sourceHash": "sha256:38b99dcba63092cd7d24c853e3bf9d279b1e35fc453ae4a2e127adf7a0953198",
+      "text": "将给定笛卡尔向量的各分量乘以给定标量。"
+    },
+    {
+      "id": "Cartesian3.multiplyByScalar",
+      "field": "params/cartesian/description",
+      "sourceHash": "sha256:399cb7ee4a7868528b089f2908ee7e9bd24af3f348f3369fcd9968667e9f6279",
+      "text": "要缩放的笛卡尔向量。"
+    },
+    {
+      "id": "Cartesian3.multiplyByScalar",
+      "field": "params/scalar/description",
+      "sourceHash": "sha256:f947f410a6a05720d667798aca2b64c18c1e125a950a90cc08c10ad49e439a83",
+      "text": "要乘的标量。"
+    },
+    {
+      "id": "Cartesian3.multiplyComponents",
+      "field": "description",
+      "sourceHash": "sha256:587f49c3b204a64f3c37de701cf1fbed0901e8f181b94f7a6972b9b8871f517e",
+      "text": "计算两个笛卡尔向量逐分量的积。"
+    },
+    {
+      "id": "Cartesian3.negate",
+      "field": "description",
+      "sourceHash": "sha256:0dc214165b3f81a1e4c40ad19a02626d37abb211ebf3ffc0169b3ddfac97de6c",
+      "text": "将给定笛卡尔向量各分量取反。"
+    },
+    {
+      "id": "Cartesian3.negate",
+      "field": "params/cartesian/description",
+      "sourceHash": "sha256:f70f592f3beacd9c529c08bda068519461c6c3d88d4b81ef9a847717ef2df35e",
+      "text": "要取反的笛卡尔向量。"
+    },
+    {
+      "id": "Cartesian3.normalize",
+      "field": "description",
+      "sourceHash": "sha256:c64dcb03fcdfbe8e60c2ca183c77a0af06b3ef53bcf0532f639d5e841bd7fd68",
+      "text": "计算给定笛卡尔向量的归一化形式。"
+    },
+    {
+      "id": "Cartesian3.normalize",
+      "field": "params/cartesian/description",
+      "sourceHash": "sha256:202e7a4c9ed1169dc3bd85cf841739fb3317e5b595150fe1b40ab8646bd2d36a",
+      "text": "要归一化的笛卡尔向量。"
+    },
+    {
+      "id": "Cartesian3.ONE",
+      "field": "description",
+      "sourceHash": "sha256:d256b721899d3d6a30b7acc22bc470dd65a9b5fd48f6f6bdb7d9724a66134fe9",
+      "text": "初始化为 (1.0, 1.0, 1.0) 的不可变 Cartesian3 实例。"
+    },
+    {
+      "id": "Cartesian3.packArray",
+      "field": "description",
+      "sourceHash": "sha256:09720a2ad733fbab062801f5a6f1a6ac5e55cac02ad4525d782e49a4e5bb7d31",
+      "text": "将 Cartesian3 数组展平为分量数组。"
+    },
+    {
+      "id": "Cartesian3.packArray",
+      "field": "params/array/description",
+      "sourceHash": "sha256:cabd2b342eb83dfe4a17468997909e5ee4f4e83bdef933b3b6d951984eb0911f",
+      "text": "要打包的笛卡尔向量数组。"
+    },
+    {
+      "id": "Cartesian3.packArray",
+      "field": "params/result/description",
+      "sourceHash": "sha256:e9d8fad7671f92907eae575519fbfb13450d6f324aef554911ee5ab563a5cb5f",
+      "text": "用于保存结果的数组。若为类型化数组，必须具有 array.length * 3 个分量，否则抛出 {@link DeveloperError}；若为普通数组，则调整长度为 array.length * 3。"
+    },
+    {
+      "id": "Cartesian3.projectVector",
+      "field": "description",
+      "sourceHash": "sha256:825118848df3a0c6898b6d137dd8d602d211c38b4eea4d604314759459eb8f6a",
+      "text": "将向量 a 投影到向量 b。"
+    },
+    {
+      "id": "Cartesian3.projectVector",
+      "field": "params/a/description",
+      "sourceHash": "sha256:fcf3082c82ae3f7e4bda82cf8c141ed59e00fe30429102c89ad6306565aaae92",
+      "text": "待投影的向量。"
+    },
+    {
+      "id": "Cartesian3.projectVector",
+      "field": "params/b/description",
+      "sourceHash": "sha256:5dd99b79a90b3e37072a21ff35c115fa64d8e754ef588afb5ed0bd5294490c88",
+      "text": "投影所落在的向量。"
+    },
+    {
+      "id": "Cartesian3.projectVector",
+      "field": "params/result/description",
+      "sourceHash": "sha256:a5e5ceae564cdc9c88f690a9f9b90c49f1a8ccdac46f7e942d693bb22f1df7df",
+      "text": "结果笛卡尔向量。"
+    },
+    {
+      "id": "Cartesian3.projectVector",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:ae79fcd815358c776448a53c1098d6f3ccc98c8e210f0fb1fb8fa69b624daffb",
+      "text": "修改后的 result 参数。"
+    },
+    {
+      "id": "Cartesian3.subtract",
+      "field": "description",
+      "sourceHash": "sha256:3deaad3e5cffbed851030c02fef4719961c9dee502918ad09fd39df00d42e07c",
+      "text": "计算两个笛卡尔向量逐分量的差。"
+    },
+    {
+      "id": "Cartesian3.UNIT_X",
+      "field": "description",
+      "sourceHash": "sha256:89970c76f5843a02829961cc150867e445bb6bd6ca98d984474331e3a2e773e6",
+      "text": "初始化为 (1.0, 0.0, 0.0) 的不可变 Cartesian3 实例。"
+    },
+    {
+      "id": "Cartesian3.UNIT_Y",
+      "field": "description",
+      "sourceHash": "sha256:79c340a273951d9e83768b15b214877072da24623771e0794642af2978dae105",
+      "text": "初始化为 (0.0, 1.0, 0.0) 的不可变 Cartesian3 实例。"
+    },
+    {
+      "id": "Cartesian3.UNIT_Z",
+      "field": "description",
+      "sourceHash": "sha256:5a37ee18f1bee9781deaf7cb15957f22e09999240c7898c12a109354a6c7e442",
+      "text": "初始化为 (0.0, 0.0, 1.0) 的不可变 Cartesian3 实例。"
+    },
+    {
+      "id": "Cartesian3.unpack",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:3b28d95418a91fc98ef8eabf19a1cbff31f190a0c1124274ab830b7bd48ee92f",
+      "text": "修改后的 result 参数；未提供时返回新建的 Cartesian3 实例。"
+    },
+    {
+      "id": "Cartesian3.unpackArray",
+      "field": "description",
+      "sourceHash": "sha256:95d3839d527c5496447121991597dab7b14379f403a555acae3df0c802caa0ee",
+      "text": "将笛卡尔分量数组解包为 Cartesian3 数组。"
+    },
+    {
+      "id": "Cartesian3.unpackArray",
+      "field": "params/array/description",
+      "sourceHash": "sha256:761b03a4a01a1ef3a05d3ef102bd166754372e250e3053ba6067be9fe25fe5a0",
+      "text": "要解包的分量数组。"
+    },
+    {
+      "id": "Cartesian3.unpackArray",
+      "field": "params/result/description",
+      "sourceHash": "sha256:e92ce6987d55381c90196bb0f2de2e9021c026fda6edb8330ecad112a8d7c273",
+      "text": "用于保存结果的数组。"
+    },
+    {
+      "id": "Cartesian3.unpackArray",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:e0f13d64283eff08944af38407c51866a8ca5eece7c26aa0952f227ca9a0038c",
+      "text": "解包后的数组。"
+    },
+    {
+      "id": "Cartesian3.ZERO",
+      "field": "description",
+      "sourceHash": "sha256:4cab19c023ced3e7e97fb1c2a24211bbf89ff66a4233db27e095e94b7acd3a8c",
+      "text": "初始化为 (0.0, 0.0, 0.0) 的不可变 Cartesian3 实例。"
+    },
+    {
+      "id": "Cartesian3#clone",
+      "field": "description",
+      "sourceHash": "sha256:fdfb7b7df2b76c352586e0ea0a811782c1f9aea7d33681886176fe24445617f4",
+      "text": "复制此 Cartesian3 实例。"
+    },
+    {
+      "id": "Cartesian3#clone",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:3b28d95418a91fc98ef8eabf19a1cbff31f190a0c1124274ab830b7bd48ee92f",
+      "text": "修改后的 result 参数；未提供时返回新建的 Cartesian3 实例。"
+    },
+    {
+      "id": "Cartesian3#equals",
+      "field": "description",
+      "sourceHash": "sha256:9ad112ac4414abd22156e86bc41662fe006057bc898e89dad59a513401954f9b",
+      "text": "将此笛卡尔向量与给定向量逐分量比较，相等时返回 <code>true</code>，否则返回 <code>false</code>。"
+    },
+    {
+      "id": "Cartesian3#equals",
+      "field": "params/right/description",
+      "sourceHash": "sha256:efda8c59547b894072307b332dca5dabeebf3f0542ddd583683d0d46706ab293",
+      "text": "右侧笛卡尔向量。"
+    },
+    {
+      "id": "Cartesian3#equalsEpsilon",
+      "field": "description",
+      "sourceHash": "sha256:27efa44f941f76cd0b5023a94a47dea5b0074c1ea8023e9c2464817dcc45642d",
+      "text": "将此笛卡尔向量与给定向量逐分量比较，通过绝对或相对容差测试时返回 <code>true</code>，否则返回 <code>false</code>。"
+    },
+    {
+      "id": "Cartesian3#equalsEpsilon",
+      "field": "params/absoluteEpsilon/description",
+      "sourceHash": "sha256:62e5c46861c6b7f0f4262f10c359b2b825b6fe2f8691de32fe6da1f2101fe776",
+      "text": "相等测试使用的绝对 epsilon 容差。"
+    },
+    {
+      "id": "Cartesian3#equalsEpsilon",
+      "field": "params/relativeEpsilon/description",
+      "sourceHash": "sha256:b6e762c1ad7a06b44a988832e91d2358793ab32a78832b268298e9342caffe33",
+      "text": "相等测试使用的相对 epsilon 容差。"
+    },
+    {
+      "id": "Cartesian3#equalsEpsilon",
+      "field": "params/right/description",
+      "sourceHash": "sha256:efda8c59547b894072307b332dca5dabeebf3f0542ddd583683d0d46706ab293",
+      "text": "右侧笛卡尔向量。"
+    },
+    {
+      "id": "Cartesian3#equalsEpsilon",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:10dbf4a7ddfcc7153660dfa7cfbd4cdcdcb39e498b54dcf418df578bc90f40df",
+      "text": "若差异在给定 epsilon 范围内，则返回 <code>true</code>；否则返回 <code>false</code>。"
+    },
+    {
+      "id": "Cartesian3#toString",
+      "field": "description",
+      "sourceHash": "sha256:96b4a92ae77782db3450a1da9369235c0d01465cbde2b16a743dd61cf3cd46ed",
+      "text": "创建以 '(x, y, z)' 格式表示此笛卡尔坐标的字符串。"
+    },
+    {
+      "id": "Cartesian3#toString",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:14adc1d1621545c6f66c728c89ac9a606486a44be2f4c679ee241359d9f98cb2",
+      "text": "以 '(x, y, z)' 格式表示此笛卡尔坐标的字符串。"
+    },
+    {
+      "id": "Cartesian4.abs",
+      "field": "description",
+      "sourceHash": "sha256:4d340cc745e9f191f5bdb6505565f0db7864d0d7b7b1092dd136c22f1930727b",
+      "text": "计算给定笛卡尔向量各分量的绝对值。"
+    },
+    {
+      "id": "Cartesian4.abs",
+      "field": "params/cartesian/description",
+      "sourceHash": "sha256:459e786d95ec92c818df5edc3f64107d82aaba55fd0edcbbadb35ca991e5a65c",
+      "text": "要计算绝对值的笛卡尔向量。"
+    },
+    {
+      "id": "Cartesian4.add",
+      "field": "description",
+      "sourceHash": "sha256:7e2a45bd37343e77952e91194a8322167918a6ce931d3655e50e467f797f7a44",
+      "text": "计算两个笛卡尔向量逐分量的和。"
+    },
+    {
+      "id": "Cartesian4.clamp",
+      "field": "description",
+      "sourceHash": "sha256:18d68f96e668e9cf34a7211c6e57ffa7b6ea3b24ef9673124bd7e684d1ebef5f",
+      "text": "将一个值限制在两个值之间。"
+    },
+    {
+      "id": "Cartesian4.clamp",
+      "field": "params/max/description",
+      "sourceHash": "sha256:2b58192289f856877e629190592a4a464e9148f28b5c6ef2d99c4a027302e00b",
+      "text": "最大边界值。"
+    },
+    {
+      "id": "Cartesian4.clamp",
+      "field": "params/min/description",
+      "sourceHash": "sha256:b5c08cbefc0b415b7c7f8e5adc2bf9ad0d1ab9e5cd98367b037cd5461d28bac2",
+      "text": "最小边界值。"
+    },
+    {
+      "id": "Cartesian4.clamp",
+      "field": "params/value/description",
+      "sourceHash": "sha256:0d91bc456302ff8c58412b83ad84e147e3625b55b07b5e68084d25236ce50227",
+      "text": "要限制的值。"
+    },
+    {
+      "id": "Cartesian4.clamp",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:d613b7f7158eecf31728c719b8584809ecbf67db494ca2a8128e3c2a97363e1c",
+      "text": "限制后的值，满足 min <= result <= max。"
+    },
+    {
+      "id": "Cartesian4.clone",
+      "field": "description",
+      "sourceHash": "sha256:0bcb5110bb4eacb90641e1d35d12ea6bc3262044fe069eeb40ddcf67a0bd6ab2",
+      "text": "复制 Cartesian4 实例。"
+    },
+    {
+      "id": "Cartesian4.clone",
+      "field": "params/cartesian/description",
+      "sourceHash": "sha256:284563ad40ab68557472d242ef753f261de3ab77273326ec1537627110bfe255",
+      "text": "要复制的笛卡尔向量。"
+    },
+    {
+      "id": "Cartesian4.clone",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:b5460decc202d315ccdb5426f3dc21461b9453a272dd89f248f327207dfbb1dd",
+      "text": "修改后的 result 参数；未提供时返回新建的 Cartesian4 实例。若 cartesian 为 undefined，则返回 undefined。"
+    },
+    {
+      "id": "Cartesian4.distance",
+      "field": "description",
+      "sourceHash": "sha256:80557a7cd8f9ebd5e6de912b282412df01b4d1f960bca8c9996b02ddb1449d68",
+      "text": "计算两个点在四维空间中的距离。"
+    },
+    {
+      "id": "Cartesian4.distance",
+      "field": "params/left/description",
+      "sourceHash": "sha256:f028363c4baad1c5925966d994ac207f15a7567875353703eb436784b27e9b84",
+      "text": "距离计算的起点。"
+    },
+    {
+      "id": "Cartesian4.distance",
+      "field": "params/right/description",
+      "sourceHash": "sha256:5043878552895cfedc19d760096865cc6558ab4803819180254358a73318f1b4",
+      "text": "距离计算的终点。"
+    },
+    {
+      "id": "Cartesian4.distance",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:750c1a8707c7a7a28f67c422c912b7719725ba88258921a2c6ed27463290a738",
+      "text": "两点间的距离。"
+    },
+    {
+      "id": "Cartesian4.distanceSquared",
+      "field": "description",
+      "sourceHash": "sha256:7587cb7f1c8a72bd808ae8b8f8af03a13a91b822bff9982e42f238f1d4cc8928",
+      "text": "计算两点间距离的平方。使用此函数比较距离平方，比使用 {@link Cartesian4#distance} 比较距离更高效。"
+    },
+    {
+      "id": "Cartesian4.distanceSquared",
+      "field": "params/left/description",
+      "sourceHash": "sha256:f028363c4baad1c5925966d994ac207f15a7567875353703eb436784b27e9b84",
+      "text": "距离计算的起点。"
+    },
+    {
+      "id": "Cartesian4.distanceSquared",
+      "field": "params/right/description",
+      "sourceHash": "sha256:5043878552895cfedc19d760096865cc6558ab4803819180254358a73318f1b4",
+      "text": "距离计算的终点。"
+    },
+    {
+      "id": "Cartesian4.distanceSquared",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:750c1a8707c7a7a28f67c422c912b7719725ba88258921a2c6ed27463290a738",
+      "text": "两点间的距离。"
+    },
+    {
+      "id": "Cartesian4.divideByScalar",
+      "field": "description",
+      "sourceHash": "sha256:049b56939bcfd4fec643f14444bd0f2c30b48af323b186701253f3f675e2cfdf",
+      "text": "将给定笛卡尔向量的各分量除以给定标量。"
+    },
+    {
+      "id": "Cartesian4.divideByScalar",
+      "field": "params/cartesian/description",
+      "sourceHash": "sha256:528eae60993ed300c48ba829c93a4647021e20b5ab93a8543d5214c0899b5190",
+      "text": "被除的笛卡尔向量。"
+    },
+    {
+      "id": "Cartesian4.divideByScalar",
+      "field": "params/scalar/description",
+      "sourceHash": "sha256:89b6fd5063ab1169ca0a24ef34bed5ed0fa9dd6f6223b01a00f303fd1e555166",
+      "text": "用作除数的标量。"
+    },
+    {
+      "id": "Cartesian4.divideComponents",
+      "field": "description",
+      "sourceHash": "sha256:346bc3b8181b5046704d80dcb61f027be8aac9a67e4479f8ac7dfb29579ec7f2",
+      "text": "计算两个笛卡尔向量逐分量的商。"
+    },
+    {
+      "id": "Cartesian4.dot",
+      "field": "description",
+      "sourceHash": "sha256:a8497d4e4fd8afa74f6391f5fce454b7667d124631030503111afb4156eb6aba",
+      "text": "计算两个笛卡尔向量的点积（标量积）。"
+    },
+    {
+      "id": "Cartesian4.dot",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:bf9d783712cc1006d6e21ba309f1e5b73362e5c43a24f98b28e69e2db8dcc2c3",
+      "text": "点积。"
+    },
+    {
+      "id": "Cartesian4.equals",
+      "field": "description",
+      "sourceHash": "sha256:023d501dde57a487ac0b5cfcc66380034f06061174bed45d7563719848ba7ec1",
+      "text": "逐分量比较给定笛卡尔向量，相等时返回 <code>true</code>，否则返回 <code>false</code>。"
+    },
+    {
+      "id": "Cartesian4.equalsEpsilon",
+      "field": "description",
+      "sourceHash": "sha256:b08299128d348cf01aeb73869f73d79390a4e790a509a5d1a9e0845fcf84d705",
+      "text": "逐分量比较给定笛卡尔向量，通过绝对或相对容差测试时返回 <code>true</code>，否则返回 <code>false</code>。"
+    },
+    {
+      "id": "Cartesian4.equalsEpsilon",
+      "field": "params/absoluteEpsilon/description",
+      "sourceHash": "sha256:62e5c46861c6b7f0f4262f10c359b2b825b6fe2f8691de32fe6da1f2101fe776",
+      "text": "相等测试使用的绝对 epsilon 容差。"
+    },
+    {
+      "id": "Cartesian4.equalsEpsilon",
+      "field": "params/relativeEpsilon/description",
+      "sourceHash": "sha256:b6e762c1ad7a06b44a988832e91d2358793ab32a78832b268298e9342caffe33",
+      "text": "相等测试使用的相对 epsilon 容差。"
+    },
+    {
+      "id": "Cartesian4.equalsEpsilon",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:d73d821dc6b34822dfe11364cb173a7333751e53e9ef3a80bb985a26ce173b2c",
+      "text": "若 left 和 right 的差异在给定 epsilon 范围内，则返回 <code>true</code>；否则返回 <code>false</code>。"
+    },
+    {
+      "id": "Cartesian4.fromArray",
+      "field": "description",
+      "sourceHash": "sha256:3330594c34b057b6648f330ac68bfbd8ead722269c75df8b6fb336c55ffd5a4c",
+      "text": "使用数组中连续四个元素创建 Cartesian4。"
+    },
+    {
+      "id": "Cartesian4.fromArray",
+      "field": "params/array/description",
+      "sourceHash": "sha256:c8c8ce8bdd54f5b9d6b8a18941348a5662f0b02c239c15e5089cdfbc5662b380",
+      "text": "连续四个元素分别对应 x、y、z、w 分量的数组。"
+    },
+    {
+      "id": "Cartesian4.fromArray",
+      "field": "params/startingIndex/description",
+      "sourceHash": "sha256:83ca85452a6d466fb74a46463ac58b6cdb1b272cf95e5f63585ea894451648b5",
+      "text": "数组中第一个元素的偏移，该元素对应 x 分量。"
+    },
+    {
+      "id": "Cartesian4.fromArray",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:41fa290d6d7e39e32cac5a4c47f27b2b5ed378da7f61f6ec508037ba92ff5d71",
+      "text": "修改后的 result 参数；未提供时返回新建的 Cartesian4 实例。"
+    },
+    {
+      "id": "Cartesian4.fromColor",
+      "field": "description",
+      "sourceHash": "sha256:b825acefe4f4037ad0ba754dc1483f28759abc48f932b6644a581a39dbaa6a50",
+      "text": "从 {@link Color} 创建 Cartesian4 实例。<code>red</code>、<code>green</code>、<code>blue</code> 和 <code>alpha</code> 分别映射到 <code>x</code>、<code>y</code>、<code>z</code> 和 <code>w</code>。"
+    },
+    {
+      "id": "Cartesian4.fromColor",
+      "field": "params/color/description",
+      "sourceHash": "sha256:7ca77b86b9552be88826164e5001bfbfe7a40617a5e7bb2b45dd5e6cb131324e",
+      "text": "原始颜色。"
+    },
+    {
+      "id": "Cartesian4.fromColor",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:41fa290d6d7e39e32cac5a4c47f27b2b5ed378da7f61f6ec508037ba92ff5d71",
+      "text": "修改后的 result 参数；未提供时返回新建的 Cartesian4 实例。"
+    },
+    {
+      "id": "Cartesian4.fromElements",
+      "field": "description",
+      "sourceHash": "sha256:0e7c166cb98b0df39dbee15dee4e2dab8f4e55238c7470d88776586d1651cb70",
+      "text": "使用 x、y、z 和 w 坐标创建 Cartesian4 实例。"
+    },
+    {
+      "id": "Cartesian4.fromElements",
+      "field": "params/w/description",
+      "sourceHash": "sha256:5ca1cd5b50918e9b54a4c340f601be1b9db64fe1ea8fd02dfbdcf3e6cbfbc914",
+      "text": "w 坐标。"
+    },
+    {
+      "id": "Cartesian4.fromElements",
+      "field": "params/x/description",
+      "sourceHash": "sha256:71a6e78b56307f36c5371cb0a58b9ff3c4c8deae5099273a4dd5696eeebe6a4a",
+      "text": "x 坐标。"
+    },
+    {
+      "id": "Cartesian4.fromElements",
+      "field": "params/y/description",
+      "sourceHash": "sha256:0ecf5f8080177eb0a9c5ca817e4ac68d9a3b537ea7c8219a72c613ba31c109b2",
+      "text": "y 坐标。"
+    },
+    {
+      "id": "Cartesian4.fromElements",
+      "field": "params/z/description",
+      "sourceHash": "sha256:d6f59f019e2fc3d6c3db15b3d71f6e062ea29d56ff2c36cac1003ac4c8a8af30",
+      "text": "z 坐标。"
+    },
+    {
+      "id": "Cartesian4.fromElements",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:41fa290d6d7e39e32cac5a4c47f27b2b5ed378da7f61f6ec508037ba92ff5d71",
+      "text": "修改后的 result 参数；未提供时返回新建的 Cartesian4 实例。"
+    },
+    {
+      "id": "Cartesian4.lerp",
+      "field": "description",
+      "sourceHash": "sha256:5c9d661505fa4474581334bc92aa041e1823f953d35c7ee96e8ffb167f6ce6c6",
+      "text": "使用给定笛卡尔向量计算 t 处的线性插值或外推值。"
+    },
+    {
+      "id": "Cartesian4.lerp",
+      "field": "params/end/description",
+      "sourceHash": "sha256:884dbeba3bf8ed28078f4abb3810e7ed45b54311c72e42bb597360f2446046c9",
+      "text": "t 为 1.0 时对应的值。"
+    },
+    {
+      "id": "Cartesian4.lerp",
+      "field": "params/start/description",
+      "sourceHash": "sha256:685c8a784648baf605d5df5eb389e4780c6c401b0f95ba40560c670835b18674",
+      "text": "t 为 0.0 时对应的值。"
+    },
+    {
+      "id": "Cartesian4.lerp",
+      "field": "params/t/description",
+      "sourceHash": "sha256:eb6494a782486871612062cf92e61cb7f60fe742bd528058e9b997e4f93d2b45",
+      "text": "要进行插值的 t 参数位置。"
+    },
+    {
+      "id": "Cartesian4.magnitude",
+      "field": "description",
+      "sourceHash": "sha256:af785ae8036893738e9e3b08f7ad03a9a03618b4cfccc0651bfbaa9ca39feab0",
+      "text": "计算笛卡尔向量的模（长度）。"
+    },
+    {
+      "id": "Cartesian4.magnitude",
+      "field": "params/cartesian/description",
+      "sourceHash": "sha256:be4d4f824d95703a8e8a9a3fd6ce9c9f97d86674dea97ac371748adc6f8a51df",
+      "text": "要计算模的笛卡尔向量实例。"
+    },
+    {
+      "id": "Cartesian4.magnitude",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:72c8045572472070abc8a17116132846ebcc47e397086d78ff1292ddc7aa256b",
+      "text": "模。"
+    },
+    {
+      "id": "Cartesian4.magnitudeSquared",
+      "field": "description",
+      "sourceHash": "sha256:f60d6bcd3b0ea832520423695ecbb15b70d969201a550d4d9fbe1970bfe87c8b",
+      "text": "计算给定笛卡尔向量模的平方。"
+    },
+    {
+      "id": "Cartesian4.magnitudeSquared",
+      "field": "params/cartesian/description",
+      "sourceHash": "sha256:c38041d1fab102e2c4922f2af3a99511b5c917333eb13995d8d2c7f5f44eaefe",
+      "text": "要计算模平方的笛卡尔向量实例。"
+    },
+    {
+      "id": "Cartesian4.magnitudeSquared",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:56c3be773653f09e09b088451a8c23595c1bd5d807b8ea4181cfcda9935398b4",
+      "text": "模的平方。"
+    },
+    {
+      "id": "Cartesian4.maximumByComponent",
+      "field": "description",
+      "sourceHash": "sha256:a7dfc4dde9b633e85488f29ecac30f548dc3b96161aa5556e904071df8798f0c",
+      "text": "比较两个笛卡尔向量，计算由对应分量最大值组成的笛卡尔向量。"
+    },
+    {
+      "id": "Cartesian4.maximumByComponent",
+      "field": "params/first/description",
+      "sourceHash": "sha256:c0b3aea81f089154cf263dc98cb25a3dc6173002d12a5d1a33a3b924e8eb74f3",
+      "text": "要比较的笛卡尔向量。"
+    },
+    {
+      "id": "Cartesian4.maximumByComponent",
+      "field": "params/second/description",
+      "sourceHash": "sha256:c0b3aea81f089154cf263dc98cb25a3dc6173002d12a5d1a33a3b924e8eb74f3",
+      "text": "要比较的笛卡尔向量。"
+    },
+    {
+      "id": "Cartesian4.maximumByComponent",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:cec4d11db3df7a58830fca936757eaa958d4934b14ee20d16f9dd0db65a9e8ec",
+      "text": "由对应分量最大值组成的笛卡尔向量。"
+    },
+    {
+      "id": "Cartesian4.maximumComponent",
+      "field": "description",
+      "sourceHash": "sha256:1a213645f9e25e60c2f122909c4a28592964834e7137297e94f17a600af0d061",
+      "text": "计算给定笛卡尔向量中最大分量的值。"
+    },
+    {
+      "id": "Cartesian4.maximumComponent",
+      "field": "params/cartesian/description",
+      "sourceHash": "sha256:831143459eac2940b428999fe5dd1dccee7f356a5c894b1658c84683bb1c0396",
+      "text": "要使用的笛卡尔向量。"
+    },
+    {
+      "id": "Cartesian4.maximumComponent",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:e6499b3cda908c19bf61a55538335b0fb912af7596c6569dbfc345e4a609adc8",
+      "text": "最大分量的值。"
+    },
+    {
+      "id": "Cartesian4.minimumByComponent",
+      "field": "description",
+      "sourceHash": "sha256:f7cba161a086a38827318101668083a573274ea15ac2f03df413ab35e0664b9e",
+      "text": "比较两个笛卡尔向量，计算由对应分量最小值组成的笛卡尔向量。"
+    },
+    {
+      "id": "Cartesian4.minimumByComponent",
+      "field": "params/first/description",
+      "sourceHash": "sha256:c0b3aea81f089154cf263dc98cb25a3dc6173002d12a5d1a33a3b924e8eb74f3",
+      "text": "要比较的笛卡尔向量。"
+    },
+    {
+      "id": "Cartesian4.minimumByComponent",
+      "field": "params/second/description",
+      "sourceHash": "sha256:c0b3aea81f089154cf263dc98cb25a3dc6173002d12a5d1a33a3b924e8eb74f3",
+      "text": "要比较的笛卡尔向量。"
+    },
+    {
+      "id": "Cartesian4.minimumByComponent",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:0e35484f0ba60d5b080ba26b62f32a5377da89b3d7600fe28220c6d337c56a10",
+      "text": "由对应分量最小值组成的笛卡尔向量。"
+    },
+    {
+      "id": "Cartesian4.minimumComponent",
+      "field": "description",
+      "sourceHash": "sha256:466732a905f91f5a3d63fd6645cfdf5b05324831798877801eae781872595638",
+      "text": "计算给定笛卡尔向量中最小分量的值。"
+    },
+    {
+      "id": "Cartesian4.minimumComponent",
+      "field": "params/cartesian/description",
+      "sourceHash": "sha256:831143459eac2940b428999fe5dd1dccee7f356a5c894b1658c84683bb1c0396",
+      "text": "要使用的笛卡尔向量。"
+    },
+    {
+      "id": "Cartesian4.minimumComponent",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:fde295d969cf6d06ee6ad31f14e1eeef5b6b8e864b13556d4469e69ef16402c3",
+      "text": "最小分量的值。"
+    },
+    {
+      "id": "Cartesian4.mostOrthogonalAxis",
+      "field": "description",
+      "sourceHash": "sha256:d3874c270419ee7802e200775575a091b046af671c691be9df411a720599e5d8",
+      "text": "返回与给定笛卡尔向量最接近正交的坐标轴。"
+    },
+    {
+      "id": "Cartesian4.mostOrthogonalAxis",
+      "field": "params/cartesian/description",
+      "sourceHash": "sha256:428d8c6f0a6bdda28b912b56e04b809c1180a5e400f55cfaa321da157bb91eae",
+      "text": "用于确定最正交坐标轴的笛卡尔向量。"
+    },
+    {
+      "id": "Cartesian4.mostOrthogonalAxis",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:deb2ed69873ba92660c0a963f8aa3860c1196894520177e99454112fa4732bc0",
+      "text": "最接近正交的坐标轴。"
+    },
+    {
+      "id": "Cartesian4.multiplyByScalar",
+      "field": "description",
+      "sourceHash": "sha256:38b99dcba63092cd7d24c853e3bf9d279b1e35fc453ae4a2e127adf7a0953198",
+      "text": "将给定笛卡尔向量的各分量乘以给定标量。"
+    },
+    {
+      "id": "Cartesian4.multiplyByScalar",
+      "field": "params/cartesian/description",
+      "sourceHash": "sha256:399cb7ee4a7868528b089f2908ee7e9bd24af3f348f3369fcd9968667e9f6279",
+      "text": "要缩放的笛卡尔向量。"
+    },
+    {
+      "id": "Cartesian4.multiplyByScalar",
+      "field": "params/scalar/description",
+      "sourceHash": "sha256:f947f410a6a05720d667798aca2b64c18c1e125a950a90cc08c10ad49e439a83",
+      "text": "要乘的标量。"
+    },
+    {
+      "id": "Cartesian4.multiplyComponents",
+      "field": "description",
+      "sourceHash": "sha256:587f49c3b204a64f3c37de701cf1fbed0901e8f181b94f7a6972b9b8871f517e",
+      "text": "计算两个笛卡尔向量逐分量的积。"
+    },
+    {
+      "id": "Cartesian4.negate",
+      "field": "description",
+      "sourceHash": "sha256:0dc214165b3f81a1e4c40ad19a02626d37abb211ebf3ffc0169b3ddfac97de6c",
+      "text": "将给定笛卡尔向量各分量取反。"
+    },
+    {
+      "id": "Cartesian4.negate",
+      "field": "params/cartesian/description",
+      "sourceHash": "sha256:f70f592f3beacd9c529c08bda068519461c6c3d88d4b81ef9a847717ef2df35e",
+      "text": "要取反的笛卡尔向量。"
+    },
+    {
+      "id": "Cartesian4.normalize",
+      "field": "description",
+      "sourceHash": "sha256:c64dcb03fcdfbe8e60c2ca183c77a0af06b3ef53bcf0532f639d5e841bd7fd68",
+      "text": "计算给定笛卡尔向量的归一化形式。"
+    },
+    {
+      "id": "Cartesian4.normalize",
+      "field": "params/cartesian/description",
+      "sourceHash": "sha256:202e7a4c9ed1169dc3bd85cf841739fb3317e5b595150fe1b40ab8646bd2d36a",
+      "text": "要归一化的笛卡尔向量。"
+    },
+    {
+      "id": "Cartesian4.ONE",
+      "field": "description",
+      "sourceHash": "sha256:f8a0269d7733fa4cadecd564dd07703f30afcd2fc4e1e8f5467f8dac0468a224",
+      "text": "初始化为 (1.0, 1.0, 1.0, 1.0) 的不可变 Cartesian4 实例。"
+    },
+    {
+      "id": "Cartesian4.packArray",
+      "field": "description",
+      "sourceHash": "sha256:76fea4b7a6050a286ee20ad340767770b47d250af10608525e0e4aa85ba42061",
+      "text": "将 Cartesian4 数组展平为分量数组。"
+    },
+    {
+      "id": "Cartesian4.packArray",
+      "field": "params/array/description",
+      "sourceHash": "sha256:cabd2b342eb83dfe4a17468997909e5ee4f4e83bdef933b3b6d951984eb0911f",
+      "text": "要打包的笛卡尔向量数组。"
+    },
+    {
+      "id": "Cartesian4.packArray",
+      "field": "params/result/description",
+      "sourceHash": "sha256:948c6a92950011ce1fcf1766f379f7f150eae020a7a1e691d16b0708a0c0c610",
+      "text": "用于保存结果的数组。若为类型化数组，必须具有 array.length * 4 个分量，否则抛出 {@link DeveloperError}；若为普通数组，则调整长度为 array.length * 4。"
+    },
+    {
+      "id": "Cartesian4.packFloat",
+      "field": "description",
+      "sourceHash": "sha256:44bb04bbe46c37f23ae2221d99de66c67b5f5f10e4f85874653ec48f367024ad",
+      "text": "将任意浮点值打包为四个可用 uint8 表示的值。"
+    },
+    {
+      "id": "Cartesian4.packFloat",
+      "field": "params/result/description",
+      "sourceHash": "sha256:016eb45cd8d46b525804312ae3df378aa1be91b91882b884a541f109c193b8fe",
+      "text": "用于保存打包后浮点值的 Cartesian4。"
+    },
+    {
+      "id": "Cartesian4.packFloat",
+      "field": "params/value/description",
+      "sourceHash": "sha256:751ab542643aa2cc8cfa95295ab87f0a23b20c21d382f7ad4d1e65a55af542a3",
+      "text": "浮点数。"
+    },
+    {
+      "id": "Cartesian4.packFloat",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:bafc602c204e6668ebe57cd5cd382836d3717fc8fe998879f251bf612bacb122",
+      "text": "在 x、y、z 和 w 中保存打包后浮点值的 Cartesian4。"
+    },
+    {
+      "id": "Cartesian4.subtract",
+      "field": "description",
+      "sourceHash": "sha256:3deaad3e5cffbed851030c02fef4719961c9dee502918ad09fd39df00d42e07c",
+      "text": "计算两个笛卡尔向量逐分量的差。"
+    },
+    {
+      "id": "Cartesian4.UNIT_W",
+      "field": "description",
+      "sourceHash": "sha256:726362e69f1d0da7e0eddc1737c3dcbfaa552a7e6996753fe3413c06b1f5b254",
+      "text": "初始化为 (0.0, 0.0, 0.0, 1.0) 的不可变 Cartesian4 实例。"
+    },
+    {
+      "id": "Cartesian4.UNIT_X",
+      "field": "description",
+      "sourceHash": "sha256:80095d3eee74663f470bcfffad454ec4418be4bdbca767cf53002faea1b9cbf8",
+      "text": "初始化为 (1.0, 0.0, 0.0, 0.0) 的不可变 Cartesian4 实例。"
+    },
+    {
+      "id": "Cartesian4.UNIT_Y",
+      "field": "description",
+      "sourceHash": "sha256:c667719300386ea1f0143f33e833351272fbf32c4adcc577d139bfea681b21f4",
+      "text": "初始化为 (0.0, 1.0, 0.0, 0.0) 的不可变 Cartesian4 实例。"
+    },
+    {
+      "id": "Cartesian4.UNIT_Z",
+      "field": "description",
+      "sourceHash": "sha256:54ce606803718de5bd1c34c8bb3811febec80a5e49e9b8d5eb550c6ee80e2467",
+      "text": "初始化为 (0.0, 0.0, 1.0, 0.0) 的不可变 Cartesian4 实例。"
+    },
+    {
+      "id": "Cartesian4.unpack",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:41fa290d6d7e39e32cac5a4c47f27b2b5ed378da7f61f6ec508037ba92ff5d71",
+      "text": "修改后的 result 参数；未提供时返回新建的 Cartesian4 实例。"
+    },
+    {
+      "id": "Cartesian4.unpackArray",
+      "field": "description",
+      "sourceHash": "sha256:f4f519c0bbe97fa620b129a03bc4bcc1883e2aee08b04019590981b852a02f74",
+      "text": "将笛卡尔分量数组解包为 Cartesian4 数组。"
+    },
+    {
+      "id": "Cartesian4.unpackArray",
+      "field": "params/array/description",
+      "sourceHash": "sha256:761b03a4a01a1ef3a05d3ef102bd166754372e250e3053ba6067be9fe25fe5a0",
+      "text": "要解包的分量数组。"
+    },
+    {
+      "id": "Cartesian4.unpackArray",
+      "field": "params/result/description",
+      "sourceHash": "sha256:e92ce6987d55381c90196bb0f2de2e9021c026fda6edb8330ecad112a8d7c273",
+      "text": "用于保存结果的数组。"
+    },
+    {
+      "id": "Cartesian4.unpackArray",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:e0f13d64283eff08944af38407c51866a8ca5eece7c26aa0952f227ca9a0038c",
+      "text": "解包后的数组。"
+    },
+    {
+      "id": "Cartesian4.ZERO",
+      "field": "description",
+      "sourceHash": "sha256:5dccb46b9286539267c9ec22a4fd5a96b49a1f37d387765b8e985689cd1934b1",
+      "text": "初始化为 (0.0, 0.0, 0.0, 0.0) 的不可变 Cartesian4 实例。"
+    },
+    {
+      "id": "Cartesian4",
+      "field": "classdesc",
+      "sourceHash": "sha256:6fe71853d1fe0b8b366818550e8f35080a5225f7edc133057ed8a180bba4b3cd",
+      "text": "四维笛卡尔坐标点。"
+    },
+    {
+      "id": "Cartesian4",
+      "field": "params/w/description",
+      "sourceHash": "sha256:4fece05e64eeab3db76b0f7d67923d562a7cd7d23b915fada4e2859da15f3dbb",
+      "text": "W 分量。"
+    },
+    {
+      "id": "Cartesian4#clone",
+      "field": "description",
+      "sourceHash": "sha256:7d203d0603d3a5191421b6848e85fd13cf5e2e99ed2ae6677efa99af69755b93",
+      "text": "复制此 Cartesian4 实例。"
+    },
+    {
+      "id": "Cartesian4#clone",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:41fa290d6d7e39e32cac5a4c47f27b2b5ed378da7f61f6ec508037ba92ff5d71",
+      "text": "修改后的 result 参数；未提供时返回新建的 Cartesian4 实例。"
+    },
+    {
+      "id": "Cartesian4#equals",
+      "field": "description",
+      "sourceHash": "sha256:9ad112ac4414abd22156e86bc41662fe006057bc898e89dad59a513401954f9b",
+      "text": "将此笛卡尔向量与给定向量逐分量比较，相等时返回 <code>true</code>，否则返回 <code>false</code>。"
+    },
+    {
+      "id": "Cartesian4#equals",
+      "field": "params/right/description",
+      "sourceHash": "sha256:efda8c59547b894072307b332dca5dabeebf3f0542ddd583683d0d46706ab293",
+      "text": "右侧笛卡尔向量。"
+    },
+    {
+      "id": "Cartesian4#equalsEpsilon",
+      "field": "description",
+      "sourceHash": "sha256:27efa44f941f76cd0b5023a94a47dea5b0074c1ea8023e9c2464817dcc45642d",
+      "text": "将此笛卡尔向量与给定向量逐分量比较，通过绝对或相对容差测试时返回 <code>true</code>，否则返回 <code>false</code>。"
+    },
+    {
+      "id": "Cartesian4#equalsEpsilon",
+      "field": "params/absoluteEpsilon/description",
+      "sourceHash": "sha256:62e5c46861c6b7f0f4262f10c359b2b825b6fe2f8691de32fe6da1f2101fe776",
+      "text": "相等测试使用的绝对 epsilon 容差。"
+    },
+    {
+      "id": "Cartesian4#equalsEpsilon",
+      "field": "params/relativeEpsilon/description",
+      "sourceHash": "sha256:b6e762c1ad7a06b44a988832e91d2358793ab32a78832b268298e9342caffe33",
+      "text": "相等测试使用的相对 epsilon 容差。"
+    },
+    {
+      "id": "Cartesian4#equalsEpsilon",
+      "field": "params/right/description",
+      "sourceHash": "sha256:efda8c59547b894072307b332dca5dabeebf3f0542ddd583683d0d46706ab293",
+      "text": "右侧笛卡尔向量。"
+    },
+    {
+      "id": "Cartesian4#equalsEpsilon",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:10dbf4a7ddfcc7153660dfa7cfbd4cdcdcb39e498b54dcf418df578bc90f40df",
+      "text": "若差异在给定 epsilon 范围内，则返回 <code>true</code>；否则返回 <code>false</code>。"
+    },
+    {
+      "id": "Cartesian4#toString",
+      "field": "description",
+      "sourceHash": "sha256:9c6f25a8d5ecfb8c5c41b13ab3f63f366a2c3bd83d8e65a9c5c1eccf468cbbcb",
+      "text": "创建以 '(x, y, z, w)' 格式表示此笛卡尔坐标的字符串。"
+    },
+    {
+      "id": "Cartesian4#toString",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:52b0b8d30f84a19d99e53c9afb510500fe178c9b94281255a0aed9cbd3e4be70",
+      "text": "以 '(x, y, z, w)' 格式表示给定笛卡尔坐标的字符串。"
+    },
+    {
+      "id": "Cartesian4#w",
+      "field": "description",
+      "sourceHash": "sha256:4fece05e64eeab3db76b0f7d67923d562a7cd7d23b915fada4e2859da15f3dbb",
+      "text": "W 分量。"
+    },
+    {
+      "id": "Cartographic.clone",
+      "field": "description",
+      "sourceHash": "sha256:42acb7c14f3d7d216ce67cc99151816f9ec1d3dca52c7e61eda82cc8d0edccf7",
+      "text": "复制 Cartographic 实例。"
+    },
+    {
+      "id": "Cartographic.clone",
+      "field": "params/cartographic/description",
+      "sourceHash": "sha256:9abfc8a3326528e11f37d9c3417dfc5cce39a8c9dbb0456d313691e858ee1ac7",
+      "text": "要复制的地理坐标。"
+    },
+    {
+      "id": "Cartographic.clone",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:8e0158e91d29a8f8452d282cfe933a91c5f4f19a79f78a74240463544fcf2df5",
+      "text": "修改后的 result 参数；未提供时返回新建的 Cartographic 实例。若 cartographic 为 undefined，则返回 undefined。"
+    },
+    {
+      "id": "Cartographic.equals",
+      "field": "description",
+      "sourceHash": "sha256:06a49354f23267ec70c3a7df56ed9498d2da7c35b05451fb30e493c5315360bb",
+      "text": "逐分量比较给定地理坐标，相等时返回 <code>true</code>，否则返回 <code>false</code>。"
+    },
+    {
+      "id": "Cartographic.equals",
+      "field": "params/left/description",
+      "sourceHash": "sha256:82c0c2a8849e6fd80afbff8e73dd5df17ce4f81ce94e58b9e975ea69e79bf20f",
+      "text": "第一个地理坐标。"
+    },
+    {
+      "id": "Cartographic.equals",
+      "field": "params/right/description",
+      "sourceHash": "sha256:475072f84c09d40190f63ece1dcda9ca1b04bb2ebf903af1ef8e2798bc7f917d",
+      "text": "第二个地理坐标。"
+    },
+    {
+      "id": "Cartographic.equalsEpsilon",
+      "field": "description",
+      "sourceHash": "sha256:618734e48811d0616299ade14e177b581b770b4c4f96b25c78f20778953c130f",
+      "text": "逐分量比较给定地理坐标，差异在给定 epsilon 范围内时返回 <code>true</code>，否则返回 <code>false</code>。"
+    },
+    {
+      "id": "Cartographic.equalsEpsilon",
+      "field": "params/epsilon/description",
+      "sourceHash": "sha256:1ab4d3a4f4ca315af12f39b1b4e64b7ec35e58ae52588c40ff36843a8836cb4b",
+      "text": "相等测试使用的 epsilon 容差。"
+    },
+    {
+      "id": "Cartographic.equalsEpsilon",
+      "field": "params/left/description",
+      "sourceHash": "sha256:82c0c2a8849e6fd80afbff8e73dd5df17ce4f81ce94e58b9e975ea69e79bf20f",
+      "text": "第一个地理坐标。"
+    },
+    {
+      "id": "Cartographic.equalsEpsilon",
+      "field": "params/right/description",
+      "sourceHash": "sha256:475072f84c09d40190f63ece1dcda9ca1b04bb2ebf903af1ef8e2798bc7f917d",
+      "text": "第二个地理坐标。"
+    },
+    {
+      "id": "Cartographic.equalsEpsilon",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:d73d821dc6b34822dfe11364cb173a7333751e53e9ef3a80bb985a26ce173b2c",
+      "text": "若 left 和 right 的差异在给定 epsilon 范围内，则返回 <code>true</code>；否则返回 <code>false</code>。"
+    },
+    {
+      "id": "Cartographic.fromCartesian",
+      "field": "description",
+      "sourceHash": "sha256:36e26aea3eeecbfc5ea3eaa6657ad4fda156bfb724b38544dd28bdd725d73504",
+      "text": "从笛卡尔坐标位置创建 Cartographic 实例，结果对象中的角度使用弧度。"
+    },
+    {
+      "id": "Cartographic.fromCartesian",
+      "field": "params/cartesian/description",
+      "sourceHash": "sha256:afde385fb8b3b45b2b81c843c1f6e60148fbb609f0b8f816d582d5e67a0ec96b",
+      "text": "要转换为地理坐标表示的笛卡尔位置。"
+    },
+    {
+      "id": "Cartographic.fromCartesian",
+      "field": "params/ellipsoid/description",
+      "sourceHash": "sha256:58b38c0ef6f1c358f1484d47f40f9b2fbddaf67abd0b01ad61751e7b1f2dd177",
+      "text": "位置所在的椭球。"
+    },
+    {
+      "id": "Cartographic.fromCartesian",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:525088ac109ccd24ea246b907894900cf64b0b9e0ced5e18fd3b5c4c121ecf58",
+      "text": "修改后的 result 参数；未提供时返回新建的 Cartographic 实例；若笛卡尔位置位于椭球中心，则返回 undefined。"
+    },
+    {
+      "id": "Cartographic.fromDegrees",
+      "field": "params/latitude/description",
+      "sourceHash": "sha256:e0a60d15ba4c6884516446a6f8dfe6acf6c4394abab27a7a26d6e097fa2931ae",
+      "text": "纬度，单位为度。"
+    },
+    {
+      "id": "Cartographic.fromDegrees",
+      "field": "params/longitude/description",
+      "sourceHash": "sha256:9e652f8170586ca3931c3bd963f3772e14362944efb875b778f52a49427dea79",
+      "text": "经度，单位为度。"
+    },
+    {
+      "id": "Cartographic.fromDegrees",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:908e25b84734957fb3e1bb6ce760bb2bb0af6eb42a171b7f9f9e21332549e44a",
+      "text": "修改后的 result 参数；未提供时返回新建的 Cartographic 实例。"
+    },
+    {
+      "id": "Cartographic.fromRadians",
+      "field": "description",
+      "sourceHash": "sha256:362672c64a31de3efd1b2b1285405766a4287177c918f0e786f6ccd007c13566",
+      "text": "根据以弧度为单位的经纬度创建 Cartographic 实例。"
+    },
+    {
+      "id": "Cartographic.fromRadians",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:908e25b84734957fb3e1bb6ce760bb2bb0af6eb42a171b7f9f9e21332549e44a",
+      "text": "修改后的 result 参数；未提供时返回新建的 Cartographic 实例。"
+    },
+    {
+      "id": "Cartographic.toCartesian",
+      "field": "description",
+      "sourceHash": "sha256:41ae95bd37fe3b0f43b479aee1d5168219bd77065f0ac9e7153b4f1275e01636",
+      "text": "从 Cartographic 输入创建 Cartesian3 实例。输入对象中的角度应使用弧度。"
+    },
+    {
+      "id": "Cartographic.toCartesian",
+      "field": "params/cartographic/description",
+      "sourceHash": "sha256:a4ac0afa63072b65e0f1fb7a0ff3e294c277ce89b4aaa054cd92e06a85e1fe41",
+      "text": "要转换为 Cartesian3 的输入。"
+    },
+    {
+      "id": "Cartographic.toCartesian",
+      "field": "params/ellipsoid/description",
+      "sourceHash": "sha256:58b38c0ef6f1c358f1484d47f40f9b2fbddaf67abd0b01ad61751e7b1f2dd177",
+      "text": "位置所在的椭球。"
+    },
+    {
+      "id": "Cartographic.toCartesian",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:d13a8864364f44de71406803f784ee7cde818840c270272d89471f508a52a4c9",
+      "text": "位置。"
+    },
+    {
+      "id": "Cartographic.ZERO",
+      "field": "description",
+      "sourceHash": "sha256:6ed1c8cedfe09bfccacd2b4ec2ac6833ee565fb42380f058d56fe74fc4cde04c",
+      "text": "初始化为 (0.0, 0.0, 0.0) 的不可变 Cartographic 实例。"
+    },
+    {
+      "id": "Cartographic#clone",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:908e25b84734957fb3e1bb6ce760bb2bb0af6eb42a171b7f9f9e21332549e44a",
+      "text": "修改后的 result 参数；未提供时返回新建的 Cartographic 实例。"
+    },
+    {
+      "id": "Cartographic#equals",
+      "field": "description",
+      "sourceHash": "sha256:b425d4c6084bcb559a1450d9a3d85425eed8fbd9e301e3164fa4c9fc5497c39e",
+      "text": "将给定地理坐标与此坐标逐分量比较，相等时返回 <code>true</code>，否则返回 <code>false</code>。"
+    },
+    {
+      "id": "Cartographic#equals",
+      "field": "params/right/description",
+      "sourceHash": "sha256:475072f84c09d40190f63ece1dcda9ca1b04bb2ebf903af1ef8e2798bc7f917d",
+      "text": "第二个地理坐标。"
+    },
+    {
+      "id": "Cartographic#equalsEpsilon",
+      "field": "description",
+      "sourceHash": "sha256:b3a2abf8c99d3943e67563945c488464c424e50f3e3e81715f80d7c41e986c5d",
+      "text": "将给定地理坐标与此坐标逐分量比较，差异在给定 epsilon 范围内时返回 <code>true</code>，否则返回 <code>false</code>。"
+    },
+    {
+      "id": "Cartographic#equalsEpsilon",
+      "field": "params/epsilon/description",
+      "sourceHash": "sha256:1ab4d3a4f4ca315af12f39b1b4e64b7ec35e58ae52588c40ff36843a8836cb4b",
+      "text": "相等测试使用的 epsilon 容差。"
+    },
+    {
+      "id": "Cartographic#equalsEpsilon",
+      "field": "params/right/description",
+      "sourceHash": "sha256:475072f84c09d40190f63ece1dcda9ca1b04bb2ebf903af1ef8e2798bc7f917d",
+      "text": "第二个地理坐标。"
+    },
+    {
+      "id": "Cartographic#equalsEpsilon",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:d73d821dc6b34822dfe11364cb173a7333751e53e9ef3a80bb985a26ce173b2c",
+      "text": "若 left 和 right 的差异在给定 epsilon 范围内，则返回 <code>true</code>；否则返回 <code>false</code>。"
+    },
+    {
+      "id": "Cartographic#toString",
+      "field": "description",
+      "sourceHash": "sha256:d0f9ad149aacdfa6aa337fe046b76b836986eba13f6e2d3519686a4b97cc89e9",
+      "text": "创建以 '(longitude, latitude, height)' 格式表示此地理坐标的字符串。"
+    },
+    {
+      "id": "Cartographic#toString",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:88ac34754631a291625a1746846213b64e4f746a79806b831d38f2a067ab400b",
+      "text": "以 '(longitude, latitude, height)' 格式表示给定地理坐标的字符串。"
+    },
+    {
+      "id": "Ellipsoid.clone",
+      "field": "description",
+      "sourceHash": "sha256:903abd6cd282ff9bb2f4fb770255cd7af22581a831c091030d7cf7f918d7cb1b",
+      "text": "复制 Ellipsoid 实例。"
+    },
+    {
+      "id": "Ellipsoid.clone",
+      "field": "params/ellipsoid/description",
+      "sourceHash": "sha256:acd4cfac48599eec8ddb093277bce9e2a547e7665fdb7307b68d800eeb3c040f",
+      "text": "要复制的椭球。"
+    },
+    {
+      "id": "Ellipsoid.clone",
+      "field": "params/result/description",
+      "sourceHash": "sha256:6aaa37e5262297fccf4536aba352efd823065098a4ae9e8194d158dde3902d74",
+      "text": "用于保存结果的对象；若为 undefined，则创建新实例。"
+    },
+    {
+      "id": "Ellipsoid.clone",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:f7556a5321d80d551ff06c62a757e86ed1d101de1ecdf440a04b31efe659358f",
+      "text": "复制后的 Ellipsoid。若 ellipsoid 为 undefined，则返回 undefined。"
+    },
+    {
+      "id": "Ellipsoid.default",
+      "field": "description",
+      "sourceHash": "sha256:c56f7bbb918af0e5ad2411e36f38f5cbe937d861fcd560d39668d1eb966df0b4",
+      "text": "未另行指定时使用的默认椭球。"
+    },
+    {
+      "id": "Ellipsoid.fromCartesian3",
+      "field": "description",
+      "sourceHash": "sha256:dbd239c1941bcbb60693cc15130ee6f0c5b75fdef269ab6ddeb3170b15d0064c",
+      "text": "根据指定 x、y、z 方向半径的笛卡尔向量计算 Ellipsoid。"
+    },
+    {
+      "id": "Ellipsoid.fromCartesian3",
+      "field": "exceptions/0/description",
+      "sourceHash": "sha256:ae6a2ec6fa3adcfae4e278198f4e7b587cff3b8c39dee21e2a00d964d8d9d574",
+      "text": "全部半径分量必须大于等于零。"
+    },
+    {
+      "id": "Ellipsoid.fromCartesian3",
+      "field": "params/cartesian/description",
+      "sourceHash": "sha256:1771d88b8041fc1bcb4d622b045e444546bd9bb2064fd478e2437f37d63c83dd",
+      "text": "椭球在 x、y、z 方向上的半径。"
+    },
+    {
+      "id": "Ellipsoid.fromCartesian3",
+      "field": "params/result/description",
+      "sourceHash": "sha256:6aaa37e5262297fccf4536aba352efd823065098a4ae9e8194d158dde3902d74",
+      "text": "用于保存结果的对象；若为 undefined，则创建新实例。"
+    },
+    {
+      "id": "Ellipsoid.fromCartesian3",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:651b79a3423f17d9e5caa23a01a3873bb814f970d3e44616ef5aef39ac159b9c",
+      "text": "新建的 Ellipsoid 实例。"
+    },
+    {
+      "id": "Ellipsoid.MARS",
+      "field": "description",
+      "sourceHash": "sha256:e08aace303fc2605937ea911840feb185c4ac88687e5b64c6b3216ed883a424c",
+      "text": "使用火星平均半径初始化为球体的 Ellipsoid 实例。来源：https://epsg.io/104905"
+    },
+    {
+      "id": "Ellipsoid.MOON",
+      "field": "description",
+      "sourceHash": "sha256:db8a4e06c64b9c775f6d5f1b42353042e47db4c13e21195aeb529578f1ef8f2e",
+      "text": "使用月球半径初始化为球体的 Ellipsoid 实例。"
+    },
+    {
+      "id": "Ellipsoid.UNIT_SPHERE",
+      "field": "description",
+      "sourceHash": "sha256:96606d2b62afd9eca6ec16390b9c56c5deadcfe09a7589cb7d6dace8c997da6e",
+      "text": "半径初始化为 (1.0, 1.0, 1.0) 的 Ellipsoid 实例。"
+    },
+    {
+      "id": "Ellipsoid.unpack",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:9217b266d148958cdff73b888ee32e1b5b5be2c8d67d23479aa66b2df92fa1a5",
+      "text": "修改后的 result 参数；未提供时返回新建的 Ellipsoid 实例。"
+    },
+    {
+      "id": "Ellipsoid.WGS84",
+      "field": "description",
+      "sourceHash": "sha256:a6b2dd3007c0ae8938df5535a5d9b95327b82d467103b42f9153efa86887b43b",
+      "text": "按 WGS84 标准初始化的 Ellipsoid 实例。"
+    },
+    {
+      "id": "Ellipsoid",
+      "field": "classdesc",
+      "sourceHash": "sha256:8df2bf4616418f70401d8bfdbaecb0cdf6866ee99a44cce7a5243c13d343caae",
+      "text": "在笛卡尔坐标中由方程 <code>(x / a)^2 + (y / b)^2 + (z / c)^2 = 1</code> 定义的二次曲面。Cesium 主要用其表示行星天体的形状。通常使用提供的常量之一，而不直接构造此对象。"
+    },
+    {
+      "id": "Ellipsoid",
+      "field": "exceptions/0/description",
+      "sourceHash": "sha256:ae6a2ec6fa3adcfae4e278198f4e7b587cff3b8c39dee21e2a00d964d8d9d574",
+      "text": "全部半径分量必须大于等于零。"
+    },
+    {
+      "id": "Ellipsoid",
+      "field": "params/x/description",
+      "sourceHash": "sha256:bc9a336259730fc3af4c9548f4c35a1afc6695fde0ff097a03e7d50fc80499ee",
+      "text": "x 方向的半径。"
+    },
+    {
+      "id": "Ellipsoid",
+      "field": "params/y/description",
+      "sourceHash": "sha256:9f7de160d819f1f0f2fc5385c683b9f60bd8e97650d4d2765e3ac5bc23dbd8b0",
+      "text": "y 方向的半径。"
+    },
+    {
+      "id": "Ellipsoid",
+      "field": "params/z/description",
+      "sourceHash": "sha256:d17e0b74e217fdee59ae15e3a1775cf0be99c020997a67b0c3007226dcec5edd",
+      "text": "z 方向的半径。"
+    },
+    {
+      "id": "Ellipsoid#cartesianArrayToCartographicArray",
+      "field": "description",
+      "sourceHash": "sha256:f4b197de8094899b40cd0ad38a0c1db78c1e87e7e520bd7017b98e786c9370d7",
+      "text": "将给定笛卡尔坐标数组转换为地理坐标数组。"
+    },
+    {
+      "id": "Ellipsoid#cartesianArrayToCartographicArray",
+      "field": "params/cartesians/description",
+      "sourceHash": "sha256:500fff3bf3f8d94cc8df7c494cb57c687903a0e34cea54151ea5d8ff0256af4c",
+      "text": "笛卡尔位置数组。"
+    },
+    {
+      "id": "Ellipsoid#cartesianArrayToCartographicArray",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:bb1ef4daf5a63548c1f8e033334736a20b34d7dc7c621cf51272792a8b13a6ed",
+      "text": "修改后的 result 参数；未提供时返回新建的 Array 实例。"
+    },
+    {
+      "id": "Ellipsoid#cartesianToCartographic",
+      "field": "description",
+      "sourceHash": "sha256:b38f7d6c3b3903e5beed6659f750bcb9518af9c374c372770f7d094beba7677f",
+      "text": "将给定笛卡尔坐标转换为地理坐标表示。在椭球中心处，转换结果为 undefined。"
+    },
+    {
+      "id": "Ellipsoid#cartesianToCartographic",
+      "field": "params/cartesian/description",
+      "sourceHash": "sha256:afde385fb8b3b45b2b81c843c1f6e60148fbb609f0b8f816d582d5e67a0ec96b",
+      "text": "要转换为地理坐标表示的笛卡尔位置。"
+    },
+    {
+      "id": "Ellipsoid#cartesianToCartographic",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:525088ac109ccd24ea246b907894900cf64b0b9e0ced5e18fd3b5c4c121ecf58",
+      "text": "修改后的 result 参数；未提供时返回新建的 Cartographic 实例；若笛卡尔位置位于椭球中心，则返回 undefined。"
+    },
+    {
+      "id": "Ellipsoid#cartographicArrayToCartesianArray",
+      "field": "description",
+      "sourceHash": "sha256:635b8d8f2dd4759fb5ac7c2a33e7acf9eed75886a8878fe9ed482167f5aae80b",
+      "text": "将给定地理坐标数组转换为笛卡尔坐标数组。"
+    },
+    {
+      "id": "Ellipsoid#cartographicArrayToCartesianArray",
+      "field": "params/cartographics/description",
+      "sourceHash": "sha256:f39163497710af3229cfe69d51acf530aad38b3f048e77bfb9f4fca895ec8ef8",
+      "text": "地理坐标位置数组。"
+    },
+    {
+      "id": "Ellipsoid#cartographicArrayToCartesianArray",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:bb1ef4daf5a63548c1f8e033334736a20b34d7dc7c621cf51272792a8b13a6ed",
+      "text": "修改后的 result 参数；未提供时返回新建的 Array 实例。"
+    },
+    {
+      "id": "Ellipsoid#cartographicToCartesian",
+      "field": "description",
+      "sourceHash": "sha256:276cb3992893f3272d6310929b19a6eb7272bc0a4ce798b6e7100a5ff1491582",
+      "text": "将给定地理坐标转换为笛卡尔表示。"
+    },
+    {
+      "id": "Ellipsoid#cartographicToCartesian",
+      "field": "params/cartographic/description",
+      "sourceHash": "sha256:c8b7c2afe9b3724189224f49285527939f35753517ec9614237acad4ca8eafbd",
+      "text": "地理坐标位置。"
+    },
+    {
+      "id": "Ellipsoid#cartographicToCartesian",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:58994a1321e2dd82ba863175243208c5c1817bbd27f7b0b89039be0d8930abd4",
+      "text": "修改后的 result 参数；未提供时返回新建的 Cartesian3 实例。"
+    },
+    {
+      "id": "Ellipsoid#clone",
+      "field": "description",
+      "sourceHash": "sha256:903abd6cd282ff9bb2f4fb770255cd7af22581a831c091030d7cf7f918d7cb1b",
+      "text": "复制 Ellipsoid 实例。"
+    },
+    {
+      "id": "Ellipsoid#clone",
+      "field": "params/result/description",
+      "sourceHash": "sha256:6aaa37e5262297fccf4536aba352efd823065098a4ae9e8194d158dde3902d74",
+      "text": "用于保存结果的对象；若为 undefined，则创建新实例。"
+    },
+    {
+      "id": "Ellipsoid#clone",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:44cde72db8ec32dafbd0525f6ef266c2ab2d55ff6315b0731d9a7c01507564fb",
+      "text": "复制后的 Ellipsoid。"
+    },
+    {
+      "id": "Ellipsoid#equals",
+      "field": "description",
+      "sourceHash": "sha256:ef35c0be103e551caeef8df530cb2dc8053dd58045b253e91fb97135093f37e7",
+      "text": "将此 Ellipsoid 与给定椭球逐分量比较，相等时返回 <code>true</code>，否则返回 <code>false</code>。"
+    },
+    {
+      "id": "Ellipsoid#equals",
+      "field": "params/right/description",
+      "sourceHash": "sha256:e179ef6622356ebf60b4fcef5125c3b42acaf45c9facd95bc83829b1e8e8ac80",
+      "text": "另一个 Ellipsoid。"
+    },
+    {
+      "id": "Ellipsoid#geocentricSurfaceNormal",
+      "field": "description",
+      "sourceHash": "sha256:d7e4c12ef3890993111f9f8f22ef926359ddbecc490270fd01811727e1a30521",
+      "text": "计算从此椭球中心指向给定笛卡尔位置的单位向量。"
+    },
+    {
+      "id": "Ellipsoid#geocentricSurfaceNormal",
+      "field": "params/cartesian/description",
+      "sourceHash": "sha256:a6f23f722352f458a523c3ac2336ecb1745513b22860a1bf892ad0d3cd1be505",
+      "text": "要确定其地心法线的笛卡尔坐标。"
+    },
+    {
+      "id": "Ellipsoid#geocentricSurfaceNormal",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:58994a1321e2dd82ba863175243208c5c1817bbd27f7b0b89039be0d8930abd4",
+      "text": "修改后的 result 参数；未提供时返回新建的 Cartesian3 实例。"
+    },
+    {
+      "id": "Ellipsoid#geodeticSurfaceNormal",
+      "field": "description",
+      "sourceHash": "sha256:3d2b3528bd91bbefcb9611a2eabb9af91d678805b8bda3d3fee0f08cfce2e7f8",
+      "text": "计算椭球表面在给定位置处切平面的法线。"
+    },
+    {
+      "id": "Ellipsoid#geodeticSurfaceNormal",
+      "field": "params/cartesian/description",
+      "sourceHash": "sha256:8d73274815b35e4ea14119b7ea1efe640ca1e41f9086211d8c2a8d9563552566",
+      "text": "要确定其表面法线的笛卡尔位置。"
+    },
+    {
+      "id": "Ellipsoid#geodeticSurfaceNormal",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:0898a47a81c7ffa2d7d7e26bdbcee120690904b74775f330124e52fbc83d52ff",
+      "text": "修改后的 result 参数；未提供时返回新建的 Cartesian3 实例；若无法确定法线，则返回 undefined。"
+    },
+    {
+      "id": "Ellipsoid#geodeticSurfaceNormalCartographic",
+      "field": "description",
+      "sourceHash": "sha256:3d2b3528bd91bbefcb9611a2eabb9af91d678805b8bda3d3fee0f08cfce2e7f8",
+      "text": "计算椭球表面在给定位置处切平面的法线。"
+    },
+    {
+      "id": "Ellipsoid#geodeticSurfaceNormalCartographic",
+      "field": "params/cartographic/description",
+      "sourceHash": "sha256:3ca8326b75ef3e1961f8728e141b774473fee76c9b4352eb12d512e3733fe326",
+      "text": "要确定其大地法线的地理坐标位置。"
+    },
+    {
+      "id": "Ellipsoid#geodeticSurfaceNormalCartographic",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:58994a1321e2dd82ba863175243208c5c1817bbd27f7b0b89039be0d8930abd4",
+      "text": "修改后的 result 参数；未提供时返回新建的 Cartesian3 实例。"
+    },
+    {
+      "id": "Ellipsoid#getLocalCurvature",
+      "field": "description",
+      "sourceHash": "sha256:023786f82cff4651d2715e934429427e7abf98af065a28d287392fd312bacbfc",
+      "text": "计算椭球表面给定位置处的曲率。"
+    },
+    {
+      "id": "Ellipsoid#getLocalCurvature",
+      "field": "exceptions/0/description",
+      "sourceHash": "sha256:94060387a59c663afebeeb6301701e29975f47866551c2e000feb096551f041b",
+      "text": "必须提供 position。"
+    },
+    {
+      "id": "Ellipsoid#getLocalCurvature",
+      "field": "params/result/description",
+      "sourceHash": "sha256:b9f1c98cbf792e821cbf79c0a302b23c7a14664e223f7b47e8e7bd1b0dd0d84c",
+      "text": "用于接收结果的笛卡尔坐标对象；为 undefined 时创建并返回新实例。"
+    },
+    {
+      "id": "Ellipsoid#getLocalCurvature",
+      "field": "params/surfacePosition/description",
+      "sourceHash": "sha256:4215a0397a546f1dc447f402ede8ee94be2443bdfe72b1c3acc295ad92a00a44",
+      "text": "要计算曲率的椭球表面位置。"
+    },
+    {
+      "id": "Ellipsoid#getLocalCurvature",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:8e005a94e265bfec91436747350bd670f8772bfcf67965223e2551c63a9548a6",
+      "text": "椭球表面在给定位置处沿东向和北向的局部曲率。"
+    },
+    {
+      "id": "Ellipsoid#getSurfaceNormalIntersectionWithZAxis",
+      "field": "description",
+      "sourceHash": "sha256:0bf8c14933147dfc8b2a6b7233b7f7cbcb5e9deb22566593669b835f9c549c37",
+      "text": "计算表面法线与 z 轴的交点。"
+    },
+    {
+      "id": "Ellipsoid#getSurfaceNormalIntersectionWithZAxis",
+      "field": "exceptions/0/description",
+      "sourceHash": "sha256:94060387a59c663afebeeb6301701e29975f47866551c2e000feb096551f041b",
+      "text": "必须提供 position。"
+    },
+    {
+      "id": "Ellipsoid#getSurfaceNormalIntersectionWithZAxis",
+      "field": "exceptions/1/description",
+      "sourceHash": "sha256:9a6ed9f04d6aa134e77e4127e11ce18659f74789af14242b7fcc23b8567b7bff",
+      "text": "椭球必须为旋转椭球，即 radii.x == radii.y。"
+    },
+    {
+      "id": "Ellipsoid#getSurfaceNormalIntersectionWithZAxis",
+      "field": "exceptions/2/description",
+      "sourceHash": "sha256:21a0199471bf9943c0ce985d703be3dd94e29f5c072672db492f54333153f3c7",
+      "text": "Ellipsoid.radii.z 必须大于 0。"
+    },
+    {
+      "id": "Ellipsoid#getSurfaceNormalIntersectionWithZAxis",
+      "field": "params/buffer/description",
+      "sourceHash": "sha256:29150cee117442f3805270f2d0a9e2a912fa42d2a7b048923ff73258d196ab73",
+      "text": "检查交点是否位于椭球内部时，从椭球尺寸中减去的缓冲量。对使用常见地球基准的情况，无需此缓冲量，因为交点始终相对接近中心。在 WGS84 基准中，交点最大 z = +-42841.31151331382，约为 z 轴长度的 0.673%。若长轴与旋转轴之比大于 2 的平方根，交点可能位于椭球外部。"
+    },
+    {
+      "id": "Ellipsoid#getSurfaceNormalIntersectionWithZAxis",
+      "field": "params/position/description",
+      "sourceHash": "sha256:a57854b2c9a9ca05d9ddc66d294fbca837f11a6bad40484d9027f822bdab3ee3",
+      "text": "位置，必须位于椭球表面。"
+    },
+    {
+      "id": "Ellipsoid#getSurfaceNormalIntersectionWithZAxis",
+      "field": "params/result/description",
+      "sourceHash": "sha256:dbf415f9ebc5bd09889b17796a62515c7079d334d04ff616a0012003629dbdbb",
+      "text": "用于接收结果的笛卡尔坐标对象；为 undefined 时创建并返回新实例。"
+    },
+    {
+      "id": "Ellipsoid#getSurfaceNormalIntersectionWithZAxis",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:ee61aa78b332eb51036fb73d5f3462715acbf355ac4185bad82265937a0455a5",
+      "text": "若交点位于椭球内部，则返回交点；否则返回 undefined。"
+    },
+    {
+      "id": "Ellipsoid#maximumRadius",
+      "field": "description",
+      "sourceHash": "sha256:014bbf077f8c6ffd1ec08d8000edcf8b99822d344d2d3d10e499158599e4fe88",
+      "text": "获取椭球的最大半径。"
+    },
+    {
+      "id": "Ellipsoid#minimumRadius",
+      "field": "description",
+      "sourceHash": "sha256:8efee5548acb7ad39a6f5224aa3301ec6fea176d0b95f348ed12d41534230fa7",
+      "text": "获取椭球的最小半径。"
+    },
+    {
+      "id": "Ellipsoid#oneOverRadii",
+      "field": "description",
+      "sourceHash": "sha256:d82b62c0e3078ff1375c71a4292cf8fa9db86597b896651f2a523a7b7cf526c3",
+      "text": "获取椭球各半径的倒数。"
+    },
+    {
+      "id": "Ellipsoid#oneOverRadiiSquared",
+      "field": "description",
+      "sourceHash": "sha256:3f21f194675a4a18c0d8d0632548525d0de58a99629af9ea807df5c23a04deae",
+      "text": "获取椭球各半径平方的倒数。"
+    },
+    {
+      "id": "Ellipsoid#radii",
+      "field": "description",
+      "sourceHash": "sha256:1ac4b12110fd3d5182fd371d16cb590a23ffcfab4f708747419ce82468994e91",
+      "text": "获取椭球各方向的半径。"
+    },
+    {
+      "id": "Ellipsoid#radiiSquared",
+      "field": "description",
+      "sourceHash": "sha256:de49b296e60422eaa8d505b9ef51666e7e52f418c41048cd5df48b500eee59b7",
+      "text": "获取椭球各半径的平方。"
+    },
+    {
+      "id": "Ellipsoid#radiiToTheFourth",
+      "field": "description",
+      "sourceHash": "sha256:3154c1b8025cee7ef5eff8fd85d9767756884aa35ba25c67100338e3d8a77a8e",
+      "text": "获取椭球各半径的四次方。"
+    },
+    {
+      "id": "Ellipsoid#scaleToGeocentricSurface",
+      "field": "description",
+      "sourceHash": "sha256:38c8827698db31622c7137177987043f7d7c0adfbe353d26b82c0c84dedac960",
+      "text": "沿地心表面法线缩放给定笛卡尔位置，使其落在此椭球表面。"
+    },
+    {
+      "id": "Ellipsoid#scaleToGeocentricSurface",
+      "field": "params/cartesian/description",
+      "sourceHash": "sha256:2d27c029de1e28fdfa8a2c8dfce170d6c60e3965b68b627a169d6562e13980e9",
+      "text": "要缩放的笛卡尔位置。"
+    },
+    {
+      "id": "Ellipsoid#scaleToGeocentricSurface",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:58994a1321e2dd82ba863175243208c5c1817bbd27f7b0b89039be0d8930abd4",
+      "text": "修改后的 result 参数；未提供时返回新建的 Cartesian3 实例。"
+    },
+    {
+      "id": "Ellipsoid#scaleToGeodeticSurface",
+      "field": "description",
+      "sourceHash": "sha256:00bd757f9e72a5e114b108e8d80a01327fd90a34348d221f604a3d15b287bcc1",
+      "text": "沿大地表面法线缩放给定笛卡尔位置，使其落在此椭球表面。若位置在椭球中心，则返回 undefined。"
+    },
+    {
+      "id": "Ellipsoid#scaleToGeodeticSurface",
+      "field": "params/cartesian/description",
+      "sourceHash": "sha256:2d27c029de1e28fdfa8a2c8dfce170d6c60e3965b68b627a169d6562e13980e9",
+      "text": "要缩放的笛卡尔位置。"
+    },
+    {
+      "id": "Ellipsoid#scaleToGeodeticSurface",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:cf9d45bc5d66875cf2e9bfd5d990ab0dcc6dfff8478213b4043b92191320d3f7",
+      "text": "修改后的 result 参数；未提供时返回新建的 Cartesian3 实例；若位置在中心，则返回 undefined。"
+    },
+    {
+      "id": "Ellipsoid#surfaceArea",
+      "field": "description",
+      "sourceHash": "sha256:d2561e1d8786880d0413eda8faf74ace12e5dfa30908afc2236b7f7e793bef02",
+      "text": "使用十阶高斯－勒让德求积，近似计算椭球表面上矩形区域的面积。"
+    },
+    {
+      "id": "Ellipsoid#surfaceArea",
+      "field": "params/rectangle/description",
+      "sourceHash": "sha256:2f0f47868fd8e1bc991bed9c6f009edad6ebba3ff5a634de13964e386d36aed7",
+      "text": "用于计算表面积的矩形。"
+    },
+    {
+      "id": "Ellipsoid#surfaceArea",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:a8816728d87a5b6b5bd5baa171c4b944f4f80760872924ed28a55f37832f6239",
+      "text": "此椭球表面矩形区域的近似面积。"
+    },
+    {
+      "id": "Ellipsoid#toString",
+      "field": "description",
+      "sourceHash": "sha256:9b9f4fbf4172d78c6cd31cb07625a9a90459eb07b80f114a13bcc55088ab1792",
+      "text": "创建以 '(radii.x, radii.y, radii.z)' 格式表示此椭球的字符串。"
+    },
+    {
+      "id": "Ellipsoid#toString",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:c4fb562d857a76f06d17204bae003ab60da52e04cf1216b10f487ffce9534ad6",
+      "text": "以 '(radii.x, radii.y, radii.z)' 格式表示此椭球的字符串。"
+    },
+    {
+      "id": "Ellipsoid#transformPositionFromScaledSpace",
+      "field": "description",
+      "sourceHash": "sha256:812547a06797fb06c1f341cdc70cfd90c797f055462c443fe5f169be34b800f8",
+      "text": "将笛卡尔 X、Y、Z 位置的各分量乘以 {@link Ellipsoid#radii}，从椭球缩放空间变换回来。"
+    },
+    {
+      "id": "Ellipsoid#transformPositionFromScaledSpace",
+      "field": "params/position/description",
+      "sourceHash": "sha256:9bee94e985264659387a0aeabf28d8c441a59e6b0dfdc217b6659fc6c76f11f6",
+      "text": "要变换的位置。"
+    },
+    {
+      "id": "Ellipsoid#transformPositionFromScaledSpace",
+      "field": "params/result/description",
+      "sourceHash": "sha256:bbcff85dac61a4a82c228d78f61376fd46d9fb7a361a61a31faf52e7a7fba826",
+      "text": "用于接收结果的位置对象；为 undefined 时创建并返回新实例。"
+    },
+    {
+      "id": "Ellipsoid#transformPositionFromScaledSpace",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:278e508884a1a9acb9e1400549b7e14b65cff0cc2389c6df8b1ceb8307d775d5",
+      "text": "未缩放空间中的位置。若提供了非 undefined 的 result，则返回该实例；否则返回新实例。"
+    },
+    {
+      "id": "Ellipsoid#transformPositionToScaledSpace",
+      "field": "description",
+      "sourceHash": "sha256:6f705ad1ed2c3adfc44ee55935678368f663cf2f44a4257ecbb7240519a64bdd",
+      "text": "将笛卡尔 X、Y、Z 位置的各分量乘以 {@link Ellipsoid#oneOverRadii}，变换到椭球缩放空间。"
+    },
+    {
+      "id": "Ellipsoid#transformPositionToScaledSpace",
+      "field": "params/position/description",
+      "sourceHash": "sha256:9bee94e985264659387a0aeabf28d8c441a59e6b0dfdc217b6659fc6c76f11f6",
+      "text": "要变换的位置。"
+    },
+    {
+      "id": "Ellipsoid#transformPositionToScaledSpace",
+      "field": "params/result/description",
+      "sourceHash": "sha256:bbcff85dac61a4a82c228d78f61376fd46d9fb7a361a61a31faf52e7a7fba826",
+      "text": "用于接收结果的位置对象；为 undefined 时创建并返回新实例。"
+    },
+    {
+      "id": "Ellipsoid#transformPositionToScaledSpace",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:d37f725784ac4217c8d5e5f8deef8a5bfe6cbf9f71f97f0416d87a7e3c3276e5",
+      "text": "缩放空间中的位置。若提供了非 undefined 的 result，则返回该实例；否则返回新实例。"
+    },
+    {
+      "id": "HeadingPitchRoll.clone",
+      "field": "description",
+      "sourceHash": "sha256:1894e0c51890877acc62dafc6f4bed2c2bbad679699e3f4295cb46370c263dd1",
+      "text": "复制 HeadingPitchRoll 实例。"
+    },
+    {
+      "id": "HeadingPitchRoll.clone",
+      "field": "params/headingPitchRoll/description",
+      "sourceHash": "sha256:48ad079f78bf2ba2f19633bd335523f27630c597d9ffc965435ed89ae62f988b",
+      "text": "要复制的 HeadingPitchRoll。"
+    },
+    {
+      "id": "HeadingPitchRoll.clone",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:1267fa7c40fbb02a8430560a27da4c991798b8cdd57b38649b4d991fb55f6920",
+      "text": "修改后的 result 参数；未提供时返回新建的 HeadingPitchRoll 实例。若 headingPitchRoll 为 undefined，则返回 undefined。"
+    },
+    {
+      "id": "HeadingPitchRoll.equals",
+      "field": "description",
+      "sourceHash": "sha256:bcbd4a78a446ad50b27344d4a7a044fbcd19fe3269e324ec4fdb6171e5134c9e",
+      "text": "逐分量比较给定 HeadingPitchRoll，相等时返回 <code>true</code>，否则返回 <code>false</code>。"
+    },
+    {
+      "id": "HeadingPitchRoll.equals",
+      "field": "params/left/description",
+      "sourceHash": "sha256:04f68d640d9e3c1326a1a7d5d70f9de45a1abf84382cf615caedac03632e1d7e",
+      "text": "第一个 HeadingPitchRoll。"
+    },
+    {
+      "id": "HeadingPitchRoll.equals",
+      "field": "params/right/description",
+      "sourceHash": "sha256:020a50e23ced6c39804462710cd740a3c8738f7b9cf97274b0e3b3c793e1e519",
+      "text": "第二个 HeadingPitchRoll。"
+    },
+    {
+      "id": "HeadingPitchRoll.equalsEpsilon",
+      "field": "description",
+      "sourceHash": "sha256:a0b90c11829df6b78133eeda22bed7826c285bf5dcaead31e4f9bf98d59805d8",
+      "text": "逐分量比较给定 HeadingPitchRoll，通过绝对或相对容差测试时返回 <code>true</code>，否则返回 <code>false</code>。"
+    },
+    {
+      "id": "HeadingPitchRoll.equalsEpsilon",
+      "field": "params/absoluteEpsilon/description",
+      "sourceHash": "sha256:62e5c46861c6b7f0f4262f10c359b2b825b6fe2f8691de32fe6da1f2101fe776",
+      "text": "相等测试使用的绝对 epsilon 容差。"
+    },
+    {
+      "id": "HeadingPitchRoll.equalsEpsilon",
+      "field": "params/left/description",
+      "sourceHash": "sha256:04f68d640d9e3c1326a1a7d5d70f9de45a1abf84382cf615caedac03632e1d7e",
+      "text": "第一个 HeadingPitchRoll。"
+    },
+    {
+      "id": "HeadingPitchRoll.equalsEpsilon",
+      "field": "params/relativeEpsilon/description",
+      "sourceHash": "sha256:b6e762c1ad7a06b44a988832e91d2358793ab32a78832b268298e9342caffe33",
+      "text": "相等测试使用的相对 epsilon 容差。"
+    },
+    {
+      "id": "HeadingPitchRoll.equalsEpsilon",
+      "field": "params/right/description",
+      "sourceHash": "sha256:020a50e23ced6c39804462710cd740a3c8738f7b9cf97274b0e3b3c793e1e519",
+      "text": "第二个 HeadingPitchRoll。"
+    },
+    {
+      "id": "HeadingPitchRoll.equalsEpsilon",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:d73d821dc6b34822dfe11364cb173a7333751e53e9ef3a80bb985a26ce173b2c",
+      "text": "若 left 和 right 的差异在给定 epsilon 范围内，则返回 <code>true</code>；否则返回 <code>false</code>。"
+    },
+    {
+      "id": "HeadingPitchRoll.fromDegrees",
+      "field": "description",
+      "sourceHash": "sha256:56c64013c300c4fde1cd1c2ecaa19e42146a720a77a2c1dbda933b2f4d6294ac",
+      "text": "根据以度为单位的角度返回新的 HeadingPitchRoll 实例。"
+    },
+    {
+      "id": "HeadingPitchRoll.fromDegrees",
+      "field": "params/heading/description",
+      "sourceHash": "sha256:7ce0fb09beb3c288a99df5f0dce3b56253d2c547c2b4be3d472ae6fa53c1a103",
+      "text": "方位角，单位为度。"
+    },
+    {
+      "id": "HeadingPitchRoll.fromDegrees",
+      "field": "params/pitch/description",
+      "sourceHash": "sha256:7e3aefd414c2b79dd017c49051f4c4e1f2ba497e53fb2f3e5e69864bc8af117f",
+      "text": "俯仰角，单位为度。"
+    },
+    {
+      "id": "HeadingPitchRoll.fromDegrees",
+      "field": "params/result/description",
+      "sourceHash": "sha256:e297ec8829a9bdfeb9e4a58b05253d14c78d5e3005af2261a7d0100a33ed40c5",
+      "text": "用于保存结果的对象；未提供时创建并返回新实例。"
+    },
+    {
+      "id": "HeadingPitchRoll.fromDegrees",
+      "field": "params/roll/description",
+      "sourceHash": "sha256:7ce0fb09beb3c288a99df5f0dce3b56253d2c547c2b4be3d472ae6fa53c1a103",
+      "text": "方位角，单位为度。"
+    },
+    {
+      "id": "HeadingPitchRoll.fromDegrees",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:75bee670651f3253f99955d483515e5ebd3c55710f4b6153c234699cae1ae9f8",
+      "text": "新建的 HeadingPitchRoll 实例。"
+    },
+    {
+      "id": "HeadingPitchRoll.fromQuaternion",
+      "field": "description",
+      "sourceHash": "sha256:f41d6ea28abcaba17de11612b62a9f38795871a2e9a5541d5dc0bc817633222c",
+      "text": "从四元数计算方位角、俯仰角和横滚角，参见 http://en.wikipedia.org/wiki/Conversion_between_quaternions_and_Euler_angles 。"
+    },
+    {
+      "id": "HeadingPitchRoll.fromQuaternion",
+      "field": "params/quaternion/description",
+      "sourceHash": "sha256:478c8cfae71c4e51b7d664461fed821924dac1e4a2fc3c15bd6e18aed27dd4da",
+      "text": "用于提取方位角、俯仰角和横滚角的四元数，所得角度均使用弧度。"
+    },
+    {
+      "id": "HeadingPitchRoll.fromQuaternion",
+      "field": "params/result/description",
+      "sourceHash": "sha256:e297ec8829a9bdfeb9e4a58b05253d14c78d5e3005af2261a7d0100a33ed40c5",
+      "text": "用于保存结果的对象；未提供时创建并返回新实例。"
+    },
+    {
+      "id": "HeadingPitchRoll.fromQuaternion",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:2dc91d949f302e274e103c79d5d75f01b93c9c91977765c091790af0023b2187",
+      "text": "修改后的 result 参数；未提供时返回新建的 HeadingPitchRoll 实例。"
+    },
+    {
+      "id": "HeadingPitchRoll",
+      "field": "description",
+      "sourceHash": "sha256:6503520a94282f1049b44638870ba6ae4bc171dfb809e68f33c3454ca32732d9",
+      "text": "以方位角、俯仰角和横滚角表示的旋转。方位角绕 z 轴负方向旋转，俯仰角绕 y 轴负方向旋转，横滚角绕 x 轴正方向旋转。"
+    },
+    {
+      "id": "HeadingPitchRoll",
+      "field": "params/heading/description",
+      "sourceHash": "sha256:2fc0ed9b5aa137845a2dbac4beacba48c6d8c7b35cf56ff5a86cd9a0f33c1b45",
+      "text": "方位角分量，单位为弧度。"
+    },
+    {
+      "id": "HeadingPitchRoll",
+      "field": "params/pitch/description",
+      "sourceHash": "sha256:2831553034c1ce0b9aa8d3ea7e9540ddc3186a3f5f125ced0f50bcbcf734e23b",
+      "text": "俯仰角分量，单位为弧度。"
+    },
+    {
+      "id": "HeadingPitchRoll",
+      "field": "params/roll/description",
+      "sourceHash": "sha256:cc63929e862d0c00adcba977fe23f3a878e90745317f580797b231d68f6b26ab",
+      "text": "横滚角分量，单位为弧度。"
+    },
+    {
+      "id": "HeadingPitchRoll#clone",
+      "field": "description",
+      "sourceHash": "sha256:b66e3004272e8b35de6674587b5b4045c589552fad49ec6bf5c451acb475de18",
+      "text": "复制此 HeadingPitchRoll 实例。"
+    },
+    {
+      "id": "HeadingPitchRoll#clone",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:2dc91d949f302e274e103c79d5d75f01b93c9c91977765c091790af0023b2187",
+      "text": "修改后的 result 参数；未提供时返回新建的 HeadingPitchRoll 实例。"
+    },
+    {
+      "id": "HeadingPitchRoll#equals",
+      "field": "description",
+      "sourceHash": "sha256:4a2dba9f3bf2479db29c431a45eb49e0e6e908e90a1fa3098051226018248e19",
+      "text": "将此 HeadingPitchRoll 与给定实例逐分量比较，相等时返回 <code>true</code>，否则返回 <code>false</code>。"
+    },
+    {
+      "id": "HeadingPitchRoll#equals",
+      "field": "params/right/description",
+      "sourceHash": "sha256:ceaa218a1101f91bc056e815f8c6e0195f32d7db5dbf46d29b37fe7db197d529",
+      "text": "右侧 HeadingPitchRoll。"
+    },
+    {
+      "id": "HeadingPitchRoll#equalsEpsilon",
+      "field": "description",
+      "sourceHash": "sha256:6654af455d08f59200817b02753f61dc2b6b8003d5d10b0b1584973eecb19f76",
+      "text": "将此 HeadingPitchRoll 与给定实例逐分量比较，通过绝对或相对容差测试时返回 <code>true</code>，否则返回 <code>false</code>。"
+    },
+    {
+      "id": "HeadingPitchRoll#equalsEpsilon",
+      "field": "params/absoluteEpsilon/description",
+      "sourceHash": "sha256:62e5c46861c6b7f0f4262f10c359b2b825b6fe2f8691de32fe6da1f2101fe776",
+      "text": "相等测试使用的绝对 epsilon 容差。"
+    },
+    {
+      "id": "HeadingPitchRoll#equalsEpsilon",
+      "field": "params/relativeEpsilon/description",
+      "sourceHash": "sha256:b6e762c1ad7a06b44a988832e91d2358793ab32a78832b268298e9342caffe33",
+      "text": "相等测试使用的相对 epsilon 容差。"
+    },
+    {
+      "id": "HeadingPitchRoll#equalsEpsilon",
+      "field": "params/right/description",
+      "sourceHash": "sha256:ceaa218a1101f91bc056e815f8c6e0195f32d7db5dbf46d29b37fe7db197d529",
+      "text": "右侧 HeadingPitchRoll。"
+    },
+    {
+      "id": "HeadingPitchRoll#equalsEpsilon",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:10dbf4a7ddfcc7153660dfa7cfbd4cdcdcb39e498b54dcf418df578bc90f40df",
+      "text": "若差异在给定 epsilon 范围内，则返回 <code>true</code>；否则返回 <code>false</code>。"
+    },
+    {
+      "id": "HeadingPitchRoll#heading",
+      "field": "description",
+      "sourceHash": "sha256:b6ed58e10cc7fa5ef9c41c80d5f95562fd55d695a47b1f64314d0daa37dc8673",
+      "text": "获取或设置方位角。"
+    },
+    {
+      "id": "HeadingPitchRoll#pitch",
+      "field": "description",
+      "sourceHash": "sha256:e46b0eb74eb5e9cd364771de5c6743832da28bab9e579f2e37153e4327520610",
+      "text": "获取或设置俯仰角。"
+    },
+    {
+      "id": "HeadingPitchRoll#roll",
+      "field": "description",
+      "sourceHash": "sha256:7507309ca8d83102a1d5359db5fc417312acabdceed09c75c76d56a7c0772842",
+      "text": "获取或设置横滚角。"
+    },
+    {
+      "id": "HeadingPitchRoll#toString",
+      "field": "description",
+      "sourceHash": "sha256:d0ba3031171c5fd8d83b19b89fbb5293e7d266cffcae175077a98f3e8916dfc1",
+      "text": "创建以 '(heading, pitch, roll)' 格式表示此 HeadingPitchRoll 的字符串，角度使用弧度。"
+    },
+    {
+      "id": "HeadingPitchRoll#toString",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:dadc7392005cffd79b9d1272bcbeed7c05b5f51c93a53dc1ec5531bccc6d87cd",
+      "text": "以 '(heading, pitch, roll)' 格式表示给定 HeadingPitchRoll 的字符串。"
+    },
+    {
+      "id": "Rectangle.center",
+      "field": "description",
+      "sourceHash": "sha256:f041cb526b529d3e30ab0dd36e9ee0f5bc6c4d0d1013013a34ef3dd1a5dfab08",
+      "text": "计算矩形中心。"
+    },
+    {
+      "id": "Rectangle.center",
+      "field": "params/rectangle/description",
+      "sourceHash": "sha256:436d4460352dac0cac07004431ac49ea6b3d5d171adceb68348504aadf2ff173",
+      "text": "要计算中心的矩形。"
+    },
+    {
+      "id": "Rectangle.center",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:b7ec4c60491c4bf61dfcffaebcafebcd10e43556ca5312d8c052a1c649c0db56",
+      "text": "修改后的 result 参数；未提供时返回新建的 Cartographic 实例。"
+    },
+    {
+      "id": "Rectangle.clone",
+      "field": "description",
+      "sourceHash": "sha256:4d7600e276a77334a1b7ba4acc6c7b1d8d27d15d12c5c7b573963852115bc3c6",
+      "text": "复制 Rectangle。"
+    },
+    {
+      "id": "Rectangle.clone",
+      "field": "params/rectangle/description",
+      "sourceHash": "sha256:970b8ca9cb57f9801654ddbce60ff5588abac35d4a1e4efd95af211a6a4a06ee",
+      "text": "要复制的矩形。"
+    },
+    {
+      "id": "Rectangle.clone",
+      "field": "params/result/description",
+      "sourceHash": "sha256:e2cfcc20dc3b2e7b7653db77de742efd777885c7dbdf2b0289ba96fa06c6cc45",
+      "text": "用于保存结果的对象；若为 undefined，则创建新实例。"
+    },
+    {
+      "id": "Rectangle.clone",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:cce26bb38155a9ecce51320ce881c49f380540f989fb966a65d43cc526d53743",
+      "text": "修改后的 result 参数；未提供时返回新建的 Rectangle 实例。若 rectangle 为 undefined，则返回 undefined。"
+    },
+    {
+      "id": "Rectangle.computeHeight",
+      "field": "description",
+      "sourceHash": "sha256:b05621921509a8eb21da74198f1061164de46bad775a52bd13082d37b72fa0af",
+      "text": "计算矩形的角高度，单位为弧度。"
+    },
+    {
+      "id": "Rectangle.computeHeight",
+      "field": "params/rectangle/description",
+      "sourceHash": "sha256:90482be6f30dcf4873413af94c1d8e7c4741d28107307a59f598c710c238c0b2",
+      "text": "要计算高度的矩形。"
+    },
+    {
+      "id": "Rectangle.computeHeight",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:098374175f007adcdd595cb145ab45fd2fcceb2b12ff22d33703108a5a9bdf0f",
+      "text": "高度。"
+    },
+    {
+      "id": "Rectangle.computeWidth",
+      "field": "description",
+      "sourceHash": "sha256:c0ac1bcae71c111b6f26c5871ba21ae8f95dc583bb57ee376ee4933c6bef7cdc",
+      "text": "计算矩形的角宽度，单位为弧度。"
+    },
+    {
+      "id": "Rectangle.computeWidth",
+      "field": "params/rectangle/description",
+      "sourceHash": "sha256:ec95542849f1160ac61a2061520e5372e2641822b0a427f496eb8178e7970267",
+      "text": "要计算宽度的矩形。"
+    },
+    {
+      "id": "Rectangle.computeWidth",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:4415afc731ef3886e0a80c513deaf0003abcc6eb432262cbc46a8138c1e1d3ed",
+      "text": "宽度。"
+    },
+    {
+      "id": "Rectangle.contains",
+      "field": "description",
+      "sourceHash": "sha256:8aaeef76dfda558690c7ae02380bba82f3c5054cb8d631467f2e938cc07ac695",
+      "text": "若地理坐标位于矩形内或边界上，则返回 true；否则返回 false。"
+    },
+    {
+      "id": "Rectangle.contains",
+      "field": "params/cartographic/description",
+      "sourceHash": "sha256:6ee298007ca96841805f2cc379692434506bc445b87ebc9bdfbe00b5d2739114",
+      "text": "要测试的地理坐标。"
+    },
+    {
+      "id": "Rectangle.contains",
+      "field": "params/rectangle/description",
+      "sourceHash": "sha256:c4dd72767b86f84466856a0dbd083ce675d77ad98692b94a8897c2e4640c0413",
+      "text": "矩形。"
+    },
+    {
+      "id": "Rectangle.contains",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:31bc8ede66e610d9ed2bf5d0d3b6e07ed49fdb9bd0279785dc6dc371184d06ce",
+      "text": "若给定地理坐标位于矩形内，则返回 true；否则返回 false。"
+    },
+    {
+      "id": "Rectangle.equals",
+      "field": "description",
+      "sourceHash": "sha256:38678dfab79685b84e71fa72be3beaeb0924df77b606f4840f7d63ca4a13f169",
+      "text": "比较给定矩形，相等时返回 <code>true</code>，否则返回 <code>false</code>。"
+    },
+    {
+      "id": "Rectangle.equals",
+      "field": "params/left/description",
+      "sourceHash": "sha256:a1b6bb8e6a63bbc69bce95dcf3c3b3be802c68edadf4a55894eec313e163dd00",
+      "text": "第一个 Rectangle。"
+    },
+    {
+      "id": "Rectangle.equals",
+      "field": "params/right/description",
+      "sourceHash": "sha256:00aeaaa8019aad120bdae6dfd0b7d8a312a10a1414b5b6cb7fb133c75b969d86",
+      "text": "第二个 Rectangle。"
+    },
+    {
+      "id": "Rectangle.equals",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:f27beb8fce90b73f90f1a5d09d23c19bda3e1ea8180abb94d9d7da7ed9ba4f42",
+      "text": "若 left 与 right 相等，则返回 <code>true</code>；否则返回 <code>false</code>。"
+    },
+    {
+      "id": "Rectangle.equalsEpsilon",
+      "field": "description",
+      "sourceHash": "sha256:bbe756d8b2817dc6a2519bd6fc3ef74064abe6af565dd6d5678cd15604d2a13b",
+      "text": "逐分量比较给定 Rectangle，通过绝对或相对容差测试时返回 <code>true</code>，否则返回 <code>false</code>。"
+    },
+    {
+      "id": "Rectangle.equalsEpsilon",
+      "field": "params/absoluteEpsilon/description",
+      "sourceHash": "sha256:62e5c46861c6b7f0f4262f10c359b2b825b6fe2f8691de32fe6da1f2101fe776",
+      "text": "相等测试使用的绝对 epsilon 容差。"
+    },
+    {
+      "id": "Rectangle.equalsEpsilon",
+      "field": "params/left/description",
+      "sourceHash": "sha256:a1b6bb8e6a63bbc69bce95dcf3c3b3be802c68edadf4a55894eec313e163dd00",
+      "text": "第一个 Rectangle。"
+    },
+    {
+      "id": "Rectangle.equalsEpsilon",
+      "field": "params/right/description",
+      "sourceHash": "sha256:00aeaaa8019aad120bdae6dfd0b7d8a312a10a1414b5b6cb7fb133c75b969d86",
+      "text": "第二个 Rectangle。"
+    },
+    {
+      "id": "Rectangle.equalsEpsilon",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:d73d821dc6b34822dfe11364cb173a7333751e53e9ef3a80bb985a26ce173b2c",
+      "text": "若 left 和 right 的差异在给定 epsilon 范围内，则返回 <code>true</code>；否则返回 <code>false</code>。"
+    },
+    {
+      "id": "Rectangle.expand",
+      "field": "description",
+      "sourceHash": "sha256:15fb7c987a7451fc12277e6ec1e53c3264732369a55d0af0c06e7d675087b1e8",
+      "text": "扩大给定矩形，直到其包含给定地理坐标，并返回所得矩形。"
+    },
+    {
+      "id": "Rectangle.expand",
+      "field": "params/cartographic/description",
+      "sourceHash": "sha256:b98a51251a22b4ab38156b195096c1f4b6101169a184aa0f0a97223c0aa8d6bc",
+      "text": "要包含在矩形中的地理坐标。"
+    },
+    {
+      "id": "Rectangle.expand",
+      "field": "params/rectangle/description",
+      "sourceHash": "sha256:f3c171580614a8d0c07b2d49927858517139cb776bf04113e868d4f3d16ebe35",
+      "text": "要扩大的矩形。"
+    },
+    {
+      "id": "Rectangle.expand",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:4549e7e610381860ea7d8ac5e72a23aeaea203114fb9c84971a92ffa15baecb3",
+      "text": "修改后的 result 参数；未提供时返回新建的 Rectangle 实例。"
+    },
+    {
+      "id": "Rectangle.fromBoundingSphere",
+      "field": "description",
+      "sourceHash": "sha256:faf6c1088fd42c55c03f1b1cbe538e7705650a422b72ae1a373ced64798831f4",
+      "text": "从包围球创建矩形，忽略高度。"
+    },
+    {
+      "id": "Rectangle.fromBoundingSphere",
+      "field": "params/boundingSphere/description",
+      "sourceHash": "sha256:1b0d74a529414793cb598c68d781dd36268a87b35802cee3050b1b23ebf35c40",
+      "text": "包围球。"
+    },
+    {
+      "id": "Rectangle.fromBoundingSphere",
+      "field": "params/ellipsoid/description",
+      "sourceHash": "sha256:d4987f5b4d3b55df0ddb3f54009edf4bc5f1decfcd20d213883232e3abcc7dd4",
+      "text": "椭球。"
+    },
+    {
+      "id": "Rectangle.fromBoundingSphere",
+      "field": "params/result/description",
+      "sourceHash": "sha256:e2cfcc20dc3b2e7b7653db77de742efd777885c7dbdf2b0289ba96fa06c6cc45",
+      "text": "用于保存结果的对象；若为 undefined，则创建新实例。"
+    },
+    {
+      "id": "Rectangle.fromBoundingSphere",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:ed20d2e2438998feffa13970044d628b6fbfd3c0dfa3f917c899efc0b8461211",
+      "text": "修改后的 result 参数；未提供时返回新建的 Rectangle 实例。"
+    },
+    {
+      "id": "Rectangle.fromCartesianArray",
+      "field": "description",
+      "sourceHash": "sha256:676c29908d41cfeefa3644dcc5e9369e32cc0210dda9ba7887fa5bf93f2cf529",
+      "text": "创建包含给定数组中全部位置的最小 Rectangle。"
+    },
+    {
+      "id": "Rectangle.fromCartesianArray",
+      "field": "params/cartesians/description",
+      "sourceHash": "sha256:749a95b0b59c5a0757ce2d471172935d5513da97ffac31726ae144c2b9a05430",
+      "text": "笛卡尔坐标实例列表。"
+    },
+    {
+      "id": "Rectangle.fromCartesianArray",
+      "field": "params/ellipsoid/description",
+      "sourceHash": "sha256:30ed6eb757770ecf4453c9269ec5e9c3f1c111204c1be4a91d53ee2a58b0419e",
+      "text": "笛卡尔坐标所在的椭球。"
+    },
+    {
+      "id": "Rectangle.fromCartesianArray",
+      "field": "params/result/description",
+      "sourceHash": "sha256:e2cfcc20dc3b2e7b7653db77de742efd777885c7dbdf2b0289ba96fa06c6cc45",
+      "text": "用于保存结果的对象；若为 undefined，则创建新实例。"
+    },
+    {
+      "id": "Rectangle.fromCartesianArray",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:ed20d2e2438998feffa13970044d628b6fbfd3c0dfa3f917c899efc0b8461211",
+      "text": "修改后的 result 参数；未提供时返回新建的 Rectangle 实例。"
+    },
+    {
+      "id": "Rectangle.fromCartographicArray",
+      "field": "description",
+      "sourceHash": "sha256:676c29908d41cfeefa3644dcc5e9369e32cc0210dda9ba7887fa5bf93f2cf529",
+      "text": "创建包含给定数组中全部位置的最小 Rectangle。"
+    },
+    {
+      "id": "Rectangle.fromCartographicArray",
+      "field": "params/cartographics/description",
+      "sourceHash": "sha256:42715ec9f8bcf3e8ac3342170d2f99b6adf60cafb392d7298e251f2c123ffcca",
+      "text": "Cartographic 实例列表。"
+    },
+    {
+      "id": "Rectangle.fromCartographicArray",
+      "field": "params/result/description",
+      "sourceHash": "sha256:e2cfcc20dc3b2e7b7653db77de742efd777885c7dbdf2b0289ba96fa06c6cc45",
+      "text": "用于保存结果的对象；若为 undefined，则创建新实例。"
+    },
+    {
+      "id": "Rectangle.fromCartographicArray",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:ed20d2e2438998feffa13970044d628b6fbfd3c0dfa3f917c899efc0b8461211",
+      "text": "修改后的 result 参数；未提供时返回新建的 Rectangle 实例。"
+    },
+    {
+      "id": "Rectangle.fromDegrees",
+      "field": "description",
+      "sourceHash": "sha256:168d73f743107ca94b4bf42ac180e173ab3efeb9f562d612c57b7ca1275c25e9",
+      "text": "根据以度为单位的边界经纬度创建矩形。"
+    },
+    {
+      "id": "Rectangle.fromDegrees",
+      "field": "params/east/description",
+      "sourceHash": "sha256:7e8d72b019e509facb2c3f482e18f8170cbe71e18b48088210d28beb2a89ea2e",
+      "text": "最东侧经度，单位为度，范围为 [-180.0, 180.0]。"
+    },
+    {
+      "id": "Rectangle.fromDegrees",
+      "field": "params/north/description",
+      "sourceHash": "sha256:466e3ebe192739290282956885ebd369f4ea8b1bc0153e75b3baf033a2776997",
+      "text": "最北侧纬度，单位为度，范围为 [-90.0, 90.0]。"
+    },
+    {
+      "id": "Rectangle.fromDegrees",
+      "field": "params/result/description",
+      "sourceHash": "sha256:e2cfcc20dc3b2e7b7653db77de742efd777885c7dbdf2b0289ba96fa06c6cc45",
+      "text": "用于保存结果的对象；若为 undefined，则创建新实例。"
+    },
+    {
+      "id": "Rectangle.fromDegrees",
+      "field": "params/south/description",
+      "sourceHash": "sha256:cc3a8b67aaafe780628d5c03a175f9cdd1ff5d12b7eeae26da86147b78a7d059",
+      "text": "最南侧纬度，单位为度，范围为 [-90.0, 90.0]。"
+    },
+    {
+      "id": "Rectangle.fromDegrees",
+      "field": "params/west/description",
+      "sourceHash": "sha256:bb08a80867ad93b27e16cda7be50f1926d0a081b64fb252c41b177dc9a188cc8",
+      "text": "最西侧经度，单位为度，范围为 [-180.0, 180.0]。"
+    },
+    {
+      "id": "Rectangle.fromDegrees",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:ed20d2e2438998feffa13970044d628b6fbfd3c0dfa3f917c899efc0b8461211",
+      "text": "修改后的 result 参数；未提供时返回新建的 Rectangle 实例。"
+    },
+    {
+      "id": "Rectangle.fromRadians",
+      "field": "description",
+      "sourceHash": "sha256:b7f12f78dc514bd4935cb0b609c2260d652fe1b093bc4b50b894ca75f9378279",
+      "text": "根据以弧度为单位的边界经纬度创建矩形。"
+    },
+    {
+      "id": "Rectangle.fromRadians",
+      "field": "params/east/description",
+      "sourceHash": "sha256:5d093aa15f16c7a10368e48e26181f3222a9afc6b39f3eadbc2f8cdea098bff5",
+      "text": "最东侧经度，单位为弧度，范围为 [-Math.PI, Math.PI]。"
+    },
+    {
+      "id": "Rectangle.fromRadians",
+      "field": "params/north/description",
+      "sourceHash": "sha256:65cfbfa291a43e5c1294339c52d3696fe16062b0224666445108f3f91a94a4f2",
+      "text": "最北侧纬度，单位为弧度，范围为 [-Math.PI/2, Math.PI/2]。"
+    },
+    {
+      "id": "Rectangle.fromRadians",
+      "field": "params/result/description",
+      "sourceHash": "sha256:e2cfcc20dc3b2e7b7653db77de742efd777885c7dbdf2b0289ba96fa06c6cc45",
+      "text": "用于保存结果的对象；若为 undefined，则创建新实例。"
+    },
+    {
+      "id": "Rectangle.fromRadians",
+      "field": "params/south/description",
+      "sourceHash": "sha256:012e5d5a4c5cc8495c4cf7bfbfd61de98b664d40cc4f4129d1f729de1258c86e",
+      "text": "最南侧纬度，单位为弧度，范围为 [-Math.PI/2, Math.PI/2]。"
+    },
+    {
+      "id": "Rectangle.fromRadians",
+      "field": "params/west/description",
+      "sourceHash": "sha256:9aaa9ac68d9433feb624629300b48019c2f99f49466061806870e01b91e5e60b",
+      "text": "最西侧经度，单位为弧度，范围为 [-Math.PI, Math.PI]。"
+    },
+    {
+      "id": "Rectangle.fromRadians",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:ed20d2e2438998feffa13970044d628b6fbfd3c0dfa3f917c899efc0b8461211",
+      "text": "修改后的 result 参数；未提供时返回新建的 Rectangle 实例。"
+    },
+    {
+      "id": "Rectangle.intersection",
+      "field": "description",
+      "sourceHash": "sha256:b9f14a61308c5aa33f221e8016429c6b55910e34613dab4b8ad74df0a7713b49",
+      "text": "计算两个矩形的交集。此函数假定矩形坐标为弧度经纬度，并会考虑同一角度存在多种数值表示，以及经度跨越反子午线的情况，从而得到正确交集。若要忽略这些因素进行简单求交，或处理投影坐标，请参见 {@link Rectangle.simpleIntersection}。"
+    },
+    {
+      "id": "Rectangle.intersection",
+      "field": "params/otherRectangle/description",
+      "sourceHash": "sha256:ebd9096407d65ec6ad20c314a732e8af50c808c15e34ece59bd4c110635a2db2",
+      "text": "参与求交的另一个矩形。"
+    },
+    {
+      "id": "Rectangle.intersection",
+      "field": "params/rectangle/description",
+      "sourceHash": "sha256:f465aead9a7eac1af95ed8c3ed865a453ba87c4854aa185b07c8cf9f28072b34",
+      "text": "参与求交的一个矩形。"
+    },
+    {
+      "id": "Rectangle.intersection",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:5ab6b04bdca9b4061ce9996ccf060390932efdb8bc76bbad1996d7590e18b3fa",
+      "text": "修改后的 result 参数；未提供时返回新建的 Rectangle 实例；若没有交集，则返回 undefined。"
+    },
+    {
+      "id": "Rectangle.MAX_VALUE",
+      "field": "description",
+      "sourceHash": "sha256:d5a18b4cc9fbd2648dd1f050683f03def7f5eb6da9a7af55577a4edf2730dd7d",
+      "text": "可表示的最大矩形范围。"
+    },
+    {
+      "id": "Rectangle.northeast",
+      "field": "description",
+      "sourceHash": "sha256:187d514511b713281254a5b7c9233bf856c1131e4db923d089aae7b868abaeb1",
+      "text": "计算矩形东北角。"
+    },
+    {
+      "id": "Rectangle.northeast",
+      "field": "params/rectangle/description",
+      "sourceHash": "sha256:e4dd9d101850fd2eeb0633c221ac37b074f9ec5e19b9818e7f56747c16e7590f",
+      "text": "要计算角点的矩形。"
+    },
+    {
+      "id": "Rectangle.northeast",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:b7ec4c60491c4bf61dfcffaebcafebcd10e43556ca5312d8c052a1c649c0db56",
+      "text": "修改后的 result 参数；未提供时返回新建的 Cartographic 实例。"
+    },
+    {
+      "id": "Rectangle.northwest",
+      "field": "description",
+      "sourceHash": "sha256:8ef57a287050cb00fd6c13903886adde9129d31f3d5ead34b929afe13c4ce940",
+      "text": "计算矩形西北角。"
+    },
+    {
+      "id": "Rectangle.northwest",
+      "field": "params/rectangle/description",
+      "sourceHash": "sha256:e4dd9d101850fd2eeb0633c221ac37b074f9ec5e19b9818e7f56747c16e7590f",
+      "text": "要计算角点的矩形。"
+    },
+    {
+      "id": "Rectangle.northwest",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:b7ec4c60491c4bf61dfcffaebcafebcd10e43556ca5312d8c052a1c649c0db56",
+      "text": "修改后的 result 参数；未提供时返回新建的 Cartographic 实例。"
+    },
+    {
+      "id": "Rectangle.simpleIntersection",
+      "field": "description",
+      "sourceHash": "sha256:542f865b469d1594cb00d0cd5adb7bb9bfa2bf7536a9c84d6f3c39b78da6ba43",
+      "text": "计算两个矩形的简单交集。与 {@link Rectangle.intersection} 不同，此函数不尝试将角度坐标归一到一致范围，也不处理跨越反子午线的情况，因此可用于坐标不只是经纬度的矩形，例如投影坐标。"
+    },
+    {
+      "id": "Rectangle.simpleIntersection",
+      "field": "params/otherRectangle/description",
+      "sourceHash": "sha256:ebd9096407d65ec6ad20c314a732e8af50c808c15e34ece59bd4c110635a2db2",
+      "text": "参与求交的另一个矩形。"
+    },
+    {
+      "id": "Rectangle.simpleIntersection",
+      "field": "params/rectangle/description",
+      "sourceHash": "sha256:f465aead9a7eac1af95ed8c3ed865a453ba87c4854aa185b07c8cf9f28072b34",
+      "text": "参与求交的一个矩形。"
+    },
+    {
+      "id": "Rectangle.simpleIntersection",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:5ab6b04bdca9b4061ce9996ccf060390932efdb8bc76bbad1996d7590e18b3fa",
+      "text": "修改后的 result 参数；未提供时返回新建的 Rectangle 实例；若没有交集，则返回 undefined。"
+    },
+    {
+      "id": "Rectangle.southeast",
+      "field": "description",
+      "sourceHash": "sha256:35841e2d401cdebe4bea41280200713ac5de27522cfbac0a253aebd2dd646242",
+      "text": "计算矩形东南角。"
+    },
+    {
+      "id": "Rectangle.southeast",
+      "field": "params/rectangle/description",
+      "sourceHash": "sha256:e4dd9d101850fd2eeb0633c221ac37b074f9ec5e19b9818e7f56747c16e7590f",
+      "text": "要计算角点的矩形。"
+    },
+    {
+      "id": "Rectangle.southeast",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:b7ec4c60491c4bf61dfcffaebcafebcd10e43556ca5312d8c052a1c649c0db56",
+      "text": "修改后的 result 参数；未提供时返回新建的 Cartographic 实例。"
+    },
+    {
+      "id": "Rectangle.southwest",
+      "field": "description",
+      "sourceHash": "sha256:b30b7f46fbb84a0ab9e7edff4c70a769c9a116592854322d3edf135f089e786f",
+      "text": "计算矩形西南角。"
+    },
+    {
+      "id": "Rectangle.southwest",
+      "field": "params/rectangle/description",
+      "sourceHash": "sha256:e4dd9d101850fd2eeb0633c221ac37b074f9ec5e19b9818e7f56747c16e7590f",
+      "text": "要计算角点的矩形。"
+    },
+    {
+      "id": "Rectangle.southwest",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:b7ec4c60491c4bf61dfcffaebcafebcd10e43556ca5312d8c052a1c649c0db56",
+      "text": "修改后的 result 参数；未提供时返回新建的 Cartographic 实例。"
+    },
+    {
+      "id": "Rectangle.subsample",
+      "field": "description",
+      "sourceHash": "sha256:8d9d4bd4389662bb0cc2dffce1f545af81a2837776aab043fb4fe484c209e1ba",
+      "text": "对矩形采样，得到适合传入 {@link BoundingSphere#fromPoints} 的笛卡尔点列表。采样用于正确处理覆盖极点或跨越赤道的矩形。"
+    },
+    {
+      "id": "Rectangle.subsample",
+      "field": "params/ellipsoid/description",
+      "sourceHash": "sha256:898193b4581945790ae937a56e5f5f598381851485e2b0aff35da36368e21e7d",
+      "text": "要使用的椭球。"
+    },
+    {
+      "id": "Rectangle.subsample",
+      "field": "params/rectangle/description",
+      "sourceHash": "sha256:82dfca2bb4f8b3d597caccd4dd9fde07c8cd5ef31e3320d9d64a8d7c3927a236",
+      "text": "要采样的矩形。"
+    },
+    {
+      "id": "Rectangle.subsample",
+      "field": "params/result/description",
+      "sourceHash": "sha256:89059a29de9f95965d4666389f18c81c9a1e5c3d7fc5b408b3942b17c0ba7ffb",
+      "text": "用于保存结果的笛卡尔坐标数组。"
+    },
+    {
+      "id": "Rectangle.subsample",
+      "field": "params/surfaceHeight/description",
+      "sourceHash": "sha256:a998f204d2c9c2431b8de40874460e23932edcb55b7d98d2dc9ada76c0d675af",
+      "text": "矩形相对于椭球的高度。"
+    },
+    {
+      "id": "Rectangle.subsample",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:549733c4bba1382cbc8ed5e3f10e88cfd5e5a0a16d26763413f2d7b8d4cbc684",
+      "text": "修改后的 result 参数；未提供时返回新建的笛卡尔坐标实例数组。"
+    },
+    {
+      "id": "Rectangle.subsection",
+      "field": "description",
+      "sourceHash": "sha256:7bd1e113fe06a90eac158d6daee8ac80b95b32a0ecaea1f880c036efb39b795c",
+      "text": "根据 [0.0, 1.0] 范围内的归一化坐标，计算矩形的子区域。"
+    },
+    {
+      "id": "Rectangle.subsection",
+      "field": "params/eastLerp/description",
+      "sourceHash": "sha256:b4ee52723df2a856ebcca6617f8f3b5e56dcbe4d84cf2e855ece9af082f3e58c",
+      "text": "东侧插值系数，范围为 [0.0, 1.0]，必须大于等于 westLerp。"
+    },
+    {
+      "id": "Rectangle.subsection",
+      "field": "params/northLerp/description",
+      "sourceHash": "sha256:9067d999982c8db06f42b09ab179dbd5f1bdcf5b855c453ac6444d0a7285e9aa",
+      "text": "北侧插值系数，范围为 [0.0, 1.0]，必须大于等于 southLerp。"
+    },
+    {
+      "id": "Rectangle.subsection",
+      "field": "params/rectangle/description",
+      "sourceHash": "sha256:4dcc65fc64dc51e213f233e8e52cae0d255fbac5b734fa0b046eb87ac4914796",
+      "text": "要计算子区域的矩形。"
+    },
+    {
+      "id": "Rectangle.subsection",
+      "field": "params/southLerp/description",
+      "sourceHash": "sha256:a770fd27419e8d448e2a6352bc2afb867c813d7b241730e329169506d6a14d34",
+      "text": "南侧插值系数，范围为 [0.0, 1.0]，必须小于等于 northLerp。"
+    },
+    {
+      "id": "Rectangle.subsection",
+      "field": "params/westLerp/description",
+      "sourceHash": "sha256:948d55f3726f9b89f47805c2226d6e9d734c8d99491c4b2e395ff6226e166c8e",
+      "text": "西侧插值系数，范围为 [0.0, 1.0]，必须小于等于 eastLerp。"
+    },
+    {
+      "id": "Rectangle.subsection",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:ed20d2e2438998feffa13970044d628b6fbfd3c0dfa3f917c899efc0b8461211",
+      "text": "修改后的 result 参数；未提供时返回新建的 Rectangle 实例。"
+    },
+    {
+      "id": "Rectangle.union",
+      "field": "description",
+      "sourceHash": "sha256:85d04035f2e3dcde9d8bdeb702285fd12e32e61face135cd061b4b359d5fcc6c",
+      "text": "计算包围两个矩形并集的矩形。"
+    },
+    {
+      "id": "Rectangle.union",
+      "field": "params/otherRectangle/description",
+      "sourceHash": "sha256:533ef9f0a1cc04f460a6a2b4f28815e111c2587fe01f57222d64e7d71cf3ee45",
+      "text": "要包含在结果矩形中的矩形。"
+    },
+    {
+      "id": "Rectangle.union",
+      "field": "params/rectangle/description",
+      "sourceHash": "sha256:7b6eae2eca738db1b7de39a818591fdd2d2fc7e18c99f1c99de85da5603ac4dc",
+      "text": "要包含在结果矩形中的矩形。"
+    },
+    {
+      "id": "Rectangle.union",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:ed20d2e2438998feffa13970044d628b6fbfd3c0dfa3f917c899efc0b8461211",
+      "text": "修改后的 result 参数；未提供时返回新建的 Rectangle 实例。"
+    },
+    {
+      "id": "Rectangle.unpack",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:4549e7e610381860ea7d8ac5e72a23aeaea203114fb9c84971a92ffa15baecb3",
+      "text": "修改后的 result 参数；未提供时返回新建的 Rectangle 实例。"
+    },
+    {
+      "id": "Rectangle#clone",
+      "field": "description",
+      "sourceHash": "sha256:4d20d91294a5a0fa144c37925301f84af9cc16715278c6c67d5ba118d88657a0",
+      "text": "复制此 Rectangle。"
+    },
+    {
+      "id": "Rectangle#clone",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:ed20d2e2438998feffa13970044d628b6fbfd3c0dfa3f917c899efc0b8461211",
+      "text": "修改后的 result 参数；未提供时返回新建的 Rectangle 实例。"
+    },
+    {
+      "id": "Rectangle#east",
+      "field": "description",
+      "sourceHash": "sha256:ea06f8cb2f906b8349747e029375e6d8070258df136ae407cc81ffaf097f4da3",
+      "text": "最东侧经度，单位为弧度，范围为 [-Pi, Pi]。"
+    },
+    {
+      "id": "Rectangle#equals",
+      "field": "description",
+      "sourceHash": "sha256:6bbcda0b091418fadb247f510f52eb718b0a2d1567e114804d50f0315778f742",
+      "text": "将给定 Rectangle 与此矩形逐分量比较，相等时返回 <code>true</code>，否则返回 <code>false</code>。"
+    },
+    {
+      "id": "Rectangle#equals",
+      "field": "params/other/description",
+      "sourceHash": "sha256:8ec2b2fdf024e13529c8bdc42382eada13a27a58bce005bbeef547f98f1dea45",
+      "text": "要比较的 Rectangle。"
+    },
+    {
+      "id": "Rectangle#equals",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:f0f3e2b473906ceb8cc8ef6003e585152bb822431e5f308a94cd2240cba2afdf",
+      "text": "矩形相等时返回 <code>true</code>，否则返回 <code>false</code>。"
+    },
+    {
+      "id": "Rectangle#equalsEpsilon",
+      "field": "description",
+      "sourceHash": "sha256:6b7cea192576fd3217b12396fcdc906f830df91826864420ef0e85057e90b366",
+      "text": "将给定 Rectangle 与此矩形逐分量比较，差异在给定 epsilon 范围内时返回 <code>true</code>，否则返回 <code>false</code>。"
+    },
+    {
+      "id": "Rectangle#equalsEpsilon",
+      "field": "params/epsilon/description",
+      "sourceHash": "sha256:1ab4d3a4f4ca315af12f39b1b4e64b7ec35e58ae52588c40ff36843a8836cb4b",
+      "text": "相等测试使用的 epsilon 容差。"
+    },
+    {
+      "id": "Rectangle#equalsEpsilon",
+      "field": "params/other/description",
+      "sourceHash": "sha256:8ec2b2fdf024e13529c8bdc42382eada13a27a58bce005bbeef547f98f1dea45",
+      "text": "要比较的 Rectangle。"
+    },
+    {
+      "id": "Rectangle#equalsEpsilon",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:38146cd261295921ff136caba4f5e9da11de3a553cb6d04e1ff72cf8d2a88b0b",
+      "text": "矩形差异在给定 epsilon 范围内时返回 <code>true</code>，否则返回 <code>false</code>。"
+    },
+    {
+      "id": "Rectangle#height",
+      "field": "description",
+      "sourceHash": "sha256:b9356becf977eb80f64d43b1c6d71eaff4a2044704f424ca14aad937323bbc8b",
+      "text": "获取矩形的角高度，单位为弧度。"
+    },
+    {
+      "id": "Rectangle#north",
+      "field": "description",
+      "sourceHash": "sha256:f75300aa827d6ba26300cf16cbc1c92a6c4a88e62347c792d3aed5fbd18a752e",
+      "text": "最北侧纬度，单位为弧度，范围为 [-Pi/2, Pi/2]。"
+    },
+    {
+      "id": "Rectangle#south",
+      "field": "description",
+      "sourceHash": "sha256:f776dd14b3027e169a6b12b9001cce77155f77900a87695054eb81e550d49111",
+      "text": "最南侧纬度，单位为弧度，范围为 [-Pi/2, Pi/2]。"
+    },
+    {
+      "id": "Rectangle#west",
+      "field": "description",
+      "sourceHash": "sha256:ceecaeacb77752f1b37376c572de2f60eff1d257048474ca72ec15f333752100",
+      "text": "最西侧经度，单位为弧度，范围为 [-Pi, Pi]。"
+    },
+    {
+      "id": "Rectangle#width",
+      "field": "description",
+      "sourceHash": "sha256:abf3b50accfb65c4a5c2e1babf4f6fd1cc64cc159df43aa29e4bc6c7656ea92f",
+      "text": "获取矩形的角宽度，单位为弧度。"
+    },
+    {
+      "id": "Transforms.computeFixedToIcrfMatrix",
+      "field": "description",
+      "sourceHash": "sha256:1a3502138a297355bd40a314aa3c36c37eafc924a892327fb39de42a124cc18d",
+      "text": "计算给定时间的旋转矩阵，将点或向量从地固参考坐标轴（ITRF）变换到国际天球参考系（GCRF/ICRF）的惯性坐标轴。若所需数据尚未加载，此函数可能返回 undefined。"
+    },
+    {
+      "id": "Transforms.computeFixedToIcrfMatrix",
+      "field": "params/date/description",
+      "sourceHash": "sha256:570c0c2ff82d678ff1a04688dff58b2077b127c32d422b997b2f34a3fc059bcb",
+      "text": "要计算旋转矩阵的时间。"
+    },
+    {
+      "id": "Transforms.computeFixedToIcrfMatrix",
+      "field": "params/result/description",
+      "sourceHash": "sha256:48909773444f52bf5fd73bebee97cb945af00e7b8dc7254ff6cd41b67b90f06b",
+      "text": "用于保存结果的对象；若未指定，则创建并返回新实例。"
+    },
+    {
+      "id": "Transforms.computeFixedToIcrfMatrix",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:314e9bdfa96ce5e18d870454b1f8986041c80e11af81afd7c1618ed1ee39fea4",
+      "text": "旋转矩阵；若所需变换数据尚未加载，则返回 undefined。"
+    },
+    {
+      "id": "Transforms.computeIcrfToCentralBodyFixedMatrix",
+      "field": "description",
+      "sourceHash": "sha256:75d1abee2a6d6c80ae32d87d66a5d3d7e3d975183317023bccdd26b72246093b",
+      "text": "计算给定时间下，从国际天球参考系（GCRF/ICRF）惯性坐标轴到中心天体（通常为地球）固定坐标轴旋转矩阵的默认函数，用于光照和惯性参考系变换。若所需数据尚未加载，可能返回 undefined。"
+    },
+    {
+      "id": "Transforms.computeIcrfToCentralBodyFixedMatrix",
+      "field": "params/date/description",
+      "sourceHash": "sha256:570c0c2ff82d678ff1a04688dff58b2077b127c32d422b997b2f34a3fc059bcb",
+      "text": "要计算旋转矩阵的时间。"
+    },
+    {
+      "id": "Transforms.computeIcrfToCentralBodyFixedMatrix",
+      "field": "params/result/description",
+      "sourceHash": "sha256:48909773444f52bf5fd73bebee97cb945af00e7b8dc7254ff6cd41b67b90f06b",
+      "text": "用于保存结果的对象；若未指定，则创建并返回新实例。"
+    },
+    {
+      "id": "Transforms.computeIcrfToCentralBodyFixedMatrix",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:314e9bdfa96ce5e18d870454b1f8986041c80e11af81afd7c1618ed1ee39fea4",
+      "text": "旋转矩阵；若所需变换数据尚未加载，则返回 undefined。"
+    },
+    {
+      "id": "Transforms.computeIcrfToFixedMatrix",
+      "field": "description",
+      "sourceHash": "sha256:395178ed6e7412fb56c6fb9dc0870840a4ca86e9eacffbddcad2be53d443b9b6",
+      "text": "计算给定时间的旋转矩阵，将点或向量从国际天球参考系（GCRF/ICRF）惯性坐标轴变换到地固参考坐标轴（ITRF）。若所需数据尚未加载，此函数可能返回 undefined。"
+    },
+    {
+      "id": "Transforms.computeIcrfToFixedMatrix",
+      "field": "params/date/description",
+      "sourceHash": "sha256:570c0c2ff82d678ff1a04688dff58b2077b127c32d422b997b2f34a3fc059bcb",
+      "text": "要计算旋转矩阵的时间。"
+    },
+    {
+      "id": "Transforms.computeIcrfToFixedMatrix",
+      "field": "params/result/description",
+      "sourceHash": "sha256:48909773444f52bf5fd73bebee97cb945af00e7b8dc7254ff6cd41b67b90f06b",
+      "text": "用于保存结果的对象；若未指定，则创建并返回新实例。"
+    },
+    {
+      "id": "Transforms.computeIcrfToFixedMatrix",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:314e9bdfa96ce5e18d870454b1f8986041c80e11af81afd7c1618ed1ee39fea4",
+      "text": "旋转矩阵；若所需变换数据尚未加载，则返回 undefined。"
+    },
+    {
+      "id": "Transforms.computeIcrfToMoonFixedMatrix",
+      "field": "description",
+      "sourceHash": "sha256:0d3f6c5109e9587b2a6cd39ba3e5293701ec2764bbad88677b20367351988bf7",
+      "text": "计算给定时间的旋转矩阵，将点或向量从国际天球参考系（GCRF/ICRF）惯性坐标轴变换到月固参考坐标轴。"
+    },
+    {
+      "id": "Transforms.computeIcrfToMoonFixedMatrix",
+      "field": "params/date/description",
+      "sourceHash": "sha256:570c0c2ff82d678ff1a04688dff58b2077b127c32d422b997b2f34a3fc059bcb",
+      "text": "要计算旋转矩阵的时间。"
+    },
+    {
+      "id": "Transforms.computeIcrfToMoonFixedMatrix",
+      "field": "params/result/description",
+      "sourceHash": "sha256:48909773444f52bf5fd73bebee97cb945af00e7b8dc7254ff6cd41b67b90f06b",
+      "text": "用于保存结果的对象；若未指定，则创建并返回新实例。"
+    },
+    {
+      "id": "Transforms.computeIcrfToMoonFixedMatrix",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:f27bf8a32ec9579cfa755a7f66fcdea0c3230fd537df2a0074703f3a5f28f082",
+      "text": "旋转矩阵。"
+    },
+    {
+      "id": "Transforms.computeMoonFixedToIcrfMatrix",
+      "field": "description",
+      "sourceHash": "sha256:e72ece6da8ffc9b332fdc2a283ef88a8b50cd14da79bda700e5030561bc3991a",
+      "text": "计算给定时间的旋转矩阵，将点或向量从月固参考坐标轴变换到国际天球参考系（GCRF/ICRF）惯性坐标轴。"
+    },
+    {
+      "id": "Transforms.computeMoonFixedToIcrfMatrix",
+      "field": "params/date/description",
+      "sourceHash": "sha256:570c0c2ff82d678ff1a04688dff58b2077b127c32d422b997b2f34a3fc059bcb",
+      "text": "要计算旋转矩阵的时间。"
+    },
+    {
+      "id": "Transforms.computeMoonFixedToIcrfMatrix",
+      "field": "params/result/description",
+      "sourceHash": "sha256:48909773444f52bf5fd73bebee97cb945af00e7b8dc7254ff6cd41b67b90f06b",
+      "text": "用于保存结果的对象；若未指定，则创建并返回新实例。"
+    },
+    {
+      "id": "Transforms.computeMoonFixedToIcrfMatrix",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:f27bf8a32ec9579cfa755a7f66fcdea0c3230fd537df2a0074703f3a5f28f082",
+      "text": "旋转矩阵。"
+    },
+    {
+      "id": "Transforms.computeTemeToPseudoFixedMatrix",
+      "field": "description",
+      "sourceHash": "sha256:a61a3c11f2bf22e6653cc51a7ccf1cc1fe9188254727ca206b156c4cef062ad2",
+      "text": "计算给定时间的旋转矩阵，将点或向量从真赤道平春分点（TEME）坐标轴变换到伪固定坐标轴。此方法将 UT1 时间标准视为等同于 UTC。"
+    },
+    {
+      "id": "Transforms.computeTemeToPseudoFixedMatrix",
+      "field": "params/date/description",
+      "sourceHash": "sha256:570c0c2ff82d678ff1a04688dff58b2077b127c32d422b997b2f34a3fc059bcb",
+      "text": "要计算旋转矩阵的时间。"
+    },
+    {
+      "id": "Transforms.computeTemeToPseudoFixedMatrix",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:6789be9ce05b85019b20ba39a04901544c08331f8a7e1e28f872345ef48099a4",
+      "text": "修改后的 result 参数；未提供时返回新建的 Matrix3 实例。"
+    },
+    {
+      "id": "Transforms.eastNorthUpToFixedFrame",
+      "field": "description",
+      "sourceHash": "sha256:ed9e98764b76bc3d10d268bbe928a3e58213703d0a06d24aef9778b84e011a8b",
+      "text": "计算从以给定原点为中心的东、北、天参考坐标系，到给定椭球固定参考坐标系的 4x4 变换矩阵。局部坐标轴定义如下：<ul><li><code>x</code> 轴指向局部东方。</li><li><code>y</code> 轴指向局部北方。</li><li><code>z</code> 轴沿该位置处的椭球表面法线方向。</li></ul>"
+    },
+    {
+      "id": "Transforms.eastNorthUpToFixedFrame",
+      "field": "params/ellipsoid/description",
+      "sourceHash": "sha256:02bbb79485804b625aca95faa8030b5d598ac20d36480a4efbf3c7609c0742d9",
+      "text": "变换所使用固定参考坐标系对应的椭球。"
+    },
+    {
+      "id": "Transforms.eastNorthUpToFixedFrame",
+      "field": "params/origin/description",
+      "sourceHash": "sha256:d0ebc55d186e16f26a9fb247e4f8d767a6824e9773951631ab3889c2142458ae",
+      "text": "局部参考坐标系的中心点。"
+    },
+    {
+      "id": "Transforms.eastNorthUpToFixedFrame",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:66e7158304e522d89b07174d60c4f07ebc69bc3d013f30aedff2d0977bc53a8c",
+      "text": "修改后的 result 参数；未提供时返回新建的 Matrix4 实例。"
+    },
+    {
+      "id": "Transforms.fixedFrameToHeadingPitchRoll",
+      "field": "description",
+      "sourceHash": "sha256:0c5075c72435b4196fde31a3b9e2a4b579ec5de3efab4ec1c013b0ff32bbbc54",
+      "text": "从特定参考坐标系中的变换计算方位角、俯仰角和横滚角。在默认东、北、天坐标系中，方位角从局部东方起算，正值绕局部向上轴负向旋转。俯仰角从局部东－北平面起算，正值在平面上方，负值在平面下方。横滚是首先应用的、绕局部东轴的旋转。"
+    },
+    {
+      "id": "Transforms.fixedFrameToHeadingPitchRoll",
+      "field": "params/ellipsoid/description",
+      "sourceHash": "sha256:02bbb79485804b625aca95faa8030b5d598ac20d36480a4efbf3c7609c0742d9",
+      "text": "变换所使用固定参考坐标系对应的椭球。"
+    },
+    {
+      "id": "Transforms.fixedFrameToHeadingPitchRoll",
+      "field": "params/fixedFrameTransform/description",
+      "sourceHash": "sha256:dad86e635548ff4bd1e06d0e87b936260b5570f981ecdd5c8b8f1e7819ec0f31",
+      "text": "从某参考坐标系到给定椭球固定参考坐标系的 4x4 变换矩阵。"
+    },
+    {
+      "id": "Transforms.fixedFrameToHeadingPitchRoll",
+      "field": "params/transform/description",
+      "sourceHash": "sha256:06f2e55dce454f56e9fe2bca010c81bbc5aa643efc45a0b61ed262aceab08c9a",
+      "text": "变换。"
+    },
+    {
+      "id": "Transforms.fixedFrameToHeadingPitchRoll",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:6ea52960f638b2f4d3d2e8a749175edec79eb64078d25d5cb1996d85975c2de7",
+      "text": "修改后的 result 参数；未提供时返回新建的 HeadingPitchRoll 实例。"
+    },
+    {
+      "id": "Transforms.headingPitchRollQuaternion",
+      "field": "description",
+      "sourceHash": "sha256:84fa7d02513e80c7e092b0c54f168b83664c778aa20dbadfc3a10604892d078b",
+      "text": "根据以给定原点为中心、由方位角、俯仰角和横滚角确定坐标轴的参考坐标系计算四元数。在默认东、北、天坐标系中，方位角从局部东方起算，正值绕局部向上轴负向旋转。俯仰角从局部东－北平面起算，正值在平面上方，负值在平面下方。横滚是首先应用的、绕局部东轴的旋转。"
+    },
+    {
+      "id": "Transforms.headingPitchRollQuaternion",
+      "field": "params/ellipsoid/description",
+      "sourceHash": "sha256:02bbb79485804b625aca95faa8030b5d598ac20d36480a4efbf3c7609c0742d9",
+      "text": "变换所使用固定参考坐标系对应的椭球。"
+    },
+    {
+      "id": "Transforms.headingPitchRollQuaternion",
+      "field": "params/fixedFrameTransform/description",
+      "sourceHash": "sha256:dad86e635548ff4bd1e06d0e87b936260b5570f981ecdd5c8b8f1e7819ec0f31",
+      "text": "从某参考坐标系到给定椭球固定参考坐标系的 4x4 变换矩阵。"
+    },
+    {
+      "id": "Transforms.headingPitchRollQuaternion",
+      "field": "params/headingPitchRoll/description",
+      "sourceHash": "sha256:671c3e5a723fb6629791de988def97266423f72aa173467d878f7c6244757619",
+      "text": "方位角、俯仰角和横滚角。"
+    },
+    {
+      "id": "Transforms.headingPitchRollQuaternion",
+      "field": "params/origin/description",
+      "sourceHash": "sha256:d0ebc55d186e16f26a9fb247e4f8d767a6824e9773951631ab3889c2142458ae",
+      "text": "局部参考坐标系的中心点。"
+    },
+    {
+      "id": "Transforms.headingPitchRollQuaternion",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:86b8e0afa52b598d8a01c9e991dacaf7f2d33e78bf61bf20159526fb9627ea6b",
+      "text": "修改后的 result 参数；未提供时返回新建的 Quaternion 实例。"
+    },
+    {
+      "id": "Transforms.headingPitchRollToFixedFrame",
+      "field": "description",
+      "sourceHash": "sha256:807a1fe506d2507b542c60a36ea5df3e9f4f5af40d6043cfba9ac624d8108353",
+      "text": "计算从以给定原点为中心、由方位角、俯仰角和横滚角确定坐标轴的参考坐标系，到给定椭球固定参考坐标系的 4x4 变换矩阵。在默认东、北、天坐标系中，方位角从局部东方起算，正值绕局部向上轴负向旋转。俯仰角从局部东－北平面起算，正值在平面上方，负值在平面下方。横滚是首先应用的、绕局部东轴的旋转。"
+    },
+    {
+      "id": "Transforms.headingPitchRollToFixedFrame",
+      "field": "params/ellipsoid/description",
+      "sourceHash": "sha256:02bbb79485804b625aca95faa8030b5d598ac20d36480a4efbf3c7609c0742d9",
+      "text": "变换所使用固定参考坐标系对应的椭球。"
+    },
+    {
+      "id": "Transforms.headingPitchRollToFixedFrame",
+      "field": "params/fixedFrameTransform/description",
+      "sourceHash": "sha256:dad86e635548ff4bd1e06d0e87b936260b5570f981ecdd5c8b8f1e7819ec0f31",
+      "text": "从某参考坐标系到给定椭球固定参考坐标系的 4x4 变换矩阵。"
+    },
+    {
+      "id": "Transforms.headingPitchRollToFixedFrame",
+      "field": "params/headingPitchRoll/description",
+      "sourceHash": "sha256:671c3e5a723fb6629791de988def97266423f72aa173467d878f7c6244757619",
+      "text": "方位角、俯仰角和横滚角。"
+    },
+    {
+      "id": "Transforms.headingPitchRollToFixedFrame",
+      "field": "params/origin/description",
+      "sourceHash": "sha256:d0ebc55d186e16f26a9fb247e4f8d767a6824e9773951631ab3889c2142458ae",
+      "text": "局部参考坐标系的中心点。"
+    },
+    {
+      "id": "Transforms.headingPitchRollToFixedFrame",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:66e7158304e522d89b07174d60c4f07ebc69bc3d013f30aedff2d0977bc53a8c",
+      "text": "修改后的 result 参数；未提供时返回新建的 Matrix4 实例。"
+    },
+    {
+      "id": "Transforms.LocalFrameToFixedFrame",
+      "field": "description",
+      "sourceHash": "sha256:a83257437fb942b86e4ea61f688ff7e1ebc9c1e15f1ae137062cba57e6d1ca1d",
+      "text": "计算从以给定原点为中心的参考坐标系，到给定椭球固定参考坐标系的 4x4 变换矩阵。"
+    },
+    {
+      "id": "Transforms.LocalFrameToFixedFrame",
+      "field": "params/ellipsoid/description",
+      "sourceHash": "sha256:02bbb79485804b625aca95faa8030b5d598ac20d36480a4efbf3c7609c0742d9",
+      "text": "变换所使用固定参考坐标系对应的椭球。"
+    },
+    {
+      "id": "Transforms.LocalFrameToFixedFrame",
+      "field": "params/origin/description",
+      "sourceHash": "sha256:d0ebc55d186e16f26a9fb247e4f8d767a6824e9773951631ab3889c2142458ae",
+      "text": "局部参考坐标系的中心点。"
+    },
+    {
+      "id": "Transforms.LocalFrameToFixedFrame",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:66e7158304e522d89b07174d60c4f07ebc69bc3d013f30aedff2d0977bc53a8c",
+      "text": "修改后的 result 参数；未提供时返回新建的 Matrix4 实例。"
+    },
+    {
+      "id": "Transforms.localFrameToFixedFrameGenerator",
+      "field": "description",
+      "sourceHash": "sha256:a2f6b9a14851e7b6f0c75907bb588f8ba7bdff2c690e4e309fd814f6fee24a48",
+      "text": "生成函数，用于计算从以给定原点为中心的参考坐标系，到给定椭球固定参考坐标系的 4x4 变换矩阵。"
+    },
+    {
+      "id": "Transforms.localFrameToFixedFrameGenerator",
+      "field": "params/firstAxis/description",
+      "sourceHash": "sha256:a42def615d22a8acda51c83131b080604567a311e76f96ab9b4ca91526a09eea",
+      "text": "局部参考坐标系第一坐标轴的名称，必须为 'east'、'north'、'up'、'west'、'south' 或 'down'。"
+    },
+    {
+      "id": "Transforms.localFrameToFixedFrameGenerator",
+      "field": "params/secondAxis/description",
+      "sourceHash": "sha256:57ac03a84053cefdc1f7790b48e086048678c38c32cbde4f02adb04e662e8c6f",
+      "text": "局部参考坐标系第二坐标轴的名称，必须为 'east'、'north'、'up'、'west'、'south' 或 'down'。"
+    },
+    {
+      "id": "Transforms.localFrameToFixedFrameGenerator",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:05ad962fdf292e51f5ffdce17504b54dee5ef8b2bc92d612c20303f5e02fbd1f",
+      "text": "计算 4x4 变换矩阵的函数，输入参考坐标系的第一、第二坐标轴符合所给参数。"
+    },
+    {
+      "id": "Transforms.northEastDownToFixedFrame",
+      "field": "description",
+      "sourceHash": "sha256:afad0725cbd92be0e4bfa1dcb92ef7490ed8ce5e9b6ea07102efa542a31069c8",
+      "text": "计算从以给定原点为中心的北、东、地参考坐标系，到给定椭球固定参考坐标系的 4x4 变换矩阵。局部坐标轴定义如下：<ul><li><code>x</code> 轴指向局部北方。</li><li><code>y</code> 轴指向局部东方。</li><li><code>z</code> 轴与该位置处的椭球表面法线方向相反。</li></ul>"
+    },
+    {
+      "id": "Transforms.northEastDownToFixedFrame",
+      "field": "params/ellipsoid/description",
+      "sourceHash": "sha256:02bbb79485804b625aca95faa8030b5d598ac20d36480a4efbf3c7609c0742d9",
+      "text": "变换所使用固定参考坐标系对应的椭球。"
+    },
+    {
+      "id": "Transforms.northEastDownToFixedFrame",
+      "field": "params/origin/description",
+      "sourceHash": "sha256:d0ebc55d186e16f26a9fb247e4f8d767a6824e9773951631ab3889c2142458ae",
+      "text": "局部参考坐标系的中心点。"
+    },
+    {
+      "id": "Transforms.northEastDownToFixedFrame",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:66e7158304e522d89b07174d60c4f07ebc69bc3d013f30aedff2d0977bc53a8c",
+      "text": "修改后的 result 参数；未提供时返回新建的 Matrix4 实例。"
+    },
+    {
+      "id": "Transforms.northUpEastToFixedFrame",
+      "field": "description",
+      "sourceHash": "sha256:3213853ffeb5bd5053616d855f07c805c2bd8812563a1c145770d495fa78ffe0",
+      "text": "计算从以给定原点为中心的北、天、东参考坐标系，到给定椭球固定参考坐标系的 4x4 变换矩阵。局部坐标轴定义如下：<ul><li><code>x</code> 轴指向局部北方。</li><li><code>y</code> 轴沿该位置处的椭球表面法线方向。</li><li><code>z</code> 轴指向局部东方。</li></ul>"
+    },
+    {
+      "id": "Transforms.northUpEastToFixedFrame",
+      "field": "params/ellipsoid/description",
+      "sourceHash": "sha256:02bbb79485804b625aca95faa8030b5d598ac20d36480a4efbf3c7609c0742d9",
+      "text": "变换所使用固定参考坐标系对应的椭球。"
+    },
+    {
+      "id": "Transforms.northUpEastToFixedFrame",
+      "field": "params/origin/description",
+      "sourceHash": "sha256:d0ebc55d186e16f26a9fb247e4f8d767a6824e9773951631ab3889c2142458ae",
+      "text": "局部参考坐标系的中心点。"
+    },
+    {
+      "id": "Transforms.northUpEastToFixedFrame",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:66e7158304e522d89b07174d60c4f07ebc69bc3d013f30aedff2d0977bc53a8c",
+      "text": "修改后的 result 参数；未提供时返回新建的 Matrix4 实例。"
+    },
+    {
+      "id": "Transforms.northWestUpToFixedFrame",
+      "field": "description",
+      "sourceHash": "sha256:3b2067198a680229e61cf59202364595a8fd2f089233ab14b5777b53effd0734",
+      "text": "计算从以给定原点为中心的北、西、天参考坐标系，到给定椭球固定参考坐标系的 4x4 变换矩阵。局部坐标轴定义如下：<ul><li><code>x</code> 轴指向局部北方。</li><li><code>y</code> 轴指向局部西方。</li><li><code>z</code> 轴沿该位置处的椭球表面法线方向。</li></ul>"
+    },
+    {
+      "id": "Transforms.northWestUpToFixedFrame",
+      "field": "params/ellipsoid/description",
+      "sourceHash": "sha256:02bbb79485804b625aca95faa8030b5d598ac20d36480a4efbf3c7609c0742d9",
+      "text": "变换所使用固定参考坐标系对应的椭球。"
+    },
+    {
+      "id": "Transforms.northWestUpToFixedFrame",
+      "field": "params/origin/description",
+      "sourceHash": "sha256:d0ebc55d186e16f26a9fb247e4f8d767a6824e9773951631ab3889c2142458ae",
+      "text": "局部参考坐标系的中心点。"
+    },
+    {
+      "id": "Transforms.northWestUpToFixedFrame",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:66e7158304e522d89b07174d60c4f07ebc69bc3d013f30aedff2d0977bc53a8c",
+      "text": "修改后的 result 参数；未提供时返回新建的 Matrix4 实例。"
+    },
+    {
+      "id": "Transforms.pointToWindowCoordinates",
+      "field": "description",
+      "sourceHash": "sha256:932adcd99a86788d8f51c2bf1f8c30a3c400a33c70ebd41a34c328643254be83",
+      "text": "将点从模型坐标变换为窗口坐标。"
+    },
+    {
+      "id": "Transforms.pointToWindowCoordinates",
+      "field": "params/modelViewProjectionMatrix/description",
+      "sourceHash": "sha256:ab91acc6a0dd50a6126d0dbc8756bd3d83ffa6d74a0bc7e87b8e94e140e785f6",
+      "text": "4x4 模型－视图－投影矩阵。"
+    },
+    {
+      "id": "Transforms.pointToWindowCoordinates",
+      "field": "params/point/description",
+      "sourceHash": "sha256:2f44789cc0b656e480f172bceb04766a01bf590d17ca6873536f8aab56895534",
+      "text": "待转换的点。"
+    },
+    {
+      "id": "Transforms.pointToWindowCoordinates",
+      "field": "params/viewportTransformation/description",
+      "sourceHash": "sha256:f250eddff98a7f3384dea44a491a28033590b2398c8cf5f5419d3276106111f1",
+      "text": "4x4 视口变换。"
+    },
+    {
+      "id": "Transforms.pointToWindowCoordinates",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:0abf1b0e50a18a82ccdd0ca02e49b6290dcdb7b0318645e44fe25adcc24749a9",
+      "text": "修改后的 result 参数；未提供时返回新建的 Cartesian2 实例。"
+    },
+    {
+      "id": "Transforms.preloadIcrfFixed",
+      "field": "description",
+      "sourceHash": "sha256:ffa6335109741920331e136c6c523bc7043159df114b7bc60f0244cd2840a786",
+      "text": "预加载给定时间区间内 ICRF 与固定坐标轴之间双向变换所需的数据。返回 Promise，兑现时表示预加载完成。"
+    },
+    {
+      "id": "Transforms.preloadIcrfFixed",
+      "field": "params/timeInterval/description",
+      "sourceHash": "sha256:6f8cbd053adafade64bbb13ef6a77393f1a24283fd0c24429100be77c75cac26",
+      "text": "要预加载的时间区间。"
+    },
+    {
+      "id": "Transforms.preloadIcrfFixed",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:afbec251b8d5e8653f7994200f85dd4d6634f4b676b8608e67f0a4d0ec11d7e9",
+      "text": "兑现时表示预加载完成的 Promise；之后在该区间内计算固定坐标轴与 ICRF 之间的变换时，不会再返回 undefined。"
+    },
+    {
+      "id": "Transforms.rotationMatrixFromPositionVelocity",
+      "field": "description",
+      "sourceHash": "sha256:7172da7449740b69c7aa467c85137d21b007a363da65ebc1467b169befcf1735",
+      "text": "将位置和速度变换为旋转矩阵。"
+    },
+    {
+      "id": "Transforms.rotationMatrixFromPositionVelocity",
+      "field": "params/ellipsoid/description",
+      "sourceHash": "sha256:02bbb79485804b625aca95faa8030b5d598ac20d36480a4efbf3c7609c0742d9",
+      "text": "变换所使用固定参考坐标系对应的椭球。"
+    },
+    {
+      "id": "Transforms.rotationMatrixFromPositionVelocity",
+      "field": "params/position/description",
+      "sourceHash": "sha256:9bee94e985264659387a0aeabf28d8c441a59e6b0dfdc217b6659fc6c76f11f6",
+      "text": "要变换的位置。"
+    },
+    {
+      "id": "Transforms.rotationMatrixFromPositionVelocity",
+      "field": "params/velocity/description",
+      "sourceHash": "sha256:a00173e3468787de53dc6d099673d2e23ca501895cbe7d0a756628a09ac94902",
+      "text": "要变换的速度向量。"
+    },
+    {
+      "id": "Transforms.rotationMatrixFromPositionVelocity",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:6789be9ce05b85019b20ba39a04901544c08331f8a7e1e28f872345ef48099a4",
+      "text": "修改后的 result 参数；未提供时返回新建的 Matrix3 实例。"
+    },
+    {
+      "id": "Transforms",
+      "field": "description",
+      "sourceHash": "sha256:5d52b7668bcb819720e8c7f92c022b1f54fc0d91764681e39518ea3bfdc353be",
+      "text": "包含将位置变换到不同参考坐标系的函数。"
+    }
+  ]
+}

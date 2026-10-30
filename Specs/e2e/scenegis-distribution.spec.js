@@ -266,3 +266,37 @@ test("translated native documentation retains camera units, ownership and tile l
   });
   expect(errors).toEqual([]);
 });
+
+test("foundation documentation displays matrix semantics and corrected random ranges", async ({
+  page,
+}, info) => {
+  const errors = [];
+  page.on("pageerror", (error) => errors.push(error.message));
+  page.on("response", (response) => {
+    if (response.status() >= 400) {
+      errors.push(`${response.status()} ${response.url()}`);
+    }
+  });
+  await page.route(/^https?:\/\/(?!127\.0\.0\.1:8104)/, (route) =>
+    route.abort(),
+  );
+  const prefix = "/deep/site/vendor/engine/Documentation/";
+  await page.goto(`${prefix}Color.html#.fromRandom`);
+  await expect(page.locator('[id=".fromRandom"]')).toBeVisible();
+  await expect(page.locator("#main")).toContainText("随机生成红色值的最大值");
+  await expect(page.locator("#main")).toContainText("随机生成红色值的最小值");
+  await page.goto(`${prefix}Matrix4.html#.multiplyByPoint`);
+  await expect(page.locator('[id=".multiplyByPoint"]')).toBeVisible();
+  await expect(page.locator("#main")).toContainText("分量为 1");
+  await expect(page.locator("#main")).toContainText("分量为零");
+  await expect(page.locator("#main")).toContainText(
+    "不会验证矩阵是否符合此形式",
+  );
+  await info.attach("foundation-documentation", {
+    body: await page.screenshot({
+      path: info.outputPath("foundation-documentation.png"),
+    }),
+    contentType: "image/png",
+  });
+  expect(errors).toEqual([]);
+});

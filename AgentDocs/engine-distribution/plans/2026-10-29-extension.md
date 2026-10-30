@@ -1,7 +1,7 @@
 # SceneGIS distribution extension plan
 
 - Type: extension plan
-- Status: completed
+- Status: active
 - Owner: Architecture Agent
 - Date: 2026-10-29
 - ADR: [0205](../../../Documentation/SceneGIS/Decisions/ADR-0205-scenegis-distribution.md)
@@ -50,3 +50,23 @@ version checks. See the [SDK handoff guide](../../../Documentation/SceneGIS/Dist
 
 C1/C2 Chinese-source amendment is complete under ADR-0207 and its phase reviews. Runtime and
 native comments/targets remain unchanged; source-hash translation is now native-only.
+
+## Complete native translation program (2026-10-30)
+
+The owner explicitly requests continuous progress until all current native prose is Chinese.
+The initial common-API checkpoint is `20a9fcac91`: 4,287/15,294 native fields translated,
+11,007 missing, zero stale/unused. Continue this stable extension with sequential editorial
+phases, each reviewed and committed before the next begins. No new runtime or generator scope.
+
+- [T1 foundation](2026-10-30-t1-foundation-translation.md): completed and reviewed;
+  coordinate/vector/matrix/color/bounds/math APIs add 2,107 fields, reaching 41.8% native coverage.
+- T2 loading and time: resources, time, terrain and provider APIs; inspect the remaining report
+  after T1 before choosing concrete roots and files.
+- T3 rendering and data: models, rendering options, data/property/geometry APIs; elaborate only
+  when entered using the then-current inventory.
+- T4 remainder and final gate: cover every remaining native field, resolve changed/unused
+  catalog records, and verify missing/stale/unused are all zero. Preserve semantic metadata,
+  code, links and Chinese owned-source separation throughout.
+
+The final acceptance is complete current-source coverage, faithful units/constraints and
+reviewed editorial quality. Counts do not replace reading the source and translation.

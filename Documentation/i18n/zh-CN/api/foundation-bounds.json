@@ -1,0 +1,2064 @@
+{
+  "schemaVersion": 1,
+  "locale": "zh-CN",
+  "entries": [
+    {
+      "id": "BoundingRectangle.clone",
+      "field": "description",
+      "sourceHash": "sha256:2f39fef531930c239e28473d295dbe3087f4af3a0c3a30bbe200d74743496ace",
+      "text": "复制 BoundingRectangle 实例。"
+    },
+    {
+      "id": "BoundingRectangle.clone",
+      "field": "params/rectangle/description",
+      "sourceHash": "sha256:5394dd5564733061479f69302f96b06a798a91955ad7367bbf6ee9ff6d239cf0",
+      "text": "要复制的包围矩形。"
+    },
+    {
+      "id": "BoundingRectangle.clone",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:fd1f78deaf789d8bc575a1fdb6f3bd50049a58e4903a42536d52fe31960eee12",
+      "text": "修改后的 result 参数；未提供时返回新建的 BoundingRectangle 实例。若 rectangle 为 undefined，则返回 undefined。"
+    },
+    {
+      "id": "BoundingRectangle.equals",
+      "field": "description",
+      "sourceHash": "sha256:f526eb6342491dee4b993238ae95083b2c3bbdc6d2308c6e89bca2059506a261",
+      "text": "逐分量比较给定 BoundingRectangle，相等时返回 <code>true</code>，否则返回 <code>false</code>。"
+    },
+    {
+      "id": "BoundingRectangle.equals",
+      "field": "params/left/description",
+      "sourceHash": "sha256:23ec287802de4a418340162d4a5e97fc22edc997111e6f665cbbbf50c3ec9279",
+      "text": "第一个 BoundingRectangle。"
+    },
+    {
+      "id": "BoundingRectangle.equals",
+      "field": "params/right/description",
+      "sourceHash": "sha256:456e5a2a8f2a034451b763826b4593c7b5516a8375dfbfd03e5df1774d55f155",
+      "text": "第二个 BoundingRectangle。"
+    },
+    {
+      "id": "BoundingRectangle.expand",
+      "field": "description",
+      "sourceHash": "sha256:9a5615651bd7b747c336ab6b758fb4ef31e85eb082828d9057f4d6d9988a6648",
+      "text": "扩大给定矩形，直到其包含给定点，并返回所得包围矩形。"
+    },
+    {
+      "id": "BoundingRectangle.expand",
+      "field": "params/point/description",
+      "sourceHash": "sha256:e69ef0bd9148c7156bb0796fd80b47d31f55cdba9f1de2ac54cb41e95b033021",
+      "text": "要包含在包围矩形中的点。"
+    },
+    {
+      "id": "BoundingRectangle.expand",
+      "field": "params/rectangle/description",
+      "sourceHash": "sha256:f3c171580614a8d0c07b2d49927858517139cb776bf04113e868d4f3d16ebe35",
+      "text": "要扩大的矩形。"
+    },
+    {
+      "id": "BoundingRectangle.expand",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:c70b6f3732e04ce0e0e84a7de4f6d3a392581a0c0ce8c67767b456170e9e6b66",
+      "text": "修改后的 result 参数；未提供时返回新建的 BoundingRectangle 实例。"
+    },
+    {
+      "id": "BoundingRectangle.fromPoints",
+      "field": "description",
+      "sourceHash": "sha256:5ca147bc7899f7eaa63f01db39b9f97839e49eb4ba0168ccb58b453f87f09d48",
+      "text": "计算包围二维点列表的矩形，矩形以左下角为起始角点。"
+    },
+    {
+      "id": "BoundingRectangle.fromPoints",
+      "field": "params/positions/description",
+      "sourceHash": "sha256:ca7f7d12df3a0b85417a625e2598b6f25085f5f849299a73e156cadd0fa08cd2",
+      "text": "包围矩形需要包含的点列表，每个点必须具有 <code>x</code> 和 <code>y</code> 属性。"
+    },
+    {
+      "id": "BoundingRectangle.fromPoints",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:c70b6f3732e04ce0e0e84a7de4f6d3a392581a0c0ce8c67767b456170e9e6b66",
+      "text": "修改后的 result 参数；未提供时返回新建的 BoundingRectangle 实例。"
+    },
+    {
+      "id": "BoundingRectangle.fromRectangle",
+      "field": "description",
+      "sourceHash": "sha256:6960c60c02a4fbd7f21c53fcdaa8891e25b097c49af915a2b42ca006809058a0",
+      "text": "根据矩形计算包围矩形。"
+    },
+    {
+      "id": "BoundingRectangle.fromRectangle",
+      "field": "params/projection/description",
+      "sourceHash": "sha256:0537356088e53bff27b8b7f8d3a1a3b4845c4d644db1f276ca98518d5e2bfe6c",
+      "text": "用于将矩形投影到二维的投影。"
+    },
+    {
+      "id": "BoundingRectangle.fromRectangle",
+      "field": "params/rectangle/description",
+      "sourceHash": "sha256:a489cc5a4e12bba23c1cf10d49270bfd34be6a9d4a264d971b47459342f527de",
+      "text": "用于创建包围矩形的有效矩形。"
+    },
+    {
+      "id": "BoundingRectangle.fromRectangle",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:c70b6f3732e04ce0e0e84a7de4f6d3a392581a0c0ce8c67767b456170e9e6b66",
+      "text": "修改后的 result 参数；未提供时返回新建的 BoundingRectangle 实例。"
+    },
+    {
+      "id": "BoundingRectangle.intersect",
+      "field": "description",
+      "sourceHash": "sha256:3b9a950f561588a83f6882975736c221d91be81061aed23483a028b59b0a0985",
+      "text": "判断两个矩形是否相交。"
+    },
+    {
+      "id": "BoundingRectangle.intersect",
+      "field": "params/left/description",
+      "sourceHash": "sha256:1ff11754f2ee94b24d3e2e2bd1e8136dc4a56f0b517ebebb2ec25f02f562caef",
+      "text": "参与求交检查的矩形。"
+    },
+    {
+      "id": "BoundingRectangle.intersect",
+      "field": "params/right/description",
+      "sourceHash": "sha256:f24a424afae9c7cc3a3244b60646f14910d875e930e0ad3d00f32e77839e13dd",
+      "text": "参与求交检查的另一个矩形。"
+    },
+    {
+      "id": "BoundingRectangle.intersect",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:414744474c4be0e6ef71a445b8b63faedf3e1788bc866aed2b1c765007c4591f",
+      "text": "矩形相交时为 <code>Intersect.INTERSECTING</code>，否则为 <code>Intersect.OUTSIDE</code>。"
+    },
+    {
+      "id": "BoundingRectangle.union",
+      "field": "description",
+      "sourceHash": "sha256:6864aa4b9e55820110711f933cc523fc3f3019ebd51b6310282d37a878a6e812",
+      "text": "计算包围左右两个矩形并集的包围矩形。"
+    },
+    {
+      "id": "BoundingRectangle.union",
+      "field": "params/left/description",
+      "sourceHash": "sha256:f53c22dc2bb1cf9b54ec46fd41c8018eb3d60feb891b26e7e58e1d802da6776a",
+      "text": "要包含在结果包围矩形中的矩形。"
+    },
+    {
+      "id": "BoundingRectangle.union",
+      "field": "params/right/description",
+      "sourceHash": "sha256:62f2173505f623803beb5712f0a4fe748569e17603c6ab3bc5c932416ff5f339",
+      "text": "要包含在结果包围矩形中的矩形。"
+    },
+    {
+      "id": "BoundingRectangle.union",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:c70b6f3732e04ce0e0e84a7de4f6d3a392581a0c0ce8c67767b456170e9e6b66",
+      "text": "修改后的 result 参数；未提供时返回新建的 BoundingRectangle 实例。"
+    },
+    {
+      "id": "BoundingRectangle.unpack",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:c70b6f3732e04ce0e0e84a7de4f6d3a392581a0c0ce8c67767b456170e9e6b66",
+      "text": "修改后的 result 参数；未提供时返回新建的 BoundingRectangle 实例。"
+    },
+    {
+      "id": "BoundingRectangle",
+      "field": "description",
+      "sourceHash": "sha256:578cda665345b5aacb83e1ffa1653a95e37ee5ca3b8b0f174befcd7e6563b13a",
+      "text": "由角点、宽度和高度定义的包围矩形。"
+    },
+    {
+      "id": "BoundingRectangle",
+      "field": "params/height/description",
+      "sourceHash": "sha256:48ed7e80ca9e740b134dcdfcf0b1cd6f17ed26b9bfa81a4d9fe76a49708d64fb",
+      "text": "矩形高度。"
+    },
+    {
+      "id": "BoundingRectangle",
+      "field": "params/width/description",
+      "sourceHash": "sha256:1599c493b36bc10f8899c2308d788bd1a747b15ce786deea8b16f4431fb95157",
+      "text": "矩形宽度。"
+    },
+    {
+      "id": "BoundingRectangle",
+      "field": "params/x/description",
+      "sourceHash": "sha256:aca10c88cb75c413ddff7e68f0407a5ea408224deb35012d8a570ff6fd8f208b",
+      "text": "矩形 x 坐标。"
+    },
+    {
+      "id": "BoundingRectangle",
+      "field": "params/y/description",
+      "sourceHash": "sha256:8fd79a2dc3b036583c11eb090d61ef9e186c09cd0415407eb8b224fa7309b503",
+      "text": "矩形 y 坐标。"
+    },
+    {
+      "id": "BoundingRectangle#clone",
+      "field": "description",
+      "sourceHash": "sha256:04492528e0367a96127d37c82cec0c79909351d2352d2ffea0140bc3bd2fc744",
+      "text": "复制此 BoundingRectangle 实例。"
+    },
+    {
+      "id": "BoundingRectangle#clone",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:c70b6f3732e04ce0e0e84a7de4f6d3a392581a0c0ce8c67767b456170e9e6b66",
+      "text": "修改后的 result 参数；未提供时返回新建的 BoundingRectangle 实例。"
+    },
+    {
+      "id": "BoundingRectangle#equals",
+      "field": "description",
+      "sourceHash": "sha256:7e03022ed8aee85a58ad196961fc1a971f7642eabfe2fc15742260f608a2f209",
+      "text": "将此 BoundingRectangle 与给定实例逐分量比较，相等时返回 <code>true</code>，否则返回 <code>false</code>。"
+    },
+    {
+      "id": "BoundingRectangle#equals",
+      "field": "params/right/description",
+      "sourceHash": "sha256:3817d349b1b23821e6d6889a0588a4e2929f174a3b9d0583271f7fa8c009bfd8",
+      "text": "右侧 BoundingRectangle。"
+    },
+    {
+      "id": "BoundingRectangle#height",
+      "field": "description",
+      "sourceHash": "sha256:48ed7e80ca9e740b134dcdfcf0b1cd6f17ed26b9bfa81a4d9fe76a49708d64fb",
+      "text": "矩形高度。"
+    },
+    {
+      "id": "BoundingRectangle#intersect",
+      "field": "description",
+      "sourceHash": "sha256:8266711674e0570aa578604598542dafe2a94bda4f242a297449480ab19bda27",
+      "text": "判断此矩形是否与另一个矩形相交。"
+    },
+    {
+      "id": "BoundingRectangle#intersect",
+      "field": "params/right/description",
+      "sourceHash": "sha256:1ff11754f2ee94b24d3e2e2bd1e8136dc4a56f0b517ebebb2ec25f02f562caef",
+      "text": "参与求交检查的矩形。"
+    },
+    {
+      "id": "BoundingRectangle#intersect",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:414744474c4be0e6ef71a445b8b63faedf3e1788bc866aed2b1c765007c4591f",
+      "text": "矩形相交时为 <code>Intersect.INTERSECTING</code>，否则为 <code>Intersect.OUTSIDE</code>。"
+    },
+    {
+      "id": "BoundingRectangle#width",
+      "field": "description",
+      "sourceHash": "sha256:1599c493b36bc10f8899c2308d788bd1a747b15ce786deea8b16f4431fb95157",
+      "text": "矩形宽度。"
+    },
+    {
+      "id": "BoundingRectangle#x",
+      "field": "description",
+      "sourceHash": "sha256:aca10c88cb75c413ddff7e68f0407a5ea408224deb35012d8a570ff6fd8f208b",
+      "text": "矩形 x 坐标。"
+    },
+    {
+      "id": "BoundingRectangle#y",
+      "field": "description",
+      "sourceHash": "sha256:8fd79a2dc3b036583c11eb090d61ef9e186c09cd0415407eb8b224fa7309b503",
+      "text": "矩形 y 坐标。"
+    },
+    {
+      "id": "BoundingSphere.clone",
+      "field": "description",
+      "sourceHash": "sha256:4c290e193848057746bb95fe80bd0efe4ebc34916b27d7d962de583773f7e5de",
+      "text": "复制 BoundingSphere 实例。"
+    },
+    {
+      "id": "BoundingSphere.clone",
+      "field": "params/sphere/description",
+      "sourceHash": "sha256:07f759fa572f84a29cc2e82612473d880e85987e8f7e69adc27163389f876544",
+      "text": "要复制的包围球。"
+    },
+    {
+      "id": "BoundingSphere.clone",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:8f9f0d2ee09c2d98387a3f1164210018e96b5436913ed2e2752ed3c9449806a2",
+      "text": "修改后的 result 参数；未提供时返回新建的 BoundingSphere 实例。若 sphere 为 undefined，则返回 undefined。"
+    },
+    {
+      "id": "BoundingSphere.computePlaneDistances",
+      "field": "description",
+      "sourceHash": "sha256:0b367f3e6bf1af5a8f989d53618ebeeed57f4cc95f0787750e2bfa66c69d3ee8",
+      "text": "将包围球中心相对于 position 的向量投影到 direction，再加减包围球半径，得到距离范围。<br>若将法线为 direction 的无穷多个平面作为一个平面族，此函数计算从 position 出发、与包围球相交的最近和最远平面的最小距离。"
+    },
+    {
+      "id": "BoundingSphere.computePlaneDistances",
+      "field": "params/direction/description",
+      "sourceHash": "sha256:c173b156b797f9fcf2ecab048822032681e209592fae1fd23216a8f5fbf8b6ca",
+      "text": "从 position 出发的方向。"
+    },
+    {
+      "id": "BoundingSphere.computePlaneDistances",
+      "field": "params/position/description",
+      "sourceHash": "sha256:696e2e25cc91d21e87f25f3eb24271b5148d6a01a4d42b9816cb68dd056cc150",
+      "text": "计算距离所相对的位置。"
+    },
+    {
+      "id": "BoundingSphere.computePlaneDistances",
+      "field": "params/result/description",
+      "sourceHash": "sha256:9d5302de42e3516cb4a98cf42a823c8034fc605eda3315ae2266f86ab89f6f37",
+      "text": "用于保存最近和最远距离的 Interval。"
+    },
+    {
+      "id": "BoundingSphere.computePlaneDistances",
+      "field": "params/sphere/description",
+      "sourceHash": "sha256:364d26c8aba0090b14e1607f80a5204bea88c5ff879ce54707e394b5994b5feb",
+      "text": "要计算距离的包围球。"
+    },
+    {
+      "id": "BoundingSphere.computePlaneDistances",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:cd06a2fc0041b8c31f034f61fdecb3c5747142c883bc99929ff7eafd9a34f354",
+      "text": "从 position 沿 direction 到包围球的最近和最远距离。"
+    },
+    {
+      "id": "BoundingSphere.distanceSquaredTo",
+      "field": "description",
+      "sourceHash": "sha256:6e6f87bd58c32ab8114c301b63f5cf239e269b64556fec3d67b2390d1eee89b6",
+      "text": "估算包围球上最近点到给定点的距离平方。"
+    },
+    {
+      "id": "BoundingSphere.distanceSquaredTo",
+      "field": "params/cartesian/description",
+      "sourceHash": "sha256:244d5da6ed896719daafc03757667a2ad56f8be3268f5a833d8b92cccde4ad3b",
+      "text": "点。"
+    },
+    {
+      "id": "BoundingSphere.distanceSquaredTo",
+      "field": "params/sphere/description",
+      "sourceHash": "sha256:e944e6eb8ed5a516f8e05ecabd2bd1e62bf66f9187c87419f14a8d6c31d7a6bf",
+      "text": "球体。"
+    },
+    {
+      "id": "BoundingSphere.distanceSquaredTo",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:d96704d2c79daab66af0eb73a66e787e88504f35c275343889dee68a1ce6c088",
+      "text": "包围球到点的距离平方。若点位于球内，则返回 0。"
+    },
+    {
+      "id": "BoundingSphere.equals",
+      "field": "description",
+      "sourceHash": "sha256:013572ea4104bab40b9d474a54d074b5c1b842df05673cec86965e3ced2d7d04",
+      "text": "逐分量比较给定 BoundingSphere，相等时返回 <code>true</code>，否则返回 <code>false</code>。"
+    },
+    {
+      "id": "BoundingSphere.equals",
+      "field": "params/left/description",
+      "sourceHash": "sha256:e39903dc61031bc688cb40092c3d840a720707649e6884a3a145fb52827264db",
+      "text": "第一个 BoundingSphere。"
+    },
+    {
+      "id": "BoundingSphere.equals",
+      "field": "params/right/description",
+      "sourceHash": "sha256:df83c4ca3f85a650dfb014dca51d692ef0072f3624917b1591e7d8377ec28986",
+      "text": "第二个 BoundingSphere。"
+    },
+    {
+      "id": "BoundingSphere.expand",
+      "field": "description",
+      "sourceHash": "sha256:95ba3781e26b83aa8ea0d1a0d74b6473843861b00df2eea9306730fb881b9ced",
+      "text": "扩大给定球体以包含给定点，并返回所得包围球。"
+    },
+    {
+      "id": "BoundingSphere.expand",
+      "field": "params/point/description",
+      "sourceHash": "sha256:2966c83b2b687f8578edbe01b0dabd4b03ece529845bef8c759dffd2ad20839e",
+      "text": "要包含在包围球内的点。"
+    },
+    {
+      "id": "BoundingSphere.expand",
+      "field": "params/sphere/description",
+      "sourceHash": "sha256:5b93817b3626a410a58b551b034a089c7ff117e064bc94657842e6625931f290",
+      "text": "要扩大的球体。"
+    },
+    {
+      "id": "BoundingSphere.expand",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:9e7ea655b47ccf8749b441ae0b7f1783dc8479f8b57fa34b13b1e6daefcb0f2b",
+      "text": "修改后的 result 参数；未提供时返回新建的 BoundingSphere 实例。"
+    },
+    {
+      "id": "BoundingSphere.fromBoundingSpheres",
+      "field": "description",
+      "sourceHash": "sha256:25f55b3ad01866ec591ca39935f158e89b11797f3a90a89a688a48a09dcaa0f2",
+      "text": "计算紧密包含给定包围球数组的包围球。"
+    },
+    {
+      "id": "BoundingSphere.fromBoundingSpheres",
+      "field": "params/boundingSpheres/description",
+      "sourceHash": "sha256:7c139b96f53a1c71c5acdc5b5634b76470062151dd139d2e503b9104e7ef89f7",
+      "text": "包围球数组。"
+    },
+    {
+      "id": "BoundingSphere.fromBoundingSpheres",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:9e7ea655b47ccf8749b441ae0b7f1783dc8479f8b57fa34b13b1e6daefcb0f2b",
+      "text": "修改后的 result 参数；未提供时返回新建的 BoundingSphere 实例。"
+    },
+    {
+      "id": "BoundingSphere.fromCornerPoints",
+      "field": "description",
+      "sourceHash": "sha256:ecb6394aeca3aabc1ae5312af8fc7f63018f03b410e2c2203e89d7ad56947069",
+      "text": "根据轴对齐包围盒的一对相对角点计算包围球，球体紧密且完整地包围此盒。"
+    },
+    {
+      "id": "BoundingSphere.fromCornerPoints",
+      "field": "params/corner/description",
+      "sourceHash": "sha256:baf7b7353b834bf31a9248a7f364534e425584118099f60736ee75331063709f",
+      "text": "包围盒的一个角点。"
+    },
+    {
+      "id": "BoundingSphere.fromCornerPoints",
+      "field": "params/oppositeCorner/description",
+      "sourceHash": "sha256:c06a18bdfd8f5990a5aad4ebfdd24db21881db16e493c3167d26c2e4f68dca7f",
+      "text": "包围盒中与 corner 相对的角点。"
+    },
+    {
+      "id": "BoundingSphere.fromCornerPoints",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:9e7ea655b47ccf8749b441ae0b7f1783dc8479f8b57fa34b13b1e6daefcb0f2b",
+      "text": "修改后的 result 参数；未提供时返回新建的 BoundingSphere 实例。"
+    },
+    {
+      "id": "BoundingSphere.fromEllipsoid",
+      "field": "description",
+      "sourceHash": "sha256:a0f4170c7666c15f5b31df96f09043a035523a218d881887920dad7699f05c02",
+      "text": "创建包围椭球的包围球。"
+    },
+    {
+      "id": "BoundingSphere.fromEllipsoid",
+      "field": "params/ellipsoid/description",
+      "sourceHash": "sha256:5b38cf842fd3a8b5695056ab7fe15c25d4e1de7368d9478acd0f7791ed6affc0",
+      "text": "要创建其包围球的椭球。"
+    },
+    {
+      "id": "BoundingSphere.fromEllipsoid",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:9e7ea655b47ccf8749b441ae0b7f1783dc8479f8b57fa34b13b1e6daefcb0f2b",
+      "text": "修改后的 result 参数；未提供时返回新建的 BoundingSphere 实例。"
+    },
+    {
+      "id": "BoundingSphere.fromEncodedCartesianVertices",
+      "field": "description",
+      "sourceHash": "sha256:0762e711a6a68dbef99e1e91c191313e50a49820ca684604a1eaf51ba099a51a",
+      "text": "计算紧密包围 EncodedCartesian3 列表的包围球，点坐标分别按 X、Y、Z 顺序存储在相互对应的平坦数组中。分别运行朴素算法和 Ritter 算法，并采用两者中较小的球以获得紧密包围。"
+    },
+    {
+      "id": "BoundingSphere.fromEncodedCartesianVertices",
+      "field": "params/positionsHigh/description",
+      "sourceHash": "sha256:148ad3a41ac5812756966a4ea634df223deccce7c2f2076d7dd78af661bd03b8",
+      "text": "包围球所包含编码坐标的高位数组。每个点依次由数组中的 X、Y、Z 三个元素组成。"
+    },
+    {
+      "id": "BoundingSphere.fromEncodedCartesianVertices",
+      "field": "params/positionsLow/description",
+      "sourceHash": "sha256:a534c91c8bd903a05a699c53fd71bd96e2c0634c494f900dfc33155a6e67c097",
+      "text": "包围球所包含编码坐标的低位数组。每个点依次由数组中的 X、Y、Z 三个元素组成。"
+    },
+    {
+      "id": "BoundingSphere.fromEncodedCartesianVertices",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:16cd89ec319c8117d0a099c4e36a093cc1fbca7d81f0174141dc7f47fea30d6e",
+      "text": "修改后的 result 参数；未提供时返回新建的 BoundingSphere 实例。"
+    },
+    {
+      "id": "BoundingSphere.fromOrientedBoundingBox",
+      "field": "description",
+      "sourceHash": "sha256:94bd7478158043ffc177c9124d84f8a8a9c5f442d772369ec9ae0f9184fed19f",
+      "text": "计算紧密包围给定定向包围盒的包围球。"
+    },
+    {
+      "id": "BoundingSphere.fromOrientedBoundingBox",
+      "field": "params/orientedBoundingBox/description",
+      "sourceHash": "sha256:a70d8269fe22cd0cb1f9c6b45ac3d9c1cf3869a999e785eb59eb2839efcc7a61",
+      "text": "定向包围盒。"
+    },
+    {
+      "id": "BoundingSphere.fromOrientedBoundingBox",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:9e7ea655b47ccf8749b441ae0b7f1783dc8479f8b57fa34b13b1e6daefcb0f2b",
+      "text": "修改后的 result 参数；未提供时返回新建的 BoundingSphere 实例。"
+    },
+    {
+      "id": "BoundingSphere.fromPoints",
+      "field": "description",
+      "sourceHash": "sha256:64a9504ee12835d4afbb829d0a1eac74fa74f2fcfaefe54c82509949943d611a",
+      "text": "计算紧密包围三维笛卡尔点列表的包围球。分别运行朴素算法和 Ritter 算法，并采用两者中较小的球以获得紧密包围。"
+    },
+    {
+      "id": "BoundingSphere.fromPoints",
+      "field": "params/positions/description",
+      "sourceHash": "sha256:630692318207c1fa8b32dfbdf8e2afdcc8209f65fb2692226fd06a5e7459b7aa",
+      "text": "包围球需要包含的点数组，每个点必须具有 <code>x</code>、<code>y</code> 和 <code>z</code> 属性。"
+    },
+    {
+      "id": "BoundingSphere.fromPoints",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:16cd89ec319c8117d0a099c4e36a093cc1fbca7d81f0174141dc7f47fea30d6e",
+      "text": "修改后的 result 参数；未提供时返回新建的 BoundingSphere 实例。"
+    },
+    {
+      "id": "BoundingSphere.fromRectangle2D",
+      "field": "description",
+      "sourceHash": "sha256:2c1adba321eff9a70f350f7b0f7f7db2751b9d8eed216a55e9d0200b42e7fc66",
+      "text": "根据投影到二维的矩形计算包围球。"
+    },
+    {
+      "id": "BoundingSphere.fromRectangle2D",
+      "field": "params/projection/description",
+      "sourceHash": "sha256:0537356088e53bff27b8b7f8d3a1a3b4845c4d644db1f276ca98518d5e2bfe6c",
+      "text": "用于将矩形投影到二维的投影。"
+    },
+    {
+      "id": "BoundingSphere.fromRectangle2D",
+      "field": "params/rectangle/description",
+      "sourceHash": "sha256:79c8d04e1b61a99c91c0ba11d4ad23b3f3dc82bff33fba52900837540b9e7a2e",
+      "text": "要创建其包围球的矩形。"
+    },
+    {
+      "id": "BoundingSphere.fromRectangle2D",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:9e7ea655b47ccf8749b441ae0b7f1783dc8479f8b57fa34b13b1e6daefcb0f2b",
+      "text": "修改后的 result 参数；未提供时返回新建的 BoundingSphere 实例。"
+    },
+    {
+      "id": "BoundingSphere.fromRectangle3D",
+      "field": "description",
+      "sourceHash": "sha256:c7908d5265f6ecf7de1c8bdbbd61f768855196bf540211551ca131322a482cfa",
+      "text": "根据三维矩形计算包围球。使用位于椭球上且处于矩形范围内的采样点创建球体。此方法并非对所有类型椭球上的所有矩形都准确。"
+    },
+    {
+      "id": "BoundingSphere.fromRectangle3D",
+      "field": "params/ellipsoid/description",
+      "sourceHash": "sha256:473e713c8728ebc75b2a41f22eb9ed10b3772df3b7aae7c5f91561926d3c8357",
+      "text": "用于确定矩形位置的椭球。"
+    },
+    {
+      "id": "BoundingSphere.fromRectangle3D",
+      "field": "params/rectangle/description",
+      "sourceHash": "sha256:d87141bcaba5aa8ba775418a39bb5d7c1bd0658a13629a90db9b06bedb3cca48",
+      "text": "用于创建包围球的有效矩形。"
+    },
+    {
+      "id": "BoundingSphere.fromRectangle3D",
+      "field": "params/surfaceHeight/description",
+      "sourceHash": "sha256:398d12c05c1a55b93989b496ef27c90b0deef25cf8a01e65f4d068580b096987",
+      "text": "相对于椭球表面的高度。"
+    },
+    {
+      "id": "BoundingSphere.fromRectangle3D",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:9e7ea655b47ccf8749b441ae0b7f1783dc8479f8b57fa34b13b1e6daefcb0f2b",
+      "text": "修改后的 result 参数；未提供时返回新建的 BoundingSphere 实例。"
+    },
+    {
+      "id": "BoundingSphere.fromRectangleWithHeights2D",
+      "field": "description",
+      "sourceHash": "sha256:ccdbf9f3029f83a7e6955452d1db8b96a22e2db5b0536b3b8ec20fde390a3724",
+      "text": "根据投影到二维的矩形计算包围球，同时考虑对象在矩形区域内的最小和最大高度。"
+    },
+    {
+      "id": "BoundingSphere.fromRectangleWithHeights2D",
+      "field": "params/maximumHeight/description",
+      "sourceHash": "sha256:c06a18bdfd8f5990a5aad4ebfdd24db21881db16e493c3167d26c2e4f68dca7f",
+      "text": "包围盒中与 corner 相对的角点。"
+    },
+    {
+      "id": "BoundingSphere.fromRectangleWithHeights2D",
+      "field": "params/minimumHeight/description",
+      "sourceHash": "sha256:baf7b7353b834bf31a9248a7f364534e425584118099f60736ee75331063709f",
+      "text": "包围盒的一个角点。"
+    },
+    {
+      "id": "BoundingSphere.fromRectangleWithHeights2D",
+      "field": "params/projection/description",
+      "sourceHash": "sha256:0537356088e53bff27b8b7f8d3a1a3b4845c4d644db1f276ca98518d5e2bfe6c",
+      "text": "用于将矩形投影到二维的投影。"
+    },
+    {
+      "id": "BoundingSphere.fromRectangleWithHeights2D",
+      "field": "params/rectangle/description",
+      "sourceHash": "sha256:79c8d04e1b61a99c91c0ba11d4ad23b3f3dc82bff33fba52900837540b9e7a2e",
+      "text": "要创建其包围球的矩形。"
+    },
+    {
+      "id": "BoundingSphere.fromRectangleWithHeights2D",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:9e7ea655b47ccf8749b441ae0b7f1783dc8479f8b57fa34b13b1e6daefcb0f2b",
+      "text": "修改后的 result 参数；未提供时返回新建的 BoundingSphere 实例。"
+    },
+    {
+      "id": "BoundingSphere.fromTransformation",
+      "field": "description",
+      "sourceHash": "sha256:d09a2d636e7f595e1b1e4ceabd9f83fc3e22099d3f35107e5a866e38c54f7b9d",
+      "text": "计算紧密包围给定仿射变换所表示范围的包围球。"
+    },
+    {
+      "id": "BoundingSphere.fromTransformation",
+      "field": "params/transformation/description",
+      "sourceHash": "sha256:985bb41faed7b33cd283c0c66e19d438a16c08bca8deff15416e411ca32bdfec",
+      "text": "仿射变换。"
+    },
+    {
+      "id": "BoundingSphere.fromTransformation",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:9e7ea655b47ccf8749b441ae0b7f1783dc8479f8b57fa34b13b1e6daefcb0f2b",
+      "text": "修改后的 result 参数；未提供时返回新建的 BoundingSphere 实例。"
+    },
+    {
+      "id": "BoundingSphere.fromVertices",
+      "field": "description",
+      "sourceHash": "sha256:e361788bb5fa69d2994a23d4ab484835b6276c9c3edb69bd966b98ab313f98d2",
+      "text": "计算紧密包围三维点列表的包围球，点按 X、Y、Z 顺序存储在平坦数组中。分别运行朴素算法和 Ritter 算法，并采用两者中较小的球以获得紧密包围。"
+    },
+    {
+      "id": "BoundingSphere.fromVertices",
+      "field": "params/center/description",
+      "sourceHash": "sha256:a9184e5b57cf48fa2069684f4274d6f31042a1f5101fe4404db7415d0eff3c97",
+      "text": "各位置所相对的中心位置，不必是坐标系原点。适用于相对中心（RTC）渲染。"
+    },
+    {
+      "id": "BoundingSphere.fromVertices",
+      "field": "params/positions/description",
+      "sourceHash": "sha256:ce5576d4bb6a250660d7f3b88b84603f4996830b673404627718d212f3839978",
+      "text": "包围球需要包含的点数组，每个点依次由 X、Y、Z 三个元素组成。"
+    },
+    {
+      "id": "BoundingSphere.fromVertices",
+      "field": "params/stride/description",
+      "sourceHash": "sha256:0828fd15b0860d5a76a3cb46ca7cb70766add36d63bcdf5baa1a27172435c026",
+      "text": "每个顶点占用的数组元素数量，至少为 3，也可更大。无论此参数取何值，第一个位置的 X、Y、Z 坐标始终分别位于索引 0、1、2。stride 为 3 时，下一个位置的 X 从索引 3 开始；stride 为 5 时，跳过两个元素，下一个位置从索引 5 开始。"
+    },
+    {
+      "id": "BoundingSphere.fromVertices",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:16cd89ec319c8117d0a099c4e36a093cc1fbca7d81f0174141dc7f47fea30d6e",
+      "text": "修改后的 result 参数；未提供时返回新建的 BoundingSphere 实例。"
+    },
+    {
+      "id": "BoundingSphere.intersectPlane",
+      "field": "description",
+      "sourceHash": "sha256:5ef949653f2fc1ba5e18d0572cb5c199d612b9af0ea62c83c27ca29aa6b02b6a",
+      "text": "判断球体位于平面的哪一侧。"
+    },
+    {
+      "id": "BoundingSphere.intersectPlane",
+      "field": "params/plane/description",
+      "sourceHash": "sha256:16ceffc1f684849b57354f87194714a2923ade34e52d08d95afd574edef17ff7",
+      "text": "用于测试的平面。"
+    },
+    {
+      "id": "BoundingSphere.intersectPlane",
+      "field": "params/sphere/description",
+      "sourceHash": "sha256:bb70fb6ba804f1d44eb8e565c2aa8229c5df11ddb6a9a62f544caea0de2a1216",
+      "text": "要测试的包围球。"
+    },
+    {
+      "id": "BoundingSphere.intersectPlane",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:7aaa2027b02cc2e07922559c83b8ddccce482b1deb50f54fb68b1cdc84a55074",
+      "text": "若整个球体位于平面法线指向的一侧，则为 {@link Intersect.INSIDE}；若整个球体位于相反一侧，则为 {@link Intersect.OUTSIDE}；若球体与平面相交，则为 {@link Intersect.INTERSECTING}。"
+    },
+    {
+      "id": "BoundingSphere.isOccluded",
+      "field": "description",
+      "sourceHash": "sha256:753872d27ffe6c6fdcf157cc1cdeb2a110320e3b73a56de12d2f8a14d8be6de4",
+      "text": "判断球体是否被遮挡体遮住而不可见。"
+    },
+    {
+      "id": "BoundingSphere.isOccluded",
+      "field": "params/occluder/description",
+      "sourceHash": "sha256:f928c7f09a479cea316edf991c09170fc1026f092f561cda94bdd62809b6fe1c",
+      "text": "遮挡体。"
+    },
+    {
+      "id": "BoundingSphere.isOccluded",
+      "field": "params/sphere/description",
+      "sourceHash": "sha256:189b20d903547083dd3b1d5cf019a1b4236dfaedbdc3fa597f3bc7f77af74cf8",
+      "text": "包围被遮挡对象的包围球。"
+    },
+    {
+      "id": "BoundingSphere.isOccluded",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:15029159ab0544e9e736dd38d1e608678baeac4de91301b169b93da7c391865c",
+      "text": "球体不可见时返回 <code>true</code>，否则返回 <code>false</code>。"
+    },
+    {
+      "id": "BoundingSphere.projectTo2D",
+      "field": "description",
+      "sourceHash": "sha256:97ab39569daa3c8d95d22fe0c057ff8821cb26d759a692a95e58e3b8e81717f1",
+      "text": "从三维世界坐标中的包围球创建二维包围球。"
+    },
+    {
+      "id": "BoundingSphere.projectTo2D",
+      "field": "params/projection/description",
+      "sourceHash": "sha256:fd805c2b052bdce90d5398f03ad65d4cb3cc9c4822af64140062e1875f33085f",
+      "text": "到二维的投影。"
+    },
+    {
+      "id": "BoundingSphere.projectTo2D",
+      "field": "params/sphere/description",
+      "sourceHash": "sha256:0380808829fb881babb1992aa7a1db287ba23e04b7e1c8323f49b485e543191a",
+      "text": "要变换到二维的包围球。"
+    },
+    {
+      "id": "BoundingSphere.projectTo2D",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:9e7ea655b47ccf8749b441ae0b7f1783dc8479f8b57fa34b13b1e6daefcb0f2b",
+      "text": "修改后的 result 参数；未提供时返回新建的 BoundingSphere 实例。"
+    },
+    {
+      "id": "BoundingSphere.transform",
+      "field": "description",
+      "sourceHash": "sha256:99211354d38bf38d9d3bdfd1c92bdcbb9a5d199edade3a6109f25bcecbe94803",
+      "text": "对包围球应用 4x4 仿射变换矩阵。"
+    },
+    {
+      "id": "BoundingSphere.transform",
+      "field": "params/sphere/description",
+      "sourceHash": "sha256:00c7c26c37f0c2c256d6c3d5352da045d07399880c704351813f79863e5e8686",
+      "text": "要应用变换的包围球。"
+    },
+    {
+      "id": "BoundingSphere.transform",
+      "field": "params/transform/description",
+      "sourceHash": "sha256:5eed96a6fb05fb9184e0d7aa8b1207c3417ec149e887c4ac51c58d4b79789c97",
+      "text": "要应用到包围球的变换矩阵。"
+    },
+    {
+      "id": "BoundingSphere.transform",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:9e7ea655b47ccf8749b441ae0b7f1783dc8479f8b57fa34b13b1e6daefcb0f2b",
+      "text": "修改后的 result 参数；未提供时返回新建的 BoundingSphere 实例。"
+    },
+    {
+      "id": "BoundingSphere.transformWithoutScale",
+      "field": "description",
+      "sourceHash": "sha256:dbd6604edbde39277d5e640a70f8f6e57c4a69c905ecc0ecdaf33e98630d98ef",
+      "text": "对包围球应用不含缩放的 4x4 仿射变换矩阵。不会验证矩阵的均匀缩放是否为 1。此方法比使用 {@link BoundingSphere.transform} 进行一般包围球变换更快。"
+    },
+    {
+      "id": "BoundingSphere.transformWithoutScale",
+      "field": "params/sphere/description",
+      "sourceHash": "sha256:00c7c26c37f0c2c256d6c3d5352da045d07399880c704351813f79863e5e8686",
+      "text": "要应用变换的包围球。"
+    },
+    {
+      "id": "BoundingSphere.transformWithoutScale",
+      "field": "params/transform/description",
+      "sourceHash": "sha256:5eed96a6fb05fb9184e0d7aa8b1207c3417ec149e887c4ac51c58d4b79789c97",
+      "text": "要应用到包围球的变换矩阵。"
+    },
+    {
+      "id": "BoundingSphere.transformWithoutScale",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:9e7ea655b47ccf8749b441ae0b7f1783dc8479f8b57fa34b13b1e6daefcb0f2b",
+      "text": "修改后的 result 参数；未提供时返回新建的 BoundingSphere 实例。"
+    },
+    {
+      "id": "BoundingSphere.union",
+      "field": "description",
+      "sourceHash": "sha256:9248fdb4db302551f39583f3c93370075e34403ffc1866c7334ceab75cdeba6c",
+      "text": "计算同时包含左右两个包围球的包围球。"
+    },
+    {
+      "id": "BoundingSphere.union",
+      "field": "params/left/description",
+      "sourceHash": "sha256:4ad9f8a50ffba26b55c54b1ebfb70889cc6802fa732d55e29e06f86416f0a633",
+      "text": "要包含在结果包围球中的球体。"
+    },
+    {
+      "id": "BoundingSphere.union",
+      "field": "params/right/description",
+      "sourceHash": "sha256:4ad9f8a50ffba26b55c54b1ebfb70889cc6802fa732d55e29e06f86416f0a633",
+      "text": "要包含在结果包围球中的球体。"
+    },
+    {
+      "id": "BoundingSphere.union",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:9e7ea655b47ccf8749b441ae0b7f1783dc8479f8b57fa34b13b1e6daefcb0f2b",
+      "text": "修改后的 result 参数；未提供时返回新建的 BoundingSphere 实例。"
+    },
+    {
+      "id": "BoundingSphere.unpack",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:16cd89ec319c8117d0a099c4e36a093cc1fbca7d81f0174141dc7f47fea30d6e",
+      "text": "修改后的 result 参数；未提供时返回新建的 BoundingSphere 实例。"
+    },
+    {
+      "id": "BoundingSphere",
+      "field": "classdesc",
+      "sourceHash": "sha256:c1155a13b24b34a72ea6b075e4be0a5ae6b04f8b218546618aaaad2d3b12d0cb",
+      "text": "由中心和半径定义的包围球。"
+    },
+    {
+      "id": "BoundingSphere",
+      "field": "params/center/description",
+      "sourceHash": "sha256:dcef1d65c0bfd2d0bd1abffe9d8e76e9c08cb6458852449df7f5c61201d3cbe3",
+      "text": "包围球中心。"
+    },
+    {
+      "id": "BoundingSphere",
+      "field": "params/radius/description",
+      "sourceHash": "sha256:f47018fb861535cb1e02bce807d4e95f44f85897abb607a2a60f4417e33e23b1",
+      "text": "包围球半径。"
+    },
+    {
+      "id": "BoundingSphere#center",
+      "field": "description",
+      "sourceHash": "sha256:7dc18702a57d368b73a71482471a190b6cb6d1d97c864b909b530265b6136352",
+      "text": "球体中心点。"
+    },
+    {
+      "id": "BoundingSphere#clone",
+      "field": "description",
+      "sourceHash": "sha256:1f16b08ce147b7b74e429b191ac3dad0c010a49543d0f0ff743f121f0d80e2be",
+      "text": "复制此 BoundingSphere 实例。"
+    },
+    {
+      "id": "BoundingSphere#clone",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:9e7ea655b47ccf8749b441ae0b7f1783dc8479f8b57fa34b13b1e6daefcb0f2b",
+      "text": "修改后的 result 参数；未提供时返回新建的 BoundingSphere 实例。"
+    },
+    {
+      "id": "BoundingSphere#computePlaneDistances",
+      "field": "description",
+      "sourceHash": "sha256:0b367f3e6bf1af5a8f989d53618ebeeed57f4cc95f0787750e2bfa66c69d3ee8",
+      "text": "将包围球中心相对于 position 的向量投影到 direction，再加减包围球半径，得到距离范围。<br>若将法线为 direction 的无穷多个平面作为一个平面族，此函数计算从 position 出发、与包围球相交的最近和最远平面的最小距离。"
+    },
+    {
+      "id": "BoundingSphere#computePlaneDistances",
+      "field": "params/direction/description",
+      "sourceHash": "sha256:c173b156b797f9fcf2ecab048822032681e209592fae1fd23216a8f5fbf8b6ca",
+      "text": "从 position 出发的方向。"
+    },
+    {
+      "id": "BoundingSphere#computePlaneDistances",
+      "field": "params/position/description",
+      "sourceHash": "sha256:696e2e25cc91d21e87f25f3eb24271b5148d6a01a4d42b9816cb68dd056cc150",
+      "text": "计算距离所相对的位置。"
+    },
+    {
+      "id": "BoundingSphere#computePlaneDistances",
+      "field": "params/result/description",
+      "sourceHash": "sha256:9d5302de42e3516cb4a98cf42a823c8034fc605eda3315ae2266f86ab89f6f37",
+      "text": "用于保存最近和最远距离的 Interval。"
+    },
+    {
+      "id": "BoundingSphere#computePlaneDistances",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:cd06a2fc0041b8c31f034f61fdecb3c5747142c883bc99929ff7eafd9a34f354",
+      "text": "从 position 沿 direction 到包围球的最近和最远距离。"
+    },
+    {
+      "id": "BoundingSphere#distanceSquaredTo",
+      "field": "description",
+      "sourceHash": "sha256:6e6f87bd58c32ab8114c301b63f5cf239e269b64556fec3d67b2390d1eee89b6",
+      "text": "估算包围球上最近点到给定点的距离平方。"
+    },
+    {
+      "id": "BoundingSphere#distanceSquaredTo",
+      "field": "params/cartesian/description",
+      "sourceHash": "sha256:244d5da6ed896719daafc03757667a2ad56f8be3268f5a833d8b92cccde4ad3b",
+      "text": "点。"
+    },
+    {
+      "id": "BoundingSphere#distanceSquaredTo",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:61effa77f9b00679f86d85bce8ee765e4d660a23522a80054848c3ad9da5b995",
+      "text": "包围球到点的估算距离平方。"
+    },
+    {
+      "id": "BoundingSphere#equals",
+      "field": "description",
+      "sourceHash": "sha256:900a0db0f5d4090e8d68287962c49b93cd7f4e0a7612e45f982afe3f77a5e75e",
+      "text": "将此 BoundingSphere 与给定实例逐分量比较，相等时返回 <code>true</code>，否则返回 <code>false</code>。"
+    },
+    {
+      "id": "BoundingSphere#equals",
+      "field": "params/right/description",
+      "sourceHash": "sha256:9a570345ed8718d64adb720b04355d8851196a7ef4fad04a79c8625e9550e45f",
+      "text": "右侧 BoundingSphere。"
+    },
+    {
+      "id": "BoundingSphere#intersectPlane",
+      "field": "description",
+      "sourceHash": "sha256:82b21e7f089a2752b7d944d25212bdb84d3ead14d799ad368d9d1f58acef7d31",
+      "text": "判断此球体位于平面的哪一侧。"
+    },
+    {
+      "id": "BoundingSphere#intersectPlane",
+      "field": "params/plane/description",
+      "sourceHash": "sha256:16ceffc1f684849b57354f87194714a2923ade34e52d08d95afd574edef17ff7",
+      "text": "用于测试的平面。"
+    },
+    {
+      "id": "BoundingSphere#intersectPlane",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:7aaa2027b02cc2e07922559c83b8ddccce482b1deb50f54fb68b1cdc84a55074",
+      "text": "若整个球体位于平面法线指向的一侧，则为 {@link Intersect.INSIDE}；若整个球体位于相反一侧，则为 {@link Intersect.OUTSIDE}；若球体与平面相交，则为 {@link Intersect.INTERSECTING}。"
+    },
+    {
+      "id": "BoundingSphere#isOccluded",
+      "field": "description",
+      "sourceHash": "sha256:753872d27ffe6c6fdcf157cc1cdeb2a110320e3b73a56de12d2f8a14d8be6de4",
+      "text": "判断球体是否被遮挡体遮住而不可见。"
+    },
+    {
+      "id": "BoundingSphere#isOccluded",
+      "field": "params/occluder/description",
+      "sourceHash": "sha256:f928c7f09a479cea316edf991c09170fc1026f092f561cda94bdd62809b6fe1c",
+      "text": "遮挡体。"
+    },
+    {
+      "id": "BoundingSphere#isOccluded",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:15029159ab0544e9e736dd38d1e608678baeac4de91301b169b93da7c391865c",
+      "text": "球体不可见时返回 <code>true</code>，否则返回 <code>false</code>。"
+    },
+    {
+      "id": "BoundingSphere#radius",
+      "field": "description",
+      "sourceHash": "sha256:7c7485139bb7f1aa45b19a0658cd899032cf4a827522935194cc7b65834c3f5d",
+      "text": "球体半径。"
+    },
+    {
+      "id": "BoundingSphere#volume",
+      "field": "description",
+      "sourceHash": "sha256:8c4d12ac1d652fb8f6139646b18f53e94e63b23cf7774638783a95073e20680f",
+      "text": "计算 BoundingSphere 的体积。"
+    },
+    {
+      "id": "BoundingSphere#volume",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:e12ce3f44e326068abeeba1e43cae614ec998288e24a0894aa9c74bd4ac5a2be",
+      "text": "BoundingSphere 的体积。"
+    },
+    {
+      "id": "IntersectionTests.grazingAltitudeLocation",
+      "field": "description",
+      "sourceHash": "sha256:fdb85957022425283d7e4882807d369ad4c80f4a59f35ba11c29f30fa563871e",
+      "text": "给出射线上最接近椭球的点。"
+    },
+    {
+      "id": "IntersectionTests.grazingAltitudeLocation",
+      "field": "params/ellipsoid/description",
+      "sourceHash": "sha256:d4987f5b4d3b55df0ddb3f54009edf4bc5f1decfcd20d213883232e3abcc7dd4",
+      "text": "椭球。"
+    },
+    {
+      "id": "IntersectionTests.grazingAltitudeLocation",
+      "field": "params/ray/description",
+      "sourceHash": "sha256:8ab1bbf7edb941be28ae823f0c6c78c609da0248e1c6635ad0d5f3a2bb0cfdee",
+      "text": "射线。"
+    },
+    {
+      "id": "IntersectionTests.grazingAltitudeLocation",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:8c22d66b03283fcdc2030fa1e1dbc90463e9fe6ede1c626a081d7c1da9631cd1",
+      "text": "射线上按大地高度衡量最接近椭球的点。"
+    },
+    {
+      "id": "IntersectionTests.lineSegmentPlane",
+      "field": "description",
+      "sourceHash": "sha256:9d53566df897944e275575e3a5179914943264f7e20f96b77361ae885cf095a5",
+      "text": "计算线段与平面的交点。"
+    },
+    {
+      "id": "IntersectionTests.lineSegmentPlane",
+      "field": "params/endPoint0/description",
+      "sourceHash": "sha256:0290cdd1ef8c0bc8bdba2761476e9a7c322fb48b5d3a4f27c6d0bc99171db080",
+      "text": "线段的一个端点。"
+    },
+    {
+      "id": "IntersectionTests.lineSegmentPlane",
+      "field": "params/endPoint1/description",
+      "sourceHash": "sha256:44d1635a85acef7ec9a775a25459272d398b048404d2510beb3f54b0a5e39855",
+      "text": "线段的另一个端点。"
+    },
+    {
+      "id": "IntersectionTests.lineSegmentPlane",
+      "field": "params/plane/description",
+      "sourceHash": "sha256:a2cf4fe67d474b84c9a778b791a6e4a487b7b11fbbe2746fb823498f01737b16",
+      "text": "平面。"
+    },
+    {
+      "id": "IntersectionTests.lineSegmentPlane",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:9f553fc3f681e233e8b2f6f20af725e4ea756384dbe8c11b769302a2ef09ef4f",
+      "text": "交点；若不相交，则返回 undefined。"
+    },
+    {
+      "id": "IntersectionTests.lineSegmentSphere",
+      "field": "description",
+      "sourceHash": "sha256:a8baba7cc60a994b11fad37ead968c1b47bc639e6f0d52cd6adbcde4fb510cc3",
+      "text": "计算线段与球体的交点。"
+    },
+    {
+      "id": "IntersectionTests.lineSegmentSphere",
+      "field": "params/p0/description",
+      "sourceHash": "sha256:0290cdd1ef8c0bc8bdba2761476e9a7c322fb48b5d3a4f27c6d0bc99171db080",
+      "text": "线段的一个端点。"
+    },
+    {
+      "id": "IntersectionTests.lineSegmentSphere",
+      "field": "params/p1/description",
+      "sourceHash": "sha256:44d1635a85acef7ec9a775a25459272d398b048404d2510beb3f54b0a5e39855",
+      "text": "线段的另一个端点。"
+    },
+    {
+      "id": "IntersectionTests.lineSegmentSphere",
+      "field": "params/result/description",
+      "sourceHash": "sha256:7007cf99a62c0d2b28da4473d557a3d59de024711c73b5413db2d4be190383e7",
+      "text": "用于保存结果的对象。"
+    },
+    {
+      "id": "IntersectionTests.lineSegmentSphere",
+      "field": "params/sphere/description",
+      "sourceHash": "sha256:e944e6eb8ed5a516f8e05ecabd2bd1e62bf66f9187c87419f14a8d6c31d7a6bf",
+      "text": "球体。"
+    },
+    {
+      "id": "IntersectionTests.lineSegmentSphere",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:0e8bbc0b264b0f8143d9b338498f917dadf8cb74ded467f3d530094bb46bfbb2",
+      "text": "沿射线的标量参数区间；若不相交，则返回 undefined。"
+    },
+    {
+      "id": "IntersectionTests.lineSegmentTriangle",
+      "field": "description",
+      "sourceHash": "sha256:0ee63713252af380ffab66a33b449b0a4211de57e20b7cc32cb8f9886eee6d7f",
+      "text": "计算线段与三角形的交点。"
+    },
+    {
+      "id": "IntersectionTests.lineSegmentTriangle",
+      "field": "params/cullBackFaces/description",
+      "sourceHash": "sha256:e7b4c3b6d6cf6c094efb3becc678bae4f0c9130f1df1c1071adfa003bfb36f44",
+      "text": "为 <code>true</code> 时，仅计算与三角形正面的交点；与背面相交时返回 undefined。"
+    },
+    {
+      "id": "IntersectionTests.lineSegmentTriangle",
+      "field": "params/p0/description",
+      "sourceHash": "sha256:9f55c655f10c60abaf5f8904f25d6aafc36bcd0a8dd03898c314bf8dfea75610",
+      "text": "三角形的第一个顶点。"
+    },
+    {
+      "id": "IntersectionTests.lineSegmentTriangle",
+      "field": "params/p1/description",
+      "sourceHash": "sha256:53df72da9d4b5dbc9feb99cb81b866d18d9954bb5bb22a65902e05bc3d3bc5d9",
+      "text": "三角形的第二个顶点。"
+    },
+    {
+      "id": "IntersectionTests.lineSegmentTriangle",
+      "field": "params/p2/description",
+      "sourceHash": "sha256:8b9b6948fb785e37a71835ceeec115bcde3c3bdb916d64ad86202b70f96e6e2a",
+      "text": "三角形的第三个顶点。"
+    },
+    {
+      "id": "IntersectionTests.lineSegmentTriangle",
+      "field": "params/result/description",
+      "sourceHash": "sha256:c2bce9957b455168767187a9d7182c54b4015920f12ee9f28375e981ea18d030",
+      "text": "用于保存结果的 <code>Cartesian3</code>。"
+    },
+    {
+      "id": "IntersectionTests.lineSegmentTriangle",
+      "field": "params/v0/description",
+      "sourceHash": "sha256:125a094acadee3e1a4674483cd01b1c0bdb9e2c8b453728c21690726a210eb11",
+      "text": "线段的一个端点。"
+    },
+    {
+      "id": "IntersectionTests.lineSegmentTriangle",
+      "field": "params/v1/description",
+      "sourceHash": "sha256:44d1635a85acef7ec9a775a25459272d398b048404d2510beb3f54b0a5e39855",
+      "text": "线段的另一个端点。"
+    },
+    {
+      "id": "IntersectionTests.lineSegmentTriangle",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:63d95bc95342422751ed1df46725dd6500ef11d96da6f4d158760fa0c6b235fc",
+      "text": "交点；若不相交，则返回 undefined。"
+    },
+    {
+      "id": "IntersectionTests.rayAxisAlignedBoundingBox",
+      "field": "description",
+      "sourceHash": "sha256:fcbd1fcd57c62f0d2aae15b285f90c1daea4833915647012105a36d16d75f185",
+      "text": "计算射线与轴对齐包围盒的交点，包围盒在与射线相同的空间中按坐标轴对齐。"
+    },
+    {
+      "id": "IntersectionTests.rayAxisAlignedBoundingBox",
+      "field": "params/box/description",
+      "sourceHash": "sha256:aa0bb35fbf00f994d9de31c083827449b580d57efd9812737b6b18bb3c310c01",
+      "text": "轴对齐包围盒。"
+    },
+    {
+      "id": "IntersectionTests.rayAxisAlignedBoundingBox",
+      "field": "params/ray/description",
+      "sourceHash": "sha256:8ab1bbf7edb941be28ae823f0c6c78c609da0248e1c6635ad0d5f3a2bb0cfdee",
+      "text": "射线。"
+    },
+    {
+      "id": "IntersectionTests.rayAxisAlignedBoundingBox",
+      "field": "params/result/description",
+      "sourceHash": "sha256:0e8bbc0b264b0f8143d9b338498f917dadf8cb74ded467f3d530094bb46bfbb2",
+      "text": "沿射线的标量参数区间；若不相交，则返回 undefined。"
+    },
+    {
+      "id": "IntersectionTests.rayEllipsoid",
+      "field": "description",
+      "sourceHash": "sha256:486209b08cf2f786cefe554e99bf532d95c1ca43dc305959da1a5784171a5789",
+      "text": "计算射线与椭球的交点。"
+    },
+    {
+      "id": "IntersectionTests.rayEllipsoid",
+      "field": "params/ellipsoid/description",
+      "sourceHash": "sha256:d4987f5b4d3b55df0ddb3f54009edf4bc5f1decfcd20d213883232e3abcc7dd4",
+      "text": "椭球。"
+    },
+    {
+      "id": "IntersectionTests.rayEllipsoid",
+      "field": "params/ray/description",
+      "sourceHash": "sha256:8ab1bbf7edb941be28ae823f0c6c78c609da0248e1c6635ad0d5f3a2bb0cfdee",
+      "text": "射线。"
+    },
+    {
+      "id": "IntersectionTests.rayEllipsoid",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:0e8bbc0b264b0f8143d9b338498f917dadf8cb74ded467f3d530094bb46bfbb2",
+      "text": "沿射线的标量参数区间；若不相交，则返回 undefined。"
+    },
+    {
+      "id": "IntersectionTests.rayPlane",
+      "field": "description",
+      "sourceHash": "sha256:94e7f4b1ccb88d49f930b696b0f12fc18f7ced839e11fe289cbdd1bb31ba11a2",
+      "text": "计算射线与平面的交点。"
+    },
+    {
+      "id": "IntersectionTests.rayPlane",
+      "field": "params/plane/description",
+      "sourceHash": "sha256:a2cf4fe67d474b84c9a778b791a6e4a487b7b11fbbe2746fb823498f01737b16",
+      "text": "平面。"
+    },
+    {
+      "id": "IntersectionTests.rayPlane",
+      "field": "params/ray/description",
+      "sourceHash": "sha256:8ab1bbf7edb941be28ae823f0c6c78c609da0248e1c6635ad0d5f3a2bb0cfdee",
+      "text": "射线。"
+    },
+    {
+      "id": "IntersectionTests.rayPlane",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:63d95bc95342422751ed1df46725dd6500ef11d96da6f4d158760fa0c6b235fc",
+      "text": "交点；若不相交，则返回 undefined。"
+    },
+    {
+      "id": "IntersectionTests.raySphere",
+      "field": "description",
+      "sourceHash": "sha256:744f7d77307fd35515215abdb3b29c2c4c6a15077c80968e1bc5ec01263f6264",
+      "text": "计算射线与球体的交点。"
+    },
+    {
+      "id": "IntersectionTests.raySphere",
+      "field": "params/ray/description",
+      "sourceHash": "sha256:8ab1bbf7edb941be28ae823f0c6c78c609da0248e1c6635ad0d5f3a2bb0cfdee",
+      "text": "射线。"
+    },
+    {
+      "id": "IntersectionTests.raySphere",
+      "field": "params/result/description",
+      "sourceHash": "sha256:7007cf99a62c0d2b28da4473d557a3d59de024711c73b5413db2d4be190383e7",
+      "text": "用于保存结果的对象。"
+    },
+    {
+      "id": "IntersectionTests.raySphere",
+      "field": "params/sphere/description",
+      "sourceHash": "sha256:e944e6eb8ed5a516f8e05ecabd2bd1e62bf66f9187c87419f14a8d6c31d7a6bf",
+      "text": "球体。"
+    },
+    {
+      "id": "IntersectionTests.raySphere",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:0e8bbc0b264b0f8143d9b338498f917dadf8cb74ded467f3d530094bb46bfbb2",
+      "text": "沿射线的标量参数区间；若不相交，则返回 undefined。"
+    },
+    {
+      "id": "IntersectionTests.rayTriangle",
+      "field": "description",
+      "sourceHash": "sha256:f7a5730cf56750171d7230903b182649757683b54f4facde5845d899f417bf47",
+      "text": "计算射线与三角形的交点，返回 Cartesian3 坐标。实现 Tomas Moller 和 Ben Trumbore 的 {@link https://cadxfem.org/inf/Fast MinimumStorage RayTriangle Intersection.pdf|快速、低存储开销的射线/三角形求交} 方法。"
+    },
+    {
+      "id": "IntersectionTests.rayTriangle",
+      "field": "params/cullBackFaces/description",
+      "sourceHash": "sha256:e7b4c3b6d6cf6c094efb3becc678bae4f0c9130f1df1c1071adfa003bfb36f44",
+      "text": "为 <code>true</code> 时，仅计算与三角形正面的交点；与背面相交时返回 undefined。"
+    },
+    {
+      "id": "IntersectionTests.rayTriangle",
+      "field": "params/p0/description",
+      "sourceHash": "sha256:9f55c655f10c60abaf5f8904f25d6aafc36bcd0a8dd03898c314bf8dfea75610",
+      "text": "三角形的第一个顶点。"
+    },
+    {
+      "id": "IntersectionTests.rayTriangle",
+      "field": "params/p1/description",
+      "sourceHash": "sha256:53df72da9d4b5dbc9feb99cb81b866d18d9954bb5bb22a65902e05bc3d3bc5d9",
+      "text": "三角形的第二个顶点。"
+    },
+    {
+      "id": "IntersectionTests.rayTriangle",
+      "field": "params/p2/description",
+      "sourceHash": "sha256:8b9b6948fb785e37a71835ceeec115bcde3c3bdb916d64ad86202b70f96e6e2a",
+      "text": "三角形的第三个顶点。"
+    },
+    {
+      "id": "IntersectionTests.rayTriangle",
+      "field": "params/ray/description",
+      "sourceHash": "sha256:8ab1bbf7edb941be28ae823f0c6c78c609da0248e1c6635ad0d5f3a2bb0cfdee",
+      "text": "射线。"
+    },
+    {
+      "id": "IntersectionTests.rayTriangle",
+      "field": "params/result/description",
+      "sourceHash": "sha256:c2bce9957b455168767187a9d7182c54b4015920f12ee9f28375e981ea18d030",
+      "text": "用于保存结果的 <code>Cartesian3</code>。"
+    },
+    {
+      "id": "IntersectionTests.rayTriangle",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:63d95bc95342422751ed1df46725dd6500ef11d96da6f4d158760fa0c6b235fc",
+      "text": "交点；若不相交，则返回 undefined。"
+    },
+    {
+      "id": "IntersectionTests.rayTriangleParametric",
+      "field": "description",
+      "sourceHash": "sha256:d7456980862dd2d8e34cfc03bc8c8383ef212aa17796950d651d682924aedc73",
+      "text": "计算射线与三角形的交点，以沿输入射线的参数距离表示。三角形位于射线后方时，结果为负。实现 Tomas Moller 和 Ben Trumbore 的 {@link https://cadxfem.org/inf/Fast MinimumStorage RayTriangle Intersection.pdf|快速、低存储开销的射线/三角形求交} 方法。"
+    },
+    {
+      "id": "IntersectionTests.rayTriangleParametric",
+      "field": "params/cullBackFaces/description",
+      "sourceHash": "sha256:e7b4c3b6d6cf6c094efb3becc678bae4f0c9130f1df1c1071adfa003bfb36f44",
+      "text": "为 <code>true</code> 时，仅计算与三角形正面的交点；与背面相交时返回 undefined。"
+    },
+    {
+      "id": "IntersectionTests.rayTriangleParametric",
+      "field": "params/p0/description",
+      "sourceHash": "sha256:9f55c655f10c60abaf5f8904f25d6aafc36bcd0a8dd03898c314bf8dfea75610",
+      "text": "三角形的第一个顶点。"
+    },
+    {
+      "id": "IntersectionTests.rayTriangleParametric",
+      "field": "params/p1/description",
+      "sourceHash": "sha256:53df72da9d4b5dbc9feb99cb81b866d18d9954bb5bb22a65902e05bc3d3bc5d9",
+      "text": "三角形的第二个顶点。"
+    },
+    {
+      "id": "IntersectionTests.rayTriangleParametric",
+      "field": "params/p2/description",
+      "sourceHash": "sha256:8b9b6948fb785e37a71835ceeec115bcde3c3bdb916d64ad86202b70f96e6e2a",
+      "text": "三角形的第三个顶点。"
+    },
+    {
+      "id": "IntersectionTests.rayTriangleParametric",
+      "field": "params/ray/description",
+      "sourceHash": "sha256:8ab1bbf7edb941be28ae823f0c6c78c609da0248e1c6635ad0d5f3a2bb0cfdee",
+      "text": "射线。"
+    },
+    {
+      "id": "IntersectionTests.rayTriangleParametric",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:93a3f890409d360fd02854bae44af0daf1f1aa99f6a07e33e857e3818f12eb9f",
+      "text": "交点沿射线的参数距离；若不相交，则返回 undefined。"
+    },
+    {
+      "id": "IntersectionTests.trianglePlaneIntersection",
+      "field": "description",
+      "sourceHash": "sha256:17f7aae3698234ba0aa93f02a51b382034b4b1e6c047577521b35a3474bc8ab4",
+      "text": "计算三角形与平面的交集。"
+    },
+    {
+      "id": "IntersectionTests.trianglePlaneIntersection",
+      "field": "params/p0/description",
+      "sourceHash": "sha256:5a60cdb6a4ccb7e5c5c188e6e84929d694e3acbe79fa53005f8ddec46b4bd09f",
+      "text": "三角形的第一个点。"
+    },
+    {
+      "id": "IntersectionTests.trianglePlaneIntersection",
+      "field": "params/p1/description",
+      "sourceHash": "sha256:df33a320acfcb108e5184025e51cea0236776b718b884ed23344d448e43a2e4e",
+      "text": "三角形的第二个点。"
+    },
+    {
+      "id": "IntersectionTests.trianglePlaneIntersection",
+      "field": "params/p2/description",
+      "sourceHash": "sha256:d12bc6a3061f9fb2451235f59e4770c5042a9a52d8bab7d55729db6a1140f95d",
+      "text": "三角形的第三个点。"
+    },
+    {
+      "id": "IntersectionTests.trianglePlaneIntersection",
+      "field": "params/plane/description",
+      "sourceHash": "sha256:76936432a032ea427843458d0d98ce6f4804492855cd3fca114c149d2116a190",
+      "text": "求交平面。"
+    },
+    {
+      "id": "IntersectionTests.trianglePlaneIntersection",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:4f4e8f141e50c8fc1cca2cf7a90713c98cc616722e381668362dae47a8807584",
+      "text": "具有 <code>positions</code> 和 <code>indices</code> 属性的对象，两个数组表示三个不会跨越平面的三角形。若不相交，则返回 undefined。"
+    },
+    {
+      "id": "IntersectionTests",
+      "field": "description",
+      "sourceHash": "sha256:5387aa50d1b9a5c0d3664f0709bbe443fbea15137780e334df0e6a87f85aed9e",
+      "text": "用于计算射线、平面、三角形和椭球等几何体之间交集的函数。"
+    },
+    {
+      "id": "OrientedBoundingBox.clone",
+      "field": "description",
+      "sourceHash": "sha256:b684eb5a809d17c1dd6e2f609f7c92d2b9b526aa120ce1ffbf4b9cb1eac5c1f4",
+      "text": "复制 OrientedBoundingBox 实例。"
+    },
+    {
+      "id": "OrientedBoundingBox.clone",
+      "field": "params/box/description",
+      "sourceHash": "sha256:1c8e6dcd8a6cbae244a916379642fd9e4fd8fbf805e25373eed9ca5141b70968",
+      "text": "要复制的包围盒。"
+    },
+    {
+      "id": "OrientedBoundingBox.clone",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:17fe5d8c07fc65db4cee0311526b871f3d37758c1479f46f2a7ec0f42ad506f5",
+      "text": "修改后的 result 参数；未提供时返回新建的 OrientedBoundingBox 实例。若 box 为 undefined，则返回 undefined。"
+    },
+    {
+      "id": "OrientedBoundingBox.computeCorners",
+      "field": "description",
+      "sourceHash": "sha256:c31ef5fac3c2c4acbd60cb4c803a1bdd60a83be0e75593bafa9b82775d59cb54",
+      "text": "计算定向包围盒的八个角点，顺序为 (-X, -Y, -Z)、(-X, -Y, +Z)、(-X, +Y, -Z)、(-X, +Y, +Z)、(+X, -Y, -Z)、(+X, -Y, +Z)、(+X, +Y, -Z)、(+X, +Y, +Z)。"
+    },
+    {
+      "id": "OrientedBoundingBox.computeCorners",
+      "field": "params/box/description",
+      "sourceHash": "sha256:a70d8269fe22cd0cb1f9c6b45ac3d9c1cf3869a999e785eb59eb2839efcc7a61",
+      "text": "定向包围盒。"
+    },
+    {
+      "id": "OrientedBoundingBox.computeCorners",
+      "field": "params/result/description",
+      "sourceHash": "sha256:2d4e901b960e9a55e867011ba704f4d7026968cf4bb24ee183424f037e2e8c91",
+      "text": "用于保存角点的八个 {@link Cartesian3} 实例数组。"
+    },
+    {
+      "id": "OrientedBoundingBox.computeCorners",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:5c647745ae9c36754323fc80ce582d8d54fdb9a80591dd223315d3fdaa4cc79a",
+      "text": "修改后的 result 参数；未提供时返回新数组。"
+    },
+    {
+      "id": "OrientedBoundingBox.computePlaneDistances",
+      "field": "description",
+      "sourceHash": "sha256:1f468d868e7d98f0d78a8f0aea21de492ce6f5b98e32ecc18a09b6d685161e1e",
+      "text": "将包围盒中心相对于 position 的向量投影到 direction，得到距离范围。<br>若将法线为 direction 的无穷多个平面作为一个平面族，此函数计算从 position 出发、与包围盒相交的最近和最远平面的最小距离。"
+    },
+    {
+      "id": "OrientedBoundingBox.computePlaneDistances",
+      "field": "params/box/description",
+      "sourceHash": "sha256:f5b9af6a94b0291f1ed2f988a65dc1a3dd7891d3b44e6d56de0972290f3c96c5",
+      "text": "要计算距离的包围盒。"
+    },
+    {
+      "id": "OrientedBoundingBox.computePlaneDistances",
+      "field": "params/direction/description",
+      "sourceHash": "sha256:c173b156b797f9fcf2ecab048822032681e209592fae1fd23216a8f5fbf8b6ca",
+      "text": "从 position 出发的方向。"
+    },
+    {
+      "id": "OrientedBoundingBox.computePlaneDistances",
+      "field": "params/position/description",
+      "sourceHash": "sha256:696e2e25cc91d21e87f25f3eb24271b5148d6a01a4d42b9816cb68dd056cc150",
+      "text": "计算距离所相对的位置。"
+    },
+    {
+      "id": "OrientedBoundingBox.computePlaneDistances",
+      "field": "params/result/description",
+      "sourceHash": "sha256:9d5302de42e3516cb4a98cf42a823c8034fc605eda3315ae2266f86ab89f6f37",
+      "text": "用于保存最近和最远距离的 Interval。"
+    },
+    {
+      "id": "OrientedBoundingBox.computePlaneDistances",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:98ddb90d97dfff94a6bec49f207b6e7679723d935d20feac51cd259a26bb3432",
+      "text": "从 position 沿 direction 到包围盒的最近和最远距离。"
+    },
+    {
+      "id": "OrientedBoundingBox.computeTransformation",
+      "field": "description",
+      "sourceHash": "sha256:46cc0d194710a76a59c122339e76de3689b5734df20b0602d402a10ababec291",
+      "text": "根据定向包围盒计算变换矩阵。"
+    },
+    {
+      "id": "OrientedBoundingBox.computeTransformation",
+      "field": "params/box/description",
+      "sourceHash": "sha256:a70d8269fe22cd0cb1f9c6b45ac3d9c1cf3869a999e785eb59eb2839efcc7a61",
+      "text": "定向包围盒。"
+    },
+    {
+      "id": "OrientedBoundingBox.computeTransformation",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:c1688bb3c6be165dd4fddc6fd44f9ebb6669d1267bf0ac6845d264eedf805719",
+      "text": "修改后的 result 参数；未提供时返回新建的 {@link Matrix4} 实例。"
+    },
+    {
+      "id": "OrientedBoundingBox.distanceSquaredTo",
+      "field": "description",
+      "sourceHash": "sha256:846c2de8fada78e66b112d30fcc8376260c17eaaf9c7baf010205d12e63676a3",
+      "text": "估算包围盒上最近点到给定点的距离平方。"
+    },
+    {
+      "id": "OrientedBoundingBox.distanceSquaredTo",
+      "field": "params/box/description",
+      "sourceHash": "sha256:bd8cb92dc182fbfb5b79b7aebbaf2b01c5b5b363e11233dba4a7453dba683626",
+      "text": "盒体。"
+    },
+    {
+      "id": "OrientedBoundingBox.distanceSquaredTo",
+      "field": "params/cartesian/description",
+      "sourceHash": "sha256:244d5da6ed896719daafc03757667a2ad56f8be3268f5a833d8b92cccde4ad3b",
+      "text": "点。"
+    },
+    {
+      "id": "OrientedBoundingBox.distanceSquaredTo",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:1fb1482ae55c35a738103f8415935867a93c349610170cce9da3f3daee08db86",
+      "text": "定向包围盒到点的距离平方。若点位于盒内，则返回 0。"
+    },
+    {
+      "id": "OrientedBoundingBox.equals",
+      "field": "description",
+      "sourceHash": "sha256:43a328c6bb8d2ae2568c088e339e6b687bbd6ae7ea6a433e403d032fca639dec",
+      "text": "逐分量比较给定 OrientedBoundingBox，相等时返回 <code>true</code>，否则返回 <code>false</code>。"
+    },
+    {
+      "id": "OrientedBoundingBox.equals",
+      "field": "params/left/description",
+      "sourceHash": "sha256:d3edd575ecf6d1a2425f55c5218a0f028b7da060d46f5c32c2ff54cf7ebc338b",
+      "text": "第一个 OrientedBoundingBox。"
+    },
+    {
+      "id": "OrientedBoundingBox.equals",
+      "field": "params/right/description",
+      "sourceHash": "sha256:249c13c478f6b52c9112cb850339661a0a42ad7f865e4393d95f7b1297f41bca",
+      "text": "第二个 OrientedBoundingBox。"
+    },
+    {
+      "id": "OrientedBoundingBox.fromPoints",
+      "field": "description",
+      "sourceHash": "sha256:2cd5c7bba5dae61671c5d872144cc03376642228adf33884bd089dbe4e167f15",
+      "text": "根据给定位置计算 OrientedBoundingBox 实例。此实现采用 Stefan Gottschalk 博士论文中的定向包围盒碰撞查询方案。参考：http://gamma.cs.unc.edu/users/gottschalk/main.pdf"
+    },
+    {
+      "id": "OrientedBoundingBox.fromPoints",
+      "field": "params/positions/description",
+      "sourceHash": "sha256:2bf61ec248ae96f2ace17fcb900d87e42c34f8c1a06d6d06d703a01b20b70f03",
+      "text": "包围盒需要包含的 {@link Cartesian3} 点列表。"
+    },
+    {
+      "id": "OrientedBoundingBox.fromPoints",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:a66b12f4e4f8aeee03318c3c7c672208c565c542a465a31ebf3cbb575749e5f8",
+      "text": "修改后的 result 参数；未提供时返回新建的 OrientedBoundingBox 实例。"
+    },
+    {
+      "id": "OrientedBoundingBox.fromRectangle",
+      "field": "description",
+      "sourceHash": "sha256:4dbdbbed06ed4719e9687b224a4f6fc57c857bfc47c2975640da539833db046b",
+      "text": "计算包围 {@link Ellipsoid} 表面上 {@link Rectangle} 的 OrientedBoundingBox。不保证包围盒的具体朝向。"
+    },
+    {
+      "id": "OrientedBoundingBox.fromRectangle",
+      "field": "exceptions/0/description",
+      "sourceHash": "sha256:94fe69e889d872d36b350cf5c92b0b5eb1ae6f7e0e47b4089c56a514bd2d2716",
+      "text": "rectangle.width 必须位于 0 至 2 * pi 之间。"
+    },
+    {
+      "id": "OrientedBoundingBox.fromRectangle",
+      "field": "exceptions/1/description",
+      "sourceHash": "sha256:9b6ab591ec8541a1ba52d4396bb6561ea3b2d75d2d6475a1331b24b591484b0a",
+      "text": "rectangle.height 必须位于 0 至 pi 之间。"
+    },
+    {
+      "id": "OrientedBoundingBox.fromRectangle",
+      "field": "exceptions/2/description",
+      "sourceHash": "sha256:f58f4e77ca354bfc90a041cf9b2b8eedb7d5c23d84625098d64481ce88243026",
+      "text": "ellipsoid 必须为旋转椭球，即 <code>radii.x == radii.y</code>。"
+    },
+    {
+      "id": "OrientedBoundingBox.fromRectangle",
+      "field": "params/ellipsoid/description",
+      "sourceHash": "sha256:8b87e25130be79122d56052c8518af1c2fb45e56504a33a9f94db933eb1ba006",
+      "text": "定义此矩形的椭球。"
+    },
+    {
+      "id": "OrientedBoundingBox.fromRectangle",
+      "field": "params/maximumHeight/description",
+      "sourceHash": "sha256:24072bbdf348834f6a0ba6f48b45b360a178718ca71fcabb49dd287e99f97210",
+      "text": "瓦片范围内的最大高度（高程）。"
+    },
+    {
+      "id": "OrientedBoundingBox.fromRectangle",
+      "field": "params/minimumHeight/description",
+      "sourceHash": "sha256:82079f748e9f55cb9ddff93869b5169d9e2133262ced4466a1f6347f3d18dcf0",
+      "text": "瓦片范围内的最小高度（高程）。"
+    },
+    {
+      "id": "OrientedBoundingBox.fromRectangle",
+      "field": "params/rectangle/description",
+      "sourceHash": "sha256:55fabad85e5ac1cb29f619a2959ed86bf0f1d519b4143d36c562dfd836e5bc31",
+      "text": "椭球表面上的地理坐标矩形。"
+    },
+    {
+      "id": "OrientedBoundingBox.fromRectangle",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:376af1410426d97a1eff7af5c9ce14d7ccba1b9ea7ad9ced8706cf0ec7154e90",
+      "text": "修改后的 result 参数；未提供时返回新建的 OrientedBoundingBox 实例。"
+    },
+    {
+      "id": "OrientedBoundingBox.fromTransformation",
+      "field": "description",
+      "sourceHash": "sha256:64f9d3a728b7c5abc7c211ba32e8a2f5d93b769b48e0b734c57ecbef592790ed",
+      "text": "计算包围某仿射变换所表示范围的 OrientedBoundingBox。"
+    },
+    {
+      "id": "OrientedBoundingBox.fromTransformation",
+      "field": "params/transformation/description",
+      "sourceHash": "sha256:985bb41faed7b33cd283c0c66e19d438a16c08bca8deff15416e411ca32bdfec",
+      "text": "仿射变换。"
+    },
+    {
+      "id": "OrientedBoundingBox.fromTransformation",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:376af1410426d97a1eff7af5c9ce14d7ccba1b9ea7ad9ced8706cf0ec7154e90",
+      "text": "修改后的 result 参数；未提供时返回新建的 OrientedBoundingBox 实例。"
+    },
+    {
+      "id": "OrientedBoundingBox.intersectPlane",
+      "field": "description",
+      "sourceHash": "sha256:53d8127003cd62cd3e53c3fe429123768a226d441f16cae68a7f513098840519",
+      "text": "判断定向包围盒位于平面的哪一侧。"
+    },
+    {
+      "id": "OrientedBoundingBox.intersectPlane",
+      "field": "params/box/description",
+      "sourceHash": "sha256:1bfb86927d9cbe0c4ad95e47f9e131aab2dcb72ef08e17dfe16e6844b9f8c941",
+      "text": "要测试的定向包围盒。"
+    },
+    {
+      "id": "OrientedBoundingBox.intersectPlane",
+      "field": "params/plane/description",
+      "sourceHash": "sha256:16ceffc1f684849b57354f87194714a2923ade34e52d08d95afd574edef17ff7",
+      "text": "用于测试的平面。"
+    },
+    {
+      "id": "OrientedBoundingBox.intersectPlane",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:94d6a1171612477ad1edb2963b700c348567837083dba14282176125f7c2a843",
+      "text": "若整个盒体位于平面法线指向的一侧，则为 {@link Intersect.INSIDE}；若整个盒体位于相反一侧，则为 {@link Intersect.OUTSIDE}；若盒体与平面相交，则为 {@link Intersect.INTERSECTING}。"
+    },
+    {
+      "id": "OrientedBoundingBox.isOccluded",
+      "field": "description",
+      "sourceHash": "sha256:427768094285cc7eb698b9f90430e0845f4021cfde733798b074633dd4e16215",
+      "text": "判断包围盒是否被遮挡体遮住而不可见。"
+    },
+    {
+      "id": "OrientedBoundingBox.isOccluded",
+      "field": "params/box/description",
+      "sourceHash": "sha256:992f097cb892c4560beb0810d27c97caa8decdf2825be6f87b959372117887b1",
+      "text": "包围被遮挡对象的包围盒。"
+    },
+    {
+      "id": "OrientedBoundingBox.isOccluded",
+      "field": "params/occluder/description",
+      "sourceHash": "sha256:f928c7f09a479cea316edf991c09170fc1026f092f561cda94bdd62809b6fe1c",
+      "text": "遮挡体。"
+    },
+    {
+      "id": "OrientedBoundingBox.isOccluded",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:0dd6ac8d2a94eeacbe98c431638e1ec068fe1f92e0cc04756d55c3f140d28ab7",
+      "text": "盒体不可见时返回 <code>true</code>，否则返回 <code>false</code>。"
+    },
+    {
+      "id": "OrientedBoundingBox.unpack",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:a66b12f4e4f8aeee03318c3c7c672208c565c542a465a31ebf3cbb575749e5f8",
+      "text": "修改后的 result 参数；未提供时返回新建的 OrientedBoundingBox 实例。"
+    },
+    {
+      "id": "OrientedBoundingBox",
+      "field": "description",
+      "sourceHash": "sha256:327dd1a0c084050bd4fe5592551275f05c4fe84672ca567b475c51f70ccecf3b",
+      "text": "创建 OrientedBoundingBox 实例。对象的定向包围盒是封闭、凸的长方体，在许多情况下比 {@link BoundingSphere} 或 {@link AxisAlignedBoundingBox} 提供更紧密的包围体。"
+    },
+    {
+      "id": "OrientedBoundingBox",
+      "field": "params/center/description",
+      "sourceHash": "sha256:0ee54e9cf083c5c00dcf448ade0d136c35c53eeb94f4828978fb57dee33bcf09",
+      "text": "盒体中心。"
+    },
+    {
+      "id": "OrientedBoundingBox",
+      "field": "params/halfAxes/description",
+      "sourceHash": "sha256:69f984298e56c98ef21767aa2ef1ecf4112ca22c748ce84c1d7a1f53d2aecb48",
+      "text": "包围盒的三条正交半轴。等价地，可视为将以原点为中心的 2x2x2 立方体旋转和缩放的变换矩阵。"
+    },
+    {
+      "id": "OrientedBoundingBox#center",
+      "field": "description",
+      "sourceHash": "sha256:0ee54e9cf083c5c00dcf448ade0d136c35c53eeb94f4828978fb57dee33bcf09",
+      "text": "盒体中心。"
+    },
+    {
+      "id": "OrientedBoundingBox#clone",
+      "field": "description",
+      "sourceHash": "sha256:b9e063fae24862b9114121c9c765741f778a5888a237c30c2fa6ff8c65aa6bf7",
+      "text": "复制此 OrientedBoundingBox 实例。"
+    },
+    {
+      "id": "OrientedBoundingBox#clone",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:a66b12f4e4f8aeee03318c3c7c672208c565c542a465a31ebf3cbb575749e5f8",
+      "text": "修改后的 result 参数；未提供时返回新建的 OrientedBoundingBox 实例。"
+    },
+    {
+      "id": "OrientedBoundingBox#computeCorners",
+      "field": "description",
+      "sourceHash": "sha256:c31ef5fac3c2c4acbd60cb4c803a1bdd60a83be0e75593bafa9b82775d59cb54",
+      "text": "计算定向包围盒的八个角点，顺序为 (-X, -Y, -Z)、(-X, -Y, +Z)、(-X, +Y, -Z)、(-X, +Y, +Z)、(+X, -Y, -Z)、(+X, -Y, +Z)、(+X, +Y, -Z)、(+X, +Y, +Z)。"
+    },
+    {
+      "id": "OrientedBoundingBox#computeCorners",
+      "field": "params/result/description",
+      "sourceHash": "sha256:2d4e901b960e9a55e867011ba704f4d7026968cf4bb24ee183424f037e2e8c91",
+      "text": "用于保存角点的八个 {@link Cartesian3} 实例数组。"
+    },
+    {
+      "id": "OrientedBoundingBox#computeCorners",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:5c647745ae9c36754323fc80ce582d8d54fdb9a80591dd223315d3fdaa4cc79a",
+      "text": "修改后的 result 参数；未提供时返回新数组。"
+    },
+    {
+      "id": "OrientedBoundingBox#computePlaneDistances",
+      "field": "description",
+      "sourceHash": "sha256:1f468d868e7d98f0d78a8f0aea21de492ce6f5b98e32ecc18a09b6d685161e1e",
+      "text": "将包围盒中心相对于 position 的向量投影到 direction，得到距离范围。<br>若将法线为 direction 的无穷多个平面作为一个平面族，此函数计算从 position 出发、与包围盒相交的最近和最远平面的最小距离。"
+    },
+    {
+      "id": "OrientedBoundingBox#computePlaneDistances",
+      "field": "params/direction/description",
+      "sourceHash": "sha256:c173b156b797f9fcf2ecab048822032681e209592fae1fd23216a8f5fbf8b6ca",
+      "text": "从 position 出发的方向。"
+    },
+    {
+      "id": "OrientedBoundingBox#computePlaneDistances",
+      "field": "params/position/description",
+      "sourceHash": "sha256:696e2e25cc91d21e87f25f3eb24271b5148d6a01a4d42b9816cb68dd056cc150",
+      "text": "计算距离所相对的位置。"
+    },
+    {
+      "id": "OrientedBoundingBox#computePlaneDistances",
+      "field": "params/result/description",
+      "sourceHash": "sha256:9d5302de42e3516cb4a98cf42a823c8034fc605eda3315ae2266f86ab89f6f37",
+      "text": "用于保存最近和最远距离的 Interval。"
+    },
+    {
+      "id": "OrientedBoundingBox#computePlaneDistances",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:98ddb90d97dfff94a6bec49f207b6e7679723d935d20feac51cd259a26bb3432",
+      "text": "从 position 沿 direction 到包围盒的最近和最远距离。"
+    },
+    {
+      "id": "OrientedBoundingBox#computeTransformation",
+      "field": "description",
+      "sourceHash": "sha256:46cc0d194710a76a59c122339e76de3689b5734df20b0602d402a10ababec291",
+      "text": "根据定向包围盒计算变换矩阵。"
+    },
+    {
+      "id": "OrientedBoundingBox#computeTransformation",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:c1688bb3c6be165dd4fddc6fd44f9ebb6669d1267bf0ac6845d264eedf805719",
+      "text": "修改后的 result 参数；未提供时返回新建的 {@link Matrix4} 实例。"
+    },
+    {
+      "id": "OrientedBoundingBox#distanceSquaredTo",
+      "field": "description",
+      "sourceHash": "sha256:846c2de8fada78e66b112d30fcc8376260c17eaaf9c7baf010205d12e63676a3",
+      "text": "估算包围盒上最近点到给定点的距离平方。"
+    },
+    {
+      "id": "OrientedBoundingBox#distanceSquaredTo",
+      "field": "params/cartesian/description",
+      "sourceHash": "sha256:244d5da6ed896719daafc03757667a2ad56f8be3268f5a833d8b92cccde4ad3b",
+      "text": "点。"
+    },
+    {
+      "id": "OrientedBoundingBox#distanceSquaredTo",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:61effa77f9b00679f86d85bce8ee765e4d660a23522a80054848c3ad9da5b995",
+      "text": "包围球到点的估算距离平方。"
+    },
+    {
+      "id": "OrientedBoundingBox#equals",
+      "field": "description",
+      "sourceHash": "sha256:5605f17b65ff053cc57429cb1877abe47099440d595200f1f6b0a3a562bf8a0e",
+      "text": "将此 OrientedBoundingBox 与给定实例逐分量比较，相等时返回 <code>true</code>，否则返回 <code>false</code>。"
+    },
+    {
+      "id": "OrientedBoundingBox#equals",
+      "field": "params/right/description",
+      "sourceHash": "sha256:8c1bb8452514a1c8f7dc5b12827ae26114b2931acc4dfae35eeb7a29038b9871",
+      "text": "右侧 OrientedBoundingBox。"
+    },
+    {
+      "id": "OrientedBoundingBox#halfAxes",
+      "field": "description",
+      "sourceHash": "sha256:c6ff3a3282674a8679cc71a277aa62307ede1ff33a704ad1fa15326a1bbebff6",
+      "text": "包围盒的三条正交半轴。等价地，可视为将以原点为中心的 2x2x2 立方体旋转和缩放的变换矩阵。"
+    },
+    {
+      "id": "OrientedBoundingBox#intersectPlane",
+      "field": "description",
+      "sourceHash": "sha256:53d8127003cd62cd3e53c3fe429123768a226d441f16cae68a7f513098840519",
+      "text": "判断定向包围盒位于平面的哪一侧。"
+    },
+    {
+      "id": "OrientedBoundingBox#intersectPlane",
+      "field": "params/plane/description",
+      "sourceHash": "sha256:16ceffc1f684849b57354f87194714a2923ade34e52d08d95afd574edef17ff7",
+      "text": "用于测试的平面。"
+    },
+    {
+      "id": "OrientedBoundingBox#intersectPlane",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:94d6a1171612477ad1edb2963b700c348567837083dba14282176125f7c2a843",
+      "text": "若整个盒体位于平面法线指向的一侧，则为 {@link Intersect.INSIDE}；若整个盒体位于相反一侧，则为 {@link Intersect.OUTSIDE}；若盒体与平面相交，则为 {@link Intersect.INTERSECTING}。"
+    },
+    {
+      "id": "OrientedBoundingBox#isOccluded",
+      "field": "description",
+      "sourceHash": "sha256:427768094285cc7eb698b9f90430e0845f4021cfde733798b074633dd4e16215",
+      "text": "判断包围盒是否被遮挡体遮住而不可见。"
+    },
+    {
+      "id": "OrientedBoundingBox#isOccluded",
+      "field": "params/occluder/description",
+      "sourceHash": "sha256:f928c7f09a479cea316edf991c09170fc1026f092f561cda94bdd62809b6fe1c",
+      "text": "遮挡体。"
+    },
+    {
+      "id": "OrientedBoundingBox#isOccluded",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:15029159ab0544e9e736dd38d1e608678baeac4de91301b169b93da7c391865c",
+      "text": "球体不可见时返回 <code>true</code>，否则返回 <code>false</code>。"
+    },
+    {
+      "id": "Plane.clone",
+      "field": "description",
+      "sourceHash": "sha256:3dd6abd80bc5bb11e88acb4b081865b544aa003dd3cd721667e0c6c59f68eb0d",
+      "text": "复制 Plane 实例。"
+    },
+    {
+      "id": "Plane.clone",
+      "field": "params/plane/description",
+      "sourceHash": "sha256:21d12fe753242967c348351b9fac6e330d46c0a2b087271cc812a20e11063d34",
+      "text": "要复制的平面。"
+    },
+    {
+      "id": "Plane.clone",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:b0cfe2f174bd56c75cb2e286bbff6fc57910ec70d959d4336264a7790bcfad9e",
+      "text": "修改后的 result 参数；未提供时返回新建的 Plane 实例。"
+    },
+    {
+      "id": "Plane.equals",
+      "field": "description",
+      "sourceHash": "sha256:13a4be6de492fd160dc524084803765168d5846b93cdf0d700dd93646e442be4",
+      "text": "比较给定平面的法线和距离，相等时返回 <code>true</code>，否则返回 <code>false</code>。"
+    },
+    {
+      "id": "Plane.equals",
+      "field": "params/left/description",
+      "sourceHash": "sha256:c81ec2bfec5d67f20716996c34b72744aa36a561aa6db3cb61b1a7c323b28f98",
+      "text": "第一个平面。"
+    },
+    {
+      "id": "Plane.equals",
+      "field": "params/right/description",
+      "sourceHash": "sha256:0f4f0635951562fbd5f90944a74cef7e11727496e878b78ec8b0a3adfc6ded5c",
+      "text": "第二个平面。"
+    },
+    {
+      "id": "Plane.fromCartesian4",
+      "field": "description",
+      "sourceHash": "sha256:08f4c25df6d4da5ac6315539fccb60924a5199131ae6e261883df7d060782326",
+      "text": "根据一般方程创建平面。"
+    },
+    {
+      "id": "Plane.fromCartesian4",
+      "field": "exceptions/0/description",
+      "sourceHash": "sha256:357b67fd75d344e2e4ef63b07fcc749c5d87a614ff4764cccb74a26e8163a318",
+      "text": "法线必须已归一化。"
+    },
+    {
+      "id": "Plane.fromCartesian4",
+      "field": "params/coefficients/description",
+      "sourceHash": "sha256:c520b73a696963008b2a68b2adbe7aa960ad974726ed2b6752fd1c0b1f8c8a7b",
+      "text": "平面方程系数，其中法线分量必须已归一化。"
+    },
+    {
+      "id": "Plane.fromCartesian4",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:8de8b0d92c62efbd64ca8154e2d91b335570044fe466fb08d8379323cb43ddaa",
+      "text": "新建的平面实例或修改后的 result 参数。"
+    },
+    {
+      "id": "Plane.fromPointNormal",
+      "field": "description",
+      "sourceHash": "sha256:c051a58b29e78059373293c703d410400895811b4e8d5752574c09a4eaf70005",
+      "text": "根据法线和平面上的一点创建平面。"
+    },
+    {
+      "id": "Plane.fromPointNormal",
+      "field": "exceptions/0/description",
+      "sourceHash": "sha256:357b67fd75d344e2e4ef63b07fcc749c5d87a614ff4764cccb74a26e8163a318",
+      "text": "法线必须已归一化。"
+    },
+    {
+      "id": "Plane.fromPointNormal",
+      "field": "params/normal/description",
+      "sourceHash": "sha256:c520b73a696963008b2a68b2adbe7aa960ad974726ed2b6752fd1c0b1f8c8a7b",
+      "text": "平面方程系数，其中法线分量必须已归一化。"
+    },
+    {
+      "id": "Plane.fromPointNormal",
+      "field": "params/point/description",
+      "sourceHash": "sha256:eb8a80afbcb593da4d344469c1a1a468634cd3bd26c108357c58803d0db3992c",
+      "text": "平面上的点。"
+    },
+    {
+      "id": "Plane.fromPointNormal",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:8de8b0d92c62efbd64ca8154e2d91b335570044fe466fb08d8379323cb43ddaa",
+      "text": "新建的平面实例或修改后的 result 参数。"
+    },
+    {
+      "id": "Plane.getPointDistance",
+      "field": "description",
+      "sourceHash": "sha256:90033f01ccf0b23a2c412b1483880acd6b1b23c1a99fdfc612ada35cfa498fd2",
+      "text": "计算点到平面的有符号最短距离。符号决定点位于平面的哪一侧：正值表示位于法线方向的半空间，负值表示位于法线反方向的半空间，零表示平面经过该点。"
+    },
+    {
+      "id": "Plane.getPointDistance",
+      "field": "params/plane/description",
+      "sourceHash": "sha256:a2cf4fe67d474b84c9a778b791a6e4a487b7b11fbbe2746fb823498f01737b16",
+      "text": "平面。"
+    },
+    {
+      "id": "Plane.getPointDistance",
+      "field": "params/point/description",
+      "sourceHash": "sha256:54b563f410f50fbc072615f79455e900428e67f058313f840ca164b9954c8415",
+      "text": "点。"
+    },
+    {
+      "id": "Plane.getPointDistance",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:86eab7576397c11772e4d0481b5d6a997f9efa3f5495338a1414184d161c3266",
+      "text": "点到平面的有符号最短距离。"
+    },
+    {
+      "id": "Plane.ORIGIN_XY_PLANE",
+      "field": "description",
+      "sourceHash": "sha256:f090879ff000e15d2d4b46ed8d4726500f7dd19599621a6fb9d46f4e12ed1107",
+      "text": "初始化为经过原点、法线沿 Z 轴正方向的 XY 平面的常量。"
+    },
+    {
+      "id": "Plane.ORIGIN_YZ_PLANE",
+      "field": "description",
+      "sourceHash": "sha256:a2a46ceff4eb0c09939727381886d2b806e9fd7c08e463906cdbc9a08fcd6496",
+      "text": "初始化为经过原点、法线沿 X 轴正方向的 YZ 平面的常量。"
+    },
+    {
+      "id": "Plane.ORIGIN_ZX_PLANE",
+      "field": "description",
+      "sourceHash": "sha256:089c41d82c5f5785c9bd4942162871bf0ed3b1ca11536faa1a69aa49d3436e53",
+      "text": "初始化为经过原点、法线沿 Y 轴正方向的 ZX 平面的常量。"
+    },
+    {
+      "id": "Plane.projectPointOntoPlane",
+      "field": "description",
+      "sourceHash": "sha256:e8f435454e445277f29e0ce570a39f908c4fe57bc544e2511aa463ae29e3a3fe",
+      "text": "将点投影到平面。"
+    },
+    {
+      "id": "Plane.projectPointOntoPlane",
+      "field": "params/plane/description",
+      "sourceHash": "sha256:d418ef149390875f2db9e1bec96d5ce8f6fdf98396a6b9b1ead25b60512fde75",
+      "text": "点要投影到的平面。"
+    },
+    {
+      "id": "Plane.projectPointOntoPlane",
+      "field": "params/point/description",
+      "sourceHash": "sha256:2821e726dc837c3c4a3db10f6e80612c595d825762c3ccdce2ec80656067cdbf",
+      "text": "要投影到平面的点。"
+    },
+    {
+      "id": "Plane.projectPointOntoPlane",
+      "field": "params/result/description",
+      "sourceHash": "sha256:630c136dd5208f1aba6baf288e7e43e95e73934d16fad15838c6c56b83fae7f0",
+      "text": "结果点；若为 undefined，则创建新的 Cartesian3。"
+    },
+    {
+      "id": "Plane.projectPointOntoPlane",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:3b28d95418a91fc98ef8eabf19a1cbff31f190a0c1124274ab830b7bd48ee92f",
+      "text": "修改后的 result 参数；未提供时返回新建的 Cartesian3 实例。"
+    },
+    {
+      "id": "Plane.transform",
+      "field": "description",
+      "sourceHash": "sha256:f93969c4c0ce7551593e984eb04f6b7fd435d8c8643d4740dd7f033e3648ec9f",
+      "text": "使用给定变换矩阵变换平面。"
+    },
+    {
+      "id": "Plane.transform",
+      "field": "params/plane/description",
+      "sourceHash": "sha256:a2cf4fe67d474b84c9a778b791a6e4a487b7b11fbbe2746fb823498f01737b16",
+      "text": "平面。"
+    },
+    {
+      "id": "Plane.transform",
+      "field": "params/transform/description",
+      "sourceHash": "sha256:4bde37cd1358dc9fab2851852022d5c1896a8b143b00183b38453df9b6e8af64",
+      "text": "变换矩阵。"
+    },
+    {
+      "id": "Plane.transform",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:fa6275b5f4e18a0fda5c9a6dce50d866fd8d5ab2ca3c5c3970ec2c5cf8722027",
+      "text": "经给定变换矩阵变换后的平面。"
+    },
+    {
+      "id": "Plane",
+      "field": "description",
+      "sourceHash": "sha256:65e0ff9d093f9430d241b7ea2900a4510af04b3f8a609ac8ff424f7d4a73b600",
+      "text": "以 Hessian 标准式定义的平面：<pre>\rax + by + cz + d = 0\r</pre>其中 (a, b, c) 为平面的 <code>normal</code>，d 为有符号 <code>distance</code>，(x, y, z) 为平面上的任意点。"
+    },
+    {
+      "id": "Plane",
+      "field": "exceptions/0/description",
+      "sourceHash": "sha256:357b67fd75d344e2e4ef63b07fcc749c5d87a614ff4764cccb74a26e8163a318",
+      "text": "法线必须已归一化。"
+    },
+    {
+      "id": "Plane",
+      "field": "params/distance/description",
+      "sourceHash": "sha256:d57fa7b01d7012ab6b28d966912d07d9f249ce79783b5208382a599bea2b29d3",
+      "text": "原点到平面的最短距离。<code>distance</code> 的符号决定原点位于平面的哪一侧：<code>distance</code> 为正时，原点位于法线方向的半空间；为负时位于法线反方向的半空间；为零时平面经过原点。"
+    },
+    {
+      "id": "Plane",
+      "field": "params/normal/description",
+      "sourceHash": "sha256:c520b73a696963008b2a68b2adbe7aa960ad974726ed2b6752fd1c0b1f8c8a7b",
+      "text": "平面方程系数，其中法线分量必须已归一化。"
+    },
+    {
+      "id": "Plane#distance",
+      "field": "description",
+      "sourceHash": "sha256:d57fa7b01d7012ab6b28d966912d07d9f249ce79783b5208382a599bea2b29d3",
+      "text": "原点到平面的最短距离。<code>distance</code> 的符号决定原点位于平面的哪一侧：<code>distance</code> 为正时，原点位于法线方向的半空间；为负时位于法线反方向的半空间；为零时平面经过原点。"
+    },
+    {
+      "id": "Plane#normal",
+      "field": "description",
+      "sourceHash": "sha256:a30014359cddede5263a76fb62f256badd0545fa5d4810032ebff074290a88c4",
+      "text": "平面法线。"
+    },
+    {
+      "id": "Ray.clone",
+      "field": "description",
+      "sourceHash": "sha256:0b5d4b9fbb895fe3305e5de9c38d407007bd699b06f1e78783fd0afc3911f484",
+      "text": "复制 Ray 实例。"
+    },
+    {
+      "id": "Ray.clone",
+      "field": "params/ray/description",
+      "sourceHash": "sha256:d6b4ee8aba87c6d28de8e12febc5ccfd1c42052bf291ca4505ff2c5e64cd6b56",
+      "text": "要复制的射线。"
+    },
+    {
+      "id": "Ray.clone",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:2c52a26437312f0bf64e3aa80355972262095ed765e2e5b75a70491ecb4d9917",
+      "text": "修改后的 result 参数；未提供时返回新建的 Ray 实例。若 ray 为 undefined，则返回 undefined。"
+    },
+    {
+      "id": "Ray.getPoint",
+      "field": "description",
+      "sourceHash": "sha256:2daf3433d41c0e7ff3bdf83b2baaf0025b9f5eb6cf76c709b9c00214139c0b12",
+      "text": "计算射线 r(t) = o + t*d 上的点，其中 o 为射线原点，d 为方向。"
+    },
+    {
+      "id": "Ray.getPoint",
+      "field": "params/ray/description",
+      "sourceHash": "sha256:8ab1bbf7edb941be28ae823f0c6c78c609da0248e1c6635ad0d5f3a2bb0cfdee",
+      "text": "射线。"
+    },
+    {
+      "id": "Ray.getPoint",
+      "field": "params/result/description",
+      "sourceHash": "sha256:9b612b126538209ef14dd8aa26f2ef75dbd81fe28deb0cffa1f5fae78cdd066e",
+      "text": "用于保存结果的对象。"
+    },
+    {
+      "id": "Ray.getPoint",
+      "field": "params/t/description",
+      "sourceHash": "sha256:22121605154b107fcc56aa6c7e8dee90172d8bfe231b73fcadb25a8b66e556d2",
+      "text": "标量值。"
+    },
+    {
+      "id": "Ray.getPoint",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:da42cdf78576230d7482546f50c4674c0f14bd322531629ca3246a96f37fb8a4",
+      "text": "修改后的 result 参数；未提供时返回新实例。"
+    },
+    {
+      "id": "Ray",
+      "field": "classdesc",
+      "sourceHash": "sha256:48362cc6fe729abc8e3f07c1ab6f7c73f12733ea213ebfe0f64877216e3ad9dc",
+      "text": "表示从给定原点沿给定方向无限延伸的射线。"
+    },
+    {
+      "id": "Ray",
+      "field": "params/direction/description",
+      "sourceHash": "sha256:03408f9fd674116904ace4ec692c1c32e35a0321751e2d52c9bce63c0acebce2",
+      "text": "射线方向。"
+    },
+    {
+      "id": "Ray",
+      "field": "params/origin/description",
+      "sourceHash": "sha256:616bdd11e325fc0fdbd56f47e6b16c4f425b08b2af8e9281a7217c1245ea975b",
+      "text": "射线原点。"
+    },
+    {
+      "id": "Ray#direction",
+      "field": "description",
+      "sourceHash": "sha256:03408f9fd674116904ace4ec692c1c32e35a0321751e2d52c9bce63c0acebce2",
+      "text": "射线方向。"
+    },
+    {
+      "id": "Ray#origin",
+      "field": "description",
+      "sourceHash": "sha256:616bdd11e325fc0fdbd56f47e6b16c4f425b08b2af8e9281a7217c1245ea975b",
+      "text": "射线原点。"
+    }
+  ]
+}
