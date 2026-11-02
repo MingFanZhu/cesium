@@ -122,3 +122,23 @@ scene.postProcessStages.remove(projection);
 包含网格、地形和高斯捕获，captureMilliseconds 是 CPU 提交时间。
 
 设计与边界见 [ADR-0208](Decisions/ADR-0208-gaussian-video-projection.md)。
+
+### 可复现示例
+
+运行 `node scripts/scenegis/create-gaussian-video-demo.mjs`，再打开
+`Test/Rendering/高斯视频投射.html?world=planar` 或 `?world=globe`。
+示例使用本地生成的 8,531 个高斯与校准视频流，默认暂停；可播放、翻转、调整透明度、
+选择本地视频文件，并切换网格遮挡。点击“进入挡板后方”可验证显示相机看不到的高斯仍能挡光。
+阈值改为 1 时，本例所有单片元 opacity 都低于阈值，因此后墙会重新接收视频；
+这用于展示阈值近似的实际含义。切换阈值会重建投射实例，目标图元和图集保持原所有权。
+
+自动化：执行 `npm start -- --port 8096` 启动根开发服务器，再执行
+`npx playwright test -c Test/VideoProjection/playwright.gaussian.config.mjs`。
+示例由页面管理视频、定时器和目标销毁；调用方应先移除投射，再销毁目标或 Scene。
+
+一次有边界的暖态测量：Windows 10 / Chrome 156，RTX 3060 Ti / ANGLE D3D11，
+1280×800，8,531 个高斯，512×320 暂停视频，1024² 投影深度。
+page atlas 为 16 MiB，视频纹理 0.625 MiB，深度约 4 MiB，缓存两个辅助 Shader 变体。
+每帧捕获 1 次绘制；一次 CPU 捕获提交 0.40 ms，最近视频上传提交 0.70 ms。
+16 次有效 GPU timer 样本的整帧中位数为 2.42 ms、P95 为 3.36 ms。
+这些不是投射的独立增量耗时，也不包含所有主场景资源的显存总量，不能推断百万级资产性能。

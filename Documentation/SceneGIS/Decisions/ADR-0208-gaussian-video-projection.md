@@ -1,6 +1,6 @@
 # ADR-0208：自有分段高斯的视频接收与遮挡
 
-- Status: accepted for phased implementation
+- Status: accepted and implemented; technical qualification passed
 - Date: 2026-11-02
 - Owner: current task
 - Related: ADR-0177, ADR-0188

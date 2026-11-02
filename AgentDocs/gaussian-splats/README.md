@@ -10,7 +10,7 @@
 - Active phase plan: 无；[已完成原生渲染](plans/2026-10-23-p2-native-rendering.md)
 - Active standalone plan: 无；[已完成源坐标报告](plans/2026-10-28-source-coordinate-report.md)
 - Architecture / execution contact: 本任务
-- Last updated: 2026-10-28
+- Last updated: 2026-11-02
 
 ## Scope
 
@@ -33,8 +33,9 @@
 ## Current handoff
 
 2026-11-02：视频投射扩展由 [video-projection](../video-projection/README.md) 管理，
-当前 [G1](../video-projection/plans/2026-11-02-g1-gaussian-views.md) 增加共享多视角选级；
-不重做解析加载，不改变 MCI4/GSP、排序源或 SDK。既有工具维护事项保持原状态。
+共享多视角选级与 GPU 视频接收 / 遮挡已完成；
+[G3 review](../video-projection/reviews/2026-11-02-g3-gaussian-qualification.md)记录公开 API、
+双世界画面与资格。不重做解析加载，不改变 MCI4/GSP、排序源或 SDK。既有工具维护事项保持原状态。
 
 P1 `040e7d72f6`、P2 `e1dc28d796` 已按负责人要求集成到 `scenegis/develop`。
 RequestScheduler 临时取消误耗尽加载重试的问题已修复，253 项 Gaussian Specs 通过，

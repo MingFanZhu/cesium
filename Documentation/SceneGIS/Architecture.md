@@ -1555,6 +1555,14 @@ ADR-0177 将 Viewshed / VideoProjection 组织为独立公共 stage，共享自�
 coordinator 和 GLSL 遮挡判定。Scene、Planar Surface、S3M 只依赖通用 observer 协议；
 SGP-0065 保留原有调度位置。每实例独立深度资源，不覆盖太阳 shadowMap，不拥有来源几何。
 
+ADR-0208 为自有 SceneGISGaussianSegmentedPrimitive 增加显式 gaussianTargets 接收路径。
+显示 / 投影视角共享一个受预算约束的 Active Cut、atlas 和显示排序；投影捕获不得推进第二次
+加载或排序。SGP-0065 仅为高斯目标增加主绘制之前的捕获，普通 observer 保留原位置。
+高斯片元的最大密度位置与透明度阈值定义近似遮挡，正常 Gaussian pass 不写深度；
+视频只在捕获 RGB 中混合，保留 alpha，并受全局显示变换影响。每目标最多四路启用投射，
+按 stage 集合顺序混合，当前联合视角覆盖未就绪时保留原色。投射借用目标 / 媒体，
+自有深度与视频随 stage 释放，辅助 Shader 变体随目标 renderer 释放；不修改原生 Gaussian。
+
 ## 局部 GPU 流体
 
 ADR-0187：`SceneGISFluidPrimitive` 是独立于 GPU 粒子特效和 FFT 水面的原生图元。

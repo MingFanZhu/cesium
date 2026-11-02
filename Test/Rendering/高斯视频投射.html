@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>自有高斯视频投射 · SceneGIS</title>
+    <link rel="stylesheet" href="/Build/CesiumUnminified/Widgets/widgets.css" />
+    <link rel="stylesheet" href="/Test/examples.css" />
+  </head>
+  <body>
+    <div id="map"></div>
+    <aside>
+      <h1>自有高斯视频投射</h1>
+      <p>
+        <a href="?world=planar">平面米制</a> ·
+        <a href="?world=globe">球面 ENU</a>
+      </p>
+      <p>
+        前挡板与后墙均由高斯构成。视频沿三维形状投射；后墙灰色区域是高斯遮挡。
+      </p>
+      <p>
+        首次运行：<code
+          >node scripts/scenegis/create-gaussian-video-demo.mjs</code
+        >
+      </p>
+      <video
+        id="media"
+        muted
+        playsinline
+        style="width: 100%; background: #17212c"
+      ></video>
+      <p>
+        <button id="play" type="button">播放视频</button>
+        <button id="focus" type="button">复位视角</button>
+        <button id="behind" type="button">进入挡板后方</button>
+      </p>
+      <p>
+        <label><input id="enabled" type="checkbox" checked /> 视频投射</label>
+        <label><input id="flip" type="checkbox" /> 上下翻转</label>
+      </p>
+      <p>
+        <label><input id="blocker" type="checkbox" /> 网格遮挡物</label>
+        <label><input id="guide" type="checkbox" /> 投影视锥</label>
+      </p>
+      <label for="opacity">融合透明度</label>
+      <input
+        id="opacity"
+        type="range"
+        min="0"
+        max="1"
+        step="0.01"
+        value="1"
+        style="width: 100%"
+      />
+      <p>
+        <label for="threshold">高斯遮挡阈值</label>
+        <select id="threshold">
+          <option value="0.3">0.3（默认）</option>
+          <option value="0.05">0.05</option>
+          <option value="1">1（本例不挡光）</option>
+        </select>
+      </p>
+      <p>
+        <label for="file">使用本地视频</label
+        ><input id="file" type="file" accept="video/*" style="width: 100%" />
+      </p>
+      <p id="status">正在加载…</p>
+      <p id="error"></p>
+      <p>遮挡阈值 0.3；深度 1024²。低透明度与稀疏数据的遮挡为近似。</p>
+    </aside>
+    <script>
+      window.CESIUM_BASE_URL = "/Build/CesiumUnminified/";
+    </script>
+    <script type="module" src="./高斯视频投射.js"></script>
+  </body>
+</html>

@@ -39,9 +39,11 @@ implements Chinese owned public JSDoc and one Chinese documentation edition.
 and committed as `05362428b6`; [C2](plans/2026-10-30-c2-chinese-edition.md) is
 [reviewed](reviews/2026-10-30-c2-chinese-edition.md) and complete.
 
-All 73 owned API source files maintain Chinese prose directly. The 2,337 published owned
+All 73 owned API source files maintain Chinese prose directly. The 2,342 published owned
 fields include synthetic VERSION and bypass external translation. Native English comments
-remain intact; independent catalogs cover all 15,523 native fields.
+remain intact; independent catalogs cover all 15,522 native fields.
+The 2026-11-02 owned VideoProjection enabled override replaces one inherited native field;
+its Gaussian options/getters add Chinese source prose without new external translations.
 Missing/stale/unused are all zero; pure numeric/formula descriptions remain literal. Each build overwrites source
 inventory/report without altering maintained catalogs. Historical bilingual delivery in
 [ADR-0206](../../Documentation/SceneGIS/Decisions/ADR-0206-documentation-localization.md) and

@@ -960,7 +960,6 @@ test("widget input prose preserves cancellation, controller units and native inh
     ["SceneGISModelFlatten#uniforms", "CustomShader#uniforms"],
     ["SceneGISRainLensStage#uniforms", "PostProcessStage#uniforms"],
     ["SceneGISSnowLensStage#ready", "PostProcessStage#ready"],
-    ["SceneGISVideoProjection#enabled", "PostProcessStage#enabled"],
     ["SceneGISViewshed#textureScale", "PostProcessStage#textureScale"],
   ]) {
     const inherited = lookup.get(id);
@@ -970,6 +969,10 @@ test("widget input prose preserves cancellation, controller units and native inh
     assert.ok(inherited.i18n.translatedFields.includes("description"));
   }
   assert.equal(lookup.get("SceneGISModelFlatten").sourceLocale, "zh-CN");
+  const enabled = lookup.get("SceneGISVideoProjection#enabled");
+  assert.equal(enabled.sourceLocale, "zh-CN");
+  assert.match(enabled.description, /请求重绘.*不暂停借用视频/);
+  assert.deepEqual(enabled.i18n.translatedFields, []);
 });
 
 test("utility prose preserves task backpressure, live arrays and render formulas", () => {

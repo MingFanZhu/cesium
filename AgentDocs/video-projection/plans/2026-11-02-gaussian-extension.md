@@ -1,7 +1,7 @@
 # 自有分段高斯视频投射
 
 - Type: extension plan
-- Status: active
+- Status: completed; technical qualification passed, owner visual judgment retained
 - Date: 2026-11-02
 - Owner: current task, architecture / execution / review
 - Architecture review: confirmed
@@ -28,7 +28,7 @@ Projector/video handles remain owned by the stage; targets and media remain borr
 | ----- | ------------------------------------------------------- | ---------------------------------------------------------------------------------- | --------- |
 | G1    | Shared multi-view Active Cut / observation              | Union visibility, maximum SSE, freshness / budget tests; reviewed local checkpoint | completed |
 | G2    | Target API, GPU projection, observer depth and lifetime | Real video / depth / occlusion / transforms / teardown Specs; reviewed checkpoint  | completed |
-| G3    | Both-world example, SDK guide and qualification         | Reproducible images, bounded costs, full build / types / regressions; checkpoint   | pending   |
+| G3    | Both-world example, SDK guide and qualification         | Reproducible images, bounded costs, full build / types / regressions; checkpoint   | completed |
 
 ## Global acceptance
 

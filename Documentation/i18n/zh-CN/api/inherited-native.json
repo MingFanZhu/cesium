@@ -249,12 +249,6 @@
       "text": "清空输出纹理时所用的颜色。"
     },
     {
-      "id": "SceneGISVideoProjection#enabled",
-      "field": "description",
-      "sourceHash": "sha256:3eb19eece264775a72ba95f493d678e3056c32092659186c0628ec761b8f8d23",
-      "text": "就绪后是否执行此后处理阶段。"
-    },
-    {
       "id": "SceneGISVideoProjection#forcePowerOfTwo",
       "field": "description",
       "sourceHash": "sha256:290e4c1c2c4f746f9f4c0823d142da6d57f3eaec7ebbc0e38ea6e77e82f4b88f",
