@@ -6,8 +6,8 @@
 - Status: active; Gaussian receiver extension in progress
 - Planning model: extension
 - Active extension plan: [Gaussian receivers](plans/2026-11-02-gaussian-extension.md)
-- Current phase: G1 shared multi-view selection
-- Active phase plan: [G1](plans/2026-11-02-g1-gaussian-views.md)
+- Current phase: G2 core completed; G3 qualification next
+- Active phase plan: none; latest [G2](plans/2026-11-02-g2-gaussian-receivers.md)
 - Architecture / execution: current task; no independent agent
 - Updated: 2026-11-02
 - Integrated branch: scenegis/develop; source branch: feature/video-projection

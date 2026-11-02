@@ -69,3 +69,56 @@ alpha 保持目标画面原值。阶段按 postProcessStages 顺序叠加。不�
 同位姿捕获，也不缓存可能已经变化的动态遮挡。SDK 集成和投影标定另行安排。
 
 设计见 [ADR-0177](Decisions/ADR-0177-video-projection.md)，验收入口见 `Test/视频投射.html`。
+
+## 自有分段高斯
+
+传入非空 `gaussianTargets` 可投射到自有的 `SceneGISGaussianSegmentedPrimitive`。
+它不支持 Cesium 原生 GaussianSplatPrimitive。目标必须已经加入同一 Scene，可在嵌套
+PrimitiveCollection 内；投射只借用目标，不负责挂载或销毁。
+
+```js
+const projection = scene.postProcessStages.add(
+  new SceneGIS.SceneGISVideoProjection({
+    scene,
+    world: scene.world,
+    video,
+    position,
+    direction,
+    up,
+    gaussianTargets: [splats],
+    sources: [buildingTileset], // Mesh occluders; targets also occlude one another.
+    terrain: true,
+    gaussianAlphaThreshold: 0.3,
+    resolution: 1024,
+    opacity: 1,
+  }),
+);
+projection.enabled = false; // Requests a redraw; borrowed media is not paused.
+scene.postProcessStages.remove(projection);
+```
+
+- `gaussianTargets`：创建时固定、只读的目标数组，默认空。非空时仅向这些高斯投射，
+  后处理不再覆盖不透明表面；需要两类接收者时创建独立实例。先移除投射，再移除或销毁目标。
+- `gaussianAlphaThreshold`：创建时固定的单个高斯片元透明度阈值，默认 `0.3`，范围 `(0,1]`。
+  达到阈值的片元写入投影相机的近似遮挡深度，不改变正常显示透明度。
+- 同一目标最多同时接收四路启用的投射，按 postProcessStages 集合顺序混合；超出会明确报错。
+  `opacity`、`flipY`、媒体替换及 `setView` 沿用现有接口。
+
+显示相机与各投影相机共同驱动同一份 Active Cut；投影深度分辨率决定其像素误差尺度。
+原数据、Worker 排序与 atlas 不复制，加载和选级仍受原预算约束。投影视角变化或目标变换后，
+完整覆盖重新就绪之前保留高斯原色；`ready` 不能替代 `projectionReady`。
+
+片元接收位置采用三维 Gaussian 沿显示射线的最大密度点。协方差归一化后加入相对 `1e-6`
+对角方差以稳定近退化形状的求逆，不改变显示形状或 alpha。高斯遮挡是单片元阈值近似，
+不是不透明网格或累积透射求解；稀疏、低透明度数据可能漏光，有限 LOD 和深度尺寸也限制边缘精度。
+视频在高斯捕获 RGB 中混合，之后与高斯一起参与场景曝光和显示变换；不会修改 SH，
+也不进行 PBR 重光照。这与普通路径在显示阶段叠加 SDR 视频的颜色契约不同。
+
+每个投射仍拥有一张视频纹理及一份独立投影深度；1024² 深度约 4 MiB，RGBA 视频约
+`宽 × 高 × 4` 字节。每个可见目标增加一次遮挡绘制，接收视频不额外重绘高斯。
+每个曾启用投射的目标最多缓存接收 / 深度两个 Shader 变体，在目标销毁时释放；
+移除投射立即释放其深度和视频资源。更多视角可能使现有 atlas 驻留更多数据，但不扩大预算。
+目标 statistics 中的 videoProjectorCount、videoShaderPrograms 可用于诊断；投射 drawCalls
+包含网格、地形和高斯捕获，captureMilliseconds 是 CPU 提交时间。
+
+设计与边界见 [ADR-0208](Decisions/ADR-0208-gaussian-video-projection.md)。

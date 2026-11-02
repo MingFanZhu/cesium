@@ -27,7 +27,7 @@ Projector/video handles remain owned by the stage; targets and media remain borr
 | Phase | Scope                                                   | Exit                                                                               | State     |
 | ----- | ------------------------------------------------------- | ---------------------------------------------------------------------------------- | --------- |
 | G1    | Shared multi-view Active Cut / observation              | Union visibility, maximum SSE, freshness / budget tests; reviewed local checkpoint | completed |
-| G2    | Target API, GPU projection, observer depth and lifetime | Real video / depth / occlusion / transforms / teardown Specs; reviewed checkpoint  | pending   |
+| G2    | Target API, GPU projection, observer depth and lifetime | Real video / depth / occlusion / transforms / teardown Specs; reviewed checkpoint  | completed |
 | G3    | Both-world example, SDK guide and qualification         | Reproducible images, bounded costs, full build / types / regressions; checkpoint   | pending   |
 
 ## Global acceptance

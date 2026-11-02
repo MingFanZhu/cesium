@@ -17,6 +17,8 @@ import PrimitiveCollection from "../../../Scene/PrimitiveCollection.js";
 import SceneMode from "../../../Scene/SceneMode.js";
 import SceneGISPlanarPrimitive from "../SceneGISPlanarPrimitive.js";
 import SceneGISS3MLayer from "../SceneGISS3MLayer.js";
+import SceneGISGaussianSegmentedPrimitive from "../SceneGISGaussianSegmentedPrimitive.js";
+import GaussianVideo from "./Gaussian/_SceneGISGaussianVideo.js";
 import Depth from "./_SceneGISViewshedDepth.js";
 import GlobeSelection from "./_SceneGISViewshedGlobe.js";
 import FrustumGuide from "./_SceneGISViewshedFrustum.js";
@@ -189,6 +191,24 @@ const ObserverPasses = {
     return [...new Set(sources)];
   },
 
+  validateGaussianTargets(scene, targets) {
+    if (!Array.isArray(targets)) {
+      throw new DeveloperError("gaussianTargets must be an array.");
+    }
+    for (const target of targets) {
+      if (
+        !(target instanceof SceneGISGaussianSegmentedPrimitive) ||
+        target.isDestroyed() ||
+        !contains(scene.primitives, target)
+      ) {
+        throw new DeveloperError(
+          "gaussianTargets must contain live SceneGISGaussianSegmentedPrimitive members of the bound Scene.",
+        );
+      }
+    }
+    return Object.freeze([...new Set(targets)]);
+  },
+
   prepare(scene) {
     const frame = scene.frameState;
     const active = (frame._sceneGISObservers ??= []);
@@ -197,8 +217,10 @@ const ObserverPasses = {
     if (!frame.passes.render || frame.passes.pick || frame.passes.depth) {
       return;
     }
-    for (const stage of scene._sceneGISObservers ?? []) {
-      if (!scene.postProcessStages.contains(stage)) {
+    const targetCounts = new Map();
+    for (let index = 0; index < scene.postProcessStages.length; index++) {
+      const stage = scene.postProcessStages.get(index);
+      if (!scene._sceneGISObservers?.has(stage)) {
         continue;
       }
       const state = stage._observer;
@@ -225,6 +247,20 @@ const ObserverPasses = {
         continue;
       }
       this.validateSources(scene, state.sources);
+      if (state.gaussianTargets?.length) {
+        this.validateGaussianTargets(scene, state.gaussianTargets);
+        for (const target of state.gaussianTargets) {
+          const count = (targetCounts.get(target) ?? 0) + 1;
+          if (count > 4) {
+            throw new DeveloperError(
+              "A Gaussian target supports at most four active video projectors.",
+            );
+          }
+          targetCounts.set(target, count);
+        }
+        state.media.setActive(true);
+        state.media.update(scene.context);
+      }
       state.analysisReady = false;
       state.status = "loading";
       state.commands.length = 0;
@@ -238,13 +274,16 @@ const ObserverPasses = {
     }
   },
 
-  execute(scene) {
+  execute(scene, gaussian = false) {
     const frame = scene.frameState;
     if (!frame.passes.render || frame.passes.pick || frame.passes.depth) {
       return;
     }
     const mainCommands = frame.commandList;
     for (const state of frame._sceneGISObservers ?? []) {
+      if (Boolean(state.gaussianTargets?.length) !== gaussian) {
+        continue;
+      }
       const start = performance.now();
       let complete = true;
       try {
@@ -313,6 +352,21 @@ const ObserverPasses = {
               scene.context.uniformState.updatePass(Pass.COMPUTE);
               command.execute(scene._computeEngine);
             }
+          }
+          for (const target of state.gaussianTargets ?? []) {
+            if (!target.show) {
+              continue;
+            }
+            if (target.error) {
+              throw target.error;
+            }
+            if (!GaussianVideo.ready(target)) {
+              complete = false;
+              continue;
+            }
+            state.commands.push(
+              GaussianVideo.depthCommand(target, state, observerFrame),
+            );
           }
           state.depth ??= new Depth(scene);
           state.depth.capture(state.camera, state.commands, state.resolution);

@@ -2229,6 +2229,11 @@ Object.defineProperties(_SceneGISGaussianSegmentedRuntimeController.prototype, {
         cpuPresentationBytes: d2?.cpuPresentationCurrentBytes ?? 0,
         gpuPresentationBytes: d2?.gpuPresentationCurrentBytes ?? 0,
         selectedSplats: d3?.globalPresentationSplats ?? 0,
+        videoProjectorCount: this._primitive._videoProjectors?.length ?? 0,
+        videoShaderPrograms: Math.max(
+          0,
+          (this._renderResources?.statistics.sharedShaderCount ?? 0) - 1,
+        ),
         slots: this._d3?.current?.presentation?.composition?.slotCount ?? 0,
         contentGeneration: d3?.globalContentGeneration ?? 0,
         mappingGeneration: d3?.globalMappingGeneration ?? 0,

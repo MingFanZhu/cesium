@@ -16,6 +16,7 @@ import ShaderDestination from "../../../../Renderer/ShaderDestination.js";
 import VertexArray from "../../../../Renderer/VertexArray.js";
 import GaussianStreamFS from "../../../../Shaders/SceneGIS/Gaussian/SceneGISGaussianStreamFS.js";
 import GaussianStreamVS from "../../../../Shaders/SceneGIS/Gaussian/SceneGISGaussianStreamVS.js";
+import GaussianVideo from "./_SceneGISGaussianVideo.js";
 import BlendingState from "../../../../Scene/BlendingState.js";
 
 /** Shared off-route renderer for exactly one global DrawCommand. @private */
@@ -30,6 +31,7 @@ export default class _SceneGISGaussianSegmentedGlobalRenderResources {
     this._buildShaderProgram = options.buildShaderProgram;
     this._createVertexArray = options.createVertexArray;
     this._shaderProgram = undefined;
+    this._videoPrograms = new Map();
     this._vertexArray = undefined;
     this._destroyed = false;
     this._destroyCursor = 0;
@@ -80,6 +82,8 @@ export default class _SceneGISGaussianSegmentedGlobalRenderResources {
       builder.addUniform("vec4", "u_renderTuning0", ShaderDestination.BOTH);
       builder.addUniform("vec4", "u_renderTuning1", ShaderDestination.VERTEX);
       builder.addUniform("float", "u_falloff", ShaderDestination.FRAGMENT);
+      this._videoBuilder = builder.clone();
+      this._context = frameState.context;
       builder.addVertexLines(GaussianStreamVS);
       builder.addFragmentLines(GaussianStreamFS);
       this._shaderProgram = this._buildShaderProgram
@@ -163,6 +167,7 @@ export default class _SceneGISGaussianSegmentedGlobalRenderResources {
       u_renderTuning0: () => primitive._renderTuning0,
       u_renderTuning1: () => primitive._renderTuning1,
       u_falloff: () => primitive._falloff,
+      ...GaussianVideo.uniforms(primitive, this._context),
     };
     const command = new DrawCommand({
       modelMatrix: primitive._effectiveModelMatrix,
@@ -183,9 +188,27 @@ export default class _SceneGISGaussianSegmentedGlobalRenderResources {
     return command;
   }
 
+  getVideoProgram(mode) {
+    if (mode === "base") {
+      return this._shaderProgram;
+    }
+    if (!this._videoPrograms.has(mode)) {
+      const builder = this._videoBuilder.clone();
+      GaussianVideo.configure(builder, mode === "depth");
+      builder.addVertexLines(GaussianStreamVS);
+      builder.addFragmentLines(GaussianStreamFS);
+      this._videoPrograms.set(mode, builder.buildShaderProgram(this._context));
+    }
+    return this._videoPrograms.get(mode);
+  }
+
   destroy() {
     if (this._destroyed) {
       return false;
+    }
+    for (const [mode, program] of this._videoPrograms) {
+      program.destroy();
+      this._videoPrograms.delete(mode);
     }
     if (this._constructionError) {
       this._settleConstructionCleanup();
@@ -218,7 +241,7 @@ export default class _SceneGISGaussianSegmentedGlobalRenderResources {
 
   get statistics() {
     return Object.freeze({
-      sharedShaderCount: this._destroyed ? 0 : 1,
+      sharedShaderCount: this._destroyed ? 0 : 1 + this._videoPrograms.size,
       drawCommandCount: 0,
       destroyed: this._destroyed,
     });

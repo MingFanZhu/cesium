@@ -27,5 +27,16 @@ void main() {
     if (rgba.a < MIN_ALPHA) {
         discard;
     }
+#ifdef SCENEGIS_GAUSSIAN_VIDEO
+    vec3 receiverPosition = sceneGIS_gaussianVideoPosition();
+#ifdef SCENEGIS_GAUSSIAN_VIDEO_DEPTH
+    float receiverDepth = -receiverPosition.z;
+    if (rgba.a < u_gvAlphaThreshold || receiverDepth < u_gvDepthRange.x || receiverDepth > u_gvDepthRange.y) discard;
+    gl_FragDepth = log2(receiverDepth - u_gvDepthRange.x + 1.0) /
+        log2(u_gvDepthRange.y - u_gvDepthRange.x + 1.0);
+#else
+    rgba.rgb = sceneGIS_gaussianVideoColor(rgba.rgb, receiverPosition);
+#endif
+#endif
     out_FragColor = vec4(rgba.rgb * rgba.a, rgba.a);
 }

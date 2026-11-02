@@ -26,6 +26,10 @@ maximum-density point along a view ray through its 3D Gaussian; alpha falloff an
 threshold define approximate occluder coverage. Depth and receiving use the same position
 rule. Native opaque occluders share the projector depth test. Do not enable depth writes in
 the normal Gaussian pass or use terrain behind a splat as its receiver location.
+The position proxy normalizes covariance and adds a relative 1e-6 diagonal variance floor
+before inversion, bounding its condition number for nearly planar splats; rendered footprint,
+alpha and stored data are unchanged. The threshold applies to each fragment contribution,
+not accumulated transmittance. Sparse low-opacity layers may therefore transmit the projection.
 
 Video is mixed with Gaussian captured RGB before premultiplied alpha compositing, leaving
 Gaussian alpha and main opaque depth unchanged. Global display/exposure then affects this

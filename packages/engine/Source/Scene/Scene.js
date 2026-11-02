@@ -4148,6 +4148,11 @@ function executeCommandsInViewport(firstViewport, scene, passState) {
     }
   }
 
+  // SCENEGIS_PATCH_BEGIN SGP-0065: Capture Gaussian projectors before their receiver colors are drawn.
+  if (firstViewport) {
+    SceneGISObserverPasses.execute(scene, true);
+  }
+  // SCENEGIS_PATCH_END SGP-0065
   executeCommands(scene, passState);
   // SCENEGIS_PATCH_BEGIN SGP-0065: Capture after main geometry, before display post-processing.
   if (firstViewport) {

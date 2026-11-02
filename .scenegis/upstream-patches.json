@@ -249,7 +249,7 @@
       "id": "SGP-0065",
       "title": "Integrate independent observer viewshed selection and capture",
       "status": "active",
-      "reason": "ADR-0177 shares the observer coordinator between Viewshed and VideoProjection. ADR-0176 delegates observer capture to owned helpers, exposes native terrain command generation and scales tile SSE to an explicit observer viewport. Default rendering remains unchanged when no analysis is registered.",
+      "reason": "ADR-0177 shares the observer coordinator between Viewshed and VideoProjection. ADR-0176 delegates observer capture to owned helpers, exposes native terrain command generation and scales tile SSE to an explicit observer viewport. Default rendering remains unchanged when no analysis is registered. ADR-0208 adds an early Gaussian-target capture dispatch before receiver drawing, reusing the same observer lifecycle.",
       "risk": "high",
       "files": [
         {
@@ -267,7 +267,8 @@
       ],
       "tests": [
         "packages/engine/Specs/SceneGIS/Scene/SceneGISViewshedSpec.js",
-        "packages/engine/Specs/SceneGIS/Scene/SceneGISViewshedDepthSpec.js"
+        "packages/engine/Specs/SceneGIS/Scene/SceneGISViewshedDepthSpec.js",
+        "packages/engine/Specs/SceneGIS/Scene/SceneGISGaussianVideoProjectionSpec.js"
       ],
       "decision": "Documentation/SceneGIS/Decisions/ADR-0176-observer-viewshed.md",
       "removalCondition": "Native Scene supports independent analysis views with shared terrain and tile resources, explicit view resolution and preserved main-view state."

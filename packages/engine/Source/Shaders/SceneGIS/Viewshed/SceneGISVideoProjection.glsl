@@ -5,12 +5,14 @@ uniform float u_videoAspect;
 uniform float u_frustumAspect;
 uniform float u_opacity;
 uniform bool u_flipY;
+uniform bool u_gaussianOnly;
 in vec2 v_textureCoordinates;
 
 void main()
 {
     vec4 color = texture(colorTexture, v_textureCoordinates);
     out_FragColor = color;
+    if (u_gaussianOnly) return;
     vec2 uv;
     bool visible;
     if (!u_videoReady || !sceneGIS_observerVisibility(v_textureCoordinates, uv, visible) || !visible) {

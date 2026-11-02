@@ -108,8 +108,10 @@ class SceneGISViewshedDepth {
       uniforms._sceneGISProjectionJitter = undefined;
       uniforms.updateCamera(camera);
       for (const command of commands) {
+        const gaussian = command._sceneGISGaussianObserver === true;
         if (
-          (command.pass !== Pass.OPAQUE &&
+          (!gaussian &&
+            command.pass !== Pass.OPAQUE &&
             command.pass !== Pass.CESIUM_3D_TILE &&
             command.pass !== Pass.GLOBE) ||
           !command.renderState.depthMask ||
@@ -120,7 +122,10 @@ class SceneGISViewshedDepth {
           continue;
         }
         uniforms.updatePass(command.pass);
-        derive(this, command).execute(context, passState);
+        (gaussian ? command : derive(this, command)).execute(
+          context,
+          passState,
+        );
         this.drawCount++;
       }
       this.ready = true;

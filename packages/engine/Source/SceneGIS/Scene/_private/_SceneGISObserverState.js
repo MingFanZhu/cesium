@@ -25,6 +25,9 @@ function positive(value, name) {
 
 /** Shared observer state, uniforms and ownership. @private */
 const ObserverState = {
+  validateGaussianTargets(scene, targets) {
+    return Passes.validateGaussianTargets(scene, targets);
+  },
   create(options) {
     const scene = options.scene;
     if (
@@ -171,6 +174,7 @@ const ObserverState = {
     state.frustumGuide?.destroy();
     state.commands.length = 0;
     state.sourceStates.clear();
+    state.gaussianCommands?.clear();
   },
 };
 export default ObserverState;

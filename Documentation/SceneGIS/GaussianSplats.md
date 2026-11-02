@@ -67,6 +67,12 @@ atlas 按配置和设备限制预分配，`maximumGpuPageBytes` 不能按当前�
 `usePersistentCache=false` 完全关闭；`requestPersistentStorage=false` 禁止请求持久化许可。
 数据页按内容身份和校验隔离，失败的浏览器缓存不应阻止 HTTP 加载。
 
+## 视频投射
+
+可作为 `SceneGISVideoProjection.gaussianTargets` 的接收者并提供近似遮挡。
+不需重新切片或训练，复用同一套选级预算、Worker 与 GPU 图集；
+用法、颜色契约、透明度阈值和资源所有权见[视频投射](VideoProjection.md#自有分段高斯)。
+
 ## 切片与部署
 
 CPU 工具位于 [Tools/GaussianSplatTiler](../../Tools/GaussianSplatTiler/README.md)，

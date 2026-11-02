@@ -211,6 +211,16 @@ void main() {
     vec2 corner = vec2((gl_VertexID << 1) & 2, gl_VertexID & 2) - 1.0;
     vec2 pixelOffset = corner.x * axis1 * radius1 + corner.y * axis2 * radius2;
     vec2 ndc = clipCenter.xy / clipCenter.w + (2.0 / renderSize) * pixelOffset;
+#ifdef SCENEGIS_GAUSSIAN_VIDEO
+    // Normalize covariance before inversion; a relative variance floor bounds
+    // the receiver proxy's condition number without changing rendered alpha.
+    mat3 covariance3D = rs * transpose(rs);
+    float varianceScale = max(covariance3D[0][0], max(covariance3D[1][1], covariance3D[2][2]));
+    v_gvPrecision = inverse(covariance3D / varianceScale + mat3(1.0e-6));
+    v_gvCenter = viewCenter;
+    vec4 planePosition = czm_inverseProjection * vec4(ndc, clipCenter.z / clipCenter.w, 1.0);
+    v_gvRay = planePosition.xyz / planePosition.w;
+#endif
     gl_Position = vec4(ndc * clipCenter.w, clipCenter.zw);
     gl_Position.z = clamp(gl_Position.z, -abs(gl_Position.w), abs(gl_Position.w));
     v_tileCropPosition = center.xy;

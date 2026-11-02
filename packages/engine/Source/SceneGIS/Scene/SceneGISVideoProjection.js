@@ -26,6 +26,8 @@ function boolean(value, name) {
  *
  * 播放、音频、跳转、src 和 srcObject 均由调用方控制。此类不会暂停视频或停止流轨道。要求 WebGL2、SCENE3D 及视频帧回调支持。精度受有限深度分辨率与源 LOD 约束，此 API 为实验性。
  *
+ * gaussianTargets 非空时，仅向这些自有分段高斯投射，不再执行不透明表面覆盖。高斯共享显示和投影相机的选级预算，以片元透明度阈值近似遮挡表面；视频在高斯捕获 RGB 中混合，随后参与场景曝光与显示变换，保留原透明度。每个目标最多同时接收四路视频，顺序与 postProcessStages 一致。不修改数据页、SH 或借用目标的所有权。
+ *
  * @alias SceneGISVideoProjection
  * @extends PostProcessStage
  * @param {object} options 配置。
@@ -41,6 +43,8 @@ function boolean(value, name) {
  * @param {number} [options.verticalAngle=Math.PI/3] 竖直角，单位为弧度，范围 (0,PI)。
  * @param {number} [options.resolution=1024] 正方形观察者深度图尺寸。
  * @param {Array<Model|Cesium3DTileset|SceneGISS3MLayer|Primitive|SceneGISPlanarPrimitive>} [options.sources=[]] 借用 scene.primitives 中的显式遮挡物，不是接收者过滤器。
+ * @param {Array<SceneGISGaussianSegmentedPrimitive>} [options.gaussianTargets=[]] 同一 Scene 任意层级集合中的自有高斯接收者，同时作为高斯遮挡物。非空时切换为高斯接收路径；创建后不可更换列表。
+ * @param {number} [options.gaussianAlphaThreshold=0.3] 高斯遮挡深度的单片元透明度阈值，范围 (0,1]；不是多粒子累积透明度。
  * @param {boolean} [options.terrain=true] 遮挡是否包含 World 地形。
  * @param {number} [options.depthBias=0.1] 米制深度比较容差。
  * @param {number} [options.opacity=1] 显示混合权重，范围 [0,1]。
@@ -61,6 +65,15 @@ function boolean(value, name) {
 class SceneGISVideoProjection extends PostProcessStage {
   constructor(options = {}) {
     const state = Observer.create(options);
+    state.gaussianTargets = Observer.validateGaussianTargets(
+      state.scene,
+      options.gaussianTargets ?? [],
+    );
+    const threshold = options.gaussianAlphaThreshold ?? 0.3;
+    if (!Number.isFinite(threshold) || threshold <= 0 || threshold > 1) {
+      throw new DeveloperError("gaussianAlphaThreshold must be in (0, 1].");
+    }
+    state.gaussianAlphaThreshold = threshold;
     state.opacity = opacity(options.opacity ?? 1);
     state.flipY = boolean(options.flipY ?? false, "flipY");
     // Create the media owner after the native constructor accepts its options.
@@ -79,6 +92,7 @@ class SceneGISVideoProjection extends PostProcessStage {
         u_frustumAspect: () => state.camera.frustum.aspectRatio,
         u_opacity: () => state.opacity,
         u_flipY: () => state.flipY,
+        u_gaussianOnly: () => state.gaussianTargets.length > 0,
       },
     });
     state.media = new VideoTexture(
@@ -98,6 +112,45 @@ class SceneGISVideoProjection extends PostProcessStage {
    */
   get scene() {
     return this._observer.scene;
+  }
+
+  /**
+   * 借用的自有高斯目标列表，只读；非空表示高斯专用接收路径。
+   * @type {Array<SceneGISGaussianSegmentedPrimitive>}
+   * @readonly
+   */
+  get gaussianTargets() {
+    return this._observer.gaussianTargets;
+  }
+
+  /**
+   * 高斯遮挡的单片元透明度阈值，范围 (0,1]，不改变显示透明度。
+   * @type {number}
+   * @readonly
+   */
+  get gaussianAlphaThreshold() {
+    return this._observer.gaussianAlphaThreshold;
+  }
+
+  /**
+   * 是否启用投射。修改会请求重绘；禁用立即停止视频帧通知，但不暂停借用视频。
+   * @type {boolean}
+   * @default true
+   */
+  get enabled() {
+    return this._videoEnabled;
+  }
+  set enabled(value) {
+    this._videoEnabled = boolean(value, "enabled");
+    // The base PostProcessStage constructor assigns enabled before the observer exists.
+    const state = this._observer;
+    if (state) {
+      if (!value) {
+        state.media.setActive(false);
+      }
+      state.analysisReady = false;
+      state.scene.requestRender();
+    }
   }
 
   /**
@@ -278,6 +331,7 @@ class SceneGISVideoProjection extends PostProcessStage {
    * @returns {undefined}
    */
   destroy() {
+    this.scene.requestRender();
     this._observer.media.destroy();
     Observer.destroy(this);
     return super.destroy();
