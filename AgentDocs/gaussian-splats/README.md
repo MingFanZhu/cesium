@@ -3,12 +3,12 @@
 ## Metadata
 
 - Extension slug: `gaussian-splats`
-- Status: completed; ordinary tiler source-coordinate reporting validated
+- Status: completed; navigation depth integration qualified
 - Planning model: extension
 - Active extension plan: 无；[已完成迁移](plans/2026-10-23-migration.md)
 - Current phase: P2 completed
 - Active phase plan: 无；[已完成原生渲染](plans/2026-10-23-p2-native-rendering.md)
-- Active standalone plan: 无；[已完成源坐标报告](plans/2026-10-28-source-coordinate-report.md)
+- Active standalone plan: 无；[已完成导航深度接入](plans/2026-11-02-navigation-depth.md)
 - Architecture / execution contact: 本任务
 - Last updated: 2026-11-02
 
@@ -31,6 +31,11 @@
 - SGP: SGP-0067（`Renderer/createUniform.js`）
 
 ## Current handoff
+
+2026-11-02：SDK 导航深度反馈已定位为示例与接入说明遗漏 `scene.pickTranslucentDepth=true`。
+旧版本示例显式启用；当前引擎深度重放路径仍有效。两个示例及指南已补齐，3 项严格
+GPU Specs 与双世界真实滚轮 / 视频 E2E 通过，不改写 Scene 默认或高斯颜色深度。
+[导航深度 review](reviews/2026-11-02-navigation-depth.md) 记录原因、SDK 配置与近似边界。
 
 2026-11-02：视频投射扩展由 [video-projection](../video-projection/README.md) 管理，
 共享多视角选级与 GPU 视频接收 / 遮挡已完成；

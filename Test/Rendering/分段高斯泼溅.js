@@ -35,6 +35,7 @@ const viewer = new C.Viewer("map", {
   selectionIndicator: false,
 });
 const scene = viewer.scene;
+scene.pickTranslucentDepth = true;
 scene.fog.enabled = false;
 scene.backgroundColor = C.Color.fromCssColorString("#152027");
 if (scene.globe) {

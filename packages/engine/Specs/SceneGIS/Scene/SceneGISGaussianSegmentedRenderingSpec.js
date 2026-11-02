@@ -12,6 +12,7 @@ import {
   Primitive,
   PerInstanceColorAppearance,
   ColorGeometryInstanceAttribute,
+  SceneTransforms,
 } from "../../../index.js";
 import { createFrozenFinalA4Bytes } from "./Gaussian/SceneGISGaussianSegmentedGlobalA4Fixture.js";
 import { createMacroChunkRuntimeManifest } from "../../../Source/SceneGIS/Core/_private/Gaussian/_SceneGISGaussianManifest.js";
@@ -190,6 +191,63 @@ describe("SceneGIS/Scene/SceneGISGaussianSegmentedRendering", function () {
       }
       expect(primitive._controller._pageBackend).toBe(resources);
       expect(primitive.statistics.gpuAtlasAllocatedBytes).toBe(allocated);
+
+      // Navigation consumes native translucent depth, independently of color writes.
+      if (scene.world) {
+        scene.world.show = false;
+      }
+      const sourcePosition = point(
+        11.011764526367188,
+        11.011764526367188,
+        11.011764526367188,
+      );
+      const windowPosition = SceneTransforms.worldToWindowCoordinates(
+        scene,
+        sourcePosition,
+      );
+      expect(scene.pickTranslucentDepth).toBe(false);
+      renderPixels();
+      expect(scene.pickPosition(windowPosition)).toBeUndefined();
+      scene.pickTranslucentDepth = true;
+      const colorBeforePick = renderPixels();
+      const controller = primitive._controller;
+      const load = spyOn(controller._loader, "update").and.callThrough();
+      const select = spyOn(controller, "_observeView").and.callThrough();
+      const command = controller._d3.current.command;
+      const sortCount = primitive.statistics.globalSortDispatchCount;
+      const hit = scene.pickPosition(windowPosition);
+      expect(hit).toBeDefined();
+      expect(Cartesian3.distance(hit, sourcePosition)).toBeLessThan(2);
+      expect(scene.pickPositionWorldCoordinates(windowPosition)).toEqualEpsilon(
+        hit,
+        1e-6,
+      );
+      expect(load).not.toHaveBeenCalled();
+      expect(select).not.toHaveBeenCalled();
+      expect(primitive.statistics.globalSortDispatchCount).toBe(sortCount);
+      expect(primitive.statistics.gpuAtlasAllocatedBytes).toBe(allocated);
+      expect(controller._d3.current.command).toBe(command);
+      expect(command.renderState.depthMask).toBe(false);
+      expect(renderPixels()).toEqual(colorBeforePick);
+
+      blocker.show = true;
+      renderPixels();
+      const frontHit = Matrix4.multiplyByPoint(
+        Matrix4.inverseTransformation(transform, new Matrix4()),
+        scene.pickPosition(windowPosition),
+        new Cartesian3(),
+      );
+      expect(frontHit.y).toEqualEpsilon(-20.5, 0.1);
+      blocker.show = false;
+      primitive.show = false;
+      renderPixels();
+      expect(scene.pickPosition(windowPosition)).toBeUndefined();
+      primitive.show = true;
+      renderPixels();
+      scene.useDepthPicking = false;
+      expect(scene.pickPosition(windowPosition)).toBeUndefined();
+      scene.useDepthPicking = true;
+
       const before = primitive.boundingSphere.center.clone();
       primitive.modelMatrix = Matrix4.multiplyByTranslation(
         transform,

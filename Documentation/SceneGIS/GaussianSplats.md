@@ -8,6 +8,7 @@
 
 ```js
 const MiB = 1024 ** 2;
+viewer.scene.pickTranslucentDepth = true;
 const splats = viewer.scene.primitives.add(
   new Cesium.SceneGISGaussianSegmentedPrimitive({
     url: "/assets/capture/scene.mcl.json",
@@ -72,6 +73,31 @@ atlas 按配置和设备限制预分配，`maximumGpuPageBytes` 不能按当前�
 可作为 `SceneGISVideoProjection.gaussianTargets` 的接收者并提供近似遮挡。
 不需重新切片或训练，复用同一套选级预算、Worker 与 GPU 图集；
 用法、颜色契约、透明度阈值和资源所有权见[视频投射](VideoProjection.md#自有分段高斯)。
+
+## 相机导航与深度拾取
+
+高斯正常颜色绘制不写不透明深度，以保留透明混合。需要鼠标缩放、旋转锚点或
+`scene.pickPosition` / `scene.pickPositionWorldCoordinates` 命中高斯时，由应用显式开启：
+
+```js
+viewer.scene.pickTranslucentDepth = true;
+// Call after the current view has rendered.
+const position = viewer.scene.pickPosition(windowPosition);
+```
+
+`scene.useDepthPicking` 默认 true，应用若关闭它，须同时恢复。球面原生相机控制器和
+平面 `SceneGISPlanarCameraController` 已消费上述位置拾取，无需 SDK 另建高斯深度图。
+这与旧 1.141 的分段高斯示例使用同一配置；引擎不会在加载图元时改写 Scene 的开关。
+视频投射的 observer 深度只服务投影遮挡，不能代替普通相机深度；视频启停不影响此配置。
+
+原生路径按需重放当前可绘制内容的 depth-only 命令，正常颜色命令仍保持 `depthMask=false`。
+深度拾取不推进高斯加载、选级或 Worker 排序，不复制 atlas。它使用当前 LOD 的 billboard
+深度及 alpha discard，属于导航位置近似，不是重建网格、Gaussian 单点 ID 或实体碰撞。
+`gaussianAlphaThreshold` 仅控制视频投影遮挡，不控制导航拾取。
+
+该开关作用于整个 Scene，也会纳入其他透明对象；透明深度重放和同步单像素读回有开销，
+不建议无需求地每帧反复调用。高斯隐藏、透明片元被丢弃或尚无可绘制内容时不会提供命中，
+前方不透明物体仍按深度遮挡。移除或关闭需要下一次正常渲染更新当前画面与拾取缓存。
 
 ## 切片与部署
 

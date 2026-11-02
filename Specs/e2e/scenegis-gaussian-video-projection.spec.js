@@ -49,6 +49,23 @@ const difference = (a, b) =>
     .slice(0, 3)
     .reduce((sum, value, index) => sum + Math.abs(value - b[index]), 0);
 
+async function navigationPoint(page) {
+  return page.evaluate(async () => {
+    const e = window.gaussianVideoExample;
+    const C = await import("/Build/CesiumUnminified/index.js");
+    e.viewer.render();
+    const position = e.point(5, 0, 6.3);
+    const xy = C.SceneTransforms.worldToWindowCoordinates(e.scene, position);
+    const hit = e.scene.pickPosition(xy);
+    return {
+      enabled: e.scene.pickTranslucentDepth && e.scene.useDepthPicking,
+      error: hit ? C.Cartesian3.distance(hit, position) : null,
+      hit,
+      xy,
+    };
+  });
+}
+
 for (const world of ["planar", "globe"]) {
   test(`Gaussian ${world}: video grid, front/rear occlusion, pause and ownership`, async ({
     page,
@@ -71,10 +88,15 @@ for (const world of ["planar", "globe"]) {
       window.gaussianVideoExample.viewer.useDefaultRenderLoop = false;
     });
     const projected = await sample(page);
+    const projectedNavigation = await navigationPoint(page);
+    expect(projectedNavigation.enabled).toBe(true);
+    expect(projectedNavigation.error).not.toBeNull();
+    expect(projectedNavigation.error).toBeLessThan(0.5);
     await page.evaluate(() => {
       window.gaussianVideoExample.projection.enabled = false;
     });
     const original = await sample(page);
+    expect((await navigationPoint(page)).hit).toEqual(projectedNavigation.hit);
     expect(difference(projected[0], original[0])).toBeGreaterThan(50);
     expect(difference(projected[1], original[1])).toBeLessThan(25);
     expect(difference(projected[2], original[2])).toBeGreaterThan(50);
@@ -120,6 +142,46 @@ for (const world of ["planar", "globe"]) {
     });
     await ready(page);
     expect(await sample(page)).not.toEqual(stable);
+
+    const navigation = await navigationPoint(page);
+    await page.evaluate(() => {
+      const e = window.gaussianVideoExample;
+      e.navigationHits = 0;
+      e.restoreNavigation = [];
+      for (const key of ["pickPosition", "pickPositionWorldCoordinates"]) {
+        const original = e.scene[key];
+        e.restoreNavigation.push(() => {
+          e.scene[key] = original;
+        });
+        e.scene[key] = function (...args) {
+          const position = original.apply(this, args);
+          if (position) {
+            e.navigationHits++;
+          }
+          return position;
+        };
+      }
+      e.cameraBeforeNavigation = e.scene.camera.positionWC.clone();
+      e.viewer.useDefaultRenderLoop = true;
+    });
+    await page.mouse.move(navigation.xy.x, navigation.xy.y);
+    await page.mouse.wheel(0, -100);
+    await expect
+      .poll(() =>
+        page.evaluate(() => window.gaussianVideoExample.navigationHits),
+      )
+      .toBeGreaterThan(0);
+    expect(
+      await page.evaluate(async () => {
+        const e = window.gaussianVideoExample;
+        const C = await import("/Build/CesiumUnminified/index.js");
+        e.restoreNavigation.forEach((restore) => restore());
+        return C.Cartesian3.distance(
+          e.scene.camera.positionWC,
+          e.cameraBeforeNavigation,
+        );
+      }),
+    ).toBeGreaterThan(0.01);
     await page.evaluate(() => {
       const e = window.gaussianVideoExample;
       e.destroy();

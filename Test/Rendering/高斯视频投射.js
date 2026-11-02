@@ -32,15 +32,16 @@ const viewer = new C.Viewer("map", {
   skyAtmosphere: false,
 });
 const scene = viewer.scene;
+scene.pickTranslucentDepth = true;
 scene.world.show = false;
 scene.environmentEffects.enabled = false;
 scene.postProcessStages.fxaa.enabled = false;
 scene.backgroundColor = C.Color.fromCssColorString("#17212c");
-if (scene.moon) {scene.moon.show = false;}
+if (scene.moon) {
+  scene.moon.show = false;
+}
 const errors = [];
-scene.renderError.addEventListener((...args) =>
-  errors.push(String(args[1])),
-);
+scene.renderError.addEventListener((...args) => errors.push(String(args[1])));
 const transform = planar
   ? C.Matrix4.IDENTITY
   : C.Transforms.eastNorthUpToFixedFrame(C.Cartesian3.fromDegrees(118, 32, 50));
@@ -184,7 +185,9 @@ const timer = setInterval(() => {
   }
 }, 1000 / 24);
 function destroy() {
-  if (destroyed) {return;}
+  if (destroyed) {
+    return;
+  }
   destroyed = true;
   clearInterval(timer);
   scene.postProcessStages.remove(projection);
@@ -194,7 +197,9 @@ function destroy() {
   video.removeAttribute("src");
   video.load();
   stream.getTracks().forEach((track) => track.stop());
-  if (fileUrl) {URL.revokeObjectURL(fileUrl);}
+  if (fileUrl) {
+    URL.revokeObjectURL(fileUrl);
+  }
 }
 const example = (window.gaussianVideoExample = {
   viewer,
@@ -212,7 +217,9 @@ const example = (window.gaussianVideoExample = {
   destroy,
 });
 window.addEventListener("pagehide", (event) => {
-  if (!event.persisted) {destroy();}
+  if (!event.persisted) {
+    destroy();
+  }
 });
 document.getElementById("enabled").onchange = (event) => {
   projection.enabled = event.target.checked;
@@ -248,25 +255,34 @@ document.getElementById("threshold").onchange = (event) => {
   example.projection = projection;
 };
 document.getElementById("play").onclick = async () => {
-  if (video.paused) {await video.play();}
-  else {video.pause();}
+  if (video.paused) {
+    await video.play();
+  } else {
+    video.pause();
+  }
   document.getElementById("play").textContent = video.paused
     ? "播放视频"
     : "暂停视频";
 };
 document.getElementById("file").onchange = async (event) => {
   const file = event.target.files[0];
-  if (!file) {return;}
+  if (!file) {
+    return;
+  }
   video.pause();
   video.srcObject = null;
-  if (fileUrl) {URL.revokeObjectURL(fileUrl);}
+  if (fileUrl) {
+    URL.revokeObjectURL(fileUrl);
+  }
   fileUrl = URL.createObjectURL(file);
   video.src = fileUrl;
   await video.play();
 };
 let lastStatus = 0;
 scene.postRender.addEventListener(() => {
-  if (performance.now() - lastStatus < 300) {return;}
+  if (performance.now() - lastStatus < 300) {
+    return;
+  }
   lastStatus = performance.now();
   const stats = splats.statistics;
   document.getElementById("status").textContent =
