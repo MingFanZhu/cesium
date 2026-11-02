@@ -147,6 +147,9 @@ function frozenViewProof(view) {
     drawingBufferWidth: view.drawingBufferWidth,
     drawingBufferHeight: view.drawingBufferHeight,
     projectionKind: view.projectionKind,
+    ...(view.additionalViews && {
+      additionalViews: Object.freeze(view.additionalViews.map(frozenViewProof)),
+    }),
   });
 }
 
@@ -166,6 +169,11 @@ function sameViewProof(left, right) {
       left.frustumPlanesScene.length === candidate.frustumPlanesScene.length &&
       left.frustumPlanesScene.every((plane, index) =>
         arraysEqual(plane, candidate.frustumPlanesScene[index]),
+      ) &&
+      (left.additionalViews?.length ?? 0) ===
+        (candidate.additionalViews?.length ?? 0) &&
+      (left.additionalViews ?? []).every((view, index) =>
+        sameViewProof(view, candidate.additionalViews[index]),
       )
     );
   } catch {
@@ -676,7 +684,7 @@ function requireProjectedView(view) {
   }
 }
 
-function evaluateNode(
+function evaluateSingleViewNode(
   index,
   nodeIndex,
   error,
@@ -728,7 +736,51 @@ function evaluateNode(
   resultScratch[1] = projectedError;
   resultScratch[2] = pixelScale;
   resultScratch[3] = distance;
+  resultScratch[4] = Number(view.projectionKind === "orthographic");
   return resultScratch;
+}
+
+const additionalEvaluation = new Float64Array(5);
+function evaluateNode(
+  index,
+  nodeIndex,
+  error,
+  view,
+  bounds,
+  mathBounds,
+  result,
+) {
+  evaluateSingleViewNode(
+    index,
+    nodeIndex,
+    error,
+    view,
+    bounds,
+    mathBounds,
+    result,
+  );
+  for (const additional of view.additionalViews ?? []) {
+    evaluateSingleViewNode(
+      index,
+      nodeIndex,
+      error,
+      additional,
+      bounds,
+      mathBounds,
+      additionalEvaluation,
+    );
+    if (
+      additionalEvaluation[0] &&
+      (!result[0] ||
+        additionalEvaluation[1] > result[1] ||
+        (error === 0 &&
+          additionalEvaluation[2] / Math.max(additionalEvaluation[3], 1e-12) >
+            result[2] / Math.max(result[3], 1e-12)))
+    ) {
+      result.set(additionalEvaluation);
+    }
+  }
+  return result;
 }
 
 function coveragePressure(coverage, count, evaluation) {
@@ -767,7 +819,7 @@ function canonicalJoin(index, state, view, policy, metrics) {
   const segment = new Float64Array(8);
   const bounds = new Float64Array(6);
   const mathBounds = Array(6).fill(0);
-  const evaluation = new Float64Array(2);
+  const evaluation = new Float64Array(5);
   let output = 0;
   for (let slot = 0; slot < maximum;) {
     const nodeIndex = state.coverageNodeIndices[slot];
@@ -884,7 +936,7 @@ function splitVisibleInternal(index, state, view, refineThreshold, metrics) {
   const segment = new Float64Array(8);
   const bounds = new Float64Array(6);
   const mathBounds = Array(6).fill(0);
-  const evaluation = new Float64Array(2);
+  const evaluation = new Float64Array(5);
   let output = 0;
   for (let slot = 0; slot < state.coverageNodeIndices.length; slot++) {
     const nodeIndex = state.coverageNodeIndices[slot];
@@ -1313,7 +1365,7 @@ export function planSegmentedActiveCut(index, currentCut, view, options = {}) {
   const segment = new Float64Array(8);
   const bounds = new Float64Array(6);
   const mathBounds = Array(6).fill(0);
-  const evaluation = new Float64Array(4);
+  const evaluation = new Float64Array(5);
   const leafTarget = new Float64Array(5);
   const parentProxy = new Float64Array(4);
   metrics.visitedNodeCount += capacity;
@@ -1916,6 +1968,31 @@ class ViewPriorityCandidateHeap {
 }
 
 function createViewPriorityGeometry(index, view) {
+  if (view.additionalViews?.length) {
+    const views = [view, ...view.additionalViews];
+    const measures = views.map((entry) =>
+      createViewPriorityGeometry(index, {
+        ...entry,
+        additionalViews: undefined,
+      }),
+    );
+    const candidate = new Float64Array(2);
+    return (node, bounds, result) => {
+      result[0] = 0;
+      result[1] = Number.POSITIVE_INFINITY;
+      for (const measure of measures) {
+        measure(node, bounds, candidate);
+        if (candidate[0] > 0) {
+          result[0] = Math.max(result[0], candidate[0]);
+          result[1] = Math.min(result[1], candidate[1]);
+        }
+      }
+      if (result[0] === 0) {
+        result[1] = 1;
+      }
+      return result;
+    };
+  }
   const geometry = createSegmentedViewGeometry(view);
   const readCropBounds = createSegmentedCropBoundsReader(index);
   const crop = new Float64Array(4);
@@ -1961,7 +2038,7 @@ function buildViewPriorityCanonicalTarget(index, view, policy) {
   const proxy = new Float64Array(4);
   const bounds = new Float64Array(6);
   const mathBounds = Array(6).fill(0);
-  const evaluation = new Float64Array(4);
+  const evaluation = new Float64Array(5);
   const frontier = new Map();
   // Each active state is offered once and is popped before replacement or
   // splitting. The heap therefore cannot exceed the tree's node count, even
@@ -2167,9 +2244,7 @@ function buildViewPriorityCanonicalTarget(index, view, policy) {
     const [screenFraction, visibleDepth] = state.viewGeometry;
     const priorityScale =
       Math.sqrt(screenFraction) *
-      (view.projectionKind === "orthographic"
-        ? evaluation[2]
-        : evaluation[2] / visibleDepth);
+      (evaluation[4] === 1 ? evaluation[2] : evaluation[2] / visibleDepth);
     // Compare only needs the candidate can improve. Express coverage pressure
     // in equivalent quality-error pixels and do not divide by splat cost.
     const priorityProjectedError = Math.max(

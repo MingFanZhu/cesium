@@ -77,6 +77,7 @@ export function validateFrozenView(view) {
           "drawingBufferWidth",
           "drawingBufferHeight",
           "projectionKind",
+          "additionalViews",
         ].includes(key),
     ) ||
     typeof view.viewIdentity !== "string" ||
@@ -115,6 +116,20 @@ export function validateFrozenView(view) {
   }
   if (hasProjection) {
     validateProjectionView(view);
+  }
+  if (view.additionalViews !== undefined) {
+    if (
+      !Array.isArray(view.additionalViews) ||
+      view.additionalViews.length > 4
+    ) {
+      throw new TypeError("Frozen view supports at most four additional views");
+    }
+    for (const additional of view.additionalViews) {
+      if (additional.additionalViews !== undefined) {
+        throw new TypeError("Additional views must not be nested");
+      }
+      validateFrozenView(additional);
+    }
   }
   return view;
 }

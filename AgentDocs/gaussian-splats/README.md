@@ -32,6 +32,10 @@
 
 ## Current handoff
 
+2026-11-02：视频投射扩展由 [video-projection](../video-projection/README.md) 管理，
+当前 [G1](../video-projection/plans/2026-11-02-g1-gaussian-views.md) 增加共享多视角选级；
+不重做解析加载，不改变 MCI4/GSP、排序源或 SDK。既有工具维护事项保持原状态。
+
 P1 `040e7d72f6`、P2 `e1dc28d796` 已按负责人要求集成到 `scenegis/develop`。
 RequestScheduler 临时取消误耗尽加载重试的问题已修复，253 项 Gaussian Specs 通过，
 [调度取消 review](reviews/2026-10-23-scheduler-cancellation.md) 关闭 G7。

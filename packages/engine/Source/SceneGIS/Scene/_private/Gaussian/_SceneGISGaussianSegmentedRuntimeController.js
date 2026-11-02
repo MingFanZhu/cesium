@@ -490,7 +490,25 @@ _SceneGISGaussianSegmentedRuntimeController.prototype._updateRenderTransform =
 _SceneGISGaussianSegmentedRuntimeController.prototype._observeView = function (
   frameState,
 ) {
-  const observation = observeGaussianMacroChunkView(frameState);
+  const additionalViews = (frameState._sceneGISObservers ?? [])
+    .filter((state) => state.gaussianTargets?.includes(this._primitive))
+    .map((state) =>
+      observeGaussianMacroChunkView(
+        {
+          ...frameState,
+          camera: state.camera,
+          cullingVolume: state.cullingVolume,
+        },
+        state.resolution,
+      ),
+    );
+  const mainObservation = observeGaussianMacroChunkView(frameState);
+  const observation = additionalViews.length
+    ? Object.freeze({
+        ...mainObservation,
+        additionalViews: Object.freeze(additionalViews),
+      })
+    : mainObservation;
   if (!this._index) {
     this._observation = observation;
     return false;
@@ -1582,6 +1600,7 @@ _SceneGISGaussianSegmentedRuntimeController.prototype._planLatestView =
       }
     }
     if (convergedPlan.stepCount === 0) {
+      this._observerReadyGeneration = this._viewGeneration;
       this._stopReason =
         convergedPlan.stopReason ??
         SEGMENTED_ACTIVE_CUT_STOP_REASON.DETAIL_EXHAUSTED;

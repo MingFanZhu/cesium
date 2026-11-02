@@ -3,13 +3,13 @@
 ## Metadata
 
 - Extension slug: video-projection
-- Status: completed; owner visual acceptance confirmed 2026-10-21
+- Status: active; Gaussian receiver extension in progress
 - Planning model: extension
-- Active extension plan: [video projection](plans/2026-10-21-extension.md)
-- Current phase: P3 completed and accepted
-- Active phase plan: none; latest [P3](plans/2026-10-21-p3-qualification.md)
+- Active extension plan: [Gaussian receivers](plans/2026-11-02-gaussian-extension.md)
+- Current phase: G1 shared multi-view selection
+- Active phase plan: [G1](plans/2026-11-02-g1-gaussian-views.md)
 - Architecture / execution: current task; no independent agent
-- Updated: 2026-10-21
+- Updated: 2026-11-02
 - Integrated branch: scenegis/develop; source branch: feature/video-projection
 
 ## Engineering links

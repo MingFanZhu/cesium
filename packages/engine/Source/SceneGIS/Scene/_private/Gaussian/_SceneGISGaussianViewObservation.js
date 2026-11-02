@@ -323,7 +323,7 @@ function frustumPlanesDiffer(previous, current) {
   );
 }
 
-export function observeGaussianMacroChunkView(frameState) {
+export function observeGaussianMacroChunkView(frameState, resolution) {
   const camera = frameState.camera;
   const planes = frameState.cullingVolume?.planes;
   if (!defined(camera) || !Array.isArray(planes) || planes.length !== 6) {
@@ -341,8 +341,10 @@ export function observeGaussianMacroChunkView(frameState) {
   const projectionMatrix = Object.freeze(
     Array.from(camera.frustum.projectionMatrix),
   );
-  const drawingBufferWidth = frameState.context.drawingBufferWidth;
-  const drawingBufferHeight = frameState.context.drawingBufferHeight;
+  const drawingBufferWidth =
+    resolution ?? frameState.context.drawingBufferWidth;
+  const drawingBufferHeight =
+    resolution ?? frameState.context.drawingBufferHeight;
   if (
     !viewMatrix.every(Number.isFinite) ||
     !projectionMatrix.every(Number.isFinite) ||
@@ -376,6 +378,16 @@ export function observeGaussianMacroChunkView(frameState) {
 
 export function gaussianMacroChunkViewChanged(previous, current) {
   if (!defined(previous)) {
+    return true;
+  }
+  const previousViews = previous.additionalViews ?? [];
+  const currentViews = current.additionalViews ?? [];
+  if (
+    previousViews.length !== currentViews.length ||
+    currentViews.some((view, index) =>
+      gaussianMacroChunkViewChanged(previousViews[index], view),
+    )
+  ) {
     return true;
   }
   const toCartesian = (value) =>
@@ -457,6 +469,12 @@ export function createGaussianMacroChunkFrozenView(options) {
     drawingBufferWidth: observation.drawingBufferWidth,
     drawingBufferHeight: observation.drawingBufferHeight,
   };
+  const additionalViews = observation.additionalViews?.map((additional) =>
+    createGaussianMacroChunkFrozenView({ ...options, observation: additional }),
+  );
+  if (additionalViews) {
+    identity.additionalViews = additionalViews.map((view) => view.viewIdentity);
+  }
   return Object.freeze({
     viewIdentity: JSON.stringify(identity),
     cameraPositionScene: Object.freeze([
@@ -469,6 +487,7 @@ export function createGaussianMacroChunkFrozenView(options) {
     drawingBufferWidth: observation.drawingBufferWidth,
     drawingBufferHeight: observation.drawingBufferHeight,
     projectionKind: observation.projectionKind,
+    ...(additionalViews && { additionalViews: Object.freeze(additionalViews) }),
   });
 }
 
