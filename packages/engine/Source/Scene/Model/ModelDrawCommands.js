@@ -13,6 +13,9 @@ import ModelVS from "../../Shaders/Model/ModelVS.js";
 import ModelFS from "../../Shaders/Model/ModelFS.js";
 import ModelUtility from "./ModelUtility.js";
 import DeveloperError from "../../Core/DeveloperError.js";
+// SCENEGIS_PATCH_BEGIN SGP-0075: Match i3dm draw bounds to the GPU transform order.
+import LegacyInstanceBounds from "../../SceneGIS/Scene/_private/_SceneGISLegacyInstanceBounds.js";
+// SCENEGIS_PATCH_END SGP-0075
 
 /**
  * Internal functions to build draw commands for models.
@@ -144,6 +147,14 @@ function buildDrawCommandForModel(
       modelMatrix,
     );
   }
+
+  // SCENEGIS_PATCH_BEGIN SGP-0075: Node transforms must not scale the distribution of legacy instances.
+  LegacyInstanceBounds.update(
+    primitiveRenderResources,
+    boundingSphere,
+    frameState,
+  );
+  // SCENEGIS_PATCH_END SGP-0075
 
   // Initialize render state with default values
   let renderState = clone(

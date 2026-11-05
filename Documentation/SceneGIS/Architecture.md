@@ -997,6 +997,13 @@ SGP-0068 只在原生集合生命周期、范围判断及 Model polygon stage �
 集合拥有一张数据纹理，瓦片模型借用。坐标是 World 绝对米制 XY，模型移动不带动区域。
 颜色、拾取、深度和阴影共用 discard，不生成切面，不执行球面距离纹理计算。
 
+## 模型实例化包围体
+
+ADR-0210 / SGP-0075 使 legacy i3dm 的 CPU 范围遵循 GPU 的 instance / axis / node 顺序。
+Loader 为整批实例保存并跨 mesh node 共享 192-byte affine 系数区间；初始绘制、矩阵更新及
+模型总范围消费同一 owned helper。保留 draw modelMatrix 和剔除流程，不改 Shader 或普通
+EXT_mesh_gpu_instancing。区间允许保守扩大，不保留逐实例 CPU 变换；绘制修正资格为 SCENE3D。
+
 ## 模型局部压平
 
 模型局部压平按 [ADR-0175](Decisions/ADR-0175-model-flatten.md) 使用显式

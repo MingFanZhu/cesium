@@ -27,6 +27,9 @@ import NodeRenderResources from "./NodeRenderResources.js";
 import PrimitiveRenderResources from "./PrimitiveRenderResources.js";
 import ModelDrawCommands from "./ModelDrawCommands.js";
 import addAllToArray from "../../Core/addAllToArray.js";
+// SCENEGIS_PATCH_BEGIN SGP-0075: Aggregate legacy instancing bounds in the correct model space.
+import LegacyInstanceBounds from "../../SceneGIS/Scene/_private/_SceneGISLegacyInstanceBounds.js";
+// SCENEGIS_PATCH_END SGP-0075
 
 /**
  * An in memory representation of the scene graph for a {@link Model}
@@ -620,6 +623,13 @@ ModelSceneGraph.prototype.computeBoundingVolumes = function (
         primitiveRenderResources.positionMax,
         scratchPrimitivePositionMax,
       );
+      // SCENEGIS_PATCH_BEGIN SGP-0075: Keep node transforms inside each instance, matching the vertex shader.
+      LegacyInstanceBounds.modelPositions(
+        primitiveRenderResources,
+        primitivePositionMin,
+        primitivePositionMax,
+      );
+      // SCENEGIS_PATCH_END SGP-0075
 
       Cartesian3.minimumByComponent(
         modelPositionMin,

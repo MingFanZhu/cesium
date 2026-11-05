@@ -22,6 +22,9 @@ import StencilConstants from "../StencilConstants.js";
 import StencilFunction from "../StencilFunction.js";
 import StencilOperation from "../StencilOperation.js";
 import StyleCommandsNeeded from "./StyleCommandsNeeded.js";
+// SCENEGIS_PATCH_BEGIN SGP-0075: Keep legacy instance bounds correct after model or node changes.
+import LegacyInstanceBounds from "../../SceneGIS/Scene/_private/_SceneGISLegacyInstanceBounds.js";
+// SCENEGIS_PATCH_END SGP-0075
 
 /**
  * A wrapper around the draw commands used to render a {@link ModelRuntimePrimitive}.
@@ -364,6 +367,12 @@ Object.defineProperties(ModelDrawCommand.prototype, {
         this._modelMatrix,
         this._boundingVolume,
       );
+      // SCENEGIS_PATCH_BEGIN SGP-0075: Recompute only the fixed-size i3dm summary in the current node frame.
+      LegacyInstanceBounds.update(
+        this._primitiveRenderResources,
+        this._boundingVolume,
+      );
+      // SCENEGIS_PATCH_END SGP-0075
     },
   },
 

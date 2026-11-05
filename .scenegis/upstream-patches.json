@@ -2,6 +2,29 @@
   "schemaVersion": 1,
   "patches": [
     {
+      "id": "SGP-0075",
+      "title": "Match legacy i3dm bounds to instance and node transform order",
+      "status": "active",
+      "reason": "Legacy instancing applies node transforms before per-instance transforms on the GPU, while native CPU bounds scale the instance distribution by the node hierarchy. Capture a bounded instance transform summary and use owned bounds math for initial draws, matrix updates and model bounds.",
+      "risk": "medium",
+      "files": [
+        { "path": "packages/engine/Source/Scene/Model/I3dmLoader.js", "markerMode": "paired" },
+        { "path": "packages/engine/Source/Scene/Model/ModelDrawCommands.js", "markerMode": "paired" },
+        { "path": "packages/engine/Source/Scene/Model/ModelDrawCommand.js", "markerMode": "paired" },
+        { "path": "packages/engine/Source/Scene/Model/ModelSceneGraph.js", "markerMode": "paired" }
+      ],
+      "tests": [
+        "packages/engine/Specs/SceneGIS/Scene/SceneGISLegacyInstanceBoundsSpec.js",
+        "packages/engine/Specs/Scene/Model/I3dmLoaderSpec.js",
+        "packages/engine/Specs/Scene/Model/ModelDrawCommandSpec.js",
+        "packages/engine/Specs/Scene/Model/ModelMatrixUpdateStageSpec.js",
+        "packages/engine/Specs/Scene/Model/ModelSceneGraphSpec.js",
+        "packages/engine/Specs/Scene/Model/InstancingPipelineStageSpec.js"
+      ],
+      "decision": "Documentation/SceneGIS/Decisions/ADR-0210-i3dm-instance-bounds.md",
+      "removalCondition": "Upstream computes i3dm draw and model bounds using the GPU instance/node transform order, including subsequent matrix changes."
+    },
+    {
       "id": "SGP-0074",
       "title": "Copy static asset files without emitting source directory entries",
       "status": "active",

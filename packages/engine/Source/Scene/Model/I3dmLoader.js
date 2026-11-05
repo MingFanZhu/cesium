@@ -27,6 +27,9 @@ import parseBatchTable from "../parseBatchTable.js";
 import PropertyTable from "../PropertyTable.js";
 import ResourceLoader from "../ResourceLoader.js";
 import StructuralMetadata from "../StructuralMetadata.js";
+// SCENEGIS_PATCH_BEGIN SGP-0075: Retain bounded legacy instance transform metadata for CPU bounds.
+import LegacyInstanceBounds from "../../SceneGIS/Scene/_private/_SceneGISLegacyInstanceBounds.js";
+// SCENEGIS_PATCH_END SGP-0075
 
 const I3dmLoaderState = {
   NOT_LOADED: 0,
@@ -518,6 +521,13 @@ function createInstances(loader, components, frameState) {
   // Create instances.
   const instances = new Instances();
   instances.transformInWorldSpace = true;
+  // SCENEGIS_PATCH_BEGIN SGP-0075: Capture Float32 instance transforms before their CPU arrays are released.
+  instances._sceneGISInstanceBounds = LegacyInstanceBounds.create(
+    translationTypedArray,
+    rotationTypedArray,
+    scaleTypedArray,
+  );
+  // SCENEGIS_PATCH_END SGP-0075
   const buffers = loader._buffers;
 
   // Create translation vertex attribute.
@@ -647,6 +657,9 @@ function createInstances(loader, components, frameState) {
 function createInstancesCopy(instances) {
   const instancesCopy = new Instances();
   instancesCopy.transformInWorldSpace = instances.transformInWorldSpace;
+  // SCENEGIS_PATCH_BEGIN SGP-0075: All mesh nodes share the same immutable instance summary.
+  instancesCopy._sceneGISInstanceBounds = instances._sceneGISInstanceBounds;
+  // SCENEGIS_PATCH_END SGP-0075
 
   const attributes = instances.attributes;
   const attributesLength = attributes.length;
