@@ -1738,7 +1738,7 @@ SceneGISEnvironmentEffects.prototype._validateRenderFrame = function () {
  * @property {number} [aerialRadianceScale=1.0] 相对 backgroundRadianceScale 的空气透视辐亮度倍率，两世界范围均为闭区间 0–64。
  * @property {number} [aerialPerspectiveDistanceScale] 有限接收点的大气查询距离倍率，范围 [0,8]。球面默认 0.5，平面默认且仅允许 1.0。同步缩放散射与衰减，不包含初始真空段，不改变背景天空、光照或几何。
  * @property {number} [surfaceRadianceScale=1.2] 球面、平面地表和物理模型的直射及天空漫反射辐亮度倍率，闭区间 0–64，独立于显示 HDR 与曝光。
- * @property {number} [nightAmbientIntensity=1.0] 艺术化蓝灰夜间环境光下限倍率，范围 [0,8]，0 关闭。按物理天空辐照度混合，位于材质和环境遮蔽之前，支持球面和平面，独立于月光及曝光。
+ * @property {number} [nightAmbientIntensity=1.0] 艺术化蓝灰夜间环境光下限倍率，范围 [0,8]，0 关闭。按物理天空照明补足漫反射和默认镜面环境反射，支持球面和平面，独立于月光及曝光。
  * @property {number} [bloomThreshold=10.0] HDR 泛光阈值，范围为 RGBA16F 闭区间 0–65504。
  * @property {number} [bloomIntensity=0.005] 全场景泛光强度，闭区间 0–64。
  * @property {number} [lensFlareIntensity=5.0] 受太阳可见性控制的镜头光学效果强度，闭区间 0–64。

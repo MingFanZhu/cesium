@@ -40,3 +40,17 @@ on upstream upgrades. Source/glsl generation and tests use the existing build en
 ## 2026-10-12 WebGL maintenance backport
 
 Authored Model SH/cubes precede Scene SH/cubes, which precede default physical/procedural sources in both lighting modes. Uniform callbacks read the current SH array. A changed or cleared Scene URL immediately withdraws the previous map. Backported from `122ba3dd1d`; SGP-0015 now also covers the narrow Scene frame-state seam.
+
+## 2026-11-24: Twilight ambient continuity
+
+Both capture modes use the shared ADR-0167 night floor. Upper rays compare local
+scene-linear radiance with the isotropic hemisphere equivalent of the floor
+(`E = πL`). The Globe ground branch supplements the local sky irradiance before
+applying ground albedo and atmospheric transmittance. Planar ground radiance uses
+the existing neutral reflectance for its lower-hemisphere floor.
+
+The capture cache includes `nightAmbientIntensity`. A value change refreshes the
+same six faces and prefiltered mip chain as a sun or altitude change. Zero
+publishes physical sky radiance only. Default deep-night radiance, camera-only
+reuse, authored maps and resource ownership retain their existing contracts.
+See the [twilight maintenance plan](../../../AgentDocs/rendering-quality/plans/2026-11-24-twilight-sky-reflections.md).

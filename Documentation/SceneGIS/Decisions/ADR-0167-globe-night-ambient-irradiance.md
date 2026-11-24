@@ -61,3 +61,9 @@ The renderer already publishes the scalar; the Planar material map borrows it.
 No new upstream seam or GPU resource is required. Preserve the Planar slab LUT,
 Sun/Moon direction, specular capture, visibility and style contracts. This amendment
 supersedes the Planar-only-one restriction above and ADR-0050's P4 angle gating.
+
+## 2026-11-24: 镜面天空补光
+
+默认镜面 IBL 与漫反射共用 `nightAmbientIntensity`，并按镜面探针的物理辐亮度补足夜间下限。
+球面地面反射在反照率和传输之前补足接收点的天空辐照度。具体换算和缓存接点见
+[ADR-0085](ADR-0085-physical-sky-specular-ibl.md)。

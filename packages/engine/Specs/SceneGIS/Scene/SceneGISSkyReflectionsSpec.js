@@ -48,6 +48,7 @@ describe("SceneGIS/Scene/SceneGISSkyReflections", function () {
     textures = [];
     renderer = {
       _mode: "planar",
+      _owner: { nightAmbientIntensity: 1.0 },
       _frame: {
         altitude: 10,
         east: Cartesian3.clone(Cartesian3.UNIT_X),
@@ -174,16 +175,46 @@ describe("SceneGIS/Scene/SceneGISSkyReflections", function () {
     );
   });
 
-  it("keeps the readable night floor when physical scattering disappears", function () {
-    renderer._resources.scatteringTexture = texture([0, 0, 0, 0], true);
-    renderer._resources.irradianceTexture = texture([0, 0, 0, 1]);
-    probe.update(scene.frameState);
-    expect(sample(Cartesian3.UNIT_Z)[2]).toEqual(0);
-    renderer._sunDirection = new Cartesian3(0, 0, -1);
-    probe.update(scene.frameState);
-    const night = sample(Cartesian3.UNIT_Z);
-    expect(night[2]).toBeGreaterThan(night[0]);
-    expect(night[0]).toBeGreaterThan(0);
+  ["planar", "globe"].forEach((mode) => {
+    it(`keeps ${mode} sky reflections at the night floor when physical scattering disappears during twilight`, function () {
+      renderer._mode = mode;
+      renderer._resources.scatteringTexture = texture([0, 0, 0, 0], true);
+      renderer._resources.irradianceTexture = texture([0, 0, 0, 1]);
+      renderer._sunDirection = Cartesian3.normalize(
+        new Cartesian3(1, 0, -0.07),
+        new Cartesian3(),
+      );
+      probe.update(scene.frameState);
+      const cube = probe.texture;
+      const twilight = sample(Cartesian3.UNIT_Z);
+      const reference = [0.02, 0.036, 0.06].map((value) => value / Math.PI);
+      for (let channel = 0; channel < 3; channel++) {
+        expect(twilight[channel]).toEqualEpsilon(reference[channel], 0.00002);
+      }
+
+      renderer._sunDirection = new Cartesian3(0, 0, -1);
+      probe.update(scene.frameState);
+      expect(sample(Cartesian3.UNIT_Z)).toEqual(twilight);
+      const night = probe.generation;
+      renderer._owner.nightAmbientIntensity = 0;
+      probe.update(scene.frameState);
+      expect(probe.generation).toBe(night + 1);
+      expect(sample(Cartesian3.UNIT_Z)).toEqual([0, 0, 0, 1]);
+      expect(sample(Cartesian3.UNIT_Z, 7)).toEqual([0, 0, 0, 1]);
+      renderer._owner.nightAmbientIntensity = 2;
+      probe.update(scene.frameState);
+      expect(probe.generation).toBe(night + 2);
+      const brighter = sample(Cartesian3.UNIT_Z);
+      for (let channel = 0; channel < 3; channel++) {
+        expect(brighter[channel]).toEqualEpsilon(
+          2.0 * twilight[channel],
+          0.00002,
+        );
+      }
+      probe.update(scene.frameState);
+      expect(probe.generation).toBe(night + 2);
+      expect(probe.texture).toBe(cube);
+    });
   });
 
   [true, false].forEach((planar) => {

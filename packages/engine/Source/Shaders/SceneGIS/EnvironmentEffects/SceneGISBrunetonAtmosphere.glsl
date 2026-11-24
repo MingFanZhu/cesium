@@ -94,24 +94,6 @@ const float SCENEGIS_HDR_MAX = 65504.0;
 const vec3 SCENEGIS_READABLE_NIGHT_SKY_IRRADIANCE =
     vec3(0.020, 0.036, 0.060);
 
-float sceneGISReadableNightFactor(
-    vec3 radialUp,
-    vec3 sunDirection)
-{
-    return 1.0 - smoothstep(
-        -0.2079116908,
-        -0.1045284633,
-        dot(radialUp, sunDirection));
-}
-
-vec3 sceneGISReadableNightSkyIrradiance(
-    vec3 radialUp,
-    vec3 sunDirection)
-{
-    return SCENEGIS_READABLE_NIGHT_SKY_IRRADIANCE *
-        sceneGISReadableNightFactor(radialUp, sunDirection);
-}
-
 vec3 sceneGISGuardHdrStorage(vec3 sceneLinearRadiance)
 {
     return clamp(

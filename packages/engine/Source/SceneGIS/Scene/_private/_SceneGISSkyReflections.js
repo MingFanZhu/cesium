@@ -64,6 +64,7 @@ function createResources(probe, context) {
     u_face: () => probe._face,
     u_sunDirection: () => probe._sun,
     u_altitude: () => probe._altitude,
+    u_nightAmbientIntensity: () => probe._nightAmbientIntensity,
     u_transmittanceTexture: () => probe._resources.transmittanceTexture,
     u_scatteringTexture: () => probe._resources.scatteringTexture,
     u_irradianceTexture: () => probe._resources.irradianceTexture,
@@ -125,6 +126,7 @@ function SceneGISSkyReflections(renderer) {
   this._east = new Cartesian3();
   this._vertical = new Cartesian3();
   this._altitude = undefined;
+  this._nightAmbientIntensity = undefined;
   this._resources = undefined;
   this._frames = [];
   this._sourceFrames = [];
@@ -136,6 +138,7 @@ function SceneGISSkyReflections(renderer) {
 SceneGISSkyReflections.prototype.update = function (frameState) {
   const renderer = this._renderer;
   const frame = renderer._frame;
+  const nightAmbientIntensity = renderer._owner.nightAmbientIntensity;
   Cartesian3.fromElements(
     Cartesian3.dot(renderer._sunDirection, frame.east),
     Cartesian3.dot(renderer._sunDirection, frame.north),
@@ -144,6 +147,7 @@ SceneGISSkyReflections.prototype.update = function (frameState) {
   );
   if (
     this._resources === renderer._resources &&
+    this._nightAmbientIntensity === nightAmbientIntensity &&
     Math.abs(this._altitude - frame.altitude) < 100.0 &&
     Cartesian3.dot(this._sun, localSun) > minimumDirectionDot &&
     Cartesian3.dot(this._east, frame.east) > minimumDirectionDot &&
@@ -157,6 +161,7 @@ SceneGISSkyReflections.prototype.update = function (frameState) {
   }
   this._resources = renderer._resources;
   this._altitude = frame.altitude;
+  this._nightAmbientIntensity = nightAmbientIntensity;
   Cartesian3.clone(localSun, this._sun);
   Cartesian3.clone(frame.east, this._east);
   Cartesian3.clone(frame.vertical, this._vertical);
