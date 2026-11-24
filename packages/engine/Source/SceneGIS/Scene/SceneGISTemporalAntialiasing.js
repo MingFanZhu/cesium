@@ -91,7 +91,7 @@ Object.defineProperties(SceneGISTemporalAntialiasing.prototype, {
     },
   },
   /**
-   * 基础历史贡献，较低值对内容变化响应更快。深度拒绝和颜色裁剪后，亮度差异可提高历史保留以抑制亚像素闪烁。0 禁用历史混合。
+   * 基础历史贡献，较低值对内容变化响应更快。亮度权重兼顾暗部细节响应与高反差区域的防闪烁。0 禁用历史混合。
    * @memberof SceneGISTemporalAntialiasing.prototype
    * @type {number}
    * @default 0.9

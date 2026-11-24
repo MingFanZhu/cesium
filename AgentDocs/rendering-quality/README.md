@@ -4,18 +4,18 @@
 
 ## Metadata
 
-| Field                  | Value                                                                                                    |
-| ---------------------- | -------------------------------------------------------------------------------------------------------- |
-| Extension slug         | `rendering-quality`                                                                                      |
-| Status                 | `active`                                                                                                 |
-| Planning model         | `extension`                                                                                              |
-| Active extension plan  | [roadmap](plans/2026-09-18-rendering-quality-extension.md)                                               |
-| Current phase          | None; R38 completed                                                                                      |
-| Active phase plan      | None; [completed R38](plans/2026-10-29-r38-water-boundary-bvh.md)                                        |
-| Active standalone plan | None; [completed directional occlusion assessment](plans/2026-10-22-directional-occlusion-assessment.md) |
-| Architecture contact   | Current task                                                                                             |
-| Execution contact      | Current task                                                                                             |
-| Last updated           | `2026-10-29`                                                                                             |
+| Field                  | Value                                                                              |
+| ---------------------- | ---------------------------------------------------------------------------------- |
+| Extension slug         | `rendering-quality`                                                                |
+| Status                 | `active`                                                                           |
+| Planning model         | `extension`                                                                        |
+| Active extension plan  | [roadmap](plans/2026-09-18-rendering-quality-extension.md)                         |
+| Current phase          | None; R38 completed                                                                |
+| Active phase plan      | None; [completed R38](plans/2026-10-29-r38-water-boundary-bvh.md)                  |
+| Active standalone plan | None; [completed TAA night luminance fix](plans/2026-11-24-taa-night-luminance.md) |
+| Architecture contact   | Current task                                                                       |
+| Execution contact      | Current task                                                                       |
+| Last updated           | `2026-11-24`                                                                       |
 
 ## Scope
 
@@ -36,6 +36,11 @@
 - R1 example: [级联阴影](../../Test/Planar/级联阴影.html).
 
 ## Current handoff
+
+2026-11-24：R4 夜景维护将暗部响应限定在低亮度邻域，保留高反差区域的原防闪烁权重。
+球面和平面细亮纹恢复亮度，13 项严格 WebGL Specs 在开发版与发行版均通过。
+[独立计划](plans/2026-11-24-taa-night-luminance.md)与
+[评审](reviews/2026-11-24-taa-night-luminance.md)记录量化结果和剩余限制。
 
 - R38 technically complete after `066143a580`: replace full shore scan/256-edge ceiling with
   shared original-edge BVH queries and explicit byte budget. [Plan](plans/2026-10-29-r38-water-boundary-bvh.md)

@@ -111,3 +111,21 @@ continuous surface footprint of the actual scene-jitter displacement. This
 prevents terrain-backed clouds from repeatedly losing history while sky-backed
 clouds remain stable. Scene TAA itself, its weights and its depth history are
 unchanged; the correction belongs to cloud history qualification.
+
+## 2026-11-24: Night highlight retention
+
+The Filament/Lottes weighting reduces the current contribution on a luminance
+disagreement. In low-radiance neighborhoods this can sustain dark history and
+attenuate fine night highlights. The low-radiance variant instead scales the history
+weight by the same luminance agreement squared, then normalizes both contributions.
+
+Use the existing 3×3 channelwise color upper bound to estimate the local luminance
+range. Apply the responsive weighting below 0.09 scene-linear luminance, interpolate
+over one stop to the 0.18 reference gray of ADR-0044, and retain the established
+anti-flicker weighting at and above 0.18. A high-contrast edge therefore keeps its
+stabilization even when its center sample is dark. The transition is screen-local
+and independent of time of day or display exposure. Zero history weight continues
+to publish the current reconstruction. Color clipping, HDR compression and depth
+rejection retain their order and resource layout.
+
+See [night luminance verification](../../../AgentDocs/rendering-quality/reviews/2026-11-24-taa-night-luminance.md).

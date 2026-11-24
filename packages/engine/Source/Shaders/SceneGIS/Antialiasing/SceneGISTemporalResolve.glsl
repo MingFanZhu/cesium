@@ -179,16 +179,21 @@ void main()
     vec3 low = max(mix(low5, low9, 0.5), mean - sigma);
     vec3 high = min(mix(high5, high9, 0.5), mean + sigma);
     vec3 history = clipHistory(low, high, reconstructed, sampleHistory(previousUv, size));
-    // Filament/Lottes: attenuate an inconsistent current sample after clipping has
-    // rejected stale colors. Thin highlights should not dominate the accumulated
-    // coverage merely because this frame's jitter happens to hit them.
+    // Below reference gray, retain the response to dim subpixel highlights.
+    // The neighborhood bound keeps high-contrast edges on the Filament/Lottes
+    // stabilization path even when the current pixel happens to be dark.
     float currentWeight = 1.0 - u_historyWeight;
     if (u_historyWeight > 0.0) {
-        float currentLuma = dot(reconstructed, vec3(0.2126, 0.7152, 0.0722));
-        float historyLuma = dot(history, vec3(0.2126, 0.7152, 0.0722));
-        float confidence = 1.0 - abs(currentLuma - historyLuma)
+        const vec3 lumaWeights = vec3(0.2126, 0.7152, 0.0722);
+        float currentLuma = dot(reconstructed, lumaWeights);
+        float historyLuma = dot(history, lumaWeights);
+        float agreement = 1.0 - abs(currentLuma - historyLuma)
             / (0.001 + max(currentLuma, historyLuma));
-        currentWeight *= confidence * confidence;
+        float confidence = agreement * agreement;
+        float stabilizedWeight = currentWeight * confidence;
+        float responsiveWeight = currentWeight / (currentWeight + u_historyWeight * confidence);
+        float brightRegion = smoothstep(0.09, 0.18, dot(high9, lumaWeights));
+        currentWeight = mix(responsiveWeight, stabilizedWeight, brightRegion);
     }
     // Keep Filament's ordering: spatial reconstruction and clipping in linear RGB,
     // HDR compression only for temporal blending, then restore linear HDR radiance.
