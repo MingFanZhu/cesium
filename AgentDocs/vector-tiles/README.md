@@ -1,16 +1,18 @@
 # Vector Tiles
 
+> 本扩展遗留的人工确认项已关闭。以下旧记录中的待确认状态仅供追溯。见 [2026-11-24 收口决定](../README.md#旧验收项收口2026-11-24)。
+
 ## Metadata
 
 | Field                    | Value                                                                                                                    |
 | ------------------------ | ------------------------------------------------------------------------------------------------------------------------ |
 | Extension slug           | `vector-tiles`                                                                                                           |
-| Status                   | `active`（动态绘制规则；此前扩展已验收）                                                                                 |
+| Status                   | `completed`（动态绘制规则）                                                                                              |
 | Planning model           | `extension`                                                                                                              |
-| Active extension plan    | [动态绘制规则](plans/2026-10-16-dynamic-style-extension.md)                                                              |
+| Latest completed plan    | [动态绘制规则](plans/2026-10-16-dynamic-style-extension.md)                                                              |
 | Completed extension plan | [四类样式增强](plans/2026-09-17-style-enhancements-extension.md)、[总体计划](plans/2026-09-12-vector-tiles-extension.md) |
-| Current phase            | D2 技术完成，等待动态规则人工视觉 gate                                                                                   |
-| Active phase plan        | None；[D2](plans/2026-10-16-d2-layer-style-runtime.md) technical completed                                               |
+| Current phase            | 无；D2 已完成                                                                                                            |
+| Active phase plan        | None；[D2](plans/2026-10-16-d2-layer-style-runtime.md) completed                                                         |
 | Last completed phase     | D2：Layer 动态样式运行时；D1 checkpoint `7414056515`                                                                     |
 | Active standalone plan   | None；[未声明缩放范围](plans/2026-10-20-implicit-zoom-bounds.md) completed                                               |
 | Architecture contact     | 当前 Agent                                                                                                               |
@@ -122,7 +124,7 @@ Buffer vector 与 VectorProvider 链路。MVT 解析保持 CRS 无关，tile mat
 [self-review](reviews/2026-10-16-low-angle-rendering.md) 的 P1 已 fixed。
 85 项相关回归、构建及静态检查通过；公开页 300 帧缩放往返未重现此前空档，
 记录了旧注记保留、有限过渡 cache 和提交后释放证据。负责人最终视觉 gate 已通过。
-随后报告另一当前视角下整层不显示，作为独立问题继续诊断；不改动 D2 的待验收状态。
+随后报告另一当前视角下整层不显示，作为独立问题继续诊断。
 
 2026-10-16 SDK JSON 接入完成后启动[动态绘制规则扩展](plans/2026-10-16-dynamic-style-extension.md)。
 当前 D1 [样式快照与原子校验](plans/2026-10-16-d1-style-snapshots.md) completed，17 项 Core Specs 通过，
@@ -130,7 +132,7 @@ Buffer vector 与 VectorProvider 链路。MVT 解析保持 CRS 无关，tile mat
 [D2](plans/2026-10-16-d2-layer-style-runtime.md) technical completed，Layer 七个公开方法、Worker 同步、
 缓存与标注版本隔离、两世界控件/导出已交付。[D2 self-review](reviews/2026-10-16-d2-layer-style-runtime.md)
 记录 10 项新增动态规则、112 项专项通过及 1 项已有失败、4 项 E2E、完整构建/类型资格与边界。
-当前仅保留负责人视觉 gate，尚无对本项新增规则的人工验收；无 open discussion。
+D2 遗留视觉验收已按负责人决定关闭；无 open discussion。
 Architecture / implementation self-review 仍由当前 Agent 承担。沿用本对话指定的 `scenegis/develop`，
 D2 独立本地 checkpoint 由本文件 Git 历史定位；SDK lock、临时 state、生成产物不在提交范围。
 SDK 升级必须同步主 bundle、Worker 与类型；ID 是 Style 内部层 ID，null 删除，getter 即时、绘制异步。

@@ -1,6 +1,8 @@
 # M3 自审与交付资格
 
-- Status: technical passed; product visual acceptance pending
+> 本记录的遗留人工确认项已关闭。见 [2026-11-24 收口决定](../../README.md#旧验收项收口2026-11-24)。
+
+- Status: technical passed
 - Reviewer / owner role: architecture / execution（当前任务自审）
 - Date: 2026-10-21
 - Target: MaterialProperty 桥、四类 Visualizer、PrimitiveOwner 与综合示例

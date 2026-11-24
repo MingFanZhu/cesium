@@ -1,7 +1,9 @@
 # 平面地平线高度雾技术自审
 
+> 本记录的遗留人工确认项已关闭。见 [2026-11-24 收口决定](../../README.md#旧验收项收口2026-11-24)。
+
 - Type：review
-- Status：approved；负责人视觉验收待定
+- Status：approved
 - Owner / reviewer：当前任务，Architecture / execution；非独立评审
 - Created / Updated：2026-10-20
 - Target：`df7b55399a` 后本项工作区修改

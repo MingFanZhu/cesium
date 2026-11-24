@@ -1,7 +1,9 @@
 # 平面影像分屏技术自审
 
+> 本记录的遗留人工确认项已关闭。见 [2026-11-24 收口决定](../../README.md#旧验收项收口2026-11-24)。
+
 - Type: review
-- Status: approved technically; owner visual acceptance pending
+- Status: approved technically
 - Author role: Architecture / implementation self-review
 - Date: 2026-10-22
 - Target: [standalone plan](../plans/2026-10-22-imagery-split.md)

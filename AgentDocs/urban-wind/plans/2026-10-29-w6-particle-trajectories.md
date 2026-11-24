@@ -1,6 +1,8 @@
 # W6: Independent marker dimensions and GPU trajectories
 
-- Type: phase; status: completed; owner visual gate pending; 2026-10-29.
+> 本记录的遗留人工确认项已关闭。见 [2026-11-24 收口决定](../../README.md#旧验收项收口2026-11-24)。
+
+- Type: phase; status: completed; 2026-10-29.
 - Parent: [roadmap](2026-10-28-urban-wind.md); owner/reviewer: current engine task, self-review.
 - Architecture review: confirmed; ADR-0203; upstream/SGP: none planned.
 - Entry: V3 `9f58ccf4f3`; wind solver/concentration unchanged.

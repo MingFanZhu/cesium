@@ -1,5 +1,7 @@
 # WebGL Deferred Renderer
 
+> 本扩展遗留的人工确认项已关闭。以下旧记录中的待确认状态仅供追溯。见 [2026-11-24 收口决定](../README.md#旧验收项收口2026-11-24)。
+
 ## Metadata
 
 | Field                            | Value                                                                                  |

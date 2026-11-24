@@ -1,7 +1,9 @@
 # D2：Layer 动态样式运行时
 
+> 本记录的遗留人工确认项已关闭。见 [2026-11-24 收口决定](../../README.md#旧验收项收口2026-11-24)。
+
 - Type: phase plan
-- Status: completed (technical); owner visual gate pending
+- Status: completed
 - Created / updated: 2026-10-16
 - Owner: 当前 Agent，Architecture / implementation self-review
 - Architecture review: confirmed

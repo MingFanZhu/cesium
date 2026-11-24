@@ -1,6 +1,8 @@
 # 平面相机 Roll 与导航接管
 
-- Type: standalone plan; status: completed technically, owner visual confirmation pending; updated: 2026-10-22.
+> 本记录的遗留人工确认项已关闭。见 [2026-11-24 收口决定](../../README.md#旧验收项收口2026-11-24)。
+
+- Type: standalone plan; status: completed technically; updated: 2026-10-22.
 - Owner / architecture / execution / review: current task, self-review.
 - Parent: [扩展索引](../README.md).
 - Baseline: `scenegis/develop@29bb119e3f`.

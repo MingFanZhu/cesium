@@ -1,9 +1,11 @@
 # Default advanced environment ownership
 
+> 本记录的遗留人工确认项已关闭。见 [2026-11-24 收口决定](../../README.md#旧验收项收口2026-11-24)。
+
 ## Metadata
 
 - Type: discussion
-- Status: owner-approved; implementation and technical validation complete, visual gate pending
+- Status: owner-approved; implementation and technical validation complete
 - Created / Updated: 2026-10-14
 - Parent: [P4d](../plans/2026-10-14-p4d-opaque-pipeline-consolidation.md)
 - ADR / SGP: ADR-0161 / SGP-0046

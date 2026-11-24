@@ -1,7 +1,9 @@
 # 平面地形元数据接入技术自审
 
+> 本记录的遗留人工确认项已关闭。见 [2026-11-24 收口决定](../../README.md#旧验收项收口2026-11-24)。
+
 - Type: implementation / architecture self-review
-- Status: approved technically；联合产物验收通过，项目负责人视觉验收待定
+- Status: approved technically；联合产物验收通过
 - Author / owner: 当前 Agent；未启用独立评审 Agent
 - Created / Updated: 2026-09-18
 - Target: `feature/planar-terrain-layer-metadata` 工作区中的本项变更

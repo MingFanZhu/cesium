@@ -1,7 +1,9 @@
 # R36 implementation and technical review
 
+> 本记录的遗留人工确认项已关闭。见 [2026-11-24 收口决定](../../README.md#旧验收项收口2026-11-24)。
+
 - Type: review; 2026-10-29.
-- Status: technical review approved; owner visual gate pending.
+- Status: technical review approved.
 - Owner / reviewer: current architecture and implementation task, source-based self-review.
 - Target: [R36](../plans/2026-10-29-r36-regional-caustics.md), ADR-0201, regional
   preparation, WaterField, receiver transforms/shaders and both examples.

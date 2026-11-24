@@ -1,7 +1,9 @@
 # 地表锚点旋转与中心边界解耦
 
+> 本记录的遗留人工确认项已关闭。见 [2026-11-24 收口决定](../../README.md#旧验收项收口2026-11-24)。
+
 - Type: standalone plan
-- Status: completed（技术验证完成，待负责人视觉复测）
+- Status: completed（技术验证完成）
 - Created / Updated: 2026-10-20
 - Owner: 当前 Agent（实现与技术自审）
 - Architecture review: confirmed（依据负责人明确确认的交互契约）

@@ -1,7 +1,9 @@
 # 高度雾完整可见段积分评审
 
+> 本记录的遗留人工确认项已关闭。见 [2026-11-24 收口决定](../../README.md#旧验收项收口2026-11-24)。
+
 - Type: technical review / self-review
-- Status: technically verified；负责人视觉验收待定
+- Status: technically verified
 - Author / Owner: 当前任务，Architecture / execution
 - Created / Updated: 2026-10-19
 - Target: [standalone plan](../plans/2026-10-19-height-fog-visible-segment.md)

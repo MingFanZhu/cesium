@@ -1,5 +1,7 @@
 # SceneGIS Planar Surface Styling
 
+> 本扩展遗留的人工确认项已关闭。以下旧记录中的待确认状态仅供追溯。见 [2026-11-24 收口决定](../README.md#旧验收项收口2026-11-24)。
+
 ## 2026-10-22 当前工作
 
 - Completed standalone plan：[Globe 滤镜兼容](plans/2026-10-22-globe-filter-compatibility.md)。
@@ -61,7 +63,7 @@
   focused re-review已批准代码、release evidence与Sandcastle launcher，S4-R001至S4-R003及S4-T007全部fixed。端口释放后，
   同一Playwright config/project/spec的headed dev与release E2E均通过；项目负责人已使用修复后的launcher完成final visual/manual
   gate并授权进入下一扩展。默认headless `--use-angle=gl`在当前NVIDIA环境的Context初始化失败保留为工具链风险。
-- Next action: S1–S4 已关闭；Globe 滤镜兼容已通过技术检查，等待项目负责人视觉反馈，不新增 S5。
+- S1–S4 已关闭；Globe 滤镜兼容已通过技术检查，负责人已关闭遗留视觉验收。
 - Current phase status: S1=`completed`；S2=`completed`；S3=`completed`；S4=`completed`。
 - Open discussions: None；S3 已确认复用 Cesium `Material`/Fabric source与uniform lifecycle，但由SceneGIS组装
   planar inputs，并冻结caller ownership、north-clockwise aspect、sampler budget与normal-render publication边界。

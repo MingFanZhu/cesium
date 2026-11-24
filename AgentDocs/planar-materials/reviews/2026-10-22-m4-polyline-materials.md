@@ -1,6 +1,8 @@
 # M4 平面折线 Fabric 材质评审
 
-- Type: review; status: technical passed, owner visual acceptance pending.
+> 本记录的遗留人工确认项已关闭。见 [2026-11-24 收口决定](../../README.md#旧验收项收口2026-11-24)。
+
+- Type: review; status: approved; technical checks completed.
 - Author role: architecture / current task self-review (no separate review agent).
 - Updated: 2026-10-22.
 - Target: feature/planar-polyline-materials, M4 implementation, Specs, example and docs.

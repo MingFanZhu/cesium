@@ -1,6 +1,8 @@
 # 夜晚星空技术自审
 
-- Type: review; status: code approved; owner visual acceptance pending
+> 本记录的遗留人工确认项已关闭。见 [2026-11-24 收口决定](../../README.md#旧验收项收口2026-11-24)。
+
+- Type: review; status: code approved
 - Date: 2026-09-30
 - Reviewer / implementer: 当前 Agent（技术自审，非独立评审）
 - Target: [standalone plan](../plans/2026-09-30-night-stars.md)

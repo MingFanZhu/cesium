@@ -1,5 +1,7 @@
 # Rendering Quality
 
+> 本扩展遗留的人工确认项已关闭。以下旧记录中的待确认状态仅供追溯。见 [2026-11-24 收口决定](../README.md#旧验收项收口2026-11-24)。
+
 ## Metadata
 
 | Field                  | Value                                                                                                    |
@@ -8,7 +10,7 @@
 | Status                 | `active`                                                                                                 |
 | Planning model         | `extension`                                                                                              |
 | Active extension plan  | [roadmap](plans/2026-09-18-rendering-quality-extension.md)                                               |
-| Current phase          | R38 technically complete; owner visual gate pending                                                      |
+| Current phase          | None; R38 completed                                                                                      |
 | Active phase plan      | None; [completed R38](plans/2026-10-29-r38-water-boundary-bvh.md)                                        |
 | Active standalone plan | None; [completed directional occlusion assessment](plans/2026-10-22-directional-occlusion-assessment.md) |
 | Architecture contact   | Current task                                                                                             |
@@ -39,8 +41,8 @@
   shared original-edge BVH queries and explicit byte budget. [Plan](plans/2026-10-29-r38-water-boundary-bvh.md)
   / [review](reviews/2026-10-29-r38-water-boundary-bvh.md) / ADR-0204; 94 release
   GPU cases, two large-boundary browser cases and full build/types pass. No SDK/
-  upstream change. Profile triangle budget remains independent; owner visual gate
-  pending. No next phase active.
+  upstream change. The profile triangle budget remains a separate technical limitation.
+  No next phase is active.
 
 - R37 technically complete after `e467891320`: owner removes explicit depth grids
   and persistent shore transport. [Plan](plans/2026-10-29-r37-screen-water-effects.md) /

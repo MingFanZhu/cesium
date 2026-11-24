@@ -1,7 +1,9 @@
 # 球面透明地表高度雾截断
 
+> 本记录的遗留人工确认项已关闭。见 [2026-11-24 收口决定](../../README.md#旧验收项收口2026-11-24)。
+
 - Type: standalone plan
-- Status: implementation verified；负责人视觉验收待定
+- Status: implementation verified
 - Owner / review: 当前任务 execution / architecture self-review
 - Created / Updated: 2026-10-23
 - Parent: [扩展计划](2026-08-14-atmosphere-clouds-effects-extension.md)

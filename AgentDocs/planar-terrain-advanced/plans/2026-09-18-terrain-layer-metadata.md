@@ -1,7 +1,9 @@
 # 平面地形 layer.json 接入与 TileWorker 兼容核验
 
+> 本记录的遗留人工确认项已关闭。见 [2026-11-24 收口决定](../../README.md#旧验收项收口2026-11-24)。
+
 - Type: standalone plan
-- Status: active
+- Status: completed
 - Created / Updated: 2026-09-18
 - Owner / architecture review: 当前 Agent；confirmed
 - Parent: [平面高级地形](2026-08-10-planar-terrain-advanced-extension.md)
@@ -59,4 +61,4 @@ Go 地形定向测试通过，协议与产物字节不变；消费端两个 Chro
 用法见 [PlanarWorldGuide](../../../Documentation/SceneGIS/PlanarWorldGuide.md) 和
 [地形服务](../../../Test/Planar/地形服务.html)。
 
-状态 active，仅待项目负责人视觉验收。本项未提交或 push，既有大气变更保持独立。
+本项与同期大气变更独立。该次验证记录形成时尚未提交或推送。

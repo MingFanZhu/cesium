@@ -1,8 +1,10 @@
 # Review: Planar imagery follows Globe
 
+> 本记录的遗留人工确认项已关闭。见 [2026-11-24 收口决定](../../README.md#旧验收项收口2026-11-24)。
+
 ## Metadata
 
-- Type: technical self-review; status: approved, owner visual feedback pending.
+- Type: technical self-review; status: approved.
 - Created/updated: 2026-10-22; author/reviewer: current architecture/execution task.
 - Target: `scenegis/develop` at `acd9cddbb0` plus this focused change.
 - Plan: [Globe compatibility](../plans/2026-10-22-globe-filter-compatibility.md).

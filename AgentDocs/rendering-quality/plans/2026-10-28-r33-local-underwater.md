@@ -1,6 +1,8 @@
 # R33: Local underwater medium and bottom caustics
 
-- Type: phase plan; status: visual correction technically complete, owner visual gate pending; 2026-10-28.
+> 本记录的遗留人工确认项已关闭。见 [2026-11-24 收口决定](../../README.md#旧验收项收口2026-11-24)。
+
+- Type: phase plan; status: visual correction technically complete; 2026-10-28.
 - Owner/roles: current architecture and implementation task.
 - Baseline: R32 checkpoint `8a5600d08a`; owner requests continued water improvements.
 - Parent: [roadmap](2026-09-18-rendering-quality-extension.md).

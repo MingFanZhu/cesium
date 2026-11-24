@@ -1,7 +1,9 @@
 # 平面地平线高度雾合成
 
+> 本记录的遗留人工确认项已关闭。见 [2026-11-24 收口决定](../../README.md#旧验收项收口2026-11-24)。
+
 - Type：standalone plan
-- Status：implementation verified；负责人视觉验收待定
+- Status：implementation verified
 - Owner：当前任务，Architecture / execution
 - Created / Updated：2026-10-20
 - Parent：[extension](2026-08-14-atmosphere-clouds-effects-extension.md)

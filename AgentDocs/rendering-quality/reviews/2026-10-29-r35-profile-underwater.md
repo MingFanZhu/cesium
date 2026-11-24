@@ -1,7 +1,9 @@
 # R35 implementation and technical review
 
+> 本记录的遗留人工确认项已关闭。见 [2026-11-24 收口决定](../../README.md#旧验收项收口2026-11-24)。
+
 - Type: review; 2026-10-29.
-- Status: technical gate approved; owner visual gate pending.
+- Status: technical gate approved.
 - Owner / reviewer: current architecture and implementation task, source-based self-review.
 - Target: [R35](../plans/2026-10-29-r35-profile-underwater.md), ADR-0200,
   WaterDomain, Underwater, profile/polynomial/volume shaders, RiverSurface and examples.

@@ -1,6 +1,8 @@
 # Phase R25: Regional ellipsoid water
 
-- Type: phase; status: implementation checkpointed, owner visual follow-up pending; created: 2026-10-21
+> 本记录的遗留人工确认项已关闭。见 [2026-11-24 收口决定](../../README.md#旧验收项收口2026-11-24)。
+
+- Type: phase; status: implementation checkpointed; created: 2026-10-21
 - Parent: [rendering quality](2026-09-18-rendering-quality-extension.md)
 - Owner/reviewer: current task, implementation and architecture self-review
 - Architecture review: confirmed from R8/R22 source and ownership boundaries

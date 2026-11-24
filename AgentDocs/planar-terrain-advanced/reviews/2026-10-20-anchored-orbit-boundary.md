@@ -1,7 +1,9 @@
 # 地表锚点旋转边界技术自审
 
+> 本记录的遗留人工确认项已关闭。见 [2026-11-24 收口决定](../../README.md#旧验收项收口2026-11-24)。
+
 - Type: review
-- Status: approved（技术自审；负责人视觉复测待定）
+- Status: approved（技术自审）
 - Created / Updated: 2026-10-20
 - Owner / reviewer: 当前 Agent
 - Review target: [维护计划](../plans/2026-10-20-anchored-orbit-boundary.md)、Controller 与对应 Specs、ADR-0024 amendment

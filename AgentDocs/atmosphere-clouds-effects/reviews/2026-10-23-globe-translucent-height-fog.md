@@ -1,7 +1,9 @@
 # 球面透明地表高度雾截断技术自审
 
+> 本记录的遗留人工确认项已关闭。见 [2026-11-24 收口决定](../../README.md#旧验收项收口2026-11-24)。
+
 - Type: review
-- Status: code / automated verification passed；负责人视觉验收待定
+- Status: code / automated verification passed
 - Owner / reviewer: 当前任务 execution / architecture self-review，非独立 Agent review
 - Created / Updated: 2026-10-23
 - Plan: [透明地表高度雾截断](../plans/2026-10-23-globe-translucent-height-fog.md)

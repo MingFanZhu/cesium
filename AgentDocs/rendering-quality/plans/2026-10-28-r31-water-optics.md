@@ -1,6 +1,8 @@
 # R31: Water optics and comparison fixture
 
-- Type: phase plan; status: technically complete, owner visual gate pending; created: 2026-10-28.
+> 本记录的遗留人工确认项已关闭。见 [2026-11-24 收口决定](../../README.md#旧验收项收口2026-11-24)。
+
+- Type: phase plan; status: technically complete; created: 2026-10-28.
 - Roles: current task, architecture and implementation; source-based self-review.
 - Parent: [rendering-quality roadmap](2026-09-18-rendering-quality-extension.md).
 - ADR: [ADR-0194](../../../Documentation/SceneGIS/Decisions/ADR-0194-water-medium-optics.md).

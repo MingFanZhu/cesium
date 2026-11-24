@@ -1,7 +1,9 @@
 # 球面空气透视模型条带技术自审
 
+> 本记录的遗留人工确认项已关闭。见 [2026-11-24 收口决定](../../README.md#旧验收项收口2026-11-24)。
+
 - Type: review
-- Status: approved; project-owner visual acceptance pending
+- Status: approved
 - Created / Updated: 2026-09-18
 - Reviewer / implementation owner: 当前 Agent（技术自审，非独立评审）
 - Review target: `scenegis/develop@69f76a94c6` 之后的本项工作区改动

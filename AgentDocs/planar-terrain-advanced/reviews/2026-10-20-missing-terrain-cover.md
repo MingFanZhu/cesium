@@ -1,7 +1,9 @@
 # 缺失子级地形连续覆盖技术自审
 
+> 本记录的遗留人工确认项已关闭。见 [2026-11-24 收口决定](../../README.md#旧验收项收口2026-11-24)。
+
 - Type: review
-- Status: approved（技术自审；负责人原场景复测待定）
+- Status: approved（技术自审）
 - Created / Updated: 2026-10-20
 - Owner / reviewer: 当前 Agent
 - Review target: [维护计划](../plans/2026-10-20-missing-terrain-cover.md)、Terrain runtime、Terrain / Surface Specs、ADR-0009 澄清

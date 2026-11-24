@@ -1,5 +1,7 @@
 # Extension Plan: Local urban wind
 
+> 本记录的遗留人工确认项已关闭。见 [2026-11-24 收口决定](../../README.md#旧验收项收口2026-11-24)。
+
 - Type: extension; status: technically completed through W6; owner: architecture / current task.
 - Created / updated: 2026-10-28; architecture review: confirmed (self-review).
 - Discussion: [model](../discussions/2026-10-28-model.md); review: [W4](../reviews/2026-10-28-w4-city.md); ADR: 0197 / 0203; SGP: none.
@@ -49,4 +51,4 @@ Chinese commit. City visual acceptance remains with the owner.
 
 W6 technical gate is complete; [review](../reviews/2026-10-29-w6-particle-trajectories.md)
 records verification, thin-path pictures and bounded resource/draw cost. Owner
-visual acceptance is pending; no next phase is active.
+legacy visual gate is closed; no next phase is active.

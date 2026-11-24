@@ -1,6 +1,8 @@
 # Phase Plan: R18 Hierarchical Screen-space Reflections
 
-- Plan type: `phase`; status: `completed`; owner visual acceptance: pending
+> 本记录的遗留人工确认项已关闭。见 [2026-11-24 收口决定](../../README.md#旧验收项收口2026-11-24)。
+
+- Plan type: `phase`; status: `completed`
 - Author / architecture / execution: Current task
 - Created: `2026-09-28`
 - Parent: [rendering roadmap](2026-09-18-rendering-quality-extension.md)

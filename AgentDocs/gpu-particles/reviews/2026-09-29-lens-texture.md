@@ -1,6 +1,8 @@
 # Lens texture follow-up review
 
-- Type: code/architecture review; status: approved for checkpoint, owner visual acceptance pending
+> 本记录的遗留人工确认项已关闭。见 [2026-11-24 收口决定](../../README.md#旧验收项收口2026-11-24)。
+
+- Type: code/architecture review; status: approved for checkpoint
 - Created/updated: 2026-09-29; reviewer: current task, self-review
 - Target: lens follow-up after 279103d298
 - Parent: [plan](../plans/2026-09-29-lens-texture.md); [ADR-0105](../../../Documentation/SceneGIS/Decisions/ADR-0105-rain-surface-and-lens-details.md)

@@ -1,7 +1,9 @@
 # 固定太阳白点显示校正
 
+> 本记录的遗留人工确认项已关闭。见 [2026-11-24 收口决定](../../README.md#旧验收项收口2026-11-24)。
+
 - Type: standalone plan
-- Status: implementation verified；负责人视觉验收待定
+- Status: implementation verified
 - Owner: 当前任务，Architecture / execution
 - Created / Updated: 2026-10-19
 - Architecture review: confirmed；负责人已授权参照 Bruneton 加入白平衡

@@ -1,6 +1,8 @@
 # M4 平面折线 Fabric 材质
 
-- Type: phase; status: technical completed, owner visual pending; updated: 2026-10-22.
+> 本记录的遗留人工确认项已关闭。见 [2026-11-24 收口决定](../../README.md#旧验收项收口2026-11-24)。
+
+- Type: phase; status: completed; updated: 2026-10-22.
 - Parent: [Planar materials](2026-10-21-planar-materials.md).
 - Owner / architecture review: current task, confirmed from current source.
 - ADR: [ADR-0182](../../../Documentation/SceneGIS/Decisions/ADR-0182-planar-polyline-materials.md).
@@ -66,4 +68,4 @@ as vertex-metric, rather than exact per-pixel world arc length.
 [Architecture review and evidence](../reviews/2026-10-22-m4-polyline-materials.md) records
 86 development Specs, 27 release Specs, both Viewer/browser builds and screenshots,
 resource lifecycles, 128-line batching and warm submission costs. Full release/types
-and patch audit passed. Owner visual acceptance remains pending; no next phase activated.
+and patch audit passed. No next phase is active.

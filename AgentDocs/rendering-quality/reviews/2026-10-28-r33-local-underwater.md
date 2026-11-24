@@ -1,8 +1,10 @@
 # R33 implementation and technical review
 
+> 本记录的遗留人工确认项已关闭。见 [2026-11-24 收口决定](../../README.md#旧验收项收口2026-11-24)。
+
 - Type: review; owner/author: current architecture and execution task; 2026-10-28.
 - Target: [R33 plan](../plans/2026-10-28-r33-local-underwater.md), ADR-0196.
-- Status: R33 visual follow-up technically complete; owner visual gate pending.
+- Status: R33 visual follow-up technically complete.
 - Baseline: R32 `8a5600d08a`; no SDK changes.
 
 ## Algorithm implementation and findings

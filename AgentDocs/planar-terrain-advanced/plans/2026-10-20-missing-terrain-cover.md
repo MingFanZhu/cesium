@@ -1,7 +1,9 @@
 # 缺失子级地形的连续覆盖修复
 
+> 本记录的遗留人工确认项已关闭。见 [2026-11-24 收口决定](../../README.md#旧验收项收口2026-11-24)。
+
 - Type: standalone plan
-- Status: active（实现与技术自审完成，待负责人原场景复测）
+- Status: completed（实现与技术自审完成）
 - Created / Updated: 2026-10-20
 - Owner / architecture review: 当前 Agent；confirmed
 - Parent: 已完成的 planar-terrain-advanced 扩展维护

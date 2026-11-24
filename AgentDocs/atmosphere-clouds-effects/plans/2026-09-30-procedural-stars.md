@@ -1,6 +1,8 @@
 # 程序星空替换星图
 
-- Type: standalone plan; status: implemented, technical review passed; owner visual acceptance pending; date: 2026-09-30
+> 本记录的遗留人工确认项已关闭。见 [2026-11-24 收口决定](../../README.md#旧验收项收口2026-11-24)。
+
+- Type: standalone plan; status: implemented, technical review passed; date: 2026-09-30
 - Owner: 当前 Agent（实现与架构自审）
 - Parent: [extension](2026-08-14-atmosphere-clouds-effects-extension.md)
 - Supersedes: [夜晚星空的图像资源方案](2026-09-30-night-stars.md)

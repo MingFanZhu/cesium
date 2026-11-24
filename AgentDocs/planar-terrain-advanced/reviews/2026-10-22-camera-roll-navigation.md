@@ -1,6 +1,8 @@
 # 平面相机 Roll 导航评审
 
-- Type: review; status: approved technically, owner visual confirmation pending.
+> 本记录的遗留人工确认项已关闭。见 [2026-11-24 收口决定](../../README.md#旧验收项收口2026-11-24)。
+
+- Type: review; status: approved technically.
 - Updated: 2026-10-22; architecture / execution / review: current task, self-review.
 - Plan: [roll 维护](../plans/2026-10-22-camera-roll-navigation.md).
 - Baseline: `scenegis/develop@29bb119e3f`; upstream-owned files / SGP: none.

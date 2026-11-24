@@ -1,6 +1,8 @@
 # R38 indexed underwater boundary review
 
-- Type: review; status: technically approved; owner visual gate pending; 2026-10-29.
+> 本记录的遗留人工确认项已关闭。见 [2026-11-24 收口决定](../../README.md#旧验收项收口2026-11-24)。
+
+- Type: review; status: technically approved; 2026-10-29.
 - Owner/reviewer: current engine task, architecture/code self-review.
 - Target: [R38](../plans/2026-10-29-r38-water-boundary-bvh.md), ADR-0204,
   boundary preparation, underwater queries, public budget, Specs and example.

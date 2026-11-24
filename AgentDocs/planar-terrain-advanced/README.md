@@ -1,5 +1,7 @@
 # SceneGIS Planar Terrain Advanced
 
+> 本扩展遗留的人工确认项已关闭。以下旧记录中的待确认状态仅供追溯。见 [2026-11-24 收口决定](../README.md#旧验收项收口2026-11-24)。
+
 ## Metadata
 
 - Extension slug: `planar-terrain-advanced`
@@ -12,10 +14,10 @@
 - Latest completed phase:
   [A7 平面高级地形统一资格与交付](plans/2026-08-11-phase-a7-unified-qualification-and-delivery.md)
 - Active standalone plan: None；[Roll 导航维护](plans/2026-10-22-camera-roll-navigation.md) 技术完成
-- Pending roll visual acceptance: [技术自审](reviews/2026-10-22-camera-roll-navigation.md)
+- Roll navigation review: [技术自审](reviews/2026-10-22-camera-roll-navigation.md)
 - Previous maintenance: [缺失子级地形连续覆盖](plans/2026-10-20-missing-terrain-cover.md)
-- Pending orbit visual acceptance: [地表锚点旋转与中心边界解耦](plans/2026-10-20-anchored-orbit-boundary.md)
-- Pending visual acceptance: [地形元数据接入](plans/2026-09-18-terrain-layer-metadata.md)
+- Anchored orbit plan: [地表锚点旋转与中心边界解耦](plans/2026-10-20-anchored-orbit-boundary.md)
+- Terrain metadata plan: [地形元数据接入](plans/2026-09-18-terrain-layer-metadata.md)
 - Latest completed standalone plan: [地形剖切与多边形裁剪](plans/2026-09-18-terrain-clipping.md)（技术与视觉验收通过）
 - Architecture contact: Architecture Agent
 - Execution contact: Execution Agent
@@ -70,20 +72,20 @@
 2026-10-22：负责人确认保留平面 Camera 的程序 roll，pan/wheel 不清零，中键围绕有效
 锚点逐步扶正。[Roll 导航维护](plans/2026-10-22-camera-roll-navigation.md) 技术完成，
 102 项 Specs 与两种投影真实鼠标 E2E 通过，[review](reviews/2026-10-22-camera-roll-navigation.md)
-记录验证与手感验收边界。只调整 owned controller；既有 terrain/orbit 未决视觉记录保持原状态。
+记录验证与手感验收边界。只调整 owned controller。
 
 2026-10-20：模型压平与 S3M 已快进合并到 `scenegis/develop@12171614c5`。
 多级地形缺失时的 FLAT 提前发布与高度包围体收紧已修复，
 见[独立维护计划](plans/2026-10-20-missing-terrain-cover.md)与
 [技术自审](reviews/2026-10-20-missing-terrain-cover.md)。
 17 项 runtime、两项新增 GPU 连续覆盖、18 项 Quadtree 通过；扩大检查的三项旧像素失败
-已在旧实现复现，详见 review。按负责人要求形成本地提交，未推送；原场景复测待定，原 A1–A7 完成状态保持。
+已在旧实现复现，详见 review。按负责人要求形成本地提交，未推送。
 
 2026-10-20：高空、extent 外相机围绕有效地表锚点旋转时，center target clamp 会额外拉远相机。
 本轮按负责人确认保留有效锚点 orbit，允许 center target 越界，并处理再次拖动；
 pan boundary、pointer miss fallback 与 terrain clearance 保持。61 项 Controller 与 5 项真实 terrain/depth Specs
 通过，当前综合页高空连续旋转、惯性和再次拖动实测通过；见[计划](plans/2026-10-20-anchored-orbit-boundary.md)
-和[技术自审](reviews/2026-10-20-anchored-orbit-boundary.md)。待负责人视觉复测；
+和[技术自审](reviews/2026-10-20-anchored-orbit-boundary.md)。
 2026-10-20 按负责人要求形成本地提交并汇入 `scenegis/develop`，未推送。
 
 2026-09-18：平面剖切和多边形裁剪已实现，直接复用原生 Cesium collection / polygon API。
@@ -97,7 +99,7 @@ pan boundary、pointer miss fallback 与 terrain clearance 保持。61 项 Contr
 [跨仓库讨论](discussions/2026-09-18-terrain-layer-contract.md) 已 resolved，双方确认完整协议，ADR-0080 已修订。
 消费端仅支持当前 v2 profile，未知格式统一拒绝；11 项 Specs 通过，两个真实 Chromium E2E 联合验收通过。
 TW-R001/R002/R003 已关闭；连同未改的 URL provider / World 为 54 项 Specs。完整 build/buildTs/tsc、lint 与画面检查通过，
-active standalone plan 仅待负责人视觉验收；本仓库未提交或 push。
+本仓库在该次记录时尚未提交或推送。
 [技术自审](reviews/2026-09-18-terrain-layer-metadata.md) 与
 [兼容性清单](reviews/2026-09-18-tileworker-compatibility.md) 记录当前契约和验证证据。
 

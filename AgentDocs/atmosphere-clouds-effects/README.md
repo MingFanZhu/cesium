@@ -1,5 +1,7 @@
 # atmosphere-clouds-effects
 
+> 本扩展遗留的人工确认项已关闭。以下旧记录中的待确认状态仅供追溯。见 [2026-11-24 收口决定](../README.md#旧验收项收口2026-11-24)。
+
 ## Status
 
 - Latest handoff：2026-10-26 负责人要求提交当前云优化；在 `scenegis/develop` 按启动性能、画质修复形成两个本地提交，不推送。
@@ -24,13 +26,13 @@
   缓存补测确认球面原结果受编译缓存影响，不能直接作为双世界冷编译对比；同一球面 resolve 等价改名变体首次约 5.07 秒、重复约 0.19 秒。
   本项仅记录实测与优化方向，不改变渲染实现，也不关闭既有视觉 / regression 待办。
 
-- Latest standalone：[球面透明地表高度雾截断](plans/2026-10-23-globe-translucent-height-fog.md) — implementation verified；负责人视觉验收待定。
+- Latest standalone：[球面透明地表高度雾截断](plans/2026-10-23-globe-translucent-height-fog.md) — implementation verified。
   修正地表交点早于或等于起雾距离时遗漏地面截断；开发 / release GPU 回归、默认参数画面与资源生命周期通过。
   [技术自审](reviews/2026-10-23-globe-translucent-height-fog.md)；[人工示例](../../Test/透明地表大气.html)。SDK 仍引用旧引擎 `b7ab45e`，未改其引擎锁定或分发文件。
 
 - Previous standalone：[综合环境同源影像](plans/2026-10-21-integrated-imagery.md) — completed；双世界默认使用指定的 EPSG:3857 World Imagery，保留中性影像参数。
   综合页 E2E、真实公网加载与画面检查通过；[技术自审](reviews/2026-10-21-integrated-imagery.md)。只改示例和测试，不改环境颜色或引擎。
-- Previous standalone：[平面地平线高度雾合成](plans/2026-10-20-planar-horizon-fog-composition.md) — implementation verified；负责人视觉验收待定。
+- Previous standalone：[平面地平线高度雾合成](plans/2026-10-20-planar-horizon-fog-composition.md) — implementation verified。
   统一最终雾合成，使用吸收透射中点取样，修复透明边缘差异与水平光源跳变；
   5 项 focused GPU / lifecycle Specs、构建及连续视角验证通过。[技术自审](reviews/2026-10-20-planar-horizon-fog-composition.md)；按负责人要求形成本地提交。
 
@@ -94,7 +96,7 @@
   atmosphere maintenance owner should isolate their resource/attachment lifecycle
   before claiming a complete strict-validation suite pass; they do not reopen the
   accepted cloud quality work automatically.
-- Previous standalone plan: [程序星空](plans/2026-09-30-procedural-stars.md) — implemented; technical review passed; owner visual acceptance pending; ADR-0107; no upstream delta.
+- Previous standalone plan: [程序星空](plans/2026-09-30-procedural-stars.md) — implemented; technical review passed; ADR-0107; no upstream delta.
 - Latest technical review: [平面局部行星大气](reviews/2026-10-20-planar-local-planet.md).
 - Previous technical review: [平面方向性多次散射](reviews/2026-10-20-planar-directional-scattering.md).
 - Previous technical review: [平面中午高度雾亮度域](reviews/2026-10-20-planar-fog-source-domain.md).
@@ -109,8 +111,8 @@
 - Previous technical review: [程序星空](reviews/2026-09-30-procedural-stars.md).
 - Night stars example: [双世界星空](../../Test/AdvancedEnvironment/夜晚星空.html);
   Specs: `packages/engine/Specs/SceneGIS/Scene/SceneGISAtmosphereStarsSpec.js`.
-- Previous standalone awaiting visual acceptance:
-  [球面空气透视模型条带修复](plans/2026-09-18-globe-aerial-receiver-distance.md) — implementation verified；负责人视觉验收待定
+- Previous completed standalone plan:
+  [球面空气透视模型条带修复](plans/2026-09-18-globe-aerial-receiver-distance.md) — implementation verified
 - Previous completed standalone plan:
   [平面空气透视模型水平色带修复](plans/2026-09-18-planar-aerial-horizon-band.md) — completed；2026-09-18 负责人视觉验收通过。
 - Previous standalone review:

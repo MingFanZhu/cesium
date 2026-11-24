@@ -1,5 +1,7 @@
 # 平面 GeoJSON
 
+> 本扩展遗留的人工确认项已关闭。以下旧记录中的待确认状态仅供追溯。见 [2026-11-24 收口决定](../README.md#旧验收项收口2026-11-24)。
+
 ## Metadata
 
 | Field                  | Value            |
@@ -40,7 +42,7 @@
 ## Current handoff
 
 - Current state: 显式 native loader 与 planar gate 已实现，单元、浏览器、类型及完整 release 验证通过。
-- Next action: 实现、验证与 review 已达到独立本地提交条件；项目负责人可在新 Test 页面验收。
+- 实现、验证与 review 已达到独立本地提交条件；Test 页面可供参考。
 - Current phase status: None。
 - Open discussions: None
 - Unresolved reviews: None

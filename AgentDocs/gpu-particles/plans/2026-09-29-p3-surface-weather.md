@@ -1,6 +1,8 @@
 # P3: Approximate surface wetness and thin snow
 
-- Type: phase; status: completed implementation, owner visual acceptance pending; created/updated: 2026-09-29
+> 本记录的遗留人工确认项已关闭。见 [2026-11-24 收口决定](../../README.md#旧验收项收口2026-11-24)。
+
+- Type: phase; status: completed implementation; created/updated: 2026-09-29
 - Parent: [extension](2026-09-29-gpu-particles.md); entry checkpoint: 781e2a9d90
 - Architecture/execution/review: current task, self-review; architecture entry confirmed
 - ADR-0104; SGP-0028

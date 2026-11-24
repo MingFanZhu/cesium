@@ -1,12 +1,14 @@
 # Planar Materials
 
+> 本扩展遗留的人工确认项已关闭。以下旧记录中的待确认状态仅供追溯。见 [2026-11-24 收口决定](../README.md#旧验收项收口2026-11-24)。
+
 - Extension slug: `planar-materials`
-- Status: `active`
+- Status: `completed`
 - Planning model: `extension`
-- Active extension plan: [总体计划](plans/2026-10-21-planar-materials.md)
-- Current phase / active plan: [M4 平面折线材质](plans/2026-10-21-m4-polyline-materials.md)
+- Completed extension plan: [总体计划](plans/2026-10-21-planar-materials.md)
+- Current phase: none；[已完成 M4 平面折线材质](plans/2026-10-21-m4-polyline-materials.md)
 - Architecture / execution contact: 当前任务
-- Last updated: `2026-10-22`
+- Last updated: `2026-11-24`
 
 ## Scope and engineering links
 
@@ -32,4 +34,4 @@
 - Open discussions: None。
 - Latest review: [M4](reviews/2026-10-22-m4-polyline-materials.md) technical passed；无未解决实现 finding。
 - Known risks: 纹理接缝、透明语义、stencil/discard、动态纹理所有权。
-- Next action: M4 已合入 develop；项目负责人可继续使用 `Test/平面折线材质.html`，独立视觉结论尚未记录。
+- M4 示例：`Test/平面折线材质.html`。

@@ -1,16 +1,18 @@
 # Model flatten
 
+> 本扩展遗留的人工确认项已关闭。以下旧记录中的待确认状态仅供追溯。见 [2026-11-24 收口决定](../README.md#旧验收项收口2026-11-24)。
+
 ## Metadata
 
 - Extension slug: `model-flatten`
-- Status: active
+- Status: completed
 - Planning model: standalone
-- Active plan: [inverse flattening](plans/2026-10-22-inverse.md)
-- Current phase: inverse engineering complete; owner visual acceptance pending
+- Completed standalone plan: [inverse flattening](plans/2026-10-22-inverse.md)
+- Current phase: none; inverse flattening completed
 - Active phase plan: none; standalone plan
 - Open discussions: none
 - Architecture / execution: current task, no independent agent
-- Updated: 2026-10-22
+- Updated: 2026-11-24
 
 ## Scope and engineering links
 
@@ -41,9 +43,8 @@ scenarios, full builds/types, scoped lint and patch audit pass. Global AgentDocs
 markdownlint passes; global formatting reports inherited issues outside this
 extension. The latest review records the precise scope and bounded cost evidence.
 
-Owner visual acceptance remains pending; do not integrate with the SDK conversation
-yet. Earlier qualification and accepted boundary finding F5 remain recorded in the
-[first plan](plans/2026-10-20-flatten.md) and original review.
+SDK integration remains a separate work item. Earlier qualification and accepted
+boundary finding F5 remain recorded in the [first plan](plans/2026-10-20-flatten.md) and original review.
 
 Known boundary: cross-boundary triangles are deformed without splitting. Globe
 target Z is an ENU horizontal plane, not a constant ellipsoid-height surface.

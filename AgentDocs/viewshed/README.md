@@ -1,13 +1,15 @@
 # Viewshed
 
+> 本扩展遗留的人工确认项已关闭。以下旧记录中的待确认状态仅供追溯。见 [2026-11-24 收口决定](../README.md#旧验收项收口2026-11-24)。
+
 ## Metadata
 
 - Extension slug: `viewshed`
-- Status: `active`
+- Status: `completed`
 - Planning model: `extension`
-- Active extension plan: [directed viewshed](plans/2026-10-21-extension.md)
-- Current phase: V3 — technically completed, visual acceptance pending
-- Active phase plan: [V3](plans/2026-10-21-v3-qualification.md)
+- Completed extension plan: [directed viewshed](plans/2026-10-21-extension.md)
+- Current phase: none; V3 completed
+- Latest completed phase plan: [V3](plans/2026-10-21-v3-qualification.md)
 - Active standalone plan: None; [Observer range guide](plans/2026-10-21-frustum-guide.md) technically completed
 - Architecture / execution contact: current task, no independent agent
 - Last updated: 2026-10-21
@@ -32,9 +34,9 @@
 用户已同意总体方案；V1 checkpoint 为 `04101ff1ea`。
 V2 checkpoint `c2a91dceb7` 已接入独立数据选取与公开 API，并通过[自审](reviews/2026-10-21-v2.md)。
 V3 技术 gate 已通过：[最新 review](reviews/2026-10-21-v3.md) 记录 10 项 dev E2E、
-3 项 release smoke、暖态 CPU 和 4 MiB 深度资源。最终负责人视觉验收待确认。
+3 项 release smoke、暖态 CPU 和 4 MiB 深度资源。
 暂无 open discussion 或阻塞 review；粗糙倾斜摄影采样噪点、有限精度和既有
-Surface 透明像素失败明确保留。下一步由负责人检查页面，再决定 SDK 集成。
+Surface 透明像素失败明确保留。SDK 集成另行安排。
 
 V3 checkpoint `62cc7be37e` 已完成。观察范围辅助线 standalone 已通过技术验收，
 见[最新 review](reviews/2026-10-21-frustum-guide.md)：14 项 Specs、2 项双世界 E2E、

@@ -1,7 +1,9 @@
 # 平面影像线性输入评审
 
+> 本记录的遗留人工确认项已关闭。见 [2026-11-24 收口决定](../../README.md#旧验收项收口2026-11-24)。
+
 - Type: review
-- Status: approved（技术检查完成，项目负责人视觉验收待反馈）
+- Status: approved（技术检查完成）
 - Reviewer role: architecture
 - Updated: 2026-10-21
 - Target: 平面影像进入共享线性渲染管线的颜色边界

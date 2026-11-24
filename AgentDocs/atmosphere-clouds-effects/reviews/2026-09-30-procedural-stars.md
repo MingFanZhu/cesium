@@ -1,6 +1,8 @@
 # 程序星空技术自审
 
-- Type: architecture/code review; status: technical gate passed; owner visual acceptance pending
+> 本记录的遗留人工确认项已关闭。见 [2026-11-24 收口决定](../../README.md#旧验收项收口2026-11-24)。
+
+- Type: architecture/code review; status: technical gate passed
 - Date: 2026-09-30; reviewer/implementation owner: 当前 Agent
 - Target: [standalone plan](../plans/2026-09-30-procedural-stars.md)
 - ADR: [ADR-0107](../../../Documentation/SceneGIS/Decisions/ADR-0107-atmosphere-stars.md)

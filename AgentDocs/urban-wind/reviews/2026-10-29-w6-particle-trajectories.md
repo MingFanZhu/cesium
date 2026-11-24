@@ -1,6 +1,8 @@
 # W6 GPU trajectories review
 
-- Type: review; status: technically approved; owner visual gate pending; 2026-10-29.
+> 本记录的遗留人工确认项已关闭。见 [2026-11-24 收口决定](../../README.md#旧验收项收口2026-11-24)。
+
+- Type: review; status: technically approved; 2026-10-29.
 - Owner/reviewer: current engine task, architecture/code self-review.
 - Target: [W6](../plans/2026-10-29-w6-particle-trajectories.md), ADR-0203, wind-owned
   particle state/copies, dimension/ribbon shaders, Specs, SDK guide and city example.

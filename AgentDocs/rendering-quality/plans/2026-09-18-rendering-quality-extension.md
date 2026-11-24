@@ -1,5 +1,7 @@
 # Extension Plan: Rendering Quality
 
+> 本记录的遗留人工确认项已关闭。见 [2026-11-24 收口决定](../../README.md#旧验收项收口2026-11-24)。
+
 ## Water-quality roadmap, 2026-10-28
 
 The owner approves improving medium optics, shoreline/crest foam and underwater

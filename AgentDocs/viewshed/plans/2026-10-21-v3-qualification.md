@@ -1,9 +1,11 @@
 # Phase Plan: V3 example and qualification
 
+> 本记录的遗留人工确认项已关闭。见 [2026-11-24 收口决定](../../README.md#旧验收项收口2026-11-24)。
+
 ## Metadata
 
 - Plan type: phase
-- Status: completed (technical; project-owner visual acceptance pending)
+- Status: completed
 - Parent plan: [extension](2026-10-21-extension.md)
 - Phase: V3
 - Owner role: execution
@@ -67,4 +69,4 @@ pipeline 同次生成的 uniforms，并在来源 uniformMap 重建时重建组�
 透明地表不再参与 observer readiness，GPU 回归通过。完整 release / declarations
 通过。1024 深度图 4 MiB，暖态 CPU / draw 开销见 [V3 review](../reviews/2026-10-21-v3.md)。
 街区轮廓通过自查，倾斜摄影粗糙表面的采样噪点与既有 Surface 失败明确保留。
-技术 gate 已确认；最终负责人视觉验收与 SDK 集成待后续确认。
+技术 gate 已确认；SDK 集成另行安排。

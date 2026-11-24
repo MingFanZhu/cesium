@@ -1,7 +1,9 @@
 # 平面 Entity 通用属性修复技术自审
 
+> 本记录的遗留人工确认项已关闭。见 [2026-11-24 收口决定](../../README.md#旧验收项收口2026-11-24)。
+
 - Type: implementation / architecture self-review
-- Status: approved technically；待负责人验收
+- Status: approved；技术自审通过
 - Created / Updated: 2026-09-18
 - Author / owner: 当前 Agent；未启用独立评审 Agent
 - Target: [standalone plan](../plans/2026-09-18-entity-api-fixes.md)

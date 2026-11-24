@@ -1,21 +1,23 @@
 # 局部三维城市风场
 
+> 本扩展遗留的人工确认项已关闭。以下旧记录中的待确认状态仅供追溯。见 [2026-11-24 收口决定](../README.md#旧验收项收口2026-11-24)。
+
 WebGL2 局部空气 LBM 与被动示踪；独立于 PBF 液体，不修改 SDK 或复制发行包。
 
 ## Metadata
 
-| Field                  | Value                                                              |
-| ---------------------- | ------------------------------------------------------------------ |
-| Extension slug         | `urban-wind`                                                       |
-| Status                 | `completed`                                                        |
-| Planning model         | `extension`                                                        |
-| Active extension plan  | [roadmap](plans/2026-10-28-urban-wind.md)                          |
-| Current phase          | W6 technically complete; owner visual gate pending                 |
-| Active phase plan      | None; [completed W6](plans/2026-10-29-w6-particle-trajectories.md) |
-| Active standalone plan | None                                                               |
-| Architecture contact   | Current task / self-review                                         |
-| Execution contact      | Current task                                                       |
-| Last updated           | `2026-10-29`                                                       |
+| Field                    | Value                                                              |
+| ------------------------ | ------------------------------------------------------------------ |
+| Extension slug           | `urban-wind`                                                       |
+| Status                   | `completed`                                                        |
+| Planning model           | `extension`                                                        |
+| Completed extension plan | [roadmap](plans/2026-10-28-urban-wind.md)                          |
+| Current phase            | None; W6 completed                                                 |
+| Active phase plan        | None; [completed W6](plans/2026-10-29-w6-particle-trajectories.md) |
+| Active standalone plan   | None                                                               |
+| Architecture contact     | Current task / self-review                                         |
+| Execution contact        | Current task                                                       |
+| Last updated             | `2026-10-29`                                                       |
 
 允许的扩展状态为 `proposed`、`active`、`paused`、`completed` 或 `retired`。
 
@@ -41,8 +43,8 @@ WebGL2 局部空气 LBM 与被动示踪；独立于 PBF 液体，不修改 SDK �
 - W6 [review](reviews/2026-10-29-w6-particle-trajectories.md) approves independent
   dimensions and GPU three-dimensional history. Owner drops compatibility;
   particleSize is removed. Fifteen development GPU, 34 related release and two
-  city browser cases plus full build/types pass. No solver/SDK/upstream changes;
-  owner visual acceptance pending. API/defaults/cost: UrbanWind and ADR-0203.
+  city browser cases plus full build/types pass. No solver, SDK or upstream changes.
+  See UrbanWind and ADR-0203 for the API, defaults and cost.
 
 - Integrated W1–W5 and generic voxelization into `scenegis/develop` on 2026-10-29. The wind ADR is now ADR-0197 to avoid the independently assigned split-view ADR-0193; implementation is unchanged by this identifier reconciliation.
 
@@ -54,4 +56,4 @@ WebGL2 局部空气 LBM 与被动示踪；独立于 PBF 液体，不修改 SDK �
   [W3](reviews/2026-10-28-w3-tracer-display.md) and [W4](reviews/2026-10-28-w4-city.md), approved.
 - SDK integration / API / evidence: [UrbanWind](../../Documentation/SceneGIS/UrbanWind.md).
 - Risks: near-half relaxation time at air viscosity; coarse walls, open boundaries and unresolved LES.
-- Owner visual judgment remains required for final city presentation.
+- The city example remains available for visual reference.

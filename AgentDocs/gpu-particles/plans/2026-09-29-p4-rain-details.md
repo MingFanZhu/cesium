@@ -1,6 +1,8 @@
 # P4: Surface ripples and lens rain
 
-- Type: phase; status: completed implementation; owner visual acceptance pending; created/updated: 2026-09-29
+> 本记录的遗留人工确认项已关闭。见 [2026-11-24 收口决定](../../README.md#旧验收项收口2026-11-24)。
+
+- Type: phase; status: completed implementation; created/updated: 2026-09-29
 - Parent: [extension](2026-09-29-gpu-particles.md); entry checkpoint: 87debf6371
 - Architecture/execution/review: current task, self-review; architecture entry confirmed
 - ADR-0105; upstream-owned files / SGP: none planned

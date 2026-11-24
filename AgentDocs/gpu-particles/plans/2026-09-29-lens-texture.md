@@ -1,6 +1,8 @@
 # Lens texture follow-up
 
-- Type: standalone follow-up to P4; status: implemented, owner visual acceptance pending; date: 2026-09-29
+> 本记录的遗留人工确认项已关闭。见 [2026-11-24 收口决定](../../README.md#旧验收项收口2026-11-24)。
+
+- Type: standalone follow-up to P4; status: implemented; date: 2026-09-29
 - Architecture/execution/review: current task, self-review
 - Entry checkpoint: 279103d298; parent: [extension](2026-09-29-gpu-particles.md)
 - ADR-0105 amendment; upstream-owned files / SGP: none planned

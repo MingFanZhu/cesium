@@ -1,5 +1,7 @@
 # GPU Particles
 
+> 本扩展遗留的人工确认项已关闭。以下旧记录中的待确认状态仅供追溯。见 [2026-11-24 收口决定](../README.md#旧验收项收口2026-11-24)。
+
 2026-10-28 wind follow-up adds the narrow optional `timeSource` clock callback; default Scene-time
 behavior is preserved. This work is tracked in the existing [urban-wind W5 plan](../urban-wind/plans/2026-10-28-w5-particles.md),
 not a new weather phase. See ADR-0102 amendment and the generic clock regression Spec.
@@ -8,10 +10,10 @@ P5 completed: [unified weather composition](plans/2026-09-30-p5-weather-composit
 following checkpoint 51be32aa8d. Existing fog/surface/lens effects are integrated into
 SceneGISWeather with explicit manual control. ADR-0106; no upstream changes.
 
-- Updated: 2026-09-30; status: unified weather implemented, owner Viewer acceptance pending; planning model: extension
+- Updated: 2026-11-24; status: completed; planning model: extension
 - Architecture/execution/reviewer: current task, self-review
-- Active extension: [roadmap](plans/2026-09-29-gpu-particles.md)
-- Current phase: P5 completed implementation after static frost checkpoint 51be32aa8d; [review](reviews/2026-09-30-p5-weather-composition.md)
+- Completed extension: [roadmap](plans/2026-09-29-gpu-particles.md)
+- Current phase: none; P5 completed after static frost checkpoint 51be32aa8d; [review](reviews/2026-09-30-p5-weather-composition.md)
 - Open discussions / unresolved code reviews: none; [snow lens review](reviews/2026-09-29-snow-lens.md), [rain lens review](reviews/2026-09-29-lens-texture.md), [approved P4 review](reviews/2026-09-29-p4-rain-details.md)
 - ADR: [0102](../../Documentation/SceneGIS/Decisions/ADR-0102-gpu-particle-foundation.md), [0103](../../Documentation/SceneGIS/Decisions/ADR-0103-aerial-weather.md), [0104](../../Documentation/SceneGIS/Decisions/ADR-0104-approximate-surface-weather.md); SGP: SGP-0028
 - Source: packages/engine/Source/SceneGIS/Scene/SceneGISGpuParticleSystem.js, SceneGISWeather.js, SceneGISSurfaceWeather.js, SceneGISRainLensStage.js, SceneGISSnowLensStage.js
@@ -31,7 +33,7 @@ The aerial example no longer supplies a weather-update loop. Source, ownership a
 same-frame/request-render timing contracts are in ADR-0106 and the updated guide.
 Eighteen development/release weather Specs and the local aerial interaction test pass;
 release/type checks and desktop snow/fog/surface/frost inspection pass. P5 review
-records limits and the pending Viewer integration/owner visual acceptance. No other
+records limits and the Viewer integration notes. No other
 checkout or chat was modified; the owner can use the guide in the ongoing Viewer task.
 
 The owner clarified that snow lens should be static frost on glass, not attached flakes. The completed correction replaces the flake/melt controls and shader with intensity/coverage and a packaged static crystal texture, retaining the stage name and weather selection. Three GPU Specs pass in development/release, five scoped E2E cases pass, and full release/types plus engine asset delivery are verified. Both-world desktop visuals show edge frost with a clear center. A bounded batch timing at 1001×826 measures about 0.342 ms incremental median, with a 6 MiB sampled texture and one native output target. No upstream/SGP change or later phase; owner visual acceptance is pending. See the current plan/review and ADR-0105 amendment. The following initial snow checkpoint is superseded visually/API-wise by this correction.

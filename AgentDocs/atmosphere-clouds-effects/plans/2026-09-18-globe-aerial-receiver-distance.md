@@ -1,12 +1,14 @@
 # 球面空气透视模型条带修复
 
+> 本记录的遗留人工确认项已关闭。见 [2026-11-24 收口决定](../../README.md#旧验收项收口2026-11-24)。
+
 - Type: standalone plan
-- Status: active; implementation verified; project-owner visual acceptance pending
+- Status: completed for Globe; implementation verified
 - Created / Updated: 2026-09-18
 - Owner / architecture review: 当前 Agent；confirmed
 - Baseline: `scenegis/develop@69f76a94c6`
 - Parent: [环境扩展](2026-08-14-atmosphere-clouds-effects-extension.md)
-- Review: [技术自审](../reviews/2026-09-18-globe-aerial-receiver-distance.md) — approved；负责人视觉验收待定
+- Review: [技术自审](../reviews/2026-09-18-globe-aerial-receiver-distance.md) — approved
 - Upstream-owned files / SGP delta: None
 
 ## 复现与根因
@@ -63,7 +65,7 @@
 - 实现与技术自审完成。当前 Agent 未代替负责人作最终视觉验收；本项代码与文档尚未提交。
 - 实际远处地形 LOD 引起的 depth 变化可以改变大气光程，旧的人工 LOD-invariance 不再承诺。
   已移除只验证该变形行为的断言，保留真实远深度、stale-depth、clear identity 和雾回归。
-- 无新增 API、SGP 或未处置的技术阻塞；下一步按负责人对当前页面的视觉反馈关闭或继续本 standalone plan。
+- 球面修复无新增 API、SGP 或技术阻塞；平面对照排查见下节。
 
 ## 平面对照排查 — 2026-09-18
 

@@ -1,7 +1,9 @@
 # 平面影像分屏
 
+> 本记录的遗留人工确认项已关闭。见 [2026-11-24 收口决定](../../README.md#旧验收项收口2026-11-24)。
+
 - Type: standalone plan
-- Status: completed technically; owner visual acceptance pending
+- Status: completed technically
 - Author roles: Architecture / Execution
 - Date: 2026-10-22
 - Architecture review: confirmed

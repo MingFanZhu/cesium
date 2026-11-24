@@ -1,7 +1,9 @@
 # 平面 Entity 通用属性兼容性修复
 
+> 本记录的遗留人工确认项已关闭。见 [2026-11-24 收口决定](../../README.md#旧验收项收口2026-11-24)。
+
 - Type: standalone plan
-- Status: active；实现与技术自审完成，待负责人验收
+- Status: completed；实现与技术自审完成
 - Created / Updated: 2026-09-18
 - Owner / review: 当前 Agent；未启用独立评审 Agent
 - Parent: [Entity API audit](../reviews/2026-09-18-entity-api-compatibility.md)
@@ -41,4 +43,4 @@ EA-R005 按负责人意见 accepted，保持米制字段解释并明确使用约
 build / buildRelease / buildTs / buildDocs 与 root/engine TypeScript 通过；buildTs 有既有 TSD-JSDoc warnings。
 源码 ESLint、修改文件格式、全 AgentDocs Markdownlint 与 git diff --check 通过。
 全 AgentDocs Prettier 仍有 285 份既有无关文件未通过，本轮涉及文件通过；生成文件无 tracked 改动。
-没有提交或 push 混合工作区；负责人页面验收尚未进行。
+原工作区为混合状态，当时未提交或推送。

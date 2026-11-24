@@ -1,6 +1,8 @@
 # R38: Indexed underwater shore queries
 
-- Type: phase; status: completed; owner visual gate pending; 2026-10-29.
+> 本记录的遗留人工确认项已关闭。见 [2026-11-24 收口决定](../../README.md#旧验收项收口2026-11-24)。
+
+- Type: phase; status: completed; 2026-10-29.
 - Parent: [roadmap](2026-09-18-rendering-quality-extension.md).
 - Owner/reviewer: current task, architecture/code self-review; architecture review confirmed.
 - Entry: `066143a580`; ADR-0204; no upstream files or SGP changes planned.

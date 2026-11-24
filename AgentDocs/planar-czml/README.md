@@ -1,5 +1,7 @@
 # 平面 CZML
 
+> 本扩展遗留的人工确认项已关闭。以下旧记录中的待确认状态仅供追溯。见 [2026-11-24 收口决定](../README.md#旧验收项收口2026-11-24)。
+
 ## Metadata
 
 - Extension slug: `planar-czml`
@@ -29,8 +31,8 @@
 ## Current handoff
 
 - Current state: 实现、240 项 Specs、开发/发布 E2E、完整 release、类型和技术自审通过。
-- Next action: 负责人已授权本地提交并合并至 `scenegis/develop`；未 push，人工观感仍可通过本地示例验收。
+- 负责人已授权本地提交并合并至 `scenegis/develop`；未 push。本地示例可供参考。
 - Open discussions / unresolved reviews: None
 - Latest review: [Native loading](reviews/2026-10-20-native-loading.md)
 - Known risks: 沿用既有 Graphics profile 和 native 非事务加载语义；带导数的 forward HOLD
-  原生 stride 缺陷保持同等行为，见 review。人工最终观感尚待验收。
+  原生 stride 缺陷保持同等行为，见 review。

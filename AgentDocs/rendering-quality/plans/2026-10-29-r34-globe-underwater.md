@@ -1,6 +1,8 @@
 # R34: Regional Globe underwater viewing
 
-- Type: phase plan; status: completed (technical); owner visual gate pending; 2026-10-29.
+> 本记录的遗留人工确认项已关闭。见 [2026-11-24 收口决定](../../README.md#旧验收项收口2026-11-24)。
+
+- Type: phase plan; status: completed (technical); 2026-10-29.
 - Owner / architecture reviewer: current engine task; source-based self-review confirmed.
 - Parent: [rendering-quality roadmap](2026-09-18-rendering-quality-extension.md).
 - Entry: R33 implementation checkpoints exist; its owner visual gate remains recorded independently.
