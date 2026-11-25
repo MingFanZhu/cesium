@@ -541,6 +541,7 @@ describe("SceneGIS/Scene/SceneGISWaterSurface", function () {
           primaryLightDirection: vector(0, 0, 1),
           sunDirection: vector(0, 0, 1),
           primaryLightScale: new Cartesian3(1, 1, 1),
+          secondarySunWeight: 0,
           cameraRelativePosition: new Cartesian3(
             0,
             0,

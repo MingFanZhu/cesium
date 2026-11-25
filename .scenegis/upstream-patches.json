@@ -698,7 +698,7 @@
       "id": "SGP-0010",
       "title": "Connect optional SceneGIS physical lighting to native model PBR",
       "status": "active",
-      "reason": "Native model PBR has no current-frame source hook for SceneGIS physical irradiance and Beer cloud transmittance; final-color relighting would incorrectly attenuate emissive and indirect light.",
+      "reason": "Native model PBR has no current-frame source hook for SceneGIS physical irradiance and Beer cloud transmittance. The ADR-0053 dawn correction evaluates a separate Sun contribution in the existing PBR and clearcoat hooks.",
       "risk": "high",
       "files": [
         {
@@ -910,7 +910,7 @@
       "id": "SGP-0009",
       "title": "Add optional SceneGIS Globe surface lighting seam",
       "status": "active",
-      "reason": "Cesium Globe surface shaders have no explicit frame-local extension seam for a caller-owned physical Sun/sky irradiance source and volumetric Beer cloud transmittance, while post-process relighting would incorrectly light already shaded scene primitives. ADR-0167 adds one warm nightAmbientIntensity uniform to the existing GlobeSurfaceTileProvider map; the irradiance-driven ambient floor remains SceneGIS-owned.",
+      "reason": "Cesium Globe surface shaders have no explicit frame-local extension seam for physical Sun/sky irradiance and volumetric Beer cloud transmittance. ADR-0167 binds the owned ambient floor and the ADR-0053 dawn correction binds the independently evaluated Sun weight.",
       "risk": "high",
       "files": [
         {

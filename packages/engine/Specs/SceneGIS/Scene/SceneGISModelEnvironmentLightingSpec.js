@@ -190,6 +190,7 @@ describe("SceneGIS/Scene/SceneGISModelEnvironmentLighting", function () {
             scene.camera.positionWC.z,
           ),
           primaryLightScale: new Cartesian3(1, 1, 1),
+          secondarySunWeight: 0,
           surfaceRadianceScale: 1,
           nightAmbientIntensity: 1,
           cloudTop: 4000,
@@ -235,6 +236,19 @@ describe("SceneGIS/Scene/SceneGISModelEnvironmentLighting", function () {
         record.showCloudShadows = false;
         expect(pixel()).toEqual(sky);
         expect(sky[0]).toBeGreaterThan(0);
+        if (!planar) {
+          // The real Sun lights this receiver even with the primary source
+          // facing away. It must use its own BRDF direction.
+          record.primaryLightDirection = new Cartesian3(-1, 0, 0);
+          scene.light.direction = Cartesian3.UNIT_X;
+          record.secondarySunWeight = 0.5;
+          expect(pixel()[0]).toBeGreaterThan(sky[0]);
+          record.secondarySunWeight = 0;
+          expect(pixel()).toEqual(sky);
+          record.primaryLightDirection = Cartesian3.UNIT_X;
+          scene.light.direction = new Cartesian3(-1, 0, 0);
+          expect(modelProgram()).toBe(physicalProgram);
+        }
         record.surfaceRadianceScale = 2;
         expect(pixel()[0]).toBeGreaterThan(sky[0]);
         expect(modelProgram()).toBe(physicalProgram);

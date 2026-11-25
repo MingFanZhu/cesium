@@ -4,6 +4,7 @@ uniform float u_surfaceRadianceScale;
 uniform vec3 u_sceneGISActualSunDirection;
 uniform vec3 u_sceneGISPrimaryLightDirection;
 uniform vec3 u_sceneGISPrimaryLightScale;
+uniform float u_sceneGISSecondarySunWeight;
 
 vec3 sceneGISGlobeGeodeticSurfaceNormal(vec3 positionMC)
 {
@@ -56,6 +57,9 @@ vec3 sceneGISGlobeSurfaceLighting(
         normalize(u_sceneGISPrimaryLightDirection),
         unusedPrimarySkyIrradiance) *
         max(u_sceneGISPrimaryLightScale, vec3(0.0));
+    vec3 solarIrradiance = sceneGISGlobeSecondarySunIrradiance(
+        u_sceneGISTransmittanceTexture, virtualPoint, globeNormal, globeSun,
+        u_sceneGISSecondarySunWeight);
     float skyHemisphere = 0.5 *
         (1.0 + dot(globeNormal, geodeticNormal));
     skyIrradiance += sceneGISNightAmbientIrradiance(
@@ -70,7 +74,8 @@ vec3 sceneGISGlobeSurfaceLighting(
         skyIrradiance += groundWeight * sceneGISGlobeGroundIrradiance(
             u_sceneGISTransmittanceTexture, u_sceneGISIrradianceTexture,
             geodeticNormal, globeSun, normalize(u_sceneGISPrimaryLightDirection),
-            u_sceneGISPrimaryLightScale, groundCloudTransmittance);
+            u_sceneGISPrimaryLightScale, u_sceneGISSecondarySunWeight,
+            groundCloudTransmittance);
     }
     float cloudTransmittance = 1.0;
     if (u_sceneGISShowCloudShadows) {
@@ -95,9 +100,14 @@ vec3 sceneGISGlobeSurfaceLighting(
     wetHighlight = primaryIrradiance * cloudTransmittance * u_surfaceRadianceScale *
         sceneGISWeatherFilm(weatherPositionEC, weatherNormalEC,
             normalize(czm_viewRotation * u_sceneGISPrimaryLightDirection), wetness);
+    if (any(greaterThan(solarIrradiance, vec3(0.0)))) {
+        wetHighlight += solarIrradiance * u_surfaceRadianceScale *
+            sceneGISWeatherFilm(weatherPositionEC, weatherNormalEC,
+                normalize(czm_viewRotation * globeSun), wetness);
+    }
     #endif
     return wetHighlight + max(albedo, vec3(0.0)) * (1.0 / czm_pi) *
-        (primaryIrradiance * cloudTransmittance +
+        (primaryIrradiance * cloudTransmittance + solarIrradiance +
             max(skyIrradiance, vec3(0.0))) *
         u_surfaceRadianceScale;
 }

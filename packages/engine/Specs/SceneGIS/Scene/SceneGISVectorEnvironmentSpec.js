@@ -280,6 +280,7 @@ describe("SceneGIS/Scene/SceneGISVectorEnvironment", function () {
             scene.camera.positionWC.z,
           ),
           primaryLightScale: new Cartesian3(1, 1, 1),
+          secondarySunWeight: 0,
           surfaceRadianceScale: 1,
           nightAmbientIntensity: 1,
           cloudTop: 4000,

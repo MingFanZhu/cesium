@@ -1557,6 +1557,10 @@ ADR-0161 / SGP-0046：WebGL 延迟入口统一使用高级物理环境；原生 
 
 Globe / Planar 均允许调用方安装 scene.light DirectionalLight；自动主光让位，统一驱动地表、模型、云和现有阴影。恢复 SunLight 后恢复自动太阳 / 月亮主光。自定义光对象不被改写或销毁，天空与天体仍按既有星历或 Planar 天体方向；环境释放只恢复仍归其持有的光源。
 
+ADR-0053 的 2026-11-25 修订要求两世界按实际天体方向计算直射，几何和云阴影图跟随同一真实主光。
+Globe 的地表、PBR 和矢量接收者可另行接收真实太阳直射。严格平面在月光渐入时太阳直射为零。
+SGP-0009、SGP-0010 沿用现有接入点。
+
 ## Shared directed observers
 
 ADR-0177 将 Viewshed / VideoProjection 组织为独立公共 stage，共享自有 observer state、

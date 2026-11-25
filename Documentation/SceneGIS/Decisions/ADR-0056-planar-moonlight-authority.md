@@ -13,6 +13,10 @@ projected/custom coordinates and cannot infer lunar phase from world XY.
 
 ## Decision
 
+2026-11-25 修订见 [ADR-0053](ADR-0053-globe-moonlight-shadow-surface.md)。
+严格平面的月光渐入时，实际太阳在地平线下。定向受光和阴影选择真实月亮及其照度，
+其余时段沿用真实太阳方向及原太阳权重。
+
 Share Globe primary-light radiometry: Sun twilight from -6 to -12 degrees,
 Moon horizon fade from 0 to 3 degrees, Lambert phase and full-phase readable
 irradiance RGB (0.12, 0.16, 0.22). Planar phase angle is the arccosine of the

@@ -49,6 +49,10 @@ vec3 vectorSurfaceRadiance(vec3 albedo, vec3 eye, vec3 normal)
 #ifdef SCENEGIS_VECTOR_SHADOWS
     direct *= vectorShadowVisibility(eye, normal);
 #endif
+#ifdef SCENEGIS_GLOBE
+    direct += sceneGISModelSecondarySource(eye) *
+        (max(dot(normalWC, normalize(u_sceneGISActualSunDirection)), 0.0) / czm_pi);
+#endif
     vec3 indirect = albedo * sceneGISModelSkyIrradiance(eye, normal);
 #ifdef SCENEGIS_AO_MAIN
     sceneGISRecordIndirect(indirect);

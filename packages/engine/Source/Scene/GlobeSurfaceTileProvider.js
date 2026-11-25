@@ -1824,6 +1824,9 @@ function createTileUniformMap(frameState, globeSurfaceTileProvider) {
     u_sceneGISPrimaryLightScale: function () {
       return frameState._sceneGISGlobeLighting.primaryLightScale;
     },
+    u_sceneGISSecondarySunWeight: function () {
+      return frameState._sceneGISGlobeLighting.secondarySunWeight;
+    },
     u_sceneGISShadowCameraPosition: function () {
       return frameState._sceneGISGlobeLighting.cameraPosition;
     },

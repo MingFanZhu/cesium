@@ -5,6 +5,7 @@ uniform float u_surfaceRadianceScale;
 uniform vec3 u_sceneGISActualSunDirection;
 uniform vec3 u_sceneGISPrimaryLightDirection;
 uniform vec3 u_sceneGISPrimaryLightScale;
+uniform float u_sceneGISSecondarySunWeight;
 
 vec3 sceneGISModelGlobePosition(vec3 positionEC)
 {
@@ -69,11 +70,45 @@ vec3 sceneGISModelSkyIrradiance(vec3 positionEC, vec3 normalEC)
         sky += groundWeight * sceneGISGlobeGroundIrradiance(
             u_sceneGISTransmittanceTexture, u_sceneGISIrradianceTexture,
             up, sun, normalize(u_sceneGISPrimaryLightDirection),
-            u_sceneGISPrimaryLightScale, cloudTransmittance);
+            u_sceneGISPrimaryLightScale, u_sceneGISSecondarySunWeight,
+            cloudTransmittance);
     }
     // Native diffuse IBL expects irradiance/pi before its material weighting.
     return max(sky, vec3(0.0)) * (u_surfaceRadianceScale / czm_pi);
 }
+
+vec3 sceneGISModelSecondarySource(vec3 positionEC)
+{
+    if (u_sceneGISSecondarySunWeight <= 0.0) {
+        return vec3(0.0);
+    }
+    vec3 sun = normalize(u_sceneGISActualSunDirection);
+    return sceneGISGlobeSecondarySunIrradiance(
+        u_sceneGISTransmittanceTexture,
+        sceneGISModelGlobePosition(positionEC) * 0.001,
+        sun, sun, u_sceneGISSecondarySunWeight) * u_surfaceRadianceScale;
+}
+
+#if defined(SCENEGIS_MODEL_LIGHTING) && defined(USE_CLEARCOAT) && !defined(USE_CUSTOM_LIGHT_COLOR)
+vec3 sceneGISModelSecondaryClearcoat(
+    vec3 position,
+    vec3 viewDirection,
+    vec3 fresnel,
+    czm_modelMaterial material)
+{
+    vec3 source = sceneGISModelSecondarySource(position);
+    if (!any(greaterThan(source, vec3(0.0)))) {
+        return vec3(0.0);
+    }
+    vec3 sun = normalize(czm_viewRotation * u_sceneGISActualSunDirection);
+    vec3 halfway = normalize(viewDirection + sun);
+    vec3 normal = material.clearcoatNormal;
+    float roughness = material.clearcoatRoughness;
+    float strength = computeDirectSpecularStrength(normal, sun, viewDirection,
+        halfway, roughness * roughness);
+    return source * fresnel * strength * clamp(dot(normal, sun), 0.001, 1.0);
+}
+#endif
 #else
 vec3 sceneGISModelDirectSource(vec3 positionEC, vec3 nativeSource)
 {

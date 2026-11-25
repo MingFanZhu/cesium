@@ -2,6 +2,9 @@
 
 ## 状态
 
+- 2026-11-25 修订：日月直射分离，取代下文的日月方向加权。南京黎明时日月几乎反向，
+  归一化后的加权方向在一分钟内转到地平线附近并改变地表透射色。固定曝光同样复现。
+
 - Deferred amendment: [ADR-0161](ADR-0161-unified-opaque-deferred-direction.md)
   supersedes the exclusive scene.light ownership below. Caller-installed
   DirectionalLight instances override automatic Sun/Moon lighting for surfaces,
@@ -47,6 +50,23 @@ displacement texture与自定义Moon shader，但Cesium native `Moon`没有publi
 displacement material contract。
 
 ## 决定
+
+### 2026-11-25：日月直射分离
+
+既有月相、月亮高度和太阳低于 −6° 到 −12° 的渐变控制月光强度。参考点的月光启用时，
+唯一原生几何阴影图和 Beer 云影图使用真实月亮方向及其照度。其余时段使用真实太阳方向
+及原太阳权重。单方向体积云与定向雾沿用同一个选定光源。显式调用方 DirectionalLight
+接管全部直射光。
+
+Globe 地表、默认 PBR Model / 3D Tiles 与矢量接收者分别计算光源透射和方向响应。
+月亮作为主光时，Globe 保留日光剩余权重，用真实太阳方向在各接收点查询太阳透射。
+严格平面的全局太阳在月光渐入时低于地平线，因此该项为零。地面反弹也分开计算入射能量。
+几何和云影仅作用于对应的主光，次要太阳项使用大气地球遮挡。当前一个原生阴影图和一个
+Beer 图的预算保留。
+
+一个 frame-local 标量接入现有 SGP-0009、SGP-0010 源光照缝隙。没有新增 API、纹理或绘制。
+验收在实际的南京三帧、双世界光照和原生 PBR 的真实 Shader 路径进行。详见
+[实施计划](../../../AgentDocs/atmosphere-clouds-effects/plans/2026-11-25-celestial-direct-light.md)。
 
 ### Celestial authority
 

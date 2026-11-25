@@ -243,6 +243,25 @@ AtmosphereParameters sceneGISAtmosphereParameters()
     return atmosphere;
 }
 
+vec3 sceneGISGlobeSecondarySunIrradiance(
+    sampler2D transmittanceTexture,
+    vec3 point,
+    vec3 normal,
+    vec3 sunDirection,
+    float sunWeight)
+{
+    float cosine = dot(normal, sunDirection);
+    if (sunWeight <= 0.0 || cosine <= 0.0) {
+        return vec3(0.0);
+    }
+    AtmosphereParameters atmosphere = sceneGISAtmosphereParameters();
+    float radius = length(point);
+    vec3 transmittance = GetTransmittanceToSun(atmosphere,
+        transmittanceTexture, radius, dot(point, sunDirection) / radius);
+    return sceneGISSunRadianceToScene(atmosphere.solar_irradiance *
+        transmittance) * (sunWeight * cosine);
+}
+
 vec3 sceneGISGlobeGroundIrradiance(
     sampler2D transmittanceTexture,
     sampler2D irradianceTexture,
@@ -250,6 +269,7 @@ vec3 sceneGISGlobeGroundIrradiance(
     vec3 sunDirection,
     vec3 primaryDirection,
     vec3 primaryScale,
+    float secondarySunWeight,
     float cloudTransmittance)
 {
     AtmosphereParameters atmosphere = sceneGISAtmosphereParameters();
@@ -260,10 +280,12 @@ vec3 sceneGISGlobeGroundIrradiance(
     vec3 unusedSky;
     vec3 direct = sceneGISGlobeSunAndSkyIrradiance(atmosphere,
         transmittanceTexture, irradianceTexture, ground, up, primaryDirection, unusedSky);
+    vec3 solar = sceneGISGlobeSecondarySunIrradiance(transmittanceTexture,
+        ground, up, sunDirection, secondarySunWeight);
     sky += sceneGISNightAmbientIrradiance(sky, 1.0);
     // A Lambertian lower hemisphere: radiance = albedo * irradiance / pi.
     // The receiver's cosine integral supplies pi; its hemisphere weight is separate.
-    return SCENEGIS_GROUND_ALBEDO * (sky + direct *
+    return SCENEGIS_GROUND_ALBEDO * (sky + solar + direct *
         max(primaryScale, vec3(0.0)) * cloudTransmittance);
 }
 

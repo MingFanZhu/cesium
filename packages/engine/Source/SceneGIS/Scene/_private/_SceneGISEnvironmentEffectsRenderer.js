@@ -1767,7 +1767,6 @@ const sunFixedPosition = new Cartesian3();
 const moonInertialPosition = new Cartesian3();
 const moonToObserver = new Cartesian3();
 const moonToSun = new Cartesian3();
-const primaryWeightedDirection = new Cartesian3();
 // Match SceneGISBrunetonAtmosphere.glsl: the source preset's spectral-to-sRGB
 // factors share one photometric reference, not one normalization per channel.
 // RGB Moonlight and caller-owned lights must divide by the converted solar RGB.
@@ -1786,10 +1785,6 @@ const sinMoonHorizonEnd = Math.sin((3.0 * Math.PI) / 180.0);
 function smoothStep01(value) {
   const t = Math.min(Math.max(value, 0.0), 1.0);
   return t * t * (3.0 - 2.0 * t);
-}
-
-function luminance(value) {
-  return value.x * 0.2126 + value.y * 0.7152 + value.z * 0.0722;
 }
 
 function computeGlobeSunDirection(time, result) {
@@ -1932,58 +1927,46 @@ function updatePrimaryLight(
     moonContribution,
     renderer._moonIrradiance,
   );
-  renderer._primaryLightScale.x =
-    1.0 - nightFactor + renderer._moonIrradiance.x / solarIrradiance.x;
-  renderer._primaryLightScale.y =
-    1.0 - nightFactor + renderer._moonIrradiance.y / solarIrradiance.y;
-  renderer._primaryLightScale.z =
-    1.0 - nightFactor + renderer._moonIrradiance.z / solarIrradiance.z;
-
-  const sunWeight = luminance(solarIrradiance) * (1.0 - nightFactor);
-  const moonWeight = luminance(renderer._moonIrradiance);
-  Cartesian3.multiplyByScalar(
-    renderer._sunDirection,
-    sunWeight,
-    primaryWeightedDirection,
-  );
-  Cartesian3.multiplyByScalar(
-    renderer._moonDirection,
-    moonWeight,
-    renderer._primaryLightDirectionScratch,
-  );
-  Cartesian3.add(
-    primaryWeightedDirection,
-    renderer._primaryLightDirectionScratch,
-    primaryWeightedDirection,
-  );
-  if (Cartesian3.magnitudeSquared(primaryWeightedDirection) > 1.0e-24) {
-    Cartesian3.normalize(
-      primaryWeightedDirection,
-      renderer._primaryLightDirection,
+  const sunWeight = 1.0 - nightFactor;
+  // Moonlight only enters after the Sun is below the reference horizon.
+  // The single shadow direction follows that real source. Globe receivers
+  // may still see the Sun at a different position or altitude.
+  const useMoon = moonContribution > 0.0;
+  renderer._secondarySunWeight = useMoon ? sunWeight : 0.0;
+  if (useMoon) {
+    Cartesian3.clone(renderer._moonDirection, renderer._primaryLightDirection);
+    Cartesian3.divideComponents(
+      renderer._moonIrradiance,
+      solarIrradiance,
+      renderer._primaryLightScale,
     );
-  }
-
-  if (nightFactor === 0.0) {
-    Color.clone(sunColor, renderer._nativeLightColor);
-    renderer._nativeLightIntensity = sunIntensity;
-  } else if (nightFactor === 1.0) {
     renderer._nativeLightColor.red = renderer._moonIrradiance.x;
     renderer._nativeLightColor.green = renderer._moonIrradiance.y;
     renderer._nativeLightColor.blue = renderer._moonIrradiance.z;
     renderer._nativeLightColor.alpha = 1.0;
     renderer._nativeLightIntensity = 1.0;
   } else {
-    renderer._nativeLightColor.red =
-      sunColor.red * sunIntensity * (1.0 - nightFactor) +
-      renderer._moonIrradiance.x;
-    renderer._nativeLightColor.green =
-      sunColor.green * sunIntensity * (1.0 - nightFactor) +
-      renderer._moonIrradiance.y;
-    renderer._nativeLightColor.blue =
-      sunColor.blue * sunIntensity * (1.0 - nightFactor) +
-      renderer._moonIrradiance.z;
-    renderer._nativeLightColor.alpha = 1.0;
-    renderer._nativeLightIntensity = 1.0;
+    if (sunWeight > 0.0) {
+      Cartesian3.clone(renderer._sunDirection, renderer._primaryLightDirection);
+    }
+    Cartesian3.fromElements(
+      sunWeight,
+      sunWeight,
+      sunWeight,
+      renderer._primaryLightScale,
+    );
+    if (sunWeight === 1.0) {
+      Color.clone(sunColor, renderer._nativeLightColor);
+      renderer._nativeLightIntensity = sunIntensity;
+    } else {
+      Color.multiplyByScalar(
+        sunColor,
+        sunIntensity * sunWeight,
+        renderer._nativeLightColor,
+      );
+      renderer._nativeLightColor.alpha = 1.0;
+      renderer._nativeLightIntensity = 1.0;
+    }
   }
   renderer._primaryLightState.nativeIntensity = renderer._nativeLightIntensity;
   renderer._primaryLightState.moonContribution = moonContribution;
@@ -2021,6 +2004,7 @@ function updateFrame(renderer, scene, frameState, time) {
       ? renderer._owner._directionalLight
       : renderer._world.environment._light;
   if (light instanceof DirectionalLight && light !== automatic) {
+    renderer._secondarySunWeight = 0.0;
     Cartesian3.normalize(light.direction, renderer._primaryLightDirection);
     Cartesian3.negate(
       renderer._primaryLightDirection,
@@ -2116,8 +2100,8 @@ function SceneGISEnvironmentEffectsRenderer(options) {
   this._moonPosition = new Cartesian3();
   this._moonDirection = new Cartesian3();
   this._primaryLightDirection = new Cartesian3(1.0, 0.0, 0.0);
-  this._primaryLightDirectionScratch = new Cartesian3();
   this._primaryLightScale = new Cartesian3(1.0, 1.0, 1.0);
+  this._secondarySunWeight = 0.0;
   this._moonIrradiance = new Cartesian3();
   this._nativeLightColor = new Color();
   this._nativeLightIntensity = 2.0;
@@ -2687,6 +2671,7 @@ SceneGISEnvironmentEffectsRenderer.prototype.prepareGlobeLighting = function (
     sunDirection: this._sunDirection,
     primaryLightDirection: this._primaryLightDirection,
     primaryLightScale: this._primaryLightScale,
+    secondarySunWeight: this._secondarySunWeight,
     moonIrradiance: this._moonIrradiance,
     cameraPosition: this._frame.cameraPosition,
     cloudTop: this._shadowCloudSupport.y,

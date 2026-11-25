@@ -92,6 +92,7 @@ describe("SceneGIS/Scene/SceneGISReflectionProbe", function () {
       showCloudShadows: false,
       primaryLightDirection: up,
       primaryLightScale: Cartesian3.ZERO,
+      secondarySunWeight: 0,
       sunDirection: up,
       cloudTop: 4000,
       cameraRelativePosition: new Cartesian3(0, -4, 10),

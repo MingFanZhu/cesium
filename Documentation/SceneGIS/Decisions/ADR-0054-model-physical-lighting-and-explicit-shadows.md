@@ -10,6 +10,11 @@
 
 ## Decision
 
+2026-11-25 起，按 [ADR-0053](ADR-0053-globe-moonlight-shadow-surface.md) 的日月直射修订，
+Globe PBR 在月亮是主光时使用真实太阳方向另算直射、clearcoat 和 SSIL 漫反射来源。
+每个方向各进入一次相应 BRDF。原生几何阴影与云影仍跟随同一主光。显式 Model
+`lightColor` 保持覆盖语义。
+
 Advanced Globe lighting extends its existing frame-local lighting record to
 PBR Models and 3D Tiles. A SceneGIS-owned helper participates in native Model
 update and LightingPipelineStage; native GLSL exposes only narrow source hooks.

@@ -16,6 +16,7 @@ const fields = {
   u_sceneGISActualSunDirection: "sunDirection",
   u_sceneGISPrimaryLightDirection: "primaryLightDirection",
   u_sceneGISPrimaryLightScale: "primaryLightScale",
+  u_sceneGISSecondarySunWeight: "secondarySunWeight",
   u_surfaceRadianceScale: "surfaceRadianceScale",
   u_nightAmbientIntensity: "nightAmbientIntensity",
 };

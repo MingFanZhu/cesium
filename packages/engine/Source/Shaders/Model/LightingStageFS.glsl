@@ -71,6 +71,11 @@ vec3 addClearcoatReflection(vec3 baseLayerColor, vec3 position, vec3 lightDirect
     float directStrength = computeDirectSpecularStrength(normal, lightDirection, viewDirection, halfwayDirection, alphaRoughness);
     vec3 directReflection = F * directStrength * NdotL;
     vec3 color = lightColorHdr * directReflection;
+    // SCENEGIS_PATCH_BEGIN SGP-0010: Evaluate the second celestial source before layering clearcoat.
+    #if defined(SCENEGIS_MODEL_LIGHTING) && defined(SCENEGIS_GLOBE) && !defined(USE_CUSTOM_LIGHT_COLOR)
+    color += sceneGISModelSecondaryClearcoat(position, viewDirection, F, material);
+    #endif
+    // SCENEGIS_PATCH_END SGP-0010
     // SCENEGIS_PATCH_BEGIN SGP-0019: Local sources illuminate clearcoat independently of Sun shadows.
     #if defined(SCENEGIS_LOCAL_LIGHTS) && defined(LIGHTING_PBR) && defined(HAS_NORMALS)
     color += sceneGISLocalClearcoat(material, position);
@@ -171,6 +176,18 @@ vec3 computePbrLighting(in czm_modelMaterial material, in vec3 position)
     sceneGISSILRecord(material, lightDirection, lightColorHdr);
     #endif
     // SCENEGIS_PATCH_END SGP-0026
+    // SCENEGIS_PATCH_BEGIN SGP-0010: Accumulate the separately transmitted Sun with its own BRDF direction.
+    #if defined(SCENEGIS_MODEL_LIGHTING) && defined(SCENEGIS_GLOBE) && !defined(USE_CUSTOM_LIGHT_COLOR)
+    vec3 secondarySource = sceneGISModelSecondarySource(position);
+    if (any(greaterThan(secondarySource, vec3(0.0)))) {
+        vec3 sunDirection = normalize(czm_viewRotation * u_sceneGISActualSunDirection);
+        directColor += secondarySource * czm_pbrLighting(viewDirection, normal, sunDirection, material);
+        #ifdef SCENEGIS_SSIL_MAIN
+        sceneGISSILLocal(material, sunDirection, secondarySource);
+        #endif
+    }
+    #endif
+    // SCENEGIS_PATCH_END SGP-0010
     // SCENEGIS_PATCH_BEGIN SGP-0019: Evaluate local sources through the same native PBR material.
     #ifdef SCENEGIS_LOCAL_LIGHTS
     directColor += sceneGISLocalPbr(material, position);

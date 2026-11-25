@@ -4,6 +4,10 @@
 
 ## Status
 
+- 最新修复：[日月直射光分离](plans/2026-11-25-celestial-direct-light.md)及
+  [评审](reviews/2026-11-25-celestial-direct-light.md)。Viewer 05:49、05:50、05:51 的黎明跳色已消除，
+  15 项定向 WebGL Specs 通过，沿用 SGP-0009、SGP-0010。
+
 - Latest handoff：2026-10-26 负责人要求提交当前云优化；在 `scenegis/develop` 按启动性能、画质修复形成两个本地提交，不推送。
   保留评审中已有的有限采样噪声、性能与 legacy fixture 维护事项；本次提交不代表整套历史测试全部通过。
 - Latest standalone：[中质量云重建](plans/2026-10-26-medium-cloud-reconstruction.md) — completed；负责人接受当前结果并要求提交。

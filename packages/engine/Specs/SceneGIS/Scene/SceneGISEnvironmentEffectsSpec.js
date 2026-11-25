@@ -7468,6 +7468,76 @@ ${hardCascadeLibrary}`;
     expect(compositeFramebuffer.isDestroyed()).toBe(true);
   });
 
+  it("keeps the actual Moon direction through the Nanjing dawn transition", async function () {
+    await connectControlledCloudMode("globe", () => {
+      effects.showClouds = false;
+      scene.camera.setView({
+        destination: Cartesian3.fromDegrees(118.77857, 32.03584, 321),
+        orientation: { heading: 0.0, pitch: -0.15, roll: 0.0 },
+      });
+    });
+    if (!SceneGISEnvironmentEffects.isSupported(scene)) {
+      return;
+    }
+    const pipeline = effects._pipeline;
+    const resources = pipeline._resources;
+    const reference = pipeline._frame.vertical;
+    const receiverDirections = [];
+    for (const minute of [49, 50, 51]) {
+      const time = JulianDate.fromIso8601(`2026-11-24T21:${minute}:00Z`);
+      scene.renderForSpecs(time);
+      effects.update(scene, time);
+      expect(Cartesian3.dot(reference, pipeline._sunDirection)).toBeLessThan(
+        0.0,
+      );
+      expect(
+        Cartesian3.dot(reference, pipeline._moonDirection),
+      ).toBeGreaterThan(0.2);
+      expect(pipeline._primaryLightDirection).toEqual(pipeline._moonDirection);
+      expect(pipeline._secondarySunWeight).toBe(1.0 - pipeline._nightFactor);
+      expect(pipeline._secondarySunWeight).toBeGreaterThan(0.0);
+      expect(pipeline._primaryLightScale.x).toEqualEpsilon(
+        pipeline._moonIrradiance.x / (1.474 * sunToScene[0]),
+        1.0e-12,
+      );
+      receiverDirections.push(
+        Cartesian3.clone(pipeline._primaryLightDirection),
+      );
+    }
+    expect(
+      Cartesian3.angleBetween(receiverDirections[0], receiverDirections[2]),
+    ).toBeLessThan(0.01);
+    expect(pipeline._resources).toBe(resources);
+
+    scene.light = new DirectionalLight({ direction: Cartesian3.UNIT_Z });
+    effects.update(scene, scene.frameState.time);
+    expect(pipeline._primaryLightDirection).toEqual(
+      new Cartesian3(0.0, 0.0, -1.0),
+    );
+    expect(pipeline._secondarySunWeight).toBe(0.0);
+  });
+
+  it("keeps the actual Moon direction during Planar twilight", async function () {
+    await connectControlledCloudMode("planar");
+    if (!SceneGISEnvironmentEffects.isSupported(scene)) {
+      return;
+    }
+    const time = scene.frameState.time;
+    const pipeline = effects._pipeline;
+    const twilightSunZ = Math.sin(CesiumMath.toRadians(-11.1));
+    environment.sunDirection = new Cartesian3(
+      Math.sqrt(1.0 - twilightSunZ * twilightSunZ),
+      0.0,
+      twilightSunZ,
+    );
+    environment.moonDirection = new Cartesian3(-Math.sqrt(0.9375), 0.0, 0.25);
+    environment.update(scene, time);
+    effects.update(scene, time);
+    expect(pipeline._nightFactor).toBeLessThan(1.0);
+    expect(pipeline._moonContribution).toBeGreaterThan(0.0);
+    expect(pipeline._primaryLightDirection).toEqual(environment.moonDirection);
+  });
+
   it("publishes Planar P11 Moon phase and primary light with stable ownership and warm history", async function () {
     await connectControlledCloudMode("planar");
     if (!SceneGISEnvironmentEffects.isSupported(scene)) {
@@ -8873,6 +8943,7 @@ ${hardCascadeLibrary}`;
             u_sceneGISPrimaryLightDirection: () => Cartesian3.UNIT_Z,
             u_sceneGISActualSunDirection: () => Cartesian3.UNIT_Z,
             u_sceneGISPrimaryLightScale: () => Cartesian3.ONE,
+            u_sceneGISSecondarySunWeight: () => 0.0,
             u_sceneGISShowCloudShadows: () => false,
             u_sceneGISShowCrepuscularRays: () => false,
             u_sceneGISCloudShadowAtlas: () =>
@@ -9091,6 +9162,7 @@ ${hardCascadeLibrary}`;
             u_sceneGISPrimaryLightDirection: () => sunDirection,
             u_sceneGISActualSunDirection: () => actualSunDirection,
             u_sceneGISPrimaryLightScale: () => primaryLightScale,
+            u_sceneGISSecondarySunWeight: () => 0.0,
             u_sceneGISShowCloudShadows: () => showCloudShadows,
             u_sceneGISShowCrepuscularRays: () => false,
             u_sceneGISCloudShadowAtlas: () => shadowAtlas,
@@ -9310,6 +9382,7 @@ ${hardCascadeLibrary}`;
             u_testDirectionalScale: () => directionalScale,
             u_sceneGISShadowSunDirection: () => new Cartesian3(0, 0, -1),
             u_sceneGISPrimaryLightScale: () => Cartesian3.ZERO,
+            u_sceneGISSecondarySunWeight: () => 0.0,
             u_sceneGISShadowCloudTop: () => 6000,
           },
         },
