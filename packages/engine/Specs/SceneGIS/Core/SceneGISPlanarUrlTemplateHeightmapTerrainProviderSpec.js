@@ -472,10 +472,11 @@ describe("SceneGIS/Core/SceneGISPlanarUrlTemplateHeightmapTerrainProvider", func
       coordinateSystem: tilingScheme.coordinateSystem,
       maximumLevel: 4,
     });
+    const defaultProvider = world.terrainProvider;
     expect(function () {
       world.terrainProvider = provider;
     }).toThrowDeveloperError();
-    expect(world.terrainProvider).toBeUndefined();
+    expect(world.terrainProvider).toBe(defaultProvider);
     expect(world.tilingScheme).not.toBe(tilingScheme);
 
     const canonicalProvider =

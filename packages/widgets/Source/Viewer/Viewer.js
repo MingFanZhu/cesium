@@ -1554,11 +1554,12 @@ Object.defineProperties(Viewer.prototype, {
     },
   },
 
+  // SCENEGIS_PATCH_BEGIN SGP-0002: Document primary world terrain on the delegated property.
   /**
-   * The terrain provider providing surface geometry for the globe.
+   * The terrain provider providing surface geometry for the active Globe or planar world.
    * @memberof Viewer.prototype
    *
-   * @type {TerrainProvider}
+   * @type {TerrainProvider|SceneGISPlanarTerrainProvider|undefined}
    */
   terrainProvider: {
     get: function () {
@@ -1568,6 +1569,7 @@ Object.defineProperties(Viewer.prototype, {
       this.scene.terrainProvider = terrainProvider;
     },
   },
+  // SCENEGIS_PATCH_END SGP-0002
 
   /**
    * Gets the camera.

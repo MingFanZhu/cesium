@@ -13,6 +13,7 @@ import {
   SceneGISPlanarExtent,
   SceneGISPlanarHeightmapTerrainData,
   SceneGISPlanarEnvironment,
+  SceneGISPlanarTerrainSampler,
   SceneGISPlanarTilingScheme,
   SceneGISPlanarWorld,
   SceneMode,
@@ -108,10 +109,41 @@ describe("SceneGIS/Scene/SceneGISPlanarWorld", function () {
     expect(world.show).toBe(true);
     expect(world.tilesLoaded).toBe(true);
     expect(world.imageryLayers.tilingScheme).toBe(world.tilingScheme);
-    expect(world.terrainProvider).toBeUndefined();
+    expect(world.terrainProvider.tilingScheme).toBe(world.tilingScheme);
+    expect(world.terrainProvider.minimumHeight).toBe(0.0);
+    expect(world.terrainProvider.maximumHeight).toBe(0.0);
+    expect(world.terrainProvider.maximumLevel).toBe(world.maximumLevel);
     expect(world.material).toBeUndefined();
     expect(world.environment).toBeUndefined();
     world.destroy();
+  });
+
+  it("samples the built-in zero-height terrain without a rendered scene", async function () {
+    const world = createWorld();
+    const provider = world.terrainProvider;
+    try {
+      expect(provider.getTileDataAvailable(15, 15, 4)).toBe(true);
+      expect(provider.getTileDataAvailable(16, 15, 4)).toBe(false);
+      expect(provider.getTileDataAvailable(0, 0, 5)).toBe(false);
+      const root = await provider.requestTileGeometry(0, 0, 0);
+      expect(root.isChildAvailable(0, 0, 1, 1)).toBe(true);
+      const leaf = await provider.requestTileGeometry(15, 15, 4);
+      expect(leaf.isChildAvailable(15, 15, 31, 31)).toBe(false);
+      const positions = [
+        new Cartesian3(-128, 128, 5),
+        new Cartesian3(128, -128, -5),
+        new Cartesian3(129, 0, 0),
+      ];
+      const heights = await SceneGISPlanarTerrainSampler.sampleAtLevel(
+        provider,
+        4,
+        positions,
+      );
+      expect(heights).toEqual([0.0, 0.0, undefined]);
+      expect(world._surface._quadtree._tiles.size).toBe(0);
+    } finally {
+      world.destroy();
+    }
   });
 
   it("validates the shallow-view detail distance without mutating terrain or camera state", function () {
@@ -201,8 +233,9 @@ describe("SceneGIS/Scene/SceneGISPlanarWorld", function () {
     second.destroy();
   });
 
-  it("atomically attaches, replaces, and detaches caller-owned terrain providers", function () {
+  it("atomically replaces caller-owned terrain providers and restores the default", function () {
     const world = createWorld();
+    const defaultProvider = world.terrainProvider;
     const first = createTerrainProvider(world);
     const second = createTerrainProvider(world);
     world.terrainProvider = first;
@@ -228,8 +261,8 @@ describe("SceneGIS/Scene/SceneGISPlanarWorld", function () {
     world.terrainProvider = second;
     expect(world.terrainProvider).toBe(second);
     world.terrainProvider = undefined;
-    expect(world.terrainProvider).toBeUndefined();
-    expect(world._surface._terrain).toBeUndefined();
+    expect(world.terrainProvider).toBe(defaultProvider);
+    expect(world._surface._terrain.provider).toBe(defaultProvider);
     expect(world.tilesLoaded).toBe(true);
     world.destroy();
     expect(first.destroy).not.toHaveBeenCalled();

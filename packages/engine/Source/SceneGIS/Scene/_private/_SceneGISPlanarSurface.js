@@ -117,13 +117,6 @@ SceneGISPlanarSurface.prototype.setTerrainProvider = function (
 ) {
   this._renderCommands.length = 0;
   this.invalidateTerrainQuerySnapshot();
-  if (!defined(provider)) {
-    this._terrain?.destroy();
-    this._terrain = undefined;
-    this._quadtree.setHeightRange(0.0, 0.0);
-    this._tilesLoaded = this._imagery.tilesLoaded;
-    return;
-  }
   if (!defined(this._terrain)) {
     this._terrain = new SceneGISPlanarTerrain(
       (callback) => this._quadtree.forEachTile(callback),
@@ -135,7 +128,7 @@ SceneGISPlanarSurface.prototype.setTerrainProvider = function (
     Math.min(0.0, provider.minimumHeight),
     Math.max(0.0, provider.maximumHeight),
   );
-  this._tilesLoaded = false;
+  this._tilesLoaded = this._terrain.tilesLoaded && this._imagery.tilesLoaded;
 };
 
 SceneGISPlanarSurface.prototype.invalidateTerrainQuerySnapshot = function () {
@@ -169,7 +162,7 @@ SceneGISPlanarSurface.prototype.getTerrainHeight = function (
     }
     const tile = this._quadtree.getTile(coordinates.x, coordinates.y, level);
     const content = tile?.terrainEntry?.activeContent;
-    if (defined(content?.mesh) && content.source !== "FLAT") {
+    if (defined(content?.mesh) || content?.source === "ZERO") {
       return SceneGISPlanarTerrainQuery.getHeight(
         tile,
         content,

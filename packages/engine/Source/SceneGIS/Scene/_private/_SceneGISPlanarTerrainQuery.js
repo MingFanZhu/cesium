@@ -55,10 +55,6 @@ function interpolateTriangle(mesh, index0, index1, index2, x, y) {
 }
 
 function getHeight(tile, content, x, y) {
-  const mesh = content?.mesh;
-  if (!defined(mesh)) {
-    return undefined;
-  }
   const extent = tile.extent;
   if (
     x < extent.minimumX ||
@@ -66,6 +62,13 @@ function getHeight(tile, content, x, y) {
     y < extent.minimumY ||
     y > extent.maximumY
   ) {
+    return undefined;
+  }
+  if (content?.source === "ZERO") {
+    return 0.0;
+  }
+  const mesh = content?.mesh;
+  if (!defined(mesh)) {
     return undefined;
   }
 
@@ -259,7 +262,8 @@ function pick(snapshot, count, ray, result, clipping) {
     if (!isCurrent(entry)) {
       continue;
     }
-    const isFlat = entry.source === "FLAT";
+    const isFallback = entry.source === "FLAT";
+    const isFlat = isFallback || entry.source === "ZERO";
     const t = isFlat
       ? intersectFlat(entry.tile, ray)
       : intersectTerrain(entry.tile, entry.content, ray, clipping);
@@ -272,7 +276,7 @@ function pick(snapshot, count, ray, result, clipping) {
     ) {
       nearest = t;
       nearestKey = entry.key;
-      nearestIsFlat = isFlat;
+      nearestIsFlat = isFallback;
     }
   }
   if (!defined(nearest) || nearestIsFlat) {

@@ -11,6 +11,7 @@ import ShadowMode from "../../Scene/ShadowMode.js";
 import validatePlanarShadowMode from "./_private/_SceneGISPlanarShadowMode.js";
 import SceneGISPlanarCoordinateSystem from "../Core/SceneGISPlanarCoordinateSystem.js";
 import SceneGISPlanarTilingScheme from "../Core/SceneGISPlanarTilingScheme.js";
+import SceneGISPlanarZeroTerrainProvider from "../Core/_private/_SceneGISPlanarZeroTerrainProvider.js";
 /* eslint-disable no-unused-vars -- Public JSDoc type requires a runtime-resolvable import. */
 import SceneGISPlanarTerrainProvider from "../Core/SceneGISPlanarTerrainProvider.js";
 /* eslint-enable no-unused-vars */
@@ -237,12 +238,16 @@ function SceneGISPlanarWorld(options) {
   this._clippingPolygons = undefined;
   this._environment = undefined;
   this._show = true;
-  this._terrainProvider = undefined;
   this._imageryLayers = new SceneGISPlanarImageryLayerCollection({
     tilingScheme,
   });
   this._imageryLayers._owner = this;
   this._surface = new SceneGISPlanarSurface(tilingScheme, this._imageryLayers);
+  this._defaultTerrainProvider = new SceneGISPlanarZeroTerrainProvider(
+    tilingScheme,
+    this._maximumLevel,
+  );
+  this.terrainProvider = this._defaultTerrainProvider;
   this._atmosphereRenderer = new SceneGISPlanarAtmosphereRenderer();
   this._celestialBodyRenderer = new SceneGISPlanarCelestialBodyRenderer();
   this._frameState = undefined;
@@ -414,7 +419,7 @@ Object.defineProperties(SceneGISPlanarWorld.prototype, {
     },
   },
   /**
-   * 获取或设置调用方所有的平面地形提供者，须使用此世界的标准切片方案。赋值 undefined 恢复平坦 Z=0 表面。替换或销毁世界不销毁提供者。
+   * 获取或设置平面地形提供者，须使用此世界的标准切片方案。默认提供零高程地形，赋值 undefined 恢复同一个内置提供者。替换或销毁世界不销毁调用方的提供者。
    *
    * @memberof SceneGISPlanarWorld.prototype
    * @type {SceneGISPlanarTerrainProvider|undefined}
@@ -425,17 +430,17 @@ Object.defineProperties(SceneGISPlanarWorld.prototype, {
       return this._terrainProvider;
     },
     set: function (provider) {
+      if (provider === undefined) {
+        provider = this._defaultTerrainProvider;
+      }
       if (provider === this._terrainProvider) {
         return;
       }
-      let geometricErrors;
-      if (provider !== undefined) {
-        geometricErrors = validateTerrainProvider(
-          provider,
-          this._tilingScheme,
-          this._maximumLevel,
-        );
-      }
+      const geometricErrors = validateTerrainProvider(
+        provider,
+        this._tilingScheme,
+        this._maximumLevel,
+      );
       this._surface.setTerrainProvider(provider, geometricErrors);
       this._terrainProvider = provider;
     },
@@ -730,7 +735,7 @@ SceneGISPlanarWorld.prototype.endFrame = function (frameState) {
 };
 
 /**
- * 从包含位置的最深驻留直接或上采样 Float32 表面网格读取地形高度。不请求、创建、晋升或保留瓦片。平坦后备内容不视为地形。
+ * 从包含位置的最深驻留地形瓦片读取高程，包括内置零高程瓦片。不请求、创建、晋升或保留瓦片。平坦后备内容不视为地形。
  *
  * @param {Cartesian3} position 有限平面位置，验证 Z，但 Z 不参与寻址。
  * @returns {number|undefined} 驻留地形高度，单位为米；没有驻留地形时为 undefined。
@@ -748,9 +753,6 @@ SceneGISPlanarWorld.prototype.getTerrainHeight = function (position) {
     throw new DeveloperError(
       "position must be a Cartesian3 with finite components.",
     );
-  }
-  if (!this._terrainProvider) {
-    return undefined;
   }
   return this._surface.getTerrainHeight(position, this._maximumLevel);
 };

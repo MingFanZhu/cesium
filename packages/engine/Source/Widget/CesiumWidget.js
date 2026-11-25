@@ -662,11 +662,12 @@ Object.defineProperties(CesiumWidget.prototype, {
     },
   },
 
+  // SCENEGIS_PATCH_BEGIN SGP-0001: Document primary world terrain on the delegated property.
   /**
-   * The terrain provider providing surface geometry for the globe.
+   * The terrain provider providing surface geometry for the active Globe or planar world.
    * @memberof CesiumWidget.prototype
    *
-   * @type {TerrainProvider}
+   * @type {TerrainProvider|SceneGISPlanarTerrainProvider|undefined}
    */
   terrainProvider: {
     get: function () {
@@ -676,6 +677,7 @@ Object.defineProperties(CesiumWidget.prototype, {
       this._scene.terrainProvider = terrainProvider;
     },
   },
+  // SCENEGIS_PATCH_END SGP-0001
 
   /**
    * Manages the list of credits to display on screen and in the lightbox.

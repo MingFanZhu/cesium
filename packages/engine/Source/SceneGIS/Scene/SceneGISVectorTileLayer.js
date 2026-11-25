@@ -10,6 +10,7 @@ import Globe from "../../Scene/Globe.js";
 import SceneMode from "../../Scene/SceneMode.js";
 import Ellipsoid from "../../Core/Ellipsoid.js";
 import EllipsoidTerrainProvider from "../../Core/EllipsoidTerrainProvider.js";
+import SceneGISPlanarZeroTerrainProvider from "../Core/_private/_SceneGISPlanarZeroTerrainProvider.js";
 import SceneGISPlanarWorld from "./SceneGISPlanarWorld.js";
 import SceneGISVectorTileSource from "../Core/SceneGISVectorTileSource.js";
 import SceneGISVectorTileStyle from "../Core/SceneGISVectorTileStyle.js";
@@ -832,7 +833,7 @@ function publishOrder(layer) {
 
 /**
  * 将独立解码的矢量瓦片绘制到 SceneGIS 平面世界或 WGS84 Globe。加入 scene.primitives 后由集合拥有生命周期。构造时不请求数据或分配 GPU 资源。Scene、World、style 和 source 覆盖配置均为借用。规则 setter 生成图层所有的不可变样式，源配置保持固定。GPU 异步刷新并保留源缓存。
- * 无 terrainProvider 时使用平坦快速路径，有 provider 时直接贴地绘制。贴地路径要求 WebGL2、浮点纹理和深度纹理。在缓存预算内，已发布驻留的祖先或后代瓦片可覆盖等待中的目标瓦片；缓存无空余槽位时可能逐出该覆盖。
+ * 内置平面零高程地形使用平坦快速路径，自定义地形使用贴地绘制。贴地路径要求 WebGL2、浮点纹理和深度纹理。在缓存预算内，已发布驻留的祖先或后代瓦片可覆盖等待中的目标瓦片；缓存无空余槽位时可能逐出该覆盖。
  * @alias SceneGISVectorTileLayer
  * @constructor
  * @experimental 此 API 为实验性，可能发生变化。
@@ -957,7 +958,7 @@ function SceneGISVectorTileLayer(options) {
   this._globe = globe;
   this._tilingScheme = tilingScheme;
   this._extent = tilingScheme.coordinateSystem.extent;
-  this._ground = scene.world.terrainProvider !== undefined;
+  this._ground = usesGroundDraping(scene.world.terrainProvider);
   this._groundHeights = new Cartesian2();
   this._groundGeometry = new Map();
   this._style = style;
@@ -1194,6 +1195,13 @@ Object.defineProperties(SceneGISVectorTileLayer.prototype, {
   },
 });
 
+function usesGroundDraping(provider) {
+  return (
+    provider !== undefined &&
+    !(provider instanceof SceneGISPlanarZeroTerrainProvider)
+  );
+}
+
 /** @private */
 SceneGISVectorTileLayer.prototype.update = function (frameState) {
   if (
@@ -1219,7 +1227,7 @@ SceneGISVectorTileLayer.prototype.update = function (frameState) {
   }
   if (frameState.passes.render) {
     const provider = this._world.terrainProvider;
-    const ground = provider !== undefined;
+    const ground = usesGroundDraping(provider);
     if (ground !== this._ground) {
       this._ground = ground;
       this._symbols?.clear();

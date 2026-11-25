@@ -16,6 +16,7 @@ import {
   PerInstanceColorAppearance,
   PolylineMaterialAppearance,
   PrimitiveType,
+  Ray,
   Scene,
   SceneTransforms,
   SceneGISPlanarCoordinateSystem,
@@ -1345,14 +1346,16 @@ czm_material czm_getMaterial(czm_materialInput inputValue) {
     expect(limited.requests[1]).toBeLessThan(unrestricted.requests[1]);
   });
 
-  it("lazily creates one shared unit quad and renders the base color", function () {
+  it("renders and picks the default terrain using one shared unit quad", function () {
     const world = createWorld({ maximumLevel: 0 });
     scene = createPlanarScene(world);
     scene.backgroundColor = Color.BLACK;
     pointCameraAt(world);
 
+    const ray = new Ray(Cartesian3.UNIT_Z, new Cartesian3(0, 0, -1));
     expect(world._surface._vertexArray).toBeUndefined();
-    expect(world._surface._terrain).toBeUndefined();
+    expect(world.getTerrainHeight(Cartesian3.ZERO)).toBeUndefined();
+    expect(world.pickTerrain(ray)).toBeUndefined();
     expect(scene).toRender([255, 0, 0, 255]);
 
     const surface = world._surface;
@@ -1370,8 +1373,21 @@ czm_material czm_getMaterial(czm_materialInput inputValue) {
     expect(tile._imageryRelease).toBeUndefined();
     expect(tile.command.boundingVolume).toBe(tile.commandBoundingVolume);
     expect(tile.command.boundingVolume).not.toBe(tile.boundingVolume);
-    expect(tile.terrainEntry).toBeUndefined();
+    expect(tile.terrainEntry.activeContent.source).toBe("ZERO");
     expect(tile._terrainRelease).toBeUndefined();
+    expect(world.tilesLoaded).toBe(true);
+    expect(world.getTerrainHeight(Cartesian3.ZERO)).toBe(0.0);
+    expect(world.getTerrainHeight(new Cartesian3(129, 0, 0))).toBeUndefined();
+    expect(world.pickTerrain(ray)).toEqual(Cartesian3.ZERO);
+    const debug = { ...surface._terrain._debug };
+    expect(debug.createdRequests).toBe(0);
+    expect(debug.startedMeshTasks).toBe(0);
+    expect(debug.createdVertexBuffers).toBe(0);
+    expect(scene).toRender([255, 0, 0, 255]);
+    expect(surface._terrain._debug).toEqual(debug);
+    world.show = false;
+    expect(world.pickTerrain(ray)).toBeUndefined();
+    expect(scene).toRender([0, 0, 0, 255]);
   });
 
   it("changes a pending flat tile to one indexed terrain command on normal render", async function () {
@@ -1461,6 +1477,9 @@ czm_material czm_getMaterial(czm_materialInput inputValue) {
     expect(snapshotEntry.tile).toBeUndefined();
     expect(snapshotEntry.content).toBeUndefined();
     expect(snapshotEntry.mesh).toBeUndefined();
+    scene.renderForSpecs();
+    expect(world.getTerrainHeight(Cartesian3.ZERO)).toBe(0.0);
+    expect(tile.command.vertexArray).toBe(world._surface._vertexArray);
   });
 
   it("drapes through an interior terrain peak with linear and logarithmic depth", async function () {

@@ -455,13 +455,15 @@ Globe 的 `quantized-mesh-1.0` / `heightmap-1.0`、动态 availability 和 paren
 
 ### 运行时与光照
 
-`terrainProvider`由调用方拥有，并且必须引用World的canonical tiling scheme。Runtime维持direct、
+平面 World 默认提供可采样、可拾取的 0 米地形。`world.terrainProvider`、`scene.terrainProvider`
+与 `viewer.terrainProvider` 访问同一 provider。赋值 `undefined` 可恢复内置 provider。
+自定义 provider 由调用方拥有，且必须引用 World 的 canonical tiling scheme。Runtime 维持 direct、
 upsampled与flat fallback的连续单层coverage，以skirt遮蔽mixed-LOD边缘；terrain geometry与imagery
 始终共用每tile一个opaque command。Provider replacement、eviction与World destroy释放World拥有的
 request/mesh/GPU资源，但不销毁provider。
 
 `enableLighting`默认关闭。启用后，non-flat Heightmap/Quantized terrain使用Worker按真实surface topology生成的
-area-weighted smooth vertex normals；flat/no-provider与active FLAT fallback继续使用fragment geometric normal。
+area-weighted smooth vertex normals；内置零高程瓦片和 active FLAT fallback 使用 fragment geometric normal。
 Worker在tile extent真实meter metric中累计normal，2-byte oct stream固定在planar world axes；shader仅作world-to-eye
 rotation，避免EPSG:3857大尺度model transform放大量化误差。
 `lambertDiffuseMultiplier`可调Diffuse强度。Smooth normals改善同一mesh内共享边和代表性LOD边界连续性，但不保证

@@ -41,6 +41,23 @@ canonical identity API；应先创建 World，再用 `world.tilingScheme` 创建
 
 ## 决策
 
+### 2026-11-25 默认零高程 provider
+
+平面 World 在构造时安装内置 provider，引用该 World 的标准切片方案。全层级 TileData 均为
+2×2 的零高程 heightmap，适用于独立 sampler。赋值 `undefined` 恢复同一个内置 provider，
+自定义 provider 继续由调用方拥有并经过原有验证。
+
+已知为零的地形瓦片在同一地表覆盖中同步就绪，共享四边形和现有几何法线。每个瓦片只借用内置
+provider 的共享 terrain content，且不启用请求、Worker、逐瓦片 GPU buffer 或矢量贴地通道。
+零高程地形与异步地形的未知 `FLAT` 占位在驻留查询、裁剪拾取和 observer 就绪时具有不同语义，
+详见 [ADR-0010](ADR-0010-planar-terrain-query-picking-and-sampling.md)。
+
+本修订更新下方的初始/恢复契约。`Scene.terrainProvider` 经 SGP-0001 路由到平面 World，
+CesiumWidget 和 Viewer 沿用现有委托，属性文档分别由 SGP-0001 和 SGP-0002 追踪。
+构造参数和异步 `Scene.setTerrain` 保持球面契约。
+
+实施与验证记录见[独立计划](../../../AgentDocs/planar-terrain/plans/2026-11-25-default-zero-terrain.md)。
+
 ### World 的 `terrainProvider` 属性
 
 `SceneGISPlanarWorld` 增加公开可写属性：

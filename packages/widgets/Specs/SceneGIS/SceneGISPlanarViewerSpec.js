@@ -163,6 +163,7 @@ describe(
 
       expect(world).toBeInstanceOf(SceneGISPlanarWorld);
       expect(viewer.scene.world).toBe(world);
+      expect(viewer.terrainProvider).toBe(world.terrainProvider);
       expect(viewer.planarCameraController.world).toBe(world);
       expect(world.coordinateSystem.crs).toBe("EPSG:3857");
       expect(world.coordinateSystem.extent.minimumX).toBe(-256);
@@ -916,6 +917,7 @@ describe(
         fullscreenButton: false,
       });
       expect(viewer.scene.globe).toBeDefined();
+      expect(viewer.terrainProvider).toBe(viewer.scene.globe.terrainProvider);
       expect(viewer.planarCameraController).toBeUndefined();
       expect(viewer.planarWorld).toBeUndefined();
       viewer.destroy();
@@ -930,6 +932,7 @@ describe(
         baseLayerPicker: false,
       });
       expect(viewer.scene.globe).toBeUndefined();
+      expect(viewer.terrainProvider).toBeUndefined();
       expect(viewer.planarCameraController).toBeUndefined();
       expect(viewer.planarWorld).toBeUndefined();
     });

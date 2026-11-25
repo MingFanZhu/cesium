@@ -8,10 +8,10 @@
 - Active extension plan: None
 - Current phase: None；T1-T6均已完成
 - Active phase plan: None
-- Active standalone plan: None
+- Active standalone plan: None；[默认零高程维护](plans/2026-11-25-default-zero-terrain.md)已完成
 - Architecture contact: Architecture Agent
 - Execution contact: Execution Agent（extension已完成）
-- Last updated: `2026-08-08`
+- Last updated: `2026-11-25`
 
 允许的扩展状态为 `proposed`、`active`、`paused`、`completed` 或 `retired`。
 
@@ -24,7 +24,7 @@
 - 让已有 planar imagery 贴附在地形 geometry 上。
 - 支持异步加载、LOD fallback、上采样、连续覆盖、缓存和资源生命周期。
 - 提供与实际地形一致的高度查询、地形拾取和可执行示例。
-- 在无 terrain provider 时完整保留现有 Z=0 flat surface 行为和快速路径。
+- 内置零高程 terrain provider，使用共享表面几何快速路径。
 
 ### Out of scope
 
@@ -61,6 +61,9 @@
 
 ## Current handoff
 
+- 2026-11-25 默认零高程 provider 已安装在平面 World，Scene、CesiumWidget 与 Viewer 共用该属性。
+  已验证零高程采样、地表显隐、添加和撤回自定义地形。见[独立计划](plans/2026-11-25-default-zero-terrain.md)
+  与[最新评审](reviews/2026-11-25-default-zero-terrain.md)，关联 ADR-0008、ADR-0010 与 SGP-0001/0002。
 - Current state: T1-T6均完成implementation、验证、Architecture/code review与独立阶段门禁；项目负责人
   已在真实浏览器/GPU确认T6通过，`planar-terrain` extension状态为`completed`。
 - Next action: 在新的extension或standalone plan中讨论后续能力，不在本extension继续追加未规划阶段。
@@ -68,7 +71,7 @@
 - Open discussions: None。固定环境亮度`0.3`、fragment geometric normal和不引入Worker均已获批；若
   实际画面、profiling或实现要求CPU normals、Worker、Shader build或upstream改动，Execution必须
   停止并交回裁决。
-- Latest review:
+- T6 review:
   [T6 terrain lighting and delivery review request](reviews/2026-08-08-t6-terrain-lighting-and-delivery.md)
   （`approved`）。
 - Unresolved reviews: None。项目负责人的真实浏览器/GPU人工视觉验收已通过。

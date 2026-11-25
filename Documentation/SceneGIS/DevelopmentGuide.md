@@ -457,7 +457,7 @@ canonical scheme 校验与稀疏 availability。以下检查约束原 URL-templa
   必须验证exact TypedArray与`2 * vertexCount` byte length，再与position/index/VA放入同一原子GPU lifecycle。
 - Worker normal必须在tile extent的真实meter XY与meter Z中累计；oct stream是fixed planar world-axis normal，不能在
   unit-local XY/meter Z混合尺度上先量化。Smooth variant以`czm_octDecode`和`czm_viewRotation`恢复并插值eye-space
-  normal；flat/no-provider和active `FLAT`
+  normal；内置零高程地形和 active `FLAT`
   fallback继续使用`dFdx`/`dFdy` geometric normal，unlit不得读取normal attribute。Smooth lighting保持Worker
   topology-up方向，geometric fallback必须归一到planar `+Z` hemisphere；double-sided可见性不能用camera-facing
   normal决定。不要增加back-face culling、runtime邻居normal registry或camera collision。
@@ -479,8 +479,8 @@ canonical scheme 校验与稀疏 availability。以下检查约束原 URL-templa
   provider和GPU objects不得转移。
 - Worker result必须在主线程按kind、TypedArray、length/count和finite metadata完整preflight；GPU upload、bounds、
   active switch和LRU仍只能发生在normal render。
-- Mesh task每normal frame最多启动两个，GPU promotion仍最多两个；pending task参与current-view readiness。Flat
-  no-provider path必须保持零Worker creation/task/payload clone。
+- Mesh task每normal frame最多启动两个，GPU promotion仍最多两个；pending task参与current-view readiness。
+  内置零高程 provider 必须保持零 Worker creation/task/payload clone。
 - TaskProcessor 1.144没有per-task abort。取消要区分fetch Request cancellation、提交前不再schedule与active late
   result generation isolation；不得通过destroy共享Worker冒充单tile取消。
 - Focused验证覆盖真实TaskProcessor Worker、LERC/mesh transfer、stale/retry/fallback、depth replay、resource

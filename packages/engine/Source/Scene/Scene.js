@@ -127,6 +127,10 @@ import SceneGISPlanarSceneApi from "../SceneGIS/Scene/_private/_SceneGISPlanarSc
 // SCENEGIS_PATCH_BEGIN SGP-0001: Type the primary world lifecycle slot.
 /** @import SceneGISWorld from "../SceneGIS/Scene/SceneGISWorld.js"; */
 // SCENEGIS_PATCH_END SGP-0001
+// SCENEGIS_PATCH_BEGIN SGP-0001: Identify the planar terrain provider capability.
+import SceneGISPlanarWorld from "../SceneGIS/Scene/SceneGISPlanarWorld.js";
+/** @import SceneGISPlanarTerrainProvider from "../SceneGIS/Core/SceneGISPlanarTerrainProvider.js"; */
+// SCENEGIS_PATCH_END SGP-0001
 
 const requestRenderAfterFrame = function (scene) {
   return function () {
@@ -1348,16 +1352,19 @@ Object.defineProperties(Scene.prototype, {
     },
   },
 
+  // SCENEGIS_PATCH_BEGIN SGP-0001: Route terrain access to the active Globe or planar world.
   /**
-   * The terrain provider providing surface geometry for the globe.
+   * The terrain provider providing surface geometry for the active Globe or planar world.
    * @memberof Scene.prototype
    *
-   * @type {TerrainProvider}
+   * @type {TerrainProvider|SceneGISPlanarTerrainProvider|undefined}
    */
   terrainProvider: {
     get: function () {
       if (!defined(this.globe)) {
-        return undefined;
+        return this._world instanceof SceneGISPlanarWorld
+          ? this._world.terrainProvider
+          : undefined;
       }
 
       return this.globe.terrainProvider;
@@ -1370,9 +1377,13 @@ Object.defineProperties(Scene.prototype, {
 
       if (defined(this.globe)) {
         this.globe.terrainProvider = terrainProvider;
+      } else if (this._world instanceof SceneGISPlanarWorld) {
+        this._world.terrainProvider = terrainProvider;
+        this.requestRender();
       }
     },
   },
+  // SCENEGIS_PATCH_END SGP-0001
 
   /**
    * Gets an event that's raised when the terrain provider is changed

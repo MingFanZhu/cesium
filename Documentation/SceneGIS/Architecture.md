@@ -379,9 +379,9 @@ SW→NE triangle interpolation 与 Cesium 数据表示兼容，但 extent、坐�
 
 ### 平面地形 Surface 集成
 
-`SceneGISPlanarWorld` 的 terrain provider 通过可写 `terrainProvider` 属性在 World 创建后显式
-挂载；T2 不提供 constructor option，因为 provider 必须引用该 World 已创建的同一个 canonical
-`SceneGISPlanarTilingScheme` object。provider 始终由调用方拥有，setter 必须在任何 request、
+`SceneGISPlanarWorld` 构造时安装内置零高程 provider，赋值 `undefined` 恢复同一实例。
+自定义 provider 通过可写 `terrainProvider` 属性挂载，必须引用该 World 已创建的同一个 canonical
+`SceneGISPlanarTilingScheme` object。自定义 provider 由调用方拥有，setter 必须在任何 request、
 command 或 GPU mutation 前原子验证 identity、米制全局高度范围、maximum level、error curve、
 event、Credit 和 request/availability contract。replacement、detach、tile eviction 与 world
 destroy 必须取消旧 request、隔离迟到 generation 并 exactly once 释放 World-owned CPU/GPU
@@ -398,8 +398,8 @@ pass 只重放最近 normal render 的 command references。`scene.pickPosition`
 terrain depth，但 World 和 camera controller 的现有 public pick 继续表示有界 Z=0 reference
 plane，直到独立 terrain query/picking phase 提供明确 API。
 
-无 provider 时不得 materialize terrain runtime、entry、request、mesh 或 terrain GPU buffer，
-现有 shared-unit-quad flat path 保持。T2 只提供 Z=0 ideal-tile fallback 和主线程 Heightmap mesh；
+内置零高程 provider 的瓦片共享同一已知地形内容和 unit quad，无 request、Worker、逐瓦片 mesh 或
+terrain GPU buffer。早期 T2 只提供 Z=0 ideal-tile fallback 和主线程 Heightmap mesh；
 ancestor fallback、upsampling、裂缝处理、availability metadata、Worker 和 byte budget 必须在
 后续 phase 依据真实 runtime 重新设计。完整决定见
 [ADR-0008](Decisions/ADR-0008-planar-terrain-mesh-and-surface-integration.md)。
@@ -426,8 +426,8 @@ shared index buffer 在 replacement、eviction、detach 与 destroy 中 exactly 
 
 `tilesLoaded` 只描述当前 view：recoverable direct、availability、request、promotion 或 revision
 refresh 即使已有 fallback 仍为 false；terminal direct 配合稳定 fallback 可以收敛。Imagery 只绑定
-actual render tiles，pick+depth 继续精确 replay 最近 normal-render command references。无 provider
-仍保持 zero terrain allocation，public World/camera picking 仍是 Z=0 reference plane。完整决定见
+actual render tiles，pick+depth 继续精确 replay 最近 normal-render command references。内置
+provider 保持共享 quad 路径，public World/camera reference picking 仍是 Z=0 reference plane。完整决定见
 [ADR-0009](Decisions/ADR-0009-planar-terrain-continuous-lod-and-cache.md)。
 
 `World.maximumTiltedTileDistance` 按 [ADR-0066](Decisions/ADR-0066-planar-tilted-tile-distance.md)
@@ -443,9 +443,9 @@ actual render tiles，pick+depth 继续精确 replay 最近 normal-render comman
 Globe 的 DepthPlane 仍限定于 Globe。地形查询与分类保留真实地表；延迟地形深度和
 多视锥透明恢复共享既有资源，不能通过关闭地表 depthTest/depthMask 代替此开关。
 
-平面地形的读取接口必须区分数据来源。`SceneGISPlanarWorld.getTerrainHeight` 只读取 canonical
-quadtree cache 中最深的 resident `DIRECT`/`UPSAMPLED` active mesh，并按实际 Float32 surface
-triangles求高程；它不创建 tile、不更新 LRU，也不把 `FLAT` 当作已知 terrain。`world.pickTerrain`
+平面地形的读取接口必须区分数据来源。`SceneGISPlanarWorld.getTerrainHeight` 读取 canonical
+quadtree cache 中最深的 resident `DIRECT`/`UPSAMPLED` active mesh 或已知零高程瓦片；
+它不创建 tile、不更新 LRU，也不把 `FLAT` 当作已知 terrain。`world.pickTerrain`
 只拾取最近成功 normal render发布的 actual terrain cover snapshot，使用双面 surface triangle
 intersection并排除 skirt；nearest `FLAT` 可以遮挡更远 terrain，但其自身返回 `undefined`。
 
@@ -699,7 +699,7 @@ new Viewer("cesiumContainer", {
 ```
 
 `planarWorld`只接受raw square extent、opaque CRS与现有World constructor字段；SceneGIS-owned helper同步组装
-Extent→CoordinateSystem→World，不推断CRS、不创建provider且不保留config引用。两种入口均通过readonly
+Extent→CoordinateSystem→World，不推断CRS且不保留config引用。两种入口均通过readonly
 `viewer.planarWorld`发布与`viewer.scene.world`相同的resolved World。generic custom world、`world: false`和手工
 controller ownership继续使用低层`CesiumWidget`。
 
@@ -710,8 +710,9 @@ WebGL、controller或provider mutation前拒绝invalid raw config、base layer�
 planar Viewer 关闭 legacy `screenSpaceCameraController` 的 inputs，但不替换该属性；它通过
 `ControllerHost` 注册唯一 `SceneGISPlanarCameraController`，并在 CesiumWidget/Scene/world
 销毁前成对移除。传入live world或声明式创建resolved world均把独占生命周期所有权交给Scene；同一live world
-instance不得交给第二个Viewer/CesiumWidget，且P6不增加跨Scene owner registry。依赖canonical tiling scheme的provider
-必须在Viewer返回后通过`viewer.planarWorld`显式创建与安装。
+instance不得交给第二个Viewer/CesiumWidget，且P6不增加跨Scene owner registry。自定义 provider
+须使用 `viewer.planarWorld.tilingScheme` 创建。`viewer.terrainProvider` 和 `scene.terrainProvider`
+均访问该平面 World 的当前 provider，见 [ADR-0008](Decisions/ADR-0008-planar-terrain-mesh-and-surface-integration.md)。
 
 Viewer 使用 SceneGIS-owned planar Home command 调用 controller `viewHome(scene)`。InfoBox保留
 title/description；camera button对当前可track的FIXED Entity执行track/untrack，对不可track但bounds为`DONE`的Entity执行

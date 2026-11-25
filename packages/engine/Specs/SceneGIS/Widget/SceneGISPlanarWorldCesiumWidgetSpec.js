@@ -56,6 +56,20 @@ describe("SceneGIS/Widget/SceneGISPlanarWorldCesiumWidget", function () {
 
     expect(widget.scene.world).toBe(world);
     expect(widget.scene.globe).toBeUndefined();
+    const defaultProvider = world.terrainProvider;
+    expect(widget.terrainProvider).toBe(defaultProvider);
+    expect(widget.scene.terrainProvider).toBe(defaultProvider);
+    const copiedProvider = {
+      ...defaultProvider,
+      getLevelMaximumGeometricError: () => 0,
+      requestTileGeometry: () => undefined,
+      getTileDataAvailable: () => undefined,
+      loadTileDataAvailability: () => undefined,
+    };
+    widget.terrainProvider = copiedProvider;
+    expect(world.terrainProvider).toBe(copiedProvider);
+    widget.terrainProvider = undefined;
+    expect(world.terrainProvider).toBe(defaultProvider);
     expect(widget.scene.skyBox).toBeUndefined();
     expect(widget.scene.skyAtmosphere).toBeUndefined();
     expect(widget.scene.moon).toBeUndefined();

@@ -50,6 +50,13 @@ T4 需要同时提供驻留查询、render-cover terrain picking 和独立 provi
 
 ## 决策
 
+### 2026-11-25 默认零高程地形查询
+
+[ADR-0008](ADR-0008-planar-terrain-mesh-and-surface-integration.md) 的内置 provider 为 World 提供
+已知零高程瓦片。驻留的默认瓦片支持 `getTerrainHeight`。已渲染覆盖可通过 `pickTerrain`
+拾取，其精确求交为有界四边形交点，并使用当前地表裁剪快照。独立 sampler 直接读取 provider
+的 heightmap，无需先渲染。未知的 `FLAT` 占位仍不产生地形查询结果。
+
 ### 公共 API
 
 `SceneGISPlanarWorld` 增加：

@@ -14,6 +14,7 @@ import VertexArray from "../../../Renderer/VertexArray.js";
 import SceneGISPlanarQuantizedMeshTerrainData from "../../Core/SceneGISPlanarQuantizedMeshTerrainData.js";
 import upsampleSceneGISPlanarTerrain from "../../Core/_private/_SceneGISPlanarTerrainUpsampler.js";
 import terrainWorkerScheduler from "../../Core/_private/_SceneGISPlanarTerrainWorkerScheduler.js";
+import SceneGISPlanarZeroTerrainProvider from "../../Core/_private/_SceneGISPlanarZeroTerrainProvider.js";
 import {
   createSceneGISPlanarTerrainMeshTask,
   finalizeSceneGISPlanarTerrainMesh,
@@ -54,6 +55,7 @@ const Source = Object.freeze({
   DIRECT: "DIRECT",
   UPSAMPLED: "UPSAMPLED",
   FLAT: "FLAT",
+  ZERO: "ZERO",
 });
 
 function reportProviderError(
@@ -278,6 +280,7 @@ function SceneGISPlanarTerrain(forEachTile, getTile, workerScheduler) {
   this._getTile = getTile;
   this._workerScheduler = workerScheduler ?? terrainWorkerScheduler;
   this._provider = undefined;
+  this._zeroTerrainEntry = undefined;
   this._geometricErrors = undefined;
   this._generation = 0;
   this._contentRevision = 0;
@@ -397,12 +400,25 @@ SceneGISPlanarTerrain.prototype.setProvider = function (
   this._provider = provider;
   this._geometricErrors = geometricErrors;
   this._error = undefined;
-  this._tilesLoaded = !defined(provider);
+  this._zeroTerrainEntry =
+    provider instanceof SceneGISPlanarZeroTerrainProvider
+      ? {
+          activeContent: {
+            source: Source.ZERO,
+            revision: ++this._contentRevision,
+          },
+        }
+      : undefined;
+  this._tilesLoaded = !defined(provider) || defined(this._zeroTerrainEntry);
 };
 
 SceneGISPlanarTerrain.prototype.releaseTile = function (tile) {
   const entry = tile.terrainEntry;
   if (!entry) {
+    return;
+  }
+  if (entry === this._zeroTerrainEntry) {
+    tile.terrainEntry = undefined;
     return;
   }
   ++entry.attempt;
@@ -1283,6 +1299,13 @@ SceneGISPlanarTerrain.prototype.prepare = function (
   if (!this._provider) {
     return;
   }
+  if (defined(this._zeroTerrainEntry)) {
+    // All zero-height tiles borrow the same quad and need no per-tile work.
+    for (const tile of loadTiles) {
+      tile.terrainEntry = this._zeroTerrainEntry;
+    }
+    return;
+  }
   const directKeys = new Set();
   for (const desiredTile of desiredTiles) {
     let x = desiredTile.x;
@@ -1438,7 +1461,7 @@ SceneGISPlanarTerrain.prototype.areTilesLoaded = function (
   tiles,
   desiredTiles,
 ) {
-  if (!this._provider) {
+  if (!this._provider || defined(this._zeroTerrainEntry)) {
     return true;
   }
   const directKeys = new Set();
@@ -1467,11 +1490,12 @@ SceneGISPlanarTerrain.prototype.areTilesLoaded = function (
 SceneGISPlanarTerrain.prototype.isAnalysisReady = function (tile) {
   const entry = tile.terrainEntry;
   return (
-    defined(entry?.activeContent?.mesh) &&
-    (entry.state === State.READY ||
-      (entry.state === State.UNAVAILABLE &&
-        entry.fallbackState === FallbackState.READY &&
-        entry.activeContent.source === Source.UPSAMPLED))
+    entry?.activeContent?.source === Source.ZERO ||
+    (defined(entry?.activeContent?.mesh) &&
+      (entry.state === State.READY ||
+        (entry.state === State.UNAVAILABLE &&
+          entry.fallbackState === FallbackState.READY &&
+          entry.activeContent.source === Source.UPSAMPLED)))
   );
 };
 
@@ -1501,6 +1525,7 @@ SceneGISPlanarTerrain.prototype.destroy = function () {
   this._forEachTile((tile) => this.releaseTile(tile));
   this._destroyRemainingIndexBuffers();
   this._provider = undefined;
+  this._zeroTerrainEntry = undefined;
   this._geometricErrors = undefined;
   this._destroyed = true;
 };
