@@ -15,9 +15,10 @@
 - 公共入口（中，已修复）：Scene、Viewer、CesiumWidget 与 World 共享 provider，赋值
   `undefined` 恢复同一实例。已验证 Globe 与 `globe:false` 的读取结果。通用属性的
   TypeScript 声明包含两种 provider；仅操作球面数据的代码可从 Globe 获取原生类型。负责人角色：执行。
-- 既有地形光照断言（低，已确认基线）：`SceneGISPlanarTerrainCesiumWidgetSpec` 中的 indexed terrain
+- 既有地形光照断言（低，已修复测试前提）：`SceneGISPlanarTerrainCesiumWidgetSpec` 中的 indexed terrain
   光照用例在修改前 `a2c4e7471a` 和本次实现上，均出现相同的 lighting mode 与像素失败。
-  使用同一 WebGL 测试分别加载基线和候选引擎复核。后续光照维护可复用此对照。
+  使用同一 WebGL 测试分别加载基线和候选引擎复核。后续用例已显式选择基础 Lambert 分支，
+  两个构建均通过，见[光照测试评审](2026-11-25-indexed-terrain-lighting-test.md)。
 
 ## 验证
 

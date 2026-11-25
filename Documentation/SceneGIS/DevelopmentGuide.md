@@ -449,9 +449,10 @@ canonical scheme 校验与稀疏 availability。以下检查约束原 URL-templa
 
 ### 平面地形光照检查
 
-- 默认`enableLighting=false`必须保留unlit shader fast path；shader cache key同时包含shown layer count、
-  lighting flag与normal mode。`lambertDiffuseMultiplier`只经uniform读取，修改它不得创建command、shader、
-  mesh或其他GPU/request资源。
+- 高级环境激活时优先使用物理光照。基础 Lambert 用例先设 `scene.environmentEffects.enabled = false`，
+  再以 `enableLighting` 验证 unlit 与 lit 路径。Shader cache key 包含 shown layer count、lighting flag、
+  normal mode 和高级光照标记。`lambertDiffuseMultiplier` 由基础 Lambert 分支的 uniform 读取，
+  调整倍率不创建 command、shader、mesh 或其他 GPU/request 资源。
 - Lit non-flat terrain必须使用existing Worker mesh task按真实Heightmap/Quantized surface topology生成的
   area-weighted `Uint8x2` oct normals；skirt duplicate复制surface normal且skirt triangles不参与累计。Main thread
   必须验证exact TypedArray与`2 * vertexCount` byte length，再与position/index/VA放入同一原子GPU lifecycle。
@@ -461,8 +462,8 @@ canonical scheme 校验与稀疏 availability。以下检查约束原 URL-templa
   fallback继续使用`dFdx`/`dFdy` geometric normal，unlit不得读取normal attribute。Smooth lighting保持Worker
   topology-up方向，geometric fallback必须归一到planar `+Z` hemisphere；double-sided可见性不能用camera-facing
   normal决定。不要增加back-face culling、runtime邻居normal registry或camera collision。
-- Base color和imagery必须先完成single-pass bottom-to-top合成，再统一应用scene light、Lambert与固定
-  ambient；depth pick仍只重放最近normal render的exact command references。
+- Base color 和 imagery 先完成 single-pass bottom-to-top 合成，再进入物理光照或基础 Lambert 分支。
+  基础 Lambert 使用 scene light 和固定 ambient。Depth pick 只重放最近 normal render 的 exact command references。
 - Real Context Spec至少证明smooth/geometric/unlit mode、lit/unlit像素不同、terrain/imagery single command、
   2-byte normal stream、two-buffer warm allocation收敛、multiplier uniform-only、surface下方可见与destroy平衡。
   Sandcastle使用显式稳定

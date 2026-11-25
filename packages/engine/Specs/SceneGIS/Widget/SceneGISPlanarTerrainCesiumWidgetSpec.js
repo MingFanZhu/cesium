@@ -16,7 +16,6 @@ import {
 } from "../../../index.js";
 import getWebGLStub from "../../../../../Specs/getWebGLStub.js";
 import pollToPromise from "../../../../../Specs/pollToPromise.js";
-import SceneGISPlanarCamera from "../../../Source/SceneGIS/Scene/_private/_SceneGISPlanarCamera.js";
 
 function samplePixelNeighborhood(scene, rgba, position) {
   const windowPosition = SceneTransforms.worldToWindowCoordinates(
@@ -124,6 +123,8 @@ describe("SceneGIS/Widget/SceneGISPlanarTerrainCesiumWidget", function () {
       useDefaultRenderLoop: false,
       contextOptions,
     });
+    // Exercise the basic Lambert path independently of physical environment lighting.
+    widget.scene.environmentEffects.enabled = false;
     widget.scene.camera.setView({
       destination: new Cartesian3(0.0, 0.0, 256.0),
       orientation: {
@@ -325,12 +326,7 @@ describe("SceneGIS/Widget/SceneGISPlanarTerrainCesiumWidget", function () {
     expect(terrainWindowPosition.z).toBeCloseTo(renderedPosition.z, 0);
     expect(world._surface._terrain._debug).toEqual(queryDebug);
 
-    const ray = SceneGISPlanarCamera.getWindowRay(
-      widget.scene.camera,
-      widget.scene.canvas,
-      windowPosition,
-      new Ray(),
-    );
+    const ray = widget.scene.camera.getPickRay(windowPosition, new Ray());
     const referencePosition = world.pick(ray, new Cartesian3());
     expect(referencePosition).toBeDefined();
     expect(referencePosition.z).toBe(0.0);

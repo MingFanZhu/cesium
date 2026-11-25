@@ -8,7 +8,7 @@
 - Active extension plan: None
 - Current phase: None；T1-T6均已完成
 - Active phase plan: None
-- Active standalone plan: None；[默认零高程维护](plans/2026-11-25-default-zero-terrain.md)已完成
+- Active standalone plan: None；[地形光照测试维护](plans/2026-11-25-indexed-terrain-lighting-test.md)已完成
 - Architecture contact: Architecture Agent
 - Execution contact: Execution Agent（extension已完成）
 - Last updated: `2026-11-25`
@@ -61,9 +61,12 @@
 
 ## Current handoff
 
+- 2026-11-25 地形 Widget 光照测试显式选择基础 Lambert，并通过公开相机接口验证拾取。
+  开发版和发行版的两个用例均通过。见[独立计划](plans/2026-11-25-indexed-terrain-lighting-test.md)
+  和[评审](reviews/2026-11-25-indexed-terrain-lighting-test.md)。
 - 2026-11-25 默认零高程 provider 已安装在平面 World，Scene、CesiumWidget 与 Viewer 共用该属性。
   已验证零高程采样、地表显隐、添加和撤回自定义地形。见[独立计划](plans/2026-11-25-default-zero-terrain.md)
-  与[最新评审](reviews/2026-11-25-default-zero-terrain.md)，关联 ADR-0008、ADR-0010 与 SGP-0001/0002。
+  与[评审](reviews/2026-11-25-default-zero-terrain.md)，关联 ADR-0008、ADR-0010 与 SGP-0001/0002。
 - Current state: T1-T6均完成implementation、验证、Architecture/code review与独立阶段门禁；项目负责人
   已在真实浏览器/GPU确认T6通过，`planar-terrain` extension状态为`completed`。
 - Next action: 在新的extension或standalone plan中讨论后续能力，不在本extension继续追加未规划阶段。
