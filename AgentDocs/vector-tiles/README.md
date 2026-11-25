@@ -14,10 +14,10 @@
 | Current phase            | 无；D2 已完成                                                                                                            |
 | Active phase plan        | None；[D2](plans/2026-10-16-d2-layer-style-runtime.md) completed                                                         |
 | Last completed phase     | D2：Layer 动态样式运行时；D1 checkpoint `7414056515`                                                                     |
-| Active standalone plan   | None；[未声明缩放范围](plans/2026-10-20-implicit-zoom-bounds.md) completed                                               |
+| Active standalone plan   | None；[Globe 低视角地面参考](plans/2026-11-25-globe-visible-ground-scale.md) completed                                   |
 | Architecture contact     | 当前 Agent                                                                                                               |
 | Execution contact        | 当前 Agent                                                                                                               |
-| Last updated             | `2026-10-28`                                                                                                             |
+| Last updated             | `2026-11-25`                                                                                                             |
 
 ## Scope
 
@@ -64,6 +64,11 @@ Buffer vector 与 VectorProvider 链路。MVT 解析保持 CRS 无关，tile mat
 - V3B1 ADR：[ADR-0062](../../Documentation/SceneGIS/Decisions/ADR-0062-vector-stroke-and-coverage.md)；无新增 SGP。
 
 ## Current handoff
+
+2026-11-25：低空仰视的 Globe 矢量使用视口内地面参考，视轴角度接近地平线时平滑过渡。
+在原公开示例标签页恢复同一相机与显示设置后，布局标注从 0 到 64，可见瓦片均为 19。
+详见[实施计划](plans/2026-11-25-globe-visible-ground-scale.md)与
+[评审](reviews/2026-11-25-globe-visible-ground-scale.md)。示例源码保持原版，无上游文件或 SGP 变化。
 
 2026-10-28：负责人实际查看后认为建筑 PBR 材质效果不佳，明确要求撤回并删除。
 已撤回 `43a656d184`、`d7319e1f05`、`678cfe1dc7` 的实现、Specs、示例、贴图、API/ADR 和阶段文档；

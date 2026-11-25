@@ -517,22 +517,60 @@ describe("SceneGIS/Scene/SceneGISVectorGlobe", function () {
     scene.renderForSpecs();
     expect(Cover.computeZoom({}, scene.frameState)).toBeGreaterThan(zooms[0]);
   });
-  it("uses surface distance instead of the near plane when looking above the horizon", function () {
+  it("uses visible ground independent of the near plane when looking above the horizon", function () {
     const layer = {};
     scene.camera.setView({
       destination: Cartesian3.fromDegrees(118.74, 32.02, 23.5),
       orientation: { heading: 0, pitch: 0.00858, roll: 0 },
     });
     const zooms = [];
+    const depths = [];
     for (const near of [0.1, 1, 10]) {
       scene.camera.frustum.near = near;
       scene.renderForSpecs();
       zooms.push(Cover.computeZoom(layer, scene.frameState));
-      expect(layer._referenceDepth).toEqualEpsilon(23.5, 1e-7);
+      depths.push(layer._referenceDepth);
+      expect(layer._referenceDepth).toBeGreaterThan(23.5);
       expect(zooms.at(-1)).toBeGreaterThan(0);
       expect(zooms.at(-1)).toBeLessThan(24);
     }
     expect(new Set(zooms).size).toBe(1);
+    expect(depths[1]).toEqualEpsilon(depths[0], 1e-9);
+    expect(depths[2]).toEqualEpsilon(depths[0], 1e-9);
+  });
+  it("uses the visible street scale without a zoom jump as the street view crosses the horizon", function () {
+    const camera = scene.camera;
+    const position = Cartesian3.fromDegrees(
+      118.77795431648988,
+      32.04361819167927,
+      5.3990450205556355,
+    );
+    const heading = 1.7277008106668061;
+    camera.frustum.fov = Math.PI / 3;
+    camera.frustum.aspectRatio = 1037 / 834;
+    const layer = {};
+    const frameState = {
+      camera,
+      context: { drawingBufferWidth: 1037, drawingBufferHeight: 834 },
+      pixelRatio: 1,
+    };
+    function zoomAt(degrees) {
+      camera.setView({
+        destination: position,
+        orientation: { heading, pitch: (degrees * Math.PI) / 180, roll: 0 },
+      });
+      return Cover.computeZoom(layer, frameState);
+    }
+    expect(zoomAt(1.636219676715893)).toEqualEpsilon(20.74115, 0.0001);
+    expect(layer._referenceDepth).toEqualEpsilon(34.02731, 0.001);
+    let previous = zoomAt(-2);
+    for (let step = 1; step <= 400; step++) {
+      const zoom = zoomAt(-2 + step * 0.01);
+      expect(Math.abs(zoom - previous)).toBeLessThan(0.01);
+      previous = zoom;
+    }
+    zoomAt(60);
+    expect(layer._referenceDepth).toEqualEpsilon(5.399045, 0.0001);
   });
   [0, 32.1, 75].forEach((latitude) => {
     it(`keeps style scale continuous across the ellipsoid horizon at latitude ${latitude}`, function () {
@@ -638,6 +676,54 @@ describe("SceneGIS/Scene/SceneGISVectorGlobe", function () {
     const beside = new Cartesian2(pixel.point.x + 15, pixel.point.y);
     expect(scene.pick(beside)?.id.styleLayer).toBe("land");
     expect(layer.statistics.drawCommands).toBeGreaterThan(0);
+  });
+  it("draws a nearby POI below a sky-facing axis and excludes the more distant POI", async function () {
+    source = new SceneGISVectorTileSource({
+      url: "https://example.invalid/{z}/{x}/{y}",
+      tilingScheme: scheme,
+      maximumLevel: 14,
+    });
+    const camera = scene.camera;
+    camera.lookAt(
+      Coordinates.position(target.x, target.y),
+      new HeadingPitchRange(0, -Math.asin(5.4 / 65), 65),
+    );
+    camera.lookAtTransform(Matrix4.IDENTITY);
+    camera.setView({
+      destination: Cartesian3.clone(camera.positionWC),
+      orientation: { heading: 0, pitch: Math.PI / 110, roll: 0 },
+    });
+    camera.frustum.near = 0.1;
+    spyOn(Resource.prototype, "fetchArrayBuffer").and.resolveTo(encodeGlyphs());
+    const layer = add(
+      [feature(1, [[2048, 2048]], "near"), feature(1, [[2048, 1450]], "far")],
+      [
+        {
+          id: "poi",
+          type: "symbol",
+          layout: {
+            "text-field": "A",
+            "text-font": ["Test"],
+            "text-size": 24,
+          },
+        },
+      ],
+      { glyphs: "https://example.invalid/{fontstack}/{range}.pbf" },
+    );
+    await ready(layer);
+    const placed = layer._symbols._placed.filter(
+      (candidate) => candidate.placed?.text,
+    );
+    expect(placed.map((candidate) => candidate.identity.featureId)).toEqual([
+      "near",
+    ]);
+    const { screen, projected } = placed[0];
+    const corners = projected.text.quads[0].corners;
+    const point = new Cartesian2(
+      screen.x + corners.reduce((sum, corner) => sum + corner[0], 0) / 4,
+      screen.y + corners.reduce((sum, corner) => sum + corner[1], 0) / 4,
+    );
+    expect(scene.pick(point)?.id.featureId).toBe("near");
   });
   [
     [179.999, 75],

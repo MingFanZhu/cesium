@@ -42,6 +42,18 @@ Style zoom 与 line `_referenceDepth` 消费同一距离；不依赖 near、历�
 使用固定 scratch 对象，无逐帧瓦片遍历、额外请求或 GPU 资源。见
 [修复计划](../../../AgentDocs/vector-tiles/plans/2026-10-16-horizon-style-scale.md)。
 
+### 2026-11-25：视口内可见地面参考
+
+近地仰视时，前向最近点会落在相机脚下，导致参考距离短于屏幕内地面。对透视视锥，
+在视轴不可信或未命中时采样视口下部的九条椭球射线。以入射余弦平方为权重，对
+眼深度和当地 Mercator 投影尺度分别作对数平均，并为参考尺度留出一级透视范围。
+视轴交点的入射余弦相对于样点平均值趋近零时，在对数尺度上平滑过渡到采样结果。
+可信的视轴交点直接决定尺度，常规绕转依然稳定。无有效地面采样时沿用原视轴或椭球回退，
+正交视锥继续使用原计算。九条射线由当前投影矩阵生成，与 near 及异步地形加载独立。
+
+连续 style zoom、线宽参考深度与标注的四倍距离范围使用同一参考。source SSE、样式显隐、
+深度与碰撞仍由原路径决定。详见[实施计划](../../../AgentDocs/vector-tiles/plans/2026-11-25-globe-visible-ground-scale.md)。
+
 Globe 默认椭球 anchors 直接映射 geodetic zero。真实地形 anchors 消费已渲染 mesh，由现有
 vector Worker 创建空间索引后做局部射线查询；索引与 mesh revision/provider 绑定，过时结果
 不发布，图层不主动请求 terrain。GPU 遮挡仍读取实际 surface depth，pick 使用同一判断。

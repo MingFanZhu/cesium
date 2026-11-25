@@ -94,7 +94,9 @@ World.opacity 默认 1，接受有限 0..1，在下次正常 render 发布；req
 显式 source override 必须与传入的 `tilingScheme` 共享 identity；不能传 Globe 的 geographic
 terrain scheme。MVT 数值和 style/layout 不重投影；渲染 adapter 映射到 ECEF。矢量 cover 独立使用
 地理包围体、horizon、三维 SSE 与现有 tile budget，保留近细远粗与 resident parent coverage。
-Style zoom 以视轴椭球交点和当地 Mercator 比例计算；越过地平线时采用前向最近点，不限制相机俯角。
+Style zoom 以视轴椭球交点和当地 Mercator 比例计算。视轴接近地平线时平滑过渡到视口下部
+可见地面，并让线宽和标注距离复用该尺度。无有效采样时使用原视轴或椭球回退。
+见 [ADR-0070](Decisions/ADR-0070-globe-vector-ground-rendering.md)。
 
 面和线读取 native Globe depth，按独立 Worker 准备的数值几何做覆盖、透明混合和拾取，
 不合成地图颜色纹理。真实地形的圆点和文字使用 Worker 构建的已渲染 mesh BVH 查询高度，
