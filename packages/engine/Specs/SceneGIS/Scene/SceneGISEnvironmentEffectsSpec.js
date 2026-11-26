@@ -35,6 +35,7 @@ import {
   SceneGISPlanarExtent,
   SceneGISPlanarWorld,
   SceneGISTemporalAntialiasing,
+  SceneGISWeather,
   ShadowMode,
   Texture,
   TextureMagnificationFilter,
@@ -11522,6 +11523,69 @@ ${hardCascadeLibrary}`;
       expect(cloudTexture.isDestroyed()).toBe(true);
       expect(shadowTexture.isDestroyed()).toBe(true);
     });
+  });
+
+  it("keeps twilight cloud history while rain advances the scene clock", async function () {
+    const buffers = Object.values(createLutBuffers());
+    let assetIndex = 0;
+    spyOn(Resource, "fetchArrayBuffer").and.callFake(() =>
+      Promise.resolve(buffers[assetIndex++]),
+    );
+    await connectControlledCloudMode("globe", () => {
+      effects.showStars = false;
+      scene.camera.setView({
+        destination: Cartesian3.fromDegrees(118.78211, 32.02791, 25),
+        orientation: {
+          heading: 5.641990059823285,
+          pitch: 0.020247288285332843,
+          roll: 0.0,
+        },
+      });
+    });
+    scene.primitives.add(
+      new SceneGISWeather({ mode: "globe", type: "rain", quality: "low" }),
+    );
+    const start = JulianDate.fromIso8601("2026-11-26T09:43:35.082Z");
+    const time = new JulianDate();
+    const pipeline = effects._pipeline;
+    function render(seconds) {
+      JulianDate.addSeconds(start, seconds, time);
+      effects.update(scene, time);
+      scene.renderForSpecs(time);
+    }
+
+    render(0);
+    const energy = pipeline._primaryLightScale.x;
+    const history = pipeline._resources.cloudHistoryFramebuffer0;
+    const diagnostics = pipeline._cloudHistoryDiagnostics;
+    render(1.0 / 60.0);
+    expect(pipeline._primaryLightScale.x).not.toBe(energy);
+    expect(diagnostics.historyValid).toBe(true);
+    expect(diagnostics.mode).toBe("continuous-same-uv");
+    expect(diagnostics.weight).toBe(0.82);
+    expect(pipeline._cloudHistoryReprojection).toBe(false);
+
+    render(20);
+    expect(diagnostics.historyValid).toBe(false);
+    expect(diagnostics.resetReason).toBe("primary-light-energy");
+    render(20 + 1.0 / 60.0);
+    expect(diagnostics.historyValid).toBe(true);
+
+    const light = new DirectionalLight({
+      direction: Cartesian3.negate(
+        pipeline._primaryLightDirection,
+        new Cartesian3(),
+      ),
+    });
+    scene.light = light;
+    render(20);
+    render(20);
+    expect(diagnostics.historyValid).toBe(true);
+    light.intensity += 0.00001;
+    render(20);
+    expect(diagnostics.historyValid).toBe(false);
+    expect(diagnostics.resetReason).toBe("primary-light-energy");
+    expect(pipeline._resources.cloudHistoryFramebuffer0).toBe(history);
   });
 
   it("invalidates cloud history for every warm discontinuity", async function () {

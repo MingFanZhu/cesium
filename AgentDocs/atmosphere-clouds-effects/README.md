@@ -4,7 +4,10 @@
 
 ## Status
 
-- 最新修复：[日月直射光分离](plans/2026-11-25-celestial-direct-light.md)及
+- 最新修复 [降雨播放时的暮光云历史](plans/2026-11-26-rain-twilight-cloud-history.md)及
+  [评审](reviews/2026-11-26-rain-twilight-cloud-history.md)。Viewer 停雨对照确认云历史逐帧失效，
+  本地引擎复测保留连续降雨帧的历史。无上游文件或 SGP 改动。
+- 前一修复 [日月直射光分离](plans/2026-11-25-celestial-direct-light.md)及
   [评审](reviews/2026-11-25-celestial-direct-light.md)。Viewer 05:49、05:50、05:51 的黎明跳色已消除，
   15 项定向 WebGL Specs 通过，沿用 SGP-0009、SGP-0010。
 

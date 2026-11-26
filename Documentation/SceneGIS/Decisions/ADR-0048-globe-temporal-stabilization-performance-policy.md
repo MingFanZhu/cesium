@@ -1192,3 +1192,15 @@ There are no additional reads, passes, resources or traced rays. Full-resolution
 reduced nonphased and Planar kernels retain their previous behavior. This replaces
 the medium tent kernel policy; its bounded smoothing trades some sub-three-pixel
 cloud detail for reduced grain. See the [plan](../../../AgentDocs/atmosphere-clouds-effects/plans/2026-10-26-medium-cloud-reconstruction.md).
+
+## 2026-11-26 — 云历史允许暮光照度连续变化
+
+场景时间推进时，自动主光照度的连续变化可沿用云体历史。每个通道以相邻帧较大照度的 0.5% 或
+0.0001 绝对差值中的较大值为上限。超过该上限、显式主光照度变化或主光控制来源切换时重置历史。
+主光方向、有限值及相机切换依然使用各自的连续性检查。
+
+相机、投影与云的几何采样条件精确匹配时，在相同 UV 融合历史。光照精确匹配使用权重 0.9，
+连续变化使用 0.82。几何变化仍由现有重投影处理。两种世界共用此规则，云影历史保留独立策略。
+沿用既有 Shader、采样预算及帧缓冲。此规则修复暮光开雨后每帧清除云体历史的问题。
+见[实施计划](../../../AgentDocs/atmosphere-clouds-effects/plans/2026-11-26-rain-twilight-cloud-history.md)及
+[技术评审](../../../AgentDocs/atmosphere-clouds-effects/reviews/2026-11-26-rain-twilight-cloud-history.md)。

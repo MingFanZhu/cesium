@@ -140,6 +140,8 @@ const cloudHistoryMaximumTranslation = 25000.0;
 const cloudHistoryMinimumOrientationDot = 0.984807753;
 const cloudHistoryMinimumSunDot = 0.99999;
 const cloudHistoryMaximumFrustumChange = 0.25;
+const cloudHistoryRelativeCelestialEnergyStep = 0.005;
+const cloudHistoryAbsoluteCelestialEnergyStep = 0.0001;
 const cloudPresetIndices = Object.freeze({
   cumulus: 0,
   stratus: 1,
@@ -2003,7 +2005,9 @@ function updateFrame(renderer, scene, frameState, time) {
     renderer._mode === SceneGISAtmosphereReferenceFrame.GLOBE
       ? renderer._owner._directionalLight
       : renderer._world.environment._light;
-  if (light instanceof DirectionalLight && light !== automatic) {
+  renderer._customPrimaryLight =
+    light instanceof DirectionalLight && light !== automatic;
+  if (renderer._customPrimaryLight) {
     renderer._secondarySunWeight = 0.0;
     Cartesian3.normalize(light.direction, renderer._primaryLightDirection);
     Cartesian3.negate(
@@ -2101,6 +2105,7 @@ function SceneGISEnvironmentEffectsRenderer(options) {
   this._moonDirection = new Cartesian3();
   this._primaryLightDirection = new Cartesian3(1.0, 0.0, 0.0);
   this._primaryLightScale = new Cartesian3(1.0, 1.0, 1.0);
+  this._customPrimaryLight = false;
   this._secondarySunWeight = 0.0;
   this._moonIrradiance = new Cartesian3();
   this._nativeLightColor = new Color();
@@ -3005,6 +3010,7 @@ function createCloudHistorySnapshot() {
     cloudOffset: new Cartesian2(),
     sunDirection: new Cartesian3(),
     primaryLightScale: new Cartesian3(),
+    customPrimaryLight: false,
     frame: SceneGISAtmosphereReferenceFrame.createSnapshot(),
   };
 }
@@ -3149,11 +3155,22 @@ function cloudHistoryContinuityFailure(renderer, width, height) {
   ) {
     return "sun-direction";
   }
+  // A normal clock tick changes celestial irradiance continuously at twilight.
+  // Authored lighting and discontinuous celestial changes still reject history.
+  const lightEnergyContinuous = renderer._customPrimaryLight
+    ? cloudHistoryVectorEqual(
+        previous.primaryLightScale,
+        renderer._primaryLightScale,
+      )
+    : Cartesian3.equalsEpsilon(
+        previous.primaryLightScale,
+        renderer._primaryLightScale,
+        cloudHistoryRelativeCelestialEnergyStep,
+        cloudHistoryAbsoluteCelestialEnergyStep,
+      );
   if (
-    !cloudHistoryVectorEqual(
-      previous.primaryLightScale,
-      renderer._primaryLightScale,
-    )
+    previous.customPrimaryLight !== renderer._customPrimaryLight ||
+    !lightEnergyContinuous
   ) {
     return "primary-light-energy";
   }
@@ -3177,7 +3194,7 @@ function cloudHistoryContinuityFailure(renderer, width, height) {
   return undefined;
 }
 
-function cloudHistoryStationary(renderer) {
+function cloudHistoryGeometryStationary(renderer) {
   const previous = renderer._cloudHistorySnapshot;
   const frame = renderer._frame;
   return (
@@ -3197,15 +3214,7 @@ function cloudHistoryStationary(renderer) {
       previous.frame.cameraDirection,
     ) &&
     cloudHistoryVectorEqual(frame.cameraUp, previous.frame.cameraUp) &&
-    cloudHistoryVectorEqual(frame.cameraRight, previous.frame.cameraRight) &&
-    cloudHistoryVectorEqual(
-      cloudHistoryLightDirection(renderer),
-      previous.sunDirection,
-    ) &&
-    cloudHistoryVectorEqual(
-      renderer._primaryLightScale,
-      previous.primaryLightScale,
-    )
+    cloudHistoryVectorEqual(frame.cameraRight, previous.frame.cameraRight)
   );
 }
 
@@ -3234,6 +3243,7 @@ function commitCloudHistorySnapshot(renderer, width, height) {
   Cartesian2.clone(renderer._cloudOffset, snapshot.cloudOffset);
   Cartesian3.clone(cloudHistoryLightDirection(renderer), snapshot.sunDirection);
   Cartesian3.clone(renderer._primaryLightScale, snapshot.primaryLightScale);
+  snapshot.customPrimaryLight = renderer._customPrimaryLight;
   snapshot.frame.mode = frame.mode;
   snapshot.frame.projection = frame.projection;
   snapshot.frame.altitude = frame.altitude;
@@ -3271,15 +3281,26 @@ function executeCloudResolve(renderer, context, depthTexture) {
     ? cloudHistoryContinuityFailure(renderer, width, height)
     : (renderer._cloudHistoryPendingResetReason ?? "invalid-history");
   renderer._cloudHistoryValid = previousValid && !defined(failure);
+  const geometryStationary =
+    renderer._cloudHistoryValid && cloudHistoryGeometryStationary(renderer);
+  const previous = renderer._cloudHistorySnapshot;
   renderer._cloudHistoryStationary =
-    renderer._cloudHistoryValid && cloudHistoryStationary(renderer);
+    geometryStationary &&
+    cloudHistoryVectorEqual(
+      cloudHistoryLightDirection(renderer),
+      previous.sunDirection,
+    ) &&
+    cloudHistoryVectorEqual(
+      renderer._primaryLightScale,
+      previous.primaryLightScale,
+    );
   renderer._cloudHistoryWeight = renderer._cloudHistoryValid
     ? renderer._cloudHistoryStationary
       ? 0.9
       : 0.82
     : 0.0;
   renderer._cloudHistoryReprojection =
-    renderer._cloudHistoryValid && !renderer._cloudHistoryStationary;
+    renderer._cloudHistoryValid && !geometryStationary;
   // Subtract in CPU double precision before publishing large Planar motion.
   Cartesian3.subtract(
     renderer._frame.cameraPosition,
