@@ -303,7 +303,7 @@ describe("SceneGIS/Scene/SceneGISDeferredCustomShader", function () {
     value.customShader = translucent;
     render();
     expect(renderer.drawCount).toBe(0);
-    expect(renderer._models.size).toBe(0);
+    expect(renderer._modelGroups.size).toBe(0);
     expect(renderer._raw.getColorTexture()).toBe(raw);
     expect(sample(renderer._raw.getColorTexture(2))[3]).toBe(0);
     expect(composite()[1]).toBeGreaterThan(0.1);
@@ -372,7 +372,7 @@ describe("SceneGIS/Scene/SceneGISDeferredCustomShader", function () {
     expect(scene.pick(point)).toBe(feature);
     scene.primitives.remove(tileset);
     render();
-    expect(renderer._models.size).toBe(0);
+    expect(renderer._modelGroups.size).toBe(0);
     expect(custom.isDestroyed()).toBe(false);
     expect(scene.context._gl.getError()).toBe(0);
   });

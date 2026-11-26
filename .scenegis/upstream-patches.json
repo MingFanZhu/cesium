@@ -601,6 +601,8 @@
       ],
       "tests": [
         "packages/engine/Specs/SceneGIS/Scene/SceneGISSkyReflectionsSpec.js",
+        "packages/engine/Specs/SceneGIS/Scene/SceneGISDeferredLightingSpec.js",
+        "packages/engine/Specs/SceneGIS/Scene/SceneGISDeferredStylingSpec.js",
         "packages/engine/Specs/Scene/Model/ImageBasedLightingPipelineStageSpec.js",
         "packages/engine/Specs/Scene/DynamicEnvironmentMapManagerSpec.js",
         "packages/engine/Specs/Renderer/FramebufferSpec.js",

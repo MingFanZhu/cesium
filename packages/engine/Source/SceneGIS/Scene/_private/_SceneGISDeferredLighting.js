@@ -16,10 +16,12 @@ import RenderState from "../../../Renderer/RenderState.js";
 import ShaderBuilder from "../../../Renderer/ShaderBuilder.js";
 import ShaderDestination from "../../../Renderer/ShaderDestination.js";
 import ShaderSource from "../../../Renderer/ShaderSource.js";
+import ColorBlendMode from "../../../Scene/ColorBlendMode.js";
 import ImageBasedLightingPipelineStage from "../../../Scene/Model/ImageBasedLightingPipelineStage.js";
 import LightingPipelineStage from "../../../Scene/Model/LightingPipelineStage.js";
 import ModelColorPipelineStage from "../../../Scene/Model/ModelColorPipelineStage.js";
 import LightingModel from "../../../Scene/Model/LightingModel.js";
+import SpecularEnvironmentCubeMap from "../../../Scene/SpecularEnvironmentCubeMap.js";
 import StencilConstants from "../../../Scene/StencilConstants.js";
 import StencilFunction from "../../../Scene/StencilFunction.js";
 import StencilOperation from "../../../Scene/StencilOperation.js";
@@ -63,6 +65,7 @@ import WaterFrame from "./_SceneGISWaterFrame.js";
 import PointEDL from "./_SceneGISDeferredPointEDL.js";
 import MaterialArray from "../../Renderer/_SceneGISMaterialArray.js";
 import DeferredDebug from "./_SceneGISDeferredDebug.js";
+import ModelEnvironmentLighting from "./_SceneGISModelEnvironmentLighting.js";
 
 const opaquePasses = [
   Pass.GLOBE,
@@ -75,7 +78,7 @@ const classificationPasses = [
   Pass.CESIUM_3D_TILE_CLASSIFICATION,
 ];
 const lightingDefine =
-  /^(PRIMITIVE_TYPE_POINTS$|HAS_POINT_CLOUD_COLOR_STYLE$|HAS_PRIMITIVE_OUTLINE$|USE_CLEARCOAT$|USE_ANISOTROPY$|USE_SPECULAR$|LIGHTING_|HAS_MODEL_COLOR$|HAS_SELECTED_FEATURE_ID$|HAS_NORMALS$|USE_IBL_LIGHTING$|USE_CUSTOM_LIGHT_COLOR$|DIFFUSE_IBL$|SPECULAR_IBL$|CUSTOM_SPHERICAL_HARMONICS$|CUSTOM_SPECULAR_IBL$|SCENEGIS_MODEL_|SCENEGIS_SKY_REFLECTIONS$|SCENEGIS_GLOBE$)/;
+  /^(PRIMITIVE_TYPE_POINTS$|HAS_POINT_CLOUD_COLOR_STYLE$|HAS_PRIMITIVE_OUTLINE$|USE_CLEARCOAT$|USE_ANISOTROPY$|USE_SPECULAR$|LIGHTING_|HAS_MODEL_COLOR$|HAS_SELECTED_FEATURE_ID$|HAS_NORMALS$|USE_IBL_LIGHTING$|USE_CUSTOM_LIGHT_COLOR$|DIFFUSE_IBL$|SPECULAR_IBL$|CUSTOM_SPHERICAL_HARMONICS$|CUSTOM_SPECULAR_IBL$|SCENEGIS_MODEL_|SCENEGIS_SKY_REFLECTIONS$|SCENEGIS_LOCAL_PROBES$|SCENEGIS_GLOBE$)/;
 const pendingGlobeBranches = ["TRANSLUCENT"];
 
 function executeVoxel(renderer, command, passState) {
@@ -202,7 +205,10 @@ function shaderInfo(renderer, command) {
       pendingGlobeBranch: pendingGlobeBranches.find((name) =>
         fs.defines.includes(name),
       ),
-      key: fs.defines.filter((define) => lightingDefine.test(define)).join(";"),
+      key: fs.defines
+        .filter((define) => lightingDefine.test(define))
+        .sort()
+        .join(";"),
     };
     renderer._shaders.set(shader, info);
   }
@@ -219,6 +225,122 @@ function sharedState(scene) {
 
 function groupKey(info, edl) {
   return `${info.point ? "point;" : ""}${info.key}${edl ? ";EDL" : ""}`;
+}
+
+function lightingResourceId(renderer, resource) {
+  if (!resource) {
+    return 0;
+  }
+  let id = renderer._lightingResourceIds.get(resource);
+  if (id === undefined) {
+    id = ++renderer._nextLightingResourceId;
+    renderer._lightingResourceIds.set(resource, id);
+  }
+  return id;
+}
+
+function appendIblBindings(renderer, frameState, model, supported, values) {
+  const ibl = model.imageBasedLighting;
+  const environment = model.environmentMapManager;
+  const sky = model._sceneGISSkyReflections;
+  const atlas = ModelEnvironmentLighting.specularIblAtlas(model, frameState);
+  const harmonics = ModelEnvironmentLighting.diffuseIblCoefficients(
+    ibl,
+    environment,
+    frameState,
+  );
+  const cubeMap = ibl.specularEnvironmentCubeMap;
+  const diffuse =
+    supported && (harmonics?.[0] || ibl.useDefaultSphericalHarmonics);
+  const customSpecular = supported && (atlas || cubeMap?.ready);
+  const specular = customSpecular || (supported && ibl.useDefaultSpecularMaps);
+  const physicalDiffuse =
+    model._sceneGISEnvironmentLighting &&
+    ibl.enabled &&
+    !ibl.sphericalHarmonicCoefficients &&
+    !frameState.sphericalHarmonicCoefficients;
+  const factor = ibl.imageBasedLightingFactor;
+  const intensity = sky ? 1 : environment.intensity || 1;
+  if (diffuse || physicalDiffuse) {
+    values.push("diffuse", factor.x * intensity);
+    if (!physicalDiffuse && harmonics?.[0]) {
+      for (const { x, y, z } of harmonics) {
+        values.push(x, y, z);
+      }
+    }
+  }
+  if (specular) {
+    values.push("specular", factor.y * intensity);
+    if (!sky && customSpecular) {
+      const texture = atlas ?? cubeMap.texture;
+      const source = atlas ? environment : cubeMap;
+      values.push(
+        lightingResourceId(renderer, texture),
+        source.maximumMipmapLevel,
+      );
+    }
+  }
+  // Native IBL may sample in the model's frame. Physical sky sampling is world-fixed.
+  if ((diffuse && !physicalDiffuse) || (specular && !sky)) {
+    values.push("frame");
+    const matrix = model._iblReferenceFrameMatrix;
+    for (let i = 0; i < 9; ++i) {
+      values.push(matrix[i]);
+    }
+  }
+  // Shader assembly captures the atlas and sky objects, while the numeric uniforms stay live.
+  // A resource becoming ready can change this variant before a native draw command rebuilds.
+  return [
+    supported && !!harmonics?.[0],
+    !!diffuse,
+    !!physicalDiffuse,
+    !!specular,
+    !!customSpecular,
+    lightingResourceId(renderer, supported ? atlas : undefined),
+    lightingResourceId(renderer, sky),
+  ].join(",");
+}
+
+function modelLightingBindings(
+  renderer,
+  frameState,
+  model,
+  key,
+  edl,
+  supported,
+) {
+  const values = [lightingResourceId(renderer, edl)];
+  let program = "";
+  if (model) {
+    if (key.includes("HAS_MODEL_COLOR")) {
+      const { red, green, blue, alpha } = model.color;
+      const blend = ColorBlendMode.getColorBlend(
+        model.colorBlendMode,
+        model.colorBlendAmount,
+      );
+      values.push(red, green, blue, alpha, blend);
+    }
+    if (key.includes("HAS_PRIMITIVE_OUTLINE")) {
+      const { red, green, blue, alpha } = model.outlineColor;
+      values.push(red, green, blue, alpha);
+    }
+    if (key.includes("LIGHTING_PBR") && key.includes("HAS_NORMALS")) {
+      const light = model.lightColor;
+      if (light) {
+        values.push("light", light.x, light.y, light.z);
+      }
+      if (key.includes("USE_IBL_LIGHTING")) {
+        program = appendIblBindings(
+          renderer,
+          frameState,
+          model,
+          supported,
+          values,
+        );
+      }
+    }
+  }
+  return { signature: `${program};${values.join(",")}`, program };
 }
 
 function release(renderer) {
@@ -270,12 +392,13 @@ function release(renderer) {
   renderer._copyWater?.shaderProgram.destroy();
   renderer._copyWater = undefined;
   renderer._waterReady = false;
-  for (const groups of renderer._models.values()) {
+  for (const groups of renderer._modelGroups.values()) {
     for (const group of groups.values()) {
       group.command.shaderProgram.destroy();
     }
   }
-  renderer._models.clear();
+  renderer._modelGroups.clear();
+  renderer._modelLightingVariants.clear();
   renderer._globeBatches.clear();
   renderer._groups.length = 0;
   renderer._commands = new WeakMap();
@@ -641,6 +764,10 @@ function createGroup(renderer, model, key, family, edl) {
 }
 
 function prepareGroups(renderer, ranges) {
+  const frameState = renderer._scene.frameState;
+  const iblSupported = SpecularEnvironmentCubeMap.isSupported(
+    frameState.context,
+  );
   const extensionDefines = new Set();
   let extensionStyleTarget = false;
   for (const range of ranges) {
@@ -674,11 +801,12 @@ function prepareGroups(renderer, ranges) {
     ranges.some((range) =>
       classificationPasses.some((pass) => range.indices[pass] > 0),
     );
-  for (const groups of renderer._models.values()) {
+  for (const groups of renderer._modelGroups.values()) {
     for (const group of groups.values()) {
       group.seen = false;
     }
   }
+  renderer._modelLightingVariants.clear();
   renderer._groups.length = 0;
   renderer._hasPassthrough = false;
   renderer._globeBatches.clear();
@@ -744,23 +872,42 @@ function prepareGroups(renderer, ranges) {
         }
         renderer._hasPassthrough ||= info.unlitOverlay && !edl;
         const model = command.owner;
-        let groups = renderer._models.get(model);
-        if (!groups) {
-          groups = new Map();
-          renderer._models.set(model, groups);
-        }
         const key = groupKey(info, edl);
-        renderer._hasFeatureStyle ||= key.includes("HAS_SELECTED_FEATURE_ID");
-        let group = groups.get(key);
-        // Material capture resolves one group per owner/lighting key. Primitive
-        // material uniforms differ, but must not invalidate a group already
-        // selected this frame. Recheck its representative binding next frame.
-        if (group?.seen) {
+        let variant = renderer._modelLightingVariants.get(key);
+        if (!variant) {
+          variant = { models: new Map(), bindings: new Map() };
+          renderer._modelLightingVariants.set(key, variant);
+          renderer._hasFeatureStyle ||= key.includes("HAS_SELECTED_FEATURE_ID");
+        }
+        if (variant.models.has(model)) {
           continue;
         }
+        const { signature, program } = modelLightingBindings(
+          renderer,
+          frameState,
+          info.model ? model : undefined,
+          key,
+          edl,
+          iblSupported,
+        );
+        let group = variant.bindings.get(signature);
+        if (group) {
+          variant.models.set(model, group);
+          continue;
+        }
+
+        // The equivalence key is frame-local. Keep shader caching independent of
+        // camera matrices and changing numeric uniforms.
+        let groups = renderer._modelGroups.get(model);
+        if (!groups) {
+          groups = new Map();
+          renderer._modelGroups.set(model, groups);
+        }
+        group = groups.get(key);
         if (
           group &&
           (group.extensionKey !== renderer._extensionLayout.key ||
+            group.bindingProgram !== program ||
             group.edl !== edl ||
             group.sourceUniforms !== command.uniformMap)
         ) {
@@ -775,6 +922,8 @@ function prepareGroups(renderer, ranges) {
             info.point ? "point" : undefined,
             edl,
           );
+          group.representative = model;
+          group.bindingProgram = program;
           groups.set(key, group);
         }
         group.seen = true;
@@ -791,11 +940,13 @@ function prepareGroups(renderer, ranges) {
             command.uniformMap,
           );
         }
+        variant.bindings.set(signature, group);
+        variant.models.set(model, group);
         renderer._groups.push(group);
       }
     }
   }
-  for (const [model, groups] of renderer._models) {
+  for (const [model, groups] of renderer._modelGroups) {
     for (const [key, group] of groups) {
       if (!group.seen) {
         group.command.shaderProgram.destroy();
@@ -803,7 +954,7 @@ function prepareGroups(renderer, ranges) {
       }
     }
     if (groups.size === 0) {
-      renderer._models.delete(model);
+      renderer._modelGroups.delete(model);
     }
   }
   if (renderer._hasPassthrough) {
@@ -966,7 +1117,10 @@ class _SceneGISDeferredLighting {
     }
     this._scene = scene;
     this._active = this._ready = false;
-    this._models = new Map();
+    this._modelGroups = new Map();
+    this._modelLightingVariants = new Map();
+    this._lightingResourceIds = new WeakMap();
+    this._nextLightingResourceId = 0;
     this._extensionLayouts = new Map();
     this._globeBatches = new Map();
     this._groups = [];
@@ -1552,7 +1706,9 @@ class _SceneGISDeferredLighting {
     const edl = this._pointEDLOwners.get(command.owner);
     const group =
       model || edl
-        ? this._models.get(command.owner).get(groupKey(info, edl))
+        ? this._modelLightingVariants
+            .get(groupKey(info, edl))
+            .models.get(command.owner)
         : info.phong
           ? info.sunPhong
             ? this._sunPhong

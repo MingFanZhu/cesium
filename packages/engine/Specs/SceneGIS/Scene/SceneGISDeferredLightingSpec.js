@@ -12,8 +12,10 @@ import {
   DirectionalLight,
   FramebufferManager,
   GeometryInstance,
+  Globe,
   ImageBasedLighting,
   LightingModel,
+  Matrix3,
   Matrix4,
   Model,
   OrthographicFrustum,
@@ -99,6 +101,7 @@ describe("SceneGIS/Scene/SceneGISDeferredLighting", function () {
         ),
         customShader: custom,
         imageBasedLighting: ibl,
+        environmentMapOptions: { enabled: false },
         gltfCallback: (gltf) => {
           if (withoutNormals) {
             gltf.meshes.forEach((mesh) =>
@@ -186,9 +189,66 @@ describe("SceneGIS/Scene/SceneGISDeferredLighting", function () {
     );
   }
   afterEach(function () {
-    scene?.destroyForSpecs();
+    scene?.primitives.removeAll();
     borrowed.splice(0).forEach((resource) => resource.destroy());
+    scene?.destroyForSpecs();
     scene = renderer = undefined;
+  });
+  it("shares physical lighting across more than 2048 visible glTF models", async function () {
+    setup();
+    scene.globe = new Globe();
+    scene.globe.show = false;
+    await pollToPromise(() => {
+      render();
+      return scene.environmentEffects.ready;
+    });
+
+    const count = 2049;
+    const columns = 46;
+    const models = await Promise.all(
+      Array.from({ length: count }, (_, i) => {
+        const x = (i % columns) + 9;
+        const y = Math.floor(i / columns) + 9;
+        return Model.fromGltfAsync({
+          url: "./Data/Models/glTF-2.0/Box/glTF/Box.gltf",
+          modelMatrix: Matrix4.multiplyByUniformScale(
+            Matrix4.fromTranslation(
+              new Cartesian3(7000000 + (x - 31.5) / 8, (y - 31.5) / 8, 0),
+            ),
+            0.1,
+            new Matrix4(),
+          ),
+        });
+      }),
+    );
+    for (const model of models) {
+      scene.primitives.add(model);
+    }
+    await pollToPromise(() => {
+      render();
+      return models.every((model) => model.ready);
+    });
+    render();
+    expect(renderer.drawCount).toBe(count);
+    expect(renderer.groupCount).toBe(1);
+    expect(renderer.lightDrawCount).toBe(1);
+    const specular = renderer._raw.getColorTexture(2);
+    expect(sample(specular, 9, 9)[3]).toBe(1);
+    expect(sample(specular, 33, 53)[3]).toBe(1);
+    const lit = color(32);
+    expect(lit[0] + lit[1] + lit[2]).toBeGreaterThan(0);
+
+    const representative = renderer._groups[0].representative;
+    scene.primitives.remove(representative);
+    render();
+    expect(renderer.drawCount).toBe(count - 1);
+    expect(renderer.lightDrawCount).toBe(1);
+    expect(renderer._groups[0].representative).not.toBe(representative);
+
+    scene.primitives.removeAll();
+    render();
+    expect(renderer.groupCount).toBe(0);
+    expect(specular.isDestroyed()).toBe(true);
   });
   it("selects one lighting group for different primitive uniforms and preserves native updates", async function () {
     setup();
@@ -293,7 +353,7 @@ describe("SceneGIS/Scene/SceneGISDeferredLighting", function () {
     expect(color(44)).toEqualEpsilon(green, 0.001);
     scene.primitives.remove(model);
     render();
-    expect(renderer._models.size).toBe(0);
+    expect(renderer._modelGroups.size).toBe(0);
   });
   it("preserves opaque and translucent native silhouettes with deferred model lighting", async function () {
     setup();
@@ -523,7 +583,7 @@ describe("SceneGIS/Scene/SceneGISDeferredLighting", function () {
       expect(nearDepth[0]).toBeGreaterThan(10);
       expect(farDepth[0]).toEqualEpsilon(850, 0.02);
       expect(nearDepth[1]).toBeLessThan(farDepth[1]);
-      expect(renderer.lightDrawCount).toBe(2);
+      expect(renderer.lightDrawCount).toBe(1);
       expect(renderer.drawCount).toBe(2);
       expect(renderer._framebuffer.numberOfColorAttachments).toBe(5);
       expect(renderer.byteLength).toBe(64 * 64 * 40);
@@ -738,7 +798,7 @@ describe("SceneGIS/Scene/SceneGISDeferredLighting", function () {
     expect(depth.isDestroyed()).toBe(true);
     expect(borrowedDepth.isDestroyed()).toBe(false);
     expect(renderer.ready).toBe(false);
-    expect(renderer._models.size).toBe(0);
+    expect(renderer._modelGroups.size).toBe(0);
   });
   it("keeps independent Model lightColor, SH and live IBL factors", async function () {
     setup();
@@ -777,6 +837,59 @@ describe("SceneGIS/Scene/SceneGISDeferredLighting", function () {
     expect(changed[2]).toBeGreaterThan(beforeLeft[2] + 0.01);
     expect(changed[1]).toBeLessThan(beforeLeft[1]);
     expect(color(46)).toEqualEpsilon(beforeRight, 0.001);
+
+    right.lightColor = Cartesian3.clone(left.lightColor);
+    right.imageBasedLighting.sphericalHarmonicCoefficients =
+      left.imageBasedLighting.sphericalHarmonicCoefficients.map((coefficient) =>
+        Cartesian3.clone(coefficient),
+      );
+    render();
+    expect(renderer.groupCount).toBe(1);
+    const group = renderer._groups[0];
+    scene.camera.twistRight(0.05);
+    render();
+    expect(renderer.groupCount).toBe(1);
+    expect(renderer._groups[0]).toBe(group);
+
+    right.referenceMatrix = Matrix4.fromRotationTranslation(
+      Matrix3.fromRotationZ(Math.PI / 2),
+    );
+    render();
+    expect(renderer.groupCount).toBe(2);
+  });
+  it("shares a reflection cube across models and separates different texture bindings", async function () {
+    setup();
+    const left = await addModel(false, false, -1.7);
+    const right = await addModel(false, false, 1.7);
+    const mapUrl = "./Data/EnvironmentMap/kiara_6_afternoon_2k_ibl.ktx2";
+    const leftIbl = left.imageBasedLighting;
+    const rightIbl = right.imageBasedLighting;
+    leftIbl.imageBasedLightingFactor = new Cartesian2(0, 1);
+    rightIbl.imageBasedLightingFactor = new Cartesian2(0, 1);
+    async function loadMap(lighting, url) {
+      lighting.specularEnvironmentMaps = url;
+      await pollToPromise(() => {
+        render();
+        return lighting.specularEnvironmentCubeMap?.ready;
+      });
+      render();
+    }
+
+    await loadMap(leftIbl, mapUrl);
+    await loadMap(rightIbl, mapUrl);
+    expect(rightIbl.specularEnvironmentCubeMap.texture).toBe(
+      leftIbl.specularEnvironmentCubeMap.texture,
+    );
+    expect(renderer.lightDrawCount).toBe(1);
+    const original = [color(18), color(46)];
+
+    await loadMap(rightIbl, `${mapUrl}?separateBinding`);
+    expect(rightIbl.specularEnvironmentCubeMap.texture).not.toBe(
+      leftIbl.specularEnvironmentCubeMap.texture,
+    );
+    expect(renderer.lightDrawCount).toBe(2);
+    expect(color(18)).toEqualEpsilon(original[0], 0.002);
+    expect(color(46)).toEqualEpsilon(original[1], 0.002);
   });
   it("retains ordinary opaque occlusion, transparent composition and local lights", async function () {
     setup();

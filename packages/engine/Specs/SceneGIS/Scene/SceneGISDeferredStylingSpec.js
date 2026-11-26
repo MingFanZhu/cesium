@@ -15,6 +15,7 @@ import {
   Model,
   Pass,
   PixelDatatype,
+  Resource,
   SceneGISScreenSpaceReflections,
   SceneGISScreenSpaceIndirectLighting,
 } from "../../../index.js";
@@ -24,6 +25,7 @@ import pollToPromise from "../../../../../Specs/pollToPromise.js";
 
 describe("SceneGIS/Scene/SceneGISDeferredStyling", function () {
   let scene, renderer, ibl;
+  const extraIbl = [];
   const origin = Cartesian3.fromRadians(-1.31968, 0.698874);
   function render() {
     scene.renderForSpecs();
@@ -48,6 +50,7 @@ describe("SceneGIS/Scene/SceneGISDeferredStyling", function () {
   afterEach(function () {
     scene?.destroyForSpecs();
     ibl.destroy();
+    extraIbl.splice(0).forEach((lighting) => lighting.destroy());
     scene = undefined;
   });
   async function tiles(kind = "Batched/BatchedWithBatchTable") {
@@ -234,8 +237,8 @@ describe("SceneGIS/Scene/SceneGISDeferredStyling", function () {
     scene.primitives.remove(tileset);
     render();
     expect(resized.isDestroyed()).toBe(true);
-    expect(renderer._models.has(ordinary)).toBe(true);
-    expect(renderer._models.size).toBe(1);
+    expect(renderer._groups[0].representative).toBe(ordinary);
+    expect(renderer._modelGroups.size).toBe(1);
     expect(renderer._style).toBeUndefined();
     await tiles();
     render();
@@ -267,18 +270,23 @@ describe("SceneGIS/Scene/SceneGISDeferredStyling", function () {
     probe.destroy();
     expect(style.isDestroyed()).toBe(false);
   });
-  it("refreshes lighting groups when native tile LOD unloads and reloads content", async function () {
+  it("shares native tileset IBL through tile LOD unload and reload", async function () {
+    ibl.imageBasedLightingFactor = new Cartesian2(1, 0);
     const tileset = await tiles("Tilesets/Tileset");
     tileset.maximumScreenSpaceError = 1;
     await pollToPromise(
       () => {
         render();
-        return tileset.tilesLoaded && renderer.groupCount > 1;
+        return tileset.tilesLoaded && renderer.drawCount > 1;
       },
       { timeout: 30000 },
     );
-    expect(renderer.groupCount).toBeGreaterThan(1);
-    const models = [...renderer._models.keys()];
+    expect(renderer.groupCount).toBe(1);
+    const models = new Set(
+      scene.frameState.commandList
+        .map((command) => command.owner)
+        .filter((owner) => owner instanceof Model),
+    );
     scene.camera.lookAt(origin, new HeadingPitchRange(0, -1.57, 500));
     scene.camera.lookAtTransform(Matrix4.IDENTITY);
     tileset.maximumScreenSpaceError = 16;
@@ -286,7 +294,7 @@ describe("SceneGIS/Scene/SceneGISDeferredStyling", function () {
     expect(renderer.groupCount).toBe(1);
     tileset.trimLoadedTiles();
     render();
-    expect(models.some((model) => model.isDestroyed())).toBe(true);
+    expect([...models].some((model) => model.isDestroyed())).toBe(true);
     tileset.style = new Cesium3DTileStyle({ color: "color('orange')" });
     scene.camera.lookAt(origin, new HeadingPitchRange(0, -1.57, 100));
     scene.camera.lookAtTransform(Matrix4.IDENTITY);
@@ -294,15 +302,92 @@ describe("SceneGIS/Scene/SceneGISDeferredStyling", function () {
     await pollToPromise(
       () => {
         render();
-        return tileset.tilesLoaded && renderer.groupCount > 1;
+        return tileset.tilesLoaded && renderer.drawCount > 1;
       },
       { timeout: 30000 },
     );
-    expect(renderer.groupCount).toBeGreaterThan(1);
-    expect(
-      [...renderer._models.keys()].every((model) => !model.isDestroyed()),
-    ).toBe(true);
+    expect(renderer.groupCount).toBe(1);
+    expect(renderer._groups[0].representative.isDestroyed()).toBe(false);
+  });
+  it("keeps one screen lighting draw when the same native IBL tiles are split into separate tilesets", async function () {
+    function options(lighting) {
+      lighting.imageBasedLightingFactor = new Cartesian2(0.8, 0);
+      lighting.sphericalHarmonicCoefficients = Array.from(
+        { length: 9 },
+        (_, i) => new Cartesian3(i === 0 ? 0.7 : 0, 0, i === 0 ? 0.3 : 0),
+      );
+      return {
+        imageBasedLighting: lighting,
+        environmentMapOptions: { enabled: false },
+        maximumScreenSpaceError: 1,
+      };
+    }
+    const url = "./Data/Cesium3DTiles/Tilesets/Tileset/tileset.json";
+    const combined = scene.primitives.add(
+      await Cesium3DTileset.fromUrl(url, options(ibl)),
+    );
+    await pollToPromise(() => {
+      render();
+      return combined.tilesLoaded && renderer.drawCount > 1;
+    });
+    expect(renderer.lightDrawCount).toBe(1);
+    const originalDraws = renderer.drawCount;
+    const original = Array.from(hdr());
+    scene.primitives.remove(combined);
+
+    const json = await Resource.fetchJson({ url });
+    const root = json.root;
+    const base = new URL(url, document.baseURI);
+    for (const node of [root, ...root.children]) {
+      node.content.uri = new URL(node.content.uri, base).href;
+    }
+    const splitRoots = [
+      { ...root, children: undefined },
+      ...root.children.map((child) => ({
+        ...root,
+        content: undefined,
+        children: [child],
+      })),
+    ];
+    const split = [];
+    for (const splitRoot of splitRoots) {
+      const lighting = new ImageBasedLighting();
+      extraIbl.push(lighting);
+      const jsonUrl = URL.createObjectURL(
+        new Blob([JSON.stringify({ ...json, root: splitRoot })], {
+          type: "application/json",
+        }),
+      );
+      try {
+        split.push(
+          scene.primitives.add(
+            await Cesium3DTileset.fromUrl(jsonUrl, options(lighting)),
+          ),
+        );
+      } finally {
+        URL.revokeObjectURL(jsonUrl);
+      }
+    }
+    await pollToPromise(() => {
+      render();
+      return (
+        split.every((tileset) => tileset.tilesLoaded) &&
+        renderer.drawCount === originalDraws
+      );
+    });
+    expect(renderer.lightDrawCount).toBe(1);
+    expect(Array.from(hdr())).toEqualEpsilon(original, 0.002);
+
+    extraIbl[0].imageBasedLightingFactor = new Cartesian2(0.2, 0);
     render();
+    expect(renderer.lightDrawCount).toBe(2);
+    expect(hdr().some((value, i) => Math.abs(value - original[i]) > 0.01)).toBe(
+      true,
+    );
+    extraIbl[0].imageBasedLightingFactor = new Cartesian2(0.8, 0);
+    render();
+    expect(renderer.lightDrawCount).toBe(1);
+    expect(Array.from(hdr())).toEqualEpsilon(original, 0.002);
   });
   it("preserves texture feature IDs and fragment-level transparent filtering", async function () {
     const model = scene.primitives.add(

@@ -54,3 +54,9 @@ same six faces and prefiltered mip chain as a sun or altitude change. Zero
 publishes physical sky radiance only. Default deep-night radiance, camera-only
 reuse, authored maps and resource ownership retain their existing contracts.
 See the [twilight maintenance plan](../../../AgentDocs/rendering-quality/plans/2026-11-24-twilight-sky-reflections.md).
+
+## 2026-11-26 shared IBL source resolution
+
+SGP-0015 uses the same SH and procedural cube source resolution for native shader
+assembly and deferred binding equivalence. Current Model, Scene and procedural
+source precedence remains live in both paths. See [ADR-0161](ADR-0161-unified-opaque-deferred-direction.md#model-lighting-group-reuse).

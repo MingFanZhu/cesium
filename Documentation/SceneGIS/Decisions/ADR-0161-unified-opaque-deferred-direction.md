@@ -651,6 +651,30 @@ full-screen lighting commands and repeated shader construction/cache queries.
 At the next frame, retain invalidation for a changed representative uniformMap,
 extension layout, EDL and lighting defines. In particular, preserve the paired
 native IBL shader/uniform generation needed when asynchronous environment data
-becomes ready. Do not freeze live Model lighting values or merge distinct models.
-No upstream seam or shader algorithm changes in this amendment. See the
-[R29 review](../../../AgentDocs/rendering-quality/reviews/2026-10-22-r29-directional-occlusion-cost.md).
+becomes ready. See the [R29 review](../../../AgentDocs/rendering-quality/reviews/2026-10-22-r29-directional-occlusion-cost.md).
+
+The 2026-11-26 maintenance update shares IDs between distinct Models with a
+compatible lighting variant and shared bindings. Default physical sky models use
+world-space lighting, and models without IBL can share the scene lighting path.
+Tiles with native IBL may share within a tileset when they inherit its IBL object,
+environment manager and reference frame. Keep independent groups for model-level
+light color, non-neutral tint, outlines, independent IBL bindings and point EDL.
+Selection changes with the current bindings. A change of representative rebuilds
+its paired shader and uniforms, and inactive groups release their programs.
+
+The exact half-float range applies to distinct groups. Material capture still uses
+each geometry command's own uniforms, and picking still uses native IDs. This update
+adds no attachments or material draws and stays within SceneGIS-owned paths.
+
+The next maintenance increment uses the lighting shader variant and effective
+bindings across all Model and tileset owners. Bound numeric values, SH and native
+IBL matrices are compared per frame. Cubemaps and per-processor EDL depth keep
+their resource identity. Physical sky uses its world frame. Geometry material
+uniforms stay with each original draw command. SGP-0015 shares IBL source resolution
+with the native stage so authored, scene and procedural sources keep one precedence.
+
+Handle frame-local group IDs independently of the cached representative program.
+Changing a matrix or numeric uniform can split or merge groups without replacing
+the representative's program. A changed IBL shader branch or captured atlas
+invalidates that program's paired uniforms. Confirm both the rendered pixels and
+screen-lighting draw count when the same visible tiles are packed differently.

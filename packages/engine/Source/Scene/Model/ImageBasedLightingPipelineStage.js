@@ -30,21 +30,15 @@ ImageBasedLightingPipelineStage.process = function (
   const environmentMapManager = model.environmentMapManager;
   const shaderBuilder = renderResources.shaderBuilder;
 
-  // If environment maps or spherical harmonics are not specifically provided, use procedural lighting.
-  let specularEnvironmentMapAtlas;
-  if (!defined(imageBasedLighting.specularEnvironmentMaps)) {
-    // SCENEGIS_PATCH_BEGIN SGP-0015: Explicit scene maps outrank procedural sources.
-    specularEnvironmentMapAtlas = defined(frameState.specularEnvironmentMaps)
-      ? undefined
-      : (model._sceneGISSkyReflections?.texture ??
-        environmentMapManager.radianceCubeMap);
-    // SCENEGIS_PATCH_END SGP-0015
-  }
-  // SCENEGIS_PATCH_BEGIN SGP-0015: Explicit Model and Scene SH precede default environment coefficients.
+  // SCENEGIS_PATCH_BEGIN SGP-0015: Share native IBL source precedence with deferred lighting.
+  const specularEnvironmentMapAtlas =
+    SceneGISModelEnvironmentLighting.specularIblAtlas(model, frameState);
   const sphericalHarmonicCoefficients =
-    imageBasedLighting.sphericalHarmonicCoefficients ??
-    frameState.sphericalHarmonicCoefficients ??
-    environmentMapManager.sphericalHarmonicCoefficients;
+    SceneGISModelEnvironmentLighting.diffuseIblCoefficients(
+      imageBasedLighting,
+      environmentMapManager,
+      frameState,
+    );
   // SCENEGIS_PATCH_END SGP-0015
 
   shaderBuilder.addDefine(
@@ -157,10 +151,10 @@ ImageBasedLightingPipelineStage.process = function (
     },
     model_sphericalHarmonicCoefficients: function () {
       // SCENEGIS_PATCH_BEGIN SGP-0015: Read the current source when callers replace authored coefficient arrays.
-      return (
-        imageBasedLighting.sphericalHarmonicCoefficients ??
-        frameState.sphericalHarmonicCoefficients ??
-        environmentMapManager.sphericalHarmonicCoefficients
+      return SceneGISModelEnvironmentLighting.diffuseIblCoefficients(
+        imageBasedLighting,
+        environmentMapManager,
+        frameState,
       );
       // SCENEGIS_PATCH_END SGP-0015
     },

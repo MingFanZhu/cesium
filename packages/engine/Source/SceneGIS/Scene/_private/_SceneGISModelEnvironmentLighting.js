@@ -129,6 +129,27 @@ const SceneGISModelEnvironmentLighting = {
     }
   },
 
+  diffuseIblCoefficients(ibl, environment, frameState) {
+    return (
+      ibl.sphericalHarmonicCoefficients ??
+      frameState.sphericalHarmonicCoefficients ??
+      environment.sphericalHarmonicCoefficients
+    );
+  },
+
+  specularIblAtlas(model, frameState) {
+    if (
+      defined(model.imageBasedLighting.specularEnvironmentMaps) ||
+      defined(frameState.specularEnvironmentMaps)
+    ) {
+      return undefined;
+    }
+    return (
+      model._sceneGISSkyReflections?.texture ??
+      model.environmentMapManager.radianceCubeMap
+    );
+  },
+
   processSpecular(renderResources, frameState) {
     const { model, shaderBuilder, uniformMap } = renderResources;
     const sky = model._sceneGISSkyReflections;

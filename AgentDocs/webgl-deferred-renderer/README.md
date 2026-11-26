@@ -18,6 +18,12 @@
 
 ## Scope
 
+2026-11-26 跨 tileset 维护增量按实际光照绑定合并延迟组。见 [计划](plans/2026-11-26-lighting-binding-equivalence.md)
+与 [验证记录](reviews/2026-11-26-lighting-binding-equivalence.md)。
+
+2026-11-26 维护增量修复大场景模型光照组溢出。见 [计划](plans/2026-11-26-model-lighting-groups.md)
+与 [验证记录](reviews/2026-11-26-model-lighting-groups.md)。
+
 2026-10-22 maintenance: rendering-quality [R29](../rendering-quality/plans/2026-10-22-r29-directional-occlusion-cost.md)
 fixes repeated per-model lighting-group selection in the owned deferred helper.
 The [review](../rendering-quality/reviews/2026-10-22-r29-directional-occlusion-cost.md)
