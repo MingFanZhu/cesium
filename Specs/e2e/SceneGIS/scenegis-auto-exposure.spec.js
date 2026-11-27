@@ -27,6 +27,7 @@ for (const world of ["planar", "globe"]) {
     await page
       .getByRole("button", { name: "立即重新测光", exact: true })
       .click();
+    await page.evaluate(() => window.example.viewer.render());
     const sample = () =>
       page.evaluate(async () => {
         const { Pass } = await import("/Build/CesiumUnminified/index.js");
@@ -78,6 +79,8 @@ for (const world of ["planar", "globe"]) {
     await page
       .getByRole("button", { name: "立即重新测光", exact: true })
       .click();
+    await page.evaluate(() => window.example.viewer.render());
+    expect((await sample()).gain).toBeCloseTo(before.gain, 2);
     await page
       .getByRole("combobox", { name: "环境亮度", exact: true })
       .selectOption({ label: "夜间" });

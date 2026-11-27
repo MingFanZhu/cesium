@@ -26,6 +26,8 @@ const viewer = new C.Viewer("map", {
   timeline: false,
   fullscreenButton: false,
 });
+// Compare imagery protocols with the same lighting and display inputs.
+viewer.scene.environmentEffects.enabled = false;
 const world = viewer.planarWorld;
 viewer.camera.setView({
   destination: new C.Cartesian3(0, -15000, 18000),

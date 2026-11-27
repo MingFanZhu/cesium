@@ -115,7 +115,6 @@ byId("show").onchange = () => {
   resetHistory();
 };
 for (const [id, effect] of Object.entries({
-  deferred: renderer,
   ao: scene.postProcessStages.ambientOcclusion,
   ssr,
   ssil,

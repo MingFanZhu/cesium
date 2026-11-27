@@ -33,6 +33,8 @@ const viewer = new C.Viewer("map", {
   selectionIndicator: false,
 });
 const scene = viewer.scene;
+// Meter only the controlled light, model IBL, and background below.
+scene.environmentEffects.enabled = false;
 if (planar) {
   viewer.planarWorld.show = false;
 } else {
