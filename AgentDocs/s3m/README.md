@@ -23,7 +23,7 @@
 - Source: `packages/engine/Source/SceneGIS/Core/_private/_SceneGISS3m*.js`、
   `packages/engine/Source/SceneGIS/Scene/SceneGISS3MLayer.js`
 - Specs: `packages/engine/Specs/SceneGIS/Core/SceneGISS3mDecodeSpec.js`、
-  `Specs/e2e/scenegis-s3m-bridge.spec.js`、`Specs/e2e/scenegis-s3m-layer.spec.js`
+  `Specs/e2e/SceneGIS/scenegis-s3m-bridge.spec.js`、`Specs/e2e/SceneGIS/scenegis-s3m-layer.spec.js`
 - Example: [S3M 加载](../../Test/S3M/图层加载.html)
 - User guide: [S3M](../../Documentation/SceneGIS/S3M.md)
 - Current branch: `feature/viewshed`

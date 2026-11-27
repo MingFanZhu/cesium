@@ -183,7 +183,7 @@ translation-source.json 与 translation-report.json 只含原生英文内容，�
 ```powershell
 npm run build-scenegis
 node --test scripts/docs-i18n/doclets.test.mjs scripts/scenegis/distribution.test.mjs scripts/scenegis/documentation.test.mjs scripts/scenegis/documentation-locales.test.mjs scripts/scenegis/documentation-source.test.mjs scripts/scenegis/documentation-translations.test.mjs
-npx playwright test -c scripts/scenegis/playwright.distribution.config.mjs
+npx playwright test -c Specs/e2e/SceneGIS/config/distribution.config.mjs
 ```
 
 交付验证覆盖 IIFE/ESM 的球面与平面创建/销毁、根目录/子目录资源识别、全局变量优先级、

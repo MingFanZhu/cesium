@@ -21,7 +21,7 @@
 - Shared runtime: _private/_SceneGISObserverState.js, _SceneGISObserverPasses.js
 - Shader: packages/engine/Source/Shaders/SceneGIS/Viewshed/SceneGISVideoProjection.glsl
 - Specs: packages/engine/Specs/SceneGIS/Scene/SceneGISVideoProjectionSpec.js
-- E2E: Specs/e2e/scenegis-video-projection.spec.js
+- E2E: Specs/e2e/SceneGIS/scenegis-video-projection.spec.js
 - Example: Test/视频投射.html; Test/VideoProjection/
 - ADR: [0177](../../Documentation/SceneGIS/Decisions/ADR-0177-video-projection.md), ADR-0176
 - Upstream seam: SGP-0065; this extension changed only Scene.js dispatch names

@@ -50,10 +50,10 @@ Buffer vector 与 VectorProvider 链路。MVT 解析保持 CRS 无关，tile mat
 - 新页面：[公开地图](../../Test/vector-tiles/planar-map.html)，默认 MapLibre 示例使用的 OpenFreeMap / Bright，
   保留 Liberty 对照，无需 token；来源和样式差距见 [参考](../../Test/vector-tiles/reference/README.md)。
 - Globe 页面：[球面地图](../../Test/vector-tiles/globe-map.html)，默认本地；公共数据、整球与真实地形切换。
-- 页面回归使用 `Test/vector-tiles/playwright.config.mjs`，直接连接根开发服务器。
+- 页面回归使用 `Specs/e2e/SceneGIS/config/vector-tiles.config.mjs`，直接连接根开发服务器。
   V3D1 的 6 项相关 E2E 通过；贴地性能修正后另通过 1 项 Globe E2E，非重新运行全部历史矩阵。
-- E2E：`Specs/e2e/scenegis-vector-tiles.spec.js`，3 项通过。
-- 公开页 E2E：`Specs/e2e/scenegis-vector-public.spec.js`，5 项通过；使用本地数据拦截外网。
+- E2E：`Specs/e2e/SceneGIS/scenegis-vector-tiles.spec.js`，3 项通过。
+- 公开页 E2E：`Specs/e2e/SceneGIS/scenegis-vector-public.spec.js`，5 项通过；使用本地数据拦截外网。
 - Sandcastle：不新建；使用根服务器直接访问 `Test/**`。
 - ADR：[ADR-0057](../../Documentation/SceneGIS/Decisions/ADR-0057-independent-vector-tiles-runtime.md)。
 - SGP：历史阶段的 `SGP-0011` 涉及 `packages/engine/package.json`、`ThirdParty.extra.json`；

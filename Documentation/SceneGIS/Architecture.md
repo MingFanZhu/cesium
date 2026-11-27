@@ -62,8 +62,7 @@ packages/engine/Specs/SceneGIS/**
 packages/widgets/Source/SceneGIS/**
 packages/widgets/Specs/SceneGIS/**
 packages/sandcastle/gallery/scenegis-*/**
-Test/**
-Specs/e2e/scenegis-*.spec.js
+Specs/e2e/SceneGIS/**
 Documentation/SceneGIS/**
 AgentDocs/**
 .scenegis/**
@@ -171,13 +170,11 @@ SceneGIS/DataSources
 | `Scene`       | Core、Renderer、Cesium Scene、SceneGIS Scene          | DataSources、Widgets                  |
 | `DataSources` | Core、Scene、Cesium DataSources、SceneGIS DataSources | Widgets                               |
 
-UI 能力属于 `packages/widgets/Source/SceneGIS`。`Test/**` 是 SceneGIS-owned 的直接开发示例根目录，只组装API、
-本地测试数据和人工调试UI，不承载可复用业务实现，也不进入engine/widgets npm产物。既有
-`packages/sandcastle/gallery/scenegis-*` 作为legacy示例保留；除兼容性复现或明确的上游Sandcastle集成需求外，
-新SceneGIS示例默认进入`Test/**`。
-
-`Test/lib/**`只允许保存浏览器示例确实需要的本地第三方库。每个库必须记录固定版本、上游来源和许可证；
-不得由engine/widgets/runtime导入，不得把CDN、access token或其他secret作为示例运行前提。
+UI 能力属于 `packages/widgets/Source/SceneGIS`。`Test/` 是本地开发试验目录，由 Git 和 npm 忽略。
+仓库内的 Playwright 用例、共享夹具与运行配置属于 `Specs/e2e/SceneGIS/`，由 Cesium 开发服务直接提供静态夹具。
+Jasmine 测试保留在各 workspace 的 `Specs/SceneGIS/`。既有 `packages/sandcastle/gallery/scenegis-*`
+继续用于必要的 Sandcastle 集成。测试夹具不进入 npm 产物，不作为产品运行时依赖。
+目录、服务与发行边界见 [ADR-0211](Decisions/ADR-0211-scenegis-test-layout.md)。
 
 ## 公共 API 与私有语义
 
@@ -1019,8 +1016,8 @@ SceneGIS 使用四层验证：
 
 1. Jasmine 单元、契约和资源生命周期 Specs。
 2. WebGL、Shader 和渲染 matcher 测试。
-3. `Test/**` 直接开发示例与人工视觉验收；必要时保留legacy Sandcastle兼容案例。
-4. Playwright 关键交互和持久视觉回归。
+3. 本地 `Test/` 开发试验与人工视觉验收。必要时保留 Sandcastle 兼容案例。
+4. `Specs/e2e/SceneGIS/` 中的 Playwright 关键交互和持久视觉回归。
 
 开发示例截图只能作为基础冒烟，不能覆盖参数组合、错误输入、销毁过程和性能变化。
 

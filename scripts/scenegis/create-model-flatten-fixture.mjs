@@ -1,7 +1,7 @@
 import { mkdir, writeFile } from "node:fs/promises";
 import { Buffer } from "node:buffer";
 import { URL } from "node:url";
-const directory = new URL("../../Test/ModelFlatten/data/", import.meta.url);
+const directory = new URL("../../Specs/e2e/SceneGIS/fixtures/ModelFlatten/data/", import.meta.url);
 await mkdir(directory, { recursive: true });
 function mesh(minX, maxX, nx, ny) {
   const positions = [],

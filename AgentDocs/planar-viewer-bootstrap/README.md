@@ -37,7 +37,7 @@
 
 - Product paths: `packages/widgets/Source/Viewer/Viewer.js`、
   `packages/widgets/Source/SceneGIS/**`
-- Test paths: `packages/widgets/Specs/SceneGIS/**`、`Specs/e2e/scenegis-planar-release.spec.js`
+- Test paths: `packages/widgets/Specs/SceneGIS/**`、`Specs/e2e/SceneGIS/scenegis-planar-release.spec.js`
 - Direct example: `Test/平面环境.html`
 - Branch: `feature/planar-viewer-bootstrap`
 - Base checkpoint: `685a3bb06e54243706e1b73caef5833d48bdf197`

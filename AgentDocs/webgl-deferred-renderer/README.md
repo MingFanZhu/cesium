@@ -182,15 +182,11 @@ P4d checkpoint 为 `4ba2e217c7`。2026-10-15 负责人在此前矢量画面通�
 - [诊断器](../../packages/engine/Source/SceneGIS/Scene/_private/_SceneGISGBuffer.js)、
   [延迟控制器](../../packages/engine/Source/SceneGIS/Scene/_private/_SceneGISDeferredLighting.js)、
   [共享 MRT resolve helper](../../packages/engine/Source/SceneGIS/Renderer/_SceneGISResolveMrt.js)。
-- [GPU Specs](../../packages/engine/Specs/SceneGIS/Scene/SceneGISGBufferSpec.js)、
-  [Bistro E2E](../../Specs/e2e/scenegis-gbuffer.spec.js)、
-  [独立 E2E 配置](../../Test/Rendering/playwright.gbuffer.config.mjs)。
-- [独立街道原型](../../Test/Rendering/GBuffer原型.html)，复用
-  [原 PBR 示例组装](../../Test/Rendering/PBR验收.js)、Clock、资产、环境与右侧面板。
-- P2 [延迟街道](../../Test/Rendering/延迟光照原型.html)、
+- [GBuffer GPU Specs](../../packages/engine/Specs/SceneGIS/Scene/SceneGISGBufferSpec.js)。
+  本地 `Test/Rendering/GBuffer原型.html` 复用 PBR 示例组装及街道资产。
+- P2 本地 `Test/Rendering/延迟光照原型.html`、
   [GPU Specs](../../packages/engine/Specs/SceneGIS/Scene/SceneGISDeferredLightingSpec.js)、
-  [Bistro E2E](../../Specs/e2e/scenegis-deferred-lighting.spec.js)、
-  [E2E 配置](../../Test/Rendering/playwright.deferred.config.mjs)。
+  [E2E 配置](../../Specs/e2e/SceneGIS/config/deferred.config.mjs)。
 - [ADR-0155](../../Documentation/SceneGIS/Decisions/ADR-0155-webgl-gbuffer-prototype.md)、
   [SGP-0045](../../.scenegis/upstream-patches.json)。
 - [接入与复用讨论](discussions/2026-10-13-command-integration-and-reuse.md)、

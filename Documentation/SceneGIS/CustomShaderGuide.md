@@ -71,5 +71,5 @@ Cesium 的 OIT 使用 [Weighted Blended OIT](https://www.jcgt.org/published/0002
 
 本轮无需修改运行时、公共 API 或资源预算；新增资格证据见
 [P4f review](../../AgentDocs/webgl-deferred-renderer/reviews/2026-10-15-p4f-custom-shader.md)。
-[验收页](../../Test/Rendering/延迟CustomShader验收.html) 提供材质模式、受光、纹理、
+[验收页](../../Specs/e2e/SceneGIS/fixtures/Rendering/延迟CustomShader验收.html) 提供材质模式、受光、纹理、
 顶点位移、孔洞、透明度、遮挡和要素拾取控件。

@@ -1,5 +1,9 @@
 /.metadata
 /Build
+# SCENEGIS_PATCH_BEGIN SGP-0076: Keep local trials and generated SceneGIS screenshots out of Git.
+/Test/
+/Specs/e2e/SceneGIS/**/*-snapshots/
+# SCENEGIS_PATCH_END SGP-0076
 /Cesium-*.zip
 /cesium-*.tgz
 /packages/**/*.tgz

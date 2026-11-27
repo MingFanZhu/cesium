@@ -30,8 +30,7 @@
 - `packages/widgets/Source/SceneGIS/**`
 - `packages/widgets/Specs/SceneGIS/**`
 - `packages/sandcastle/gallery/scenegis-*/**`
-- `Test/**`
-- `Specs/e2e/scenegis-*.spec.js`
+- `Specs/e2e/SceneGIS/**`
 - `Documentation/SceneGIS/**`
 - `AgentDocs/**`
 - `.scenegis/**`
@@ -109,8 +108,8 @@
 
 ## 验证与交付
 
-- 每个行为变化必须有与风险相称的自动化测试。`Test/**` 开发示例以及保留的 legacy Sandcastle
-  案例只用于组装、调试和视觉验收，不能替代 Specs。
+- 每个行为变化必须有与风险相称的自动化测试。SceneGIS Jasmine 放在各 workspace 的 `Specs/SceneGIS/`，
+  Playwright 用例与共享夹具放在 `Specs/e2e/SceneGIS/`。本地 `Test/` 由 Git 忽略，用于组装、调试和视觉验收。
 - 渲染热路径修改必须验证画面正确性、资源生命周期，并提供性能或回归证据。
 - 禁止没有已复现失败模式或明确产品契约依据的防御性编码，包括臆测式 fallback、重复 retry、settling frame、静默降级和为测试专设的产品分支。修复应直接针对已确认根因，并保持最小实现面。
 - 每项验证必须对应一个明确风险或验收条件；已有更直接证据时，不得继续叠加重复 hash、交叉组合矩阵、同义 gate 或反复 rerun 来证明验证工具本身。达到最小充分证据后即停止扩展验证。

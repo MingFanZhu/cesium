@@ -109,7 +109,7 @@ failure/replacement/destroy 中维持 exactly-once ownership。
 - Focused C1-C11 Specs define per-type validation, topology, lifecycle, picking and ground behavior.
 - `SceneGISPlanarContentQualificationSpec` covers the fixed moderate profile, all eight child roles, direct ordinary/ground
   primitives, deterministic local terrain, warm/mutation/provider/lifecycle gates.
-- `Specs/e2e/scenegis-planar-content.spec.js` runs the same local-network-zero scenario against development and release bundles.
+- `Specs/e2e/SceneGIS/scenegis-planar-content.spec.js` runs the same local-network-zero scenario against development and release bundles.
 - `scenegis-planar-content` is the executable manual example; public imagery/terrain there is best-effort and is not automated
   evidence.
 

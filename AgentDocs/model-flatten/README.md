@@ -21,7 +21,7 @@ No topology splitting, source mutation or SDK integration before visual approval
 
 - Source: `packages/engine/Source/SceneGIS/Scene/SceneGISModelFlatten.js`
 - Specs: `packages/engine/Specs/SceneGIS/Scene/SceneGISModelFlattenSpec.js`
-- E2E: `Specs/e2e/scenegis-model-flatten.spec.js`
+- E2E: `Specs/e2e/SceneGIS/scenegis-model-flatten.spec.js`
 - Example: `Test/模型压平.html`
 - Sandcastle: none; manual inspection uses the Test example
 - Branch: `scenegis/develop`

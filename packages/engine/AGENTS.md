@@ -77,7 +77,7 @@ Specs/SceneGIS/Scene/SceneGISBarSpec.js
 - 公共 API 测试优先从 engine 根入口导入，以验证真实导出；内部行为测试可以直接导入源码模块。
 - 渲染功能使用 Cesium 现有 WebGL matcher，并覆盖默认画面、关键状态变化、资源释放和错误路径。
 - 改动渲染热路径时记录测试场景、设备/浏览器条件和性能对比，避免只凭肉眼判断。
-- Sandcastle 示例不能替代 Specs；复杂交互或持久视觉基线放入 `Specs/e2e/scenegis-*.spec.js`。
+- Sandcastle 示例不能替代 Specs。复杂交互或持久视觉基线放入仓库根 `Specs/e2e/SceneGIS/`。
 
 ## 禁止修改的生成物
 

@@ -70,7 +70,7 @@ CustomShader 必须维护正确包围体；已有 `SceneGISModelFlatten` 的 bou
 
 ## 验收入口
 
-根开发服务器运行后打开 `Test/可视域分析.html`，支持 `world=planar` /
+根开发服务器运行后打开 `Specs/e2e/SceneGIS/fixtures/可视域分析.html`，支持 `world=planar` /
 `world=globe`。默认本地街区，黄色点为观察点，可调整姿态、范围、分辨率和
 遮挡源显隐。可选本地 AGI HQ 3D Tiles、官方 S3M 精模 / 实例化。
 S3M 倾斜选项需要先执行 `node scripts/scenegis/fetch-s3m-sample.mjs`；

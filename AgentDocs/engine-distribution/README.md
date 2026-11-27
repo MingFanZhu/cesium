@@ -25,7 +25,7 @@ automatic compatibility checks or registry publication.
 ## Engineering links
 
 - Source: `scripts/scenegis/`, `scripts/build.js`, `gulpfile.js`, Core/buildModuleUrl.js.
-- Tests: owned Node build tests and `Specs/e2e/scenegis-distribution.spec.js`.
+- Tests: owned Node build tests and `Specs/e2e/SceneGIS/distribution/scenegis-distribution.spec.js`.
 - Branch: `feature/scenegis-distribution`.
 - ADR: [ADR-0205](../../Documentation/SceneGIS/Decisions/ADR-0205-scenegis-distribution.md).
 - SGP: `SGP-0073`, `SGP-0074`.

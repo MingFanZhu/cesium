@@ -128,7 +128,7 @@ const glb = await obj2gltf(join(directory, "AGI_HQ.obj"), {
   secure: true,
 });
 const output = fileURLToPath(
-  new URL("../../Test/Rendering/data/", import.meta.url),
+  new URL("../../Specs/e2e/SceneGIS/fixtures/Rendering/data/", import.meta.url),
 );
 await mkdir(output, { recursive: true });
 await writeFile(join(output, "agi-hq.glb"), glb);

@@ -692,7 +692,7 @@ reference frame，不互相伪造坐标语义。
 - A4 assets/generator：`packages/engine/Source/Assets/SceneGIS/Environment/CloudCore/`、`scripts/scenegis/`
 - Specs：`packages/engine/Specs/SceneGIS/Scene/`
 - 上手示例：`Test/AdvancedEnvironment/示例目录.html`；维护综合页：`Test/AdvancedEnvironment/tests/`
-- 页面 E2E：`Specs/e2e/scenegis-environment-examples.spec.js`
+- 页面 E2E：`Specs/e2e/SceneGIS/scenegis-environment-examples.spec.js`
 
 ## Current handoff
 

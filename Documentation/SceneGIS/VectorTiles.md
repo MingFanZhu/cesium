@@ -1,8 +1,8 @@
 # Vector Tiles
 
-程序员上手入口：[简单示例目录](../../Test/vector-tiles/examples/示例目录.html)。
+程序员上手入口：[简单示例目录](../../Specs/e2e/SceneGIS/fixtures/vector-tiles/examples/示例目录.html)。
 平面和球面各有独立的公开 Bright 示例及完整初始化 JavaScript；
-不含高级环境和调试面板，阅读顺序及数据替换方法见 [上手说明](../../Test/vector-tiles/examples/README.md)。
+不含高级环境和调试面板，阅读顺序及数据替换方法见 [上手说明](../../Specs/e2e/SceneGIS/fixtures/vector-tiles/examples/README.md)。
 
 ## 当前交付范围
 
@@ -16,27 +16,27 @@
 | 自动换位 | text-variable-anchor、text-radial-offset                 | 点标注，Worker 候选与稳定碰撞选择；沿线换位未接入                                    |
 | 适配牌面 | icon-text-fit、padding、sprite content/stretchX/stretchY | 普通 RGBA、多段伸缩、与可变 anchor 配对；不含 SDF icon、textFitWidth/Height 比例规则 |
 
-四项本地入口：[平面样式增强](../../Test/vector-tiles/平面样式增强.html)、
-[球面样式增强](../../Test/vector-tiles/球面样式增强.html)。图文设置见 [标注](VectorTileSymbols.md)。
+四项本地入口：[平面样式增强](../../Specs/e2e/SceneGIS/fixtures/vector-tiles/平面样式增强.html)、
+[球面样式增强](../../Specs/e2e/SceneGIS/fixtures/vector-tiles/球面样式增强.html)。图文设置见 [标注](VectorTileSymbols.md)。
 下列阶段条目保留历史交付范围，不代表当前支持数量。
 
 V1 提供独立的 MVT 数据、坐标、URL source 与 Style v8 子集计算前端。
 V2 在此基础上提供无 terrainProvider 的平面批量 renderer；不依赖 Cesium experimental MVT。
-`Test/vector-tiles/planar-city.html` 的实际 flat 画面已于 2026-09-13 通过项目负责人验收。
+`Specs/e2e/SceneGIS/fixtures/vector-tiles/planar-city.html` 的实际 flat 画面已于 2026-09-13 通过项目负责人验收。
 V3A 增加缓存瓦片的逐区域替换，自动化与项目负责人加载过渡画面验收均已通过。
 V3B0 将资源与命令迁入自有地图图元，保持已验收样式范围；
 不再依赖原生 Primitive/Appearance/BatchTable，通用 Renderer 与拾取派生继续复用。
 V3B1 增加自有 stroke、虚线数值表、fill fringe 与 circle blur；代码和自动验证已完成，
 新增样式图集已于 2026-09-13 通过项目负责人视觉验收。
-V3C0 新增 [公开地图 Test 页面](../../Test/vector-tiles/planar-map.html)，以真实数据建立样式与性能基线；
+V3C0 新增 [公开地图 Test 页面](../../Specs/e2e/SceneGIS/fixtures/vector-tiles/planar-map.html)，以真实数据建立样式与性能基线；
 现有 runtime/API 没有变化。按负责人选择，采用 MapLibre 示例使用的 OpenFreeMap / Bright，
 接入 93/119 层，另保留 Liberty 82/111 层对照；Streets v12 仅保留离线样式参考。
-未支持层及来源见 [参考说明](../../Test/vector-tiles/reference/README.md)。
+未支持层及来源见 [参考说明](../../Specs/e2e/SceneGIS/fixtures/vector-tiles/reference/README.md)。
 Bright 在线俯视/倾斜/16 级数据已 smoke，无需 token，公开页已于 2026-09-13 通过负责人验收。
-V5A 增加独立平面点标注与 [本地点标注图集](../../Test/vector-tiles/planar-symbols.html)，
+V5A 增加独立平面点标注与 [本地点标注图集](../../Specs/e2e/SceneGIS/fixtures/vector-tiles/planar-symbols.html)，
 当时 Bright 接入 108/119 层，Liberty 97/111 层，各新增 15 个 point symbol layers。
 V5B 继续接入各 10 个沿线名称、路牌与箭头层：当前 Bright 118/119、Liberty 107/111。
-新增 [沿线标注图集](../../Test/vector-tiles/planar-line-symbols.html)；语义和限制见 [标注文档](VectorTileSymbols.md)。
+新增 [沿线标注图集](../../Specs/e2e/SceneGIS/fixtures/vector-tiles/planar-line-symbols.html)；语义和限制见 [标注文档](VectorTileSymbols.md)。
 V4A 已实现平面直接贴地、terrain anchors 和公开页地形开关，技术资格见下文；
 负责人已于 2026-09-14 确认视觉验收。G1 增加 Globe 适配，技术验证与人工页见下文；
 G1 负责人于 2026-09-14 确认视觉与性能结果可接受，完整连续曲面字形仍未支持。
@@ -79,7 +79,7 @@ imageryLayer.alpha = 0.7;
 它乘每个 background/fill/line/circle/text/icon 的 style alpha，以及 fill-extrusion-opacity，不先合成地图纹理，
 因此重叠要素的结果与整幅地图 group opacity 不同。修改无需重新解析或上传几何。
 
-[球面测试页](../../Test/vector-tiles/globe-map.html) 提供三个滑块和本地网格影像；
+[球面测试页](../../Specs/e2e/SceneGIS/fixtures/vector-tiles/globe-map.html) 提供三个滑块和本地网格影像；
 平面页同样提供三个滑块：`viewer.planarWorld.opacity` 控制地表整体颜色，
 `viewer.planarWorld.imageryLayers.get(0).alpha` 控制影像贡献，Layer.opacity 控制矢量。
 World.opacity 默认 1，接受有限 0..1，在下次正常 render 发布；requestRenderMode 下设置后调用 scene.requestRender()。
@@ -103,7 +103,7 @@ Style zoom 以视轴椭球交点和当地 Mercator 比例计算。视轴接近�
 地形 LOD/provider 变化保留地图几何与 glyph atlas；待索引就绪前的锚点受真实地表遮挡。
 G1 不承诺完整环境材质融合；V4B 的环境资格见下文。陡坡大字形连续曲面贴合和稳定 60 FPS 仍未承诺。
 
-[Globe 离线入口](../../Test/vector-tiles/globe-map.html) 默认使用本地构造 MVT / Bright 样式，
+[Globe 离线入口](../../Specs/e2e/SceneGIS/fixtures/vector-tiles/globe-map.html) 默认使用本地构造 MVT / Bright 样式，
 可切换公共 Bright/Liberty 与 Esri 高程。范围与数值协议见 [ADR-0070](Decisions/ADR-0070-globe-vector-ground-rendering.md)。
 
 ### 原始瓦片坐标
@@ -223,7 +223,7 @@ style light、translate、transition 或复杂屋顶，不承诺 MapLibre 像素
 本轮不含 image/available-images、动态图像注册、整数 zoom crossfade、跨瓦片道路全局里程、复杂建筑纹理展开和各向异性 mipmap。
 细密图案在远景可能产生走样，不承诺与 MapLibre 像素一致。详见 [ADR-0075](Decisions/ADR-0075-vector-pattern-materials.md)。
 
-本地入口：[平面样式增强](../../Test/vector-tiles/平面样式增强.html)、[球面样式增强](../../Test/vector-tiles/球面样式增强.html)。
+本地入口：[平面样式增强](../../Specs/e2e/SceneGIS/fixtures/vector-tiles/平面样式增强.html)、[球面样式增强](../../Specs/e2e/SceneGIS/fixtures/vector-tiles/球面样式增强.html)。
 
 ### 动态要素状态
 
@@ -359,7 +359,7 @@ ground 要求 WebGL2、float textures 与 depth textures。Worker 把已有 fill
 terrain cover 收紧，含零高程等待地表及 skirts。只改高度 uniform，不重建 geometry。
 圆点与文字使用独立 terrain anchor，详见 [地形标注](VectorTileSymbols.md#地形标注)。
 
-`Test/vector-tiles/planar-map.html` 提供“真实地形 · 矢量贴地”开关，以及紫金山、因斯布鲁克定位。
+`Specs/e2e/SceneGIS/fixtures/vector-tiles/planar-map.html` 提供“真实地形 · 矢量贴地”开关，以及紫金山、因斯布鲁克定位。
 地形使用既有示例的 Esri WorldElevation3D LERC 服务；失败显示提示，关闭恢复零高程。
 不限定用户相机的 pitch；style 比例仍沿用视轴与 Z=0 参考面的契约，视轴完全不再朝向参考面
 时不显示地图，此既有比例限制尚需后续三维比例契约解决。Globe 的独立 G1 资格见前述 Globe 使用范围。
@@ -412,7 +412,7 @@ engine Specs 和独立发布包的环境验证保留，V4B 产品能力与历史
 ### 配置与样式
 
 `scene` 必须已创建 `SceneGISPlanarWorld`，数据与其 canonical tilingScheme 对齐。
-实际平面示例见 [Test/vector-tiles](../../Test/vector-tiles/README.md)。
+实际平面示例见 [Test/vector-tiles](../../Specs/e2e/SceneGIS/fixtures/vector-tiles/README.md)。
 
 ```js
 const layer = scene.primitives.add(
@@ -480,7 +480,7 @@ layer.setFilter("water", null);
 首版修改粒度是内部样式层，不是 paint-only GPU subrange 更新；每次非空修改同步复制和编译完整 Style。
 SDK 保存修改后的 URL 样式时可使用 `getStyle()` 导出 inline Style；引擎不写远端 JSON。
 升级时应同时更新主 bundle、Worker 与类型产物。决定见 [ADR-0163](Decisions/ADR-0163-vector-dynamic-style-rules.md)。
-两世界的[样式增强示例](../../Test/vector-tiles/README.md)提供道路宽度、建筑高度、标注字号、可见性、过滤、恢复与导出控件。
+两世界的[样式增强示例](../../Specs/e2e/SceneGIS/fixtures/vector-tiles/README.md)提供道路宽度、建筑高度、标注字号、可见性、过滤、恢复与导出控件。
 
 ### 绘制范围与缓存
 

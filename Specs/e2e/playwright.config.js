@@ -28,6 +28,9 @@ const defaultViewport = { width: 960, height: 540 };
  */
 export default defineConfig({
   testDir: ".",
+  // SCENEGIS_PATCH_BEGIN SGP-0076: Keep the alternate-server distribution tests opt-in.
+  testIgnore: "**/SceneGIS/distribution/**",
+  // SCENEGIS_PATCH_END SGP-0076
   outputDir: "../../Build/Specs/e2e/artifacts",
   forbidOnly: !!process.env.CI,
   retries: updateSnapshots ? 0 : 1,

@@ -22,7 +22,7 @@
 
 - Source: `packages/engine/Source/SceneGIS/DataSources/_private/_SceneGISPlanarCzml.js`
 - Specs: `packages/engine/Specs/SceneGIS/DataSources/SceneGISPlanarCzmlSpec.js`
-- E2E: `Specs/e2e/scenegis-planar-czml.spec.js`
+- E2E: `Specs/e2e/SceneGIS/scenegis-planar-czml.spec.js`
 - Example: `Test/平面CZML.html`
 - Integration branch: `scenegis/develop`；implementation branch: `feature/planar-czml`
 - ADR: [ADR-0173](../../Documentation/SceneGIS/Decisions/ADR-0173-planar-czml-loading.md)

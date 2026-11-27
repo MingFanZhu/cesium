@@ -92,7 +92,7 @@ await viewer.dataSources.add(source);
 静止画面复用结果。`clusterEvent` 的成员保留原 Entity；默认 label.id 是成员数组，使用自定义 point/billboard
 时按示例设置 id。`scene.pick(...).id` 是该数组或未聚类的原 Entity；可显式 `viewer.zoomTo(members)`。
 原生聚类不对自定义聚类图标做第二次碰撞排布，不提供稳定簇 ID 或地形遮挡分析；不同 DataSource 独立聚类。
-示例：`Test/平面聚类.html`。数据源移除和 Viewer 销毁仍由原生 collection 释放资源，应用移除自建事件订阅。
+示例：`Specs/e2e/SceneGIS/fixtures/平面聚类.html`。数据源移除和 Viewer 销毁仍由原生 collection 释放资源，应用移除自建事件订阅。
 
 C2 的 private Model visualizer 直接使用 `Model.fromGltfAsync` 与 `scene.primitives`。URI 和
 `incrementallyLoadTextures` 定义 load generation；position、terrain height、orientation 和 style 更新
@@ -520,7 +520,7 @@ Image 含 alpha 时，直接 Fabric 需按原生 Material 契约声明 transluce
 Entity 可使用 ImageMaterialProperty({ image, transparent: true })。
 显式 textureCoordinates、连续路径 UV 展开以及 Model CustomShader 不在本轮范围。
 
-本地验收入口：`Test/平面材质.html`，包括地形、低倾角、动态 Entity 材质与 128 对象批。
+本地验收入口：`Specs/e2e/SceneGIS/fixtures/平面材质.html`，包括地形、低倾角、动态 Entity 材质与 128 对象批。
 
 ## 平面折线材质（ADR-0182）
 
@@ -567,5 +567,5 @@ modelMatrix 不重算源长度参数，修改 positions 时重新计算。
 秒制动画在 MaterialProperty.getValue 中使用
 `JulianDate.secondsDifference(time, epoch)`，引擎不隐式注入 time/frameNumber。
 冻结 Viewer clock 会冻结此动画，但外部颜色等非恒定属性仍会读取。
-本地例子 `Test/平面折线材质.html` 演示 Entity、Primitive、起伏地形、闭合边界、
+本地例子 `Specs/e2e/SceneGIS/fixtures/平面折线材质.html` 演示 Entity、Primitive、起伏地形、闭合边界、
 颜色/透明度/效果切换、位置修改、拾取和重复增删。

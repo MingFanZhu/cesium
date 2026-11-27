@@ -285,6 +285,10 @@ packages/engine/Source/SceneGIS/Scene/SceneGISFoo.js
 packages/engine/Specs/SceneGIS/Scene/SceneGISFooSpec.js
 ```
 
+Playwright 使用 Cesium 根配置，SceneGIS 用例放在 `Specs/e2e/SceneGIS/`。
+共享页面和数据放在同目录的 `fixtures/`，保持干净检出可运行。详见
+[SceneGIS 浏览器测试](../../Specs/e2e/SceneGIS/README.md)。
+
 按风险选择验证：
 
 | 变化                    | 最低验证                                                 |
@@ -316,15 +320,15 @@ npm run test -- --includeName SceneGISFoo
 npm run prettier-check
 npm run eslint
 
-# 按名称运行相关 E2E
-npm run test-e2e -- -g "SceneGIS Foo"
+# 按名称运行相关 SceneGIS E2E
+npm run test-e2e -- "e2e[/\\]SceneGIS[/\\]" -g "SceneGIS Foo"
 ```
 
 不要求每个局部修改运行所有命令，但必须说明实际运行了什么、为什么足够，以及未运行检查的原因。
 
 ## SceneGIS 开发示例
 
-可视化或交互型公共功能默认在SceneGIS-owned `Test/**`下提供一个可由根Cesium开发服务器直接访问的HTML入口：
+本地试验可在 Git 忽略的 `Test/` 下提供一个可由 Cesium 根开发服务器访问的 HTML 入口：
 
 ```text
 Test/
@@ -348,20 +352,13 @@ Test/
 示例默认使用本地确定性数据，不包含access token或其他secret。开发便利所需的公开diagnostic reference可以挂在`window`，
 但不得成为产品API。
 
-`Test/lib/**`可以保存经典WebGL/UI等浏览器库，但必须在`Test/lib/README.md`登记固定版本、上游来源、许可证和使用页面，
-并一并保存许可证文本。产品源码不得导入该目录。
-
-当前upstream `.prettierignore`的directory allowlist尚未包含新`Test/**`根目录；在不修改upstream config的前提下，
-Test页面必须使用显式命令检查，例如
-`npx prettier --check --ignore-path .gitignore "Test/**/*.html" "Test/**/*.md"`。不要把默认`prettier-check`没有报告
-Test文件误当成已验证。
+浏览器夹具需要第三方库时，随版本化夹具保存版本、上游来源与许可证。产品源码不导入夹具代码。
 
 开发示例负责组装和人工验收；边界条件、资源释放和内部状态必须由Specs覆盖。关键交互和持久画面变化使用Playwright。
 tool/control panel面向用户的标题、标签、按钮、选项说明、帮助文字和状态提示统一使用中文；API名称、枚举值、源码标识符、
 代码片段和必须与Cesium对齐的技术术语保持英文。
 
-已有`packages/sandcastle/gallery/scenegis-*`示例作为legacy案例保留，不要求为本次约定迁移。后续只有在明确验证上游
-Sandcastle集成、gallery兼容性或维护既有案例时才继续修改它们；新能力默认补`Test/**`示例。
+既有 `packages/sandcastle/gallery/scenegis-*` 用于 Sandcastle 集成与兼容性验证。
 
 ### 平面影像实现检查
 
@@ -411,7 +408,7 @@ scene.requestRender();
 逐对象选择方向，可以只对比模型而不分割底图。影像只影响该层颜色，其他消费者沿用 discard、
 拾取和原有阴影策略；Model 的方向变化仍沿用原生 command 重建行为。
 共享 helper 使用绘制缓冲区 Y，按枚举区间判断浮点 varying，不精确比较插值后的方向值。
-开发示例：[分屏对比](../../Test/分屏对比.html)，`?world=globe` / `?world=planar`。
+开发示例：[分屏对比](../../Specs/e2e/SceneGIS/fixtures/分屏对比.html)，`?world=globe` / `?world=planar`。
 
 ### 平面 URL Heightmap Provider 检查
 
@@ -761,7 +758,7 @@ R10 按 [ADR-0088](Decisions/ADR-0088-directional-shadow-refinement.md) 共享�
 接收面几何导数必须在级联分支前求值，深度校正在各采样中心计算；不要通过扩大 slope bias 掩盖条纹。
 Globe 保留可见范围裁剪并向上分档，测试应等待该范围发布后检查档内稳定性。
 回归入口是 SceneGISShadowQualitySpec、SceneGISPlanarShadowsSpec 与原生 ShadowMap Specs。
-人工入口为 `Test/Rendering/阴影精细度.html?world=planar|globe` 和 `实景对比.html`。
+人工入口为 `Specs/e2e/SceneGIS/fixtures/Rendering/阴影精细度.html?world=planar|globe` 和 `实景对比.html`。
 
 R13 按 [ADR-0092](Decisions/ADR-0092-depth-shadow-submission.md) 在级联插入处检查已委托 camera
 traversal 的 tile model bounds。各级联独立测试；普通 command、point/single-pass light 保留
@@ -790,7 +787,7 @@ ao.uniforms.ambientOcclusionOnly = false;
 实现入口为 `_SceneGISAmbientOcclusion.js`，GLSL 位于 `Source/Shaders/SceneGIS/AmbientOcclusion/`。
 正交相机的原生 `czm_inverseProjection` 为零矩阵，必须使用原生 window-to-eye 重建；不得把
 线性深度当作当前视锥 device depth。多视锥合并、clip/discard、IBL 与自发光分离、资源寿命的
-回归入口为 `SceneGISAmbientOcclusionSpec.js`；人工入口为 `Test/Planar/环境光遮蔽.html`。
+回归入口为 `SceneGISAmbientOcclusionSpec.js`；人工入口为 `Specs/e2e/SceneGIS/fixtures/Planar/环境光遮蔽.html`。
 
 成本包括额外 opaque 几何提交、4 个复用目标和一个 HDR pass-through/debug 目标，约 21 bytes/pixel
 （不计 driver padding 与 ShaderCache）。屏幕外/隐藏遮挡、亚像素细节、透明接收和 specular bent normal
@@ -835,9 +832,8 @@ Phong 图元沿用标量 AO。透明接收与半透明反向分类独立工作�
 替换方向资源。派生光照程序由原生 ShaderCache 随源程序管理；热帧按 Shader 实例复用。
 上述 R2/R13/R14 是历史接入记录，当前共享深度与资源边界以 ADR-0158/0161/0184 为准。
 
-人工对比入口为 `Test/Rendering/PBR综合验收.html?world=globe|planar`，在环境遮蔽面板切换
-“方向性环境反射遮蔽”。自动验证为 `SceneGISDirectionalOcclusionSpec`、现有 AO/SSR Specs
-及 `Test/playwright.directional-occlusion.config.mjs`。性能和画面结论见 R28 review。
+本地 `Test/Rendering/PBR综合验收.html?world=globe|planar` 可在环境遮蔽面板切换“方向性环境反射遮蔽”。
+自动验证由 `SceneGISDirectionalOcclusionSpec` 和 AO/SSR Specs 覆盖。性能和画面结论见 R28 review。
 
 ## 验证物理天空环境反射
 
@@ -918,7 +914,7 @@ Globe 默认使用 `scene.environmentEffects.aerialPerspectiveDistanceScale = 0.
 保留 Planar 中性空气距离 1；两页均提供北京时间和夜间环境光控件。
 两页已移除重复的外观倍率配置，直接使用引擎默认；HDR 与自动曝光仍关闭。
 
-打开 [环境反射示例](../../Test/Planar/环境反射.html)，用 world=globe 切换球面。前排金属、后排
+打开 [环境反射示例](../../Specs/e2e/SceneGIS/fixtures/Planar/环境反射.html)，用 world=globe 切换球面。前排金属、后排
 涂层陶瓷，粗糙度逐渐增大；对比镜面开关、白天/日落/夜间和转动视角。反射中不包含附近球体、
 云或地形纹理，这是 R3 的区域天空探针范围。地面仅中性受光近似。球面必须继续关闭与物理
 环境冲突的 native Globe lighting / ground atmosphere 等功能；示例已经按契约设置。
@@ -959,12 +955,12 @@ probes.reflections = true;
 `capture()` 只更新一次，光照/模型变化后由调用方再次调用；失败保留原结果并拒绝 Promise。
 仅支持普通单视图 SCENE3D，捕获当帧可能卡顿，不适合逐帧调用。
 
-打开 [局部环境探针](../../Test/Rendering/局部环境探针.html)，比较屋檐遮挡、粗糙度、离屏红墙
+打开 [局部环境探针](../../Specs/e2e/SceneGIS/fixtures/Rendering/局部环境探针.html)，比较屋檐遮挡、粗糙度、离屏红墙
 反射与 GTAO/SSR；`world=globe` 使用同一 API。Bistro 的“局部探针（手动捕获）”面板可调位置
 和范围，默认不会创建或捕获探针。光照变化后重新捕获；`基线 A` 排除局部探针。
 方向遮挡只描述捕获点，跨墙的大盒可能漏光或过暗；不包含漫反射反弹、透明/水面捕获、云、
 地形或流式 3D Tiles。GPU 入口为 `SceneGIS/Scene/SceneGISReflectionProbe`，页面组合测试为
-`Specs/e2e/scenegis-local-probes.spec.js`。决策及升级边界见 ADR-0096 / SGP-0024。
+`Specs/e2e/SceneGIS/scenegis-local-probes.spec.js`。决策及升级边界见 ADR-0096 / SGP-0024。
 
 ### 屏幕空间反射使用
 
@@ -981,9 +977,9 @@ maximumDistance / thickness 使用米，maximumRoughness 使用感知粗糙度�
 Shader 位于 Source/Shaders/SceneGIS/Reflections/。捕获使用原生 log/HDR/shadow/AO 命令，逐视锥合并
 R32F 深度；MRT 保存基础层和清漆层方向/粗糙度。结果回到材质 IBL，后处理色调映射和环境顺序保持。
 
-验收入口为 Test/Planar/屏幕空间反射.html?world=planar 或 world=globe。对比开关、粗糙度和相机移动；
+验收入口为 Specs/e2e/SceneGIS/fixtures/Planar/屏幕空间反射.html?world=planar 或 world=globe。对比开关、粗糙度和相机移动；
 原生地表仅为反射来源，示例镜面地板是 PBR 模型。透明物体、屏幕外几何和递归反射尚未支持。
-R18 的独立入口为 [反射稳定性](../../Test/Rendering/反射稳定性.html)，Bistro 同时提供分辨率和时域开关。
+R18 的独立入口为 [反射稳定性](../../Specs/e2e/SceneGIS/fixtures/Rendering/反射稳定性.html)，Bistro 同时提供分辨率和时域开关。
 AMD FidelityFX SSSR/Reflection Denoiser 的固定版本来源、MIT 许可和 WebGL2 适配边界见 ADR-0097。
 R12 按 ADR-0091 为合格的单视锥启用主通道 MRT，省去完整 shaded replay；多视锥、分类、
 清除 Globe 深度及未适配的材质后处理继续使用原路径。保留原生 MSAA，辅助浮点附件独立 resolve。
@@ -1026,9 +1022,9 @@ Phong 镜面转换为 GGX，anisotropy 的面光镜面项使用 isotropic 拟合
 灯本身不创建可见几何，不投射局部阴影，也不照亮体积介质。
 
 集合由 Scene 销毁，描述对象不需要 destroy；request-render 模式修改属性后手动请求帧。
-人工入口 [矩形光源](../../Test/Rendering/矩形光源.html) 提供 Globe/Planar、宽高、旋转、
+人工入口 [矩形光源](../../Specs/e2e/SceneGIS/fixtures/Rendering/矩形光源.html) 提供 Globe/Planar、宽高、旋转、
 倾斜、单双面和照明开关。验证入口为 `SceneGISRectAreaLight`、`SceneGISLightCollection`、
-`SceneGISLightTiles` Specs，以及 `Test/Rendering/playwright.rect-area-light.config.mjs`。
+`SceneGISLightTiles` Specs，以及 `Specs/e2e/SceneGIS/config/rect-area-light.config.mjs`。
 固定版本数据、许可、存储与算法边界见 ADR-0186。
 
 ## 局部水面使用与验证
@@ -1048,7 +1044,7 @@ requestRenderMode 下由应用调用 scene.requestRender。`show`、`id`、集�
 opaque 快照。`water.reflections=false` 只关闭水面的屏幕追踪，天空反射仍保留。没有物理环境时，
 `reflectionColor` 提供明确的常量环境辐亮度。共享天空和 opaque targets 均不能由图元销毁。
 
-人工入口为 `Test/Planar/局部水面.html?world=planar` 或 `world=globe`。关闭显示水面检查水下结构，
+人工入口为 `Specs/e2e/SceneGIS/fixtures/Planar/局部水面.html?world=planar` 或 `world=globe`。关闭显示水面检查水下结构，
 切换场景倒影，暂停时间、调整波纹和泡沫并旋转相机。首版只支持水上视角、局部单层和 opaque
 水下物体；屏幕外/隐藏反射、透明水下物体、焦散及水下介质不在范围内。真实风浪位移见下文。
 
@@ -1078,7 +1074,7 @@ water.scatteringAnisotropy = 0.35;
 运行时可替换或修改其分量，在下次正常帧验证并更新 uniform；不重建网格、纹理或 shader。
 折射接受的颜色和深度成对使用，无有效底面时按无限深水处理，不推断真实湖底。
 
-`Test/Planar/局部水面.html` 提供原有配色、清水、湖水、浑水预设，并可独立切换法线波纹和
+`Specs/e2e/SceneGIS/fixtures/Planar/局部水面.html` 提供原有配色、清水、湖水、浑水预设，并可独立切换法线波纹和
 FFT 风浪。预设是外观演示，不代表实测水质。示例使用固定光照倍率 1，保留相同曝光进行比较。
 资源销毁顺序仍是移除全部借用水面，再销毁风浪模拟，最后销毁 Viewer。
 焦散、水下相机、持久泡沫模拟不由本选项启用；边界和算法见 ADR-0194。
@@ -1090,7 +1086,7 @@ FFT 风浪。预设是外观演示，不代表实测水质。示例使用固定�
 和 `scattering = linearScatteringColor * turbidity` 转成引擎系数。黑色透射钳至 1e-4，
 保证系数有限。这些颜色描述介质，最终像素仍由光程、受光和反射决定，不是固定透明度。
 
-`Test/Rendering/玄武湖风浪.html`、`曲面河湖.html` 和 `河流水面.html` 同样提供开放颜色、
+`Specs/e2e/SceneGIS/fixtures/Rendering/玄武湖风浪.html`、`曲面河湖.html` 和 `河流水面.html` 同样提供开放颜色、
 清水/湖水/河水/浑水预设，以及岸沫范围、岸沫强度和风浪白沫半衰期。预设仅为外观演示，
 不是实测水质。河流水位或风浪开关触发重建时保留颜色与泡沫设置；玄武湖岸线异步加载后
 采用当前设置。初始参数按场景区分：
@@ -1190,11 +1186,11 @@ waves.destroy();
 没有沿岸绕射、浅水流动、破碎浪或水下相机；默认模式在 Globe 使用局部 ENU 平面。
 区域曲面入口见下一节，两个模式均不是全球海洋模拟。
 
-人工入口 `Test/Rendering/玄武湖风浪.html?world=planar` / `world=globe`，
+人工入口 `Specs/e2e/SceneGIS/fixtures/Rendering/玄武湖风浪.html?world=planar` / `world=globe`，
 可选 `quality=64|128|256`。数据目录记录 OSM 许可，地形和植被为示意。
 自动验证使用 `SceneGIS/Scene/SceneGISWindWaves`、`SceneGIS/Scene/SceneGISWaterSurface`
-和 `Test/Rendering/playwright.wind-water.config.mjs`；GPU 数值与独立 CPU DFT 对照。
-曲面湖泊主验收入口为 `Test/Rendering/曲面河湖.html?sample=lake`，新增“浪面特写”视角和两项风浪参数。
+和 `Specs/e2e/SceneGIS/config/wind-water.config.mjs`；GPU 数值与独立 CPU DFT 对照。
+曲面湖泊主验收入口为 `Specs/e2e/SceneGIS/fixtures/Rendering/曲面河湖.html?sample=lake`，新增“浪面特写”视角和两项风浪参数。
 实现、边界和实测预算见 ADR-0101、ADR-0181 与 R22 / R27 review。
 
 ## 区域曲面河湖使用与验证
@@ -1246,7 +1242,7 @@ GPU 光程采用随相机重定位的曲率球壳，球形 Globe 上精确，扁
 外环、岛屿和嵌套孔洞共用静态岸线 BVH；射线求交与内外判断只检查候选边。
 岸线预算按 maximumUnderwaterBoundaryBytes 控制，原始数据不简化，不截断查询；最坏情况仍可能线性退化。
 变水位容积独立保留 1024 个准备后三角形预算，不由岸线优化隐式扩大。
-SceneGISRiverSurface 提供同名预算和字节统计属性。大轮廓示例为 Test/Rendering/岸线索引.html?world=globe 或 planar。
+SceneGISRiverSurface 提供同名预算和字节统计属性。大轮廓示例为 Specs/e2e/SceneGIS/fixtures/Rendering/岸线索引.html?world=globe 或 planar。
 水下归属不从屏幕图像猜测；当前可见 opaque 深度可截断光程。接口与资格见 ADR-0199、ADR-0200。
 
 曲面水面和河流直接设置 `causticsIntensity`、`foamWidth`、`foamIntensity`，无需提供水底格网。
@@ -1294,11 +1290,11 @@ const river = scene.primitives.add(
 `cachedTiles` 为 CPU 节点数，并非全部持有 GPU 网格。FFT 和 Scene 共享目标不计入这些字节。
 局部模式的 `statistics` 为 undefined。首次构建是同步的，快速跳到未缓存区域可能产生短暂停顿。
 
-人工入口 `Test/Rendering/曲面河湖.html?sample=lake` / `sample=river`，包含岛屿、
+人工入口 `Specs/e2e/SceneGIS/fixtures/Rendering/曲面河湖.html?sample=lake` / `sample=river`，包含岛屿、
 凹岸线、沿程水位、近景、低角度和高空切换，使用本地确定性示意几何。
 大湖额外有“水下近景”“水下仰视”和“水下模式”开关，湖底和立柱提供显式深度参照。
 严格 GPU Specs 为 `SceneGISEllipsoidWater` 和 `SceneGISGlobeUnderwater`；E2E 入口
-`Test/Rendering/playwright.curved-water.config.mjs`，回归沿用 WaterSurface/WindWaves 和双 World 玄武湖示例。
+`Specs/e2e/SceneGIS/config/curved-water.config.mjs`，回归沿用 WaterSurface/WindWaves 和双 World 玄武湖示例。
 设计与已知性能范围见 ADR-0179、R25 plan/review。
 
 ## 河流水位、流向与风浪
@@ -1352,10 +1348,10 @@ Globe 使用区域 chart，宽度按控制点局部度量换算，沿程距离�
 拾取返回 `{ primitive: river, id }`，`getBoundingSphere()` 返回包含水流和风浪位移的 World 空间保守包围球，
 `statistics` 沿用水面 LOD/缓存指标。首次到访高精度区域仍可能同步构建较多网格。
 
-人工入口 `Test/Rendering/河流水面.html?world=globe` / `world=planar`，使用本地示意河道和河床，
+人工入口 `Specs/e2e/SceneGIS/fixtures/Rendering/河流水面.html?world=globe` / `world=planar`，使用本地示意河道和河床，
 提供水位、流速、独立风浪、控制点标注和近/远/低角度视角，以及“水下顺流”“水下仰视”和水下模式开关。
 水位或风浪重建保留该开关。自动化入口：
-`SceneGISRiverSurface` Specs、`Test/Rendering/playwright.river-water.config.mjs`。
+`SceneGISRiverSurface` Specs、`Specs/e2e/SceneGIS/config/river-water.config.mjs`。
 接口边界与性能证据见 ADR-0180 和 R26 review；视觉效果仍需项目负责人验收。
 
 ## 可编程 GPU 粒子使用与验证
@@ -1418,7 +1414,7 @@ life/age 单位秒。age/seed 由底层维护，其余字段由 Shader 保存和
 阴影和粒子运动矢量。默认集合拥有图元：`scene.primitives.remove(particles)` 会销毁资源。
 
 自动验证入口 `SceneGIS/Scene/SceneGISGpuParticleSystem`，独立人工入口
-`Test/Rendering/GPU粒子.html?world=planar` / `world=globe`。
+`Specs/e2e/SceneGIS/fixtures/Rendering/GPU粒子.html?world=planar` / `world=globe`。
 示例的喷泉重力、轨道与体积漂浮均为调用方 Shader；天气不是底层参数。
 性能证据与首版边界见 `AgentDocs/gpu-particles/reviews/`。
 
@@ -1490,7 +1486,7 @@ low/medium/high 总槽位为 16K/32K/64K，双池模拟纹理约 2.02/4/8.04 MiB
 自动模式下天气雾密度随 actualIntensity 归零；关闭“能见度随天气变化”也清除天气雾。
 下雨自动湿润、下雪自动积雪，晴天关闭覆盖；独立地表 API 仍可使用。
 示例同时提供联动强度和当前值的手动控件，编辑当前值会显式转为对应的手动模式。
-人工入口 `Test/Rendering/鸟瞰天气.html?world=planar` / `world=globe`，
+人工入口 `Specs/e2e/SceneGIS/fixtures/Rendering/鸟瞰天气.html?world=planar` / `world=globe`，
 自动验证 `SceneGIS/Scene/SceneGISWeather` 与 `SceneGIS/Scene/SceneGISGpuParticleSystem`。
 
 球面鸟瞰天气通过 `createOsmBuildingsAsync` 在线加载 Cesium ion OSM Buildings，
@@ -1499,7 +1495,7 @@ low/medium/high 总槽位为 16K/32K/64K，双池模拟纹理约 2.02/4/8.04 MiB
 配置，不在示例中保存凭据。ion 建筑和地形按视角流式加载；请求失败会明确提示。
 平面继续使用示意街区。
 不保存本地建筑快照或自行挤出建筑；Globe 验证依赖公网与 ion 授权。
-示例加载、控件和销毁验证：`npx playwright test --config Test/Rendering/playwright.weather.config.mjs`。
+示例加载、控件和销毁验证：`npx playwright test --config Specs/e2e/SceneGIS/config/weather.config.mjs`。
 
 本地调试可在当前页面的 `sessionStorage` 设置 `sceneGIS.ionAccessToken` 后刷新。
 鸟瞰天气示例在创建任何 ion provider 前读取此值；未配置时保留 SDK 默认行为。
@@ -1528,8 +1524,8 @@ surfaceWeather.snowCoverage = 0.8;
 薄雪不改变轮廓，无屋檐遮挡或真实积水深度；底图无地物语义，可能覆盖照片里的树木/水域。
 探针仍按其原有手动更新契约捕获，修改表面后如需更新离屏反射，应重新捕获。
 
-人工入口 `Test/Rendering/地表雨雪.html?world=planar` / `world=globe`，
-真实数据入口 `Test/Rendering/鸟瞰天气.html?world=globe`。前者不依赖公网；后者沿用 ion。
+人工入口 `Specs/e2e/SceneGIS/fixtures/Rendering/地表雨雪.html?world=planar` / `world=globe`，
+真实数据入口 `Specs/e2e/SceneGIS/fixtures/Rendering/鸟瞰天气.html?world=globe`。前者不依赖公网；后者沿用 ion。
 专项 Specs：`SceneGIS/Scene/SceneGISSurfaceWeather`；示例 E2E 沿用 weather 配置。
 
 ### 湿地涟漪与镜头雨滴
@@ -1557,7 +1553,7 @@ scene.postProcessStages.remove(rainLens);
 镜头雨滴与地表覆盖互相独立，提供水珠、滑落水痕和局部折射，只有一个颜色后处理，无深度重绘。
 两者随 Scene time 动画，暂停时间即冻结；不会主动启动时钟或请求连续帧。
 可独立手动控制，也可由绑定 Scene 的 SceneGISWeather 联动强度并关闭零强度的镜头 stage。
-独立本地示例 `Test/Rendering/降雨细节.html` 支持两种世界；鸟瞰天气页面已提供开关与强度调节。
+独立本地示例 `Specs/e2e/SceneGIS/fixtures/Rendering/降雨细节.html` 支持两种世界；鸟瞰天气页面已提供开关与强度调节。
 专项 Specs 加入 `SceneGIS/Scene/SceneGISRainLensStage`；设计与限制见 ADR-0105。
 
 ### 降雪镜头
@@ -1581,7 +1577,7 @@ const snowLens = scene.postProcessStages.add(
 不随时间动画，不模拟雪点撞击或融化。一次颜色后处理，轻微模糊和透光，无深度、历史或固定亮点高光。
 纹理首次启用时加载，跟随 stage 释放；不改变相机、光照、空中粒子或地表积雪。独立调用方可显式选择镜头 stage；
 绑定 Scene 的 SceneGISWeather 默认负责自动选择，晴天或隐藏天气时关闭自动控制的镜头。
-`Test/Rendering/降雪细节.html` 提供本地球面/平面示例，`鸟瞰天气.html` 提供统一联动及手动控制。
+`Specs/e2e/SceneGIS/fixtures/Rendering/降雪细节.html` 提供本地球面/平面示例，`鸟瞰天气.html` 提供统一联动及手动控制。
 
 ## 几何高光抗锯齿
 
@@ -1599,7 +1595,7 @@ Scene 拥有该设置；也可提前调用 `destroy()` 解除绑定。默认关�
 FBO 或绘制通道。它按几何法线的屏幕变化增加基础层和清漆的有效粗糙度，不修改源材质。
 平整镜面保持原粗糙度；这不能代替 TAA / MSAA，也不处理法线贴图频率或透明裁剪边缘。
 动态修改材质做即时对比时，可调用已有 TAA / SSR 的 `reset()` 清除历史。
-独立示例为 `Test/Rendering/高光抗锯齿.html?world=planar|globe`；Bistro 的实验 B
+独立示例为 `Specs/e2e/SceneGIS/fixtures/Rendering/高光抗锯齿.html?world=planar|globe`；Bistro 的实验 B
 提供“高光抗锯齿”开关。实现与升级边界见 ADR-0098 / SGP-0025。
 
 ## 可选屏幕空间间接光（SSIL）
@@ -1619,7 +1615,7 @@ const indirectLighting = new Cesium.SceneGISScreenSpaceIndirectLighting({
 SSIL / SSGI 名称有重叠；这里实现的是局部、可见表面之间的一次漫反射。使用同帧主 MRT 的
 直接漫反射和自发光，避免模糊最终画面和重复反弹 IBL。非 PBR / unlit / 地形只参与遮挡；
 屏幕外和被挡住的几何、玻璃、水和多次反弹不作为源或接收者。Bistro 的
-“屏幕空间间接光”分组直接控制当前配置，默认关闭；独立示例是 `Test/Rendering/屏幕空间间接光.html`，
+“屏幕空间间接光”分组直接控制当前配置，默认关闭；独立示例是 `Specs/e2e/SceneGIS/fixtures/Rendering/屏幕空间间接光.html`，
 支持 `world=planar|globe`，可关闭彩墙自发光单独检查直接漫反射的颜色传递。
 
 默认每像素 4 个切片方向、每侧 8 个采样，半分辨率估计后保边重建。`radius` 是米制最大距离，
@@ -1655,7 +1651,7 @@ taa.reset();
 
 `historyWeight` 默认 0.9、范围 [0, 0.95]，降低可加快响应但减弱稳定性。当前使用相机运动
 重投影，未提供物体 motion vectors；运动模型、透明对象和标注可能柔化或残影。request-render
-模式不请求额外收敛帧。独立页面 `Test/Rendering/时域抗锯齿.html` 提供四种 AA 模式、相机和
+模式不请求额外收敛帧。独立页面 `Specs/e2e/SceneGIS/fixtures/Rendering/时域抗锯齿.html` 提供四种 AA 模式、相机和
 物体运动对照。详见 ADR-0094 / SGP-0022；性能应在同样视角、分辨率、图层与效果下实测。
 
 ## 可选自动曝光
@@ -1701,7 +1697,7 @@ API 默认关闭，不改变原生固定曝光。`enabled=false` 释放自有 GP
 观察适应的期间维持渲染。长时间无渲染后的下一帧按实际经过时间适应。加载完成或相机瞬移
 可调用 reset()，首帧立即测光。全局曝光无法同时解决深阴影和高亮天空的所有局部对比问题。
 
-独立示例 `Test/Rendering/自动曝光.html?world=planar|globe` 默认开启，提供日光/黄昏/夜间
+独立示例 `Specs/e2e/SceneGIS/fixtures/Rendering/自动曝光.html?world=planar|globe` 默认开启，提供日光/黄昏/夜间
 切换。PBR 综合验收的 Bistro 使用“HDR 与曝光”分组直接控制当前配置，默认关闭以保留固定
 曝光基准；Sponza 仍使用“自动曝光 / 人眼适应”分组并共用于 A/B。Cycles 校准导出要求先关闭自动曝光。
 详见 ADR-0100 / SGP-0027 和 R21 review 的实测结果。
@@ -1739,7 +1735,7 @@ grading.tint = 0.03;
 默认 disabled，启用必须打开 HDR。Scene 拥有控制器，也可提前 `destroy()` 解绑。
 调色复用原生 tone mapping 通道，无新增纹理/FBO/绘制，不反馈到自动测光或 TAA，参数调整无需
 重置 TAA/SSR。全局白平衡不能同时消除阳光与蓝天等混合光源，也不能补充建筑对天空的遮挡。
-`Test/Rendering/PBR综合验收.html` 的“画面风格与白平衡”提供三种起点及自定义参数；预设
+本地 `Test/Rendering/PBR综合验收.html` 的“画面风格与白平衡”提供三种起点及自定义参数。预设
 只调整颜色与 tone mapper，保持时间、光照、大气和曝光配置。完整边界见 ADR-0154。
 
 ## 原生局部流体与喷泉

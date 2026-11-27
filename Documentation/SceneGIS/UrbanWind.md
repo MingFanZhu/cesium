@@ -257,7 +257,7 @@ K=trailSegments+1，C=ceil(sqrt(K))，R=ceil(K/C)。
 
 - 球面：`/Test/Wind/?world=globe`
 - 平面：`/Test/Wind/?world=planar`
-- 原始求解器计时诊断：`/Test/Wind/solver.html`（仅速度，不包含示踪/显示）
+- 原始求解器计时诊断：`/Specs/e2e/SceneGIS/fixtures/Wind/solver.html`（仅速度，不包含示踪/显示）
 
 城市案例是 9 栋确定性挤出建筑，显式几何同时用于显示和体素化；无需网络数据。
 默认 128×128×32 = 524,288 格，dx=2 m，局部域 256×256×64 m，dt=0.02 s，
@@ -278,7 +278,7 @@ GPU 场共 119.25 MiB：768×768 atlas，11 个速度/分布 RGBA32F、2 个示�
 | 平面 +X，独立运行   |     40 |           1.640 |       4.05 |     9.88× |
 
 W6 的独立长宽、GPU 历史和可复现细风迹可通过
-Test/Wind/playwright.trajectories.config.mjs 验证。该用例同时记录标记/历史线带
+Specs/e2e/SceneGIS/config/trajectories.config.mjs 验证。该用例同时记录标记/历史线带
 的独立 native draw GPU 耗时、纹理字节和暂停画面；这些绘制计时排除求解、OIT 合成和
 场景其他工作，不能与下方 solver GPU 计时混为一谈。截图和设备实测见
 [W6 review](../../AgentDocs/urban-wind/reviews/2026-10-29-w6-particle-trajectories.md)。

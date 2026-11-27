@@ -1,0 +1,327 @@
+import { test, expect } from "@playwright/test";
+import { writeFile } from "node:fs/promises";
+import process from "node:process";
+
+for (const world of ["planar", "globe"]) {
+  test(`local water ${world}: presets, wave comparison, motion and disposal`, async ({
+    page,
+  }, testInfo) => {
+    const errors = [];
+    page.on("pageerror", (error) => errors.push(error.message));
+    if (process.env.SCENEGIS_TEST_RELEASE === "true") {
+      await page.route("**/Build/CesiumUnminified/index.js", (route) =>
+        route.continue({
+          url: route.request().url().replace("/CesiumUnminified/", "/Cesium/"),
+        }),
+      );
+    }
+    await page.goto(
+      `/Specs/e2e/SceneGIS/fixtures/Planar/局部水面.html?world=${world}`,
+    );
+    await page.waitForFunction(
+      () =>
+        window.example?.water.ready &&
+        window.example.viewer.scene.frameState._sceneGISWater?.foamMaterial
+          ?.texture &&
+        window.example.models.length === 6 &&
+        window.example.models.every((m) => m.ready),
+    );
+    await page
+      .getByRole("checkbox", { name: "时间动画", exact: true })
+      .uncheck();
+    const edited = await page.evaluate(() => {
+      const e = window.example;
+      const controls = e.gui.controllersRecursive();
+      controls
+        .find((c) => c.property === "transmissionColor")
+        .setValue("#80b0d0");
+      controls.find((c) => c.property === "colorDistance").setValue(4);
+      controls
+        .find((c) => c.property === "scatteringColor")
+        .setValue("#ffffff");
+      controls.find((c) => c.property === "turbidity").setValue(0.2);
+      return {
+        preset: e.state.preset,
+        absorption: e.water.absorption,
+        scattering: e.water.scattering,
+      };
+    });
+    expect(edited.preset).toBe("自定义");
+    expect(edited.absorption.x).toBeCloseTo(
+      -Math.log(((128 / 255 + 0.055) / 1.055) ** 2.4) / 4,
+      8,
+    );
+    expect(edited.scattering).toEqual({ x: 0.2, y: 0.2, z: 0.2 });
+    // Freeze the actual wave epoch for reproducible above/below views.
+    await page.evaluate(async () => {
+      const C = await import("/Build/CesiumUnminified/index.js");
+      const e = window.example,
+        v = e.viewer;
+      v.useDefaultRenderLoop = false;
+      v.clock.currentTime = C.JulianDate.clone(e.water._epoch);
+      v.render();
+      C.JulianDate.addSeconds(v.clock.currentTime, 4, v.clock.currentTime);
+      v.render();
+      v.useDefaultRenderLoop = true;
+    });
+    for (const preset of ["原有配色", "清水", "湖水", "浑水"]) {
+      await page
+        .getByRole("combobox", { name: "水体预设", exact: true })
+        .selectOption({ label: preset });
+      const result = await page.evaluate(async () => {
+        const e = window.example;
+        await new Promise((resolve) => {
+          const remove = e.viewer.scene.postRender.addEventListener(() => {
+            remove();
+            resolve();
+          });
+        });
+        return {
+          preset: e.state.preset,
+          medium: e.water.scattering !== undefined,
+          shown: e.waters.filter((s) => s.show).length,
+        };
+      });
+      expect(result).toEqual({
+        preset,
+        medium: preset !== "原有配色",
+        shown: 1,
+      });
+      await expect(page.locator("#error")).toHaveText("");
+      await page.screenshot({
+        path: testInfo.outputPath(`${world}-${preset}.png`),
+      });
+    }
+    await page
+      .getByRole("combobox", { name: "水体预设", exact: true })
+      .selectOption({ label: "清水" });
+    await page
+      .getByRole("combobox", { name: "波浪模式", exact: true })
+      .selectOption({ label: "法线波纹" });
+    await page.waitForFunction(
+      () =>
+        window.example.waters[0].ready &&
+        window.example.waters[0].show &&
+        !window.example.waters[1].show,
+    );
+    await page.screenshot({ path: testInfo.outputPath(`${world}-normal.png`) });
+    await page
+      .getByRole("combobox", { name: "波浪模式", exact: true })
+      .selectOption({ label: "FFT 风浪" });
+    await page.getByRole("button", { name: "进入水下", exact: true }).click();
+    await page.waitForFunction(
+      () =>
+        window.example.water._underwater?.active &&
+        window.example.water._underwater.texture,
+    );
+    await expect(page.locator("#error")).toHaveText("");
+    await page.screenshot({
+      path: testInfo.outputPath(`${world}-underwater.png`),
+    });
+    await page.getByRole("button", { name: "水下仰视", exact: true }).click();
+    await page.evaluate(
+      () =>
+        new Promise((resolve) => {
+          const remove =
+            window.example.viewer.scene.postRender.addEventListener(() => {
+              remove();
+              resolve();
+            });
+        }),
+    );
+    await page.screenshot({
+      path: testInfo.outputPath(`${world}-underwater-up.png`),
+    });
+    await page.getByRole("button", { name: "恢复视角", exact: true }).click();
+    await page.waitForFunction(() => !window.example.water._underwater?.active);
+    // Owner-reported close views: foam beside a steep obstacle and shoreline,
+    // and the magnified caustic receiver beneath the camera.
+    for (const [name, eye, target] of [
+      ["wall-foam", [15, 0, 8], [8, 6.5, 0]],
+      ["shore-foam", [17, -5, 4], [21, 0, 0]],
+      ["foam-detail", [21.1, -1.5, 0.55], [21.65, 0, 0]],
+      ["caustics-close", [0, -2, -1.1], [0, 0, -2.1]],
+    ]) {
+      await page.evaluate(
+        async ({ eye, target }) => {
+          const C = await import("/Build/CesiumUnminified/index.js"),
+            e = window.example;
+          const direction = C.Cartesian3.normalize(
+            C.Cartesian3.subtract(
+              new C.Cartesian3(...target),
+              new C.Cartesian3(...eye),
+              new C.Cartesian3(),
+            ),
+            new C.Cartesian3(),
+          );
+          e.viewer.camera.setView({
+            destination: C.Matrix4.multiplyByPoint(
+              e.water.modelMatrix,
+              new C.Cartesian3(...eye),
+              new C.Cartesian3(),
+            ),
+            orientation: {
+              direction: C.Matrix4.multiplyByPointAsVector(
+                e.water.modelMatrix,
+                direction,
+                new C.Cartesian3(),
+              ),
+              up: C.Matrix4.multiplyByPointAsVector(
+                e.water.modelMatrix,
+                C.Cartesian3.UNIT_Z,
+                new C.Cartesian3(),
+              ),
+            },
+          });
+          await new Promise((resolve) => {
+            const remove = e.viewer.scene.postRender.addEventListener(() => {
+              remove();
+              resolve();
+            });
+          });
+        },
+        { eye, target },
+      );
+      await page.screenshot({
+        path: testInfo.outputPath(`${world}-${name}.png`),
+      });
+    }
+    await page.getByRole("button", { name: "恢复视角", exact: true }).click();
+    const timing = await page.evaluate(async () => {
+      const e = window.example,
+        v = e.viewer,
+        gl = v.scene.context._gl;
+      v.useDefaultRenderLoop = false;
+      const C = await import("/Build/CesiumUnminified/index.js");
+      const foam = e.water.foamIntensity,
+        caustics = e.water.causticsIntensity;
+      // Warm the actual enabled/disabled paths before timing animated frames.
+      e.water.foamIntensity = e.water.causticsIntensity = 0;
+      v.render();
+      e.water.foamIntensity = foam;
+      e.water.causticsIntensity = caustics;
+      v.render();
+      const ext = gl.getExtension("EXT_disjoint_timer_query_webgl2");
+      const samples = [];
+      if (ext) {
+        for (let i = 0; i < 12; i++) {
+          const effects = i % 2 === 1;
+          e.water.foamIntensity = effects ? foam : 0;
+          e.water.causticsIntensity = effects ? caustics : 0;
+          C.JulianDate.addSeconds(
+            v.clock.currentTime,
+            1 / 60,
+            v.clock.currentTime,
+          );
+          const query = gl.createQuery();
+          gl.beginQuery(ext.TIME_ELAPSED_EXT, query);
+          v.render();
+          gl.endQuery(ext.TIME_ELAPSED_EXT);
+          samples.push({ query, effects });
+        }
+        gl.flush();
+        const deadline = performance.now() + 5000;
+        while (
+          !gl.getQueryParameter(
+            samples.at(-1).query,
+            gl.QUERY_RESULT_AVAILABLE,
+          ) &&
+          performance.now() < deadline
+        ) {
+          await new Promise(requestAnimationFrame);
+        }
+      }
+      const valid =
+        ext &&
+        !gl.getParameter(ext.GPU_DISJOINT_EXT) &&
+        samples.every(({ query }) =>
+          gl.getQueryParameter(query, gl.QUERY_RESULT_AVAILABLE),
+        );
+      const measurements = valid
+        ? samples.map(({ query, effects }) => ({
+            effects,
+            milliseconds: gl.getQueryParameter(query, gl.QUERY_RESULT) / 1e6,
+          }))
+        : [];
+      for (const { query } of samples) {
+        gl.deleteQuery(query);
+      }
+      e.water.foamIntensity = foam;
+      e.water.causticsIntensity = caustics;
+      v.render();
+      const effectFieldBytes = e.water._field === undefined ? 0 : -1;
+      const debug = gl.getExtension("WEBGL_debug_renderer_info");
+      v.useDefaultRenderLoop = true;
+      return {
+        renderer: debug
+          ? gl.getParameter(debug.UNMASKED_RENDERER_WEBGL)
+          : "unavailable",
+        measurements,
+        effectFieldBytes,
+      };
+    });
+    expect(timing.effectFieldBytes).toBe(0);
+    const timingPath = testInfo.outputPath(`${world}-gpu-cost.json`);
+    await writeFile(timingPath, JSON.stringify(timing, null, 2));
+    await testInfo.attach(`${world}-gpu-cost`, {
+      path: timingPath,
+      contentType: "application/json",
+    });
+    // Exercise above-water oblique views while preserving the authored local frame.
+    await page.evaluate(async () => {
+      const C = await import("/Build/CesiumUnminified/index.js"),
+        e = window.example,
+        camera = e.viewer.camera;
+      const frame = e.water.modelMatrix;
+      for (const eye of [
+        [24, -18, 5],
+        [-15, -20, 10],
+        [0, -10, 35],
+      ]) {
+        const direction = C.Cartesian3.normalize(
+          new C.Cartesian3(-eye[0], -eye[1], -eye[2]),
+          new C.Cartesian3(),
+        );
+        camera.setView({
+          destination: C.Matrix4.multiplyByPoint(
+            frame,
+            new C.Cartesian3(...eye),
+            new C.Cartesian3(),
+          ),
+          orientation: {
+            direction: C.Matrix4.multiplyByPointAsVector(
+              frame,
+              direction,
+              new C.Cartesian3(),
+            ),
+            up: C.Matrix4.multiplyByPointAsVector(
+              frame,
+              C.Cartesian3.UNIT_Z,
+              new C.Cartesian3(),
+            ),
+          },
+        });
+        await new Promise((resolve) => {
+          const remove = e.viewer.scene.postRender.addEventListener(() => {
+            remove();
+            resolve();
+          });
+        });
+      }
+    });
+    await expect(page.locator("#error")).toHaveText("");
+    const destroyed = await page.evaluate(() => {
+      const e = window.example,
+        texture = e.waves._state.bands[0].output.getColorTexture(0);
+      e.destroy();
+      return (
+        e.waters.every((s) => s.isDestroyed()) &&
+        e.waves.isDestroyed() &&
+        texture.isDestroyed() &&
+        e.viewer.isDestroyed()
+      );
+    });
+    expect(destroyed).toBe(true);
+    expect(errors).toEqual([]);
+  });
+}

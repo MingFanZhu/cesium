@@ -32,7 +32,7 @@
 
 - Source: `packages/engine/Source/SceneGIS/DataSources/_private/_SceneGISPlanarGeoJson.js`
 - Specs: `packages/engine/Specs/SceneGIS/DataSources/SceneGISPlanarGeoJsonSpec.js`
-- E2E: `Specs/e2e/scenegis-planar-geojson.spec.js`
+- E2E: `Specs/e2e/SceneGIS/scenegis-planar-geojson.spec.js`
 - Example: `Test/平面GeoJSON.html`；不新增 Sandcastle。
 - Branch: `feature/planar-geojson`
 - ADR: [ADR-0172](../../Documentation/SceneGIS/Decisions/ADR-0172-planar-geojson-loading.md)

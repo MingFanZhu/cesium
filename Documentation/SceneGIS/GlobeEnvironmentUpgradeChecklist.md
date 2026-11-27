@@ -99,7 +99,7 @@ node scripts/scenegis/audit-upstream-patches.mjs
 ## 7. Focused qualification
 
 - [ ] 依次运行 A8 phase plan 列出的五组 focused Specs。
-- [ ] development 与 release 各运行一次 `Specs/e2e/scenegis-globe-environment.spec.js`。
+- [ ] development 与 release 各运行一次 `Specs/e2e/SceneGIS/scenegis-globe-environment.spec.js`。
 - [ ] E2E 默认只使用本地 Natural Earth II，不产生公网 request；Planar 只做入口/启动 smoke。
 - [ ] Globe 手工矩阵覆盖地面高日、云上高日 mixed、真日落、无月夜、近太空高日以及 `medium -> low -> high`。
 - [ ] 手工记录 public ready/HDR、tier、太阳高度与 browser/render errors；finite/storage 由 focused automated qualification 记录，不由 release page 私有 readback；不以 hash、截图阈值或 FPS 替代 owner 判断。

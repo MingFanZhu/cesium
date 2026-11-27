@@ -368,7 +368,7 @@ expectFailure("a stale active manifest entry", (repo) => {
 
 for (const [name, file] of [
   ["SceneGIS engine source marker", "packages/engine/Source/SceneGIS/New.js"],
-  ["SceneGIS E2E marker", "Specs/e2e/scenegis-fixture.spec.js"],
+  ["SceneGIS E2E marker", "Specs/e2e/SceneGIS/scenegis-fixture.spec.js"],
   [
     "SceneGIS Sandcastle marker",
     "packages/sandcastle/gallery/scenegis-fixture/main.js",

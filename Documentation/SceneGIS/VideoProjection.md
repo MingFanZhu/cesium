@@ -68,7 +68,7 @@ alpha 保持目标画面原值。阶段按 postProcessStages 顺序叠加。不�
 缺媒体或覆盖时保留原画面。每个实例的开销包含独立深度捕获和新视频帧上传，暂不共享
 同位姿捕获，也不缓存可能已经变化的动态遮挡。SDK 集成和投影标定另行安排。
 
-设计见 [ADR-0177](Decisions/ADR-0177-video-projection.md)，验收入口见 `Test/视频投射.html`。
+设计见 [ADR-0177](Decisions/ADR-0177-video-projection.md)，验收入口见 `Specs/e2e/SceneGIS/fixtures/视频投射.html`。
 
 ## 自有分段高斯
 
@@ -130,14 +130,14 @@ scene.postProcessStages.remove(projection);
 ### 可复现示例
 
 运行 `node scripts/scenegis/create-gaussian-video-demo.mjs`，再打开
-`Test/Rendering/高斯视频投射.html?world=planar` 或 `?world=globe`。
+`Specs/e2e/SceneGIS/fixtures/Rendering/高斯视频投射.html?world=planar` 或 `?world=globe`。
 示例使用本地生成的 8,531 个高斯与校准视频流，默认暂停；可播放、翻转、调整透明度、
 选择本地视频文件，并切换网格遮挡。点击“进入挡板后方”可验证显示相机看不到的高斯仍能挡光。
 阈值改为 1 时，本例所有单片元 opacity 都低于阈值，因此后墙会重新接收视频；
 这用于展示阈值近似的实际含义。切换阈值会重建投射实例，目标图元和图集保持原所有权。
 
 自动化：执行 `npm start -- --port 8096` 启动根开发服务器，再执行
-`npx playwright test -c Test/VideoProjection/playwright.gaussian.config.mjs`。
+`npx playwright test -c Specs/e2e/SceneGIS/config/gaussian-video-projection.config.mjs`。
 示例由页面管理视频、定时器和目标销毁；调用方应先移除投射，再销毁目标或 Scene。
 
 一次有边界的暖态测量：Windows 10 / Chrome 156，RTX 3060 Ti / ANGLE D3D11，

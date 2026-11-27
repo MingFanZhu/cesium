@@ -23,7 +23,7 @@
 - Source: `packages/engine/Source/SceneGIS/Scene/`
 - Specs: `packages/engine/Specs/SceneGIS/Scene/`
 - Shader: `packages/engine/Source/Shaders/SceneGIS/Viewshed/`
-- Test: `Test/可视域分析.html`、`Specs/e2e/scenegis-viewshed.spec.js`
+- Test: `Test/可视域分析.html`、`Specs/e2e/SceneGIS/scenegis-viewshed.spec.js`
 - Public guide: [Viewshed](../../Documentation/SceneGIS/Viewshed.md)
 - Integrated branch: `scenegis/develop`; source branch: `feature/viewshed`
 - ADR: [0176](../../Documentation/SceneGIS/Decisions/ADR-0176-observer-viewshed.md)

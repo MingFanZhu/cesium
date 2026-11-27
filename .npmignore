@@ -32,6 +32,9 @@
 /server.js
 /Source/copyrightHeader.js
 /Specs
+# SCENEGIS_PATCH_BEGIN SGP-0076: Exclude the local development test directory from npm packs.
+/Test/
+# SCENEGIS_PATCH_END SGP-0076
 /Tools
 /web.config
 

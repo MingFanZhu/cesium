@@ -113,5 +113,5 @@ CPU 工具位于 [Tools/GaussianSplatTiler](../../Tools/GaussianSplatTiler/READM
 正确设置 `CESIUM_BASE_URL`。新增 Worker 后需重启已经运行的开发服务器以更新构建入口。
 
 本地示例：先运行 `node Tools/GaussianSplatTiler/examples/create-demo.js`，再打开
-`/Test/Rendering/分段高斯泼溅.html`。支持平面与球面、其他数据 URL、遮挡和位置变换。
+`/Specs/e2e/SceneGIS/fixtures/Rendering/分段高斯泼溅.html`。支持平面与球面、其他数据 URL、遮挡和位置变换。
 大型真实资产的性能与最终视觉质量仍需在目标设备上验收。

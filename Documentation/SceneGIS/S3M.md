@@ -119,7 +119,7 @@ DXT 在 Worker 转为嵌入 PNG；这会增加解码中间内存和 GPU 纹理�
 实例化样例完整加载至 depth 4。在线倾斜摄影原配置的 10 个根中有 8 个返回 404，
 因此示例通过本地最小 SCP 明确引用已验证的官方在线子区，使用 `maximumDepth: 1`，
 服务不可用时可选择本地样例。离线资格缓存准备和测试方法见
-[数据说明](../../Test/S3M/data/README.md)。
+[数据说明](../../Specs/e2e/SceneGIS/fixtures/S3M/data/README.md)。
 
 解码来源及许可证：[provenance](../../packages/engine/Source/Assets/SceneGIS/S3M/README.md)。
 架构与升级边界：[ADR-0174](Decisions/ADR-0174-s3m-model-loading.md)。

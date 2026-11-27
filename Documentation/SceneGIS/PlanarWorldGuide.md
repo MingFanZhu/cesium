@@ -104,7 +104,7 @@ viewer.scene.requestRender();
 `scene.pick` 可识别显示的地下对象；`pickPosition` 延续原有深度拾取策略，不保证穿透地形
 返回地下对象坐标。需要实际地形位置时使用 `world.pickTerrain`，需要已有地形高程时使用 `world.getTerrainHeight`。
 透明地表继续遵循 `world.opacity` 和 `scene.pickTranslucentDepth`。
-本地对照页：[地形深度测试](../../Test/地形深度测试.html)。
+本地对照页：[地形深度测试](../../Specs/e2e/SceneGIS/fixtures/地形深度测试.html)。
 
 Imagery filter直接修改layer属性，并在下一次normal render生效；不会重新请求或上传texture。默认值保持现有
 planar sampled color space。`colorToAlpha`比较raw sampled RGB，getter/setter均defensive clone；设置为
@@ -139,7 +139,7 @@ add/remove/removeAll、enabled 和 inverse。模型和地形分别配置，不�
 正常 render 发布区域数据，拾取、深度和阴影沿用相同的片元裁剪。集合替换或模型/tileset 销毁会释放资源。
 `quality` 和 `debugShowDistanceTexture` 只控制球面距离场，不影响平面精确边判断；裁剪不创建封口或侧壁。
 这项能力适用于低层原生 Model / tileset；没有向 `ModelGraphics` 增加新属性或扩大分类模型支持。
-示例：`Test/Planar/模型多区域裁剪.html`；设计见 ADR-0189。
+示例：`Specs/e2e/SceneGIS/fixtures/Planar/模型多区域裁剪.html`；设计见 ADR-0189。
 
 ## 地形剖切与多边形裁剪
 
@@ -190,7 +190,7 @@ world.clippingPolygons = new ClippingPolygonCollection({
 需要 WebGL 2 和浮点纹理，启用后占用一个 fragment sampler。平面实现直接测试边界，
 不使用球面的距离场，因此 `quality` 和 `debugShowDistanceTexture` 不影响平面画面。
 片元成本随平面数与多边形边数增长；当前验收覆盖交互式少量区域，不承诺大规模区域性能。
-本地操作入口为 [地形剖切](../../Test/Planar/地形剖切.html)，完整契约见
+本地操作入口为 [地形剖切](../../Specs/e2e/SceneGIS/fixtures/Planar/地形剖切.html)，完整契约见
 [ADR-0081](Decisions/ADR-0081-planar-terrain-clipping.md)。
 
 ## CesiumWidget 入口
@@ -323,7 +323,7 @@ heading / roll 使用非负一周范围，pitch 范围为 -π/2 到 π/2。
 `Camera.DEFAULT_VIEW_RECTANGLE` / `DEFAULT_VIEW_FACTOR` 不定义平面 Home；Home 按 World extent 拟合。
 `maximumZoomFactor` 是 Cesium 2D 参数，平面为 SCENE3D，不采用该参数。
 程序调用可指定范围外或地下 Cartesian pose；surface 导航控制器在下一次 update 按现有 clearance 规则纠正高度。
-示例 [相机控制](../../Test/Planar/相机控制.html) 可实时查看 HPR、坐标、正交宽度和 changed 计数。
+示例 [相机控制](../../Specs/e2e/SceneGIS/fixtures/Planar/相机控制.html) 可实时查看 HPR、坐标、正交宽度和 changed 计数。
 
 ## 影像与加载状态
 
@@ -383,7 +383,7 @@ URL template 在 x/y/z/s 之外支持 `reverseX`、`reverseY`、`reverseZ`、`wi
 属于程序化诊断图层，不是服务协议。没有增加 ArcGIS、Bing、Google、Ion、Mapbox 等厂商专用适配。
 当前未提供 GetCapabilities 自动发现、Clock / times 时序预取、feature picking 或跨 CRS 重投影。
 WMS 的静态 TIME 可放在 parameters 中，WMTS 可显式替换 dimensions。交互示例见
-[影像服务](../../Test/Planar/影像服务.html)，完整契约见 [ADR-0082](Decisions/ADR-0082-planar-imagery-protocols.md)。
+[影像服务](../../Specs/e2e/SceneGIS/fixtures/Planar/影像服务.html)，完整契约见 [ADR-0082](Decisions/ADR-0082-planar-imagery-protocols.md)。
 
 provider 的 `tilingScheme` 必须与 `world.tilingScheme` 是同一对象，不能只具有相同参数。每个 ideal geometry tile 始终提交一个 opaque command；shown layer 自底向顶在单 pass 中合成，因此 layer 数不能超过 WebGL texture image unit 上限。
 
@@ -411,7 +411,7 @@ viewer.scene.requestRender();
 显式请求一帧。分屏只屏蔽影像颜色贡献，另一侧仍保留底层影像/底色和地形深度；
 不会裁掉地形、Material、矢量或模型，也不会暂停被屏蔽侧的瓦片加载。
 
-示例：[影像分屏](../../Test/Planar/影像分屏.html)，支持拖动分屏线与倾斜地形视角。
+示例：[影像分屏](../../Specs/e2e/SceneGIS/fixtures/Planar/影像分屏.html)，支持拖动分屏线与倾斜地形视角。
 
 ## 地形、光照与数据边界
 
@@ -448,7 +448,7 @@ boundary posts、0 起始层级、每层静态 `available`。`available` 与 Ces
 Globe 的 `quantized-mesh-1.0` / `heightmap-1.0`、动态 availability 和 parent layer 尚不在支持范围内。
 低层 URL-template providers 继续用于已知参数的 image/LERC/mesh 接入。
 
-可运行 [地形服务示例](../../Test/Planar/地形服务.html)，切换两种真实 TileWorker 产物。
+可运行 [地形服务示例](../../Specs/e2e/SceneGIS/fixtures/Planar/地形服务.html)，切换两种真实 TileWorker 产物。
 示例默认直接读取服务公布的高度范围，也支持
 `?url=服务地址&minimumHeight=下界&maximumHeight=上界` 显式覆盖。契约见
 [ADR-0080](Decisions/ADR-0080-planar-terrain-layer-metadata.md)。
@@ -497,7 +497,7 @@ SunLight方向。双面surface允许从上下两侧观察，但lighting始终使
 相机角度和其他三维对象的可见距离不变。Terrain、imagery 和独立 MVT 共用判定，
 祖先与兄弟依赖仍可能越过细节距离；配置过小会让低角度画面大部分只显示粗层。
 属性在取得 World 后设置，不是 Viewer `planarWorld` 构造字段。确定性对照见
-[本地远景页面](../../Test/vector-tiles/planar-distance.html)，详细契约见
+[本地远景页面](../../Specs/e2e/SceneGIS/fixtures/vector-tiles/planar-distance.html)，详细契约见
 [ADR-0066](Decisions/ADR-0066-planar-tilted-tile-distance.md)。
 
 降低 `maximumScreenSpaceError` 会选择更多 tile；提高 `tileCacheSize` 会保留更多 unprotected tile record。每个 shown imagery layer 会增加 texture/request/cache 成本，但不会增加每个 ideal tile 的 draw command 数。Terrain LERC decode与Heightmap/Quantized mesh在唯一terrain Worker中执行，normal render每帧仍最多启动两个terrain task并promotion两个GPU content。每个non-flat final vertex增加2 bytes oct normal和一个terrain normal vertex buffer；`enableLighting`选择smooth或geometric Lambert variant但不增加command。调参时同时观察 selected/submitted tile、resident tile、request/texture/binding、mesh/promotion与warm-frame allocation；不要仅用单帧 FPS 推断泄漏或稳定性。
@@ -638,7 +638,7 @@ entity.box.shadows = Cesium.ShadowMode.ENABLED;
 及偏移影响。`size` 是每级尺寸，四级 atlas 边长为两倍；不要只提高距离而不考虑分辨率。
 实体连续贴地分类覆盖、矢量瓦片和标注不在本阶段新增投射/接收资格。现有高级物理光照可与
 几何阴影组合，但原生模型/地表的几何阴影仍衰减最终表面颜色，间接光和自发光分离另行处理。
-开发示例：`Test/Planar/级联阴影.html`。
+开发示例：`Specs/e2e/SceneGIS/fixtures/Planar/级联阴影.html`。
 
 ## 局部影像与最低数据层级
 
@@ -674,5 +674,5 @@ WMTS labels 使用全球 level 索引，minimumLevel 以下可以留空。TMS `f
 分辨率推导 canonical 最低层级，BoundingBox 可为局部覆盖，Origin 必须仍是全球西南角。
 SDK 显式范围和层级必须位于 metadata 声明内。SingleTile 保持整世界 Level 0 用法。
 
-本地复现入口：[局部影像](../../Test/Planar/局部影像.html)。正式契约见
+本地复现入口：[局部影像](../../Specs/e2e/SceneGIS/fixtures/Planar/局部影像.html)。正式契约见
 [ADR-0162](Decisions/ADR-0162-planar-sparse-imagery.md)。

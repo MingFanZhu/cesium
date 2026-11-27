@@ -2,6 +2,25 @@
   "schemaVersion": 1,
   "patches": [
     {
+      "id": "SGP-0076",
+      "title": "Isolate local trials and SceneGIS browser test entry points",
+      "status": "active",
+      "reason": "Local Test pages should remain independent of a clean checkout. Browser fixtures are versioned under Specs, while the distribution qualification uses a dedicated static server.",
+      "risk": "low",
+      "files": [
+        { "path": ".gitignore", "markerMode": "paired" },
+        { "path": ".npmignore", "markerMode": "paired" },
+        { "path": "Specs/e2e/playwright.config.js", "markerMode": "paired" }
+      ],
+      "tests": [
+        "Specs/e2e/SceneGIS/scenegis-feature-examples.spec.js",
+        "Specs/e2e/SceneGIS/config/distribution.config.mjs",
+        "scripts/scenegis/audit-upstream-patches.spec.mjs"
+      ],
+      "decision": "Documentation/SceneGIS/Decisions/ADR-0211-scenegis-test-layout.md",
+      "removalCondition": "The upstream test layout can segregate a custom fixture server and keep local trial pages out of Git and the package."
+    },
+    {
       "id": "SGP-0075",
       "title": "Match legacy i3dm bounds to instance and node transform order",
       "status": "active",
@@ -38,7 +57,7 @@
       ],
       "tests": [
         "scripts/scenegis/asset-copy.test.mjs",
-        "Specs/e2e/scenegis-distribution.spec.js"
+        "Specs/e2e/SceneGIS/distribution/scenegis-distribution.spec.js"
       ],
       "decision": "Documentation/SceneGIS/Decisions/ADR-0205-scenegis-distribution.md",
       "removalCondition": "Native copyFiles excludes directory entries while preserving nested static files and widget remapping."
@@ -71,7 +90,7 @@
       "tests": [
         "packages/engine/Specs/SceneGIS/Core/SceneGISBuildModuleUrlSpec.js",
         "scripts/scenegis/distribution.test.mjs",
-        "Specs/e2e/scenegis-distribution.spec.js",
+        "Specs/e2e/SceneGIS/distribution/scenegis-distribution.spec.js",
         "scripts/scenegis/documentation.test.mjs"
       ],
       "decision": "Documentation/SceneGIS/Decisions/ADR-0205-scenegis-distribution.md",
@@ -155,8 +174,8 @@
         "packages/engine/Specs/SceneGIS/Scene/SceneGISSplitSpec.js",
         "packages/engine/Specs/SceneGIS/Scene/SceneGISPlanarImageryLayerSpec.js",
         "packages/engine/Specs/SceneGIS/Scene/_private/SceneGISPlanarSurfaceSpec.js",
-        "Specs/e2e/scenegis-planar-imagery-split.spec.js",
-        "Specs/e2e/scenegis-top-bottom-split.spec.js"
+        "Specs/e2e/SceneGIS/scenegis-planar-imagery-split.spec.js",
+        "Specs/e2e/SceneGIS/scenegis-top-bottom-split.spec.js"
       ],
       "decision": "Documentation/SceneGIS/Decisions/ADR-0193-top-bottom-split.md",
       "removalCondition": "Native splitting supports equivalent top/bottom directions across all existing consumers."
@@ -268,7 +287,7 @@
       "tests": [
         "packages/engine/Specs/SceneGIS/DataSources/SceneGISPlanarClusteringSpec.js",
         "packages/engine/Specs/DataSources/EntityClusterSpec.js",
-        "Specs/e2e/scenegis-planar-clustering.spec.js"
+        "Specs/e2e/SceneGIS/scenegis-planar-clustering.spec.js"
       ],
       "decision": "Documentation/SceneGIS/Decisions/ADR-0183-planar-clustering.md",
       "removalCondition": "Native EntityCluster provides an equivalent instance-local spatial policy suitable for planar worlds."
@@ -319,7 +338,7 @@
       ],
       "tests": [
         "packages/engine/Specs/SceneGIS/Scene/SceneGISModelFlattenSpec.js",
-        "Specs/e2e/scenegis-model-flatten.spec.js",
+        "Specs/e2e/SceneGIS/scenegis-model-flatten.spec.js",
         "packages/engine/Specs/Scene/Model/ModelDrawCommandSpec.js",
         "packages/engine/Specs/Scene/Cesium3DTileSpec.js"
       ],
@@ -359,8 +378,7 @@
         }
       ],
       "tests": [
-        "packages/engine/Specs/SceneGIS/Scene/SceneGISColorGradingSpec.js",
-        "Specs/e2e/scenegis-pbr-reference.spec.js"
+        "packages/engine/Specs/SceneGIS/Scene/SceneGISColorGradingSpec.js"
       ],
       "decision": "Documentation/SceneGIS/Decisions/ADR-0154-hdr-color-grading.md",
       "removalCondition": "Native tone mapping offers equivalent linear HDR grading and explicit controller lifecycle."
@@ -513,8 +531,7 @@
         }
       ],
       "tests": [
-        "packages/engine/Specs/SceneGIS/Scene/SceneGISModelNormalMappingSpec.js",
-        "Specs/e2e/scenegis-pbr-reference.spec.js"
+        "packages/engine/Specs/SceneGIS/Scene/SceneGISModelNormalMappingSpec.js"
       ],
       "decision": "Documentation/SceneGIS/Decisions/ADR-0095-degenerate-model-normal-mapping.md",
       "removalCondition": "Native material normal mapping handles singular derivative UV frames without non-finite base, clearcoat or anisotropic normals."
@@ -611,7 +628,7 @@
         "packages/engine/Specs/Scene/Model/ImageBasedLightingPipelineStageSpec.js",
         "packages/engine/Specs/Scene/DynamicEnvironmentMapManagerSpec.js",
         "packages/engine/Specs/Renderer/FramebufferSpec.js",
-        "Specs/e2e/scenegis-webgl-environment-source-priority.spec.js"
+        "Specs/e2e/SceneGIS/scenegis-webgl-environment-source-priority.spec.js"
       ],
       "decision": "Documentation/SceneGIS/Decisions/ADR-0085-physical-sky-specular-ibl.md",
       "removalCondition": "Retire when native physical sky IBL offers equivalent HDR mip capture, explicit-source precedence and world-fixed reflection directions."
@@ -754,7 +771,7 @@
         "packages/engine/Specs/SceneGIS/Scene/SceneGISPlanarDepthTestSpec.js",
         "packages/engine/Specs/SceneGIS/Scene/SceneGISPlanarWorldSpec.js",
         "packages/engine/Specs/SceneGIS/Widget/SceneGISPlanarWorldCesiumWidgetSpec.js",
-        "Specs/e2e/scenegis-planar-depth-test.spec.js",
+        "Specs/e2e/SceneGIS/scenegis-planar-depth-test.spec.js",
         "packages/engine/Specs/SceneGIS/Widget/SceneGISWorldCesiumWidgetSpec.js",
         "packages/engine/Specs/SceneGIS/DataSources/_SceneGISPlanarVisualizersCallbackSpec.js",
         "packages/engine/Specs/SceneGIS/Widget/SceneGISPlanarContentCesiumWidgetSpec.js",
@@ -1178,13 +1195,12 @@
         "packages/engine/Specs/SceneGIS/Scene/SceneGISGBufferSpec.js",
         "packages/engine/Specs/SceneGIS/Scene/SceneGISDeferredLightingSpec.js",
         "packages/engine/Specs/SceneGIS/Scene/SceneGISDeferredStylingSpec.js",
-        "Specs/e2e/scenegis-gbuffer.spec.js",
         "packages/engine/Specs/SceneGIS/Scene/SceneGISAmbientOcclusionSpec.js",
         "packages/engine/Specs/SceneGIS/Scene/SceneGISDeferredMaterialExtensionsSpec.js",
         "packages/engine/Specs/SceneGIS/Scene/SceneGISDeferredPointCloudSpec.js",
         "packages/engine/Specs/SceneGIS/Scene/SceneGISDeferredClassificationSpec.js",
         "packages/engine/Specs/SceneGIS/Scene/SceneGISDeferredNativeModelStagesSpec.js",
-        "Specs/e2e/scenegis-deferred-native-channels.spec.js"
+        "Specs/e2e/SceneGIS/scenegis-deferred-native-channels.spec.js"
       ],
       "decision": "Documentation/SceneGIS/Decisions/ADR-0155-webgl-gbuffer-prototype.md",
       "removalCondition": "Native rendering exposes equivalent material outputs and inspector lifecycle, or deferred material inspection is retired."
@@ -1243,19 +1259,18 @@
         "packages/engine/Specs/SceneGIS/Scene/SceneGISDeferredEntrySpec.js",
         "packages/engine/Specs/SceneGIS/Scene/SceneGISDeferredGlobeSpec.js",
         "packages/engine/Specs/SceneGIS/Scene/SceneGISDeferredClassificationSpec.js",
-        "Specs/e2e/scenegis-deferred-lighting.spec.js",
         "packages/engine/Specs/SceneGIS/Scene/SceneGISDeferredAnnotationsSpec.js",
         "packages/engine/Specs/SceneGIS/Scene/SceneGISDeferredVoxelsSpec.js",
-        "Specs/e2e/scenegis-deferred-native-channels.spec.js",
+        "Specs/e2e/SceneGIS/scenegis-deferred-native-channels.spec.js",
         "packages/engine/Specs/SceneGIS/Scene/SceneGISDeferredGaussianSpec.js",
         "packages/engine/Specs/SceneGIS/Scene/SceneGISDefaultEnvironmentSpec.js",
-        "Specs/e2e/scenegis-deferred-default-environment.spec.js",
+        "Specs/e2e/SceneGIS/scenegis-deferred-default-environment.spec.js",
         "packages/engine/Specs/SceneGIS/Scene/SceneGISVectorGlobeSpec.js",
         "packages/engine/Specs/SceneGIS/Scene/SceneGISVectorGroundSpec.js",
-        "Specs/e2e/scenegis-deferred-vectors.spec.js",
+        "Specs/e2e/SceneGIS/scenegis-deferred-vectors.spec.js",
         "packages/engine/Specs/SceneGIS/Scene/SceneGISDeferredCommandProducersSpec.js",
         "packages/engine/Specs/SceneGIS/Scene/SceneGISDeferredDebugSpec.js",
-        "Specs/e2e/scenegis-deferred-debug.spec.js",
+        "Specs/e2e/SceneGIS/scenegis-deferred-debug.spec.js",
         "packages/engine/Specs/SceneGIS/Scene/SceneGISVectorSymbolsSpec.js",
         "packages/engine/Specs/SceneGIS/Scene/SceneGISVectorExtrusionSpec.js"
       ],
@@ -1403,7 +1418,7 @@
       "tests": [
         "packages/engine/Specs/SceneGIS/Scene/SceneGISDeferredGlobeSpec.js",
         "packages/engine/Specs/SceneGIS/Scene/SceneGISLogDepthClampSpec.js",
-        "Specs/e2e/scenegis-deferred-globe.spec.js"
+        "Specs/e2e/SceneGIS/scenegis-deferred-globe.spec.js"
       ],
       "decision": "Documentation/SceneGIS/Decisions/ADR-0161-unified-opaque-deferred-direction.md",
       "removalCondition": "Native log-depth command derivation preserves source depth-clamp semantics."
@@ -1528,7 +1543,7 @@
         "packages/engine/Specs/SceneGIS/Scene/SceneGISDeferredMaterialExtensionsSpec.js",
         "packages/engine/Specs/Renderer/FramebufferSpec.js",
         "packages/engine/Specs/SceneGIS/Scene/SceneGISDeferredPointCloudSpec.js",
-        "Specs/e2e/scenegis-deferred-debug.spec.js"
+        "Specs/e2e/SceneGIS/scenegis-deferred-debug.spec.js"
       ],
       "decision": "Documentation/SceneGIS/Decisions/ADR-0160-deferred-primitive-materials.md",
       "removalCondition": "Native framebuffer and uniform APIs support equivalent borrowed texture-array layers."
@@ -1591,7 +1606,7 @@
       "tests": [
         "packages/engine/Specs/SceneGIS/DataSources/SceneGISPlanarGeoJsonSpec.js",
         "packages/engine/Specs/DataSources/GeoJsonDataSourceSpec.js",
-        "Specs/e2e/scenegis-planar-geojson.spec.js"
+        "Specs/e2e/SceneGIS/scenegis-planar-geojson.spec.js"
       ],
       "decision": "Documentation/SceneGIS/Decisions/ADR-0172-planar-geojson-loading.md",
       "removalCondition": "Native GeoJsonDataSource provides equivalent instance-local world-coordinate loading and explicit planar geometry semantics."
@@ -1616,7 +1631,7 @@
         "packages/engine/Specs/SceneGIS/DataSources/SceneGISPlanarCzmlSpec.js",
         "packages/engine/Specs/DataSources/CzmlDataSourceSpec.js",
         "packages/engine/Specs/DataSources/DataSourceDisplaySpec.js",
-        "Specs/e2e/scenegis-planar-czml.spec.js"
+        "Specs/e2e/SceneGIS/scenegis-planar-czml.spec.js"
       ],
       "decision": "Documentation/SceneGIS/Decisions/ADR-0173-planar-czml-loading.md",
       "removalCondition": "Native CZML and DataSourceDisplay provide equivalent instance-bound planar coordinates and World validation."
