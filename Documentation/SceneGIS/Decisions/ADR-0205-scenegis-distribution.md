@@ -19,6 +19,7 @@ depending on the source checkout or loading a second engine module.
 Generate `Build/SceneGIS` using the existing source barrels and native builders. Emit
 SceneGIS.js (IIFE global SceneGIS), index.js (one ESM named-export entry), SceneGIS.d.ts
 (external module with `export as namespace SceneGIS`) and index.d.ts (relative-entry shim).
+The root npm script `build-scenegis` invokes `gulp buildSceneGIS` through SGP-0073.
 Generated package metadata declares ESM, its single export/types entry and asset paths.
 All original symbol/class names, including Scene, ImageryLayer, I3SLayer, Panorama and
 VERSION, remain unchanged. SDK naming composition belongs downstream. No version lock

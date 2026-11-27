@@ -2,7 +2,7 @@
 
 ## 构建与交付
 
-在引擎仓库根目录执行 `npx gulp buildSceneGIS`，生成完整的 `Build/SceneGIS`。
+在引擎仓库根目录执行 `npm run build-scenegis`，生成完整的 `Build/SceneGIS`。
 仅重新生成文档可执行 `npx gulp buildSceneGISDocs`。原 `build`、`buildRelease`、
 `buildTs`、`buildDocs` 与测试链继续保留。生成物不提交 Git，不向 SDK 目录复制。
 
@@ -181,7 +181,7 @@ translation-source.json 与 translation-report.json 只含原生英文内容，�
 ## 验证命令
 
 ```powershell
-npx gulp buildSceneGIS
+npm run build-scenegis
 node --test scripts/docs-i18n/doclets.test.mjs scripts/scenegis/distribution.test.mjs scripts/scenegis/documentation.test.mjs scripts/scenegis/documentation-locales.test.mjs scripts/scenegis/documentation-source.test.mjs scripts/scenegis/documentation-translations.test.mjs
 npx playwright test -c scripts/scenegis/playwright.distribution.config.mjs
 ```

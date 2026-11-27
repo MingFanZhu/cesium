@@ -9,11 +9,11 @@
 | Planning model         | `extension`                                                                       |
 | Active extension plan  | None; latest [Distribution](plans/2026-10-29-extension.md)                        |
 | Current phase          | Environment API boundary documentation completed                                  |
-| Active standalone plan | None; latest [Environment boundary](plans/2026-10-30-environment-api-boundary.md) |
+| Active standalone plan | None; latest [SceneGIS package build script](plans/2026-11-26-npm-build-entry.md) |
 | Active phase plan      | None; latest [T11](plans/2026-10-30-t11-reference-prose.md)                       |
 | Architecture contact   | Architecture Agent (current task)                                                 |
 | Execution contact      | Execution Agent (current task)                                                    |
-| Last updated           | 2026-10-30                                                                        |
+| Last updated           | 2026-11-26                                                                        |
 
 ## Scope
 
@@ -173,7 +173,8 @@ in Chinese; upstream source, generator, runtime and SDK stay intact. No SGP or n
 
 ## Current handoff
 
-Generate the complete artifact with `npx gulp buildSceneGIS`; docs-only with buildSceneGISDocs.
+Generate the complete artifact with `npm run build-scenegis`. Use `npx gulp buildSceneGISDocs`
+to generate the documentation alone. See the [npm entry review](reviews/2026-11-26-npm-build-entry.md).
 One Chinese edition lives at Documentation/index.html with 533 pages and 7,943 symbols.
 SDK consumes root api-doclets.json/api-index.json with output locale and per-symbol sourceLocale;
 sourceFields identify direct Chinese prose and translatedFields/fallbackFields identify native

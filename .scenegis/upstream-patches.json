@@ -61,6 +61,11 @@
         {
           "path": "gulpfile.js",
           "markerMode": "paired"
+        },
+        {
+          "path": "package.json",
+          "markerMode": "manifest-only",
+          "markerReason": "The npm script is declared in JSON, which does not allow comments."
         }
       ],
       "tests": [

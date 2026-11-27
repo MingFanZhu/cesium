@@ -11,7 +11,7 @@ PrimitiveCollection 中的 Cesium3DTileset，可直接传 SDK 的 layer.nativeLa
 
 ## SceneGIS 品牌发行
 
-`npx gulp buildSceneGIS` 生成完整的 `Build/SceneGIS`，包含单一 ESM、SceneGIS 全局脚本、
+`npm run build-scenegis` 生成完整的 `Build/SceneGIS`，包含单一 ESM、SceneGIS 全局脚本、
 独立类型、Workers/Assets/ThirdParty/Widgets、许可证及完整 API 文档和 JSON 元数据。
 `npx gulp buildSceneGISDocs` 只刷新文档。下游 SDK 只消费该发行目录；资源基址、
 类型与元数据格式见 [Distribution.md](Distribution.md)。原 Cesium 构建命令保持不变。
