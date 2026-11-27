@@ -67,7 +67,11 @@ for (const mode of ["globe", "planar"]) {
     expect(initial.ready).toBe(true);
     expect(initial.hdr).toBe(false);
     expect(initial.lighting).toBe(true);
-    expect(initial.atmosphereBytes).toBe(8527872);
+    const irradianceTexels =
+      mode === "globe" ? (64 + 65 * 9) * (17 * 16) : 64 * 16;
+    const atmosphereByteBudget =
+      (256 * 64 + 256 * 128 * 32 + irradianceTexels) * 8;
+    expect(initial.atmosphereBytes).toBe(atmosphereByteBudget);
     expect(initial.hasClouds).toBe(false);
     expect(initial.hasCloudShadows).toBe(false);
     expect(initial.hasBloom).toBe(false);
@@ -184,8 +188,8 @@ for (const mode of ["globe", "planar"]) {
     await page.evaluate(() => {
       window.example.effects.cloudCoverage = 0.7;
     });
-    await page.waitForFunction(() =>
-      window.example.effects._pipeline.hasCloudResources(),
+    await page.waitForFunction(
+      () => window.example.effects._pipeline._shadowCascadeCount > 0,
     );
     async function sample(color) {
       await page.locator("#lightColor").fill(color);

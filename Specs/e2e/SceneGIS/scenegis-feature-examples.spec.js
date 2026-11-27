@@ -43,7 +43,7 @@ for (const name of planarPages) {
         }),
     );
     await page.waitForFunction(() => window.example.world.tilesLoaded);
-    await expect(page.locator("#controls .lil-gui")).toBeVisible();
+    await expect(page.locator("#controls .lil-gui.lil-root")).toBeVisible();
     const control = (label) => page.getByLabel(label, { exact: true });
     if (name === "基础平面") {
       await control("显示地表").uncheck();
@@ -152,10 +152,11 @@ test("Planar public data documents network failure and keeps controls usable", a
   await page.waitForFunction(() => window.example?.viewer.useDefaultRenderLoop);
   await expect(page.locator("#error")).toContainText("公开服务暂不可用");
   await page.getByLabel("显示地形", { exact: true }).uncheck();
-  expect(
-    await page.evaluate(
-      () => window.example.world.terrainProvider === undefined,
-    ),
-  ).toBe(true);
+  const heightRange = await page.evaluate(() => {
+    const { minimumHeight, maximumHeight } =
+      window.example.world.terrainProvider;
+    return [minimumHeight, maximumHeight];
+  });
+  expect(heightRange).toEqual([0, 0]);
   expect(errors).toEqual([]);
 });
